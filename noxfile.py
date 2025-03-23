@@ -20,27 +20,24 @@ extend-ignore = ["TD002", "TD003", "FIX002"]
 """
 
 COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
+PYPROJECT = nox.project.load_toml()
 
 package = "singer_sdk"
-python_versions = [
-    "3.13",
-    "3.12",
-    "3.11",
-    "3.10",
-    "3.9",
-]
-main_python_version = "3.13"
+python_versions = nox.project.python_versions(PYPROJECT)
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = [
     "mypy",
     "tests",
     "benches",
     "doctest",
-    "test_cookiecutter",
+    "deps",
+    "docs",
+    "api",
+    "templates",
 ]
 
 
-@nox.session(python=main_python_version)
+@nox.session()
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
@@ -105,7 +102,7 @@ def tests(session: nox.Session) -> None:
             session.notify("coverage", posargs=[])
 
 
-@nox.session(python=main_python_version)
+@nox.session()
 def benches(session: nox.Session) -> None:
     """Run benchmarks."""
     extras = [
@@ -130,7 +127,7 @@ def benches(session: nox.Session) -> None:
     )
 
 
-@nox.session(name="deps", python=main_python_version)
+@nox.session(name="deps")
 def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
     extras = [
@@ -157,7 +154,7 @@ def dependencies(session: nox.Session) -> None:
     session.run("deptry", "singer_sdk", *session.posargs)
 
 
-@nox.session(python=main_python_version)
+@nox.session()
 def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
@@ -183,7 +180,7 @@ def update_snapshots(session: nox.Session) -> None:
     session.run("pytest", "--snapshot-update", *args)
 
 
-@nox.session(python=python_versions)
+@nox.session()
 def doctest(session: nox.Session) -> None:
     """Run examples with xdoctest."""
     if session.posargs:
@@ -204,7 +201,7 @@ def doctest(session: nox.Session) -> None:
     session.run("pytest", "--xdoctest", *args)
 
 
-@nox.session(python=main_python_version)
+@nox.session()
 def coverage(session: nox.Session) -> None:
     """Generate coverage report."""
     args = session.posargs or ["report", "-m"]
@@ -224,7 +221,7 @@ def coverage(session: nox.Session) -> None:
     session.run("coverage", *args)
 
 
-@nox.session(name="docs", python=main_python_version)
+@nox.session(name="docs")
 def docs(session: nox.Session) -> None:
     """Build the documentation."""
     args = session.posargs or ["docs", "build", "-W"]
@@ -247,7 +244,7 @@ def docs(session: nox.Session) -> None:
     session.run("sphinx-build", *args)
 
 
-@nox.session(name="docs-serve", python=main_python_version)
+@nox.session(name="docs-serve")
 def docs_serve(session: nox.Session) -> None:
     """Build the documentation."""
     args = session.posargs or [
@@ -279,8 +276,8 @@ def docs_serve(session: nox.Session) -> None:
 
 
 @nox.parametrize("replay_file_path", COOKIECUTTER_REPLAY_FILES)
-@nox.session(python=main_python_version)
-def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
+@nox.session()
+def templates(session: nox.Session, replay_file_path: Path) -> None:
     """Uses the tap template to build an empty cookiecutter.
 
     Runs the lint task on the created test project.
@@ -310,8 +307,6 @@ def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
     if cc_test_output.exists():
         session.run("rm", "-fr", str(cc_test_output), external=True)
 
-    # TODO: Use uvx
-    # https://github.com/wntrblm/nox/pull/920
     session.run(
         "uvx",
         "cookiecutter",

@@ -58,7 +58,7 @@ jobs:
 
     - name: Run Nox
       run: |
-        nox --session=test_cookiecutter
+        nox --session=templates
 
     - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
       if: always()
