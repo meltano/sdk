@@ -54,6 +54,6 @@ jobs:
         echo "ref=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
 
     # Check API against the latest commit on the base branch
-    - name: Run Nox
+    - name: Run Nox  # zizmor: ignore[template-injection]
       run: |
         nox -- ${{ steps.set-ref.outputs.ref }}
