@@ -43,7 +43,7 @@ jobs:
         fetch-depth: 0
         persist-credentials: false
 
-    - uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
+    - uses: astral-sh/setup-uv@22695119d769bdb6f7032ad67b9bca0ef8c4a174 # v5.4.0
       with:
         version: ">=0.5.19"
 
@@ -58,9 +58,9 @@ jobs:
 
     - name: Run Nox
       run: |
-        nox --session=test_cookiecutter
+        nox --session=templates
 
-    - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+    - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       if: always()
       with:
         name: cookiecutter-ubuntu-latest-py3x
