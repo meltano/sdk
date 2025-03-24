@@ -31,26 +31,33 @@ concurrency:
 env:
   FORCE_COLOR: "1"
 
+permissions: {}
+
 jobs:
   benchmarks:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
       with:
         python-version: 3.x
         architecture: x64
 
     - name: Install uv
-      uses: astral-sh/setup-uv@v5
+      uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
       with:
         version: ">=0.5.19"
 
     - name: Install dependencies
       run: |
-        uv pip install --system -r requirements/requirements.codspeed.txt
+        uv export --no-editable --frozen --no-hashes --no-dev --all-extras --group benchmark --output-file requirements.codspeed.txt
+        uv pip install --system -r requirements.codspeed.txt
 
-    - uses: CodSpeedHQ/action@v3
+    - uses: CodSpeedHQ/action@0010eb0ca6e89b80c88e8edaaa07cfe5f3e6664d # v3.5.0
       with:
         token: ${{ secrets.CODSPEED_TOKEN }}
         run: pytest tests/ --codspeed

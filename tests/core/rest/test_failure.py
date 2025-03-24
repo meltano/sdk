@@ -56,11 +56,12 @@ def custom_validation_stream(rest_tap):
 
 
 @pytest.mark.parametrize(
-    "status_code,reason,expectation",
+    "status_code,reason,content,expectation",
     [
         (
             400,
             "Bad request",
+            None,
             pytest.raises(
                 FatalAPIError,
                 match=r"400 Client Error: Bad request for path: /dummy",
@@ -69,6 +70,7 @@ def custom_validation_stream(rest_tap):
         (
             503,
             "Service Unavailable",
+            None,
             pytest.raises(
                 RetriableAPIError,
                 match=r"503 Server Error: Service Unavailable for path: /dummy",
@@ -77,6 +79,7 @@ def custom_validation_stream(rest_tap):
         (
             521,  # Cloudflare custom status code higher than max(HTTPStatus)
             "Web Server Is Down",
+            None,
             pytest.raises(
                 RetriableAPIError,
                 match=r"521 Server Error: Web Server Is Down for path: /dummy",
@@ -85,19 +88,56 @@ def custom_validation_stream(rest_tap):
         (
             429,
             "Too Many Requests",
+            None,
             pytest.raises(
                 RetriableAPIError,
                 match=r"429 Client Error: Too Many Requests for path: /dummy",
             ),
         ),
-        (200, "OK", nullcontext()),
+        (
+            403,
+            "Forbidden",
+            b'{"error": "Your token does not have the required scopes"}',
+            pytest.raises(
+                FatalAPIError,
+                match=(
+                    r"403 Client Error: Forbidden for path: /dummy, "
+                    r'content is \{\"error": \"Your token does not have the required scopes\"\}'  # noqa: E501
+                ),
+            ),
+        ),
+        (
+            403,
+            "Forbidden",
+            b"",
+            pytest.raises(
+                FatalAPIError,
+                match=r"403 Client Error: Forbidden for path: /dummy",
+            ),
+        ),
+        (200, "OK", b"OK", nullcontext()),
     ],
-    ids=["client-error", "server-error", "server-error", "rate-limited", "ok"],
+    ids=[
+        "client-error",
+        "server-error",
+        "server-error",
+        "rate-limited",
+        "forbidden-with-content",
+        "forbidden-empty-content",
+        "ok",
+    ],
 )
-def test_status_code_api(basic_rest_stream, status_code, reason, expectation):
+def test_status_code_validation(
+    basic_rest_stream: RESTStream,
+    status_code: int,
+    reason: str,
+    content: bytes | None,
+    expectation,
+):
     fake_response = requests.Response()
     fake_response.status_code = status_code
     fake_response.reason = reason
+    fake_response._content = content
 
     with expectation:
         basic_rest_stream.validate_response(fake_response)

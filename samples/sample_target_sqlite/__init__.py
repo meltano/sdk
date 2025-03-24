@@ -8,6 +8,7 @@ import typing as t
 
 from singer_sdk import SQLConnector, SQLSink, SQLTarget
 from singer_sdk import typing as th
+from singer_sdk.contrib.msgspec import MsgSpecReader
 
 DB_PATH_CONFIG = "path_to_db"
 
@@ -84,6 +85,8 @@ class SQLiteSink(SQLSink[SQLiteConnector]):
 
 class SQLiteTarget(SQLTarget):
     """The Tap class for SQLite."""
+
+    message_reader_class = MsgSpecReader
 
     name = "target-sqlite-sample"
     default_sink_class = SQLiteSink

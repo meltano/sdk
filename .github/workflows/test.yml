@@ -37,6 +37,8 @@ env:
   UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
   UV_VERSION: 0.5.26
 
+permissions: {}
+
 jobs:
   tests:
     name: "Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }}"
@@ -45,6 +47,8 @@ jobs:
     env:
       NOXPYTHON: ${{ matrix.python-version }}
       NOXSESSION: ${{ matrix.session }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -62,16 +66,17 @@ jobs:
         - { session: deps,    python-version: "3.13", os: "ubuntu-latest" }
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         fetch-depth: 0
+        persist-credentials: false
 
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
       with:
         python-version: ${{ matrix.python-version }}
         allow-prereleases: true
 
-    - uses: astral-sh/setup-uv@v5
+    - uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
       with:
         version: ${{ env.UV_VERSION }}
 
@@ -80,7 +85,7 @@ jobs:
         uv tool install 'nox[uv]'
         nox --version
 
-    - uses: actions/cache@v4
+    - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
       if: matrix.session == 'tests'
       with:
         path: http_cache.sqlite
@@ -92,7 +97,7 @@ jobs:
       run: |
         nox --verbose
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
       if: always() && (matrix.session == 'tests')
       with:
         include-hidden-files: true
@@ -112,15 +117,16 @@ jobs:
       SAMPLE_TAP_GITLAB_START_DATE: "2022-01-01T00:00:00Z"
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         fetch-depth: 0
+        persist-credentials: false
 
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
       with:
         python-version: ${{ env.NOXPYTHON }}
 
-    - uses: astral-sh/setup-uv@v5
+    - uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
       with:
         version: ${{ env.UV_VERSION }}
 
@@ -142,17 +148,19 @@ jobs:
     env:
       NOXSESSION: coverage
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
       with:
         python-version: '3.x'
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
       with:
         pattern: coverage-data-*
         merge-multiple: true
 
-    - uses: astral-sh/setup-uv@v5
+    - uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
       with:
         version: ${{ env.UV_VERSION }}
 
@@ -172,7 +180,7 @@ jobs:
       run: |
         nox -r --no-install -- xml
 
-    - uses: codecov/codecov-action@v5
+    - uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5.4.0
       with:
         fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}

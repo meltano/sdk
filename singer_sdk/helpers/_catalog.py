@@ -8,7 +8,7 @@ from copy import deepcopy
 from singer_sdk.helpers._typing import is_object_type
 
 if t.TYPE_CHECKING:
-    from singer_sdk._singerlib import Catalog, SelectionMask
+    from singer_sdk.singerlib import Catalog, SelectionMask
 
 
 # TODO: this was previously cached using the `memoization` library. However, the

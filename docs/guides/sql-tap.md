@@ -80,3 +80,10 @@ class ConfiguredSQLToJSONSchema(SQLToJSONSchema):
 ```
 
 Then, you can use your custom type mapping in your connector as in the previous example.
+
+
+### SQL tap support for Singer Decimal string format
+
+Starting from version `0.45.0`, the Meltano Singer SDK supports the `x-singer.decimal` format for strings. You can configure the tap to use it with the `use_singer_decimal` setting. SQL Targets that support the `x-singer.decimal` format will create an appropriate numeric column in the target database.
+
+Read more about target support for `x-singer.decimal` in the [SQL target guide](./sql-target.md#sql-target-support-for-singer-decimal-string-format).

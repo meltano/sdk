@@ -91,6 +91,11 @@ ssh = [
     "paramiko>=3.3.0",
 ]
 
+# msgspec extras
+msgspec = [
+    "msgspec>=0.19.0",
+]
+
 [project.urls]
 Homepage = "https://sdk.meltano.com/en/latest/"
 Repository = "https://github.com/meltano/sdk"
@@ -133,7 +138,7 @@ testing = [
     "requests-mock>=1.10.0",
     "rfc3339-validator>=0.1.4",
     "time-machine>=2.10.0",
-    "xdoctest>=1.1.1",
+    "xdoctest[colors]>=1.1.1",
 ]
 typing = [
     "mypy>=1.9",
@@ -184,7 +189,7 @@ xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.44.3"
+version_provider = "scm"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -213,6 +218,7 @@ relative_files = true  # This allows coverage to be measured in Windows
 omit = [
     "tests/*",
     "samples/*",
+    "singer_sdk/_singerlib/*",
     "singer_sdk/helpers/_compat.py",
     "singer_sdk/helpers/types.py",
 ]
