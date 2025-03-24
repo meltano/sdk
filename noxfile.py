@@ -38,7 +38,12 @@ nox.options.sessions = [
 
 
 def _uv_python(session: nox.Session) -> str | None:
-    return str(session.python) if isinstance(session.python, str) else None
+    """Get the python version from the Nox session.
+
+    Returns:
+        The python version if it is a string, otherwise None.
+    """
+    return session.python if isinstance(session.python, str) else None
 
 
 @nox.session()
@@ -110,6 +115,29 @@ def tests(session: nox.Session) -> None:
     finally:
         if session.interactive:
             session.notify("coverage", posargs=[])
+
+
+@nox.session()
+def coverage(session: nox.Session) -> None:
+    """Generate coverage report."""
+    args = session.posargs or ["report", "-m"]
+
+    session.run_install(
+        "uv",
+        "sync",
+        "--frozen",
+        "--no-dev",
+        "--group=testing",
+        env={
+            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
+            "UV_PYTHON": _uv_python(session),
+        },
+    )
+
+    if not session.posargs and any(Path().glob(".coverage.*")):
+        session.run("coverage", "combine")
+
+    session.run("coverage", *args)
 
 
 @nox.session()
@@ -221,29 +249,6 @@ def doctest(session: nox.Session) -> None:
         },
     )
     session.run("pytest", "--xdoctest", *args)
-
-
-@nox.session()
-def coverage(session: nox.Session) -> None:
-    """Generate coverage report."""
-    args = session.posargs or ["report", "-m"]
-
-    session.run_install(
-        "uv",
-        "sync",
-        "--frozen",
-        "--no-dev",
-        "--group=testing",
-        env={
-            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": _uv_python(session),
-        },
-    )
-
-    if not session.posargs and any(Path().glob(".coverage.*")):
-        session.run("coverage", "combine")
-
-    session.run("coverage", *args)
 
 
 @nox.session(name="docs")
