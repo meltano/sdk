@@ -37,13 +37,22 @@ nox.options.sessions = [
 ]
 
 
-def _uv_python(session: nox.Session) -> str | None:
-    """Get the python version from the Nox session.
+def _install_env(session: nox.Session) -> dict[str, str]:
+    """Get the environment variables for the install command.
+
+    Args:
+        session: The Nox session.
 
     Returns:
-        The python version if it is a string, otherwise None.
+        The environment variables.
     """
-    return session.python if isinstance(session.python, str) else None
+    env = {
+        "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
+    }
+    if isinstance(session.python, str):
+        env["UV_PYTHON"] = session.python
+
+    return env
 
 
 @nox.session()
@@ -65,10 +74,7 @@ def mypy(session: nox.Session) -> None:
         "--no-dev",
         "--group=typing",
         *(f"--extra={extra}" for extra in extras),
-        env={
-            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": _uv_python(session),
-        },
+        env=_install_env(session),
     )
     session.run("mypy", *args)
     if not session.posargs:
@@ -92,10 +98,7 @@ def tests(session: nox.Session) -> None:
         "--no-dev",
         "--group=testing",
         *(f"--extra={extra}" for extra in extras),
-        env={
-            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": _uv_python(session),
-        },
+        env=_install_env(session),
     )
 
     env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
@@ -128,10 +131,7 @@ def coverage(session: nox.Session) -> None:
         "--frozen",
         "--no-dev",
         "--group=testing",
-        env={
-            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": _uv_python(session),
-        },
+        env=_install_env(session),
     )
 
     if not session.posargs and any(Path().glob(".coverage.*")):
@@ -155,10 +155,7 @@ def benches(session: nox.Session) -> None:
         "--no-dev",
         "--group=testing",
         *(f"--extra={extra}" for extra in extras),
-        env={
-            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": _uv_python(session),
-        },
+        env=_install_env(session),
     )
     session.run(
         "pytest",
@@ -189,10 +186,7 @@ def dependencies(session: nox.Session) -> None:
         "--inexact",
         "--no-dev",
         *(f"--extra={extra}" for extra in extras),
-        env={
-            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": _uv_python(session),
-        },
+        env=_install_env(session),
     )
     session.install("deptry")
     session.run("deptry", "singer_sdk", *session.posargs)
@@ -218,10 +212,7 @@ def update_snapshots(session: nox.Session) -> None:
         "--no-dev",
         "--group=testing",
         *(f"--extra={extra}" for extra in extras),
-        env={
-            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": _uv_python(session),
-        },
+        env=_install_env(session),
     )
 
     session.run("pytest", "--snapshot-update", *args)
@@ -243,10 +234,7 @@ def doctest(session: nox.Session) -> None:
         "--frozen",
         "--no-dev",
         "--group=testing",
-        env={
-            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": _uv_python(session),
-        },
+        env=_install_env(session),
     )
     session.run("pytest", "--xdoctest", *args)
 
@@ -264,10 +252,7 @@ def docs(session: nox.Session) -> None:
         "--frozen",
         "--no-dev",
         "--group=docs",
-        env={
-            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": _uv_python(session),
-        },
+        env=_install_env(session),
     )
 
     build_dir = Path("build")
@@ -298,10 +283,7 @@ def docs_serve(session: nox.Session) -> None:
         "--inexact",
         "--no-dev",
         "--group=docs",
-        env={
-            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": _uv_python(session),
-        },
+        env=_install_env(session),
     )
 
     build_dir = Path("build")
