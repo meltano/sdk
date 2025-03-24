@@ -81,7 +81,6 @@ addopts = [
 ]
 
 [tool.mypy]
-python_version = "3.12"
 warn_unused_configs = true
 {#- TODO: Remove this after support for SQLAlchemy 1 is dropped in v1 -#}
 {#- https://github.com/meltano/sdk/pull/1931 -#}
