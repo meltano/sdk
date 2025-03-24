@@ -138,7 +138,7 @@ testing = [
     "requests-mock>=1.10.0",
     "rfc3339-validator>=0.1.4",
     "time-machine>=2.10.0",
-    "xdoctest>=1.1.1",
+    "xdoctest[colors]>=1.1.1",
 ]
 typing = [
     "mypy>=1.9",
