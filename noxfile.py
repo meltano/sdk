@@ -34,6 +34,7 @@ locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = [
     "mypy",
     "tests",
+    "test-lowest",
     "benches",
     "doctest",
     "deps",
@@ -118,6 +119,45 @@ def tests(session: nox.Session) -> None:
     finally:
         if session.interactive:
             session.notify("coverage", posargs=[])
+
+
+@nox.session(name="test-lowest", python=python_versions[0])
+def test_lowest_requirements(session: nox.Session) -> None:
+    """Test the package with the lowest dependency versions."""
+    extras = [
+        "faker",
+        "jwt",
+        "msgspec",
+        "parquet",
+        "s3",
+    ]
+
+    session.run_install(
+        "uv",
+        "sync",
+        "--frozen",
+        "--no-dev",
+        "--group=testing",
+        *(f"--extra={extra}" for extra in extras),
+        env=_install_env(session),
+    )
+    tmpdir = session.create_tmp()
+
+    session.run_install(
+        "uv",
+        "pip",
+        "compile",
+        "pyproject.toml",
+        "--python=3.9",
+        "--all-extras",
+        "--universal",
+        "--resolution",
+        "lowest-direct",
+        f"-o={tmpdir}/requirements.txt",
+    )
+
+    session.install("-r", f"{tmpdir}/requirements.txt")
+    session.run("pytest", *session.posargs)
 
 
 @nox.session()
