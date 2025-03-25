@@ -148,7 +148,7 @@ def test_lowest_requirements(session: nox.Session) -> None:
         "pip",
         "compile",
         "pyproject.toml",
-        "--python=3.9",
+        f"--python={session.python}",
         "--all-extras",
         "--universal",
         "--resolution",
