@@ -188,13 +188,24 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
             selected_by_default=selected_by_default,
         )
 
+        def _add_subfield_metadata(
+            properties: dict,
+            breadcrumb: Breadcrumb = (),
+        ) -> None:
+            for field_name, field_schema in properties.items():
+                key = (*breadcrumb, "properties", field_name)
+                mapping[key] = Metadata(inclusion=Metadata.InclusionType.AVAILABLE)
+
+                if field_schema.get("type") == "object":
+                    _add_subfield_metadata(field_schema.get("properties", {}), key)
+
         if schema:
             root.inclusion = Metadata.InclusionType.AVAILABLE
 
             if schema_name:
                 root.schema_name = schema_name
 
-            for field_name in schema.get("properties", {}):
+            for field_name, field_schema in schema.get("properties", {}).items():
                 if (key_properties and field_name in key_properties) or (
                     valid_replication_keys and field_name in valid_replication_keys
                 ):
@@ -202,7 +213,10 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
                 else:
                     entry = Metadata(inclusion=Metadata.InclusionType.AVAILABLE)
 
-                mapping["properties", field_name] = entry
+                breadcrumb = ("properties", field_name)
+                mapping[breadcrumb] = entry
+
+                _add_subfield_metadata(field_schema.get("properties", {}), breadcrumb)
 
         mapping[()] = root
 
