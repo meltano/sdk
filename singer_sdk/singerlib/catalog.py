@@ -196,8 +196,8 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
                 key = (*breadcrumb, "properties", field_name)
                 mapping[key] = Metadata(inclusion=Metadata.InclusionType.AVAILABLE)
 
-                if field_schema.get("type") == "object":
-                    _add_subfield_metadata(field_schema.get("properties", {}), key)
+                if field_schema.get("properties"):
+                    _add_subfield_metadata(field_schema["properties"], key)
 
         if schema:
             root.inclusion = Metadata.InclusionType.AVAILABLE
