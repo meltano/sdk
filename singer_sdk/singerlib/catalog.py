@@ -192,6 +192,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
             properties: dict,
             breadcrumb: Breadcrumb = (),
         ) -> None:
+            """Add breadcrumbs and metadata for subfields."""
             for field_name, field_schema in properties.items():
                 key = (*breadcrumb, "properties", field_name)
                 mapping[key] = Metadata(inclusion=Metadata.InclusionType.AVAILABLE)

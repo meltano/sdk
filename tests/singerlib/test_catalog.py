@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import typing as t
+
 import pytest
 
 from singer_sdk._singerlib import (
@@ -10,6 +12,9 @@ from singer_sdk._singerlib import (
     SelectionMask,
     StreamMetadata,
 )
+
+if t.TYPE_CHECKING:
+    from singer_sdk.singerlib.catalog import Breadcrumb
 
 METADATA_ARRAY = [
     {
@@ -297,7 +302,7 @@ def test_standard_metadata(
     replication_method: str | None,
     valid_replication_keys: list[str] | None,
     schema_name: str | None,
-    breadcrumbs: set,
+    breadcrumbs: set[Breadcrumb],
 ):
     """Validate generated metadata."""
     metadata = MetadataMapping.get_standard_metadata(
