@@ -193,7 +193,7 @@ def test_catalog_parsing():
 
 
 @pytest.mark.parametrize(
-    "schema,key_properties,replication_method,valid_replication_keys,schema_name",
+    "schema,key_properties,replication_method,valid_replication_keys,schema_name,breadcrumbs",
     [
         (
             {"properties": {"id": {"type": "integer"}}, "type": "object"},
@@ -201,6 +201,7 @@ def test_catalog_parsing():
             "FULL_TABLE",
             None,
             None,
+            {(), ("properties", "id")},
         ),
         (
             {
@@ -215,6 +216,12 @@ def test_catalog_parsing():
             "INCREMENTAL",
             ["updated_at"],
             "users",
+            {
+                (),
+                ("properties", "first_name"),
+                ("properties", "last_name"),
+                ("properties", "updated_at"),
+            },
         ),
         (
             {
@@ -229,6 +236,38 @@ def test_catalog_parsing():
             "FULL_TABLE",
             None,
             None,
+            {
+                (),
+                ("properties", "first_name"),
+                ("properties", "last_name"),
+                ("properties", "group"),
+            },
+        ),
+        (
+            {
+                "properties": {
+                    "id": {"type": "string"},
+                    "user": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "age": {"type": "integer"},
+                        },
+                    },
+                },
+                "type": "object",
+            },
+            ["id"],
+            "FULL_TABLE",
+            None,
+            None,
+            {
+                (),
+                ("properties", "id"),
+                ("properties", "user"),
+                ("properties", "user", "properties", "name"),
+                ("properties", "user", "properties", "age"),
+            },
         ),
         (
             {},
@@ -236,6 +275,7 @@ def test_catalog_parsing():
             None,
             None,
             None,
+            {()},
         ),
     ],
 )
@@ -245,6 +285,7 @@ def test_standard_metadata(
     replication_method: str | None,
     valid_replication_keys: list[str] | None,
     schema_name: str | None,
+    breadcrumbs: set,
 ):
     """Validate generated metadata."""
     metadata = MetadataMapping.get_standard_metadata(
@@ -272,3 +313,5 @@ def test_standard_metadata(
         rk_metadata = metadata["properties", rk]
         assert rk_metadata.inclusion == Metadata.InclusionType.AUTOMATIC
         assert rk_metadata.selected is None
+
+    assert set(metadata) == breadcrumbs
