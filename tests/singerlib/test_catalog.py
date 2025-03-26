@@ -252,6 +252,14 @@ def test_catalog_parsing():
                         "properties": {
                             "name": {"type": "string"},
                             "age": {"type": "integer"},
+                            "address": {
+                                "type": "object",
+                                "properties": {
+                                    "street": {"type": "string"},
+                                    "city": {"type": "string"},
+                                    "state": {"type": "string"},
+                                },
+                            },
                         },
                     },
                 },
@@ -267,6 +275,10 @@ def test_catalog_parsing():
                 ("properties", "user"),
                 ("properties", "user", "properties", "name"),
                 ("properties", "user", "properties", "age"),
+                ("properties", "user", "properties", "address"),
+                ("properties", "user", "properties", "address", "properties", "street"),
+                ("properties", "user", "properties", "address", "properties", "city"),
+                ("properties", "user", "properties", "address", "properties", "state"),
             },
         ),
         (
