@@ -1293,8 +1293,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         self._tap_input_catalog = catalog
 
-        catalog_entry = catalog.get_stream(self.name)
-        if catalog_entry:
+        if catalog_entry := catalog.get_stream(self.name):
             stream_metadata: StreamMetadata | None
             if stream_metadata := catalog_entry.metadata.get(()):  # type: ignore[assignment]
                 table_key_properties = stream_metadata.table_key_properties
