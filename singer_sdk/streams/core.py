@@ -489,6 +489,15 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         return self._schema
 
+    @schema.setter
+    def schema(self, new_value: dict) -> None:
+        """Set schema.
+
+        Args:
+            new_value: JSON Schema dictionary for this stream.
+        """
+        self._schema = new_value
+
     @property
     def primary_keys(self) -> t.Sequence[str] | None:
         """Get primary keys.
@@ -1306,6 +1315,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             )
             if replication_method:
                 self.forced_replication_method = replication_method
+
+            self.schema = catalog_entry.schema.to_dict()
 
     def _get_state_partition_context(
         self,
