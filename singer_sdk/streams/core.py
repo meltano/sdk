@@ -198,14 +198,18 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if self._stream_maps:
             return self._stream_maps
 
-        if self._tap.mapper:  # type: ignore[truthy-bool]
+        if self._tap.mapper is not None:
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
             self.logger.info(
                 "Tap has custom mapper. Using %d provided map(s).",
                 len(self.stream_maps),
             )
-        else:
-            self.logger.info(
+
+        # TODO: A tap mapper is always registered so this code is unreachable.
+        # Consider removing it.
+        # https://github.com/meltano/sdk/blob/c6672eb70002c7430f5db30fba05bb21cf9f0c11/singer_sdk/mapper.py#L768-L778
+        else:  # pragma: no cover
+            self.logger.info(  # type: ignore[unreachable]
                 "No custom mapper provided for '%s'. Using SameRecordTransform.",
                 self.name,
             )
