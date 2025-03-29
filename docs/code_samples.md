@@ -121,8 +121,9 @@ val1,val2,val3
 val1,val2,val3
 """
 
-@property
 class ParquetStream(Stream):
+
+    @property
     def schema(self):
         """Dynamically detect the json schema for the stream.
         This is evaluated prior to any records being retrieved.
