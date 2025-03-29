@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.45.3 (2025-03-29)
 
+### 🐛 Fixes
+
+- [#2937](https://github.com/meltano/sdk/issues/2937) Revert "fix: Ensure stream schema is overridden by the input catalog ([#2932](https://github.com/meltano/sdk/issues/2932))"
+
 ### 📚 Documentation Improvements
 
 - [#2938](https://github.com/meltano/sdk/issues/2938) Fixed the dynamic schema example
