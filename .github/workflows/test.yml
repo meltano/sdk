@@ -35,7 +35,6 @@ concurrency:
 env:
   FORCE_COLOR: "1"
   UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
-  UV_VERSION: 0.5.26
 
 permissions: {}
 
@@ -77,8 +76,6 @@ jobs:
         allow-prereleases: true
 
     - uses: astral-sh/setup-uv@22695119d769bdb6f7032ad67b9bca0ef8c4a174 # v5.4.0
-      with:
-        version: ${{ env.UV_VERSION }}
 
     - name: Install Nox
       run: |
@@ -127,8 +124,6 @@ jobs:
         python-version: ${{ env.NOXPYTHON }}
 
     - uses: astral-sh/setup-uv@22695119d769bdb6f7032ad67b9bca0ef8c4a174 # v5.4.0
-      with:
-        version: ${{ env.UV_VERSION }}
 
     - name: Install Nox
       run: |
@@ -161,8 +156,6 @@ jobs:
         merge-multiple: true
 
     - uses: astral-sh/setup-uv@22695119d769bdb6f7032ad67b9bca0ef8c4a174 # v5.4.0
-      with:
-        version: ${{ env.UV_VERSION }}
 
     - name: Install Nox
       run: |
