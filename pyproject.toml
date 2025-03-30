@@ -124,7 +124,7 @@ docs = [
     "sphinx-reredirects>=0.1.5",
 ]
 testing = [
-    "coverage[toml]>=7.4",
+    "coverage[toml]>=7.8",
     "duckdb>=0.8.0",
     "duckdb-engine>=0.9.4; python_version<'4'",
     "fastjsonschema>=2.19.1",
@@ -213,7 +213,7 @@ tests = [
 
 [tool.coverage.run]
 branch = true
-source = ["singer_sdk", "tests"]
+source_dirs = ["singer_sdk", "tests"]
 relative_files = true  # This allows coverage to be measured in Windows
 omit = [
     "tests/*",
