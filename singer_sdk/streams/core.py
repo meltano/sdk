@@ -142,6 +142,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._tap = tap
         self._tap_state = tap.state
         self._tap_input_catalog: singer.Catalog | None = None
+        self._input_schema: dict | None = None
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
@@ -240,7 +241,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         if not self.replication_key:
             return False
-        type_dict = self.schema.get("properties", {}).get(self.replication_key)
+        type_dict = self._get_schema().get("properties", {}).get(self.replication_key)
         if type_dict is None:
             msg = f"Field '{self.replication_key}' is not in schema for stream '{self.name}'"  # noqa: E501
             raise InvalidReplicationKeyException(msg)
@@ -362,6 +363,16 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         for child in self.child_streams:
             result += child.descendent_streams or []
         return result
+
+    def _get_schema(self) -> dict:
+        """Get the final schema for this stream.
+
+        This is either the hardcoded, discovered, or input schema.
+
+        Returns:
+            JSON Schema dictionary for this stream.
+        """
+        return self._input_schema if self._input_schema is not None else self.schema
 
     def _write_replication_key_signpost(
         self,
@@ -880,11 +891,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Yields:
             Record message objects.
         """
-        pop_deselected_record_properties(record, self.schema, self.mask)
+        pop_deselected_record_properties(record, self._get_schema(), self.mask)
         record = conform_record_data_types(
             stream_name=self.name,
             record=record,
-            schema=self.schema,
+            schema=self._get_schema(),
             level=self.TYPE_CONFORMANCE_LEVEL,
             logger=self.logger,
         )
@@ -1305,6 +1316,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             )
             if replication_method:
                 self.forced_replication_method = replication_method
+
+            self._input_schema = catalog_entry.schema.to_dict()
 
     def _get_state_partition_context(
         self,
