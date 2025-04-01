@@ -176,6 +176,7 @@ class StreamTestTemplate(TestTemplate):
 
     @property
     def ignore_no_records(self) -> bool:
+        """Whether or not the stream should be ignored if no records are returned."""
         return (
             self.config.ignore_no_records
             or self.stream.name in self.config.ignore_no_records_for_streams
