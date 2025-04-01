@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
-- [#2946](https://github.com/meltano/sdk/issues/2946) In the builtin tap tests, do not emit a warning for missing records on ignored streams
+- [#2946](https://github.com/meltano/sdk/issues/2946) In the built-in tap tests, do not emit a warning for missing records on ignored streams
 
 ## v0.45.3 (2025-03-29)
 
