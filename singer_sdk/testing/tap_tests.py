@@ -5,6 +5,7 @@ from __future__ import annotations
 import typing as t
 import warnings
 
+import pytest
 from jsonschema import validators
 from jsonschema.exceptions import SchemaError
 
@@ -107,11 +108,13 @@ class StreamReturnsRecordTest(StreamTestTemplate):
             self.config.ignore_no_records
             or self.stream.name in self.config.ignore_no_records_for_streams
         ):
-            # only warn if this or all streams are set to ignore no records
-            warnings.warn(UserWarning(no_records_message), stacklevel=2)
-        else:
-            record_count = len(self.stream_records)
-            assert record_count > 0, no_records_message
+            pytest.skip(
+                "Skipping test because no records were returned in "
+                f"stream '{self.stream.name}'",
+            )
+
+        record_count = len(self.stream_records)
+        assert record_count > 0, no_records_message
 
 
 class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
