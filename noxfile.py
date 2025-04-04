@@ -192,7 +192,7 @@ def dependencies(session: nox.Session) -> None:
     session.run("deptry", "singer_sdk", *session.posargs)
 
 
-@nox.session()
+@nox.session(name="snap")
 def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
