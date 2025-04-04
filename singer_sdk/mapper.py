@@ -414,6 +414,9 @@ class CustomStreamMap(StreamMap):
         if expr.startswith("bool("):
             return th.BooleanType()
 
+        if expr.startswith("json.dumps("):
+            return th.StringType()
+
         if expr.startswith(("datetime.date.", "datetime.date(")) or expr.endswith(
             ".date()"
         ):

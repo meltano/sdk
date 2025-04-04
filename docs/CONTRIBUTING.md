@@ -132,7 +132,7 @@ def test_snapshot(snapshot, snapshot_dir):
 To update or generate snapshots, run the nox `update_snapshots` session
 
 ```bash
-nox -rs update_snapshots
+nox -rs snap
 ```
 
 or use the `--snapshot-update` flag
