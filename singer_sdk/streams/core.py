@@ -106,6 +106,12 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """
 
     ignore_parent_replication_key: bool = False
+    """Set to `True` if the parent stream's replication key are not updated when child
+    items are changed.
+
+    This is used to indicate that a child stream should be synced regardless of the
+    parent stream's state.
+    """
 
     selected_by_default: bool = True
     """Whether this stream is selected by default in the catalog."""
