@@ -727,8 +727,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             A partitioned context state if applicable; else returns stream state.
             A blank state will be created in none exists.
         """
-        state_partition_context = self._get_state_partition_context(context)
-        if state_partition_context:
+        if state_partition_context := self._get_state_partition_context(context):
             return get_writeable_state_dict(
                 self.tap_state,
                 self.name,
