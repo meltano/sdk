@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.45.5 (2025-04-04)
+
+### 🐛 Fixes
+
+- [#2952](https://github.com/meltano/sdk/issues/2952) Adapt field schema type to `string` when transformed with stream maps using `json.dumps`
+
+### ⚙️ Under the Hood
+
+- [#2948](https://github.com/meltano/sdk/issues/2948) `ignore_no_records` as an instance property in built-in tests -- _**Thanks @ReubenFrankel!**_
+
+## v0.45.4 (2025-04-01)
+
+### 🐛 Fixes
+
+- [#2946](https://github.com/meltano/sdk/issues/2946) In the built-in tap tests, do not emit a warning for missing records on ignored streams
+
 ## v0.45.3 (2025-03-29)
 
 ### 🐛 Fixes

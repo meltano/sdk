@@ -106,6 +106,12 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """
 
     ignore_parent_replication_key: bool = False
+    """Set to `True` if the parent stream's replication key are not updated when child
+    items are changed.
+
+    This is used to indicate that a child stream should be synced regardless of the
+    parent stream's state.
+    """
 
     selected_by_default: bool = True
     """Whether this stream is selected by default in the catalog."""
@@ -732,8 +738,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             A partitioned context state if applicable; else returns stream state.
             A blank state will be created in none exists.
         """
-        state_partition_context = self._get_state_partition_context(context)
-        if state_partition_context:
+        if state_partition_context := self._get_state_partition_context(context):
             return get_writeable_state_dict(
                 self.tap_state,
                 self.name,

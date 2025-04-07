@@ -680,7 +680,7 @@ class SQLTap(Tap):
             *args: Positional arguments for the Tap initializer.
             **kwargs: Keyword arguments for the Tap initializer.
         """
-        self._catalog_dict: dict | None = None
+        self._catalog_dict: dict[str, list[dict]] | None = None
         super().__init__(*args, **kwargs)
 
     @classmethod
@@ -713,7 +713,7 @@ class SQLTap(Tap):
         Returns:
             The tap's catalog as a dict
         """
-        if self._catalog_dict:
+        if self._catalog_dict is not None:
             return self._catalog_dict
 
         if self.input_catalog:
@@ -721,12 +721,11 @@ class SQLTap(Tap):
 
         connector = self.tap_connector
 
-        result: dict[str, list[dict]] = {"streams": []}
-        result["streams"].extend(
-            connector.discover_catalog_entries(exclude_schemas=self.exclude_schemas),
-        )
-
-        self._catalog_dict = result
+        self._catalog_dict = {
+            "streams": connector.discover_catalog_entries(
+                exclude_schemas=self.exclude_schemas
+            )
+        }
         return self._catalog_dict
 
     def discover_streams(self) -> t.Sequence[Stream]:

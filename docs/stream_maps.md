@@ -237,6 +237,11 @@ The following functions and namespaces are available for use in mapping expressi
 | [`datetime`](inv:python:py:module:#datetime)         | This is the datetime module object from the Python standard library. You can access [`datetime.datetime`](inv:python:py:class:#datetime.datetime), [`datetime.timedelta`](inv:python:py:class:#datetime.timedelta), etc.                                                     |
 | [`json`](inv:python:py:module:#json)                 | This is the json module object from the Python standard library. Primarily used for calling [`json.dumps()`](inv:python:py:function:#json.dumps) and [`json.loads()`](inv:python:py:function:#json.loads).                                                                   |
 
+```{tip}
+With `json.dumps()`, you might want to pass the `default` argument. For example, `json.dumps(obj, default=str)` will call `str()` on
+an object if it is otherwise not serializable. This is useful for serializing datetime objects, `decimal.Decimal` instances, etc.
+```
+
 #### Built-in Variable Names
 
 The following variables are available in the context of a mapping expression:
