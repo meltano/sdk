@@ -247,10 +247,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         if not self.replication_key:
             return False
-        type_dict = self._get_schema().get("properties", {}).get(self.replication_key)
+
+        schema = self.effective_schema
+        type_dict = schema.get("properties", {}).get(self.replication_key)
+
         if type_dict is None:
             msg = f"Field '{self.replication_key}' is not in schema for stream '{self.name}'"  # noqa: E501
             raise InvalidReplicationKeyException(msg)
+
         return is_datetime_type(type_dict)
 
     def get_starting_replication_key_value(
@@ -370,10 +374,13 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             result += child.descendent_streams or []
         return result
 
-    def _get_schema(self) -> dict:
-        """Get the final schema for this stream.
+    @t.final
+    @property
+    def effective_schema(self) -> dict:
+        """The schema used to prune deselected properties and conform types.
 
-        This is either the hardcoded, discovered, or input schema.
+        If an input schema is provided, it will be used instead of the stream's
+        schema.
 
         Returns:
             JSON Schema dictionary for this stream.
@@ -896,11 +903,12 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Yields:
             Record message objects.
         """
-        pop_deselected_record_properties(record, self._get_schema(), self.mask)
+        schema = self.effective_schema
+        pop_deselected_record_properties(record, self.schema, self.mask)
         record = conform_record_data_types(
             stream_name=self.name,
             record=record,
-            schema=self._get_schema(),
+            schema=schema,
             level=self.TYPE_CONFORMANCE_LEVEL,
             logger=self.logger,
         )
