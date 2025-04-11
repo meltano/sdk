@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import typing as t
+
 import pytest
 
 from singer_sdk._singerlib import (
@@ -10,6 +12,9 @@ from singer_sdk._singerlib import (
     SelectionMask,
     StreamMetadata,
 )
+
+if t.TYPE_CHECKING:
+    from singer_sdk.singerlib.catalog import Breadcrumb
 
 METADATA_ARRAY = [
     {
@@ -193,7 +198,7 @@ def test_catalog_parsing():
 
 
 @pytest.mark.parametrize(
-    "schema,key_properties,replication_method,valid_replication_keys,schema_name",
+    "schema,key_properties,replication_method,valid_replication_keys,schema_name,breadcrumbs",
     [
         (
             {"properties": {"id": {"type": "integer"}}, "type": "object"},
@@ -201,6 +206,7 @@ def test_catalog_parsing():
             "FULL_TABLE",
             None,
             None,
+            {(), ("properties", "id")},
         ),
         (
             {
@@ -215,6 +221,12 @@ def test_catalog_parsing():
             "INCREMENTAL",
             ["updated_at"],
             "users",
+            {
+                (),
+                ("properties", "first_name"),
+                ("properties", "last_name"),
+                ("properties", "updated_at"),
+            },
         ),
         (
             {
@@ -229,6 +241,50 @@ def test_catalog_parsing():
             "FULL_TABLE",
             None,
             None,
+            {
+                (),
+                ("properties", "first_name"),
+                ("properties", "last_name"),
+                ("properties", "group"),
+            },
+        ),
+        (
+            {
+                "properties": {
+                    "id": {"type": "string"},
+                    "user": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "age": {"type": "integer"},
+                            "address": {
+                                "type": "object",
+                                "properties": {
+                                    "street": {"type": "string"},
+                                    "city": {"type": "string"},
+                                    "state": {"type": "string"},
+                                },
+                            },
+                        },
+                    },
+                },
+                "type": "object",
+            },
+            ["id"],
+            "FULL_TABLE",
+            None,
+            None,
+            {
+                (),
+                ("properties", "id"),
+                ("properties", "user"),
+                ("properties", "user", "properties", "name"),
+                ("properties", "user", "properties", "age"),
+                ("properties", "user", "properties", "address"),
+                ("properties", "user", "properties", "address", "properties", "street"),
+                ("properties", "user", "properties", "address", "properties", "city"),
+                ("properties", "user", "properties", "address", "properties", "state"),
+            },
         ),
         (
             {},
@@ -236,6 +292,7 @@ def test_catalog_parsing():
             None,
             None,
             None,
+            {()},
         ),
     ],
 )
@@ -245,6 +302,7 @@ def test_standard_metadata(
     replication_method: str | None,
     valid_replication_keys: list[str] | None,
     schema_name: str | None,
+    breadcrumbs: set[Breadcrumb],
 ):
     """Validate generated metadata."""
     metadata = MetadataMapping.get_standard_metadata(
@@ -272,3 +330,5 @@ def test_standard_metadata(
         rk_metadata = metadata["properties", rk]
         assert rk_metadata.inclusion == Metadata.InclusionType.AUTOMATIC
         assert rk_metadata.selected is None
+
+    assert set(metadata) == breadcrumbs
