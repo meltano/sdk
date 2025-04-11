@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.45.6 (2025-04-11)
+
+### 🐛 Fixes
+
+- [#2961](https://github.com/meltano/sdk/issues/2961) Conform `Nan`, `Infinity` and `-Infinity` to null values
+
+### 📚 Documentation Improvements
+
+- [#2960](https://github.com/meltano/sdk/issues/2960) Documented using `default=str` with `json.dumps` in stream maps
+- [#2955](https://github.com/meltano/sdk/issues/2955) Documented the `ignore_parent_replication_key` stream attribute
+
 ## v0.45.5 (2025-04-04)
 
 ### 🐛 Fixes
