@@ -12,6 +12,9 @@ import uuid
 from enum import Enum
 from functools import lru_cache
 
+if t.TYPE_CHECKING:
+    from collections.abc import Callable
+
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
 JSONSCHEMA_ANNOTATION_SECRET = "secret"  # noqa: S105
@@ -519,30 +522,73 @@ def _conform_uniform_list(
     return output, unmapped_properties
 
 
-def _conform_primitive_property(  # noqa: PLR0911
+def _conform_primitive_property(
     elem: t.Any,  # noqa: ANN401
     property_schema: dict,
 ) -> t.Any:  # noqa: ANN401
     """Converts a primitive (i.e. not object or array) to a json compatible type."""
-    if isinstance(elem, (datetime.datetime,)):
-        return to_json_compatible(elem)
-    if isinstance(elem, datetime.date):
-        return elem.isoformat()
-    if isinstance(elem, datetime.timedelta):
-        epoch = datetime.datetime.fromtimestamp(0, UTC)
-        timedelta_from_epoch = epoch + elem
-        if timedelta_from_epoch.tzinfo is None:
-            timedelta_from_epoch = timedelta_from_epoch.replace(tzinfo=UTC)
-        return timedelta_from_epoch.isoformat()
-    if isinstance(elem, datetime.time):
-        return str(elem)
-    if isinstance(elem, bytes):
-        # for BIT value, treat 0 as False and anything else as True
-        return elem != b"\x00" if is_boolean_type(property_schema) else elem.hex()
-    if isinstance(elem, (float, decimal.Decimal)):
-        if math.isnan(elem) or math.isinf(elem):
-            return None
-        return elem
+    # Handle None values first
+    if elem is None:
+        return None
+
+    # Process different types using a more structured approach
+    type_handlers: dict[type | tuple[type, ...], Callable[[t.Any, dict], t.Any]] = {
+        datetime.datetime: _handle_datetime,
+        datetime.date: _handle_date,
+        datetime.timedelta: _handle_timedelta,
+        datetime.time: _handle_time,
+        bytes: _handle_bytes,
+        (float, decimal.Decimal): _handle_numeric,
+    }
+
+    # Find and apply the appropriate handler based on element type
+    for types, handler in type_handlers.items():
+        if isinstance(elem, types if isinstance(types, tuple) else (types,)):
+            return handler(elem, property_schema)
+
+    # Handle boolean conversion
     if _is_exclusive_boolean_type(property_schema):
-        return None if elem is None else elem != 0
+        return elem != 0
+
+    # Default case: return the element as is
+    return elem
+
+
+def _handle_datetime(elem: datetime.datetime, _: dict) -> t.Any:  # noqa: ANN401
+    """Convert datetime to ISO format string."""
+    return to_json_compatible(elem)
+
+
+def _handle_date(elem: datetime.date, _: dict) -> str:
+    """Convert date to ISO format string."""
+    return elem.isoformat()
+
+
+def _handle_timedelta(elem: datetime.timedelta, _: dict) -> str:
+    """Convert timedelta to ISO format string."""
+    epoch = datetime.datetime.fromtimestamp(0, UTC)
+    timedelta_from_epoch = epoch + elem
+    if timedelta_from_epoch.tzinfo is None:
+        timedelta_from_epoch = timedelta_from_epoch.replace(tzinfo=UTC)
+    return timedelta_from_epoch.isoformat()
+
+
+def _handle_time(elem: datetime.time, _: dict) -> str:
+    """Convert time to string."""
+    return str(elem)
+
+
+def _handle_bytes(elem: bytes, property_schema: dict) -> bool | str:
+    """Convert bytes to appropriate type."""
+    # For BIT value, treat 0 as False and anything else as True
+    return elem != b"\x00" if is_boolean_type(property_schema) else elem.hex()
+
+
+def _handle_numeric(
+    elem: float | decimal.Decimal,
+    _: dict,
+) -> float | decimal.Decimal | None:
+    """Convert numeric values, handling special cases like NaN and infinity."""
+    if math.isnan(elem) or math.isinf(elem):
+        return None
     return elem
