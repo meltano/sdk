@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
-- [#2961](https://github.com/meltano/sdk/issues/2961) Conform `Nan`, `Infinity` and `-Infinity` to null values
+- [#2961](https://github.com/meltano/sdk/issues/2961) Conform `NaN`, `Infinity` and `-Infinity` to null values
 
 ### 📚 Documentation Improvements
 
