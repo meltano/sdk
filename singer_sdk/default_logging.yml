@@ -4,11 +4,24 @@ formatters:
   console:
     format: "{asctime:23s} | {levelname:8s} | {name:20s} | {message}"
     style: "{"
+  metrics:
+    (): singer_sdk.metrics.SingerMetricsFormatter
+    format: "{asctime:23s} | {levelname:8s} | {name:20s} | {message}: {metric_json}"
+    style: "{"
 handlers:
   default:
     class: logging.StreamHandler
     formatter: console
     stream: ext://sys.stderr
+  metrics:
+    class: logging.StreamHandler
+    formatter: metrics
+    stream: ext://sys.stderr
 root:
   level: INFO
   handlers: [default]
+loggers:
+  singer_sdk.metrics:
+    level: INFO
+    handlers: [ metrics ]
+    propagate: no
