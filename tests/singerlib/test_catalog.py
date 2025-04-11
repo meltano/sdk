@@ -200,15 +200,16 @@ def test_catalog_parsing():
 @pytest.mark.parametrize(
     "schema,key_properties,replication_method,valid_replication_keys,schema_name,breadcrumbs",
     [
-        (
+        pytest.param(
             {"properties": {"id": {"type": "integer"}}, "type": "object"},
             ["id"],
             "FULL_TABLE",
             None,
             None,
             {(), ("properties", "id")},
+            id="simple_integer_id_full_table",
         ),
-        (
+        pytest.param(
             {
                 "properties": {
                     "first_name": {"type": "string"},
@@ -227,8 +228,9 @@ def test_catalog_parsing():
                 ("properties", "last_name"),
                 ("properties", "updated_at"),
             },
+            id="users_incremental_with_datetime",
         ),
-        (
+        pytest.param(
             {
                 "properties": {
                     "first_name": {"type": "string"},
@@ -247,8 +249,9 @@ def test_catalog_parsing():
                 ("properties", "last_name"),
                 ("properties", "group"),
             },
+            id="users_full_table_with_group",
         ),
-        (
+        pytest.param(
             {
                 "properties": {
                     "id": {"type": "string"},
@@ -285,14 +288,29 @@ def test_catalog_parsing():
                 ("properties", "user", "properties", "address", "properties", "city"),
                 ("properties", "user", "properties", "address", "properties", "state"),
             },
+            id="nested_user_object_full_table",
         ),
-        (
-            {},
+        pytest.param({}, [], None, None, None, {()}, id="empty_schema"),
+        pytest.param(
+            {
+                "properties": {
+                    "id": {"type": "integer"},
+                    "nested_array": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {"name": {"type": "string"}},
+                        },
+                    },
+                },
+                "type": "object",
+            },
             [],
+            "FULL_TABLE",
             None,
             None,
-            None,
-            {()},
+            {(), ("properties", "id"), ("properties", "nested_array")},
+            id="nested_array_full_table",
         ),
     ],
 )
