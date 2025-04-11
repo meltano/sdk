@@ -106,6 +106,12 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """
 
     ignore_parent_replication_key: bool = False
+    """Set to `True` if the parent stream's replication key are not updated when child
+    items are changed.
+
+    This is used to indicate that a child stream should be synced regardless of the
+    parent stream's state.
+    """
 
     selected_by_default: bool = True
     """Whether this stream is selected by default in the catalog."""
@@ -198,14 +204,18 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if self._stream_maps:
             return self._stream_maps
 
-        if self._tap.mapper:  # type: ignore[truthy-bool]
+        if self._tap.mapper is not None:
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
             self.logger.info(
                 "Tap has custom mapper. Using %d provided map(s).",
                 len(self.stream_maps),
             )
-        else:
-            self.logger.info(
+
+        # TODO: A tap mapper is always registered so this code is unreachable.
+        # Consider removing it.
+        # https://github.com/meltano/sdk/blob/c6672eb70002c7430f5db30fba05bb21cf9f0c11/singer_sdk/mapper.py#L768-L778
+        else:  # pragma: no cover
+            self.logger.info(  # type: ignore[unreachable]
                 "No custom mapper provided for '%s'. Using SameRecordTransform.",
                 self.name,
             )
@@ -717,8 +727,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             A partitioned context state if applicable; else returns stream state.
             A blank state will be created in none exists.
         """
-        state_partition_context = self._get_state_partition_context(context)
-        if state_partition_context:
+        if state_partition_context := self._get_state_partition_context(context):
             return get_writeable_state_dict(
                 self.tap_state,
                 self.name,
@@ -1280,8 +1289,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         self._tap_input_catalog = catalog
 
-        catalog_entry = catalog.get_stream(self.name)
-        if catalog_entry:
+        if catalog_entry := catalog.get_stream(self.name):
             stream_metadata: StreamMetadata | None
             if stream_metadata := catalog_entry.metadata.get(()):  # type: ignore[assignment]
                 table_key_properties = stream_metadata.table_key_properties

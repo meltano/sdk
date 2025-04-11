@@ -964,6 +964,16 @@ class MappedTap(Tap):
             "dates.jsonl",
             id="dates",
         ),
+        pytest.param(
+            {
+                "mystream": {
+                    "user": "json.dumps(user, default=str)",
+                },
+            },
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "json_dumps.jsonl",
+            id="json_dumps",
+        ),
     ],
 )
 def test_mapped_stream(
@@ -975,9 +985,7 @@ def test_mapped_stream(
 ):
     snapshot.snapshot_dir = snapshot_dir.joinpath("mapped_stream")
 
-    tap = MappedTap(
-        config={"stream_maps": stream_maps, **config},
-    )
+    tap = MappedTap(config={"stream_maps": stream_maps, **config})
     buf = io.StringIO()
     with redirect_stdout(buf):
         tap.sync_all()

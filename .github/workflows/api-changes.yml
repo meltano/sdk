@@ -15,7 +15,6 @@ concurrency:
 env:
   FORCE_COLOR: 1
   UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
-  UV_VERSION: 0.5.26
 
 permissions:  # added using https://github.com/step-security/secure-repo
   contents: read
@@ -38,9 +37,7 @@ jobs:
       with:
         python-version: 3.x
 
-    - uses: astral-sh/setup-uv@22695119d769bdb6f7032ad67b9bca0ef8c4a174 # v5.4.0
-      with:
-        version: ${{ env.UV_VERSION }}
+    - uses: astral-sh/setup-uv@0c5e2b8115b80b4c7c5ddf6ffdd634974642d182 # v5.4.1
 
     - name: Install tools
       run: |

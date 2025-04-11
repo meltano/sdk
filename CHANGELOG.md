@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.45.6 (2025-04-11)
+
+### 🐛 Fixes
+
+- [#2961](https://github.com/meltano/sdk/issues/2961) Conform `NaN`, `Infinity` and `-Infinity` to null values
+
+### 📚 Documentation Improvements
+
+- [#2960](https://github.com/meltano/sdk/issues/2960) Documented using `default=str` with `json.dumps` in stream maps
+- [#2955](https://github.com/meltano/sdk/issues/2955) Documented the `ignore_parent_replication_key` stream attribute
+
+## v0.45.5 (2025-04-04)
+
+### 🐛 Fixes
+
+- [#2952](https://github.com/meltano/sdk/issues/2952) Adapt field schema type to `string` when transformed with stream maps using `json.dumps`
+
+### ⚙️ Under the Hood
+
+- [#2948](https://github.com/meltano/sdk/issues/2948) `ignore_no_records` as an instance property in built-in tests -- _**Thanks @ReubenFrankel!**_
+
+## v0.45.4 (2025-04-01)
+
+### 🐛 Fixes
+
+- [#2946](https://github.com/meltano/sdk/issues/2946) In the built-in tap tests, do not emit a warning for missing records on ignored streams
+
+## v0.45.3 (2025-03-29)
+
+### 🐛 Fixes
+
+- [#2937](https://github.com/meltano/sdk/issues/2937) Revert "fix: Ensure stream schema is overridden by the input catalog ([#2932](https://github.com/meltano/sdk/issues/2932))"
+
+### 📚 Documentation Improvements
+
+- [#2938](https://github.com/meltano/sdk/issues/2938) Fixed the dynamic schema example
+
+## v0.45.2 (2025-03-28)
+
+### 🐛 Fixes
+
+- [#2935](https://github.com/meltano/sdk/issues/2935) Added `uv` venv backend to Meltano project in templates
+- [#2934](https://github.com/meltano/sdk/issues/2934) Updated cookiecutter pre-commit hooks and added `check-meltano` JSON schema check
+- [#2932](https://github.com/meltano/sdk/issues/2932) Ensure stream schema is overridden by the input catalog
+
+## v0.45.1 (2025-03-27)
+
+### 🐛 Fixes
+
+- [#2925](https://github.com/meltano/sdk/issues/2925) Let downstream packages import from deprecated `singer_sdk._singerlib.catalog`
+
 ## v0.45.0 (2025-03-25)
 
 ### ✨ New
