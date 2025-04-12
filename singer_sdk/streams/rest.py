@@ -102,7 +102,6 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             self.path = path
         self._http_headers: dict = {"User-Agent": self.user_agent}
         self._http_method = http_method
-        self._requests_session = requests.Session()
 
     @staticmethod
     def _url_encode(val: str | datetime | bool | int | list[str]) -> str:  # noqa: FBT001
