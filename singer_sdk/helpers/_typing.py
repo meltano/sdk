@@ -587,6 +587,4 @@ def _handle_numeric(
     _: dict,
 ) -> float | decimal.Decimal | None:
     """Convert numeric values, handling special cases like NaN and infinity."""
-    if math.isnan(elem) or math.isinf(elem):
-        return None
-    return elem
+    return None if math.isnan(elem) or math.isinf(elem) else elem
