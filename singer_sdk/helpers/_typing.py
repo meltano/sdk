@@ -568,8 +568,6 @@ def _handle_timedelta(elem: datetime.timedelta, _: dict) -> str:
     """Convert timedelta to ISO format string."""
     epoch = datetime.datetime.fromtimestamp(0, UTC)
     timedelta_from_epoch = epoch + elem
-    if timedelta_from_epoch.tzinfo is None:
-        timedelta_from_epoch = timedelta_from_epoch.replace(tzinfo=UTC)
     return timedelta_from_epoch.isoformat()
 
 
