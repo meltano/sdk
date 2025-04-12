@@ -48,7 +48,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
     """Abstract base class for HTTP streams."""
 
     _page_size: int = DEFAULT_PAGE_SIZE
-    _requests_session: requests.Session | None
+    _requests_session: requests.Session | None = None
 
     #: Response code reference for rate limit retries
     extra_retry_statuses: t.Sequence[int] = [HTTPStatus.TOO_MANY_REQUESTS]
