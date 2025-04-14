@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.45.7 (2025-04-14)
+
+### 🐛 Fixes
+
+- [#2968](https://github.com/meltano/sdk/issues/2968) `singer_sdk.singerlib.resolve_schema_references` now resolves `oneOf` schema references
+- [#2924](https://github.com/meltano/sdk/issues/2924) Generate standard stream metadata for nested fields
+- [#2940](https://github.com/meltano/sdk/issues/2940) Ensure streams with hardcoded `schema` attributes (e.g. REST and GraphQL streams) can have their schema overridden by the catalog
+
+### 📦 Packaging changes
+
+- [#2966](https://github.com/meltano/sdk/issues/2966) Add a `fallback-version` for hatch vcs
+
 ## v0.45.6 (2025-04-11)
 
 ### 🐛 Fixes
