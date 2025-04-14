@@ -546,12 +546,7 @@ def _conform_primitive_property(
         if isinstance(elem, types if isinstance(types, tuple) else (types,)):
             return handler(elem, property_schema)
 
-    # Handle boolean conversion
-    if _is_exclusive_boolean_type(property_schema):
-        return elem != 0
-
-    # Default case: return the element as is
-    return elem
+    return elem != 0 if _is_exclusive_boolean_type(property_schema) else elem
 
 
 def _handle_datetime(elem: datetime.datetime, _: dict) -> t.Any:  # noqa: ANN401
