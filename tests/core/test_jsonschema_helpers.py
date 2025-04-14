@@ -1061,6 +1061,11 @@ def test_schema_dependencies():
             True,
             id="oneof_datetime",
         ),
+        pytest.param(
+            {"oneOf": [{"type": "string"}, {"type": "null"}]},
+            False,
+            id="oneof_string_or_null",
+        ),
     ],
 )
 def test_is_datetime_type(schema, expected):
