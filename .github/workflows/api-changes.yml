@@ -15,7 +15,6 @@ concurrency:
 env:
   FORCE_COLOR: 1
   UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
-  UV_VERSION: 0.5.26
 
 permissions:  # added using https://github.com/step-security/secure-repo
   contents: read
@@ -28,18 +27,17 @@ jobs:
       NOXSESSION: api
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         fetch-depth: 0
+        persist-credentials: false
 
     - name: Setup Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
       with:
         python-version: 3.x
 
-    - uses: astral-sh/setup-uv@v5
-      with:
-        version: ${{ env.UV_VERSION }}
+    - uses: astral-sh/setup-uv@0c5e2b8115b80b4c7c5ddf6ffdd634974642d182 # v5.4.1
 
     - name: Install tools
       run: |
@@ -53,6 +51,6 @@ jobs:
         echo "ref=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
 
     # Check API against the latest commit on the base branch
-    - name: Run Nox
+    - name: Run Nox  # zizmor: ignore[template-injection]
       run: |
         nox -- ${{ steps.set-ref.outputs.ref }}

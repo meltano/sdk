@@ -5,6 +5,87 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.45.6 (2025-04-11)
+
+### 🐛 Fixes
+
+- [#2961](https://github.com/meltano/sdk/issues/2961) Conform `NaN`, `Infinity` and `-Infinity` to null values
+
+### 📚 Documentation Improvements
+
+- [#2960](https://github.com/meltano/sdk/issues/2960) Documented using `default=str` with `json.dumps` in stream maps
+- [#2955](https://github.com/meltano/sdk/issues/2955) Documented the `ignore_parent_replication_key` stream attribute
+
+## v0.45.5 (2025-04-04)
+
+### 🐛 Fixes
+
+- [#2952](https://github.com/meltano/sdk/issues/2952) Adapt field schema type to `string` when transformed with stream maps using `json.dumps`
+
+### ⚙️ Under the Hood
+
+- [#2948](https://github.com/meltano/sdk/issues/2948) `ignore_no_records` as an instance property in built-in tests -- _**Thanks @ReubenFrankel!**_
+
+## v0.45.4 (2025-04-01)
+
+### 🐛 Fixes
+
+- [#2946](https://github.com/meltano/sdk/issues/2946) In the built-in tap tests, do not emit a warning for missing records on ignored streams
+
+## v0.45.3 (2025-03-29)
+
+### 🐛 Fixes
+
+- [#2937](https://github.com/meltano/sdk/issues/2937) Revert "fix: Ensure stream schema is overridden by the input catalog ([#2932](https://github.com/meltano/sdk/issues/2932))"
+
+### 📚 Documentation Improvements
+
+- [#2938](https://github.com/meltano/sdk/issues/2938) Fixed the dynamic schema example
+
+## v0.45.2 (2025-03-28)
+
+### 🐛 Fixes
+
+- [#2935](https://github.com/meltano/sdk/issues/2935) Added `uv` venv backend to Meltano project in templates
+- [#2934](https://github.com/meltano/sdk/issues/2934) Updated cookiecutter pre-commit hooks and added `check-meltano` JSON schema check
+- [#2932](https://github.com/meltano/sdk/issues/2932) Ensure stream schema is overridden by the input catalog
+
+## v0.45.1 (2025-03-27)
+
+### 🐛 Fixes
+
+- [#2925](https://github.com/meltano/sdk/issues/2925) Let downstream packages import from deprecated `singer_sdk._singerlib.catalog`
+
+## v0.45.0 (2025-03-25)
+
+### ✨ New
+
+- [#2885](https://github.com/meltano/sdk/issues/2885) Update tap, target and mapper dependencies in templates
+- [#2789](https://github.com/meltano/sdk/issues/2789) Conditionally required settings
+- [#2908](https://github.com/meltano/sdk/issues/2908) Include response content when HTTP request fails fatally in REST streams
+- [#2541](https://github.com/meltano/sdk/issues/2541) Implement Singer msgspec encoding
+- [#2786](https://github.com/meltano/sdk/issues/2786) Support the `x-singer.decimal` JSON Schema extension
+- [#2895](https://github.com/meltano/sdk/issues/2895) Graduated low-level Singer API `singerlib` to public module
+- [#2872](https://github.com/meltano/sdk/issues/2872) Add `pytest-github-actions-annotate-failures` for GitHub workflows of tap, target and mapper templates
+
+### 🐛 Fixes
+
+- [#2907](https://github.com/meltano/sdk/issues/2907) Additionally suppress `No records were available to test` warning when no records are ignored for all streams -- _**Thanks @ReubenFrankel!**_
+- [#2906](https://github.com/meltano/sdk/issues/2906) Suppress `No records were available to test` warnings when empty stream is ignored -- _**Thanks @ReubenFrankel!**_
+- [#2903](https://github.com/meltano/sdk/issues/2903) Don't warn about catalog schema not matching records if there are no records available to test against -- _**Thanks @ReubenFrankel!**_
+
+### ⚙️ Under the Hood
+
+- [#2782](https://github.com/meltano/sdk/issues/2782) Added a class method to instantiate `JSONSchemaToSQL` from the target configuration
+
+### ⚡ Performance Improvements
+
+- [#2887](https://github.com/meltano/sdk/issues/2887) Iterate only once over properties when pruning record
+
+### 📦 Packaging changes
+
+- [#2883](https://github.com/meltano/sdk/issues/2883) Pinned docs dependencies and use PEP 735 for them
+
 ## v0.44.3 (2025-02-05)
 
 ### 🐛 Fixes

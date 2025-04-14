@@ -40,7 +40,7 @@ if t.TYPE_CHECKING:
     else:
         from typing_extensions import TypeAlias
 
-    from singer_sdk._singerlib.catalog import Catalog
+    from singer_sdk.singerlib.catalog import Catalog
 
 
 MAPPER_ELSE_OPTION = "__else__"
@@ -413,6 +413,9 @@ class CustomStreamMap(StreamMap):
 
         if expr.startswith("bool("):
             return th.BooleanType()
+
+        if expr.startswith("json.dumps("):
+            return th.StringType()
 
         if expr.startswith(("datetime.date.", "datetime.date(")) or expr.endswith(
             ".date()"
