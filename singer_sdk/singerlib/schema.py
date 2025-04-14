@@ -197,6 +197,7 @@ class _SchemaKey:
     pattern_properties = "patternProperties"
     any_of = "anyOf"
     all_of = "allOf"
+    one_of = "oneOf"
 
 
 def resolve_schema_references(
@@ -263,5 +264,9 @@ def _resolve_schema_references(  # noqa: C901
     if _SchemaKey.all_of in schema:
         for i, element in enumerate(schema[_SchemaKey.all_of]):
             schema[_SchemaKey.all_of][i] = _resolve_schema_references(element, resolver)
+
+    if _SchemaKey.one_of in schema:
+        for i, element in enumerate(schema[_SchemaKey.one_of]):
+            schema[_SchemaKey.one_of][i] = _resolve_schema_references(element, resolver)
 
     return schema

@@ -2,9 +2,16 @@
 
 from __future__ import annotations
 
+import typing as t
 import warnings
 
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
+
+if t.TYPE_CHECKING:
+    from singer_sdk.singerlib import (
+        Schema,  # noqa: F401
+        resolve_schema_references,  # noqa: F401
+    )
 
 
 def __getattr__(name: str):  # noqa: ANN202
