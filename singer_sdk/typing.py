@@ -238,7 +238,7 @@ class JSONTypeHelper(t.Generic[T]):
         Returns:
             A dictionary containing the JSON Schema extras.
         """
-        result = {}
+        result: dict[str, t.Any] = {}
         if self.allowed_values:
             result["enum"] = self.allowed_values
 
