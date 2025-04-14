@@ -148,6 +148,8 @@ def is_datetime_type(type_dict: dict) -> bool:
         return any(is_datetime_type(type_dict) for type_dict in type_dict["anyOf"])
     if "allOf" in type_dict:
         return all(is_datetime_type(type_dict) for type_dict in type_dict["allOf"])
+    if "oneOf" in type_dict:
+        return any(is_datetime_type(option) for option in type_dict["oneOf"])
     if "type" in type_dict:
         return type_dict.get("format") == "date-time"
     msg = f"Could not detect type of replication key using schema '{type_dict}'"
@@ -175,6 +177,8 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
         return all(
             is_date_or_datetime_type(type_dict) for type_dict in type_dict["allOf"]
         )
+    if "oneOf" in type_dict:
+        return any(is_date_or_datetime_type(option) for option in type_dict["oneOf"])
 
     if "type" in type_dict:
         return type_dict.get("format") in {"date", "date-time"}
