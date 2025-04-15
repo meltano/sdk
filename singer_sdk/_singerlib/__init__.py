@@ -9,6 +9,7 @@ from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 
 if t.TYPE_CHECKING:
     from singer_sdk.singerlib import (
+        Catalog,  # noqa: F401
         Schema,  # noqa: F401
         resolve_schema_references,  # noqa: F401
     )

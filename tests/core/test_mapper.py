@@ -22,7 +22,6 @@ from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
     ArrayType,
     BooleanType,
-    CustomType,
     DateTimeType,
     IntegerType,
     NumberType,
@@ -422,7 +421,7 @@ def wildcard_schemas():
                 ArrayType(
                     ObjectType(
                         Property("id", IntegerType),
-                        Property("value", CustomType({})),
+                        Property("value", OneOf(StringType, IntegerType, BooleanType)),
                     ),
                 ),
             ),
