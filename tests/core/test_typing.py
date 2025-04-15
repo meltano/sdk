@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import datetime
+import decimal
 import logging
+import typing as t
 
 import pytest
 import sqlalchemy as sa
@@ -284,38 +286,80 @@ def test_conform_object_additional_properties():
     assert actual_output == expected_output
 
 
-def test_conform_primitives():
-    assert (
-        _conform_primitive_property(
+@pytest.mark.parametrize(
+    "value,type_dict,expected",
+    [
+        # Datetime conversions
+        pytest.param(
             datetime.datetime(2020, 5, 17, tzinfo=datetime.timezone.utc),
             {"type": "string"},
-        )
-        == "2020-05-17T00:00:00+00:00"
-    )
-    assert (
-        _conform_primitive_property(datetime.date(2020, 5, 17), {"type": "string"})
-        == "2020-05-17"
-    )
-    assert (
-        _conform_primitive_property(datetime.timedelta(365), {"type": "string"})
-        == "1971-01-01T00:00:00+00:00"
-    )
-    assert (
-        _conform_primitive_property(datetime.time(12, 0, 0), {"type": "string"})
-        == "12:00:00"
-    )
+            "2020-05-17T00:00:00+00:00",
+            id="datetime_to_string",
+        ),
+        pytest.param(
+            datetime.date(2020, 5, 17),
+            {"type": "string"},
+            "2020-05-17",
+            id="date_to_string",
+        ),
+        pytest.param(
+            datetime.timedelta(365),
+            {"type": "string"},
+            "1971-01-01T00:00:00+00:00",
+            id="timedelta_to_string",
+        ),
+        pytest.param(
+            datetime.time(12, 0, 0), {"type": "string"}, "12:00:00", id="time_to_string"
+        ),
+        # Bytes to string conversions
+        pytest.param(b"\x00", {"type": "string"}, "00", id="bytes_00_to_string"),
+        pytest.param(b"\xbc", {"type": "string"}, "bc", id="bytes_bc_to_string"),
+        # Bytes to boolean conversions
+        pytest.param(b"\x00", {"type": "boolean"}, False, id="bytes_00_to_boolean"),
+        pytest.param(b"\xbc", {"type": "boolean"}, True, id="bytes_bc_to_boolean"),
+        # Boolean conversions
+        pytest.param(None, {"type": "boolean"}, None, id="none_to_boolean"),
+        pytest.param(0, {"type": "boolean"}, False, id="zero_to_boolean"),
+        pytest.param(
+            0,
+            {"anyOf": [{"type": "boolean"}, {"type": "integer"}]},
+            0,
+            id="zero_to_boolean_or_integer",
+        ),
+        pytest.param(
+            0,
+            {"type": ["boolean", "integer"]},
+            0,
+            id="zero_to_boolean_or_integer_union",
+        ),
+        pytest.param(1, {"type": "boolean"}, True, id="one_to_boolean"),
+        pytest.param(
+            1, {"type": ["boolean", "null"]}, True, id="one_to_boolean_or_null"
+        ),
+        pytest.param(1, {"type": ["boolean"]}, True, id="one_to_boolean_single_type"),
+        # Number conversions
+        pytest.param(3.14, {"type": "number"}, 3.14, id="float_to_number"),
+        pytest.param(
+            decimal.Decimal("3.14"),
+            {"type": "integer"},
+            decimal.Decimal("3.14"),
+            id="decimal_to_integer",
+        ),
+        pytest.param(float("nan"), {"type": "number"}, None, id="float_nan_to_number"),
+        pytest.param(float("inf"), {"type": "number"}, None, id="float_inf_to_number"),
+        pytest.param(
+            decimal.Decimal("inf"), {"type": "number"}, None, id="decimal_inf_to_number"
+        ),
+        pytest.param(
+            decimal.Decimal("nan"), {"type": "number"}, None, id="decimal_nan_to_number"
+        ),
+    ],
+)
+def test_conform_primitives(value: t.Any, type_dict: dict, expected: t.Any):
+    assert _conform_primitive_property(value, type_dict) == expected
 
-    assert _conform_primitive_property(b"\x00", {"type": "string"}) == "00"
-    assert _conform_primitive_property(b"\xbc", {"type": "string"}) == "bc"
 
-    assert _conform_primitive_property(b"\x00", {"type": "boolean"}) is False
-    assert _conform_primitive_property(b"\xbc", {"type": "boolean"}) is True
-
-    assert _conform_primitive_property(None, {"type": "boolean"}) is None
-    assert _conform_primitive_property(0, {"type": "boolean"}) is False
-    assert _conform_primitive_property(1, {"type": "boolean"}) is True
-
-
+@pytest.mark.filterwarnings("ignore:Use `JSONSchemaToSQL` instead.:DeprecationWarning")
 @pytest.mark.parametrize(
     "jsonschema_type,expected",
     [
@@ -336,6 +380,10 @@ def test_conform_primitives():
             sa.types.DATETIME,
         ),
         ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, sa.types.INTEGER),
+        (
+            {"type": ["array", "object", "boolean", "null"]},
+            sa.types.VARCHAR,
+        ),
     ],
 )
 def test_to_sql_type(jsonschema_type, expected):

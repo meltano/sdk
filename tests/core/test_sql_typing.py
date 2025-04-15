@@ -49,7 +49,8 @@ def test_convert_jsonschema_type_to_sql_type(
     jsonschema_type: dict,
     sql_type: sa.types.TypeEngine,
 ):
-    result = th.to_sql_type(jsonschema_type)
+    with pytest.warns(DeprecationWarning, match="Use `JSONSchemaToSQL` instead"):
+        result = th.to_sql_type(jsonschema_type)
     assert isinstance(result, sql_type.__class__)
     assert str(result) == str(sql_type)
 
@@ -70,5 +71,7 @@ def test_convert_sql_type_to_jsonschema_type(
     sql_type: sa.types.TypeEngine,
     is_of_jsonschema_type: dict,
 ):
-    result = th.to_jsonschema_type(sql_type)
+    with pytest.warns(DeprecationWarning, match="Use `SQLToJSONSchema` instead"):
+        result = th.to_jsonschema_type(sql_type)
+
     assert result == is_of_jsonschema_type

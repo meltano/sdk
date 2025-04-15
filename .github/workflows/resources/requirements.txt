@@ -1,0 +1,4 @@
+griffe~=1.7
+nox==2025.2.9
+pre-commit==4.2.0
+twine==6.1.0

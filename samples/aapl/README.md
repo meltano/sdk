@@ -5,12 +5,12 @@ This tap sample helps in evaluating the performance of catalog parsing and strea
 ## Execution
 
 ```shell
-poetry run python samples/aapl
+uv run python samples/aapl
 ```
 
 Or if you want to trace the execution
 
 ```shell
-poetry run viztracer samples/aapl/__main__.py
-poetry run vizviewer result.json
+uv run viztracer samples/aapl/__main__.py
+uv run vizviewer result.json
 ```

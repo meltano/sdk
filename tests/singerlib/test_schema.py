@@ -263,6 +263,108 @@ def test_schema_from_dict(pydict, expected):
             {"allOf": [{"type": "string"}, {"type": "integer"}]},
             id="resolve_schema_all_of",
         ),
+        pytest.param(
+            {
+                "oneOf": [
+                    {"$ref": "references.json#/definitions/first_type"},
+                    {"$ref": "references.json#/definitions/second_type"},
+                ],
+                "title": "A Title",
+            },
+            {
+                "references.json": {
+                    "definitions": {
+                        "first_type": {"type": "string", "title": "First Type"},
+                        "second_type": {"type": "integer", "title": "Second Type"},
+                    }
+                },
+            },
+            {
+                "oneOf": [
+                    {"type": "string", "title": "First Type"},
+                    {"type": "integer", "title": "Second Type"},
+                ],
+                "title": "A Title",
+            },
+            id="resolve_schema_one_of",
+        ),
+        pytest.param(
+            {
+                "type": "object",
+                "properties": {
+                    "product_price": {
+                        "oneOf": [
+                            {"$ref": "components#/schemas/LegacyProductPrice"},
+                            {"$ref": "components#/schemas/ProductPrice"},
+                        ],
+                        "title": "Product Price",
+                    },
+                },
+            },
+            {
+                "components": {
+                    "schemas": {
+                        "LegacyProductPrice": {
+                            "type": "object",
+                            "properties": {"price": {"type": "number"}},
+                            "title": "Legacy Product Price",
+                        },
+                        "ProductPrice": {
+                            "oneOf": [
+                                {
+                                    "$ref": "components#/schemas/ProductPriceFixed",
+                                },
+                                {
+                                    "$ref": "components#/schemas/ProductPriceFree",
+                                },
+                            ],
+                        },
+                        "ProductPriceFixed": {
+                            "type": "object",
+                            "properties": {"price": {"type": "number"}},
+                            "title": "Product Price Fixed",
+                        },
+                        "ProductPriceFree": {
+                            "type": "object",
+                            "properties": {"price": {"type": "number", "const": 0}},
+                            "title": "Product Price Free",
+                        },
+                    }
+                },
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "product_price": {
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "properties": {"price": {"type": "number"}},
+                                "title": "Legacy Product Price",
+                            },
+                            {
+                                "oneOf": [
+                                    {
+                                        "type": "object",
+                                        "properties": {"price": {"type": "number"}},
+                                        "title": "Product Price Fixed",
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "price": {"type": "number", "const": 0}
+                                        },
+                                        "title": "Product Price Free",
+                                    },
+                                ],
+                            },
+                        ],
+                        "title": "Product Price",
+                    },
+                },
+            },
+            id="resolve_nested_one_of",
+        ),
     ],
 )
 def test_resolve_schema_references(schema, refs, expected):

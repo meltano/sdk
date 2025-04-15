@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import re
 import typing as t
+import warnings
 from collections import defaultdict
 from copy import copy
-from textwrap import dedent
 
 import sqlalchemy as sa
-from sqlalchemy.sql import quoted_name
+from sqlalchemy.sql import insert
 from sqlalchemy.sql.expression import bindparam
 
 from singer_sdk.connectors import SQLConnector
@@ -21,6 +21,7 @@ from singer_sdk.sinks.batch import BatchSink
 if t.TYPE_CHECKING:
     from sqlalchemy.sql import Executable
 
+    from singer_sdk.connectors.sql import FullyQualifiedName
     from singer_sdk.target_base import Target
 
 _C = t.TypeVar("_C", bound=SQLConnector)
@@ -90,7 +91,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Returns:
             The target schema name.
         """
-        # Look for a default_target_scheme in the configuraion fle
+        # Look for a default_target_scheme in the configuration file
         default_target_schema: str = self.config.get("default_target_schema", None)
         parts = self.stream_name.split("-")
 
@@ -109,7 +110,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         # Assumes single-DB target context.
 
     @property
-    def full_table_name(self) -> str:
+    def full_table_name(self) -> FullyQualifiedName:
         """Return the fully qualified table name.
 
         Returns:
@@ -122,7 +123,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         )
 
     @property
-    def full_schema_name(self) -> str:
+    def full_schema_name(self) -> FullyQualifiedName:
         """Return the fully qualified schema name.
 
         Returns:
@@ -269,7 +270,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
 
     def generate_insert_statement(
         self,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
         schema: dict,
     ) -> str | Executable:
         """Generate an insert statement for the given records.
@@ -281,23 +282,30 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Returns:
             An insert statement.
         """
-        property_names = list(self.conform_schema(schema)["properties"].keys())
-        column_identifiers = [
-            self.connector.quote(quoted_name(name, quote=True))
-            for name in property_names
-        ]
-        statement = dedent(
-            f"""\
-            INSERT INTO {full_table_name}
-            ({", ".join(column_identifiers)})
-            VALUES ({", ".join([f":{name}" for name in property_names])})
-            """,  # noqa: S608
+        conformed_schema = self.conform_schema(schema)
+        property_names = list(conformed_schema["properties"])
+
+        _, schema_name, table_name = self.connector.parse_full_table_name(
+            full_table_name
         )
-        return statement.rstrip()
+
+        table = sa.Table(
+            table_name,
+            sa.MetaData(),
+            *[
+                sa.Column(
+                    name, sa.String
+                )  # Assuming all columns are of type String for simplicity  # noqa: E501
+                for name in property_names
+            ],
+            schema=schema_name,
+        )
+
+        return insert(table)
 
     def bulk_insert_records(
         self,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
         schema: dict,
         records: t.Iterable[dict[str, t.Any]],
     ) -> int | None:
@@ -320,7 +328,13 @@ class SQLSink(BatchSink, t.Generic[_C]):
             full_table_name,
             schema,
         )
-        if isinstance(insert_sql, str):
+        if isinstance(insert_sql, str):  # pragma: no cover
+            warnings.warn(
+                "Generating a SQL insert statement as a string is deprecated. "
+                "Please return an SQLAlchemy Executable object instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             insert_sql = sa.text(insert_sql)
 
         conformed_records = [self.conform_record(record) for record in records]

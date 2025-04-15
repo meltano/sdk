@@ -1,6 +1,6 @@
 # Python Tips for SDK Developers
 
-## Tip #1: Intro to Virtual Environments, Poetry, and Pipx
+## Tip #1: Intro to Virtual Environments and uv
 
 Everyone comes from a different perspective - please select the scenario that you most identify with.
 
@@ -9,44 +9,26 @@ Everyone comes from a different perspective - please select the scenario that yo
 If you are completely new to the concept of virtual environments, that's great! You have
 nothing to "unlearn".
 
-Poetry and Pipx will make your life easy. They basically make it so you
-never have to worry about virtual environments. Pipx and Poetry take care of virtual
+The uv package manager will make your life easy. It basically makes it so you
+never have to worry about virtual environments. It will take care of virtual
 environments for you so that you don't have to worry about dependency conflicts.
 
-- **Pipx**: Use this _instead of pip_ whenever you are installing a python
-  program (versus a python library). Pipx automatically creates a virtual
-  environment for you and automatically makes sure that the executables
-  contained in the python package get added to your path.
-- **Poetry**: Use this when you are developing in Python. Use pipx to install poetry with
-  `pipx install poetry`. The SDK cookiecutter
-  template already sets you up for poetry. When you are
-  running a command with `poetry run ...`, poetry is doing the work to make
-  sure your command runs in the correct virtual environment behind the scenes.
-  This means you will automatically be running with whatever library versions you
-  have specified in `pyproject.toml` and/or with `poetry add ...`. If it ever feels like
-  your environment may be stale, you can run `poetry install` or `poetry update`.
+Use `uv tool install `whenever you are installing a python
+program (versus a python library). It automatically creates a virtual
+environment for you and automatically makes sure that the executables
+contained in the python package get added to your path.
+
+The SDK cookiecutter template already sets you up for uv. When you are
+running a command with `uv run ...`, uv is doing the work to make
+sure your command runs in the correct virtual environment behind the scenes.
+This means you will automatically be running with whatever library versions you
+have specified in `pyproject.toml` and/or with `uv add ...`. If it ever feels like
+your environment may be stale, you can run `uv sync`.
 
 ### If you already know about virtual environments
 
-If you are used to working with virtual environments, the challenge with pipx and poetry
-is just to learn how to let these new tools do the work for you. Instead of manually
-creating and managing virtual environments, these two tools automate the process for you.
-
-- **poetry**: Handles package management processes during **development**.
-  - Admittedly, there's a learning curve. Instead of `setup.py` and `requirements.txt`,
-    everything is managed in `pyproject.toml`.
-  - Adding new dependencies is performed with `poetry add <pippable-library-ref>` or
-    `poetry add -D <pippable-dev-only-ref>`.
-  - If version conflicts occur, relax the version constraints in `pyproject.toml` for the
-    libraries where the conflict is reported, then try again.
-  - Poetry can also publish your libraries to PyPi.
-- **pipx**: Install pipx once, and then use pipx _instead of_ pip.
-  - If you are using poetry for development, then all other pip-installables should be
-    executable tools and programs, which is what pipx is designed for.
-  - You don't need to create a virtual environment, and you don't need to remember to
-    activate/deactivate the environment. For instance, you can just run `pipx install meltano`
-    and then directly execute `meltano` with no virtual env reference, with no
-    prefix to remember, and with no activation.
+Congratulations! You are ahead of the game. You probably already know enough to
+start using uv.
 
 ### What is an virtual environment anyway?
 
@@ -115,9 +97,8 @@ instead of as a callable function (as in `pk = stream.primary_key()`).
 
 ### Troubleshooting
 
-- If you are working on a SDK tap/target that uses a `poetry-core` version before v1.0.8,
-you may have trouble specifying a `pip_url` in Meltano with "editable mode" (`-e path/to/package`) enabled
+- If you are working on a SDK tap/target that uses a `poetry-core` version before v1.0.8 in the `build-system` table of `pyproject.toml` you may have trouble specifying a `pip_url` in Meltano with "editable mode" (`-e path/to/package`) enabled
 (as per [#238](https://gitlab.com/meltano/sdk/-/issues/238)). This can be resolved by upgrading
-the version of `poetry-core>=1.0.8` in your `pyproject.toml`.
+the version of `poetry-core>=1.0.8`.
 
 For more examples, please see the [Code Samples](./code_samples.md) page.

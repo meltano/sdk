@@ -116,7 +116,7 @@ def test_batch_mode(outdir):
         },
     )
 
-    buf = io.StringIO()
+    buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
     with redirect_stdout(buf):
         tap.sync_all()
 
@@ -140,7 +140,7 @@ def test_batch_mode(outdir):
     assert counter["SCHEMA", "countries"] == 1
     assert counter["BATCH", "countries"] == 1
 
-    assert counter["STATE",] == 3
+    assert counter["STATE",] == 2
 
 
 @pytest.mark.snapshot

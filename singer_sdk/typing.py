@@ -48,18 +48,16 @@ Note:
   other valid implementations which are not syntactically identical to those generated
   here.
 
-"""  # noqa: A005
+"""
 
 from __future__ import annotations
 
 import json
+import sys
 import typing as t
 
 import sqlalchemy as sa
 from jsonschema import ValidationError, validators
-
-if t.TYPE_CHECKING:
-    from jsonschema.protocols import Validator
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -68,8 +66,14 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
 )
 
+if sys.version_info < (3, 13):
+    from typing_extensions import deprecated
+else:
+    from warnings import deprecated  # pragma: no cover
+
+
 if t.TYPE_CHECKING:
-    import sys
+    from jsonschema.protocols import Validator
 
     if sys.version_info >= (3, 10):
         from typing import TypeAlias  # noqa: ICN003
@@ -78,6 +82,7 @@ if t.TYPE_CHECKING:
 
 
 __all__ = [
+    "DEFAULT_JSONSCHEMA_VALIDATOR",
     "ArrayType",
     "BooleanType",
     "CustomType",
@@ -118,11 +123,13 @@ _JsonValue: TypeAlias = t.Union[
     None,
 ]
 
+DEFAULT_JSONSCHEMA_VALIDATOR: type[Validator] = validators.Draft202012Validator  # type: ignore[assignment]
+
 T = t.TypeVar("T", bound=_JsonValue)
 P = t.TypeVar("P")
 
 
-def extend_validator_with_defaults(validator_class):  # noqa: ANN001, ANN201
+def extend_validator_with_defaults(validator_class: type[Validator]):  # noqa: ANN201
     """Fill in defaults, before validating with the provided JSON Schema Validator.
 
     See
@@ -199,15 +206,18 @@ class JSONTypeHelper(t.Generic[T]):
         *,
         allowed_values: list[T] | None = None,
         examples: list[T] | None = None,
+        nullable: bool | None = None,
     ) -> None:
         """Initialize the type helper.
 
         Args:
             allowed_values: A list of allowed values.
             examples: A list of example values.
+            nullable: If True, the property may be null.
         """
         self.allowed_values = allowed_values
         self.examples = examples
+        self.nullable = nullable
 
     @DefaultInstanceProperty
     def type_dict(self) -> dict:
@@ -266,6 +276,8 @@ class StringType(JSONTypeHelper[str]):
         {'type': ['string'], 'enum': ['a', 'b']}
         >>> StringType(max_length=10).type_dict
         {'type': ['string'], 'maxLength': 10}
+        >>> StringType(max_length=10, nullable=True).type_dict
+        {'type': ['string', 'null'], 'maxLength': 10}
     """
 
     string_format: str | None = None
@@ -314,7 +326,7 @@ class StringType(JSONTypeHelper[str]):
             A dictionary describing the type.
         """
         result = {
-            "type": ["string"],
+            "type": ["string", "null"] if self.nullable else ["string"],
             **self._format,
             **self.extras,
         }
@@ -436,6 +448,12 @@ class RegexType(StringType):
     string_format = "regex"
 
 
+class SingerDecimalType(StringType):
+    """Decimal type."""
+
+    string_format = "singer.decimal"
+
+
 class BooleanType(JSONTypeHelper[bool]):
     """Boolean type.
 
@@ -453,7 +471,10 @@ class BooleanType(JSONTypeHelper[bool]):
         Returns:
             A dictionary describing the type.
         """
-        return {"type": ["boolean"], **self.extras}
+        return {
+            "type": ["boolean", "null"] if self.nullable else ["boolean"],
+            **self.extras,
+        }
 
 
 class _NumericType(JSONTypeHelper[T]):
@@ -500,7 +521,12 @@ class _NumericType(JSONTypeHelper[T]):
         Returns:
             A dictionary describing the type.
         """
-        result = {"type": [self.__type_name__], **self.extras}
+        result = {
+            "type": [self.__type_name__, "null"]
+            if self.nullable
+            else [self.__type_name__],
+            **self.extras,
+        }
 
         if self.minimum is not None:
             result["minimum"] = self.minimum
@@ -585,7 +611,11 @@ class ArrayType(JSONTypeHelper[list], t.Generic[W]):
         Returns:
             A dictionary describing the type.
         """
-        return {"type": "array", "items": self.wrapped_type.type_dict, **self.extras}
+        return {
+            "type": ["array", "null"] if self.nullable else "array",
+            "items": self.wrapped_type.type_dict,
+            **self.extras,
+        }
 
 
 class AnyType(JSONTypeHelper):
@@ -612,7 +642,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
     # TODO: Make some of these arguments keyword-only. This is a breaking change.
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         wrapped: JSONTypeHelper[T] | type[JSONTypeHelper[T]],
@@ -624,6 +654,10 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         examples: list[T] | None = None,
         *,
         nullable: bool | None = None,
+        title: str | None = None,
+        deprecated: bool | None = None,
+        requires_properties: list[str] | None = None,
+        **kwargs: t.Any,
     ) -> None:
         """Initialize Property object.
 
@@ -645,6 +679,11 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
             examples: Optional. A list of one or more sample values. These may be
                 displayed to the user as hints of the expected format of inputs.
             nullable: If True, the property may be null.
+            title: Optional. A short, human-readable title for the property.
+            deprecated: If True, mark this property as deprecated.
+            requires_properties: A list of property names that must also be present if
+                this property is present.
+            **kwargs: Additional keyword arguments to pass to the parent class.
         """
         self.name = name
         self.wrapped = wrapped
@@ -655,6 +694,10 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         self.allowed_values = allowed_values or None
         self.examples = examples or None
         self.nullable = nullable
+        self.title = title
+        self.deprecated = deprecated
+        self.requires_properties = requires_properties
+        self.kwargs = kwargs
 
     @property
     def type_dict(self) -> dict:  # type: ignore[override]
@@ -676,15 +719,25 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
             # TODO: this should be a TypeError, but it's a breaking change.
             raise ValueError(msg)  # noqa: TRY004
 
-        return t.cast(dict, wrapped.type_dict)
+        return t.cast("dict", wrapped.type_dict)
 
     def to_dict(self) -> dict:
         """Return a dict mapping the property name to its definition.
 
         Returns:
             A JSON Schema dictionary describing the object.
+
+        Examples:
+            >>> p = Property("name", StringType, required=True)
+            >>> print(p.to_dict())
+            {'name': {'type': ['string']}}
+            >>> p = Property("name", StringType, required=True, title="App Name")
+            >>> print(p.to_dict())
+            {'name': {'type': ['string'], 'title': 'App Name'}}
         """
         type_dict = self.type_dict
+        if self.title:
+            type_dict.update({"title": self.title})
         if self.nullable or self.optional:
             type_dict = append_type(type_dict, "null")
         if self.default is not None:
@@ -702,6 +755,12 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
             type_dict.update({"enum": self.allowed_values})
         if self.examples:
             type_dict.update({"examples": self.examples})
+
+        if self.deprecated is not None:
+            type_dict["deprecated"] = self.deprecated
+
+        type_dict.update(self.kwargs)
+
         return {self.name: type_dict}
 
 
@@ -811,14 +870,24 @@ class ObjectType(JSONTypeHelper):
         """
         merged_props = {}
         required = []
+        dependent_required: dict[str, list[str]] = {}
         for w in self.wrapped.values():
             merged_props.update(w.to_dict())
             if not w.optional:
                 required.append(w.name)
-        result: dict[str, t.Any] = {"type": "object", "properties": merged_props}
+            if w.requires_properties:
+                dependent_required[w.name] = w.requires_properties
+
+        result: dict[str, t.Any] = {
+            "type": ["object", "null"] if self.nullable else "object",
+            "properties": merged_props,
+        }
 
         if required:
             result["required"] = required
+
+        if dependent_required:
+            result["dependentRequired"] = dependent_required
 
         if self.additional_properties is not None:
             if isinstance(self.additional_properties, bool):
@@ -1057,7 +1126,75 @@ class CustomType(JSONTypeHelper):
 
 
 class PropertiesList(ObjectType):
-    """Properties list. A convenience wrapper around the ObjectType class."""
+    """Properties list. A convenience wrapper around the ObjectType class.
+
+    Examples:
+        >>> schema = PropertiesList(
+        ...     # username/password
+        ...     Property("username", StringType, requires_properties=["password"]),
+        ...     Property("password", StringType, secret=True),
+        ...     # OAuth
+        ...     Property(
+        ...         "client_id",
+        ...         StringType,
+        ...         requires_properties=["client_secret", "refresh_token"],
+        ...     ),
+        ...     Property("client_secret", StringType, secret=True),
+        ...     Property("refresh_token", StringType, secret=True),
+        ... )
+        >>> print(schema.to_json(indent=2))
+        {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "password": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "secret": true,
+              "writeOnly": true
+            },
+            "client_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "client_secret": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "secret": true,
+              "writeOnly": true
+            },
+            "refresh_token": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "secret": true,
+              "writeOnly": true
+            }
+          },
+          "dependentRequired": {
+            "username": [
+              "password"
+            ],
+            "client_id": [
+              "client_secret",
+              "refresh_token"
+            ]
+          },
+          "$schema": "https://json-schema.org/draft/2020-12/schema"
+        }
+    """
 
     def items(self) -> t.ItemsView[str, Property]:
         """Get wrapped properties.
@@ -1075,6 +1212,17 @@ class PropertiesList(ObjectType):
         """
         self.wrapped[property.name] = property
 
+    @property
+    def type_dict(self) -> dict:  # type: ignore[override]
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        d = super().type_dict
+        d["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+        return d
+
     def __iter__(self) -> t.Iterator[Property]:
         """Iterate all properties of the property list.
 
@@ -1084,6 +1232,10 @@ class PropertiesList(ObjectType):
         return self.wrapped.values().__iter__()
 
 
+@deprecated(
+    "Use `SQLToJSONSchema` instead.",
+    category=DeprecationWarning,
+)
 def to_jsonschema_type(
     from_type: str | sa.types.TypeEngine | type[sa.types.TypeEngine],
 ) -> dict:
@@ -1117,17 +1269,14 @@ def to_jsonschema_type(
         "bool": BooleanType.type_dict,
         "variant": StringType.type_dict,
     }
-    if isinstance(from_type, str):
+    if isinstance(from_type, str):  # pragma: no cover
         type_name = from_type
-    elif isinstance(from_type, sa.types.TypeEngine):
+    elif isinstance(from_type, sa.types.TypeEngine):  # pragma: no cover
         type_name = type(from_type).__name__
-    elif isinstance(from_type, type) and issubclass(
-        from_type,
-        sa.types.TypeEngine,
-    ):
+    elif issubclass(from_type, sa.types.TypeEngine):
         type_name = from_type.__name__
     else:  # pragma: no cover
-        msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."
+        msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."  # type: ignore[unreachable]
         # TODO: this should be a TypeError, but it's a breaking change.
         raise ValueError(msg)  # noqa: TRY004
 
@@ -1164,6 +1313,10 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
     )
 
 
+@deprecated(
+    "Use `JSONSchemaToSQL` instead.",
+    category=DeprecationWarning,
+)
 def to_sql_type(  # noqa: PLR0911, C901
     jsonschema_type: dict,
 ) -> sa.types.TypeEngine:
@@ -1175,6 +1328,12 @@ def to_sql_type(  # noqa: PLR0911, C901
     Returns:
         The SQL type.
     """
+    if _jsonschema_type_check(jsonschema_type, ("object",)):
+        return sa.types.VARCHAR()
+
+    if _jsonschema_type_check(jsonschema_type, ("array",)):
+        return sa.types.VARCHAR()
+
     if _jsonschema_type_check(jsonschema_type, ("string",)):
         datelike_type = get_datelike_property_type(jsonschema_type)
         if datelike_type:
@@ -1194,11 +1353,5 @@ def to_sql_type(  # noqa: PLR0911, C901
         return sa.types.DECIMAL()
     if _jsonschema_type_check(jsonschema_type, ("boolean",)):
         return sa.types.BOOLEAN()
-
-    if _jsonschema_type_check(jsonschema_type, ("object",)):
-        return sa.types.VARCHAR()
-
-    if _jsonschema_type_check(jsonschema_type, ("array",)):
-        return sa.types.VARCHAR()
 
     return sa.types.VARCHAR()

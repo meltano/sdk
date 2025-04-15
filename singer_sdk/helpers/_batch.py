@@ -11,7 +11,7 @@ from urllib.parse import ParseResult, urlencode, urlparse
 
 import fs
 
-from singer_sdk._singerlib.messages import Message, SingerMessageType
+from singer_sdk.singerlib.messages import Message, SingerMessageType
 
 if t.TYPE_CHECKING:
     from fs.base import FS
@@ -232,7 +232,7 @@ class BatchConfig:
             self.storage = StorageTarget.from_dict(self.storage)
 
         if self.batch_size is None:
-            self.batch_size = DEFAULT_BATCH_SIZE
+            self.batch_size = DEFAULT_BATCH_SIZE  # type: ignore[unreachable]
 
     def asdict(self) -> dict[str, t.Any]:
         """Return a dictionary representation of the message.

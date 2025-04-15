@@ -8,12 +8,12 @@ import os
 import sys
 import time
 import typing as t
+import warnings
 from importlib import metadata
 from pathlib import Path, PurePath
 from types import MappingProxyType
 
 import click
-from jsonschema import Draft7Validator
 
 from singer_sdk import about, metrics
 from singer_sdk.cli import plugin_cli
@@ -23,6 +23,7 @@ from singer_sdk.configuration._dict_config import (
 )
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -31,12 +32,29 @@ from singer_sdk.helpers.capabilities import (
     CapabilitiesEnum,
     PluginCapabilities,
 )
+from singer_sdk.io_base import SingerMessageType, SingerReader, SingerWriter
 from singer_sdk.mapper import PluginMapper
-from singer_sdk.typing import extend_validator_with_defaults
+from singer_sdk.typing import (
+    DEFAULT_JSONSCHEMA_VALIDATOR,
+    extend_validator_with_defaults,
+)
+
+if sys.version_info >= (3, 11):
+    _LOG_LEVELS_MAPPING = logging.getLevelNamesMapping()
+else:
+    _LOG_LEVELS_MAPPING = logging._nameToLevel  # noqa: SLF001
+
+if t.TYPE_CHECKING:
+    from jsonschema import ValidationError
+
+    from singer_sdk.singerlib.encoding.base import (
+        GenericSingerReader,
+        GenericSingerWriter,
+    )
 
 SDK_PACKAGE_NAME = "singer_sdk"
 
-JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
+JSONSchemaValidator = extend_validator_with_defaults(DEFAULT_JSONSCHEMA_VALIDATOR)
 
 
 class MapperNotInitialized(Exception):
@@ -84,6 +102,23 @@ class SingerCommand(click.Command):
             sys.exit(1)
 
 
+def _format_validation_error(error: ValidationError) -> str:
+    """Format a JSON Schema validation error.
+
+    Args:
+        error: A JSON Schema validation error.
+
+    Returns:
+        A formatted error message.
+    """
+    result = f"{error.message}"
+
+    if error.path:
+        result += f" in config[{']['.join(repr(index) for index in error.path)}]"
+
+    return result
+
+
 class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for taps."""
 
@@ -113,7 +148,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         logger = logging.getLogger(cls.name)
 
-        if log_level is not None and log_level.upper() in logging._levelToName.values():  # noqa: SLF001
+        if log_level is not None and log_level.upper() in _LOG_LEVELS_MAPPING:
             logger.setLevel(log_level.upper())
 
         return logger
@@ -136,23 +171,34 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             validate_config: True to require validation of config settings.
 
         Raises:
-            ValueError: If config is not a dict or path string.
+            TypeError: If config is not a dict or path string.
         """
-        if not config:
-            config_dict = {}
-        elif isinstance(config, (str, PurePath)):
+        config = config or {}
+        if isinstance(config, (str, PurePath)):
             config_dict = read_json_file(config)
+            warnings.warn(
+                "Passing a config file path is deprecated. Please pass the config "
+                "as a dictionary instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
         elif isinstance(config, list):
             config_dict = {}
             for config_path in config:
                 # Read each config file sequentially. Settings from files later in the
                 # list will override those of earlier ones.
                 config_dict.update(read_json_file(config_path))
+            warnings.warn(
+                "Passing a list of config file paths is deprecated. Please pass the "
+                "config as a dictionary instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
         elif isinstance(config, dict):
             config_dict = config
         else:
-            msg = f"Error parsing config of type '{type(config).__name__}'."
-            raise ValueError(msg)
+            msg = f"Error parsing config of type '{type(config).__name__}'."  # type: ignore[unreachable]
+            raise TypeError(msg)
         if parse_env_config:
             self.logger.info("Parsing env var for settings config...")
             config_dict.update(self._env_var_config)
@@ -217,7 +263,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
         """Get capabilities.
 
-        Developers may override this property in oder to add or remove
+        Developers may override this property in order to add or remove
         advertised capabilities for this plugin.
 
         Returns:
@@ -348,7 +394,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             A frozen (read-only) config dictionary map.
         """
-        return t.cast(dict, MappingProxyType(self._config))
+        return t.cast("dict", MappingProxyType(self._config))
 
     @staticmethod
     def _is_secret_config(config_key: str) -> bool:
@@ -386,7 +432,9 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 config_jsonschema,
             )
             validator = JSONSchemaValidator(config_jsonschema)
-            errors = [e.message for e in validator.iter_errors(self._config)]
+            errors = [
+                _format_validation_error(e) for e in validator.iter_errors(self._config)
+            ]
 
         if errors:
             summary = (
@@ -603,3 +651,187 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             A callable CLI object.
         """
         return cls.get_singer_command()
+
+
+_T = t.TypeVar("_T")
+
+
+class BaseSingerIO(PluginBase):
+    """Base class for Singer taps and targets."""
+
+    def __init__(
+        self,
+        *,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
+        parse_env_config: bool = False,
+        validate_config: bool = True,
+    ):
+        """Initialize the Singer tap or target.
+
+        Args:
+            config: May be one or more paths, either as str or PurePath objects, or
+                it can be a predetermined config dict.
+            parse_env_config: True to parse settings from env vars.
+            validate_config: True to require validation of config settings.
+        """
+        super().__init__(
+            config=config,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
+
+    @classmethod
+    def instantiate_processor(cls, instance: _T | None, default_cls: type[_T]) -> _T:
+        """Instantiate a processor instance.
+
+        Args:
+            instance: The instance to instantiate.
+            default_cls: The default class to instantiate.
+
+        Returns:
+            The instantiated processor instance.
+        """
+        return instance or default_cls()
+
+
+class BaseSingerReader(BaseSingerIO, metaclass=abc.ABCMeta):
+    """Base class for Singer readers."""
+
+    message_reader_class: type[GenericSingerReader] = SingerReader
+    """The message writer class to use for writing messages."""
+
+    def __init__(
+        self,
+        *,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
+        parse_env_config: bool = False,
+        validate_config: bool = True,
+        message_reader: GenericSingerReader | None = None,
+    ) -> None:
+        """Initialize the Singer reader.
+
+        Args:
+            config: May be one or more paths, either as str or PurePath objects, or
+                it can be a predetermined config dict.
+            parse_env_config: True to parse settings from env vars.
+            validate_config: True to require validation of config settings.
+            message_reader: A message reader object.
+        """
+        super().__init__(
+            config=config,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
+        self.message_reader = self.instantiate_processor(
+            message_reader,
+            self.message_reader_class,
+        )
+
+    @t.final
+    def listen(self, file_input: t.IO[str] | None = None) -> None:
+        """Read from input until all messages are processed.
+
+        Args:
+            file_input: Readable stream of messages. Defaults to standard in.
+        """
+        counter = self.process_lines(file_input)
+        line_count = sum(counter.values())
+
+        self.logger.info(
+            "Target '%s' completed reading %d lines of input "
+            "(%d schemas, %d records, %d batch manifests, %d state messages).",
+            self.name,
+            line_count,
+            counter[SingerMessageType.SCHEMA],
+            counter[SingerMessageType.RECORD],
+            counter[SingerMessageType.BATCH],
+            counter[SingerMessageType.STATE],
+        )
+        self.process_endofpipe()
+
+    @t.final
+    def process_lines(self, file_input: t.IO[str] | None) -> t.Counter[str]:
+        """Internal method to process jsonl lines from a Singer tap.
+
+        Args:
+            file_input: Readable stream of messages, each on a separate line.
+
+        Returns:
+            A counter object for the processed lines.
+        """
+        return self.message_reader.process_lines(
+            file_input,
+            callbacks={
+                SingerMessageType.SCHEMA: self._process_schema_message,
+                SingerMessageType.RECORD: self._process_record_message,
+                SingerMessageType.STATE: self._process_state_message,
+                SingerMessageType.ACTIVATE_VERSION: self._process_activate_version_message,  # noqa: E501
+                SingerMessageType.BATCH: self._process_batch_message,
+            },
+        )
+
+    def process_endofpipe(self) -> None:
+        """Process end of pipe."""
+
+    def _assert_line_requires(self, message_dict: dict, requires: set[str]) -> None:
+        """Assert that a message contains required fields.
+
+        Args:
+            message_dict: The message to check.
+            requires: The required fields.
+        """
+        self.message_reader.assert_line_requires(message_dict, requires)
+
+    @abc.abstractmethod
+    def _process_schema_message(self, message_dict: dict) -> None: ...
+
+    @abc.abstractmethod
+    def _process_record_message(self, message_dict: dict) -> None: ...
+
+    @abc.abstractmethod
+    def _process_state_message(self, message_dict: dict) -> None: ...
+
+    @abc.abstractmethod
+    def _process_activate_version_message(self, message_dict: dict) -> None: ...
+
+    @abc.abstractmethod
+    def _process_batch_message(self, message_dict: dict) -> None: ...
+
+
+class BaseSingerWriter(BaseSingerIO):
+    """Base class for Singer writers."""
+
+    message_writer_class: type[GenericSingerWriter] = SingerWriter
+    """The message writer class to use for writing messages."""
+
+    def __init__(
+        self,
+        *,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
+        parse_env_config: bool = False,
+        validate_config: bool = True,
+        message_writer: GenericSingerWriter | None = None,
+    ) -> None:
+        """Initialize the Singer writer.
+
+        Args:
+            config: May be one or more paths, either as str or PurePath objects, or
+                it can be a predetermined config dict.
+            parse_env_config: True to parse settings from env vars.
+            validate_config: True to require validation of config settings.
+            message_writer: A message writer object.
+        """
+        super().__init__(
+            config=config,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
+        self.message_writer = self.instantiate_processor(
+            message_writer,
+            self.message_writer_class,
+        )
+
+    @t.final
+    def write_message(self, message: t.Any) -> None:  # noqa: ANN401
+        """Write a message to the tap's message writer."""
+        self.message_writer.write_message(message)

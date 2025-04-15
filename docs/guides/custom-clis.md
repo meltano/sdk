@@ -6,7 +6,7 @@ By default, packages created with the Singer SDK will have a single command, e.g
 
 ## Adding a custom command
 
-To add a custom command, you will need to add a new method to your plugin class that returns an instance of [`click.Command`](https://click.palletsprojects.com/en/8.1.x/api/#commands) (or a subclass of it) and decorate it with the `singer_sdk.cli.plugin_cli` decorator. Then you will need to add the command to the `[tool.poetry.scripts]` section of your `pyproject.toml` file.
+To add a custom command, you will need to add a new method to your plugin class that returns an instance of [`click.Command`](https://click.palletsprojects.com/en/8.1.x/api/#commands) (or a subclass of it) and decorate it with the `singer_sdk.cli.plugin_cli` decorator. Then you will need to add the command to the `[tool.poetry.scripts]` or `[project.scripts]` section of your `pyproject.toml` file.
 
 ```python
 # tap_shortcut/tap.py
@@ -29,6 +29,7 @@ class ShortcutTap(Tap):
         return update
 ```
 
+````{tab} Poetry
 ```toml
 # pyproject.toml
 
@@ -36,3 +37,14 @@ class ShortcutTap(Tap):
 tap-shortcut = "tap_shortcut.tap:ShortcutTap.cli"
 tap-shortcut-update-schema = "tap_shortcut.tap:ShortcutTap.update_schema"
 ```
+````
+
+````{tab} uv
+```toml
+# pyproject.toml
+
+[project.scripts]
+tap-shortcut = "tap_shortcut.tap:ShortcutTap.cli"
+tap-shortcut-update-schema = "tap_shortcut.tap:ShortcutTap.update_schema"
+```
+````

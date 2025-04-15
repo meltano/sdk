@@ -85,8 +85,8 @@ If you're developing a tap or target package and would like to customize its log
 ```
 .
 ├── README.md
-├── poetry.lock
 ├── pyproject.toml
+├── uv.lock
 └── tap_example
     ├── __init__.py
     ├── __main__.py

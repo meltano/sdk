@@ -2,50 +2,46 @@
 
 from __future__ import annotations
 
-import sys
-{%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
+import decimal
+import typing as t
+{% if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from functools import cached_property
-{%- endif %}
-from typing import TYPE_CHECKING, Any, Iterable
+{% endif -%}
+from importlib import resources
 
 {% if cookiecutter.auth_method  == "API Key" -%}
 from singer_sdk.authenticators import APIKeyAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method  == "Bearer Token" -%}
 from singer_sdk.authenticators import BearerTokenAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method == "Basic Auth" -%}
 from requests.auth import HTTPBasicAuth
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method == "Custom or N/A" -%}
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
 
 {% endif -%}
 
-if sys.version_info >= (3, 9):
-    import importlib.resources as importlib_resources
-else:
-    import importlib_resources
-
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import requests
     {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
     from singer_sdk.helpers.types import Auth, Context
@@ -55,7 +51,7 @@ if TYPE_CHECKING:
 
 
 # TODO: Delete this is if not using json files for schema definition
-SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
+SCHEMAS_DIR = resources.files(__package__) / "schemas"
 
 
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
@@ -137,14 +133,11 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         Returns:
             A dictionary of HTTP headers.
         """
-        headers = {}
-        if "user_agent" in self.config:
-            headers["User-Agent"] = self.config.get("user_agent")
 {%- if cookiecutter.auth_method not in ("OAuth2", "JWT") %}
         # If not using an authenticator, you may also provide inline auth headers:
         # headers["Private-Token"] = self.config.get("auth_token")  # noqa: ERA001
 {%- endif %}
-        return headers
+        return {}
 
     def get_new_paginator(self) -> BaseAPIPaginator:
         """Create a new pagination helper instance.
@@ -164,8 +157,8 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     def get_url_params(
         self,
         context: Context | None,  # noqa: ARG002
-        next_page_token: Any | None,  # noqa: ANN401
-    ) -> dict[str, Any]:
+        next_page_token: t.Any | None,  # noqa: ANN401
+    ) -> dict[str, t.Any]:
         """Return a dictionary of values to be used in URL parameterization.
 
         Args:
@@ -186,7 +179,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     def prepare_request_payload(
         self,
         context: Context | None,  # noqa: ARG002
-        next_page_token: Any | None,  # noqa: ARG002, ANN401
+        next_page_token: t.Any | None,  # noqa: ARG002, ANN401
     ) -> dict | None:
         """Prepare the data payload for the REST API request.
 
@@ -202,7 +195,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         # TODO: Delete this method if no payload is required. (Most REST APIs.)
         return None
 
-    def parse_response(self, response: requests.Response) -> Iterable[dict]:
+    def parse_response(self, response: requests.Response) -> t.Iterable[dict]:
         """Parse the response and return an iterator of result records.
 
         Args:
@@ -212,7 +205,10 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
             Each record from the source.
         """
         # TODO: Parse response body and return a set of records.
-        yield from extract_jsonpath(self.records_jsonpath, input=response.json())
+        yield from extract_jsonpath(
+            self.records_jsonpath,
+            input=response.json(parse_float=decimal.Decimal),
+        )
 
     def post_process(
         self,

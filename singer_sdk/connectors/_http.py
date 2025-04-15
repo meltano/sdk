@@ -11,6 +11,7 @@ from singer_sdk.connectors.base import BaseConnector
 
 if t.TYPE_CHECKING:
     import sys
+    from collections.abc import Mapping
 
     from requests.adapters import BaseAdapter
 
@@ -25,7 +26,7 @@ _Auth: TypeAlias = t.Callable[[requests.PreparedRequest], requests.PreparedReque
 class HTTPConnector(BaseConnector[requests.Session]):
     """Base class for all HTTP-based connectors."""
 
-    def __init__(self, config: t.Mapping[str, t.Any] | None) -> None:
+    def __init__(self, config: Mapping[str, t.Any] | None = None) -> None:
         """Initialize the HTTP connector.
 
         Args:

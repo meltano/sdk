@@ -21,7 +21,7 @@ Stream Classes
 
 .. autosummary::
     :toctree: classes
-    :template: class.rst
+    :template: stream_class.rst
 
     Stream
     RESTStream
@@ -152,3 +152,13 @@ Abstract Connector Classes
     :template: class.rst
 
     connectors.BaseConnector
+
+Other
+-----
+
+.. autosummary::
+    :toctree: classes
+    :template: class.rst
+
+    connectors.sql.SQLToJSONSchema
+    connectors.sql.JSONSchemaToSQL

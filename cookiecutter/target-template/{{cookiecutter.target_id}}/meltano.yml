@@ -2,6 +2,8 @@ version: 1
 send_anonymous_usage_stats: true
 project_id: "{{cookiecutter.target_id}}"
 default_environment: test
+venv:
+  backend: uv
 environments:
 - name: test
 plugins:
@@ -21,7 +23,7 @@ plugins:
     capabilities:
     - about
     - stream-maps
-    - record-flattening
+    - schema-flattening
 
     # TODO: Declare settings and their types here:
     settings:

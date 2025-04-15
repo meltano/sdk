@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import uuid
 
 import pytest
 
@@ -150,8 +151,26 @@ def test_null_replication_value(caplog):
             check_sorted=check_sorted,
         )
 
-    assert (
-        stream_state["replication_key_value"] == "2021-05-17T20:41:16Z"
-    ), "State should not be updated."
+    assert stream_state["replication_key_value"] == "2021-05-17T20:41:16Z", (
+        "State should not be updated."
+    )
     assert caplog.records[0].levelname == "WARNING"
     assert "is null" in caplog.records[0].message
+
+
+def test_uuidv7_replication_value():
+    stream_state = {
+        "replication_key": "id",
+        "replication_key_value": "01931c63-b14e-7ff3-8621-e577ed392dc8",
+    }
+    new_string_val = "01931c63-b14e-7ff3-8621-e578edbca9a3"
+
+    _state.increment_state(
+        stream_state,
+        latest_record={"id": uuid.UUID(new_string_val)},
+        replication_key="id",
+        is_sorted=True,
+        check_sorted=True,
+    )
+
+    assert stream_state["replication_key_value"] == new_string_val

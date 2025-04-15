@@ -11,6 +11,11 @@ from referencing.jsonschema import DRAFT202012
 if t.TYPE_CHECKING:
     from referencing._core import Resolver
 
+META_KEYS = [
+    "id",
+    "schema",
+]
+
 # These are keys defined in the JSON Schema spec that do not themselves contain
 # schemas (or lists of schemas)
 STANDARD_KEYS = [
@@ -31,12 +36,16 @@ STANDARD_KEYS = [
     "pattern",
     "contentMediaType",
     "contentEncoding",
+    "deprecated",
     # These are NOT simple keys (they can contain schemas themselves). We could
     # consider adding extra handling to them.
     "additionalProperties",
     "anyOf",
     "patternProperties",
     "allOf",
+    "oneOf",
+    # JSON Schema extensions
+    "x-sql-datatype",
 ]
 
 
@@ -51,6 +60,9 @@ class Schema:
     https://github.com/transferwise/pipelinewise-singer-python/blob/master/singer/schema.py.
     This is because we wanted to expand it with extra STANDARD_KEYS.
     """
+
+    id: str | None = None
+    schema: str | None = None
 
     type: str | list[str] | None = None
     default: t.Any | None = None
@@ -75,6 +87,14 @@ class Schema:
     pattern: str | None = None
     contentMediaType: str | None = None  # noqa: N815
     contentEncoding: str | None = None  # noqa: N815
+    # JSON Schema extensions
+    x_sql_datatype: str | None = None
+
+    deprecated: bool | None = None
+    oneOf: t.Any | None = None  # noqa: N815
+
+    # TODO: Use dataclass.KW_ONLY when Python 3.9 support is dropped
+    # _: KW_ONLY  # noqa: ERA001
 
     def to_dict(self) -> dict[str, t.Any]:
         """Return the raw JSON Schema as a (possibly nested) dict.
@@ -91,8 +111,14 @@ class Schema:
             result["items"] = self.items.to_dict()
 
         for key in STANDARD_KEYS:
-            if self.__dict__.get(key) is not None:
-                result[key] = self.__dict__[key]
+            attr = key.replace("-", "_")
+            if (val := self.__dict__.get(attr)) is not None:
+                result[key] = val
+
+        for key in META_KEYS:
+            attr = key.replace("-", "_")
+            if (val := self.__dict__.get(attr)) is not None:
+                result[f"${key}"] = val
 
         return result
 
@@ -110,7 +136,57 @@ class Schema:
 
         Returns:
             The initialized Schema object.
-        """
+
+        Example:
+            >>> data = {
+            ...     "$id": "https://example.com/person.schema.json",
+            ...     "$schema": "http://json-schema.org/draft/2020-12/schema",
+            ...     "title": "Person",
+            ...     "type": "object",
+            ...     "properties": {
+            ...         "firstName": {
+            ...             "type": "string",
+            ...             "description": "The person's first name.",
+            ...         },
+            ...         "lastName": {
+            ...             "type": "string",
+            ...             "description": "The person's last name.",
+            ...         },
+            ...         "age": {
+            ...             "description": "Age in years which must be equal to or greater than zero.",
+            ...             "type": "integer",
+            ...             "minimum": 0,
+            ...             "x-sql-datatype": "smallint",
+            ...         },
+            ...         "deprecatedField": {
+            ...             "type": "string",
+            ...             "deprecated": True,
+            ...         },
+            ...         "price": {
+            ...             "oneOf": [
+            ...                 {"type": "number", "deprecated": True},
+            ...                 {"type": "null"},
+            ...             ],
+            ...         },
+            ...     },
+            ...     "required": ["firstName", "lastName"],
+            ... }
+            >>> schema = Schema.from_dict(data)
+            >>> schema.schema
+            'http://json-schema.org/draft/2020-12/schema'
+            >>> schema.title
+            'Person'
+            >>> schema.properties["firstName"].description
+            "The person's first name."
+            >>> schema.properties["age"].minimum
+            0
+            >>> schema.properties["age"].x_sql_datatype
+            'smallint'
+            >>> schema.properties["deprecatedField"].deprecated
+            True
+            >>> schema.properties["price"].oneOf[0]["deprecated"]
+            True
+        """  # noqa: E501
         kwargs = schema_defaults.copy()
         properties = data.get("properties")
         items = data.get("items")
@@ -121,9 +197,17 @@ class Schema:
             }
         if items is not None:
             kwargs["items"] = cls.from_dict(items, **schema_defaults)
+
         for key in STANDARD_KEYS:
+            attr = key.replace("-", "_")
             if key in data:
-                kwargs[key] = data[key]
+                kwargs[attr] = data[key]
+
+        for key in META_KEYS:
+            attr = key.replace("-", "_")
+            if f"${key}" in data:
+                kwargs[attr] = data[f"${key}"]
+
         return cls(**kwargs)
 
 
@@ -134,6 +218,7 @@ class _SchemaKey:
     pattern_properties = "patternProperties"
     any_of = "anyOf"
     all_of = "allOf"
+    one_of = "oneOf"
 
 
 def resolve_schema_references(
@@ -200,5 +285,9 @@ def _resolve_schema_references(  # noqa: C901
     if _SchemaKey.all_of in schema:
         for i, element in enumerate(schema[_SchemaKey.all_of]):
             schema[_SchemaKey.all_of][i] = _resolve_schema_references(element, resolver)
+
+    if _SchemaKey.one_of in schema:
+        for i, element in enumerate(schema[_SchemaKey.one_of]):
+            schema[_SchemaKey.one_of][i] = _resolve_schema_references(element, resolver)
 
     return schema

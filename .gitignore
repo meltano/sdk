@@ -1,3 +1,6 @@
+# HTTP cache
+http_cache.sqlite
+
 # Local Poetry configuration file
 
 poetry.toml
@@ -33,7 +36,6 @@ __pycache__/
 *.so
 
 # Distribution / packaging
-requirements.txt
 .Python
 build/
 develop-eggs/

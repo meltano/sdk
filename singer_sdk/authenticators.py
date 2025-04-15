@@ -5,8 +5,8 @@ from __future__ import annotations
 import base64
 import datetime
 import math
+import sys
 import typing as t
-import warnings
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
@@ -15,10 +15,15 @@ from requests.auth import AuthBase
 
 from singer_sdk.helpers._util import utc_now
 
+if sys.version_info < (3, 13):
+    from typing_extensions import deprecated
+else:
+    from warnings import deprecated
+
 if t.TYPE_CHECKING:
     import logging
 
-    from singer_sdk.streams.rest import RESTStream
+    from singer_sdk.streams.rest import _HTTPStream
 
 
 def _add_parameters(initial_url: str, extra_parameters: dict) -> str:
@@ -72,7 +77,7 @@ class SingletonMeta(type):
             A singleton instance of the derived class.
         """
         if cls.__single_instance:
-            return cls.__single_instance
+            return cls.__single_instance  # type: ignore[unreachable]
         single_obj = cls.__new__(cls, None)  # type: ignore[call-overload]
         single_obj.__init__(*args, **kwargs)
         cls.__single_instance = single_obj
@@ -87,7 +92,7 @@ class APIAuthenticatorBase:
         auth_params: URL query parameters for authentication.
     """
 
-    def __init__(self, stream: RESTStream) -> None:
+    def __init__(self, stream: _HTTPStream) -> None:
         """Init authenticator.
 
         Args:
@@ -152,7 +157,7 @@ class SimpleAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: RESTStream,
+        stream: _HTTPStream,
         auth_headers: dict | None = None,
     ) -> None:
         """Create a new authenticator.
@@ -166,7 +171,7 @@ class SimpleAuthenticator(APIAuthenticatorBase):
         """
         super().__init__(stream=stream)
         if self.auth_headers is None:
-            self.auth_headers = {}
+            self.auth_headers = {}  # type: ignore[unreachable]
         if auth_headers:
             self.auth_headers.update(auth_headers)
 
@@ -182,7 +187,7 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: RESTStream,
+        stream: _HTTPStream,
         key: str,
         value: str,
         location: str = "header",
@@ -207,17 +212,17 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
 
         if location == "header":
             if self.auth_headers is None:
-                self.auth_headers = {}
+                self.auth_headers = {}  # type: ignore[unreachable]
             self.auth_headers.update(auth_credentials)
         elif location == "params":
             if self.auth_params is None:
-                self.auth_params = {}
+                self.auth_params = {}  # type: ignore[unreachable]
             self.auth_params.update(auth_credentials)
 
     @classmethod
     def create_for_stream(
         cls: type[APIKeyAuthenticator],
-        stream: RESTStream,
+        stream: _HTTPStream,
         key: str,
         value: str,
         location: str,
@@ -245,7 +250,7 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
     'Bearer '. The token will be merged with HTTP headers on the stream.
     """
 
-    def __init__(self, stream: RESTStream, token: str) -> None:
+    def __init__(self, stream: _HTTPStream, token: str) -> None:
         """Create a new authenticator.
 
         Args:
@@ -256,13 +261,13 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
         auth_credentials = {"Authorization": f"Bearer {token}"}
 
         if self.auth_headers is None:
-            self.auth_headers = {}
+            self.auth_headers = {}  # type: ignore[unreachable]
         self.auth_headers.update(auth_credentials)
 
     @classmethod
     def create_for_stream(
         cls: type[BearerTokenAuthenticator],
-        stream: RESTStream,
+        stream: _HTTPStream,
         token: str,
     ) -> BearerTokenAuthenticator:
         """Create an Authenticator object specific to the Stream class.
@@ -278,6 +283,10 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
         return cls(stream=stream, token=token)
 
 
+@deprecated(
+    "BasicAuthenticator is deprecated. Use requests.auth.HTTPBasicAuth instead.",
+    category=DeprecationWarning,
+)
 class BasicAuthenticator(APIAuthenticatorBase):
     """Implements basic authentication for REST Streams.
 
@@ -291,7 +300,7 @@ class BasicAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: RESTStream,
+        stream: _HTTPStream,
         username: str,
         password: str,
     ) -> None:
@@ -303,25 +312,19 @@ class BasicAuthenticator(APIAuthenticatorBase):
             password: API password.
         """
         super().__init__(stream=stream)
-        warnings.warn(
-            "BasicAuthenticator is deprecated. Use "
-            "requests.auth.HTTPBasicAuth instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         credentials = f"{username}:{password}".encode()
         auth_token = base64.b64encode(credentials).decode("ascii")
         auth_credentials = {"Authorization": f"Basic {auth_token}"}
 
         if self.auth_headers is None:
-            self.auth_headers = {}
+            self.auth_headers = {}  # type: ignore[unreachable]
         self.auth_headers.update(auth_credentials)
 
     @classmethod
     def create_for_stream(
         cls: type[BasicAuthenticator],
-        stream: RESTStream,
+        stream: _HTTPStream,
         username: str,
         password: str,
     ) -> BasicAuthenticator:
@@ -344,7 +347,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: RESTStream,
+        stream: _HTTPStream,
         auth_endpoint: str | None = None,
         oauth_scopes: str | None = None,
         default_expiration: int | None = None,

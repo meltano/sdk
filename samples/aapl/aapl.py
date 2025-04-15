@@ -2,17 +2,12 @@
 
 from __future__ import annotations
 
+import importlib.resources
 import json
-import sys
 
 from singer_sdk import Stream, Tap
 
-if sys.version_info < (3, 9):
-    import importlib_resources
-else:
-    import importlib.resources as importlib_resources
-
-PROJECT_DIR = importlib_resources.files("samples.aapl")
+PROJECT_DIR = importlib.resources.files("samples.aapl")
 
 
 class AAPL(Stream):

@@ -6,6 +6,7 @@ import typing as t
 
 from singer_sdk import SQLConnector, SQLStream, SQLTap
 from singer_sdk import typing as th
+from singer_sdk.contrib.msgspec import MsgSpecWriter
 
 DB_PATH_CONFIG = "path_to_db"
 
@@ -42,12 +43,15 @@ class SQLiteStream(SQLStream):
 class SQLiteTap(SQLTap):
     """The Tap class for SQLite."""
 
+    message_writer_class = MsgSpecWriter
+
     name = "tap-sqlite-sample"
     default_stream_class = SQLiteStream
     config_jsonschema = th.PropertiesList(
         th.Property(
             DB_PATH_CONFIG,
             th.StringType,
+            title="Database Path",
             description="The path to your SQLite database file(s).",
             required=True,
             examples=["./path/to/my.db", "/absolute/path/to/my.db"],

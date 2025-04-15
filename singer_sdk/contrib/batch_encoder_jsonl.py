@@ -6,8 +6,8 @@ import gzip
 import typing as t
 from uuid import uuid4
 
-from singer_sdk._singerlib.json import serialize_json
 from singer_sdk.batch import BaseBatcher, lazy_chunked_generator
+from singer_sdk.singerlib.json import serialize_json
 
 __all__ = ["JSONLinesBatcher"]
 
@@ -40,10 +40,10 @@ class JSONLinesBatcher(BaseBatcher):
             filename = f"{prefix}{sync_id}-{i}.json.gz"
             with self.batch_config.storage.fs(create=True) as fs:
                 # TODO: Determine compression from config.
-                with fs.open(filename, "wb") as f, gzip.GzipFile(
-                    fileobj=f,
-                    mode="wb",
-                ) as gz:
+                with (
+                    fs.open(filename, "wb") as f,
+                    gzip.GzipFile(fileobj=f, mode="wb") as gz,
+                ):
                     gz.writelines(
                         (serialize_json(record) + "\n").encode() for record in chunk
                     )

@@ -1,3 +1,5 @@
+"""Simple encoding for Singer messages."""
+
 from __future__ import annotations
 
 import json
@@ -7,10 +9,10 @@ import typing as t
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
-from singer_sdk._singerlib.exceptions import InvalidInputLine
-from singer_sdk._singerlib.json import deserialize_json, serialize_json
+from singer_sdk.singerlib.exceptions import InvalidInputLine
+from singer_sdk.singerlib.json import deserialize_json, serialize_json
 
-from ._base import GenericSingerReader, GenericSingerWriter, SingerMessageType
+from .base import GenericSingerReader, GenericSingerWriter, SingerMessageType
 
 logger = logging.getLogger(__name__)
 
@@ -161,9 +163,9 @@ class SchemaMessage(Message):
         self.type = SingerMessageType.SCHEMA
 
         if isinstance(self.bookmark_properties, (str, bytes)):
-            self.bookmark_properties = [self.bookmark_properties]
+            self.bookmark_properties = [self.bookmark_properties]  # type: ignore[unreachable]
         if self.bookmark_properties and not isinstance(self.bookmark_properties, list):
-            msg = "bookmark_properties must be a string or list of strings"
+            msg = "bookmark_properties must be a string or list of strings"  # type: ignore[unreachable]
             raise ValueError(msg)
 
 

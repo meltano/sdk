@@ -9,7 +9,7 @@ import sys
 import typing as t
 from collections import Counter, defaultdict
 
-from singer_sdk._singerlib import exceptions
+from singer_sdk.singerlib import exceptions
 
 if sys.version_info < (3, 11):
     from backports.datetime_fromisoformat import MonkeyPatch
@@ -38,46 +38,36 @@ class SingerMessageType(str, enum.Enum):
 class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
     """Interface for all plugins reading Singer messages as strings or bytes."""
 
-    @t.final
-    def listen(self, file_input: t.IO[T] | None = None) -> None:
-        """Read from input until all messages are processed.
+    def __init__(self) -> None:
+        """Initialize the reader."""
+        super().__init__()
+        self._current_message: T | None = None
 
-        Args:
-            file_input: Readable stream of messages. Defaults to standard in.
-        """
-        self._process_lines(file_input or self.default_input)
-        self._process_endofpipe()
-
-    def _process_lines(self, file_input: t.IO[T]) -> t.Counter[str]:
+    def process_lines(
+        self,
+        file_input: t.IO[T] | None,
+        callbacks: dict[str, t.Callable[[dict], None]],
+    ) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:
             file_input: Readable stream of messages, each on a separate line.
+            callbacks: Dictionary of message type to callback function.
 
         Returns:
             A counter object for the processed lines.
         """
         stats: dict[str, int] = defaultdict(int)
-        for line in file_input:
+        filein = file_input or self.default_input
+        for line in filein:
+            self._current_message = line
+
             line_dict = self.deserialize_json(line)
-            self._assert_line_requires(line_dict, requires={"type"})
+            self.assert_line_requires(line_dict, requires={"type"})
 
             record_type: SingerMessageType = line_dict["type"]
-            if record_type == SingerMessageType.SCHEMA:
-                self._process_schema_message(line_dict)
-
-            elif record_type == SingerMessageType.RECORD:
-                self._process_record_message(line_dict)
-
-            elif record_type == SingerMessageType.ACTIVATE_VERSION:
-                self._process_activate_version_message(line_dict)
-
-            elif record_type == SingerMessageType.STATE:
-                self._process_state_message(line_dict)
-
-            elif record_type == SingerMessageType.BATCH:
-                self._process_batch_message(line_dict)
-
+            if callback := callbacks.get(record_type):
+                callback(line_dict)
             else:
                 self._process_unknown_message(line_dict)
 
@@ -87,10 +77,11 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
-    def default_input(self) -> t.IO[T]: ...
+    def default_input(self) -> t.IO[T]:
+        """Default input stream for the reader."""
 
     @staticmethod
-    def _assert_line_requires(line_dict: dict, requires: set[str]) -> None:
+    def assert_line_requires(line_dict: dict, requires: set[str]) -> None:
         """Check if dictionary .
 
         Args:
@@ -106,22 +97,8 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
             raise exceptions.InvalidInputLine(msg)
 
     @abc.abstractmethod
-    def deserialize_json(self, line: T) -> dict: ...
-
-    @abc.abstractmethod
-    def _process_schema_message(self, message_dict: dict) -> None: ...
-
-    @abc.abstractmethod
-    def _process_record_message(self, message_dict: dict) -> None: ...
-
-    @abc.abstractmethod
-    def _process_state_message(self, message_dict: dict) -> None: ...
-
-    @abc.abstractmethod
-    def _process_activate_version_message(self, message_dict: dict) -> None: ...
-
-    @abc.abstractmethod
-    def _process_batch_message(self, message_dict: dict) -> None: ...
+    def deserialize_json(self, line: T) -> dict:
+        """Deserialize a line of json."""
 
     def _process_unknown_message(self, message_dict: dict) -> None:  # noqa: PLR6301
         """Internal method to process unknown message types from a Singer tap.
@@ -135,9 +112,6 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
         record_type = message_dict["type"]
         msg = f"Unknown message type '{record_type}' in message."
         raise ValueError(msg)
-
-    def _process_endofpipe(self) -> None:  # noqa: PLR6301
-        logger.debug("End of pipe reached")
 
 
 class GenericSingerWriter(t.Generic[T, M], metaclass=abc.ABCMeta):
@@ -155,7 +129,9 @@ class GenericSingerWriter(t.Generic[T, M], metaclass=abc.ABCMeta):
         return self.serialize_message(message)
 
     @abc.abstractmethod
-    def serialize_message(self, message: M) -> T: ...
+    def serialize_message(self, message: M) -> T:
+        """Serialize a message into a line of json."""
 
     @abc.abstractmethod
-    def write_message(self, message: M) -> None: ...
+    def write_message(self, message: M) -> None:
+        """Write a message to stdout."""

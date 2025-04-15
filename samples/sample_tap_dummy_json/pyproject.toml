@@ -1,9 +1,9 @@
-[tool.poetry]
+[project]
 name = "tap-dummyjson"
 version = "0.0.1"
 description = "Singer tap for DummyJSON, built with the Meltano Singer SDK."
 readme = "README.md"
-authors = ["Edgar Ramírez-Mondragón <edgar@arch.dev>"]
+authors = [{ name = "Edgar Ramírez-Mondragón", email = "edgar@arch.dev" }]
 keywords = [
     "ELT",
     "DummyJSON",
@@ -11,34 +11,40 @@ keywords = [
 classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+dependencies = [
+    "requests~=2.32.3",
+    "singer-sdk",
+]
+optional-dependencies.s3 = [
+    "fs-s3fs~=1.1.1",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.8"
-requests = "~=2.32.3"
-singer-sdk = { version="~=0.38.0", extras = [] }
+[project.scripts]
+# CLI declaration
+tap-dummyjson = 'tap_dummyjson.tap:TapDummyJSON.cli'
 
-[tool.poetry.group.dev.dependencies]
-pytest = ">=8"
-singer-sdk = { version="~=0.38.0", extras = ["testing"] }
-
-[tool.poetry.extras]
-s3 = ["fs-s3fs"]
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "singer-sdk[testing]",
+]
 
 [tool.mypy]
 python_version = "3.12"
 warn_unused_configs = true
 
-[build-system]
-requires = ["poetry-core==1.9.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.uv.sources]
+singer-sdk = { path = "../../", editable = true }
 
-[tool.poetry.scripts]
-# CLI declaration
-tap-dummyjson = 'tap_dummyjson.tap:TapDummyJSON.cli'
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

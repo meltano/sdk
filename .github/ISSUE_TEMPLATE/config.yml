@@ -3,3 +3,9 @@ contact_links:
 - name: Meltano Community
   url: https://meltano.com/slack
   about: Join us on Slack.
+- name: Start a discussion
+  url: https://github.com/meltano/sdk/discussions/new
+  about: Start a GitHub discussion.
+- name: Singer SDK Documentation
+  url: https://sdk.meltano.com
+  about: Learn more about the Singer SDK.

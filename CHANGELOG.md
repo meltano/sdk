@@ -5,6 +5,310 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.45.8 (2025-04-14)
+
+### 🐛 Fixes
+
+- [#2965](https://github.com/meltano/sdk/issues/2965) `AttributeError: object has no attribute '_requests_session'` when accessing public property during stream initialization -- _**Thanks @ReubenFrankel!**_
+- [#2970](https://github.com/meltano/sdk/issues/2970) Consider `oneOf` schemas when checking for `date` and `datetime` types
+
+## v0.45.7 (2025-04-14)
+
+### 🐛 Fixes
+
+- [#2968](https://github.com/meltano/sdk/issues/2968) `singer_sdk.singerlib.resolve_schema_references` now resolves `oneOf` schema references
+- [#2924](https://github.com/meltano/sdk/issues/2924) Generate standard stream metadata for nested fields
+- [#2940](https://github.com/meltano/sdk/issues/2940) Ensure streams with hardcoded `schema` attributes (e.g. REST and GraphQL streams) can have their schema overridden by the catalog
+
+### 📦 Packaging changes
+
+- [#2966](https://github.com/meltano/sdk/issues/2966) Add a `fallback-version` for hatch vcs
+
+## v0.45.6 (2025-04-11)
+
+### 🐛 Fixes
+
+- [#2961](https://github.com/meltano/sdk/issues/2961) Conform `NaN`, `Infinity` and `-Infinity` to null values
+
+### 📚 Documentation Improvements
+
+- [#2960](https://github.com/meltano/sdk/issues/2960) Documented using `default=str` with `json.dumps` in stream maps
+- [#2955](https://github.com/meltano/sdk/issues/2955) Documented the `ignore_parent_replication_key` stream attribute
+
+## v0.45.5 (2025-04-04)
+
+### 🐛 Fixes
+
+- [#2952](https://github.com/meltano/sdk/issues/2952) Adapt field schema type to `string` when transformed with stream maps using `json.dumps`
+
+### ⚙️ Under the Hood
+
+- [#2948](https://github.com/meltano/sdk/issues/2948) `ignore_no_records` as an instance property in built-in tests -- _**Thanks @ReubenFrankel!**_
+
+## v0.45.4 (2025-04-01)
+
+### 🐛 Fixes
+
+- [#2946](https://github.com/meltano/sdk/issues/2946) In the built-in tap tests, do not emit a warning for missing records on ignored streams
+
+## v0.45.3 (2025-03-29)
+
+### 🐛 Fixes
+
+- [#2937](https://github.com/meltano/sdk/issues/2937) Revert "fix: Ensure stream schema is overridden by the input catalog ([#2932](https://github.com/meltano/sdk/issues/2932))"
+
+### 📚 Documentation Improvements
+
+- [#2938](https://github.com/meltano/sdk/issues/2938) Fixed the dynamic schema example
+
+## v0.45.2 (2025-03-28)
+
+### 🐛 Fixes
+
+- [#2935](https://github.com/meltano/sdk/issues/2935) Added `uv` venv backend to Meltano project in templates
+- [#2934](https://github.com/meltano/sdk/issues/2934) Updated cookiecutter pre-commit hooks and added `check-meltano` JSON schema check
+- [#2932](https://github.com/meltano/sdk/issues/2932) Ensure stream schema is overridden by the input catalog
+
+## v0.45.1 (2025-03-27)
+
+### 🐛 Fixes
+
+- [#2925](https://github.com/meltano/sdk/issues/2925) Let downstream packages import from deprecated `singer_sdk._singerlib.catalog`
+
+## v0.45.0 (2025-03-25)
+
+### ✨ New
+
+- [#2885](https://github.com/meltano/sdk/issues/2885) Update tap, target and mapper dependencies in templates
+- [#2789](https://github.com/meltano/sdk/issues/2789) Conditionally required settings
+- [#2908](https://github.com/meltano/sdk/issues/2908) Include response content when HTTP request fails fatally in REST streams
+- [#2541](https://github.com/meltano/sdk/issues/2541) Implement Singer msgspec encoding
+- [#2786](https://github.com/meltano/sdk/issues/2786) Support the `x-singer.decimal` JSON Schema extension
+- [#2895](https://github.com/meltano/sdk/issues/2895) Graduated low-level Singer API `singerlib` to public module
+- [#2872](https://github.com/meltano/sdk/issues/2872) Add `pytest-github-actions-annotate-failures` for GitHub workflows of tap, target and mapper templates
+
+### 🐛 Fixes
+
+- [#2907](https://github.com/meltano/sdk/issues/2907) Additionally suppress `No records were available to test` warning when no records are ignored for all streams -- _**Thanks @ReubenFrankel!**_
+- [#2906](https://github.com/meltano/sdk/issues/2906) Suppress `No records were available to test` warnings when empty stream is ignored -- _**Thanks @ReubenFrankel!**_
+- [#2903](https://github.com/meltano/sdk/issues/2903) Don't warn about catalog schema not matching records if there are no records available to test against -- _**Thanks @ReubenFrankel!**_
+
+### ⚙️ Under the Hood
+
+- [#2782](https://github.com/meltano/sdk/issues/2782) Added a class method to instantiate `JSONSchemaToSQL` from the target configuration
+
+### ⚡ Performance Improvements
+
+- [#2887](https://github.com/meltano/sdk/issues/2887) Iterate only once over properties when pruning record
+
+### 📦 Packaging changes
+
+- [#2883](https://github.com/meltano/sdk/issues/2883) Pinned docs dependencies and use PEP 735 for them
+
+## v0.44.3 (2025-02-05)
+
+### 🐛 Fixes
+
+- [#2870](https://github.com/meltano/sdk/issues/2870) Do not emit a warning needlessly when `rest_method` is not set in a stream class
+
+## v0.44.2 (2025-01-31)
+
+### 🐛 Fixes
+
+- [#2862](https://github.com/meltano/sdk/issues/2862) Include package license metadata conditionally in templates -- _**Thanks @ReubenFrankel!**_
+- [#2859](https://github.com/meltano/sdk/issues/2859) Use uv in tap, target and mapper templates
+
+### 📚 Documentation Improvements
+
+- [#2861](https://github.com/meltano/sdk/issues/2861) Document plugin development with uv and how to migrate existing ones
+
+### 📦 Packaging changes
+
+- [#2854](https://github.com/meltano/sdk/issues/2854) Use PEP 639
+- [#2852](https://github.com/meltano/sdk/issues/2852) Remove `urllib3` constraint
+- [#2851](https://github.com/meltano/sdk/issues/2851) Use uv to manage this project
+
+## v0.44.1 (2025-01-29)
+
+### 🐛 Fixes
+
+- [#2847](https://github.com/meltano/sdk/issues/2847) Update Cookiecutter templates
+- [#2844](https://github.com/meltano/sdk/issues/2844) Avoid writing an empty state -- _**Thanks @joaopamaral!**_
+- [#2843](https://github.com/meltano/sdk/issues/2843) Use SQLAlchemy to generate an insert statement
+
+## v0.44.0 (2025-01-23)
+
+### ✨ New
+
+- [#2830](https://github.com/meltano/sdk/issues/2830) Allow developers to mark stream schema and settings fields as deprecated
+- [#2829](https://github.com/meltano/sdk/issues/2829) Support a `x-sql-datatype` JSON Schema annotation to let targets customize SQL type handling
+- [#2819](https://github.com/meltano/sdk/issues/2819) Add SHA256 encryption method to inline stream maps -- _**Thanks @ben-schulz-mh!**_
+
+### 📦 Packaging changes
+
+- [#2407](https://github.com/meltano/sdk/issues/2407) Use Poetry support for PEP 621
+- [#2822](https://github.com/meltano/sdk/issues/2822) Make paramiko and transitive SSH dependencies optional
+- [#2821](https://github.com/meltano/sdk/issues/2821) Require urllib3 < 2 on Python < 3.10
+
+## v0.43.1 (2024-12-10)
+
+### 🐛 Fixes
+
+- [#2807](https://github.com/meltano/sdk/issues/2807) Allow developers to set `RESTStream.http_method`
+
+## v0.43.0 (2024-12-10)
+
+### ✨ New
+
+- [#2482](https://github.com/meltano/sdk/issues/2482) Allow SQL tap developers to auto-skip certain schemas from discovery
+- [#2784](https://github.com/meltano/sdk/issues/2784) Added a new built-in setting `activate_version` for targets to optionally disable processing of `ACTIVATE_VERSION` messages
+- [#2780](https://github.com/meltano/sdk/issues/2780) Numeric values are now parsed as `decimal.Decimal` in REST and GraphQL stream responses
+- [#2775](https://github.com/meltano/sdk/issues/2775) Log a stream's bookmark (if it's available) when its sync starts
+- [#2703](https://github.com/meltano/sdk/issues/2703) Targets now emit record count from the built-in batch file processor
+- [#2774](https://github.com/meltano/sdk/issues/2774) Accept a `maxLength` limit for VARCHARs
+- [#2769](https://github.com/meltano/sdk/issues/2769) Add `versioning-strategy` to dependabot config of Cookiecutter templates
+- [#2765](https://github.com/meltano/sdk/issues/2765) The last received Singer message is now logged when the target fails
+- [#2762](https://github.com/meltano/sdk/issues/2762) Support other content-types in REST streams
+
+### 🐛 Fixes
+
+- [#2790](https://github.com/meltano/sdk/issues/2790) Ensure the required global folder tap settings are merged into the concrete implementation settings
+- [#2785](https://github.com/meltano/sdk/issues/2785) Use FS-specific `listdir` in folder tap
+- [#2778](https://github.com/meltano/sdk/issues/2778) The path of the offending field is now printed for config validation errors
+- [#2770](https://github.com/meltano/sdk/issues/2770) Respect standard Singer stream metadata `table-key-properties`, `replication-key` and `forced-replication-method`
+- [#2755](https://github.com/meltano/sdk/issues/2755) Safely compare UUID replication keys with state bookmarks -- _**Thanks @nikzavada!**_
+
+### ⚙️ Under the Hood
+
+- [#2805](https://github.com/meltano/sdk/issues/2805) Rename setting `activate_version` to `process_activate_version_messages`
+- [#2788](https://github.com/meltano/sdk/issues/2788) Fail early if input files to `--catalog` or `--state` do not exist
+- [#2781](https://github.com/meltano/sdk/issues/2781) Added a class method to instantiate `SQLToJSONSchema` from the tap configuration
+- [#2566](https://github.com/meltano/sdk/issues/2566) Standardize on JSON Schema Draft 2020-12 to validate stream schemas
+- [#2751](https://github.com/meltano/sdk/issues/2751) Dropped support for Python 3.8
+
+### ⚡ Performance Improvements
+
+- [#2793](https://github.com/meltano/sdk/issues/2793) Improved discovery performance for SQL taps
+
+### 📚 Documentation Improvements
+
+- [#2796](https://github.com/meltano/sdk/issues/2796) Document how to configure nested stream maps values with environment variables in Meltano
+
+### 📦 Packaging changes
+
+- [#2797](https://github.com/meltano/sdk/issues/2797) SQL taps now require SQLAlchemy 2.0+
+
+## v0.42.1 (2024-11-11)
+
+### 🐛 Fixes
+
+- [#2756](https://github.com/meltano/sdk/issues/2756) Safely compare UUID replication keys with state bookmarks -- _**Thanks @nikzavada!**_
+
+## v0.42.0 (2024-11-11)
+
+### ✨ New
+
+- [#2742](https://github.com/meltano/sdk/issues/2742) Update dependencies in templates
+- [#2732](https://github.com/meltano/sdk/issues/2732) SQL target developers can now more easily override the mapping from JSON schema to SQL column type
+- [#2730](https://github.com/meltano/sdk/issues/2730) Added `SQLConnector.prepare_primary_key` for target to implement for custom table primary key adaptation
+- [#2488](https://github.com/meltano/sdk/issues/2488) Nested schema properties can now be defined as nullable
+- [#2518](https://github.com/meltano/sdk/issues/2518) Python 3.13 is officially supported
+- [#2637](https://github.com/meltano/sdk/issues/2637) Environment variables are now parsed for boolean, integer, array and object setting values
+- [#2699](https://github.com/meltano/sdk/issues/2699) Stream name can now be accessed in stream maps -- _**Thanks @holly-evans!**_
+- [#2712](https://github.com/meltano/sdk/issues/2712) JSON schema `title` is now supported in configuration and stream properties
+- [#2707](https://github.com/meltano/sdk/issues/2707) Bumped simpleeval to 1.0
+- [#2701](https://github.com/meltano/sdk/issues/2701) Stream name can now be accessed in `__alias__` context of stream maps -- _**Thanks @holly-evans!**_
+
+### 🐛 Fixes
+
+- [#2741](https://github.com/meltano/sdk/issues/2741) `datetime.datetime` instances in stream maps are now correctly mapped to `date-time` JSON schema strings
+- [#2727](https://github.com/meltano/sdk/issues/2727) Object and array JSON types are now handled before primitive types when converting them to SQL types
+- [#2723](https://github.com/meltano/sdk/issues/2723) JSON schema union types are no longer conformed into boolean values
+
+### ⚙️ Under the Hood
+
+- [#2743](https://github.com/meltano/sdk/issues/2743) Deprecate passing file paths to plugin and stream initialization
+
+### 📚 Documentation Improvements
+
+- [#2745](https://github.com/meltano/sdk/issues/2745) Document the current release process
+- [#2717](https://github.com/meltano/sdk/issues/2717) Update Meltano commands in examples
+
+### 📦 Packaging changes
+
+- [#2736](https://github.com/meltano/sdk/issues/2736) Skip `simpleeval` 1.0.1
+- [#2716](https://github.com/meltano/sdk/issues/2716) Stopped testing with SQLAlchemy 1.4
+- [#2714](https://github.com/meltano/sdk/issues/2714) Remove constraint on `urllib3`
+
+## v0.41.0 (2024-10-02)
+
+### ✨ New
+
+- [#2667](https://github.com/meltano/sdk/issues/2667) Support stream aliasing of `BATCH` messages via stream maps -- _**Thanks @ReubenFrankel!**_
+- [#2651](https://github.com/meltano/sdk/issues/2651) SQL taps now emit schemas with `maxLength` when applicable
+- [#2618](https://github.com/meltano/sdk/issues/2618) Developers can now more easily override the mapping from SQL column type to JSON schema
+
+### 🐛 Fixes
+
+- [#2697](https://github.com/meltano/sdk/issues/2697) All HTTP timeout exceptions are now retried in REST and GraphQL streams
+- [#2683](https://github.com/meltano/sdk/issues/2683) A clear error message is now emitted when flattening is enabled but `flattening_max_depth` is not set
+- [#2665](https://github.com/meltano/sdk/issues/2665) Mapped datetime values are now typed as `date-time` strings in the schema message -- _**Thanks @gregkoutsimp!**_
+- [#2663](https://github.com/meltano/sdk/issues/2663) Properties dropped using `None` or `__NULL__` in stream maps are now also removed from the schema `required` array
+
+### ⚙️ Under the Hood
+
+- [#2696](https://github.com/meltano/sdk/issues/2696) Use tox without installing Poetry explicitly in workflows
+- [#2654](https://github.com/meltano/sdk/issues/2654) Added a generic `FileStream` (still in active development!)
+- [#2695](https://github.com/meltano/sdk/issues/2695) Update dependencies in templates
+- [#2661](https://github.com/meltano/sdk/issues/2661) Drop support for Python 3.8 in templates
+- [#2670](https://github.com/meltano/sdk/issues/2670) Deprecated `Faker` class in stream maps
+- [#2666](https://github.com/meltano/sdk/issues/2666) Remove non-functional `record-flattening` capability -- _**Thanks @ReubenFrankel!**_
+- [#2652](https://github.com/meltano/sdk/issues/2652) Renamed `SQLConnector.type_mapping` to `SQLConnector.sql_to_jsonschema`
+- [#2647](https://github.com/meltano/sdk/issues/2647) Use future `warnings.deprecated` decorator
+
+### 📚 Documentation Improvements
+
+- [#2658](https://github.com/meltano/sdk/issues/2658) Added more versions when stuff changed or was added
+
+### 📦 Packaging changes
+
+- [#2694](https://github.com/meltano/sdk/issues/2694) Removed unused backport `importlib_resources` dependency in tap template
+- [#2664](https://github.com/meltano/sdk/issues/2664) Added a constraint on setuptools <= 70.3.0 to fix incompatibility with some dependencies
+
+## v0.40.0 (2024-09-02)
+
+### ✨ New
+
+- [#2486](https://github.com/meltano/sdk/issues/2486) Emit target metrics
+- [#2567](https://github.com/meltano/sdk/issues/2567) A new `schema_is_valid` built-in tap test validates stream schemas against the JSON Schema specification
+- [#2598](https://github.com/meltano/sdk/issues/2598) Stream map expressions now have access to the `Faker` class, rather than just a faker instance
+- [#2549](https://github.com/meltano/sdk/issues/2549) Added a default user agent for REST and GraphQL taps
+
+### 🐛 Fixes
+
+- [#2613](https://github.com/meltano/sdk/issues/2613) Mismatch between timezone-aware and naive datetimes in start date and bookmarks is now correctly handled
+
+### ⚙️ Under the Hood
+
+- [#2628](https://github.com/meltano/sdk/issues/2628) Use context manager to read gzip batch files
+- [#2619](https://github.com/meltano/sdk/issues/2619) Default to UTC when parsing dates without a known timezone
+- [#2603](https://github.com/meltano/sdk/issues/2603) Backwards-compatible identifier quoting in fully qualified names
+- [#2601](https://github.com/meltano/sdk/issues/2601) Improved SQL identifier (de)normalization
+- [#2599](https://github.com/meltano/sdk/issues/2599) Remove `pytest-durations` dependency from `testing` and use native pytest option `--durations`
+- [#2597](https://github.com/meltano/sdk/issues/2597) Mark pagination classes with `@override` decorator
+- [#2596](https://github.com/meltano/sdk/issues/2596) Made `auth_headers` and `auth_params` of `APIAuthenticatorBase` simple instance attributes instead of decorated properties
+
+### 📚 Documentation Improvements
+
+- [#2639](https://github.com/meltano/sdk/issues/2639) Documented versions where `fake` and `Faker` objects were added to the stream maps context
+- [#2629](https://github.com/meltano/sdk/issues/2629) Reference `get_starting_timestamp` in incremental replication guide
+- [#2604](https://github.com/meltano/sdk/issues/2604) Update project sample links
+- [#2595](https://github.com/meltano/sdk/issues/2595) Documented examples of stream glob expressions and property aliasing
+
+### 📦 Packaging changes
+
+- [#2640](https://github.com/meltano/sdk/issues/2640) Remove upper constraint on `faker` extra
+
 ## v0.39.1 (2024-08-07)
 
 ### 🐛 Fixes
@@ -29,7 +333,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ✨ New
 
 - [#2432](https://github.com/meltano/sdk/issues/2432) Developers can now customize the default logging configuration for their taps/targets by adding `default_logging.yml` to their package
-- [#2531](https://github.com/meltano/sdk/issues/2531) The `json` module is now avaiable to stream maps -- _**Thanks @grigi!**_
+- [#2531](https://github.com/meltano/sdk/issues/2531) The `json` module is now available to stream maps -- _**Thanks @grigi!**_
 - [#2529](https://github.com/meltano/sdk/issues/2529) Stream sync context is now available to all instances methods as a `Stream.context` attribute
 
 ### 🐛 Fixes
@@ -149,7 +453,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 📚 Documentation Improvements
 
 - [#2239](https://github.com/meltano/sdk/issues/2239) Linked reference docs to source code
-- [#2231](https://github.com/meltano/sdk/issues/2231) Added an example implemetation of JSON schema validation that uses `fastjsonschema`
+- [#2231](https://github.com/meltano/sdk/issues/2231) Added an example implementation of JSON schema validation that uses `fastjsonschema`
 - [#2219](https://github.com/meltano/sdk/issues/2219) Added reference docs for tap & target testing helpers
 
 ## v0.35.0 (2024-02-02)
@@ -567,7 +871,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ New
 
-- [#1262](https://github.com/meltano/sdk/issues/1262) Support string `"__NULL__"` whereever null values are allowed in stream maps configuration
+- [#1262](https://github.com/meltano/sdk/issues/1262) Support string `"__NULL__"` wherever null values are allowed in stream maps configuration
 
 ### 🐛 Fixes
 
@@ -1105,7 +1409,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changes
 
-- Target SDK: Improved performance for Batch Sinks by skipping extra drain operations when newly recieved STATE messages are unchanged from the prior received STATE (#172, !125) -- _Thanks, **[Pat Nadolny](https://gitlab.com/pnadolny13)**!_
+- Target SDK: Improved performance for Batch Sinks by skipping extra drain operations when newly received STATE messages are unchanged from the prior received STATE (#172, !125) -- _Thanks, **[Pat Nadolny](https://gitlab.com/pnadolny13)**!_
 
 ### Fixes
 

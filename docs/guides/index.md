@@ -10,4 +10,9 @@ pagination-classes
 custom-connector
 custom-clis
 config-schema
+performance
+sql-tap
+sql-target
+
+migrate-to-uv
 ```

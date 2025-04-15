@@ -1,0 +1,6 @@
+paths:
+  - samples
+  - singer_sdk
+  - tests
+paths-ignore:
+  - cookiecutter

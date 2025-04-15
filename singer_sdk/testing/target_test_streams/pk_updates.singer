@@ -1,0 +1,4 @@
+{"type": "SCHEMA", "stream": "example_stream", "schema": {"properties": {"id": {"type": "integer"}, "name": {"type": "string"}, "email": {"type": "string"}}, "key_properties": ["id"]}}
+{"type": "RECORD", "stream": "example_stream", "record": {"id": 1, "name": "Alice", "email": "alice@example.com"}}
+{"type": "SCHEMA", "stream": "example_stream", "schema": {"properties": {"id": {"type": "integer"}, "name": {"type": "string"}, "email": {"type": "string"}}, "key_properties": ["email"]}}
+{"type": "RECORD", "stream": "example_stream", "record": {"id": 2, "name": "Bob", "email": "bob@example.com"}}

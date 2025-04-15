@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import abc
 import contextlib
+import pathlib
 import typing as t
+import warnings
 from enum import Enum
 
 import click
 
-from singer_sdk._singerlib import Catalog, StateMessage
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
@@ -18,22 +19,26 @@ from singer_sdk.exceptions import (
 )
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import dump_json, read_json_file
 from singer_sdk.helpers.capabilities import (
     BATCH_CONFIG,
+    SQL_TAP_USE_SINGER_DECIMAL,
     CapabilitiesEnum,
     PluginCapabilities,
     TapCapabilities,
 )
 from singer_sdk.io_base import SingerWriter
-from singer_sdk.plugin_base import PluginBase
+from singer_sdk.plugin_base import BaseSingerWriter, PluginBase
+from singer_sdk.singerlib import Catalog, StateMessage
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
     from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
+    from singer_sdk.singerlib.encoding.base import GenericSingerWriter
     from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
@@ -47,7 +52,7 @@ class CliTestOptionValue(Enum):
     Disabled = "disabled"
 
 
-class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
+class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for taps.
 
     The Tap class governs configuration, validation, and stream discovery for tap
@@ -57,6 +62,9 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
     dynamic_catalog: bool = False
     """Whether the tap's catalog is dynamic. Set to True if the catalog is
     generated dynamically (e.g. by querying a database's system tables)."""
+
+    message_writer_class: type[GenericSingerWriter] = SingerWriter
+    """The message writer class to use for writing messages."""
 
     # Constructor
 
@@ -69,6 +77,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         parse_env_config: bool = False,
         validate_config: bool = True,
         setup_mapper: bool = True,
+        message_writer: GenericSingerWriter | None = None,
     ) -> None:
         """Initialize the tap.
 
@@ -82,11 +91,13 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
                 variables.
             validate_config: True to require validation of config settings.
             setup_mapper: True to initialize the plugin mapper.
+            message_writer: The class class to use for writing Singer messages.
         """
         super().__init__(
             config=config,
             parse_env_config=parse_env_config,
             validate_config=validate_config,
+            message_writer=message_writer,
         )
 
         # Declare private members
@@ -102,6 +113,12 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type]
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
+            warnings.warn(
+                "Passing a catalog file path is deprecated. Please pass the catalog "
+                "as a dictionary or Catalog object instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
 
         self._mapper: PluginMapper | None = None
 
@@ -114,6 +131,12 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             state_dict = state
         elif state:
             state_dict = read_json_file(state)
+            warnings.warn(
+                "Passing a state file path is deprecated. Please pass the state "
+                "as a dictionary instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
         self.load_state(state_dict)
 
     # Class properties
@@ -148,7 +171,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             RuntimeError: If state has not been initialized.
         """
         if self._state is None:
-            msg = "Could not read from uninitialized state."
+            msg = "Could not read from uninitialized state."  # type: ignore[unreachable]
             raise RuntimeError(msg)
         return self._state
 
@@ -302,7 +325,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             The tap's catalog as a dict
         """
-        return t.cast(dict, self._singer_catalog.to_dict())
+        return t.cast("dict", self._singer_catalog.to_dict())
 
     @property
     def catalog_json_text(self) -> str:
@@ -318,7 +341,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """Return a Catalog object.
 
         Returns:
-            :class:`singer_sdk._singerlib.Catalog`.
+            :class:`singer_sdk.singerlib.Catalog`.
         """
         return Catalog(
             (stream.tap_stream_id, stream._singer_catalog_entry)  # noqa: SLF001
@@ -398,7 +421,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
                 initialized.
         """
         if self.state is None:
-            msg = "Cannot write to uninitialized state dictionary."
+            msg = "Cannot write to uninitialized state dictionary."  # type: ignore[unreachable]
             raise ValueError(msg)
 
         for stream_name, stream_state in state.get("bookmarks", {}).items():
@@ -445,7 +468,8 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """Sync all streams."""
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
-        self.write_message(StateMessage(value=self.state))
+        if self.state:
+            self.write_message(StateMessage(value=self.state))
 
         stream: Stream
         for stream in self.streams.values():
@@ -480,8 +504,8 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         about: bool = False,
         about_format: str | None = None,
         config: tuple[str, ...] = (),
-        state: str | None = None,
-        catalog: str | None = None,
+        state: pathlib.Path | None = None,
+        catalog: pathlib.Path | None = None,
     ) -> None:
         """Invoke the tap's command line interface.
 
@@ -605,12 +629,20 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
                 click.Option(
                     ["--catalog"],
                     help="Use a Singer catalog file with the tap.",
-                    type=click.Path(),
+                    type=click.Path(
+                        path_type=pathlib.Path,
+                        exists=True,
+                        dir_okay=False,
+                    ),
                 ),
                 click.Option(
                     ["--state"],
                     help="Use a bookmarks file for incremental replication.",
-                    type=click.Path(),
+                    type=click.Path(
+                        path_type=pathlib.Path,
+                        exists=True,
+                        dir_okay=False,
+                    ),
                 ),
             ],
         )
@@ -634,6 +666,9 @@ class SQLTap(Tap):
     querying a database's system tables).
     """
 
+    exclude_schemas: t.Sequence[str] = []
+    """Hard-coded list of stream names to skip when discovering the catalog."""
+
     _tap_connector: SQLConnector | None = None
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
@@ -645,8 +680,18 @@ class SQLTap(Tap):
             *args: Positional arguments for the Tap initializer.
             **kwargs: Keyword arguments for the Tap initializer.
         """
-        self._catalog_dict: dict | None = None
+        self._catalog_dict: dict[str, list[dict]] | None = None
         super().__init__(*args, **kwargs)
+
+    @classmethod
+    def append_builtin_config(cls: type[SQLTap], config_jsonschema: dict) -> None:
+        """Appends built-in config to `config_jsonschema` if not already set.
+
+        Args:
+            config_jsonschema: [description]
+        """
+        merge_missing_config_jsonschema(SQL_TAP_USE_SINGER_DECIMAL, config_jsonschema)
+        super().append_builtin_config(config_jsonschema)
 
     @property
     def tap_connector(self) -> SQLConnector:
@@ -668,7 +713,7 @@ class SQLTap(Tap):
         Returns:
             The tap's catalog as a dict
         """
-        if self._catalog_dict:
+        if self._catalog_dict is not None:
             return self._catalog_dict
 
         if self.input_catalog:
@@ -676,10 +721,11 @@ class SQLTap(Tap):
 
         connector = self.tap_connector
 
-        result: dict[str, list[dict]] = {"streams": []}
-        result["streams"].extend(connector.discover_catalog_entries())
-
-        self._catalog_dict = result
+        self._catalog_dict = {
+            "streams": connector.discover_catalog_entries(
+                exclude_schemas=self.exclude_schemas
+            )
+        }
         return self._catalog_dict
 
     def discover_streams(self) -> t.Sequence[Stream]:

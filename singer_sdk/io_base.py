@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from singer_sdk._singerlib.encoding import (
+from singer_sdk.singerlib.encoding import (
     GenericSingerReader,
     GenericSingerWriter,
     SingerMessageType,
 )
-from singer_sdk._singerlib.encoding import SimpleSingerReader as SingerReader
-from singer_sdk._singerlib.encoding import SimpleSingerWriter as SingerWriter
+from singer_sdk.singerlib.encoding import SimpleSingerReader as SingerReader
+from singer_sdk.singerlib.encoding import SimpleSingerWriter as SingerWriter
 
 __all__ = [
     "GenericSingerReader",

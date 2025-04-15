@@ -16,6 +16,7 @@ from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import (
+    ACTIVATE_VERSION_CONFIG,
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
     TARGET_BATCH_SIZE_ROWS_CONFIG,
@@ -27,20 +28,21 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
     TargetCapabilities,
 )
-from singer_sdk.io_base import SingerMessageType, SingerReader
-from singer_sdk.plugin_base import PluginBase
+from singer_sdk.io_base import SingerReader
+from singer_sdk.plugin_base import BaseSingerReader
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
     from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
+    from singer_sdk.singerlib.encoding.base import GenericSingerReader
     from singer_sdk.sinks import Sink, SQLSink
 
 _MAX_PARALLELISM = 8
 
 
-class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
+class Target(BaseSingerReader, metaclass=abc.ABCMeta):
     """Abstract base class for targets.
 
     The `Target` class manages config information and is responsible for processing the
@@ -56,6 +58,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     # Required if `Target.get_sink_class()` is not defined.
     default_sink_class: type[Sink]
 
+    message_reader_class: type[GenericSingerReader] = SingerReader
+    """The message reader class to use for reading messages."""
+
     def __init__(
         self,
         *,
@@ -63,6 +68,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         parse_env_config: bool = False,
         validate_config: bool = True,
         setup_mapper: bool = True,
+        message_reader: GenericSingerReader | None = None,
     ) -> None:
         """Initialize the target.
 
@@ -74,11 +80,13 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 variables.
             validate_config: True to require validation of config settings.
             setup_mapper: True to setup the mapper. Set to False if you want to
+            message_reader: The message reader to use for reading messages.
         """
         super().__init__(
             config=config,
             parse_env_config=parse_env_config,
             validate_config=validate_config,
+            message_reader=message_reader,
         )
 
         self._latest_state: dict[str, dict] = {}
@@ -291,34 +299,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             )
             self.drain_all()
 
-    def _process_lines(self, file_input: t.IO[str]) -> t.Counter[str]:
-        """Internal method to process jsonl lines from a Singer tap.
-
-        Args:
-            file_input: Readable stream of messages, each on a separate line.
-
-        Returns:
-            A counter object for the processed lines.
-        """
-        self.logger.info("Target '%s' is listening for input from tap.", self.name)
-        counter = super()._process_lines(file_input)
-
-        line_count = sum(counter.values())
-
-        self.logger.info(
-            "Target '%s' completed reading %d lines of input "
-            "(%d schemas, %d records, %d batch manifests, %d state messages).",
-            self.name,
-            line_count,
-            counter[SingerMessageType.SCHEMA],
-            counter[SingerMessageType.RECORD],
-            counter[SingerMessageType.BATCH],
-            counter[SingerMessageType.STATE],
-        )
-
-        return counter
-
-    def _process_endofpipe(self) -> None:
+    def process_endofpipe(self) -> None:
         """Called after all input lines have been read."""
         self.drain_all(is_endofpipe=True)
 
@@ -359,6 +340,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             sink.tally_record_read()
             sink.process_record(transformed_record, context)
+            sink.record_counter_metric.increment()
             sink._after_process_record(context)  # noqa: SLF001
 
             if sink.is_full:
@@ -453,6 +435,19 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         for stream_map in self.mapper.stream_maps[stream_name]:
             sink = self.get_sink(stream_map.stream_alias)
+            if not sink.process_activate_version_messages:
+                self.logger.warning(
+                    "`ACTIVATE_VERSION` messages are not enabled for '%s'. Ignoring.",
+                    stream_map.stream_alias,
+                )
+                continue
+            if not sink.include_sdc_metadata_properties:
+                self.logger.warning(
+                    "The `ACTIVATE_VERSION` feature uses the `_sdc_deleted_at` and "
+                    "`_sdc_deleted_at` metadata properties so they will be added to "
+                    "the schema for '%s' even though `add_record_metadata` is "
+                    "disabled.",
+                )
             sink.activate_version(message_dict["version"])
 
     def _process_batch_message(self, message_dict: dict) -> None:
@@ -461,14 +456,16 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         Args:
             message_dict: TODO
         """
-        sink = self.get_sink(message_dict["stream"])
-
+        stream_name = message_dict["stream"]
         encoding = BaseBatchFileEncoding.from_dict(message_dict["encoding"])
-        sink.process_batch_files(
-            encoding,
-            message_dict["manifest"],
-        )
-        self._handle_max_record_age()
+
+        for stream_map in self.mapper.stream_maps[stream_name]:
+            sink = self.get_sink(stream_map.stream_alias)
+            sink.process_batch_files(
+                encoding,
+                message_dict["manifest"],
+            )
+            self._handle_max_record_age()
 
     # Sink drain methods
 
@@ -479,10 +476,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         This method is internal to the SDK and should not need to be overridden.
 
         Args:
-            is_endofpipe: This is passed by the
-                          :meth:`~singer_sdk.Sink._process_endofpipe()` which
-                          is called after the target instance has finished
-                          listening to the stdin
+            is_endofpipe: This is called after the target instance has finished
+                listening to the stdin.
         """
         state = copy.deepcopy(self._latest_state)
         self._drain_all(self._sinks_to_clear, 1)
@@ -510,7 +505,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             return
 
         draining_status = sink.start_drain()
-        sink.process_batch(draining_status)
+        with sink.batch_processing_timer:
+            sink.process_batch(draining_status)
         sink.mark_drained()
 
     def _drain_all(self, sink_list: list[Sink], parallelism: int) -> None:
@@ -617,6 +613,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         capabilities = cls.capabilities
 
+        if PluginCapabilities.ACTIVATE_VERSION in capabilities:
+            _merge_missing(ACTIVATE_VERSION_CONFIG, config_jsonschema)
+
         if PluginCapabilities.BATCH in capabilities:
             _merge_missing(BATCH_CONFIG, config_jsonschema)
 
@@ -656,6 +655,7 @@ class SQLTarget(Target):
         sql_target_capabilities: list[CapabilitiesEnum] = super().capabilities
         sql_target_capabilities.extend(
             [
+                PluginCapabilities.ACTIVATE_VERSION,
                 TargetCapabilities.TARGET_SCHEMA,
                 TargetCapabilities.HARD_DELETE,
             ]
