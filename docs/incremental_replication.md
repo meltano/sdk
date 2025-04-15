@@ -15,7 +15,7 @@ class CommentsStream(RESTStream):
     is_sorted = True
 
     schema = th.PropertiesList(
-        th.Property("date_gmt", th.DateTimeType, description="date"),
+        th.Property("date_gmt", th.DateTimeType(nullable=True), description="date"),
     ).to_dict()
 
     def get_url_params(self, context, next_page_token):

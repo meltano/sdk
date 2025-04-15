@@ -22,7 +22,7 @@ class {{ cookiecutter.name }}Mapper(InlineMapper):
         # TODO: Replace or remove this example config based on your needs
         th.Property(
             "example_config",
-            th.StringType,
+            th.StringType(nullable=False),
             title="Example Configuration",
             description="An example config, replace or remove based on your needs.",
         ),

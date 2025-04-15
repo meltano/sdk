@@ -131,7 +131,7 @@ class ParquetStream(Stream):
         properties: List[th.Property] = []
         for header in FAKECSV.split("\n")[0].split(","):
             # Assume string type for all fields
-            properties.append(th.Property(header, th.StringType()))
+            properties.append(th.Property(header, th.StringType(nullable=True)))
         return th.PropertiesList(*properties).to_dict()
 ```
 
