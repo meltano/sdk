@@ -243,7 +243,7 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
         Returns:
             True if this test is applicable, False if not.
         """
-        return bool(th.is_date_or_datetime_type(property_schema))
+        return th.is_date_or_datetime_type(property_schema)
 
 
 class AttributeIsBooleanTest(AttributeTestTemplate):
