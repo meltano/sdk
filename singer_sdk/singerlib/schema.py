@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import typing as t
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 
 from referencing import Registry
 from referencing.jsonschema import DRAFT202012
@@ -78,7 +78,6 @@ class Schema:
     minLength: int | None = None  # noqa: N815
     anyOf: t.Any | None = None  # noqa: N815
     allOf: t.Any | None = None  # noqa: N815
-    oneOf: t.Any | None = None  # noqa: N815
     format: str | None = None
     additionalProperties: t.Any | None = None  # noqa: N815
     patternProperties: t.Any | None = None  # noqa: N815
@@ -88,9 +87,13 @@ class Schema:
     pattern: str | None = None
     contentMediaType: str | None = None  # noqa: N815
     contentEncoding: str | None = None  # noqa: N815
-    deprecated: bool | None = None
     # JSON Schema extensions
     x_sql_datatype: str | None = None
+
+    _: KW_ONLY
+
+    deprecated: bool | None = None
+    oneOf: t.Any | None = None  # noqa: N815
 
     def to_dict(self) -> dict[str, t.Any]:
         """Return the raw JSON Schema as a (possibly nested) dict.
