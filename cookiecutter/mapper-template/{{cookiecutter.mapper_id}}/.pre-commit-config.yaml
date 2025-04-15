@@ -20,14 +20,14 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.32.1
+  rev: 0.33.0
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
   - id: check-meltano
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.11.2
+  rev: v0.11.5
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]
@@ -39,7 +39,7 @@ repos:
   - id: mypy
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.6.10
+  rev: 0.6.14
   hooks:
   - id: uv-lock
   - id: uv-sync
