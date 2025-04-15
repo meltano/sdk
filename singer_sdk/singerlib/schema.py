@@ -36,12 +36,14 @@ STANDARD_KEYS = [
     "pattern",
     "contentMediaType",
     "contentEncoding",
+    "deprecated",
     # These are NOT simple keys (they can contain schemas themselves). We could
     # consider adding extra handling to them.
     "additionalProperties",
     "anyOf",
     "patternProperties",
     "allOf",
+    "oneOf",
     # JSON Schema extensions
     "x-sql-datatype",
 ]
@@ -76,6 +78,7 @@ class Schema:
     minLength: int | None = None  # noqa: N815
     anyOf: t.Any | None = None  # noqa: N815
     allOf: t.Any | None = None  # noqa: N815
+    oneOf: t.Any | None = None  # noqa: N815
     format: str | None = None
     additionalProperties: t.Any | None = None  # noqa: N815
     patternProperties: t.Any | None = None  # noqa: N815
@@ -85,7 +88,7 @@ class Schema:
     pattern: str | None = None
     contentMediaType: str | None = None  # noqa: N815
     contentEncoding: str | None = None  # noqa: N815
-
+    deprecated: bool | None = None
     # JSON Schema extensions
     x_sql_datatype: str | None = None
 
@@ -151,10 +154,22 @@ class Schema:
             ...             "minimum": 0,
             ...             "x-sql-datatype": "smallint",
             ...         },
+            ...         "deprecatedField": {
+            ...             "type": "string",
+            ...             "deprecated": True,
+            ...         },
+            ...         "price": {
+            ...             "oneOf": [
+            ...                 {"type": "number", "deprecated": True},
+            ...                 {"type": "null"},
+            ...             ],
+            ...         },
             ...     },
             ...     "required": ["firstName", "lastName"],
             ... }
             >>> schema = Schema.from_dict(data)
+            >>> schema.schema
+            'http://json-schema.org/draft/2020-12/schema'
             >>> schema.title
             'Person'
             >>> schema.properties["firstName"].description
@@ -163,8 +178,10 @@ class Schema:
             0
             >>> schema.properties["age"].x_sql_datatype
             'smallint'
-            >>> schema.schema
-            'http://json-schema.org/draft/2020-12/schema'
+            >>> schema.properties["deprecatedField"].deprecated
+            True
+            >>> schema.properties["price"].oneOf[0]["deprecated"]
+            True
         """  # noqa: E501
         kwargs = schema_defaults.copy()
         properties = data.get("properties")

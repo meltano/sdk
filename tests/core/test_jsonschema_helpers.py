@@ -1125,6 +1125,21 @@ def test_is_datetime_type(schema, expected):
             True,
             id="oneof_datetime",
         ),
+        pytest.param(
+            {
+                "oneOf": [
+                    {"type": "null"},
+                    {
+                        "oneOf": [
+                            {"type": "string", "format": "date-time"},
+                            {"type": "string"},
+                        ],
+                    },
+                ],
+            },
+            True,
+            id="nested_oneof_datetime",
+        ),
     ],
 )
 def test_is_date_or_datetime_type(schema, expected):
