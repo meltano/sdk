@@ -99,6 +99,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         """
         if path:
             self.path = path
+        self._http_headers: dict[str, str] = {}
         self._http_method = http_method
         self._requests_session = requests.Session()
         super().__init__(name=name, schema=schema, tap=tap)
@@ -149,6 +150,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         """
         return {
             "User-Agent": self.user_agent,
+            **self._http_headers,
         }
 
     @property
