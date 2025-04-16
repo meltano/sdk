@@ -174,37 +174,47 @@ class TestConnectorSQL:  # noqa: PLR0904
             connector.create_sqlalchemy_connection()
         with pytest.deprecated_call():
             _ = connector.connection
+        with pytest.deprecated_call(), connector._connect() as _:
+            pass
 
-    def test_connect_calls_engine(self, connector):
+    def test_connect_calls_engine(self, connector: SQLConnector):
         with (
-            mock.patch.object(SQLConnector, "_engine") as mock_engine,
-            connector._connect() as _,
+            mock.patch.object(
+                SQLConnector,
+                "_engine",
+            ) as mock_engine,
+            connector.connect() as _,
         ):
             mock_engine.connect.assert_called_once()
 
-    def test_connect_calls_connect(self, connector):
+    def test_connect_calls_connect(self, connector: SQLConnector):
         attached_engine = connector._engine
         with (
-            mock.patch.object(attached_engine, "connect") as mock_conn,
-            connector._connect() as _,
+            mock.patch.object(
+                attached_engine,
+                "connect",
+            ) as mock_conn,
+            connector.connect() as _,
         ):
             mock_conn.assert_called_once()
 
-    def test_connect_raises_on_operational_failure(self, connector):
+    def test_connect_raises_on_operational_failure(self, connector: SQLConnector):
         with (
-            pytest.raises(sa.exc.OperationalError) as _,
-            connector._connect() as conn,
+            pytest.raises(
+                sa.exc.OperationalError,
+            ) as _,
+            connector.connect() as conn,
         ):
             conn.execute(sa.text("SELECT * FROM fake_table"))
 
-    def test_rename_column_uses_connect_correctly(self, connector):
+    def test_rename_column_uses_connect_correctly(self, connector: SQLConnector):
         attached_engine = connector._engine
         # Ends up using the attached engine
         with mock.patch.object(attached_engine, "connect") as mock_conn:
             connector.rename_column("fake_table", "old_name", "new_name")
             mock_conn.assert_called_once()
         # Uses the _connect method
-        with mock.patch.object(connector, "_connect") as mock_connect_method:
+        with mock.patch.object(connector, "connect") as mock_connect_method:
             connector.rename_column("fake_table", "old_name", "new_name")
             mock_connect_method.assert_called_once()
 

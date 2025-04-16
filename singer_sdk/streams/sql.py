@@ -208,7 +208,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             # processed.
             query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
 
-        with self.connector._connect() as conn:  # noqa: SLF001
+        with self.connector.connect() as conn:
             for record in conn.execute(query).mappings():
                 transformed_record = self.post_process(dict(record))
                 if transformed_record is None:

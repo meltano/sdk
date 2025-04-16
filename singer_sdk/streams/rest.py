@@ -17,6 +17,7 @@ import requests
 
 from singer_sdk import metrics
 from singer_sdk.authenticators import SimpleAuthenticator
+from singer_sdk.connectors import HTTPConnector
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers.jsonpath import extract_jsonpath
@@ -48,7 +49,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
     """Abstract base class for HTTP streams."""
 
     _page_size: int = DEFAULT_PAGE_SIZE
-    _requests_session: requests.Session | None
+    _requests_session: requests.Session
 
     #: Response code reference for rate limit retries
     extra_retry_statuses: t.Sequence[int] = [HTTPStatus.TOO_MANY_REQUESTS]
@@ -87,6 +88,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         path: str | None = None,
         *,
         http_method: str | None = None,
+        connector: HTTPConnector | None = None,
     ) -> None:
         """Initialize the HTTP stream.
 
@@ -96,12 +98,24 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             name: Name of this stream.
             path: URL path for this entity stream.
             http_method: HTTP method to use for requests.
+            connector: Connector to use for HTTP requests.
         """
         if path:
             self.path = path
+
+        self.connector = connector or HTTPConnector()
+
+        self._requests_session = self.connector.session
+        self._compiled_jsonpath = None
+        self._next_page_token_compiled_jsonpath = None
         self._http_method = http_method
-        self._requests_session = requests.Session()
         super().__init__(name=name, schema=schema, tap=tap)
+
+        # Override the connector's config with the stream's config
+        self.connector.config = self.config
+
+        # Override the connector's auth with the stream's auth
+        self.connector.auth = self.authenticator
 
     @staticmethod
     def _url_encode(val: str | datetime | bool | int | list[str]) -> str:  # noqa: FBT001
@@ -183,8 +197,12 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         Returns:
             The :class:`requests.Session` object for HTTP requests.
         """
-        if not self._requests_session:
-            self._requests_session = requests.Session()
+        warn(
+            "The `requests_session` property is deprecated and will be removed in a "
+            "future release. Use the `connector` property instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self._requests_session
 
     @cached_property
@@ -319,11 +337,13 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         Returns:
             TODO
         """
-        response = self.requests_session.send(
-            prepared_request,
-            timeout=self.timeout,
-            allow_redirects=self.allow_redirects,
-        )
+        with self.connector.connect() as session:
+            response = session.send(
+                prepared_request,
+                timeout=self.timeout,
+                allow_redirects=self.allow_redirects,
+            )
+
         self._write_request_duration_log(
             endpoint=self.path,
             response=response,
@@ -387,8 +407,8 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             A :class:`requests.PreparedRequest` object.
         """
         request = requests.Request(*args, **kwargs)
-        self.requests_session.auth = self.authenticator
-        return self.requests_session.prepare_request(request)
+        with self.connector.connect(authenticate=True) as session:
+            return session.prepare_request(request)
 
     def prepare_request(
         self,
@@ -771,6 +791,7 @@ class RESTStream(_HTTPStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         path: str | None = None,
         *,
         http_method: str | None = None,
+        connector: HTTPConnector | None = None,
     ) -> None:
         """Initialize the REST stream.
 
@@ -779,9 +800,17 @@ class RESTStream(_HTTPStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             schema: JSON schema for records in this stream.
             name: Name of this stream.
             path: URL path for this entity stream.
-            http_method: HTTP method to use for requests
+            http_method: HTTP method to use for requests.
+            connector: Connector to use for HTTP requests.
         """
-        super().__init__(tap, name, schema, path, http_method=http_method)
+        super().__init__(
+            tap,
+            name,
+            schema,
+            path,
+            http_method=http_method,
+            connector=connector,
+        )
         self._compiled_jsonpath = None
         self._next_page_token_compiled_jsonpath = None
 

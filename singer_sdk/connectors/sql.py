@@ -16,6 +16,7 @@ import sqlalchemy as sa
 from sqlalchemy.engine import reflection
 
 from singer_sdk import typing as th
+from singer_sdk.connectors.base import BaseConnector
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._util import dump_json, load_json
@@ -33,6 +34,8 @@ else:
     from typing import TypeAlias  # noqa: ICN003
 
 if t.TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from sqlalchemy.engine import Engine
     from sqlalchemy.engine.reflection import Inspector
 
@@ -140,7 +143,10 @@ class SQLToJSONSchema:
         self.use_singer_decimal = use_singer_decimal
 
     @classmethod
-    def from_config(cls: type[SQLToJSONSchema], config: dict) -> SQLToJSONSchema:
+    def from_config(
+        cls: type[SQLToJSONSchema],
+        config: Mapping[str, t.Any],
+    ) -> SQLToJSONSchema:
         """Create a new instance from a configuration dictionary.
 
         Override this to instantiate this converter with values from the tap's
@@ -303,7 +309,7 @@ class JSONSchemaToSQL:
     @classmethod
     def from_config(
         cls: type[JSONSchemaToSQL],
-        config: dict,  # noqa: ARG003
+        config: Mapping[str, t.Any],  # noqa: ARG003
         *,
         max_varchar_length: int | None,
     ) -> JSONSchemaToSQL:
@@ -551,7 +557,7 @@ class JSONSchemaToSQL:
         return self.fallback_type()
 
 
-class SQLConnector:  # noqa: PLR0904
+class SQLConnector(BaseConnector[sa.engine.Connection]):  # noqa: PLR0904
     """Base class for SQLAlchemy-based connectors.
 
     The connector class serves as a wrapper around the SQL connection.
@@ -587,7 +593,7 @@ class SQLConnector:  # noqa: PLR0904
 
     def __init__(
         self,
-        config: dict | None = None,
+        config: Mapping[str, t.Any] | None = None,
         sqlalchemy_url: str | None = None,
     ) -> None:
         """Initialize the SQL connector.
@@ -596,17 +602,8 @@ class SQLConnector:  # noqa: PLR0904
             config: The parent tap or target object's config.
             sqlalchemy_url: Optional URL for the connection.
         """
-        self._config: dict[str, t.Any] = config or {}
+        super().__init__(config=config)
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
-
-    @property
-    def config(self) -> dict:
-        """If set, provides access to the tap or target config.
-
-        Returns:
-            The settings as a dict.
-        """
-        return self._config
 
     @property
     def logger(self) -> logging.Logger:
@@ -641,9 +638,35 @@ class SQLConnector:  # noqa: PLR0904
         )
 
     @contextmanager
-    def _connect(self) -> t.Iterator[sa.engine.Connection]:
-        with self._engine.connect().execution_options(stream_results=True) as conn:
-            yield conn
+    def _connect(self):  # noqa: ANN202
+        """Connect to the source.
+
+        Yields:
+            A connection object.
+        """
+        warnings.warn(
+            "`SQLConnector._connect` is deprecated. "
+            "Use `SQLConnector.connect` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        with self.connect() as connection:
+            yield connection
+
+    def get_connection(
+        self,
+        *,
+        stream_results: bool = True,
+    ) -> sa.engine.Connection:
+        """Return a new SQLAlchemy connection using the provided config.
+
+        Args:
+            stream_results: Whether to stream results from the database.
+
+        Returns:
+            A newly created SQLAlchemy connection object.
+        """
+        return self._engine.connect().execution_options(stream_results=stream_results)
 
     @deprecated(
         "`SQLConnector.create_sqlalchemy_connection` is deprecated. "
@@ -723,7 +746,7 @@ class SQLConnector:  # noqa: PLR0904
 
         return self._sqlalchemy_url
 
-    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:  # noqa: PLR6301
+    def get_sqlalchemy_url(self, config: Mapping[str, t.Any]) -> str:  # noqa: PLR6301
         """Return the SQLAlchemy URL string.
 
         Developers can generally override just one of the following:
@@ -1278,7 +1301,7 @@ class SQLConnector:  # noqa: PLR0904
         Args:
             schema_name: The target schema to create.
         """
-        with self._connect() as conn, conn.begin():
+        with self.connect() as conn, conn.begin():
             conn.execute(sa.schema.CreateSchema(schema_name))
 
     def create_empty_table(
@@ -1355,7 +1378,7 @@ class SQLConnector:  # noqa: PLR0904
             column_name=column_name,
             column_type=sql_type,
         )
-        with self._connect() as conn, conn.begin():
+        with self.connect() as conn, conn.begin():
             conn.execute(column_add_ddl)
 
     def prepare_schema(self, schema_name: str) -> None:
@@ -1482,7 +1505,7 @@ class SQLConnector:  # noqa: PLR0904
             column_name=old_name,
             new_column_name=new_name,
         )
-        with self._connect() as conn, conn.begin():
+        with self.connect() as conn, conn.begin():
             conn.execute(column_rename_ddl)
 
     def merge_sql_types(
@@ -1789,7 +1812,7 @@ class SQLConnector:  # noqa: PLR0904
             column_name=column_name,
             column_type=compatible_sql_type,
         )
-        with self._connect() as conn, conn.begin():
+        with self.connect() as conn, conn.begin():
             conn.execute(alter_column_ddl)
 
     def serialize_json(self, obj: object) -> str:  # noqa: PLR6301
@@ -1841,7 +1864,7 @@ class SQLConnector:  # noqa: PLR0904
             version_column_name: The name of the version column.
             current_version: The current ACTIVATE version of the table.
         """
-        with self._connect() as conn, conn.begin():
+        with self.connect() as conn, conn.begin():
             conn.execute(
                 sa.text(
                     f"DELETE FROM {full_table_name} "  # noqa: S608

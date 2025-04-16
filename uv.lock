@@ -1946,6 +1946,18 @@ wheels = [
 ]
 
 [[package]]
+name = "pytest-httpserver"
+version = "1.1.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "werkzeug" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f1/d8/def15ba33bd696dd72dd4562a5287c0cba4d18a591eeb82e0b08ab385afc/pytest_httpserver-1.1.3.tar.gz", hash = "sha256:af819d6b533f84b4680b9416a5b3f67f1df3701f1da54924afd4d6e4ba5917ec", size = 68870 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0d/d2/dfc2f25f3905921c2743c300a48d9494d29032f1389fc142e718d6978fb2/pytest_httpserver-1.1.3-py3-none-any.whl", hash = "sha256:5f84757810233e19e2bb5287f3826a71c97a3740abe3a363af9155c0f82fdbb9", size = 21000 },
+]
+
+[[package]]
 name = "pytest-snapshot"
 version = "0.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2479,6 +2491,7 @@ benchmark = [
     { name = "pytest" },
     { name = "pytest-benchmark" },
     { name = "pytest-codspeed" },
+    { name = "pytest-httpserver" },
     { name = "pytest-snapshot" },
     { name = "pytest-subtests" },
     { name = "pytz" },
@@ -2501,6 +2514,7 @@ dev = [
     { name = "myst-parser", version = "4.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "pytest" },
     { name = "pytest-benchmark" },
+    { name = "pytest-httpserver" },
     { name = "pytest-snapshot" },
     { name = "pytest-subtests" },
     { name = "pytz" },
@@ -2544,6 +2558,7 @@ testing = [
     { name = "moto" },
     { name = "pytest" },
     { name = "pytest-benchmark" },
+    { name = "pytest-httpserver" },
     { name = "pytest-snapshot" },
     { name = "pytest-subtests" },
     { name = "pytz" },
@@ -2609,6 +2624,7 @@ benchmark = [
     { name = "pytest", specifier = ">=7.2.1" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
     { name = "pytest-codspeed", specifier = ">=2.2.0" },
+    { name = "pytest-httpserver", specifier = ">=1.1.3" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
     { name = "pytest-subtests", specifier = ">=0.13.1" },
     { name = "pytz", specifier = ">=2022.2.1" },
@@ -2630,6 +2646,7 @@ dev = [
     { name = "myst-parser", specifier = ">=3" },
     { name = "pytest", specifier = ">=7.2.1" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
+    { name = "pytest-httpserver", specifier = ">=1.1.3" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
     { name = "pytest-subtests", specifier = ">=0.13.1" },
     { name = "pytz", specifier = ">=2022.2.1" },
@@ -2667,6 +2684,7 @@ testing = [
     { name = "moto", specifier = ">=5.0.14" },
     { name = "pytest", specifier = ">=7.2.1" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
+    { name = "pytest-httpserver", specifier = ">=1.1.3" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
     { name = "pytest-subtests", specifier = ">=0.13.1" },
     { name = "pytz", specifier = ">=2022.2.1" },

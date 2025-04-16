@@ -11,6 +11,7 @@ from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import requests
+from requests.auth import AuthBase
 
 from singer_sdk.helpers._util import utc_now
 
@@ -593,3 +594,52 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
                 "RS256",
             ),
         }
+
+
+class NoopAuth(AuthBase):
+    """No-op authenticator."""
+
+    def __call__(self, r: requests.PreparedRequest) -> requests.PreparedRequest:
+        """Do nothing.
+
+        Args:
+            r: The prepared request.
+
+        Returns:
+            The unmodified prepared request.
+        """
+        return r
+
+
+class HeaderAuth(AuthBase):
+    """Header-based authenticator."""
+
+    def __init__(
+        self,
+        keyword: str,
+        value: str,
+        header: str = "Authorization",
+    ) -> None:
+        """Initialize the authenticator.
+
+        Args:
+            keyword: The keyword to use in the header, e.g. "Bearer".
+            value: The value to use in the header, e.g. "my-token".
+            header: The header to add the keyword and value to, defaults to
+                ``"Authorization"``.
+        """
+        self.keyword = keyword
+        self.value = value
+        self.header = header
+
+    def __call__(self, r: requests.PreparedRequest) -> requests.PreparedRequest:
+        """Add the header to the request.
+
+        Args:
+            r: The prepared request.
+
+        Returns:
+            The prepared request with the header added.
+        """
+        r.headers[self.header] = f"{self.keyword} {self.value}"
+        return r
