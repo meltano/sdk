@@ -16,6 +16,7 @@ from .tap_tests import (
     StreamPrimaryKeysTest,
     StreamRecordMatchesStreamSchema,
     StreamRecordSchemaMatchesCatalogTest,
+    StreamRequiredFieldsTest,
     StreamReturnsRecordTest,
     StreamSchemaIsValidTest,
     TapCLIPrintsTest,
@@ -76,6 +77,7 @@ tap_stream_tests = TestSuite(
         StreamReturnsRecordTest,
         StreamSchemaIsValidTest,
         StreamPrimaryKeysTest,
+        StreamRequiredFieldsTest,
     ],
 )
 tap_stream_attribute_tests = TestSuite(

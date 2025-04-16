@@ -208,6 +208,19 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
         )
 
 
+class StreamRequiredFieldsTest(StreamTestTemplate):
+    """Test that all required fields are present in the record."""
+
+    name = "required_fields"
+
+    def test(self) -> None:
+        """Run test."""
+        required = set(self.stream.schema.get("required", []))
+        for record in self.stream_records:
+            missing = required - set(record)
+            assert not missing, f"Record is missing required fields: {missing}"
+
+
 class AttributeIsDateTimeTest(AttributeTestTemplate):
     """Test a given attribute contains unique values (ignores null values)."""
 
