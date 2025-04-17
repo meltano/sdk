@@ -13,10 +13,7 @@ updates:
         dependency-type: development
       runtime-dependencies:
         dependency-type: production
-        update-types:
-          - "minor"
-          - "patch"
-    versioning-strategy: increase-if-necessary
+    versioning-strategy: lockfile-only
   - package-ecosystem: pip
     directory: "/.github/workflows/resources"
     schedule:
