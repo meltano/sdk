@@ -142,11 +142,9 @@ class TapTestRunner(SingerTestRunner):
             True if dry run test passes, else False.
         """
         new_tap = self.new_tap()
-        dry_run_record_limit = None
-        if self.suite_config.max_records_limit is not None:
-            dry_run_record_limit = self.suite_config.max_records_limit
-
-        return new_tap.run_sync_dry_run(dry_run_record_limit=dry_run_record_limit)
+        return new_tap.run_sync_dry_run(
+            dry_run_record_limit=self.suite_config.max_records_limit,
+        )
 
     def sync_all(self, **kwargs: t.Any) -> None:  # noqa: ARG002
         """Run a full tap sync, assigning output to the runner object.
