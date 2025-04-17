@@ -158,6 +158,15 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             mask=self.mask,
         )
 
+    @property
+    def effective_schema(self) -> dict:
+        """Return the effective schema for the stream.
+
+        Returns:
+            The effective schema.
+        """
+        return super().effective_schema
+
     # Get records from stream
     def get_records(self, context: Context | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
