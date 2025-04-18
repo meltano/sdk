@@ -200,9 +200,9 @@ prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
     "docs/conf.py:^release =",
-    "cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml:singer-sdk",
-    "cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:singer-sdk",
-    "cookiecutter/mapper-template/{{cookiecutter.mapper_id}}/pyproject.toml:singer-sdk",
+    """cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml:^    "singer-sdk""",
+    """cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:^    "singer-sdk""",
+    """cookiecutter/mapper-template/{{cookiecutter.mapper_id}}/pyproject.toml:^    "singer-sdk""",
     ".github/ISSUE_TEMPLATE/bug.yml:^      placeholder:",
 ]
 
