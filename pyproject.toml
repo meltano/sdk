@@ -261,6 +261,8 @@ DEP002 = [
     "paramiko",
     "fs-s3fs",
     "s3fs",
+    # Legacy dependencies
+    "importlib-resources",
 ]
 DEP004 = [
     # TODO: Make pytest a runtime dependency?
