@@ -2420,7 +2420,7 @@ wheels = [
 name = "singer-sdk"
 source = { editable = "." }
 dependencies = [
-    { name = "backoff" },
+    { name = "backoff", marker = "python_full_version < '4'" },
     { name = "backports-datetime-fromisoformat", marker = "python_full_version < '3.11'" },
     { name = "click" },
     { name = "fs" },
@@ -2474,7 +2474,7 @@ testing = [
 benchmark = [
     { name = "coverage", extra = ["toml"] },
     { name = "duckdb" },
-    { name = "duckdb-engine" },
+    { name = "duckdb-engine", marker = "python_full_version < '4'" },
     { name = "fastjsonschema" },
     { name = "moto" },
     { name = "pytest" },
@@ -2493,7 +2493,7 @@ dev = [
     { name = "coverage", extra = ["toml"] },
     { name = "deptry" },
     { name = "duckdb" },
-    { name = "duckdb-engine" },
+    { name = "duckdb-engine", marker = "python_full_version < '4'" },
     { name = "fastjsonschema" },
     { name = "furo" },
     { name = "moto" },
@@ -2540,7 +2540,7 @@ docs = [
 testing = [
     { name = "coverage", extra = ["toml"] },
     { name = "duckdb" },
-    { name = "duckdb-engine" },
+    { name = "duckdb-engine", marker = "python_full_version < '4'" },
     { name = "fastjsonschema" },
     { name = "moto" },
     { name = "pytest" },
@@ -2566,7 +2566,7 @@ typing = [
 
 [package.metadata]
 requires-dist = [
-    { name = "backoff", specifier = ">=2.0.0" },
+    { name = "backoff", marker = "python_full_version < '4'", specifier = ">=2.0.0" },
     { name = "backports-datetime-fromisoformat", marker = "python_full_version < '3.11'", specifier = ">=2.0.1" },
     { name = "click", specifier = "~=8.0" },
     { name = "cryptography", marker = "extra == 'jwt'", specifier = ">=3.4.6" },
@@ -2604,7 +2604,7 @@ provides-extras = ["faker", "jwt", "msgspec", "parquet", "s3", "ssh", "testing"]
 benchmark = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.4" },
     { name = "duckdb", specifier = ">=0.8.0" },
-    { name = "duckdb-engine", specifier = ">=0.9.4" },
+    { name = "duckdb-engine", marker = "python_full_version < '4'", specifier = ">=0.9.4" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
     { name = "moto", specifier = ">=5.0.14" },
     { name = "pytest", specifier = ">=7.2.1" },
@@ -2623,7 +2623,7 @@ dev = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.4" },
     { name = "deptry", specifier = ">=0.15.0" },
     { name = "duckdb", specifier = ">=0.8.0" },
-    { name = "duckdb-engine", specifier = ">=0.9.4" },
+    { name = "duckdb-engine", marker = "python_full_version < '4'", specifier = ">=0.9.4" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
     { name = "furo", specifier = ">=2024.5.6" },
     { name = "moto", specifier = ">=5.0.14" },
@@ -2663,7 +2663,7 @@ docs = [
 testing = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.4" },
     { name = "duckdb", specifier = ">=0.8.0" },
-    { name = "duckdb-engine", specifier = ">=0.9.4" },
+    { name = "duckdb-engine", marker = "python_full_version < '4'", specifier = ">=0.9.4" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
     { name = "moto", specifier = ">=5.0.14" },
     { name = "pytest", specifier = ">=7.2.1" },
