@@ -177,6 +177,8 @@ log_cli_level = "INFO"
 markers = [
     "external: Tests relying on external resources",
     "windows: Tests that only run on Windows",
+    "linux: Tests that only run on Linux",
+    "darwin: Tests that only run on Darwin",
     "snapshot: Tests that use pytest-snapshot",
 ]
 minversion = "7"

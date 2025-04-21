@@ -88,7 +88,14 @@ def test_storage_get_s3_url():
         pytest.param(
             "file:///Users/sdk/path/to/file",
             "file:///Users/sdk/path/to",
+            marks=(pytest.mark.linux, pytest.mark.darwin),
             id="local",
+        ),
+        pytest.param(
+            "file:///Users/sdk/path/to/file",
+            "file:///D:/Users/sdk/path/to",
+            marks=(pytest.mark.windows,),
+            id="windows-local",
         ),
         pytest.param(
             "s3://test_bucket/object_prefix/prefix--file.jsonl.gz",
@@ -115,6 +122,7 @@ def test_get_unsupported_batcher():
         pytest.param(
             "file:///Users/sdk/path/to/file",
             ("file:///Users/sdk/path/to", "file"),
+            marks=(pytest.mark.linux, pytest.mark.darwin),
             id="local",
         ),
         pytest.param(
@@ -124,15 +132,15 @@ def test_get_unsupported_batcher():
         ),
         pytest.param(
             "file://C:\\Users\\sdk\\path\\to\\file",
-            ("file://C:\\Users\\sdk\\path\\to", "file"),
+            ("file:///C:/Users/sdk/path/to", "file"),
             marks=(pytest.mark.windows,),
             id="windows-local",
         ),
         pytest.param(
             "file://\\\\remotemachine\\C$\\batches\\file",
-            ("file://\\\\remotemachine\\C$\\batches", "file"),
+            ("file://///remotemachine/C$/batches", "file"),
             marks=(pytest.mark.windows,),
-            id="windows-local",
+            id="windows-local-remote",
         ),
     ],
 )
