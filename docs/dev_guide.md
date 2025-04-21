@@ -12,6 +12,8 @@ Create taps with the SDK requires overriding just two or three classes:
    - `RESTStream` - The base class for **REST**-type streams.
    - `GraphQLStream` - The base class for **GraphQL**-type streams. This class inherits
      from `RESTStream`, since GraphQL is built upon REST.
+   - `JSONRPCStream` - The base class for **JSON-RPC**-type streams. This class inherits
+     from `RESTStream`, since JSON-RPC is typically implemented over HTTP.
 3. An optional authenticator class. You can omit this class entirely if you do not require authentication or if you prefer to write custom authentication logic. The supported authenticator classes are:
    - `SimpleAuthenticator` - This class is functionally equivalent to overriding
      `http_headers` property in the stream class.

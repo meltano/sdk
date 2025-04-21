@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .hostile_tap import SampleTapHostile
+from samples.sample_tap_hostile.hostile_tap import SampleTapHostile
 
 __all__ = [
     "SampleTapHostile",

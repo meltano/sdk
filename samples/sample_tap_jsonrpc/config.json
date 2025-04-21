@@ -1,0 +1,4 @@
+{
+  "endpoint_url": "http://localhost:8000",
+  "batch_size": 10
+}

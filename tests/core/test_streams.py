@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import decimal
+import json
 import logging
 import typing as t
 import urllib.parse
@@ -17,6 +18,7 @@ from singer_sdk._singerlib import Catalog, MetadataMapping
 from singer_sdk.exceptions import (
     FatalAPIError,
     InvalidReplicationKeyException,
+    RetriableAPIError,
 )
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
@@ -24,6 +26,7 @@ from singer_sdk.helpers._compat import datetime_fromisoformat as parse
 from singer_sdk.helpers.jsonpath import _compile_jsonpath
 from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL
 from singer_sdk.streams.graphql import GraphQLStream
+from singer_sdk.streams.jsonrpc import JSONRPCStream
 from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 from tests.core.conftest import SimpleTestStream
@@ -72,6 +75,40 @@ class GraphqlTestStream(GraphQLStream):
         Property("value", StringType, required=True),
     ).to_dict()
     replication_key = "updatedAt"
+
+
+class JsonRpcTestStream(JSONRPCStream):
+    """Test JSON-RPC stream class."""
+
+    name = "jsonrpc"
+    path = "/jsonrpc"
+    url_base = "https://example.com"
+    schema = PropertiesList(
+        Property("id", IntegerType, required=True),
+        Property("name", StringType, required=True),
+    ).to_dict()
+    method = "get_items"
+
+    def get_new_paginator(self):
+        """Return a fresh paginator for this endpoint."""
+        return self.NoNextPageTokenPaginator()
+
+    class NoNextPageTokenPaginator:
+        """A paginator that doesn't provide a next page token."""
+
+        def __init__(self) -> None:
+            self.current_value = None
+            self.finished = False
+
+        def get_next(self, response=None):  # noqa: ARG002
+            """Return next page token, which is None."""
+            if self.finished:
+                return
+            return
+
+        def advance(self, response=None):  # noqa: ARG002
+            """Mark as finished after first page."""
+            self.finished = True
 
 
 @pytest.fixture
@@ -629,6 +666,188 @@ def test_mutate_http_method(tap: Tap, requests_mock: requests_mock.Mocker):
     ]
 
 
+# JSON-RPC Stream Tests
+
+
+def test_jsonrpc_request_payload(tap: Tap):
+    """Test that JSON-RPC request payloads are correctly formatted."""
+    stream = JsonRpcTestStream(tap)
+
+    # Prepare a request for testing
+    request = stream.prepare_request(None, None)
+
+    # Test request method
+    assert request.method == "POST"
+
+    # Test content type
+    assert "application/json" in request.headers.get("Content-Type", "")
+
+    # Parse the request body
+    payload = json.loads(request.body)
+
+    # Verify JSON-RPC structure
+    assert payload["jsonrpc"] == "2.0"
+    assert payload["method"] == "get_items"
+    assert "id" in payload
+
+    # Params should not be present if empty
+    assert "params" not in payload
+
+
+def test_jsonrpc_with_params(tap: Tap):
+    """Test JSON-RPC request with parameters."""
+    stream = JsonRpcTestStream(tap)
+
+    # Override get_method_parameters to return test params
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(
+            stream,
+            "get_method_parameters",
+            lambda ctx=None, next_page_token=None: {"page": 1, "limit": 10},  # noqa: ARG005
+        )
+        request = stream.prepare_request(None, None)
+
+    payload = json.loads(request.body)
+
+    # Verify params are included
+    assert "params" in payload
+    assert payload["params"] == {"page": 1, "limit": 10}
+
+
+def test_jsonrpc_parse_response(tap: Tap):
+    """Test parsing various JSON-RPC response formats."""
+    stream = JsonRpcTestStream(tap)
+
+    # Test list result
+    response = requests.Response()
+    response._content = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "id": "123",
+            "result": [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}],
+        }
+    ).encode()
+
+    records = list(stream.parse_response(response))
+    assert len(records) == 2
+    assert records[0]["id"] == 1
+    assert records[0]["name"] == "Item 1"
+    assert records[1]["id"] == 2
+    assert records[1]["name"] == "Item 2"
+
+    # Test dict result with data key
+    response._content = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "id": "123",
+            "result": {
+                "data": [{"id": 3, "name": "Item 3"}, {"id": 4, "name": "Item 4"}]
+            },
+        }
+    ).encode()
+
+    records = list(stream.parse_response(response))
+    assert len(records) == 2
+    assert records[0]["id"] == 3
+    assert records[0]["name"] == "Item 3"
+    assert records[1]["id"] == 4
+    assert records[1]["name"] == "Item 4"
+
+    # Test dict result without data key
+    response._content = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "id": "123",
+            "result": {"id": 5, "name": "Item 5"},
+        }
+    ).encode()
+
+    records = list(stream.parse_response(response))
+    assert len(records) == 1
+    assert records[0]["id"] == 5
+    assert records[0]["name"] == "Item 5"
+
+
+def test_jsonrpc_error_handling(tap: Tap, requests_mock: requests_mock.Mocker):
+    """Test JSON-RPC error handling."""
+    stream = JsonRpcTestStream(tap)
+
+    # Mock client error with proper Content-Type header
+    requests_mock.post(
+        "https://example.com/jsonrpc",
+        json={
+            "jsonrpc": "2.0",
+            "id": "123",
+            "error": {
+                "code": -32602,
+                "message": "Invalid params",
+                "data": {"details": "missing required field"},
+            },
+        },
+        headers={"Content-Type": "application/json"},
+    )
+
+    # Should raise FatalAPIError for client errors (like Invalid params)
+    with pytest.raises(FatalAPIError) as excinfo:
+        list(stream.request_records(None))
+
+    assert "Invalid params" in str(excinfo.value)
+
+    # Mock server error with proper Content-Type header
+    # Server errors in JSON-RPC are in the -32000 to -32099 range
+    requests_mock.post(
+        "https://example.com/jsonrpc",
+        json={
+            "jsonrpc": "2.0",
+            "id": "123",
+            "error": {
+                "code": -32050,  # A server error code in the JSON-RPC spec
+                "message": "Server error",
+            },
+        },
+        headers={"Content-Type": "application/json"},
+    )
+
+    # Should raise RetriableAPIError for server errors in the allowed range
+    with pytest.raises(RetriableAPIError) as excinfo:
+        list(stream.request_records(None))
+
+    assert "Server error" in str(excinfo.value)
+
+
+def test_jsonrpc_successful_request(tap: Tap, requests_mock: requests_mock.Mocker):
+    """Test complete JSON-RPC request/response cycle."""
+    stream = JsonRpcTestStream(tap)
+
+    # Mock successful response with proper Content-Type header
+    requests_mock.post(
+        "https://example.com/jsonrpc",
+        json={
+            "jsonrpc": "2.0",
+            "id": "123",
+            "result": [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}],
+        },
+        headers={"Content-Type": "application/json"},
+    )
+
+    # Test full request/response cycle
+    records = list(stream.request_records(None))
+
+    # Verify records
+    assert len(records) == 2
+    assert records[0]["id"] == 1
+    assert records[0]["name"] == "Item 1"
+    assert records[1]["id"] == 2
+    assert records[1]["name"] == "Item 2"
+
+    # Verify request was made with correct format
+    request = requests_mock.last_request
+    payload = json.loads(request.body)
+    assert payload["jsonrpc"] == "2.0"
+    assert payload["method"] == "get_items"
+    assert "id" in payload
+
+
 def test_parse_response(tap: Tap):
     content = """[
         {"id": 1, "value": 3.14159},
@@ -737,3 +956,326 @@ def test_stream_class_selection(tap_class, input_catalog, selection):
     assert all(
         tap.streams[stream].selected is selection[stream] for stream in selection
     )
+
+
+def test_jsonrpc_custom_version(tap: Tap):
+    """Test custom JSON-RPC version."""
+
+    class CustomVersionJsonRpcStream(JsonRpcTestStream):
+        jsonrpc_version = "1.0"  # Use an older version
+
+    stream = CustomVersionJsonRpcStream(tap)
+    request = stream.prepare_request(None, None)
+    payload = json.loads(request.body)
+
+    # Verify custom version is used
+    assert payload["jsonrpc"] == "1.0"
+
+
+def test_jsonrpc_batch_response(tap: Tap):
+    """Test handling batch responses from JSON-RPC endpoint."""
+    stream = JsonRpcTestStream(tap)
+
+    # Test batch result handling - multiple results in a list
+    response = requests.Response()
+    response._content = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "id": "123",
+            "result": {
+                "items": [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}],
+                "total": 2,
+                "page": 1,
+            },
+        }
+    ).encode()
+
+    records = list(stream.parse_response(response))
+    assert len(records) == 2
+    assert records[0]["id"] == 1
+    assert records[1]["id"] == 2
+
+
+def test_jsonrpc_pagination(tap: Tap, requests_mock: requests_mock.Mocker):
+    """Test JSON-RPC pagination using params."""
+
+    class PaginatedJsonRpcStream(JSONRPCStream):
+        """Test JSON-RPC stream with pagination."""
+
+        name = "paginated_jsonrpc"
+        path = "/jsonrpc"
+        url_base = "https://example.com"
+        schema = PropertiesList(
+            Property("id", IntegerType, required=True),
+            Property("name", StringType, required=True),
+        ).to_dict()
+        method = "get_items"
+
+        def get_new_paginator(self):
+            """Return a paginator for this endpoint."""
+            return self.JsonRpcPaginator(start_page=1)
+
+        class JsonRpcPaginator:
+            """A paginator that uses page numbers."""
+
+            def __init__(self, start_page):
+                self.current_page = start_page
+                self.current_value = {"page": start_page}  # Add current_value property
+                self.finished = False
+                self.total_pages = None
+
+            def get_next(self, response):
+                """Get next page token."""
+                if self.finished:
+                    return None
+
+                response_json = response.json()
+                if "result" in response_json and isinstance(
+                    response_json["result"], dict
+                ):
+                    result = response_json["result"]
+                    self.total_pages = result.get("total_pages", 1)
+
+                    if self.current_page >= self.total_pages:
+                        self.finished = True
+                        return None
+
+                    self.current_page += 1
+                    next_value = {"page": self.current_page}
+                    self.current_value = next_value  # Update current_value
+                    return next_value
+                return None
+
+            def advance(self, response):
+                """Advance the paginator using the response."""
+                self.get_next(response)
+
+        def get_method_parameters(self, context=None, next_page_token=None):  # noqa: ARG002
+            """Add pagination parameters."""
+            params = {}
+            if next_page_token:
+                params.update(next_page_token)
+            else:
+                params["page"] = 1  # Start with page 1
+
+            return params
+
+    stream = PaginatedJsonRpcStream(tap)
+
+    # Mock first page response
+    requests_mock.post(
+        "https://example.com/jsonrpc",
+        [
+            {
+                "json": {
+                    "jsonrpc": "2.0",
+                    "id": "123",
+                    "result": {
+                        "items": [
+                            {"id": 1, "name": "Item 1"},
+                            {"id": 2, "name": "Item 2"},
+                        ],
+                        "total_pages": 2,
+                        "page": 1,
+                    },
+                },
+                "headers": {"Content-Type": "application/json"},
+            },
+            {
+                "json": {
+                    "jsonrpc": "2.0",
+                    "id": "456",
+                    "result": {
+                        "items": [
+                            {"id": 3, "name": "Item 3"},
+                            {"id": 4, "name": "Item 4"},
+                        ],
+                        "total_pages": 2,
+                        "page": 2,
+                    },
+                },
+                "headers": {"Content-Type": "application/json"},
+            },
+        ],
+    )
+
+    # Request all records across pages
+    records = list(stream.request_records(None))
+
+    # Verify we got all records from both pages
+    assert len(records) == 4
+    assert [r["id"] for r in records] == [1, 2, 3, 4]
+
+    # Verify the correct pagination parameters were sent
+    request_bodies = [json.loads(r.body) for r in requests_mock.request_history]
+    assert request_bodies[0]["params"]["page"] == 1
+    assert request_bodies[1]["params"]["page"] == 2
+
+
+def test_jsonrpc_complex_parameters(tap: Tap, requests_mock: requests_mock.Mocker):
+    """Test JSON-RPC request with complex nested parameters."""
+
+    class ComplexParamsJsonRpcStream(JsonRpcTestStream):
+        def get_method_parameters(
+            self,
+            context=None,  # noqa: ARG002
+            next_page_token=None,  # noqa: ARG002
+        ):  # Add default value to make it optional
+            """Return complex nested parameters."""
+            # context and next_page_token are not used in this implementation
+            return {
+                "filter": {
+                    "active": True,
+                    "date_range": {"start": "2021-01-01", "end": "2021-12-31"},
+                },
+                "options": {
+                    "limit": 100,
+                    "sort": [{"field": "created_at", "order": "desc"}],
+                },
+            }
+
+    stream = ComplexParamsJsonRpcStream(tap)
+
+    # Mock successful response
+    requests_mock.post(
+        "https://example.com/jsonrpc",
+        json={"jsonrpc": "2.0", "id": "123", "result": [{"id": 1, "name": "Item 1"}]},
+        headers={"Content-Type": "application/json"},
+    )
+
+    # Make the request
+    list(stream.request_records(None))
+
+    # Verify complex parameters were sent correctly
+    request = requests_mock.last_request
+    payload = json.loads(request.body)
+
+    assert "params" in payload
+    assert payload["params"]["filter"]["active"] is True
+    assert payload["params"]["filter"]["date_range"]["start"] == "2021-01-01"
+    assert payload["params"]["options"]["sort"][0]["field"] == "created_at"
+
+
+def test_jsonrpc_empty_result(tap: Tap):
+    """Test handling empty results from JSON-RPC endpoint."""
+    stream = JsonRpcTestStream(tap)
+
+    # Test empty list result
+    response = requests.Response()
+    response._content = json.dumps(
+        {"jsonrpc": "2.0", "id": "123", "result": []}
+    ).encode()
+
+    records = list(stream.parse_response(response))
+    assert len(records) == 0
+
+    # Test empty object result
+    response._content = json.dumps(
+        {"jsonrpc": "2.0", "id": "123", "result": {}}
+    ).encode()
+
+    records = list(stream.parse_response(response))
+    assert len(records) == 1  # Empty dict treated as a single record
+    assert records[0] == {}
+
+    # Test null result
+    response._content = json.dumps(
+        {"jsonrpc": "2.0", "id": "123", "result": None}
+    ).encode()
+
+    records = list(stream.parse_response(response))
+    assert len(records) == 1
+    assert records[0] == {"result": None}
+
+
+def test_jsonrpc_no_result(tap: Tap):
+    """Test handling response with missing result field."""
+    stream = JsonRpcTestStream(tap)
+
+    response = requests.Response()
+    response._content = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "id": "123",
+            # No result field
+        }
+    ).encode()
+
+    records = list(stream.parse_response(response))
+    assert len(records) == 0  # Should return empty list when no result field is present
+
+
+def test_jsonrpc_notification(tap: Tap):
+    """Test JSON-RPC request with no ID (notification)."""
+
+    class JsonRpcNotificationStream(JsonRpcTestStream):
+        def prepare_request_payload(self, context, next_page_token):
+            """Return a notification payload (no ID)."""
+            params = self.get_method_parameters(context, next_page_token)
+            payload = {"jsonrpc": self.jsonrpc_version, "method": self.method}
+
+            if params:
+                payload["params"] = params
+
+            return payload
+
+    stream = JsonRpcNotificationStream(tap)
+    request = stream.prepare_request(None, None)
+    payload = json.loads(request.body)
+
+    # Verify ID is not present
+    assert "id" not in payload
+    assert payload["jsonrpc"] == "2.0"
+    assert payload["method"] == "get_items"
+
+
+def test_jsonrpc_records_jsonpath(tap: Tap):
+    """Test that the JSONRPCStream records_jsonpath works correctly."""
+    stream = JsonRpcTestStream(tap)
+
+    # Verify that the default records_jsonpath is set correctly
+    assert stream.records_jsonpath == "$.result[*]"
+
+    # Create a response with data that matches the default JSONPath
+    response = requests.Response()
+    response._content = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "id": "123",
+            "result": [{"id": 1, "name": "Record 1"}, {"id": 2, "name": "Record 2"}],
+        }
+    ).encode()
+
+    # Parse using the default implementation, which should use records_jsonpath
+    records = list(stream.parse_response(response))
+    assert len(records) == 2
+    assert records[0]["id"] == 1
+    assert records[1]["id"] == 2
+
+    # Now test with a custom records_jsonpath
+    class CustomJsonPathJsonRpcStream(JsonRpcTestStream):
+        @classproperty
+        def records_jsonpath(cls):  # noqa: N805
+            return "$.result.custom_records[*]"
+
+    custom_stream = CustomJsonPathJsonRpcStream(tap)
+
+    # Create a response with data that matches the custom JSONPath
+    response._content = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "id": "123",
+            "result": {
+                "custom_records": [
+                    {"id": 3, "name": "Custom 1"},
+                    {"id": 4, "name": "Custom 2"},
+                ]
+            },
+        }
+    ).encode()
+
+    # The custom jsonpath should extract from the nested location
+    records = list(custom_stream.parse_response(response))
+    assert len(records) == 2
+    assert records[0]["id"] == 3
+    assert records[1]["id"] == 4

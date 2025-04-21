@@ -23,6 +23,7 @@ These are code samples taken from other projects. Use these as a reference if yo
 
 - [A simple Tap class definition with two streams](./code_samples.md#a-simple-tap-class-definition-with-two-streams)
 - [Define a simple GraphQL-based stream with schema defined in a file](./code_samples.md#define-a-simple-graphql-based-stream-with-schema-defined-in-a-file)
+- [Define a JSON-RPC stream for a remote API](./code_samples.md#define-a-json-rpc-stream-for-a-remote-api)
 - [Define a REST-based stream with a JSONPath expression](./code_samples.md#define-a-rest-based-stream-with-a-jsonpath-expression)
 - [Use a JSONPath expression to extract the next page URL from a HATEOAS response](./code_samples.md#use-a-jsonpath-expression-to-extract-the-next-page-url-from-a-hateoas-response)
 - [Dynamically discovering `schema` for a stream](./code_samples.md#dynamically-discovering-schema-for-a-stream)
@@ -72,6 +73,63 @@ class ContinentsStream(GraphQLStream):
             name
         }
         """
+```
+
+### Define a JSON-RPC stream for a remote API
+
+```python
+class UsersStream(JSONRPCStream):
+    """Stream for retrieving user data from a JSON-RPC API."""
+
+    name = "users"
+    primary_keys = ["id"]
+    replication_key = "updated_at"
+
+    @property
+    def url_base(self) -> str:
+        """Return the API base URL."""
+        return self.config["api_url"]
+
+    @property
+    def path(self) -> str:
+        """Return the API endpoint path."""
+        return "/jsonrpc"  # Most JSON-RPC APIs use a single endpoint
+
+    @property
+    def method(self) -> str:
+        """Return the JSON-RPC method to call.
+
+        This is a required property for JSON-RPC streams.
+        """
+        return "users.list"  # The specific method on the server
+
+    def get_method_parameters(
+        self,
+        context: dict | None,
+        next_page_token: dict | None,
+    ) -> dict:
+        """Return parameters for the JSON-RPC method call."""
+        params = {}
+
+        # Add pagination parameters from the token
+        if next_page_token:
+            params.update(next_page_token)
+
+        # Add incremental replication parameters if applicable
+        if self.replication_key and self.get_starting_timestamp(context):
+            params["updated_since"] = self.get_starting_timestamp(context).isoformat()
+
+        return params
+
+    # Define the schema for this stream
+    schema = th.PropertiesList(
+        th.Property("id", th.IntegerType, description="User ID"),
+        th.Property("name", th.StringType, description="User name"),
+        th.Property("email", th.StringType, description="User email"),
+        th.Property("created_at", th.DateTimeType, description="Created timestamp"),
+        th.Property("updated_at", th.DateTimeType, description="Updated timestamp"),
+        th.Property("active", th.BooleanType, description="Whether user is active"),
+    ).to_dict()
 ```
 
 ### Define a REST-based stream with a JSONPath expression
@@ -145,7 +203,7 @@ class ParquetStream(Stream):
     #...
 
     @property
-    def schema(self) -> dict:
+    def schema() -> dict:
         """Dynamically detect the json schema for the stream.
         This is evaluated prior to any records being retrieved.
         """
