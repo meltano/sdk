@@ -135,7 +135,7 @@ class StorageTarget:
     @cached_property
     def _root_path(self) -> UPath:
         """The root path of the storage target."""
-        return UPath(self.root, **self.params)
+        return UPath(self.root, **self.params).resolve()
 
     @staticmethod
     def split_url(url: str) -> tuple[str, str]:
