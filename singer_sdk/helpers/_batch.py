@@ -184,8 +184,8 @@ class StorageTarget:
             The filesystem object.
         """
         fs = self._root_path.fs
-        self._root_path.mkdir(parents=True, exist_ok=True)
         fs.start_transaction()
+        self._root_path.mkdir(parents=True, exist_ok=True)
         yield fs
         fs.end_transaction()
 
