@@ -99,7 +99,7 @@ def test_with_catalog_entry():
     assert new_schema == stream.schema
 
 
-def test_batch_mode(outdir):
+def test_batch_mode(outdir: Path):
     """Test batch mode."""
     tap = SampleTapCountries(
         config={
@@ -109,7 +109,7 @@ def test_batch_mode(outdir):
                     "compression": "gzip",
                 },
                 "storage": {
-                    "root": outdir,
+                    "root": str(outdir),
                     "prefix": "pytest-countries-",
                 },
             },

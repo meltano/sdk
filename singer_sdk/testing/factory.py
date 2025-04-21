@@ -154,7 +154,7 @@ class TapTestClassFactory:
     def _annotate_test_class(
         self,
         empty_test_class: type[BaseTestClass],
-        test_suites: list,
+        test_suites: list[TestSuite],
         test_runner: TapTestRunner,
     ) -> type[BaseTestClass]:
         """Annotate test class with test methods.

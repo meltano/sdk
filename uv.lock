@@ -182,15 +182,6 @@ wheels = [
 ]
 
 [[package]]
-name = "appdirs"
-version = "1.4.4"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d7/d8/05696357e0311f5b5c316d7b95f46c669dd9c15aaeecbb48c7d0aeb88c40/appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41", size = 13470 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3b/00/2344469e2084fb287c2e0b57b72910309874c3245463acd6cf5e3db69324/appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128", size = 9566 },
-]
-
-[[package]]
 name = "async-timeout"
 version = "5.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -890,34 +881,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/cb/83/619327da3b86ef957ee7a0cbf3c166a09ed1e87a3f7f1ff487d7d0284683/frozenlist-1.5.0-cp39-cp39-win32.whl", hash = "sha256:666534d15ba8f0fda3f53969117383d5dc021266b3c1a42c9ec4855e4b58b9d3", size = 45691 },
     { url = "https://files.pythonhosted.org/packages/8b/28/407bc34a745151ed2322c690b6e7d83d7101472e81ed76e1ebdac0b70a78/frozenlist-1.5.0-cp39-cp39-win_amd64.whl", hash = "sha256:5c28f4b5dbef8a0d8aad0d4de24d1e9e981728628afaf4ea0792f5d0939372f0", size = 51767 },
     { url = "https://files.pythonhosted.org/packages/c6/c8/a5be5b7550c10858fcf9b0ea054baccab474da77d37f1e828ce043a3a5d4/frozenlist-1.5.0-py3-none-any.whl", hash = "sha256:d994863bba198a4a518b467bb971c56e1db3f180a25c6cf7bb1949c267f748c3", size = 11901 },
-]
-
-[[package]]
-name = "fs"
-version = "2.4.16"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "appdirs" },
-    { name = "setuptools" },
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/5d/a9/af5bfd5a92592c16cdae5c04f68187a309be8a146b528eac3c6e30edbad2/fs-2.4.16.tar.gz", hash = "sha256:ae97c7d51213f4b70b6a958292530289090de3a7e15841e108fbe144f069d313", size = 187441 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b9/5c/a3d95dc1ec6cdeb032d789b552ecc76effa3557ea9186e1566df6aac18df/fs-2.4.16-py2.py3-none-any.whl", hash = "sha256:660064febbccda264ae0b6bace80a8d1be9e089e0a5eb2427b7d517f9a91545c", size = 135261 },
-]
-
-[[package]]
-name = "fs-s3fs"
-version = "1.1.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "boto3" },
-    { name = "fs" },
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/be/f1/b641963f8694cdf7c3daed0276fef361c2b51717bf5f3e8a89b63c8ba237/fs-s3fs-1.1.1.tar.gz", hash = "sha256:b57f8c7664460ff7b451b4b44ca2ea9623a374d74e1284c2d5e6df499dc7976c", size = 10353 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/14/71/9b36a6dbd28386e2028e4ab9aac9c30874fc9c74d6b8fa0c8c2806548311/fs_s3fs-1.1.1-py2.py3-none-any.whl", hash = "sha256:9ba160eaa93390cc5992a857675666cb2fbb3721b872474dfdc659a715c39280", size = 9675 },
 ]
 
 [[package]]
@@ -1845,6 +1808,18 @@ wheels = [
 ]
 
 [[package]]
+name = "pyarrow-stubs"
+version = "19.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyarrow" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9e/c7/a0bef88fb548e5acca08c6597e94144284848c98b2c27b9cb120be808a3a/pyarrow_stubs-19.1.tar.gz", hash = "sha256:e91c9b8b3bc551d53716bb466b02967d93b9827b1adc3d36bb4bba8662a81ccd", size = 84807 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d0/75/d5bf435fdb33e9f0e9048e5bf7e153a1e13cc8b90bdc76232a2be253e963/pyarrow_stubs-19.1-py3-none-any.whl", hash = "sha256:a94206b1a646f61e92da291362a337f5e77db7c18e5c56c8445f516ec919375b", size = 81286 },
+]
+
+[[package]]
 name = "pycparser"
 version = "2.22"
 source = { registry = "https://pypi.org/simple" }
@@ -2423,7 +2398,6 @@ dependencies = [
     { name = "backoff" },
     { name = "backports-datetime-fromisoformat", marker = "python_full_version < '3.11'" },
     { name = "click" },
-    { name = "fs" },
     { name = "fsspec" },
     { name = "importlib-metadata", marker = "python_full_version < '3.12'" },
     { name = "importlib-resources", marker = "python_full_version < '3.10'" },
@@ -2436,11 +2410,11 @@ dependencies = [
     { name = "pyyaml" },
     { name = "referencing" },
     { name = "requests" },
-    { name = "setuptools" },
     { name = "simpleeval" },
     { name = "simplejson" },
     { name = "sqlalchemy" },
     { name = "typing-extensions" },
+    { name = "universal-pathlib" },
 ]
 
 [package.optional-dependencies]
@@ -2460,7 +2434,6 @@ parquet = [
     { name = "pyarrow" },
 ]
 s3 = [
-    { name = "fs-s3fs" },
     { name = "s3fs" },
 ]
 ssh = [
@@ -2500,6 +2473,7 @@ dev = [
     { name = "mypy" },
     { name = "myst-parser", version = "3.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "myst-parser", version = "4.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "pyarrow-stubs" },
     { name = "pytest" },
     { name = "pytest-benchmark" },
     { name = "pytest-snapshot" },
@@ -2556,6 +2530,7 @@ testing = [
 ]
 typing = [
     { name = "mypy" },
+    { name = "pyarrow-stubs" },
     { name = "types-jsonschema" },
     { name = "types-pytz" },
     { name = "types-pyyaml" },
@@ -2571,8 +2546,6 @@ requires-dist = [
     { name = "click", specifier = "~=8.0" },
     { name = "cryptography", marker = "extra == 'jwt'", specifier = ">=3.4.6" },
     { name = "faker", marker = "extra == 'faker'", specifier = ">=22.5" },
-    { name = "fs", specifier = ">=2.4.16" },
-    { name = "fs-s3fs", marker = "extra == 's3'", specifier = ">=1.1.1" },
     { name = "fsspec", specifier = ">=2024.9.0" },
     { name = "importlib-metadata", marker = "python_full_version < '3.12'", specifier = ">=5.0" },
     { name = "importlib-resources", marker = "python_full_version < '3.10'", specifier = ">=5.12.0,!=6.2.0,!=6.3.0,!=6.3.1" },
@@ -2592,11 +2565,11 @@ requires-dist = [
     { name = "referencing", specifier = ">=0.30.0" },
     { name = "requests", specifier = ">=2.25.1" },
     { name = "s3fs", marker = "extra == 's3'", specifier = ">=2024.9.0" },
-    { name = "setuptools", specifier = "<=70.3.0" },
     { name = "simpleeval", specifier = ">=0.9.13,!=1.0.1" },
     { name = "simplejson", specifier = ">=3.17.6" },
     { name = "sqlalchemy", specifier = ">=1.4,<3.0" },
     { name = "typing-extensions", specifier = ">=4.5.0" },
+    { name = "universal-pathlib", specifier = ">=0.2.6" },
 ]
 provides-extras = ["faker", "jwt", "msgspec", "parquet", "s3", "ssh", "testing"]
 
@@ -2629,6 +2602,7 @@ dev = [
     { name = "moto", specifier = ">=5.0.14" },
     { name = "mypy", specifier = ">=1.9" },
     { name = "myst-parser", specifier = ">=3" },
+    { name = "pyarrow-stubs", specifier = ">=19.1" },
     { name = "pytest", specifier = ">=7.2.1" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
@@ -2679,6 +2653,7 @@ testing = [
 ]
 typing = [
     { name = "mypy", specifier = ">=1.9" },
+    { name = "pyarrow-stubs", specifier = ">=19.1" },
     { name = "types-jsonschema", specifier = ">=4.17.0.6" },
     { name = "types-pytz", specifier = ">=2022.7.1.2" },
     { name = "types-pyyaml", specifier = ">=6.0.12" },
@@ -3196,6 +3171,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/95/32/1a225d6164441be760d75c2c42e2780dc0873fe382da3e98a2e1e48361e5/tzdata-2025.2.tar.gz", hash = "sha256:b60a638fcc0daffadf82fe0f57e53d06bdec2f36c4df66280ae79bce6bd6f2b9", size = 196380 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5c/23/c7abc0ca0a1526a0774eca151daeb8de62ec457e77262b66b359c3c7679e/tzdata-2025.2-py2.py3-none-any.whl", hash = "sha256:1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8", size = 347839 },
+]
+
+[[package]]
+name = "universal-pathlib"
+version = "0.2.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fsspec" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/eb/21/dd871495af3933e585261adce42678dcdf1168c9d6fa0a8f7b6565e54472/universal_pathlib-0.2.6.tar.gz", hash = "sha256:50817aaeaa9f4163cb1e76f5bdf84207fa05ce728b23fd779479b3462e5430ac", size = 175427 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e5/4d/2e577f6db7aa0f932d19f799c18f604b2b302c65f733419b900ec07dbade/universal_pathlib-0.2.6-py3-none-any.whl", hash = "sha256:700dec2b58ef34b87998513de6d2ae153b22f083197dfafb8544744edabd1b18", size = 50087 },
 ]
 
 [[package]]

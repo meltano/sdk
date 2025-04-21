@@ -51,18 +51,18 @@ def _reset_envvars(monkeypatch: pytest.MonkeyPatch):
 
 
 @pytest.fixture(scope="class")
-def outdir() -> t.Generator[str, None, None]:
+def outdir() -> t.Generator[pathlib.Path, None, None]:
     """Create a temporary directory for target output."""
-    name = ".output/"
+    path = pathlib.Path(".output/").resolve()
     try:
-        pathlib.Path(name).mkdir(parents=True)
+        path.mkdir(parents=True)
     except FileExistsError:
         # Directory already exists
-        shutil.rmtree(name)
-        pathlib.Path(name).mkdir(parents=True)
+        shutil.rmtree(path)
+        path.mkdir(parents=True)
 
-    yield name
-    shutil.rmtree(name)
+    yield path
+    shutil.rmtree(path)
 
 
 @pytest.fixture(scope="session")

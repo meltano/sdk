@@ -71,20 +71,15 @@ def test_encoding_as_dict(encoding: BaseBatchFileEncoding, expected: dict) -> No
 def test_storage_get_url(file_scheme, root, prefix, expected):
     storage = StorageTarget(file_scheme + root)
 
-    with storage.fs(create=True) as fs:
-        url = fs.geturl(prefix)
-        assert url.startswith(file_scheme)
-        assert url.replace("\\", "/").endswith(expected)
+    url = storage.get_url(prefix)
+    assert url.startswith(file_scheme)
+    assert url.replace("\\", "/").endswith(expected)
 
 
 def test_storage_get_s3_url():
-    storage = StorageTarget("s3://testing123:testing123@test_bucket")
-
-    with storage.fs(create=True) as fs:
-        url = fs.geturl("prefix--file.jsonl.gz")
-        assert url.startswith(
-            "https://s3.amazonaws.com/test_bucket/prefix--file.jsonl.gz",
-        )
+    storage = StorageTarget("s3://test_bucket")
+    url = storage.get_url("prefix--file.jsonl.gz")
+    assert url.startswith("s3://test_bucket/prefix--file.jsonl.gz")
 
 
 @pytest.mark.parametrize(
@@ -96,8 +91,8 @@ def test_storage_get_s3_url():
             id="local",
         ),
         pytest.param(
-            "s3://test_bucket/prefix--file.jsonl.gz",
-            "s3://test_bucket",
+            "s3://test_bucket/object_prefix/prefix--file.jsonl.gz",
+            "s3://test_bucket/object_prefix",
             id="s3",
         ),
     ],
