@@ -374,13 +374,15 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             result += child.descendent_streams or []
         return result
 
-    @t.final
     @property
     def effective_schema(self) -> dict:
         """The schema used to prune deselected properties and conform types.
 
         If an input schema is provided, it will be used instead of the stream's
         schema.
+
+        Override this ONLY if you need to unconditionally apply changes on top of,
+        or ignore, the input schema.
 
         Returns:
             JSON Schema dictionary for this stream.

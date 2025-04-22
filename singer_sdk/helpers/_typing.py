@@ -75,11 +75,6 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["type"] = [*type_array, new_type]
         return result
 
-    logger.warning(
-        "Could not append type because the JSON schema for the dictionary "
-        "`%s` appears to be invalid.",
-        type_dict,
-    )
     return result
 
 

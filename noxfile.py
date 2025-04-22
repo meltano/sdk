@@ -382,6 +382,7 @@ def api_changes(session: nox.Session) -> None:
     """Check for API changes."""
     args = [
         "check",
+        "--no-color",
         "singer_sdk",
     ]
 
