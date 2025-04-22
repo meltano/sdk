@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import datetime
 import decimal
+import json
 import logging
 import math
 import typing as t
@@ -518,7 +519,7 @@ def _conform_uniform_list(
     return output, unmapped_properties
 
 
-def _conform_primitive_property(  # noqa: PLR0911
+def _conform_primitive_property(  # noqa: PLR0911, C901
     elem: t.Any,  # noqa: ANN401
     property_schema: dict,
 ) -> t.Any:  # noqa: ANN401
@@ -542,6 +543,26 @@ def _conform_primitive_property(  # noqa: PLR0911
         if math.isnan(elem) or math.isinf(elem):
             return None
         return elem
+    if isinstance(elem, str) and not is_string_type(property_schema):
+        return _interpret_string_property(elem, property_schema)
     if _is_exclusive_boolean_type(property_schema):
         return None if elem is None else elem != 0
+    return elem
+
+
+def _interpret_string_property(
+    elem: str,
+    property_schema: dict,
+) -> t.Any:  # noqa: ANN401
+    if not elem:
+        return None
+    if is_boolean_type(property_schema):
+        return elem.lower() == "true"
+    if is_integer_type(property_schema):
+        return int(elem)
+    if is_number_type(property_schema):
+        d = decimal.Decimal(elem)
+        return None if math.isnan(d) or math.isinf(d) else d
+    if is_array_type(property_schema) or is_object_type(property_schema):
+        return json.loads(elem)
     return elem
