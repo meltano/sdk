@@ -50,10 +50,10 @@ dependencies = [
     "requests>=2.25.1",
     # TODO: remove this constraint once we get rid of the `fs` dependency
     # newer setuptools versions are incompatible with some dependencies (fs)
-    "setuptools<=70.3.0",
+    "setuptools>=65,<=70.3.0",
     "simpleeval>=0.9.13,!=1.0.1",
     "simplejson>=3.17.6",
-    "sqlalchemy>=1.4,<3.0",
+    "sqlalchemy>=2",
     "typing-extensions>=4.5.0",
 ]
 
@@ -66,8 +66,7 @@ s3 = [
 
 # Parquet file dependencies installed as optional 'parquet' extras
 parquet = [
-    "numpy>=1.22",
-    "pyarrow>=13",
+    "pyarrow>=15",
 ]
 
 # Testing dependencies installed as optional 'testing' extras
