@@ -542,7 +542,7 @@ def _conform_primitive_property(
 
     # Find and apply the appropriate handler based on element type
     for types, handler in type_handlers.items():
-        if isinstance(elem, types if isinstance(types, tuple) else (types,)):
+        if isinstance(elem, types):
             return handler(elem, property_schema)
 
     return elem != 0 if _is_exclusive_boolean_type(property_schema) else elem
