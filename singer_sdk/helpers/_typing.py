@@ -544,13 +544,13 @@ def _conform_primitive_property(  # noqa: PLR0911, C901
             return None
         return elem
     if isinstance(elem, str) and not is_string_type(property_schema):
-        return _interpret_string_property(elem, property_schema)
+        return _transform_string_property(elem, property_schema)
     if _is_exclusive_boolean_type(property_schema):
         return None if elem is None else elem != 0
     return elem
 
 
-def _interpret_string_property(
+def _transform_string_property(
     elem: str,
     property_schema: dict,
 ) -> t.Any:  # noqa: ANN401
