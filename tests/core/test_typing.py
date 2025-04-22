@@ -355,11 +355,17 @@ def test_conform_object_additional_properties():
         ),
         pytest.param("", {"type": "string"}, "", id="string_empty_to_string"),
         pytest.param(
-            "", {"type": "boolean"}, None, id="string_empty_to_any_non_string"
+            "",
+            {"type": ["boolean", "null"]},
+            None,
+            id="string_empty_to_any_nullable_non_string",
         ),
         pytest.param("true", {"type": "boolean"}, True, id="string_true_to_boolean"),
         pytest.param(
-            "TRUE", {"type": "boolean"}, True, id="string_true_uppercase_to_boolean"
+            "TRUE",
+            {"type": "boolean"},
+            True,
+            id="string_true_uppercase_to_boolean",
         ),
         pytest.param("false", {"type": "boolean"}, False, id="string_false_to_boolean"),
         pytest.param(
@@ -368,7 +374,9 @@ def test_conform_object_additional_properties():
             False,
             id="string_not_true_to_boolean",
         ),
+        pytest.param("", {"type": "boolean"}, False, id="string_empty_to_boolean"),
         pytest.param("3", {"type": "integer"}, 3, id="string_integer_to_integer"),
+        pytest.param("", {"type": "integer"}, 0, id="string_empty_to_integer"),
         pytest.param(
             "3.14",
             {"type": "number"},
@@ -378,14 +386,25 @@ def test_conform_object_additional_properties():
         pytest.param("inf", {"type": "number"}, None, id="string_inf_to_number"),
         pytest.param("nan", {"type": "number"}, None, id="string_nan_to_number"),
         pytest.param(
-            "[1, 2, 3]", {"type": "array"}, [1, 2, 3], id="string_json_array_to_array"
+            "",
+            {"type": "number"},
+            decimal.Decimal(0),
+            id="string_empty_to_number",
         ),
+        pytest.param(
+            "[1, 2, 3]",
+            {"type": "array"},
+            [1, 2, 3],
+            id="string_json_array_to_array",
+        ),
+        pytest.param("", {"type": "array"}, [], id="string_empty_to_array"),
         pytest.param(
             '{"a": 1, "b": true, "c": 3.14}',
             {"type": "object"},
             {"a": 1, "b": True, "c": 3.14},
             id="string_json_object_to_object",
         ),
+        pytest.param("", {"type": "object"}, {}, id="string_empty_to_object"),
     ],
 )
 def test_conform_primitives(value: t.Any, type_dict: dict, expected: t.Any):

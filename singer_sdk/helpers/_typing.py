@@ -550,19 +550,24 @@ def _conform_primitive_property(  # noqa: PLR0911, C901
     return elem
 
 
-def _transform_string_property(
+def _transform_string_property(  # noqa: PLR0911
     elem: str,
     property_schema: dict,
 ) -> t.Any:  # noqa: ANN401
-    if not elem:
-        return None
+    if not elem and is_null_type(property_schema):
+        return None  # if nullable, None for empty string
+
     if is_boolean_type(property_schema):
-        return elem.lower() == "true"
+        return (
+            elem.lower() == "true"
+        )  # false for any non-"true" string (case-insensitive), including empty string
     if is_integer_type(property_schema):
-        return int(elem)
+        return int(elem or 0)  # 0 for empty string
     if is_number_type(property_schema):
-        d = decimal.Decimal(elem)
+        d = decimal.Decimal(elem or 0)  # 0 for empty string
         return None if math.isnan(d) or math.isinf(d) else d
-    if is_array_type(property_schema) or is_object_type(property_schema):
-        return json.loads(elem)
+    if is_array_type(property_schema):
+        return json.loads(elem) if elem else []  # empty array for empty string
+    if is_object_type(property_schema):
+        return json.loads(elem) if elem else {}  # empty object for empty string
     return elem
