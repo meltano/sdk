@@ -293,7 +293,7 @@ def test_conform_object_additional_properties():
         pytest.param(
             datetime.datetime(2020, 5, 17, tzinfo=datetime.timezone.utc),
             {"type": "string"},
-            "2020-05-17T00:00:00+00:00",
+            "2020-05-17T00:00:00.000000+00:00",
             id="datetime_to_string",
         ),
         pytest.param(
