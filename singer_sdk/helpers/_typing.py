@@ -44,7 +44,10 @@ def to_json_compatible(val: t.Any) -> t.Any:  # noqa: ANN401
     """Return as string if datetime. JSON does not support proper datetime types."""
     if isinstance(val, (datetime.datetime,)):
         # Make naive datetimes UTC
-        return (val.replace(tzinfo=UTC) if val.tzinfo is None else val).isoformat("T")
+        return (val.replace(tzinfo=UTC) if val.tzinfo is None else val).isoformat(
+            "T",
+            timespec="microseconds",
+        )
     if isinstance(val, (uuid.UUID,)):
         return str(val)
     return val
