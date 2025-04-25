@@ -13,6 +13,7 @@ import sqlalchemy as sa
 from singer_sdk.helpers._typing import (
     TypeConformanceLevel,
     _conform_primitive_property,
+    _transform_string_property,
     conform_record_data_types,
 )
 from singer_sdk.typing import (
@@ -409,6 +410,10 @@ def test_conform_object_additional_properties():
 )
 def test_conform_primitives(value: t.Any, type_dict: dict, expected: t.Any):
     assert _conform_primitive_property(value, type_dict) == expected
+
+
+def test_transform_string_to_string():
+    assert _transform_string_property("test", {"type": "string"}) == "test"
 
 
 @pytest.mark.filterwarnings("ignore:Use `JSONSchemaToSQL` instead.:DeprecationWarning")
