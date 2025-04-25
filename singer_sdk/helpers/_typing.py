@@ -519,7 +519,7 @@ def _conform_uniform_list(
     return output, unmapped_properties
 
 
-def _conform_primitive_property(  # noqa: PLR0911, C901
+def _conform_primitive_property(  # noqa: PLR0911
     elem: t.Any,  # noqa: ANN401
     property_schema: dict,
 ) -> t.Any:  # noqa: ANN401
@@ -540,9 +540,7 @@ def _conform_primitive_property(  # noqa: PLR0911, C901
         # for BIT value, treat 0 as False and anything else as True
         return elem != b"\x00" if is_boolean_type(property_schema) else elem.hex()
     if isinstance(elem, (float, decimal.Decimal)):
-        if math.isnan(elem) or math.isinf(elem):
-            return None
-        return elem
+        return elem if math.isfinite(elem) else None
     if isinstance(elem, str) and not is_string_type(property_schema):
         return _transform_string_property(elem, property_schema)
     if _is_exclusive_boolean_type(property_schema):
@@ -565,7 +563,7 @@ def _transform_string_property(  # noqa: PLR0911
         return int(elem or 0)  # 0 for empty string
     if is_number_type(property_schema):
         d = decimal.Decimal(elem or 0)  # 0 for empty string
-        return None if math.isnan(d) or math.isinf(d) else d
+        return d if d.is_finite() else None
     if is_array_type(property_schema):
         return json.loads(elem) if elem else []  # empty array for empty string
     if is_object_type(property_schema):
