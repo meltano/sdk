@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 📦 Packaging changes
 
 - [#2993](https://github.com/meltano/sdk/issues/2993) Restore upper Python constraint for `backoff` dependency
-- [#2981](https://github.com/meltano/sdk/issues/2981) Contrain third-party `importlib-metadata` to >=0.5.0
+- [#2981](https://github.com/meltano/sdk/issues/2981) Constrain third-party `importlib-metadata` to >=0.5.0
 
 ## v0.45.10 (2025-04-16)
 
