@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.45.11 (2025-04-28)
+
+### 🐛 Fixes
+
+- [#3004](https://github.com/meltano/sdk/issues/3004) Ensure fields with an array of JSON schema types are properly handled by SQL targets
+- [#2995](https://github.com/meltano/sdk/issues/2995) Pin GitHub actions in templates
+- [#2987](https://github.com/meltano/sdk/issues/2987) Add a date to the warning message for removal of `Faker` from stream maps contexts
+- [#2982](https://github.com/meltano/sdk/issues/2982) Allow streams to override `effective_schema` to apply schema manipulations even on the input catalog
+
+### 📚 Documentation Improvements
+
+- [#3001](https://github.com/meltano/sdk/issues/3001) Note `msgspec` extra as a prerequisite to using the corresponding writer/reader classes -- _**Thanks @ReubenFrankel!**_
+
+### 📦 Packaging changes
+
+- [#2993](https://github.com/meltano/sdk/issues/2993) Restore upper Python constraint for `backoff` dependency
+- [#2981](https://github.com/meltano/sdk/issues/2981) Constrain third-party `importlib-metadata` to >=0.5.0
+
 ## v0.45.10 (2025-04-16)
 
 ### 🐛 Fixes
