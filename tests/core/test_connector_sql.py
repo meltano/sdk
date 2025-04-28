@@ -671,6 +671,11 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         "jsonschema_type,expected_type",
         [
             pytest.param(
+                {"type": ["unknown", "null"]},
+                sa.types.VARCHAR,
+                id="unknown",
+            ),
+            pytest.param(
                 {"type": ["array", "object", "boolean", "null"]},
                 sa.types.VARCHAR,
                 id="array-first",
