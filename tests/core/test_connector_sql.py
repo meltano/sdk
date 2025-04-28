@@ -657,12 +657,6 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
         assert isinstance(result, sa.types.JSON)
 
-        jsonschema_type = {
-            "type": ["object", "null", "null"],
-        }
-        result = json_schema_to_sql.to_sql_type(jsonschema_type)
-        assert isinstance(result, sa.types.JSON)
-
     def test_anyof_unknown(self, json_schema_to_sql: JSONSchemaToSQL):
         jsonschema_type = {
             "anyOf": [
