@@ -438,7 +438,7 @@ def test_iterate_properties_list():
 
 def test_bench_conform_record_data_types(benchmark: BenchmarkFixture):
     """Run benchmark for conform_record_data_types method."""
-    number_of_runs = 10_000
+    number_of_runs = 1_000
     schema = {
         "type": "object",
         "properties": {
