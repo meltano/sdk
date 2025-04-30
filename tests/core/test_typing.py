@@ -460,17 +460,19 @@ def test_bench_conform_record_data_types(benchmark: BenchmarkFixture):
                 "properties": {},
                 "additionalProperties": True,
             },
+            "is_nan": {"type": "number"},
         },
     }
     record = {
         "id": 1,
-        "created_at": "2021-01-01T00:08:00-07:00",
+        "created_at": datetime.datetime(2021, 1, 1, tzinfo=datetime.timezone.utc),
         "count": 10,
         "amount": 100.0,
         "is_active": True,
         "tags": ["tag1", "tag2"],
         "metadata": {"key": "value"},
         "nested": {"key": "value", "deep": {"even_deeper": "value"}},
+        "is_nan": float("nan"),
     }
 
     def run_conform_record_data_types():
