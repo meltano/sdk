@@ -251,43 +251,82 @@ def resolve_schema_references(
     return _resolve_schema_references(schema, resolver)
 
 
-def _resolve_schema_references(  # noqa: C901
+def _resolve_schema_references(  # noqa: C901, PLR0912
     schema: dict[str, t.Any],
     resolver: Resolver,
+    visited_refs: set[str] | None = None,
 ) -> dict[str, t.Any]:
+    """Recursively resolve schema references while handling circular references.
+
+    Args:
+        schema: The schema dict to resolve references in
+        resolver: The JSON Schema resolver to use
+        visited_refs: Set of already visited reference paths to prevent infinite
+            recursion
+
+    Returns:
+        The schema with all references resolved
+    """
+    if visited_refs is None:
+        visited_refs = set()
+
     if _SchemaKey.ref in schema:
         reference_path = schema.pop(_SchemaKey.ref, None)
+        if reference_path in visited_refs:
+            # We've already seen this reference, return the schema as-is
+            # to prevent infinite recursion
+            return schema
+
+        visited_refs.add(reference_path)
         resolved = resolver.lookup(reference_path)
         schema.update(resolved.contents)
-        return _resolve_schema_references(schema, resolver)
+        return _resolve_schema_references(schema, resolver, visited_refs)
 
     if _SchemaKey.properties in schema:
         for k, val in schema[_SchemaKey.properties].items():
-            schema[_SchemaKey.properties][k] = _resolve_schema_references(val, resolver)
+            schema[_SchemaKey.properties][k] = _resolve_schema_references(
+                val,
+                resolver,
+                visited_refs,
+            )
 
     if _SchemaKey.pattern_properties in schema:
         for k, val in schema[_SchemaKey.pattern_properties].items():
             schema[_SchemaKey.pattern_properties][k] = _resolve_schema_references(
                 val,
                 resolver,
+                visited_refs,
             )
 
     if _SchemaKey.items in schema:
         schema[_SchemaKey.items] = _resolve_schema_references(
             schema[_SchemaKey.items],
             resolver,
+            visited_refs,
         )
 
     if _SchemaKey.any_of in schema:
         for i, element in enumerate(schema[_SchemaKey.any_of]):
-            schema[_SchemaKey.any_of][i] = _resolve_schema_references(element, resolver)
+            schema[_SchemaKey.any_of][i] = _resolve_schema_references(
+                element,
+                resolver,
+                visited_refs,
+            )
 
     if _SchemaKey.all_of in schema:
         for i, element in enumerate(schema[_SchemaKey.all_of]):
-            schema[_SchemaKey.all_of][i] = _resolve_schema_references(element, resolver)
+            schema[_SchemaKey.all_of][i] = _resolve_schema_references(
+                element,
+                resolver,
+                visited_refs,
+            )
 
     if _SchemaKey.one_of in schema:
         for i, element in enumerate(schema[_SchemaKey.one_of]):
-            schema[_SchemaKey.one_of][i] = _resolve_schema_references(element, resolver)
+            schema[_SchemaKey.one_of][i] = _resolve_schema_references(
+                element,
+                resolver,
+                visited_refs,
+            )
 
     return schema
