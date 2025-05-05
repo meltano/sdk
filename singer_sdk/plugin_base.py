@@ -208,10 +208,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
-        metrics._setup_logging(  # noqa: SLF001
-            self.config,
-            package=self.__module__.split(".", maxsplit=1)[0],
-        )
+        metrics._setup_logging(self.config)  # noqa: SLF001
         self.metrics_logger = metrics.get_metrics_logger()
 
         self._validate_config(raise_errors=validate_config)

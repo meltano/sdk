@@ -462,6 +462,10 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
                 try:
                     first_record = next(records)
                 except StopIteration:
+                    if paginator.continue_if_empty(resp):
+                        paginator.advance(resp)
+                        continue
+
                     self.logger.info(
                         "Pagination stopped after %d pages because no records were "
                         "found in the last response",
