@@ -32,7 +32,7 @@ license-files = ["LICENSE"]
 requires-python = ">=3.9"
 
 dependencies = [
-    "backoff>=2.0.0",
+    'backoff>=2.0.0; python_version<"4"',
     'backports-datetime-fromisoformat>=2.0.1; python_version<"3.11"',
     "click~=8.0",
     "fs>=2.4.16",
@@ -126,7 +126,7 @@ docs = [
 testing = [
     "coverage[toml]>=7.4",
     "duckdb>=0.8.0",
-    "duckdb-engine>=0.9.4",
+    "duckdb-engine>=0.9.4; python_version<'4'",
     "fastjsonschema>=2.19.1",
     "moto>=5.0.14",
     "pytest>=7.2.1",
@@ -194,7 +194,7 @@ xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.45.10"
+version = "0.45.11"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
