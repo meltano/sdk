@@ -479,7 +479,7 @@ class JSONSchemaToSQL:
 
                 # If we have multiple non-null types, use VARCHAR
                 if len(non_null_types) > 1:
-                    self.handle_multiple_types(non_null_types)
+                    return self.handle_multiple_types(non_null_types)
 
                 # If we have exactly one non-null type, use its handler
                 if len(non_null_types) == 1 and non_null_types[0] in self._type_mapping:

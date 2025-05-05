@@ -93,6 +93,20 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
         """
         return str(self)
 
+    def continue_if_empty(self, response: requests.Response) -> bool:  # noqa: ARG002, PLR6301
+        """Check if pagination should continue even if the response is empty.
+
+        Override this method to keep the pagination going even if the page retrieved
+        from the API is empty but the next one may have records.
+
+        Args:
+            response: API response object.
+
+        Returns:
+            Boolean flag used to indicate if the endpoint has more pages.
+        """
+        return False
+
     def advance(self, response: requests.Response) -> None:
         """Get a new page value and advance the current one.
 

@@ -365,6 +365,56 @@ def test_schema_from_dict(pydict, expected):
             },
             id="resolve_nested_one_of",
         ),
+        pytest.param(
+            {
+                "type": "object",
+                "properties": {
+                    "filter": {
+                        "$ref": "components#/schemas/Filter",
+                    },
+                },
+            },
+            {
+                "components": {
+                    "schemas": {
+                        "Filter": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "title": "Name",
+                                },
+                                "clauses": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "components#/schemas/Filter",
+                                    },
+                                    "title": "Clauses",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "filter": {
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "title": "Name",
+                            },
+                            "clauses": {
+                                "type": "array",
+                                "items": {},
+                                "title": "Clauses",
+                            },
+                        },
+                    },
+                },
+            },
+            id="resolve_schema_references_with_circular_references",
+        ),
     ],
 )
 def test_resolve_schema_references(schema, refs, expected):
