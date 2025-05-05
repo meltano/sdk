@@ -6,7 +6,6 @@ updates:
     schedule:
       interval: weekly
       time: "12:00"
-    reviewers: [meltano/engineering]
     labels: [Dependencies]
     groups:
       development-dependencies:
@@ -19,7 +18,6 @@ updates:
     schedule:
       interval: weekly
       time: "12:00"
-    reviewers: [meltano/engineering]
     labels: [Dependencies]
     groups:
       ci:
@@ -29,7 +27,6 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
-    reviewers: [meltano/engineering]
     labels: [Dependencies]
     groups:
       actions:
