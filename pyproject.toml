@@ -253,6 +253,8 @@ DEP002 = [
     # Plugins
     "paramiko",
     "s3fs",
+    # Legacy dependencies
+    "importlib-resources",
 ]
 DEP004 = [
     # TODO: Make pytest a runtime dependency?
