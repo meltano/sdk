@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import copy
 import datetime
+import decimal
 import logging
+import math
 import typing as t
 import uuid
 from enum import Enum
@@ -42,7 +44,10 @@ def to_json_compatible(val: t.Any) -> t.Any:  # noqa: ANN401
     """Return as string if datetime. JSON does not support proper datetime types."""
     if isinstance(val, (datetime.datetime,)):
         # Make naive datetimes UTC
-        return (val.replace(tzinfo=UTC) if val.tzinfo is None else val).isoformat("T")
+        return (val.replace(tzinfo=UTC) if val.tzinfo is None else val).isoformat(
+            "T",
+            timespec="microseconds",
+        )
     if isinstance(val, (uuid.UUID,)):
         return str(val)
     return val
@@ -70,11 +75,6 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["type"] = [*type_array, new_type]
         return result
 
-    logger.warning(
-        "Could not append type because the JSON schema for the dictionary "
-        "`%s` appears to be invalid.",
-        type_dict,
-    )
     return result
 
 
@@ -146,6 +146,8 @@ def is_datetime_type(type_dict: dict) -> bool:
         return any(is_datetime_type(type_dict) for type_dict in type_dict["anyOf"])
     if "allOf" in type_dict:
         return all(is_datetime_type(type_dict) for type_dict in type_dict["allOf"])
+    if "oneOf" in type_dict:
+        return any(is_datetime_type(option) for option in type_dict["oneOf"])
     if "type" in type_dict:
         return type_dict.get("format") == "date-time"
     msg = f"Could not detect type of replication key using schema '{type_dict}'"
@@ -173,6 +175,8 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
         return all(
             is_date_or_datetime_type(type_dict) for type_dict in type_dict["allOf"]
         )
+    if "oneOf" in type_dict:
+        return any(is_date_or_datetime_type(option) for option in type_dict["oneOf"])
 
     if "type" in type_dict:
         return type_dict.get("format") in {"date", "date-time"}
@@ -537,6 +541,10 @@ def _conform_primitive_property(  # noqa: PLR0911
     if isinstance(elem, bytes):
         # for BIT value, treat 0 as False and anything else as True
         return elem != b"\x00" if is_boolean_type(property_schema) else elem.hex()
+    if isinstance(elem, (float, decimal.Decimal)):
+        if math.isnan(elem) or math.isinf(elem):
+            return None
+        return elem
     if _is_exclusive_boolean_type(property_schema):
         return None if elem is None else elem != 0
     return elem

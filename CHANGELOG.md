@@ -5,6 +5,84 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.45.11 (2025-04-28)
+
+### 🐛 Fixes
+
+- [#3004](https://github.com/meltano/sdk/issues/3004) Ensure fields with an array of JSON schema types are properly handled by SQL targets
+- [#2995](https://github.com/meltano/sdk/issues/2995) Pin GitHub actions in templates
+- [#2987](https://github.com/meltano/sdk/issues/2987) Add a date to the warning message for removal of `Faker` from stream maps contexts
+- [#2982](https://github.com/meltano/sdk/issues/2982) Allow streams to override `effective_schema` to apply schema manipulations even on the input catalog
+
+### 📚 Documentation Improvements
+
+- [#3001](https://github.com/meltano/sdk/issues/3001) Note `msgspec` extra as a prerequisite to using the corresponding writer/reader classes -- _**Thanks @ReubenFrankel!**_
+
+### 📦 Packaging changes
+
+- [#2993](https://github.com/meltano/sdk/issues/2993) Restore upper Python constraint for `backoff` dependency
+- [#2981](https://github.com/meltano/sdk/issues/2981) Constrain third-party `importlib-metadata` to >=0.5.0
+
+## v0.45.10 (2025-04-16)
+
+### 🐛 Fixes
+
+- [#2978](https://github.com/meltano/sdk/issues/2978) Restore private `_http_headers` attribute of REST streams
+
+## v0.45.9 (2025-04-15)
+
+### 🐛 Fixes
+
+- [#2975](https://github.com/meltano/sdk/issues/2975) Update cookiecutter templates
+- [#2974](https://github.com/meltano/sdk/issues/2974) Do not log a warning if `null` cannot be appended to schema types
+- [#2973](https://github.com/meltano/sdk/issues/2973) Recognize `oneOf` fields in Singer schema helpers
+
+## v0.45.8 (2025-04-14)
+
+### 🐛 Fixes
+
+- [#2965](https://github.com/meltano/sdk/issues/2965) `AttributeError: object has no attribute '_requests_session'` when accessing public property during stream initialization -- _**Thanks @ReubenFrankel!**_
+- [#2970](https://github.com/meltano/sdk/issues/2970) Consider `oneOf` schemas when checking for `date` and `datetime` types
+
+## v0.45.7 (2025-04-14)
+
+### 🐛 Fixes
+
+- [#2968](https://github.com/meltano/sdk/issues/2968) `singer_sdk.singerlib.resolve_schema_references` now resolves `oneOf` schema references
+- [#2924](https://github.com/meltano/sdk/issues/2924) Generate standard stream metadata for nested fields
+- [#2940](https://github.com/meltano/sdk/issues/2940) Ensure streams with hardcoded `schema` attributes (e.g. REST and GraphQL streams) can have their schema overridden by the catalog
+
+### 📦 Packaging changes
+
+- [#2966](https://github.com/meltano/sdk/issues/2966) Add a `fallback-version` for hatch vcs
+
+## v0.45.6 (2025-04-11)
+
+### 🐛 Fixes
+
+- [#2961](https://github.com/meltano/sdk/issues/2961) Conform `NaN`, `Infinity` and `-Infinity` to null values
+
+### 📚 Documentation Improvements
+
+- [#2960](https://github.com/meltano/sdk/issues/2960) Documented using `default=str` with `json.dumps` in stream maps
+- [#2955](https://github.com/meltano/sdk/issues/2955) Documented the `ignore_parent_replication_key` stream attribute
+
+## v0.45.5 (2025-04-04)
+
+### 🐛 Fixes
+
+- [#2952](https://github.com/meltano/sdk/issues/2952) Adapt field schema type to `string` when transformed with stream maps using `json.dumps`
+
+### ⚙️ Under the Hood
+
+- [#2948](https://github.com/meltano/sdk/issues/2948) `ignore_no_records` as an instance property in built-in tests -- _**Thanks @ReubenFrankel!**_
+
+## v0.45.4 (2025-04-01)
+
+### 🐛 Fixes
+
+- [#2946](https://github.com/meltano/sdk/issues/2946) In the built-in tap tests, do not emit a warning for missing records on ignored streams
+
 ## v0.45.3 (2025-03-29)
 
 ### 🐛 Fixes

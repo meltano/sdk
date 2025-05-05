@@ -174,6 +174,14 @@ class StreamTestTemplate(TestTemplate):
         """
         return f"{self.stream.name}__{self.name}"
 
+    @property
+    def ignore_no_records(self) -> bool:
+        """Whether or not the stream should be ignored if no records are returned."""
+        return (
+            self.config.ignore_no_records
+            or self.stream.name in self.config.ignore_no_records_for_streams
+        )
+
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
@@ -194,7 +202,7 @@ class StreamTestTemplate(TestTemplate):
         super().run(config, resource, runner)
 
 
-class AttributeTestTemplate(TestTemplate[TapTestRunner]):
+class AttributeTestTemplate(StreamTestTemplate):
     """Base Tap Stream Attribute template."""
 
     plugin_type = "attribute"
@@ -226,10 +234,8 @@ class AttributeTestTemplate(TestTemplate[TapTestRunner]):
                 to use with this test.
             attribute_name: The name of the attribute to test.
         """
-        self.stream = stream
-        self.stream_records = runner.records[stream.name]
         self.attribute_name = attribute_name
-        super().run(config, resource, runner)
+        super().run(config, resource, runner, stream)
 
     @cached_property
     def non_null_attribute_values(self) -> list[t.Any]:
@@ -244,12 +250,7 @@ class AttributeTestTemplate(TestTemplate[TapTestRunner]):
             if r.get(self.attribute_name) is not None
         ]
 
-        ignore_no_records = (
-            self.config.ignore_no_records
-            or self.stream.name in self.config.ignore_no_records_for_streams
-        )
-
-        if not values and not ignore_no_records:
+        if not values and not self.ignore_no_records:
             warnings.warn(
                 UserWarning("No records were available to test."),
                 stacklevel=2,

@@ -106,6 +106,12 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """
 
     ignore_parent_replication_key: bool = False
+    """Set to `True` if the parent stream's replication key are not updated when child
+    items are changed.
+
+    This is used to indicate that a child stream should be synced regardless of the
+    parent stream's state.
+    """
 
     selected_by_default: bool = True
     """Whether this stream is selected by default in the catalog."""
@@ -142,6 +148,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._tap = tap
         self._tap_state = tap.state
         self._tap_input_catalog: singer.Catalog | None = None
+        self._input_schema: dict | None = None
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
@@ -240,10 +247,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         if not self.replication_key:
             return False
-        type_dict = self.schema.get("properties", {}).get(self.replication_key)
+
+        schema = self.effective_schema
+        type_dict = schema.get("properties", {}).get(self.replication_key)
+
         if type_dict is None:
             msg = f"Field '{self.replication_key}' is not in schema for stream '{self.name}'"  # noqa: E501
             raise InvalidReplicationKeyException(msg)
+
         return is_datetime_type(type_dict)
 
     def get_starting_replication_key_value(
@@ -362,6 +373,21 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         for child in self.child_streams:
             result += child.descendent_streams or []
         return result
+
+    @property
+    def effective_schema(self) -> dict:
+        """The schema used to prune deselected properties and conform types.
+
+        If an input schema is provided, it will be used instead of the stream's
+        schema.
+
+        Override this ONLY if you need to unconditionally apply changes on top of,
+        or ignore, the input schema.
+
+        Returns:
+            JSON Schema dictionary for this stream.
+        """
+        return self._input_schema if self._input_schema is not None else self.schema
 
     def _write_replication_key_signpost(
         self,
@@ -721,8 +747,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             A partitioned context state if applicable; else returns stream state.
             A blank state will be created in none exists.
         """
-        state_partition_context = self._get_state_partition_context(context)
-        if state_partition_context:
+        if state_partition_context := self._get_state_partition_context(context):
             return get_writeable_state_dict(
                 self.tap_state,
                 self.name,
@@ -880,11 +905,12 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Yields:
             Record message objects.
         """
+        schema = self.effective_schema
         pop_deselected_record_properties(record, self.schema, self.mask)
         record = conform_record_data_types(
             stream_name=self.name,
             record=record,
-            schema=self.schema,
+            schema=schema,
             level=self.TYPE_CONFORMANCE_LEVEL,
             logger=self.logger,
         )
@@ -1305,6 +1331,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             )
             if replication_method:
                 self.forced_replication_method = replication_method
+
+            self._input_schema = catalog_entry.schema.to_dict()
 
     def _get_state_partition_context(
         self,
