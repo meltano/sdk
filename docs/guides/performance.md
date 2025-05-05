@@ -10,7 +10,21 @@ See the [BATCH messages](/batch.md) page for more information.
 
 Starting from version `0.45.0`, the Meltano Singer SDK supports different message writers and readers.
 
-For example, to update your tap to use a message writer based on the [msgspec](https://github.com/jcrist/msgspec/) serialization library:
+For example, to use a message writer or reader based on the [msgspec](https://github.com/jcrist/msgspec/) serialization library, first specify the `msgspec` extra for the `singer-sdk` dependency:
+
+````{tab} Poetry
+```console
+$ poetry add singer-sdk --extras msgspec
+```
+````
+
+````{tab} uv
+```console
+$ uv add singer-sdk --extra msgspec
+```
+````
+
+To update your tap:
 
 ```python
 from singer_sdk.contrib.msgspec import MsgSpecWriter

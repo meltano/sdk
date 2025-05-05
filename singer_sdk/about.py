@@ -6,7 +6,6 @@ import abc
 import dataclasses
 import json
 import typing as t
-from collections import OrderedDict
 from textwrap import dedent
 
 from packaging.specifiers import SpecifierSet
@@ -164,17 +163,15 @@ class JSONFormatter(AboutFormatter, format_name="json"):
         Returns:
             A formatted string.
         """
-        data = OrderedDict(
-            [
-                ("name", about_info.name),
-                ("description", about_info.description),
-                ("version", about_info.version),
-                ("sdk_version", about_info.sdk_version),
-                ("supported_python_versions", about_info.supported_python_versions),
-                ("capabilities", [c.value for c in about_info.capabilities]),
-                ("settings", about_info.settings),
-            ],
-        )
+        data = {
+            "name": about_info.name,
+            "description": about_info.description,
+            "version": about_info.version,
+            "sdk_version": about_info.sdk_version,
+            "supported_python_versions": about_info.supported_python_versions,
+            "capabilities": [c.value for c in about_info.capabilities],
+            "settings": about_info.settings,
+        }
         return json.dumps(data, indent=self.indent, default=self.default)
 
 

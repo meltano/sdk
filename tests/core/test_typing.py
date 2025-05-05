@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import decimal
+import itertools
 import logging
 import typing as t
 
@@ -24,6 +25,9 @@ from singer_sdk.typing import (
     append_type,
     to_sql_type,
 )
+
+if t.TYPE_CHECKING:
+    from pytest_benchmark.fixture import BenchmarkFixture
 
 logger = logging.getLogger("log")
 
@@ -293,7 +297,7 @@ def test_conform_object_additional_properties():
         pytest.param(
             datetime.datetime(2020, 5, 17, tzinfo=datetime.timezone.utc),
             {"type": "string"},
-            "2020-05-17T00:00:00+00:00",
+            "2020-05-17T00:00:00.000000+00:00",
             id="datetime_to_string",
         ),
         pytest.param(
@@ -430,3 +434,55 @@ def test_iterate_properties_list():
     assert primitive_property in properties_list
     assert object_property in properties_list
     assert list_property in properties_list
+
+
+def test_bench_conform_record_data_types(benchmark: BenchmarkFixture):
+    """Run benchmark for conform_record_data_types method."""
+    number_of_runs = 1_000
+    schema = {
+        "type": "object",
+        "properties": {
+            "id": {"type": "integer"},
+            "created_at": {"type": "string", "format": "date-time"},
+            "count": {"type": "integer"},
+            "amount": {"type": "number"},
+            "is_active": {"type": "boolean"},
+            "tags": {"type": "array", "items": {"type": "string"}},
+            "metadata": {
+                "type": "object",
+                "properties": {
+                    "key": {"type": "string"},
+                    "value": {"type": "string"},
+                },
+            },
+            "nested": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": True,
+            },
+            "is_nan": {"type": "number"},
+        },
+    }
+    record = {
+        "id": 1,
+        "created_at": datetime.datetime(2021, 1, 1, tzinfo=datetime.timezone.utc),
+        "count": 10,
+        "amount": 100.0,
+        "is_active": True,
+        "tags": ["tag1", "tag2"],
+        "metadata": {"key": "value"},
+        "nested": {"key": "value", "deep": {"even_deeper": "value"}},
+        "is_nan": float("nan"),
+    }
+
+    def run_conform_record_data_types():
+        for rec in itertools.repeat(record, number_of_runs):
+            conform_record_data_types(
+                "test_stream",
+                rec,
+                schema,
+                TypeConformanceLevel.RECURSIVE,
+                logger,
+            )
+
+    benchmark(run_conform_record_data_types)
