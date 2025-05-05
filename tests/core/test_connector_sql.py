@@ -645,6 +645,18 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
         assert isinstance(result, sa.types.INTEGER)
 
+    def test_anyof_json(self):
+        json_schema_to_sql = JSONSchemaToSQL()
+        json_schema_to_sql.register_type_handler("object", sa.types.JSON)
+        jsonschema_type = {
+            "anyOf": [
+                {"type": "null"},
+                {"type": "object"},
+            ],
+        }
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.JSON)
+
     def test_anyof_unknown(self, json_schema_to_sql: JSONSchemaToSQL):
         jsonschema_type = {
             "anyOf": [
@@ -659,6 +671,11 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         "jsonschema_type,expected_type",
         [
             pytest.param(
+                {"type": ["unknown", "null"]},
+                sa.types.VARCHAR,
+                id="unknown",
+            ),
+            pytest.param(
                 {"type": ["array", "object", "boolean", "null"]},
                 sa.types.VARCHAR,
                 id="array-first",
@@ -670,7 +687,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
             ),
         ],
     )
-    def test_complex(
+    def test_multiple_types(
         self,
         json_schema_to_sql: JSONSchemaToSQL,
         jsonschema_type: dict,
@@ -678,6 +695,22 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
     ):
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
         assert isinstance(result, expected_type)
+
+    def test_multiple_types_custom_handler(self):
+        class CustomJSONSchemaToSQL(JSONSchemaToSQL):
+            def handle_multiple_types(self, types: list[str]) -> sa.types.TypeEngine:
+                if "object" in types or "array" in types:
+                    return sa.types.JSON()
+                return super().handle_multiple_types(types)
+
+        json_schema_to_sql = CustomJSONSchemaToSQL()
+        jsonschema_type = {"type": ["object", "array", "string", "null"]}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.JSON)
+
+        jsonschema_type = {"type": ["string", "number", "null"]}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.VARCHAR)
 
     def test_unknown_type(self, json_schema_to_sql: JSONSchemaToSQL):
         jsonschema_type = {"cannot": "compute"}

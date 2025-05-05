@@ -28,7 +28,7 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
     config_jsonschema = th.PropertiesList(
         th.Property(
             "auth_token",
-            th.StringType,
+            th.StringType(nullable=False),
             required=True,
             secret=True,  # Flag config as protected.
             title="Auth Token",
@@ -36,19 +36,19 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
         ),
         th.Property(
             "project_ids",
-            th.ArrayType(th.StringType),
+            th.ArrayType(th.StringType(nullable=False), nullable=False),
             required=True,
             title="Project IDs",
             description="Project IDs to replicate",
         ),
         th.Property(
             "start_date",
-            th.DateTimeType,
+            th.DateTimeType(nullable=True),
             description="The earliest record date to sync",
         ),
         th.Property(
             "api_url",
-            th.StringType,
+            th.StringType(nullable=False),
             title="API URL",
             default="https://api.mysample.com",
             description="The url for the API service",
@@ -56,7 +56,7 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
         {%- if cookiecutter.stream_type in ("GraphQL", "REST") %}
         th.Property(
             "user_agent",
-            th.StringType,
+            th.StringType(nullable=True),
             description=(
                 "A custom User-Agent header to send with each request. Default is "
                 "'<tap_name>/<tap_version>'"

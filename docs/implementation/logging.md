@@ -85,18 +85,27 @@ This will send metrics to a `metrics.jsonl`:
 
 ## For package developers
 
-If you're developing a tap or target package and would like to customize its logging configuration, you can put a `default_loggging.yml` file in the package root to set the default logging configuration for your package. This file will be used if the `SINGER_SDK_LOG_CONFIG` environment variable is not set:
+If you're developing a tap or target package and would like to customize its logging, you can call [`logging.config.dictConfig`](inv:python:py:function:#logging.config.dictConfig) with a logging [configuration dictionary](inv:python:std:label:#logging-config-dictschema)
+in the main plugin module:
 
-```
-.
-├── README.md
-├── pyproject.toml
-├── uv.lock
-└── tap_example
-    ├── __init__.py
-    ├── __main__.py
-    ├── default_logging.yml  # <-- This file will be used if SINGER_SDK_LOG_CONFIG is not set
-    ├── client.py
-    ├── streams.py
-    └── tap.py
+```python
+# tap_example/tap.py
+
+import logging.config
+
+logging.config.dictConfig(
+    {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "loggers": {
+            "some_package.some_module": {
+                "level": "WARNING",
+            },
+        },
+    },
+)
+
+
+class MyTap(Tap):
+    ...
 ```

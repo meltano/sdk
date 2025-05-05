@@ -97,12 +97,12 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             path: URL path for this entity stream.
             http_method: HTTP method to use for requests.
         """
-        super().__init__(name=name, schema=schema, tap=tap)
         if path:
             self.path = path
-        self._http_headers: dict = {"User-Agent": self.user_agent}
+        self._http_headers: dict[str, str] = {}
         self._http_method = http_method
         self._requests_session = requests.Session()
+        super().__init__(name=name, schema=schema, tap=tap)
 
     @staticmethod
     def _url_encode(val: str | datetime | bool | int | list[str]) -> str:  # noqa: FBT001
@@ -137,6 +137,21 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         return url
 
     # HTTP Request functions
+
+    @property
+    def http_headers(self) -> dict:
+        """Return headers dict to be used for HTTP requests.
+
+        If an authenticator is also specified, the authenticator's headers will be
+        combined with `http_headers` when making HTTP requests.
+
+        Returns:
+            Dictionary of HTTP headers to use as a base for every request.
+        """
+        return {
+            "User-Agent": self.user_agent,
+            **self._http_headers,
+        }
 
     @property
     def http_method(self) -> str:
@@ -447,6 +462,10 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
                 try:
                     first_record = next(records)
                 except StopIteration:
+                    if paginator.continue_if_empty(resp):
+                        paginator.advance(resp)
+                        continue
+
                     self.logger.info(
                         "Pagination stopped after %d pages because no records were "
                         "found in the last response",
@@ -578,18 +597,6 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             next_page_token: Token, page number or any request argument to request the
                 next page of data.
         """
-
-    @property
-    def http_headers(self) -> dict:
-        """Return headers dict to be used for HTTP requests.
-
-        If an authenticator is also specified, the authenticator's headers will be
-        combined with `http_headers` when making HTTP requests.
-
-        Returns:
-            Dictionary of HTTP headers to use as a base for every request.
-        """
-        return self._http_headers
 
     @property
     def timeout(self) -> int:

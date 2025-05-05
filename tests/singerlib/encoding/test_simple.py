@@ -104,3 +104,18 @@ def test_write_message():
     assert out.getvalue() == (
         '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
     )
+
+
+@pytest.mark.parametrize("float_value", [float("nan"), float("inf"), float("-inf")])
+def test_encode_nan_values(float_value):
+    writer = SimpleSingerWriter()
+    message = RecordMessage(
+        stream="test",
+        record={"id": 1, "name": float_value},
+    )
+    with redirect_stdout(io.StringIO()) as out:
+        writer.write_message(message)
+
+    assert out.getvalue() == (
+        '{"type":"RECORD","stream":"test","record":{"id":1,"name":null}}\n'
+    )

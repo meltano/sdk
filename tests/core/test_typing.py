@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import datetime
+import decimal
+import itertools
 import logging
+import typing as t
 
 import pytest
 import sqlalchemy as sa
@@ -22,6 +25,9 @@ from singer_sdk.typing import (
     append_type,
     to_sql_type,
 )
+
+if t.TYPE_CHECKING:
+    from pytest_benchmark.fixture import BenchmarkFixture
 
 logger = logging.getLogger("log")
 
@@ -284,45 +290,77 @@ def test_conform_object_additional_properties():
     assert actual_output == expected_output
 
 
-def test_conform_primitives():
-    assert (
-        _conform_primitive_property(
+@pytest.mark.parametrize(
+    "value,type_dict,expected",
+    [
+        # Datetime conversions
+        pytest.param(
             datetime.datetime(2020, 5, 17, tzinfo=datetime.timezone.utc),
             {"type": "string"},
-        )
-        == "2020-05-17T00:00:00+00:00"
-    )
-    assert (
-        _conform_primitive_property(datetime.date(2020, 5, 17), {"type": "string"})
-        == "2020-05-17"
-    )
-    assert (
-        _conform_primitive_property(datetime.timedelta(365), {"type": "string"})
-        == "1971-01-01T00:00:00+00:00"
-    )
-    assert (
-        _conform_primitive_property(datetime.time(12, 0, 0), {"type": "string"})
-        == "12:00:00"
-    )
-
-    assert _conform_primitive_property(b"\x00", {"type": "string"}) == "00"
-    assert _conform_primitive_property(b"\xbc", {"type": "string"}) == "bc"
-
-    assert _conform_primitive_property(b"\x00", {"type": "boolean"}) is False
-    assert _conform_primitive_property(b"\xbc", {"type": "boolean"}) is True
-
-    assert _conform_primitive_property(None, {"type": "boolean"}) is None
-    assert _conform_primitive_property(0, {"type": "boolean"}) is False
-    assert (
-        _conform_primitive_property(
-            0, {"anyOf": [{"type": "boolean"}, {"type": "integer"}]}
-        )
-        == 0
-    )
-    assert _conform_primitive_property(0, {"type": ["boolean", "integer"]}) == 0
-    assert _conform_primitive_property(1, {"type": "boolean"}) is True
-    assert _conform_primitive_property(1, {"type": ["boolean", "null"]}) is True
-    assert _conform_primitive_property(1, {"type": ["boolean"]}) is True
+            "2020-05-17T00:00:00.000000+00:00",
+            id="datetime_to_string",
+        ),
+        pytest.param(
+            datetime.date(2020, 5, 17),
+            {"type": "string"},
+            "2020-05-17",
+            id="date_to_string",
+        ),
+        pytest.param(
+            datetime.timedelta(365),
+            {"type": "string"},
+            "1971-01-01T00:00:00+00:00",
+            id="timedelta_to_string",
+        ),
+        pytest.param(
+            datetime.time(12, 0, 0), {"type": "string"}, "12:00:00", id="time_to_string"
+        ),
+        # Bytes to string conversions
+        pytest.param(b"\x00", {"type": "string"}, "00", id="bytes_00_to_string"),
+        pytest.param(b"\xbc", {"type": "string"}, "bc", id="bytes_bc_to_string"),
+        # Bytes to boolean conversions
+        pytest.param(b"\x00", {"type": "boolean"}, False, id="bytes_00_to_boolean"),
+        pytest.param(b"\xbc", {"type": "boolean"}, True, id="bytes_bc_to_boolean"),
+        # Boolean conversions
+        pytest.param(None, {"type": "boolean"}, None, id="none_to_boolean"),
+        pytest.param(0, {"type": "boolean"}, False, id="zero_to_boolean"),
+        pytest.param(
+            0,
+            {"anyOf": [{"type": "boolean"}, {"type": "integer"}]},
+            0,
+            id="zero_to_boolean_or_integer",
+        ),
+        pytest.param(
+            0,
+            {"type": ["boolean", "integer"]},
+            0,
+            id="zero_to_boolean_or_integer_union",
+        ),
+        pytest.param(1, {"type": "boolean"}, True, id="one_to_boolean"),
+        pytest.param(
+            1, {"type": ["boolean", "null"]}, True, id="one_to_boolean_or_null"
+        ),
+        pytest.param(1, {"type": ["boolean"]}, True, id="one_to_boolean_single_type"),
+        # Number conversions
+        pytest.param(3.14, {"type": "number"}, 3.14, id="float_to_number"),
+        pytest.param(
+            decimal.Decimal("3.14"),
+            {"type": "integer"},
+            decimal.Decimal("3.14"),
+            id="decimal_to_integer",
+        ),
+        pytest.param(float("nan"), {"type": "number"}, None, id="float_nan_to_number"),
+        pytest.param(float("inf"), {"type": "number"}, None, id="float_inf_to_number"),
+        pytest.param(
+            decimal.Decimal("inf"), {"type": "number"}, None, id="decimal_inf_to_number"
+        ),
+        pytest.param(
+            decimal.Decimal("nan"), {"type": "number"}, None, id="decimal_nan_to_number"
+        ),
+    ],
+)
+def test_conform_primitives(value: t.Any, type_dict: dict, expected: t.Any):
+    assert _conform_primitive_property(value, type_dict) == expected
 
 
 @pytest.mark.filterwarnings("ignore:Use `JSONSchemaToSQL` instead.:DeprecationWarning")
@@ -396,3 +434,55 @@ def test_iterate_properties_list():
     assert primitive_property in properties_list
     assert object_property in properties_list
     assert list_property in properties_list
+
+
+def test_bench_conform_record_data_types(benchmark: BenchmarkFixture):
+    """Run benchmark for conform_record_data_types method."""
+    number_of_runs = 1_000
+    schema = {
+        "type": "object",
+        "properties": {
+            "id": {"type": "integer"},
+            "created_at": {"type": "string", "format": "date-time"},
+            "count": {"type": "integer"},
+            "amount": {"type": "number"},
+            "is_active": {"type": "boolean"},
+            "tags": {"type": "array", "items": {"type": "string"}},
+            "metadata": {
+                "type": "object",
+                "properties": {
+                    "key": {"type": "string"},
+                    "value": {"type": "string"},
+                },
+            },
+            "nested": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": True,
+            },
+            "is_nan": {"type": "number"},
+        },
+    }
+    record = {
+        "id": 1,
+        "created_at": datetime.datetime(2021, 1, 1, tzinfo=datetime.timezone.utc),
+        "count": 10,
+        "amount": 100.0,
+        "is_active": True,
+        "tags": ["tag1", "tag2"],
+        "metadata": {"key": "value"},
+        "nested": {"key": "value", "deep": {"even_deeper": "value"}},
+        "is_nan": float("nan"),
+    }
+
+    def run_conform_record_data_types():
+        for rec in itertools.repeat(record, number_of_runs):
+            conform_record_data_types(
+                "test_stream",
+                rec,
+                schema,
+                TypeConformanceLevel.RECURSIVE,
+                logger,
+            )
+
+    benchmark(run_conform_record_data_types)

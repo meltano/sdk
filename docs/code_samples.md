@@ -121,8 +121,9 @@ val1,val2,val3
 val1,val2,val3
 """
 
-@property
 class ParquetStream(Stream):
+
+    @property
     def schema(self):
         """Dynamically detect the json schema for the stream.
         This is evaluated prior to any records being retrieved.
@@ -130,7 +131,7 @@ class ParquetStream(Stream):
         properties: List[th.Property] = []
         for header in FAKECSV.split("\n")[0].split(","):
             # Assume string type for all fields
-            properties.append(th.Property(header, th.StringType()))
+            properties.append(th.Property(header, th.StringType(nullable=True)))
         return th.PropertiesList(*properties).to_dict()
 ```
 

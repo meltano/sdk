@@ -36,12 +36,14 @@ STANDARD_KEYS = [
     "pattern",
     "contentMediaType",
     "contentEncoding",
+    "deprecated",
     # These are NOT simple keys (they can contain schemas themselves). We could
     # consider adding extra handling to them.
     "additionalProperties",
     "anyOf",
     "patternProperties",
     "allOf",
+    "oneOf",
     # JSON Schema extensions
     "x-sql-datatype",
 ]
@@ -85,9 +87,14 @@ class Schema:
     pattern: str | None = None
     contentMediaType: str | None = None  # noqa: N815
     contentEncoding: str | None = None  # noqa: N815
-
     # JSON Schema extensions
     x_sql_datatype: str | None = None
+
+    deprecated: bool | None = None
+    oneOf: t.Any | None = None  # noqa: N815
+
+    # TODO: Use dataclass.KW_ONLY when Python 3.9 support is dropped
+    # _: KW_ONLY  # noqa: ERA001
 
     def to_dict(self) -> dict[str, t.Any]:
         """Return the raw JSON Schema as a (possibly nested) dict.
@@ -151,10 +158,22 @@ class Schema:
             ...             "minimum": 0,
             ...             "x-sql-datatype": "smallint",
             ...         },
+            ...         "deprecatedField": {
+            ...             "type": "string",
+            ...             "deprecated": True,
+            ...         },
+            ...         "price": {
+            ...             "oneOf": [
+            ...                 {"type": "number", "deprecated": True},
+            ...                 {"type": "null"},
+            ...             ],
+            ...         },
             ...     },
             ...     "required": ["firstName", "lastName"],
             ... }
             >>> schema = Schema.from_dict(data)
+            >>> schema.schema
+            'http://json-schema.org/draft/2020-12/schema'
             >>> schema.title
             'Person'
             >>> schema.properties["firstName"].description
@@ -163,8 +182,10 @@ class Schema:
             0
             >>> schema.properties["age"].x_sql_datatype
             'smallint'
-            >>> schema.schema
-            'http://json-schema.org/draft/2020-12/schema'
+            >>> schema.properties["deprecatedField"].deprecated
+            True
+            >>> schema.properties["price"].oneOf[0]["deprecated"]
+            True
         """  # noqa: E501
         kwargs = schema_defaults.copy()
         properties = data.get("properties")
@@ -197,6 +218,7 @@ class _SchemaKey:
     pattern_properties = "patternProperties"
     any_of = "anyOf"
     all_of = "allOf"
+    one_of = "oneOf"
 
 
 def resolve_schema_references(
@@ -229,39 +251,82 @@ def resolve_schema_references(
     return _resolve_schema_references(schema, resolver)
 
 
-def _resolve_schema_references(  # noqa: C901
+def _resolve_schema_references(  # noqa: C901, PLR0912
     schema: dict[str, t.Any],
     resolver: Resolver,
+    visited_refs: set[str] | None = None,
 ) -> dict[str, t.Any]:
+    """Recursively resolve schema references while handling circular references.
+
+    Args:
+        schema: The schema dict to resolve references in
+        resolver: The JSON Schema resolver to use
+        visited_refs: Set of already visited reference paths to prevent infinite
+            recursion
+
+    Returns:
+        The schema with all references resolved
+    """
+    if visited_refs is None:
+        visited_refs = set()
+
     if _SchemaKey.ref in schema:
         reference_path = schema.pop(_SchemaKey.ref, None)
+        if reference_path in visited_refs:
+            # We've already seen this reference, return the schema as-is
+            # to prevent infinite recursion
+            return schema
+
+        visited_refs.add(reference_path)
         resolved = resolver.lookup(reference_path)
         schema.update(resolved.contents)
-        return _resolve_schema_references(schema, resolver)
+        return _resolve_schema_references(schema, resolver, visited_refs)
 
     if _SchemaKey.properties in schema:
         for k, val in schema[_SchemaKey.properties].items():
-            schema[_SchemaKey.properties][k] = _resolve_schema_references(val, resolver)
+            schema[_SchemaKey.properties][k] = _resolve_schema_references(
+                val,
+                resolver,
+                visited_refs,
+            )
 
     if _SchemaKey.pattern_properties in schema:
         for k, val in schema[_SchemaKey.pattern_properties].items():
             schema[_SchemaKey.pattern_properties][k] = _resolve_schema_references(
                 val,
                 resolver,
+                visited_refs,
             )
 
     if _SchemaKey.items in schema:
         schema[_SchemaKey.items] = _resolve_schema_references(
             schema[_SchemaKey.items],
             resolver,
+            visited_refs,
         )
 
     if _SchemaKey.any_of in schema:
         for i, element in enumerate(schema[_SchemaKey.any_of]):
-            schema[_SchemaKey.any_of][i] = _resolve_schema_references(element, resolver)
+            schema[_SchemaKey.any_of][i] = _resolve_schema_references(
+                element,
+                resolver,
+                visited_refs,
+            )
 
     if _SchemaKey.all_of in schema:
         for i, element in enumerate(schema[_SchemaKey.all_of]):
-            schema[_SchemaKey.all_of][i] = _resolve_schema_references(element, resolver)
+            schema[_SchemaKey.all_of][i] = _resolve_schema_references(
+                element,
+                resolver,
+                visited_refs,
+            )
+
+    if _SchemaKey.one_of in schema:
+        for i, element in enumerate(schema[_SchemaKey.one_of]):
+            schema[_SchemaKey.one_of][i] = _resolve_schema_references(
+                element,
+                resolver,
+                visited_refs,
+            )
 
     return schema
