@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ✨ New
 
 - [#2162](https://github.com/meltano/sdk/issues/2162) Expose metric dictionary to make logging metrics as JSON easier
-- [#2977](https://github.com/meltano/sdk/issues/2977) Limit extraction to 25 records by default in builtin tap tests
+- [#2977](https://github.com/meltano/sdk/issues/2977) Limit extraction to 25 records by default in built-in tap tests
 - [#2989](https://github.com/meltano/sdk/issues/2989) Allow pagination to continue after an empty page
 
 ### 🐛 Fixes
