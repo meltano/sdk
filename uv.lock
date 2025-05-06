@@ -182,15 +182,6 @@ wheels = [
 ]
 
 [[package]]
-name = "appdirs"
-version = "1.4.4"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d7/d8/05696357e0311f5b5c316d7b95f46c669dd9c15aaeecbb48c7d0aeb88c40/appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41", size = 13470, upload-time = "2020-05-11T07:59:51.037Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3b/00/2344469e2084fb287c2e0b57b72910309874c3245463acd6cf5e3db69324/appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128", size = 9566, upload-time = "2020-05-11T07:59:49.499Z" },
-]
-
-[[package]]
 name = "async-timeout"
 version = "5.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -919,34 +910,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/ba/50/2210d332234b02ce0f0d8360034e0ceada6e348a83d8fa924f418ae3b58c/frozenlist-1.6.0-cp39-cp39-win32.whl", hash = "sha256:2b8cf4cfea847d6c12af06091561a89740f1f67f331c3fa8623391905e878530", size = 115751, upload-time = "2025-04-17T22:38:48.555Z" },
     { url = "https://files.pythonhosted.org/packages/8c/a2/15db0eef508761c5f7c669b70ed4ec81af4d8ddad86d1b6ef9d6746a56b4/frozenlist-1.6.0-cp39-cp39-win_amd64.whl", hash = "sha256:1255d5d64328c5a0d066ecb0f02034d086537925f1f04b50b1ae60d37afbf572", size = 120975, upload-time = "2025-04-17T22:38:50.213Z" },
     { url = "https://files.pythonhosted.org/packages/71/3e/b04a0adda73bd52b390d730071c0d577073d3d26740ee1bad25c3ad0f37b/frozenlist-1.6.0-py3-none-any.whl", hash = "sha256:535eec9987adb04701266b92745d6cdcef2e77669299359c3009c3404dd5d191", size = 12404, upload-time = "2025-04-17T22:38:51.668Z" },
-]
-
-[[package]]
-name = "fs"
-version = "2.4.16"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "appdirs" },
-    { name = "setuptools" },
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/5d/a9/af5bfd5a92592c16cdae5c04f68187a309be8a146b528eac3c6e30edbad2/fs-2.4.16.tar.gz", hash = "sha256:ae97c7d51213f4b70b6a958292530289090de3a7e15841e108fbe144f069d313", size = 187441, upload-time = "2022-05-02T09:25:54.22Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b9/5c/a3d95dc1ec6cdeb032d789b552ecc76effa3557ea9186e1566df6aac18df/fs-2.4.16-py2.py3-none-any.whl", hash = "sha256:660064febbccda264ae0b6bace80a8d1be9e089e0a5eb2427b7d517f9a91545c", size = 135261, upload-time = "2022-05-02T09:25:52.363Z" },
-]
-
-[[package]]
-name = "fs-s3fs"
-version = "1.1.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "boto3" },
-    { name = "fs" },
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/be/f1/b641963f8694cdf7c3daed0276fef361c2b51717bf5f3e8a89b63c8ba237/fs-s3fs-1.1.1.tar.gz", hash = "sha256:b57f8c7664460ff7b451b4b44ca2ea9623a374d74e1284c2d5e6df499dc7976c", size = 10353, upload-time = "2019-08-14T10:59:30.626Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/14/71/9b36a6dbd28386e2028e4ab9aac9c30874fc9c74d6b8fa0c8c2806548311/fs_s3fs-1.1.1-py2.py3-none-any.whl", hash = "sha256:9ba160eaa93390cc5992a857675666cb2fbb3721b872474dfdc659a715c39280", size = 9675, upload-time = "2019-08-14T10:59:32.547Z" },
 ]
 
 [[package]]
@@ -1887,6 +1850,18 @@ wheels = [
 ]
 
 [[package]]
+name = "pyarrow-stubs"
+version = "19.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyarrow" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d8/f0/50a40613805e7a5beaf35d105d45f3e8dfaa1b9284f5d35de9127b296ecd/pyarrow_stubs-19.2.tar.gz", hash = "sha256:4c6862dec8a9d9ff9bd4a404cf3df02a1b2cbf07f9737a1441a72eee4611190d", size = 86065, upload-time = "2025-04-30T06:33:51.429Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/75/21/17511736ec80c4a22f56dcc9409266b5c1f52fe9a53555dc9d3f3a8cf35d/pyarrow_stubs-19.2-py3-none-any.whl", hash = "sha256:43601f94b377edd2ed73256d029077bf5118a1db86257c5fcd6783b640d06907", size = 82601, upload-time = "2025-04-30T06:33:49.954Z" },
+]
+
+[[package]]
 name = "pycparser"
 version = "2.22"
 source = { registry = "https://pypi.org/simple" }
@@ -2465,7 +2440,6 @@ dependencies = [
     { name = "backoff", marker = "python_full_version < '4'" },
     { name = "backports-datetime-fromisoformat", marker = "python_full_version < '3.11'" },
     { name = "click" },
-    { name = "fs" },
     { name = "fsspec" },
     { name = "importlib-metadata", marker = "python_full_version < '3.12'" },
     { name = "importlib-resources", marker = "python_full_version < '3.10'" },
@@ -2478,11 +2452,11 @@ dependencies = [
     { name = "pyyaml" },
     { name = "referencing" },
     { name = "requests" },
-    { name = "setuptools" },
     { name = "simpleeval" },
     { name = "simplejson" },
     { name = "sqlalchemy" },
     { name = "typing-extensions" },
+    { name = "universal-pathlib" },
 ]
 
 [package.optional-dependencies]
@@ -2502,7 +2476,6 @@ parquet = [
     { name = "pyarrow" },
 ]
 s3 = [
-    { name = "fs-s3fs" },
     { name = "s3fs" },
 ]
 ssh = [
@@ -2542,6 +2515,7 @@ dev = [
     { name = "mypy" },
     { name = "myst-parser", version = "3.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "myst-parser", version = "4.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "pyarrow-stubs" },
     { name = "pytest" },
     { name = "pytest-benchmark" },
     { name = "pytest-snapshot" },
@@ -2598,6 +2572,7 @@ testing = [
 ]
 typing = [
     { name = "mypy" },
+    { name = "pyarrow-stubs" },
     { name = "types-jsonschema" },
     { name = "types-pytz" },
     { name = "types-pyyaml" },
@@ -2613,8 +2588,6 @@ requires-dist = [
     { name = "click", specifier = "~=8.0" },
     { name = "cryptography", marker = "extra == 'jwt'", specifier = ">=3.4.6" },
     { name = "faker", marker = "extra == 'faker'", specifier = ">=22.5" },
-    { name = "fs", specifier = ">=2.4.16" },
-    { name = "fs-s3fs", marker = "extra == 's3'", specifier = ">=1.1.1" },
     { name = "fsspec", specifier = ">=2024.9.0" },
     { name = "importlib-metadata", marker = "python_full_version < '3.12'", specifier = ">=5.0" },
     { name = "importlib-resources", marker = "python_full_version < '3.10'", specifier = ">=5.12.0,!=6.2.0,!=6.3.0,!=6.3.1" },
@@ -2634,11 +2607,11 @@ requires-dist = [
     { name = "referencing", specifier = ">=0.30.0" },
     { name = "requests", specifier = ">=2.25.1" },
     { name = "s3fs", marker = "extra == 's3'", specifier = ">=2024.9.0" },
-    { name = "setuptools", specifier = "<=70.3.0" },
     { name = "simpleeval", specifier = ">=0.9.13,!=1.0.1" },
     { name = "simplejson", specifier = ">=3.17.6" },
     { name = "sqlalchemy", specifier = ">=1.4,<3.0" },
     { name = "typing-extensions", specifier = ">=4.5.0" },
+    { name = "universal-pathlib", specifier = ">=0.2.6" },
 ]
 provides-extras = ["faker", "jwt", "msgspec", "parquet", "s3", "ssh", "testing"]
 
@@ -2671,6 +2644,7 @@ dev = [
     { name = "moto", specifier = ">=5.0.14" },
     { name = "mypy", specifier = ">=1.9" },
     { name = "myst-parser", specifier = ">=3" },
+    { name = "pyarrow-stubs", specifier = ">=19.1" },
     { name = "pytest", specifier = ">=7.2.1" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
@@ -2721,6 +2695,7 @@ testing = [
 ]
 typing = [
     { name = "mypy", specifier = ">=1.9" },
+    { name = "pyarrow-stubs", specifier = ">=19.1" },
     { name = "types-jsonschema", specifier = ">=4.17.0.6" },
     { name = "types-pytz", specifier = ">=2022.7.1.2" },
     { name = "types-pyyaml", specifier = ">=6.0.12" },
@@ -3238,6 +3213,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/95/32/1a225d6164441be760d75c2c42e2780dc0873fe382da3e98a2e1e48361e5/tzdata-2025.2.tar.gz", hash = "sha256:b60a638fcc0daffadf82fe0f57e53d06bdec2f36c4df66280ae79bce6bd6f2b9", size = 196380, upload-time = "2025-03-23T13:54:43.652Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5c/23/c7abc0ca0a1526a0774eca151daeb8de62ec457e77262b66b359c3c7679e/tzdata-2025.2-py2.py3-none-any.whl", hash = "sha256:1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8", size = 347839, upload-time = "2025-03-23T13:54:41.845Z" },
+]
+
+[[package]]
+name = "universal-pathlib"
+version = "0.2.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fsspec" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/eb/21/dd871495af3933e585261adce42678dcdf1168c9d6fa0a8f7b6565e54472/universal_pathlib-0.2.6.tar.gz", hash = "sha256:50817aaeaa9f4163cb1e76f5bdf84207fa05ce728b23fd779479b3462e5430ac", size = 175427, upload-time = "2024-12-13T00:58:27.514Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e5/4d/2e577f6db7aa0f932d19f799c18f604b2b302c65f733419b900ec07dbade/universal_pathlib-0.2.6-py3-none-any.whl", hash = "sha256:700dec2b58ef34b87998513de6d2ae153b22f083197dfafb8544744edabd1b18", size = 50087, upload-time = "2024-12-13T00:58:24.582Z" },
 ]
 
 [[package]]
