@@ -68,14 +68,6 @@ class Point(t.Generic[_TVal]):
     value: _TVal
     tags: dict[str, t.Any] = field(default_factory=dict)
 
-    def __str__(self) -> str:
-        """Convert this measure to a string.
-
-        Returns:
-            A string.
-        """
-        return self.to_json()
-
     def to_dict(self) -> dict[str, t.Any]:
         """Convert this measure to a dictionary.
 
@@ -88,14 +80,6 @@ class Point(t.Generic[_TVal]):
             "value": self.value,
             "tags": self.tags,
         }
-
-    def to_json(self) -> str:
-        """Convert this measure to a JSON string.
-
-        Returns:
-            A JSON string.
-        """
-        return json.dumps(self.to_dict())
 
 
 class SingerMetricsFormatter(logging.Formatter):
