@@ -140,7 +140,7 @@ def test_get_unsupported_batcher():
             "file://\\\\remotemachine\\C$\\batches\\file",
             ("file://///remotemachine/C$/batches", "file"),
             marks=(pytest.mark.windows,),
-            id="windows-local-remote",
+            id="windows-remote",
         ),
     ],
 )
