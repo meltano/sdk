@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
-- [#3020](https://github.com/meltano/sdk/issues/3020) In SQL targets, use stream name as table name instead of splitting by hyphen if `default_target_schema` is speficied
+- [#3020](https://github.com/meltano/sdk/issues/3020) In SQL targets, use stream name as table name instead of splitting by hyphen if `default_target_schema` is specified
 - [#3019](https://github.com/meltano/sdk/issues/3019) Encode `nan`, `inf` and `-inf` values as `null` in Singer stream
 - [#2999](https://github.com/meltano/sdk/issues/2999) Preserve microsecond precision when comparing datetime replication values
 - [#2986](https://github.com/meltano/sdk/issues/2986) Stop loading package files to allow taps and targets to run as Python scripts
