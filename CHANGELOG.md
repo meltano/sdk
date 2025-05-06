@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.46.0 (2025-05-06)
+
+### ✨ New
+
+- [#2162](https://github.com/meltano/sdk/issues/2162) Expose metric dictionary to make logging metrics as JSON easier
+- [#2977](https://github.com/meltano/sdk/issues/2977) Limit extraction to 25 records by default in built-in tap tests
+- [#2989](https://github.com/meltano/sdk/issues/2989) Allow pagination to continue after an empty page
+
+### 🐛 Fixes
+
+- [#3020](https://github.com/meltano/sdk/issues/3020) In SQL targets, use stream name as table name instead of splitting by hyphen if `default_target_schema` is specified
+- [#3019](https://github.com/meltano/sdk/issues/3019) Encode `nan`, `inf` and `-inf` values as `null` in Singer stream
+- [#2999](https://github.com/meltano/sdk/issues/2999) Preserve microsecond precision when comparing datetime replication values
+- [#2986](https://github.com/meltano/sdk/issues/2986) Stop loading package files to allow taps and targets to run as Python scripts
+- [#3009](https://github.com/meltano/sdk/issues/3009) Fix infinite recursion error when resolving JSON schemas with circular references
+
+### ⚙️ Under the Hood
+
+- [#2990](https://github.com/meltano/sdk/issues/2990) Replace filesystem library used for BATCH mode
+- [#3010](https://github.com/meltano/sdk/issues/3010) Use dict instead of `OrderedDict`
+
 ## v0.45.11 (2025-04-28)
 
 ### 🐛 Fixes
