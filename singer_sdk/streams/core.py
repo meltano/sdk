@@ -1173,7 +1173,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 for idx, record_result in enumerate(self.get_records(current_context)):
                     self._check_max_record_limit(current_record_index=record_index)
 
-                    if isinstance(record_result, tuple):
+                    if isinstance(record_result, tuple):  # pragma: no cover
                         # Tuple items should be the record and the child context
                         warnings.warn(
                             "Yielding a tuple of (record, child_context) is "
