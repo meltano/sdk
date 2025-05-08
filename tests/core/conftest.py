@@ -42,9 +42,9 @@ class SimpleTestStream(Stream):
         context: dict | None,
     ) -> t.Iterable[dict[str, t.Any]]:
         """Generate records."""
-        yield {"id": 1, "value": "Egypt"}
-        yield {"id": 2, "value": "Germany"}
-        yield {"id": 3, "value": "India"}
+        yield {"id": 1, "value": "Egypt", "updatedAt": "2021-01-01T00:00:00Z"}
+        yield {"id": 2, "value": "Germany", "updatedAt": "2021-01-01T00:00:01Z"}
+        yield {"id": 3, "value": "India", "updatedAt": "2021-01-01T00:00:02Z"}
 
     @contextmanager
     def with_replication_method(self, method: str | None) -> t.Iterator[None]:

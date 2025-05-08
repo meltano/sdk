@@ -32,6 +32,7 @@ if t.TYPE_CHECKING:
     import requests_mock
 
     from singer_sdk import Stream, Tap
+    from singer_sdk.helpers.types import Context, Record
     from tests.core.conftest import SimpleTestTap
 
 CONFIG_START_DATE = "2021-01-01"
@@ -72,6 +73,17 @@ class GraphqlTestStream(GraphQLStream):
         Property("value", StringType, required=True),
     ).to_dict()
     replication_key = "updatedAt"
+
+
+class PostProcessStream(SimpleTestStream):
+    """Test stream with post-processing."""
+
+    def post_process(self, record: Record, context: Context | None) -> Record | None:  # noqa: ARG002
+        # Drop even IDs
+        if record["id"] % 2 == 0:
+            return None
+
+        return record
 
 
 @pytest.fixture
@@ -737,3 +749,13 @@ def test_stream_class_selection(tap_class, input_catalog, selection):
     assert all(
         tap.streams[stream].selected is selection[stream] for stream in selection
     )
+
+
+def test_post_process(tap: Tap):
+    """Test post-processing is applied to records."""
+    stream = PostProcessStream(tap)
+    records = list(stream._sync_records(None, write_messages=False))
+    assert records == [
+        {"id": 1, "value": "Egypt", "updatedAt": "2021-01-01T00:00:00Z"},
+        {"id": 3, "value": "India", "updatedAt": "2021-01-01T00:00:02Z"},
+    ]
