@@ -33,8 +33,8 @@ Within each stream definition, the following are considered the minimal effectiv
 implementation within the SDK:
 
 1. `replication_key` and `replication_key_value` - These two keys together should designate
-the incremental replication key (if applicable) and the highest value yet seen for this
-property.
+   the incremental replication key (if applicable) and the highest value yet seen for this
+   property.
 
 ## State Message Frequency
 

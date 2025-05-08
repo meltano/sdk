@@ -89,16 +89,16 @@ Note that the first static example was more concise while this second example is
 ### In summary
 
 - Use the static syntax whenever you are dealing with stream properties that won't change
-and use dynamic syntax whenever you need to calculate the stream's properties or discover them dynamically.
+  and use dynamic syntax whenever you need to calculate the stream's properties or discover them dynamically.
 - For those new to Python, note that the dynamic syntax is identical to declaring a function or method, with
-the one difference of having the `@property` decorator directly above the method definition. This one change
-tells Python that you want to be able to access the method as a property (as in `pk = stream.primary_key`)
-instead of as a callable function (as in `pk = stream.primary_key()`).
+  the one difference of having the `@property` decorator directly above the method definition. This one change
+  tells Python that you want to be able to access the method as a property (as in `pk = stream.primary_key`)
+  instead of as a callable function (as in `pk = stream.primary_key()`).
 
 ### Troubleshooting
 
 - If you are working on a SDK tap/target that uses a `poetry-core` version before v1.0.8 in the `build-system` table of `pyproject.toml` you may have trouble specifying a `pip_url` in Meltano with "editable mode" (`-e path/to/package`) enabled
-(as per [#238](https://gitlab.com/meltano/sdk/-/issues/238)). This can be resolved by upgrading
-the version of `poetry-core>=1.0.8`.
+  (as per [#238](https://gitlab.com/meltano/sdk/-/issues/238)). This can be resolved by upgrading
+  the version of `poetry-core>=1.0.8`.
 
 For more examples, please see the [Code Samples](./code_samples.md) page.
