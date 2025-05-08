@@ -88,7 +88,7 @@ uv sync
 ### Create and Run Tests
 
 Create tests within the `tests` subfolder and
-  then run:
+then run:
 
 ```bash
 uv run pytest
