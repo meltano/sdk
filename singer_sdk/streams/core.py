@@ -946,17 +946,6 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 manifest=manifest,
             )
 
-    def _prepare_record(
-        self,
-        record: types.Record,
-        context: types.Context | None,
-    ) -> types.Record | None:
-        if (transformed_record := self.post_process(record, context)) is not None:
-            return transformed_record
-
-        # Record filtered out during post_process()
-        return None
-
     def _write_record_message(self, record: types.Record) -> None:
         """Write out a RECORD message.
 
@@ -1193,7 +1182,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     else:
                         record = record_result
 
-                    record = self._prepare_record(record, current_context)
+                    record = self.post_process(record, current_context)
                     if record is None:
                         continue
 
