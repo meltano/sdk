@@ -75,17 +75,6 @@ class GraphqlTestStream(GraphQLStream):
     replication_key = "updatedAt"
 
 
-class PostProcessStream(SimpleTestStream):
-    """Test stream with post-processing."""
-
-    def post_process(self, record: Record, context: Context | None) -> Record | None:  # noqa: ARG002
-        # Drop even IDs
-        if record["id"] % 2 == 0:
-            return None
-
-        return record
-
-
 @pytest.fixture
 def stream(tap):
     """Create a new stream instance."""
@@ -751,11 +740,38 @@ def test_stream_class_selection(tap_class, input_catalog, selection):
     )
 
 
-def test_post_process(tap: Tap):
+def test_post_process_drops_record(tap: Tap):
     """Test post-processing is applied to records."""
-    stream = PostProcessStream(tap)
+
+    class DropsRecord(SimpleTestStream):
+        def post_process(
+            self,
+            record: Record,
+            context: Context | None,  # noqa: ARG002
+        ) -> Record | None:
+            # Drop even IDs
+            return None if record["id"] % 2 == 0 else record
+
+    stream = DropsRecord(tap)
     records = list(stream._sync_records(None, write_messages=False))
     assert records == [
         {"id": 1, "value": "Egypt", "updatedAt": "2021-01-01T00:00:00Z"},
         {"id": 3, "value": "India", "updatedAt": "2021-01-01T00:00:02Z"},
     ]
+
+
+def test_post_process_transforms_record(tap: Tap):
+    """Test post-processing is applied to records."""
+
+    class TransformsRecord(SimpleTestStream):
+        def post_process(
+            self,
+            record: Record,
+            context: Context | None,  # noqa: ARG002
+        ) -> Record | None:
+            record["extra"] = "transformed"
+            return record
+
+    stream = TransformsRecord(tap)
+    records = stream._sync_records(None, write_messages=False)
+    assert all(record["extra"] == "transformed" for record in records)
