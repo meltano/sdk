@@ -1175,9 +1175,16 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
                     if isinstance(record_result, tuple):
                         # Tuple items should be the record and the child context
+                        warnings.warn(
+                            "Yielding a tuple of (record, child_context) is "
+                            "deprecated. Please yield a single record instead.",
+                            SingerSDKDeprecationWarning,
+                            stacklevel=2,
+                        )
                         record, child_context = record_result
                     else:
                         record = record_result
+
                     try:
                         self._process_record(
                             record,
