@@ -55,7 +55,6 @@ from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, Stream
 
 if t.TYPE_CHECKING:
     import logging
-    from collections.abc import Generator, Iterable, Mapping, Sequence
 
     from singer_sdk.helpers import types
     from singer_sdk.helpers._compat import Traversable
@@ -153,7 +152,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
-        self._primary_keys: Sequence[str] | None = None
+        self._primary_keys: t.Sequence[str] | None = None
         self._state_partitioning_keys: list[str] | None = None
         self._schema_filepath: Path | Traversable | None = None
         self._metadata: singer.MetadataMapping | None = None
@@ -517,7 +516,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._schema
 
     @property
-    def primary_keys(self) -> Sequence[str] | None:
+    def primary_keys(self) -> t.Sequence[str] | None:
         """Get primary keys.
 
         Returns:
@@ -526,7 +525,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._primary_keys or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: Sequence[str] | None) -> None:
+    def primary_keys(self, new_value: t.Sequence[str] | None) -> None:
         """Set primary key(s) for the stream.
 
         Args:
@@ -670,7 +669,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return singer.Catalog([(self.tap_stream_id, self._singer_catalog_entry)])
 
     @property
-    def config(self) -> Mapping[str, t.Any]:
+    def config(self) -> t.Mapping[str, t.Any]:
         """Get stream configuration.
 
         Returns:
@@ -858,7 +857,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def _generate_schema_messages(
         self,
-    ) -> Generator[singer.SchemaMessage, None, None]:
+    ) -> t.Generator[singer.SchemaMessage, None, None]:
         """Generate schema messages from stream maps.
 
         Yields:
@@ -897,7 +896,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def _generate_record_messages(
         self,
         record: types.Record,
-    ) -> Generator[singer.RecordMessage, None, None]:
+    ) -> t.Generator[singer.RecordMessage, None, None]:
         """Write out a RECORD message.
 
         Args:
@@ -930,7 +929,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self,
         encoding: BaseBatchFileEncoding,
         manifest: list[str],
-    ) -> Generator[SDKBatchMessage, None, None]:
+    ) -> t.Generator[SDKBatchMessage, None, None]:
         """Write out a BATCH message.
 
         Args:
@@ -1143,7 +1142,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         context: types.Context | None = None,
         *,
         write_messages: bool = True,
-    ) -> Generator[dict, t.Any, t.Any]:
+    ) -> t.Generator[dict, t.Any, t.Any]:
         """Sync records, emitting RECORD and STATE messages.
 
         Args:
@@ -1421,7 +1420,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self,
         record: types.Record,
         context: types.Context | None,
-    ) -> Iterable[types.Context | None]:
+    ) -> t.Iterable[types.Context | None]:
         """Generate child contexts.
 
         Args:
@@ -1439,7 +1438,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def get_records(
         self,
         context: types.Context | None,
-    ) -> Iterable[types.Record | tuple[dict, dict | None]]:
+    ) -> t.Iterable[types.Record | tuple[dict, dict | None]]:
         """Abstract record generator function. Must be overridden by the child class.
 
         Each record emitted should be a dictionary of property names to their values.
@@ -1469,7 +1468,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             context: Stream partition or context dictionary.
         """
 
-    def get_batch_config(self, config: Mapping) -> BatchConfig | None:  # noqa: PLR6301
+    def get_batch_config(self, config: t.Mapping) -> BatchConfig | None:  # noqa: PLR6301
         """Return the batch config for this stream.
 
         Args:
@@ -1485,7 +1484,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self,
         batch_config: BatchConfig,
         context: types.Context | None = None,
-    ) -> Iterable[tuple[BaseBatchFileEncoding, list[str]]]:
+    ) -> t.Iterable[tuple[BaseBatchFileEncoding, list[str]]]:
         """Batch generator function.
 
         Developers are encouraged to override this method to customize batching
