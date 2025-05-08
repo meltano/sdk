@@ -1452,6 +1452,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         More info: :doc:`/parent_streams`
 
+        .. versionchanged:: 0.47.0
+           Deprecated support for returning a tuple of (record, child_context).
+
         Args:
             context: Stream partition or context dictionary.
         """
