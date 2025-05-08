@@ -958,22 +958,13 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         # Record filtered out during post_process()
         return None
 
-    def _write_record_message(
-        self,
-        record: types.Record,
-        *,
-        context: types.Context | None = None,
-    ) -> None:
+    def _write_record_message(self, record: types.Record) -> None:
         """Write out a RECORD message.
 
         Args:
             record: A single stream record.
-            context: Stream partition or context dictionary.
         """
-        if (prepared_record := self._prepare_record(record, context)) is None:
-            return
-
-        for record_message in self._generate_record_messages(prepared_record):
+        for record_message in self._generate_record_messages(record):
             self._tap.write_message(record_message)
 
         self._is_state_flushed = False
@@ -1166,13 +1157,16 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Yields:
             Each record from the source.
         """
+        # Type definitions
+        context_element: types.Context | None
+        record: types.Record | None
+        context_list: list[types.Context] | list[dict] | None
+
         # Initialize metrics
         record_counter = metrics.record_counter(self.name)
         timer = metrics.sync_timer(self.name)
 
         record_index = 0
-        context_element: types.Context | None
-        context_list: list[types.Context] | list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
@@ -1199,6 +1193,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                         record, child_context = record_result
                     else:
                         record = record_result
+
+                    record = self._prepare_record(record, current_context)
+                    if record is None:
+                        continue
+
                     try:
                         self._process_record(
                             record,
@@ -1219,7 +1218,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
                     if selected:
                         if write_messages:
-                            self._write_record_message(record, context=current_context)
+                            self._write_record_message(record)
 
                         self._increment_stream_state(record, context=current_context)
                         if (
