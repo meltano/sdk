@@ -14,8 +14,10 @@ from singer_sdk.singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.streams.core import REPLICATION_INCREMENTAL, Stream
 
 if t.TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+
     from singer_sdk.connectors.sql import FullyQualifiedName
-    from singer_sdk.helpers.types import Context
+    from singer_sdk.helpers.types import Context, Record
     from singer_sdk.tap_base import Tap
 
 
@@ -107,7 +109,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self._singer_catalog_entry.tap_stream_id
 
     @property
-    def primary_keys(self) -> t.Sequence[str] | None:
+    def primary_keys(self) -> Sequence[str] | None:
         """Get primary keys from the catalog entry definition.
 
         Returns:
@@ -116,7 +118,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self._singer_catalog_entry.metadata.root.table_key_properties or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: t.Sequence[str]) -> None:
+    def primary_keys(self, new_value: Sequence[str]) -> None:
         """Set or reset the primary key(s) in the stream's catalog entry.
 
         Args:
@@ -168,7 +170,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return super().effective_schema
 
     # Get records from stream
-    def get_records(self, context: Context | None) -> t.Iterable[dict[str, t.Any]]:
+    def get_records(self, context: Context | None) -> Iterable[Record]:
         """Return a generator of record-type dictionary objects.
 
         If the stream has a replication_key value defined, records will be sorted by the
@@ -218,12 +220,9 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
 
         with self.connector._connect() as conn:  # noqa: SLF001
-            for record in conn.execute(query).mappings():
-                transformed_record = self.post_process(dict(record))
-                if transformed_record is None:
-                    # Record filtered out during post_process()
-                    continue
-                yield transformed_record
+            for row in conn.execute(query).mappings():
+                # https://github.com/sqlalchemy/sqlalchemy/discussions/10053#discussioncomment-6344965
+                yield dict(row)
 
     @property
     def is_sorted(self) -> bool:

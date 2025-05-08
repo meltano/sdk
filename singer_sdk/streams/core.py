@@ -55,6 +55,7 @@ from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, Stream
 
 if t.TYPE_CHECKING:
     import logging
+    from collections.abc import Generator, Iterable, Mapping, Sequence
 
     from singer_sdk.helpers import types
     from singer_sdk.helpers._compat import Traversable
@@ -152,7 +153,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
-        self._primary_keys: t.Sequence[str] | None = None
+        self._primary_keys: Sequence[str] | None = None
         self._state_partitioning_keys: list[str] | None = None
         self._schema_filepath: Path | Traversable | None = None
         self._metadata: singer.MetadataMapping | None = None
@@ -516,7 +517,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._schema
 
     @property
-    def primary_keys(self) -> t.Sequence[str] | None:
+    def primary_keys(self) -> Sequence[str] | None:
         """Get primary keys.
 
         Returns:
@@ -525,7 +526,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._primary_keys or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: t.Sequence[str] | None) -> None:
+    def primary_keys(self, new_value: Sequence[str] | None) -> None:
         """Set primary key(s) for the stream.
 
         Args:
@@ -669,7 +670,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return singer.Catalog([(self.tap_stream_id, self._singer_catalog_entry)])
 
     @property
-    def config(self) -> t.Mapping[str, t.Any]:
+    def config(self) -> Mapping[str, t.Any]:
         """Get stream configuration.
 
         Returns:
@@ -857,7 +858,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def _generate_schema_messages(
         self,
-    ) -> t.Generator[singer.SchemaMessage, None, None]:
+    ) -> Generator[singer.SchemaMessage, None, None]:
         """Generate schema messages from stream maps.
 
         Yields:
@@ -896,7 +897,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def _generate_record_messages(
         self,
         record: types.Record,
-    ) -> t.Generator[singer.RecordMessage, None, None]:
+    ) -> Generator[singer.RecordMessage, None, None]:
         """Write out a RECORD message.
 
         Args:
@@ -929,7 +930,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self,
         encoding: BaseBatchFileEncoding,
         manifest: list[str],
-    ) -> t.Generator[SDKBatchMessage, None, None]:
+    ) -> Generator[SDKBatchMessage, None, None]:
         """Write out a BATCH message.
 
         Args:
@@ -946,13 +947,33 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 manifest=manifest,
             )
 
-    def _write_record_message(self, record: types.Record) -> None:
+    def _prepare_record(
+        self,
+        record: types.Record,
+        context: types.Context | None,
+    ) -> types.Record | None:
+        if (transformed_record := self.post_process(dict(record), context)) is not None:
+            return transformed_record
+
+        # Record filtered out during post_process()
+        return None
+
+    def _write_record_message(
+        self,
+        record: types.Record,
+        *,
+        context: types.Context | None = None,
+    ) -> None:
         """Write out a RECORD message.
 
         Args:
             record: A single stream record.
+            context: Stream partition or context dictionary.
         """
-        for record_message in self._generate_record_messages(record):
+        if (prepared_record := self._prepare_record(record, context)) is None:
+            return
+
+        for record_message in self._generate_record_messages(prepared_record):
             self._tap.write_message(record_message)
 
         self._is_state_flushed = False
@@ -1131,7 +1152,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         context: types.Context | None = None,
         *,
         write_messages: bool = True,
-    ) -> t.Generator[dict, t.Any, t.Any]:
+    ) -> Generator[dict, t.Any, t.Any]:
         """Sync records, emitting RECORD and STATE messages.
 
         Args:
@@ -1401,7 +1422,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self,
         record: types.Record,
         context: types.Context | None,
-    ) -> t.Iterable[types.Context | None]:
+    ) -> Iterable[types.Context | None]:
         """Generate child contexts.
 
         Args:
@@ -1419,7 +1440,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def get_records(
         self,
         context: types.Context | None,
-    ) -> t.Iterable[dict | tuple[dict, dict | None]]:
+    ) -> Iterable[types.Record | tuple[dict, dict | None]]:
         """Abstract record generator function. Must be overridden by the child class.
 
         Each record emitted should be a dictionary of property names to their values.
@@ -1449,7 +1470,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             context: Stream partition or context dictionary.
         """
 
-    def get_batch_config(self, config: t.Mapping) -> BatchConfig | None:  # noqa: PLR6301
+    def get_batch_config(self, config: Mapping) -> BatchConfig | None:  # noqa: PLR6301
         """Return the batch config for this stream.
 
         Args:
@@ -1465,7 +1486,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self,
         batch_config: BatchConfig,
         context: types.Context | None = None,
-    ) -> t.Iterable[tuple[BaseBatchFileEncoding, list[str]]]:
+    ) -> Iterable[tuple[BaseBatchFileEncoding, list[str]]]:
         """Batch generator function.
 
         Developers are encouraged to override this method to customize batching
@@ -1491,7 +1512,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self,
         row: types.Record,
         context: types.Context | None = None,  # noqa: ARG002
-    ) -> dict | None:
+    ) -> types.Record | None:
         """As needed, append or transform raw data to match expected structure.
 
         Optional. This method gives developers an opportunity to "clean up" the results
