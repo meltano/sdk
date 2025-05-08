@@ -1,0 +1,5 @@
+# chore: Enforce `import typing as t` by configuring `ICN003`
+54222bb2dc1903c0816347952c6a77c30267f30f
+
+# docs: Auto-format markdown with `mdformat`
+e91be649cb3494479ae4096729f21a55b0034917
