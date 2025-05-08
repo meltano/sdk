@@ -951,7 +951,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         record: types.Record,
         context: types.Context | None,
     ) -> types.Record | None:
-        if (transformed_record := self.post_process(dict(record), context)) is not None:
+        if (transformed_record := self.post_process(record, context)) is not None:
             return transformed_record
 
         # Record filtered out during post_process()
