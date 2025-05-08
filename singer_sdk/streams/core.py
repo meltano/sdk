@@ -1177,7 +1177,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                         # Tuple items should be the record and the child context
                         warnings.warn(
                             "Yielding a tuple of (record, child_context) is "
-                            "deprecated. Please yield a single record instead.",
+                            "deprecated and will be removed in version 0.49 "
+                            "at the earliest. "
+                            "Please yield a single item instead.",
                             SingerSDKDeprecationWarning,
                             stacklevel=2,
                         )
