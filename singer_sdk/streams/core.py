@@ -1219,7 +1219,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
                     if selected:
                         if write_messages:
-                            self._write_record_message(record)
+                            self._write_record_message(record, context=current_context)
 
                         self._increment_stream_state(record, context=current_context)
                         if (
