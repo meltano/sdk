@@ -385,7 +385,7 @@ unfixable = [
     "INP",      # Allow implicit namespace packages in tests
     "PLR2004",
     "S101",
-    "SLF001",
+    "SLF001",   # Allow private method access in tests
     "PLC2701",  # Allow usage of private members in tests
     "PLR6301",  # Don't suggest making test methods static, etc.
 ]
