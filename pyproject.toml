@@ -333,7 +333,7 @@ select = [
     "A",    # flake8-builtins
     "COM",  # flake8-commas
     "C4",   # flake8-comprehensions
-    "DTZ",  # flake8-datetimezs
+    "DTZ",  # flake8-datetimez
     "T10",  # flake8-debugger
     "EM",   # flake8-errmsg
     "FA",   # flake8-future-annotations
