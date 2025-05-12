@@ -73,3 +73,12 @@ repos:
   rev: v2.4.1
   hooks:
   - id: codespell
+
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.22
+  hooks:
+  - id: mdformat
+    exclude: tests/snapshots/about_format/markdown\.snap\.md
+    args: [--extensions, frontmatter]
+    additional_dependencies:
+    - mdformat-frontmatter

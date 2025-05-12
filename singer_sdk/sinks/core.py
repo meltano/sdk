@@ -748,10 +748,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 storage = StorageTarget.from_url(head)
 
             if encoding.format == BatchFileFormat.JSONL:
-                with (
-                    storage.fs(create=False) as batch_fs,
-                    batch_fs.open(tail, mode="rb") as file,
-                ):
+                with storage.open(tail, mode="rb") as file:
                     if encoding.compression == "gzip":
                         with gzip_open(file) as context_file:
                             context = {
@@ -769,10 +766,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             ):
                 import pyarrow.parquet as pq  # noqa: PLC0415
 
-                with (
-                    storage.fs(create=False) as batch_fs,
-                    batch_fs.open(tail, mode="rb") as file,
-                ):
+                with storage.open(tail, mode="rb") as file:
                     table = pq.read_table(file)
                     context = {"records": table.to_pylist()}
                     self.record_counter_metric.increment(len(context["records"]))

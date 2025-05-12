@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 import enum
-import platform
 import typing as t
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
-from urllib.parse import ParseResult, urlencode, urlparse
+from functools import cached_property
+from urllib.parse import urlparse
 
-import fs
+from upath import UPath
 
 from singer_sdk.singerlib.messages import Message, SingerMessageType
 
 if t.TYPE_CHECKING:
-    from fs.base import FS
+    from fsspec import AbstractFileSystem
 
 DEFAULT_BATCH_SIZE = 10000
 
@@ -101,7 +101,7 @@ class SDKBatchMessage(Message):
 
 @dataclass
 class StorageTarget:
-    """Storage target."""
+    """Storage target for batch files."""
 
     root: str
     """"The root directory of the storage target."""
@@ -132,6 +132,11 @@ class StorageTarget:
         """
         return cls(**data)
 
+    @cached_property
+    def _root_path(self) -> UPath:
+        """The root path of the storage target."""
+        return UPath(self.root, **self.params).resolve()
+
     @staticmethod
     def split_url(url: str) -> tuple[str, str]:
         """Split a URL into a head and tail pair.
@@ -142,13 +147,9 @@ class StorageTarget:
         Returns:
             A tuple of the head and tail parts of the URL.
         """
-        if platform.system() == "Windows" and "\\" in url:
-            # Original code from pyFileSystem split
-            # Augmented slightly to properly handle Windows paths
-            split = url.rsplit("\\", 1)
-            return (split[0] or "\\", split[1])
-
-        return fs.path.split(url)
+        url_path = UPath(url)
+        head, tail = url_path.parts[:-1], url_path.parts[-1]
+        return url_path.with_segments(*head).as_uri(), tail
 
     @classmethod
     def from_url(cls, url: str) -> StorageTarget:
@@ -164,28 +165,29 @@ class StorageTarget:
         new_url = parsed_url._replace(query="")
         return cls(root=new_url.geturl())
 
-    @property
-    def fs_url(self) -> ParseResult:
-        """Get the storage target URL.
+    def get_url(self, filename: str) -> str:
+        """Get the filename URL for the storage target.
+
+        Args:
+            filename: The filename to get the URL for.
 
         Returns:
             The storage target URL.
         """
-        return urlparse(self.root)._replace(query=urlencode(self.params))
+        return self._root_path.joinpath(filename).as_uri()
 
     @contextmanager
-    def fs(self, **kwargs: t.Any) -> t.Generator[FS, None, None]:
-        """Get a filesystem object for the storage target.
-
-        Args:
-            kwargs: Additional arguments to pass ``f`.open_fs``.
+    def _fs(self) -> t.Generator[AbstractFileSystem, None, None]:
+        """Get filesystem.
 
         Returns:
             The filesystem object.
         """
-        filesystem = fs.open_fs(self.fs_url.geturl(), **kwargs)
-        yield filesystem
-        filesystem.close()
+        fs = self._root_path.fs
+        fs.start_transaction()
+        self._root_path.mkdir(parents=True, exist_ok=True)
+        yield fs
+        fs.end_transaction()
 
     @contextmanager
     def open(
@@ -202,13 +204,8 @@ class StorageTarget:
         Returns:
             The opened file.
         """
-        filesystem = fs.open_fs(self.root, writeable=True, create=True)
-        fo = filesystem.open(filename, mode=mode)
-        try:
-            yield fo
-        finally:
-            fo.close()
-            filesystem.close()
+        with self._fs() as fs, fs.open(self._root_path / filename, mode) as f:
+            yield f
 
 
 @dataclass

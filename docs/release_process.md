@@ -14,9 +14,9 @@ The Singer SDK currently follows roughly a [ZeroVer versioning scheme](https://0
 The following steps are required to create a stable release:
 
 1. Trigger the `.github/workflows/version_bump.yml` workflow from the GitHub Actions tab, or from the CLI with `gh workflow run version_bump.yml`.
-2. Wait for the workflow to complete. It will create a new PR with the version bump, and also a draft release.
-3. Review the PR for any errors in the changelog and version bumps, then merge it.
-4. Publish the draft release from the GitHub Releases tab.
+1. Wait for the workflow to complete. It will create a new PR with the version bump, and also a draft release.
+1. Review the PR for any errors in the changelog and version bumps, then merge it.
+1. Publish the draft release from the GitHub Releases tab.
 
 #### Feature releases
 

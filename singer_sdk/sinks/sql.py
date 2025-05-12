@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import functools
 import re
 import typing as t
 import warnings
@@ -73,6 +74,15 @@ class SQLSink(BatchSink, t.Generic[_C]):
         """
         return self.connector.connection
 
+    @functools.cached_property
+    def default_target_schema(self) -> str | None:
+        """Return the default target schema.
+
+        Returns:
+            The default target schema.
+        """
+        return self.config.get("default_target_schema", None)
+
     @property
     def table_name(self) -> str:
         """Return the table name, with no schema or database part.
@@ -80,6 +90,9 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Returns:
             The target table name.
         """
+        if self.default_target_schema:
+            return self.stream_name
+
         parts = self.stream_name.split("-")
         table = self.stream_name if len(parts) == 1 else parts[-1]
         return self.conform_name(table, "table")
@@ -91,17 +104,14 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Returns:
             The target schema name.
         """
-        # Look for a default_target_scheme in the configuration file
-        default_target_schema: str = self.config.get("default_target_schema", None)
-        parts = self.stream_name.split("-")
-
         # 1) When default_target_scheme is in the configuration use it
         # 2) if the streams are in <schema>-<table> format use the
         #    stream <schema>
         # 3) Return None if you don't find anything
-        if default_target_schema:
-            return default_target_schema
+        if self.default_target_schema:
+            return self.default_target_schema
 
+        parts = self.stream_name.split("-")
         return self.conform_name(parts[-2], "schema") if len(parts) in {2, 3} else None
 
     @property
