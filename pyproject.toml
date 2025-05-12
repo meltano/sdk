@@ -60,8 +60,7 @@ s3 = [
 ]
 
 parquet = [
-    "numpy>=1.22",
-    "pyarrow>=13",
+    "pyarrow>=15",
 ]
 
 testing = [
