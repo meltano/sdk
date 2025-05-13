@@ -32,9 +32,9 @@ license-files = [ "LICENSE" ]
 requires-python = ">=3.9"
 dependencies = [
     {%- if cookiecutter.faker_extra %}
-    "singer-sdk[faker]~=0.46.0",
+    "singer-sdk[faker]~=0.46.1",
     {%- else %}
-    "singer-sdk~=0.46.0",
+    "singer-sdk~=0.46.1",
     {%- endif %}
 ]
 
