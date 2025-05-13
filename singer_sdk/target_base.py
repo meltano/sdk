@@ -32,6 +32,7 @@ from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import BaseSingerReader
 
 if t.TYPE_CHECKING:
+    from collections.abc import Iterable
     from pathlib import PurePath
 
     from singer_sdk.connectors import SQLConnector
@@ -89,7 +90,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
             message_reader=message_reader,
         )
 
-        self._latest_state: dict[str, dict] = {}
+        self._latest_state: dict[str, dict] | None = None
         self._drained_state: dict[str, dict] = {}
         self._sinks_active: dict[str, Sink] = {}
         self._sinks_to_clear: list[Sink] = []
@@ -479,17 +480,19 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
             is_endofpipe: This is called after the target instance has finished
                 listening to the stdin.
         """
-        state = copy.deepcopy(self._latest_state)
         self._drain_all(self._sinks_to_clear, 1)
         if is_endofpipe:
             for sink in self._sinks_to_clear:
                 sink.clean_up()
         self._sinks_to_clear = []
-        self._drain_all(list(self._sinks_active.values()), self.max_parallelism)
+        self._drain_all(self._sinks_active.values(), self.max_parallelism)
         if is_endofpipe:
             for sink in self._sinks_active.values():
                 sink.clean_up()
-        self._write_state_message(state)
+
+        if self._latest_state is not None:
+            self._write_state_message(copy.deepcopy(self._latest_state))
+
         self._reset_max_record_age()
 
     @t.final
@@ -509,7 +512,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
             sink.process_batch(draining_status)
         sink.mark_drained()
 
-    def _drain_all(self, sink_list: list[Sink], parallelism: int) -> None:
+    def _drain_all(self, sink_list: Iterable[Sink], parallelism: int) -> None:
         if parallelism == 1:
             for sink in sink_list:
                 self.drain_one(sink)
