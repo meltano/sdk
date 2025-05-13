@@ -70,7 +70,7 @@ def mypy(session: nox.Session) -> None:
     session.run_install(
         "uv",
         "sync",
-        "--frozen",
+        "--locked",
         "--no-dev",
         "--group=typing",
         *(f"--extra={extra}" for extra in extras),
@@ -94,7 +94,7 @@ def tests(session: nox.Session) -> None:
     session.run_install(
         "uv",
         "sync",
-        "--frozen",
+        "--locked",
         "--no-dev",
         "--group=testing",
         *(f"--extra={extra}" for extra in extras),
@@ -128,7 +128,7 @@ def coverage(session: nox.Session) -> None:
     session.run_install(
         "uv",
         "sync",
-        "--frozen",
+        "--locked",
         "--no-dev",
         "--group=testing",
         env=_install_env(session),
@@ -151,7 +151,7 @@ def benches(session: nox.Session) -> None:
     session.run_install(
         "uv",
         "sync",
-        "--frozen",
+        "--locked",
         "--no-dev",
         "--group=testing",
         *(f"--extra={extra}" for extra in extras),
@@ -182,7 +182,7 @@ def dependencies(session: nox.Session) -> None:
     session.run_install(
         "uv",
         "sync",
-        "--frozen",
+        "--locked",
         "--inexact",
         "--no-dev",
         *(f"--extra={extra}" for extra in extras),
@@ -208,7 +208,7 @@ def update_snapshots(session: nox.Session) -> None:
     session.run_install(
         "uv",
         "sync",
-        "--frozen",
+        "--locked",
         "--no-dev",
         "--group=testing",
         *(f"--extra={extra}" for extra in extras),
@@ -231,7 +231,7 @@ def doctest(session: nox.Session) -> None:
     session.run_install(
         "uv",
         "sync",
-        "--frozen",
+        "--locked",
         "--no-dev",
         "--group=testing",
         env=_install_env(session),
@@ -249,7 +249,7 @@ def docs(session: nox.Session) -> None:
     session.run_install(
         "uv",
         "sync",
-        "--frozen",
+        "--locked",
         "--no-dev",
         "--group=docs",
         env=_install_env(session),
@@ -279,7 +279,7 @@ def docs_serve(session: nox.Session) -> None:
     session.run_install(
         "uv",
         "sync",
-        "--frozen",
+        "--locked",
         "--inexact",
         "--no-dev",
         "--group=docs",
