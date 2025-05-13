@@ -176,7 +176,6 @@ def dependencies(session: nox.Session) -> None:
     session.run_install(
         *UV_SYNC_COMMAND,
         "--inexact",
-        "--no-dev",
         *(f"--extra={extra}" for extra in extras),
         env=_install_env(session),
     )
