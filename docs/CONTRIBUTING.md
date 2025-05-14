@@ -14,25 +14,16 @@ Contributors are expected to follow our [Code of Conduct](https://docs.meltano.c
 
 ## Setting up Prereqs
 
-Make sure [`poetry`](https://python-poetry.org/docs/),
+Make sure [`uv`](https://docs.astral.sh/uv/),
 [`pre-commit`](https://pre-commit.com/) and [`nox`](https://nox.thea.codes/en/stable/)
-are installed. You can use [`pipx`](https://pypa.github.io/pipx/) to install
-all of them. To install `pipx`:
+are installed. Once you have installed `uv`, you can use it to install other tools:
 
 ```bash
-pip3 install pipx
-pipx ensurepath
+uv tool install pre-commit
+uv tool install nox
 ```
 
-With `pipx` installed, you globally add the required tools:
-
-```bash
-pipx install poetry
-pipx install pre-commit
-pipx install nox
-```
-
-Now you can use Poetry to install package dependencies:
+Now you can use `uv` to install package dependencies:
 
 ```bash
 cd sdk
@@ -40,9 +31,7 @@ cd sdk
 
 ```bash
 # Install package and dependencies:
-poetry install
-# OR install in editable mode:
-poetry install --no-root
+uv sync --all-groups --all-extras
 ```
 
 ## Local Developer Setup
@@ -50,37 +39,39 @@ poetry install --no-root
 First clone, then...
 
 1. Ensure you have the correct test library, formatters, and linters installed:
-    - `poetry install`
-1. If you are going to update documentation, install the `docs` extras:
-    - `poetry install -E docs`
+
+   - `uv sync --all-groups --all-extras`
+
 1. The project has `pre-commit` hooks. Install them with:
-    - `pre-commit install`
+
+   - `pre-commit install`
+
 1. Most development tasks you might need should be covered by `nox` sessions. You can use `nox -l` to list all available tasks.
-For example:
+   For example:
 
-    - Run unit tests: `nox -r`.
+   - Run unit tests: `nox -r`.
 
-      We use `coverage` for code coverage metrics.
+     We use `coverage` for code coverage metrics.
 
-    - Run pre-commit hooks: `pre-commit run --all`.
+   - Run pre-commit hooks: `pre-commit run --all`.
 
-      We use [Ruff](https://github.com/charliermarsh/ruff),
-      [black](https://black.readthedocs.io/en/stable/index.html),
-      [flake8](https://flake8.pycqa.org/en/latest/) and
-      [mypy](https://mypy.readthedocs.io/en/stable/).
-      The project-wide max line length is `88`.
+     We use [Ruff](https://github.com/charliermarsh/ruff),
+     [black](https://black.readthedocs.io/en/stable/index.html),
+     [flake8](https://flake8.pycqa.org/en/latest/) and
+     [mypy](https://mypy.readthedocs.io/en/stable/).
+     The project-wide max line length is `88`.
 
-    - Build documentation: `nox -rs docs`
+   - Build documentation: `nox -rs docs`
 
-      We use `sphinx` to build documentation.
+     We use `sphinx` to build documentation.
 
 ### If you are using VSCode
 
 1. Make sure you have also installed the `Python` extension.
-1. Set interpreter to match poetry's virtualenv: run
-   `Python: Select interpreter` and select the poetry interpreter.
+1. Set interpreter to match uv's managed virtualenv: run
+   `Python: Select interpreter` and select the interpreter.
 1. The [pre-commit extension](https://marketplace.visualstudio.com/items?itemName=MarkLarah.pre-commit-vscode)
-will allow to run pre-commit hooks on the current file from the VSCode command palette.
+   will allow to run pre-commit hooks on the current file from the VSCode command palette.
 
 ## Testing Locally
 
@@ -145,13 +136,13 @@ def test_snapshot(snapshot, snapshot_dir):
 To update or generate snapshots, run the nox `update_snapshots` session
 
 ```bash
-nox -rs update_snapshots
+nox -rs snap
 ```
 
 or use the `--snapshot-update` flag
 
 ```bash
-poetry run pytest --snapshot-update -m 'snapshot'
+uv run pytest --snapshot-update -m 'snapshot'
 ```
 
 This will run all tests with the `snapshot` marker and update any snapshots that have changed.
@@ -174,7 +165,7 @@ Sphinx will automatically generate class stubs, so be sure to `git add` them.
 
 ## Semantic Pull Requests
 
-This repo uses the [semantic-prs](https://github.com/Ezard/semantic-prs) GitHub app to check all PRs againts the conventional commit syntax.
+This repo uses the [semantic-prs](https://github.com/Ezard/semantic-prs) GitHub app to check all PRs against the conventional commit syntax.
 
 Pull requests should be named according to the conventional commit syntax to streamline changelog and release notes management. We encourage (but do not require) the use of conventional commits in commit messages as well.
 
@@ -195,11 +186,12 @@ In general, PR titles should follow the format `<type>: <desc>`, where type is a
 
 Optionally, you may use the expanded syntax to specify a scope in the form `<type>(<scope>): <desc>`. Currently scopes are:
 
- scopes:
-  - `taps`       # tap SDK only
-  - `targets`    # target SDK only
-  - `mappers`    # mappers only
-  - `templates`  # cookiecutters
+scopes:
+
+- `taps` # tap SDK only
+- `targets` # target SDK only
+- `mappers` # mappers only
+- `templates` # cookiecutters
 
 More advanced rules and settings can be found within the file [`.github/semantic.yml`](https://github.com/meltano/sdk/blob/main/.github/semantic.yml).
 
@@ -208,7 +200,7 @@ More advanced rules and settings can be found within the file [`.github/semantic
 ### Universal Code Formatting
 
 - From the [Black](https://black.readthedocs.io) website:
-    > By using Black, you agree to cede control over minutiae of hand-formatting. In return, Black gives you speed, determinism, and freedom from pycodestyle nagging about formatting. You will save time and mental energy for more important matters. **Black makes code review faster by producing the smallest diffs possible.** Blackened code looks the same regardless of the project you’re reading. **Formatting becomes transparent after a while and you can focus on the content instead.**
+  > By using Black, you agree to cede control over minutiae of hand-formatting. In return, Black gives you speed, determinism, and freedom from pycodestyle nagging about formatting. You will save time and mental energy for more important matters. **Black makes code review faster by producing the smallest diffs possible.** Blackened code looks the same regardless of the project you’re reading. **Formatting becomes transparent after a while and you can focus on the content instead.**
 
 ### Pervasive Python Type Hints
 
@@ -218,7 +210,7 @@ Type hints allow us to spend less time reading documentation. Public modules are
 
 All public modules in the SDK are checked for the presence of docstrings in classes and functions. We follow the [Google Style convention](https://www.sphinx-doc.org/en/master/usage/extensions/example_google.html) for Python docstrings so functions are required to have a description of every argument and the return value, if applicable.
 
-### What is Poetry and why do we need it?
+### What is uv and why do we need it?
 
-For more info on `Poetry` and `Pipx`, please see the topic in our
+For more info on `uv`, please see the topic in our
 [python tips](./python_tips.md) guide.

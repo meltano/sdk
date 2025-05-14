@@ -60,7 +60,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
 
         super().__init__(tap, schema=None, name=name)
 
-        # TODO(edgarrmondragon): Make this None if the filesytem does not support it.
+        # TODO(edgarrmondragon): Make this None if the filesystem does not support it.
         self.replication_key = SDC_META_MODIFIED_AT
         self._sync_start_time = utc_now()
         self._partitions = [{SDC_META_FILEPATH: path} for path in self._filepaths]
@@ -124,7 +124,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
             and mtime is not None
             and mtime < previous_bookmark
         ):
-            self.logger.info("File has not been modified since last read, skipping")
+            self.logger.debug("File has not been modified since last read, skipping")
             return
 
         for record in self.read_file(path):

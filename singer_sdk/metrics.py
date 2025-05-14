@@ -8,14 +8,11 @@ import json
 import logging
 import logging.config
 import os
+import sys
 import typing as t
 from dataclasses import dataclass, field
 from pathlib import Path
 from time import time
-
-import yaml
-
-from singer_sdk.helpers._resources import get_package_files
 
 if t.TYPE_CHECKING:
     from types import TracebackType
@@ -71,29 +68,35 @@ class Point(t.Generic[_TVal]):
     value: _TVal
     tags: dict[str, t.Any] = field(default_factory=dict)
 
-    def __str__(self) -> str:
-        """Get string representation of this measurement.
+    def to_dict(self) -> dict[str, t.Any]:
+        """Convert this measure to a dictionary.
 
         Returns:
-            A string representation of this measurement.
+            A dictionary.
         """
-        return self.to_json()
+        return {
+            "type": self.metric_type,
+            "metric": self.metric.value,
+            "value": self.value,
+            "tags": self.tags,
+        }
 
-    def to_json(self) -> str:
-        """Convert this measure to a JSON object.
+
+class SingerMetricsFormatter(logging.Formatter):
+    """Logging formatter that adds a ``metric_json`` field to the log record."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        """Format a log record.
+
+        Args:
+            record: A log record.
 
         Returns:
-            A JSON object.
+            A formatted log record.
         """
-        return json.dumps(
-            {
-                "type": self.metric_type,
-                "metric": self.metric.value,
-                "value": self.value,
-                "tags": self.tags,
-            },
-            default=str,
-        )
+        point = record.__dict__.get("point")
+        record.__dict__["metric_json"] = json.dumps(point, default=str) if point else ""
+        return super().format(record)
 
 
 def log(logger: logging.Logger, point: Point) -> None:
@@ -103,7 +106,7 @@ def log(logger: logging.Logger, point: Point) -> None:
         logger: An logger instance.
         point: A measurement.
     """
-    logger.info("METRIC: %s", point)
+    logger.info("METRIC", extra={"point": point.to_dict()})
 
 
 class Meter(metaclass=abc.ABCMeta):
@@ -388,7 +391,7 @@ def sync_timer(stream: str, **tags: t.Any) -> Timer:
     return Timer(Metric.SYNC_DURATION, tags)
 
 
-def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN401
+def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN401 # pragma: no cover
     """Load the logging config from the YAML file.
 
     Args:
@@ -397,33 +400,59 @@ def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN40
     Returns:
         The logging config.
     """
+    import yaml  # noqa: PLC0415
+
     with path.open() as f:
         return yaml.safe_load(f)
 
 
-def _get_default_config_path(package: str) -> Traversable:
-    """Get a logging configuration.
-
-    Args:
-        package: The package name to get the logging configuration for.
-
-    Returns:
-        A logging configuration.
-    """
-    filename = "default_logging.yml"
-    path = get_package_files(package) / filename
-    return path if path.is_file() else get_package_files("singer_sdk") / filename
-
-
-def _setup_logging(config: t.Mapping[str, t.Any], *, package: str) -> None:
+def _setup_logging(config: t.Mapping[str, t.Any]) -> None:
     """Setup logging.
 
     Args:
         package: The package name to get the logging configuration for.
         config: A plugin configuration dictionary.
     """
-    path = _get_default_config_path(package)
-    logging.config.dictConfig(_load_yaml_logging_config(path))
+    logging.config.dictConfig(
+        {
+            "version": 1,
+            "disable_existing_loggers": False,
+            "formatters": {
+                "console": {
+                    "format": "{asctime:23s} | {levelname:8s} | {name:20s} | {message}",
+                    "style": "{",
+                },
+                "metrics": {
+                    "()": SingerMetricsFormatter,
+                    "format": "{asctime:23s} | {levelname:8s} | {name:20s} | {message}: {metric_json}",  # noqa: E501
+                    "style": "{",
+                },
+            },
+            "handlers": {
+                "default": {
+                    "()": logging.StreamHandler,
+                    "formatter": "console",
+                    "stream": sys.stderr,
+                },
+                "metrics": {
+                    "()": logging.StreamHandler,
+                    "formatter": "metrics",
+                    "stream": sys.stderr,
+                },
+            },
+            "root": {
+                "level": logging.INFO,
+                "handlers": ["default"],
+            },
+            "loggers": {
+                "singer_sdk.metrics": {
+                    "level": logging.INFO,
+                    "handlers": ["metrics"],
+                    "propagate": False,
+                },
+            },
+        },
+    )
 
     config = config or {}
     metrics_log_level = config.get(METRICS_LOG_LEVEL_SETTING, "INFO").upper()

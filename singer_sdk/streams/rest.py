@@ -6,7 +6,6 @@ import abc
 import copy
 import decimal
 import logging
-import sys
 import typing as t
 from functools import cached_property
 from http import HTTPStatus
@@ -29,19 +28,14 @@ from singer_sdk.pagination import (
 )
 from singer_sdk.streams.core import Stream
 
-if sys.version_info < (3, 13):
-    from typing_extensions import deprecated
-else:
-    from warnings import deprecated  # pragma: no cover
-
 if t.TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from datetime import datetime
 
     from backoff.types import Details
 
-    from singer_sdk._singerlib import Schema
     from singer_sdk.helpers.types import Auth, Context
+    from singer_sdk.singerlib import Schema
     from singer_sdk.tap_base import Tap
 
 DEFAULT_PAGE_SIZE = 1000
@@ -103,12 +97,12 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             path: URL path for this entity stream.
             http_method: HTTP method to use for requests.
         """
-        super().__init__(name=name, schema=schema, tap=tap)
         if path:
             self.path = path
-        self._http_headers: dict = {"User-Agent": self.user_agent}
+        self._http_headers: dict[str, str] = {}
         self._http_method = http_method
         self._requests_session = requests.Session()
+        super().__init__(name=name, schema=schema, tap=tap)
 
     @staticmethod
     def _url_encode(val: str | datetime | bool | int | list[str]) -> str:  # noqa: FBT001
@@ -145,38 +139,35 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
     # HTTP Request functions
 
     @property
-    @deprecated(
-        "Use `http_method` instead.",
-        category=SingerSDKDeprecationWarning,
-    )
-    def rest_method(self) -> str:
-        """HTTP method to use for requests. Defaults to "GET".
+    def http_headers(self) -> dict:
+        """Return headers dict to be used for HTTP requests.
 
-        .. deprecated:: 0.43.0
-           Override :meth:`~singer_sdk.RESTStream.http_method` instead.
+        If an authenticator is also specified, the authenticator's headers will be
+        combined with `http_headers` when making HTTP requests.
+
+        Returns:
+            Dictionary of HTTP headers to use as a base for every request.
         """
-        return self._http_method or "GET"
-
-    @rest_method.setter
-    @deprecated(
-        "Use `http_method` instead.",
-        category=SingerSDKDeprecationWarning,
-    )
-    def rest_method(self, value: str) -> None:
-        """Set the HTTP method for requests.
-
-        Args:
-            value: The HTTP method to use for requests.
-
-        .. deprecated:: 0.43.0
-           Override :meth:`~singer_sdk.RESTStream.http_method` instead.
-        """
-        self._http_method = value
+        return {
+            "User-Agent": self.user_agent,
+            **self._http_headers,
+        }
 
     @property
     def http_method(self) -> str:
         """HTTP method to use for requests. Defaults to "GET"."""
-        return self._http_method or self.rest_method
+        if self._http_method:
+            return self._http_method
+
+        if hasattr(self, "rest_method"):
+            warn(
+                "Use `http_method` instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
+            return self.rest_method  # type: ignore[no-any-return]
+
+        return "GET"
 
     @http_method.setter
     def http_method(self, value: str) -> None:
@@ -275,10 +266,15 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             else "Server"
         )
 
-        return (
+        msg = (
             f"{response.status_code} {error_type} Error: "
             f"{response.reason} for path: {full_path}"
         )
+
+        if response.content:
+            msg += f", content is {response.text}"
+
+        return msg
 
     def request_decorator(self, func: t.Callable) -> t.Callable:
         """Instantiate a decorator for handling request failures.
@@ -466,6 +462,10 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
                 try:
                     first_record = next(records)
                 except StopIteration:
+                    if paginator.continue_if_empty(resp):
+                        paginator.advance(resp)
+                        continue
+
                     self.logger.info(
                         "Pagination stopped after %d pages because no records were "
                         "found in the last response",
@@ -597,18 +597,6 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             next_page_token: Token, page number or any request argument to request the
                 next page of data.
         """
-
-    @property
-    def http_headers(self) -> dict:
-        """Return headers dict to be used for HTTP requests.
-
-        If an authenticator is also specified, the authenticator's headers will be
-        combined with `http_headers` when making HTTP requests.
-
-        Returns:
-            Dictionary of HTTP headers to use as a base for every request.
-        """
-        return self._http_headers
 
     @property
     def timeout(self) -> int:

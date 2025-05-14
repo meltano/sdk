@@ -1,5 +1,5 @@
-# Poetry
-poetry.lock
+# uv
+uv.lock
 
 # Secrets and internal config files
 **/.secrets/*

@@ -3,7 +3,6 @@ myst:
   heading_anchors: 4
 ---
 
-
 # Command Line Reference
 
 This page describes how SDK-based taps and targets can be invoked via the command line interface, or "CLI".
@@ -56,7 +55,7 @@ The SDK supports one or more `--config` inputs when run from the CLI.
 
 - If one of the supplied inputs is `--config ENV` (or `--config=ENV` according to the user's preference), the environment variable parsing rules will be applied to ingest config values from environment variables.
 - One or more files can also be sent to `--config`. If multiple files are sent, they will be processed in sequential order.
-If one or more files conflict for a given setting, the latter provided files will override earlier provided files.
+  If one or more files conflict for a given setting, the latter provided files will override earlier provided files.
   - This behavior allows to you easily inject environment overrides by adding `--config=path/to/overrides.json` at the end of the CLI command text.
 - If `--config=ENV` is set and one or more files conflict with an environment variable setting, the environment variable setting will always have precedence, regardless of ordering.
 - One benefit of this approach is that credentials and other secrets can be stored completely separately from general settings: either by having two distinct `config.json` files or by using environment variables for secure settings and `config.json` files for the rest.
@@ -81,7 +80,6 @@ The following value types are automatically cast to the appropriate Python type:
 - JSON arrays (e.g. `TAP_MY_EXAMPLE_ARRAY='["a", "b", "c"]'`)
 - JSON objects (e.g. `TAP_MY_EXAMPLE_OBJECT='{"key": "value"}'`)
 
-
 ## Tap-Specific CLI Options
 
 ### `--state`
@@ -99,9 +97,9 @@ The SDK automatically applies selection logic as described by the
 
 Selection rules are applied at three levels:
 
-1. **Streams** are filtered out if they are deselected or ommitted in the input catalog.
-2. **RECORD messages** are filtered based upon selection rules in the input catalog.
-3. **SCHEMA messages** are filtered based upon selection rules in the input catalog.
+1. **Streams** are filtered out if they are deselected or omitted in the input catalog.
+1. **RECORD messages** are filtered based upon selection rules in the input catalog.
+1. **SCHEMA messages** are filtered based upon selection rules in the input catalog.
 
 ### `--test`
 

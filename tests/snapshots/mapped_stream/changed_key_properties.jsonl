@@ -1,4 +1,3 @@
-{"type":"STATE","value":{}}
 {"type":"SCHEMA","stream":"mystream","schema":{"type":"object","properties":{"email_hash":{"type":["string","null"]}},"$schema":"https://json-schema.org/draft/2020-12/schema"},"key_properties":["email_hash"]}
 {"type":"RECORD","stream":"mystream","record":{"email_hash":"c160f8cc69a4f0bf2b0362752353d060"},"time_extracted":"2022-01-01T00:00:00+00:00"}
 {"type":"RECORD","stream":"mystream","record":{"email_hash":"4b9bb80620f03eb3719e0a061c14283d"},"time_extracted":"2022-01-01T00:00:00+00:00"}

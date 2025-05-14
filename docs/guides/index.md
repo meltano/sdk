@@ -9,6 +9,9 @@ porting
 pagination-classes
 custom-clis
 config-schema
+performance
 sql-tap
 sql-target
+
+migrate-to-uv
 ```

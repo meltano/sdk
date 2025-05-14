@@ -9,8 +9,8 @@ from functools import cached_property
 import sqlalchemy as sa
 
 import singer_sdk.helpers._catalog as catalog
-from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
+from singer_sdk.singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.streams.core import REPLICATION_INCREMENTAL, Stream
 
 if t.TYPE_CHECKING:
@@ -157,6 +157,15 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             schema=self.schema,
             mask=self.mask,
         )
+
+    @property
+    def effective_schema(self) -> dict:
+        """Return the effective schema for the stream.
+
+        Returns:
+            The effective schema.
+        """
+        return super().effective_schema
 
     # Get records from stream
     def get_records(self, context: Context | None) -> t.Iterable[dict[str, t.Any]]:

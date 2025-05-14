@@ -1,27 +1,23 @@
 version: 2
+enable-beta-ecosystems: true
 updates:
-  - package-ecosystem: "pip"
+  - package-ecosystem: "uv"
     directory: "/"
     schedule:
       interval: weekly
       time: "12:00"
-    reviewers: [meltano/engineering]
     labels: [Dependencies]
     groups:
       development-dependencies:
         dependency-type: development
       runtime-dependencies:
         dependency-type: production
-        update-types:
-          - "minor"
-          - "patch"
-    versioning-strategy: increase-if-necessary
+    versioning-strategy: lockfile-only
   - package-ecosystem: pip
     directory: "/.github/workflows/resources"
     schedule:
       interval: weekly
       time: "12:00"
-    reviewers: [meltano/engineering]
     labels: [Dependencies]
     groups:
       ci:
@@ -31,7 +27,6 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
-    reviewers: [meltano/engineering]
     labels: [Dependencies]
     groups:
       actions:

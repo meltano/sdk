@@ -19,7 +19,7 @@ When porting over an existing tap, most developers find it easier to start from 
 Next, we'll copy over the settings and readme from the old project to the new one.
 
 1. Open `archive/README.md` and copy-paste the old file into the new `README.md`. Generally, the best place to insert it is in the settings section, then move things around as needed. Commit the result when you're happy with the new file.
-2. Open the `README.md` in side-by-side mode with `tap.py` and copy paste each setting and it's description into an appropriate type helper class (prefixed with `th.*`).
+1. Open the `README.md` in side-by-side mode with `tap.py` and copy paste each setting and it's description into an appropriate type helper class (prefixed with `th.*`).
    - If settings are not defined in your README.md, you can try searching the `archived/**.py` files for references to `config.get(` or `config[`, and/or check any other available reference for the expected input settings.
 
 ## If you are building a SQL tap
@@ -33,21 +33,21 @@ Continue until just before you reach the "Pagination" section, at which point yo
 ## Authentication
 
 1. Open the `auth.py` or `client.py` file (depending on auth method) and locate the authentication logic.
-2. In your archived files, open `client.py` or whichever file pertains to authentication. (You'll use this for reference in the next step.)
-3. Update the authenticator methods by applying the logic and config values as demonstrated in the archived python code.
+1. In your archived files, open `client.py` or whichever file pertains to authentication. (You'll use this for reference in the next step.)
+1. Update the authenticator methods by applying the logic and config values as demonstrated in the archived python code.
 
 ## Define your first stream
 
 Before you begin this section, please select a stream you would like to port as your first stream. This should be a simple stream without complex logic. If your tap has nested structure, start with a top level stream rather than a child stream.
 
 1. Open `streams.py` and modify one of the samples to fit your first stream's name.
-2. Make sure you set `primary_keys`, `replication_key` first.
-3. If you have a schema file for each stream:
+1. Make sure you set `primary_keys`, `replication_key` first.
+1. If you have a schema file for each stream:
    1. Move the entire `schemas` folder out of the `archive` directory.
-   2. Set `schema_filepath` property to be equal to the schema file for this stream.
-4. If you are declaring schemas directly (without an existing JSON schema file):
+   1. Set `schema_filepath` property to be equal to the schema file for this stream.
+1. If you are declaring schemas directly (without an existing JSON schema file):
    1. Using the typing helpers (`th.*`) to define just the `primary_key`, `replication_key`, and 3-5 additional fields.
-   2. Don't worry about defining all properties up front. Instead, come back to this step _after_ you finish a successful stream test.
+   1. Don't worry about defining all properties up front. Instead, come back to this step _after_ you finish a successful stream test.
 
 Once you have a single stream defined, with 3-6 properties, you're ready to continue to the next step.
 
@@ -55,24 +55,36 @@ Once you have a single stream defined, with 3-6 properties, you're ready to cont
 
 Check for required libraries in `archive/requirements.txt` and/or `archive/setup.py`. For each library you find:
 
+````{tab} Poetry
 ```console
-#Add a library:
+# Add a library:
 poetry add my-library
 
-#Or add the same library with version constraints:
+# Or add the same library with version constraints:
 poetry add my-library==1.0.2
 ```
+````
+
+````{tab} uv
+```console
+# Add a library:
+uv add my-library
+
+# Or add the same library with version constraints:
+uv add my-library==1.0.2
+```
+````
 
 Note:
 
 - You can probably skip any libraries related to `requests`, `backoff`, or `singer-*` - as these functions are already managed in the SDK.
 
-Once you have the necessary dependencies added, run `poetry install` to make sure everything is ready to go.
+Once you have the necessary dependencies added, run `poetry install`/`uv sync` to make sure everything is ready to go.
 
 ## Perform `TODO` items in `tap.py` and `client.py`
 
 1. Open `tap.py` and search for TODO items. Depending on the type of tap you are porting, you will likely have to provide your new stream's class names so that the tap class knows to invoke them.
-2. Open `client.py` and search for TODO items. If your API type requires a `url_base`, go ahead and input it now.
+1. Open `client.py` and search for TODO items. If your API type requires a `url_base`, go ahead and input it now.
    - You can postpone the other TODOs for now. Pagination will be addressed in the steps below.
 
 Note: You _do not_ have to resolve TODOs everywhere in the project, but if there are any sections you can obviously resolve, you can go ahead and do so now.
@@ -81,17 +93,31 @@ Note: You _do not_ have to resolve TODOs everywhere in the project, but if there
 
 This is the stage where you'll finally see data streaming from the tap. 🙌
 
-If you have not already done so, run `poetry install` to make sure your project and its dependencies are properly installed in your virtual environment.
+If you have not already done so, run `poetry install`/`uv` to make sure your project and its dependencies are properly installed in your virtual environment.
 
 Repeat the following steps until you see a help message:
 
+```{tab} Poetry
 1. Run `poetry run tap-mysource --help` to confirm the program can run.
 2. Find and fix any errors that occur.
+```
+
+```{tab} uv
+1. Run `uv run tap-mysource --help` to confirm the program can run.
+2. Find and fix any errors that occur.
+```
 
 Now, repeat the following steps until you get data coming through your tap:
 
+```{tab} Poetry
 1. Run `poetry run tap-mysource` to attempt your first data sync.
 2. Find and fix any errors that occur.
+```
+
+```{tab} uv
+1. Run `uv run tap-mysource` to attempt your first data sync.
+2. Find and fix any errors that occur.
+```
 
 If you run into error, go back and debug, and especially double check your authentication process and input credentials.
 
@@ -105,7 +131,7 @@ Pagination is generally unique for almost every API. There's no single method th
 
 Most likely you will use [get_new_paginator](singer_sdk.RESTStream.get_new_paginator) to instantiate a [pagination class](./../classes/singer_sdk.pagination.BaseAPIPaginator.rst) for your source, and you'll use `get_url_params` to define how to pass the "next page" token back to the API when asking for subsequent pages.
 
-When you think you have it right, run `poetry run tap-mysource` again, and debug until you are confident the result is including multiple pages back from the API.
+When you think you have it right, run `poetry run tap-mysource`/`uv run tap-mysource` again, and debug until you are confident the result is including multiple pages back from the API.
 
 You can also add unit tests for your pagination implementation for additional confidence:
 
@@ -185,9 +211,17 @@ Note: Depending on how well the API is designed, this could take 5 minutes or mu
 
 Now is a good time to test that the built-in tests are working as expected:
 
+````{tab} Poetry
 ```console
 poetry run pytest
 ```
+````
+
+````{tab} uv
+```console
+uv run pytest
+```
+````
 
 ## Create the remaining streams
 
@@ -204,13 +238,21 @@ Notes:
 
 Now that all streams are defined, run `pytest` again.
 
+````{tab} Poetry
 ```console
 poetry run pytest
 ```
+````
+
+````{tab} uv
+```console
+uv run pytest
+```
+````
 
 1. If pytest is successful, add properties missing from your prior iteration.
-2. Run pytest again.
-3. Continue adding properties and testing until all streams are fully defined.
+1. Run pytest again.
+1. Continue adding properties and testing until all streams are fully defined.
 
 ## Optional Next Steps
 
@@ -224,8 +266,16 @@ To handle the conversion operation, you'll override [`Tap.load_state()`](singer_
 
 The SDK provides autogenerated markdown you can paste into your README:
 
+````{tab} Poetry
 ```console
 poetry run tap-mysource --about --format=markdown
 ```
+````
+
+````{tab} uv
+```console
+uv run tap-mysource --about --format=markdown
+```
+````
 
 This text will automatically document all settings, including setting descriptions. Optionally, paste this into your existing `README.md` file.

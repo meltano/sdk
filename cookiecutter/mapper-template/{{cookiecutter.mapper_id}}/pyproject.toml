@@ -15,7 +15,9 @@ keywords = [
 ]
 classifiers = [
     "Intended Audience :: Developers",
+{%- if cookiecutter.license == "Apache-2.0" %}
     "License :: OSI Approved :: Apache Software License",
+{%- endif %}
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -23,28 +25,46 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
-license = "Apache-2.0"
+{%- if cookiecutter.license != "None" %}
+license = "{{cookiecutter.license}}"
+{%- endif %}
 license-files = [ "LICENSE" ]
 requires-python = ">=3.9"
-dynamic = ["dependencies"]
+dependencies = [
+    {%- if cookiecutter.faker_extra %}
+    "singer-sdk[faker]~=0.46.1",
+    {%- else %}
+    "singer-sdk~=0.46.1",
+    {%- endif %}
+]
 
-[tool.poetry]
+[project.optional-dependencies]
+s3 = [
+    "fs-s3fs~=1.1.1",
+]
+
+[project.scripts]
+# CLI declaration
+{{cookiecutter.mapper_id}} = '{{cookiecutter.library_name}}.mapper:{{cookiecutter.name}}Mapper.cli'
+
+[dependency-groups]
+dev = [
+    { include-group = "test" },
+]
+test = [
+    "pytest>=8",
+    {%- if cookiecutter.include_ci_files == "GitHub" %}
+    "pytest-github-actions-annotate-failures>=0.3",
+    {%- endif %}
+    "singer-sdk[testing]",
+]
+
 {%- if cookiecutter.variant != "None (Skip)" %}
+[tool.hatch.build.targets.wheel]
 packages = [
-    { include = "{{cookiecutter.library_name}}" },
+    "{{cookiecutter.library_name}}",
 ]
 {%- endif %}
-
-[tool.poetry.dependencies]
-singer-sdk = { version="~=0.44.0"{{ ', extras = ["faker"]' if cookiecutter.faker_extra }} }
-fs-s3fs = { version = "~=1.1.1", optional = true }
-
-[tool.poetry.group.dev.dependencies]
-pytest = ">=8"
-singer-sdk = { version="~=0.44.0", extras = ["testing"] }
-
-[tool.poetry.extras]
-s3 = ["fs-s3fs"]
 
 [tool.pytest.ini_options]
 addopts = [
@@ -52,11 +72,7 @@ addopts = [
 ]
 
 [tool.mypy]
-python_version = "3.12"
 warn_unused_configs = true
-
-[tool.ruff]
-target-version = "py39"
 
 [tool.ruff.lint]
 ignore = [
@@ -71,9 +87,7 @@ allow-star-arg-any = true
 convention = "google"
 
 [build-system]
-requires = ["poetry-core>=2,<3"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-# CLI declaration
-{{cookiecutter.mapper_id}} = '{{cookiecutter.library_name}}.mapper:{{cookiecutter.name}}Mapper.cli'
+requires = [
+    "hatchling>=1,<2",
+]
+build-backend = "hatchling.build"

@@ -30,7 +30,10 @@ def custom_array_to_sql(jsonschema: dict) -> VectorType | sa.types.VARCHAR:
 class MyConnector(SQLConnector):
     @functools.cached_property
     def jsonschema_to_sql(self):
-        to_sql = JSONSchemaToSQL()
+        to_sql = JSONSchemaToSQL.from_config(
+            self.config,
+            max_varchar_length=self.max_varchar_length,
+        )
         to_sql.register_type_handler("array", custom_array_to_sql)
         return to_sql
 ```
@@ -46,7 +49,10 @@ from my_sqlalchemy_dialect import URI
 class MyConnector(SQLConnector):
     @functools.cached_property
     def jsonschema_to_sql(self):
-        to_sql = JSONSchemaToSQL()
+        to_sql = JSONSchemaToSQL.from_config(
+            self.config,
+            max_varchar_length=self.max_varchar_length,
+        )
         to_sql.register_format_handler("uri", URI)
         return to_sql
 ```
@@ -103,3 +109,9 @@ plugins:
 }
 ```
 ````
+
+### SQL target support for Singer Decimal string format
+
+Starting from version `0.45.0`, the Meltano Singer SDK supports the `x-singer.decimal` format for strings. If the source tap is configured to use this format, the SDK will automatically convert the string to a `DECIMAL` type in the target database.
+
+Read more about target support for `x-singer.decimal` in the [SQL tap guide](./sql-tap.md#sql-tap-support-for-singer-decimal-string-format).

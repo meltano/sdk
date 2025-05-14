@@ -25,7 +25,7 @@ In all examples below where `null` is used as a value, the special string `"__NU
 
 ### Schema Flattening Applications
 
-- ***Flatten nested properties:** separates large complex properties into multiple distinct fields.
+- **Flatten nested properties:** separates large complex properties into multiple distinct fields.
 
 For instance, a complex `user` property may look like this:
 
@@ -94,11 +94,11 @@ The following behaviors are implemented by the SDK automatically:
    - Because this process happens automatically after all other tap logic is executed, the
      tap developer does not have to write any custom handling logic.
    - The tap development process is fully insulated from this 'out-of-box' functionality.
-2. Similarly for targets, the received streams are processed by the `stream_maps` config
+1. Similarly for targets, the received streams are processed by the `stream_maps` config
    setting _prior_ to any Sink processing functions.
    - This means that the target developer can assume that all streams and records are
      transformed, aliased, filtered, etc. _before_ any custom target code is executed.
-3. The standalone mapper plugin [`meltano-map-transformer`](https://hub.meltano.com/mappers/meltano-map-transformer/) is a hybrid tap/target which
+1. The standalone mapper plugin [`meltano-map-transformer`](https://hub.meltano.com/mappers/meltano-map-transformer/) is a hybrid tap/target which
    simply receives input from a tap, transforms all stream and schema messages via the
    `stream_maps` config option, and then emits the resulting stream(s) to a downstream
    target.
@@ -175,7 +175,7 @@ to expressions using the `config` dictionary.
 ### Constructing Expressions
 
 Expressions are defined and parsed using the
-[`simpleval`](https://github.com/danthedeckie/simpleeval) expression library. This library
+[`simpleeval`](https://github.com/danthedeckie/simpleeval) expression library. This library
 accepts most native python expressions and is extended by custom functions which have been declared
 within the SDK.
 
@@ -230,29 +230,34 @@ can be referenced directly by mapping expressions.
 
 The following functions and namespaces are available for use in mapping expressions:
 
-| Function                                             | Description                                                                                                                                                                                                                                                                  |
+| Function | Description |
 | :--------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`md5()`](inv:python:py:function:#hashlib.md5)       | Returns an inline MD5 hash of any string, outputting the string representation of the hash's hex digest. This is defined by the SDK internally with native python: [`hashlib.md5(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest).       |
+| [`md5()`](inv:python:py:function:#hashlib.md5) | Returns an inline MD5 hash of any string, outputting the string representation of the hash's hex digest. This is defined by the SDK internally with native python: [`hashlib.md5(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest). |
 | [`sha256()`](inv:python:py:function:#hashlib.sha256) | Returns an inline SHA256 hash of any string, outputting the string representation of the hash's hex digest. This is defined by the SDK internally with native python: [`hashlib.sha256(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest). |
-| [`datetime`](inv:python:py:module:#datetime)         | This is the datetime module object from the Python standard library. You can access [`datetime.datetime`](inv:python:py:class:#datetime.datetime), [`datetime.timedelta`](inv:python:py:class:#datetime.timedelta), etc.                                                     |
-| [`json`](inv:python:py:module:#json)                 | This is the json module object from the Python standard library. Primarily used for calling [`json.dumps()`](inv:python:py:function:#json.dumps) and [`json.loads()`](inv:python:py:function:#json.loads).                                                                   |
+| [`datetime`](inv:python:py:module:#datetime) | This is the datetime module object from the Python standard library. You can access [`datetime.datetime`](inv:python:py:class:#datetime.datetime), [`datetime.timedelta`](inv:python:py:class:#datetime.timedelta), etc. |
+| [`json`](inv:python:py:module:#json) | This is the json module object from the Python standard library. Primarily used for calling [`json.dumps()`](inv:python:py:function:#json.dumps) and [`json.loads()`](inv:python:py:function:#json.loads). |
+
+```{tip}
+With `json.dumps()`, you might want to pass the `default` argument. For example, `json.dumps(obj, default=str)` will call `str()` on
+an object if it is otherwise not serializable. This is useful for serializing datetime objects, `decimal.Decimal` instances, etc.
+```
 
 #### Built-in Variable Names
 
 The following variables are available in the context of a mapping expression:
 
-| Variable          | Description                                                                                                                                                                                       |
+| Variable | Description |
 | :---------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `config`          | A dictionary with the `stream_map_config` values from settings. This can be used to provide a secret hash seed, for instance.                                                                     |
-| `record`          | An alias for the record values dictionary in the current stream.                                                                                                                                  |
-| `_`               | Same as `record` but shorter to type.                                                                                                                                                             |
-| `self`            | The existing property value if the property already exists.                                                                                                                                       |
-| `fake`            | A [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config` (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers) for available methods. |
-| `__stream_name__` | The name of the stream. Useful when [applying the same transformation to multiple streams](#applying-a-mapping-across-two-or-more-streams).                                                       |
+| `config` | A dictionary with the `stream_map_config` values from settings. This can be used to provide a secret hash seed, for instance. |
+| `record` | An alias for the record values dictionary in the current stream. |
+| `_` | Same as `record` but shorter to type. |
+| `self` | The existing property value if the property already exists. |
+| `fake` | A [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config` (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers) for available methods. |
+| `__stream_name__` | The name of the stream. Useful when [applying the same transformation to multiple streams](#applying-a-mapping-across-two-or-more-streams). |
 
-  ```{tip}
-  To use the `fake` object, the `faker` library must be installed.
-  ```
+```{tip}
+To use the `fake` object, the `faker` library must be installed.
+```
 
 :::{versionadded} 0.35.0
 The `faker` object.
@@ -274,7 +279,7 @@ The `__stream_name__` variable.
 
 The following variables are available in the context of the `__alias__` expression:
 
-| Variable          | Description              |
+| Variable | Description |
 | :---------------- | :----------------------- |
 | `__stream_name__` | The existing stream name |
 
@@ -292,9 +297,9 @@ The following logic is applied in determining the SCHEMA of the transformed stre
 
 1. Calculations which begin with the text `str(`, `float(`, `int(` will be
    assumed to be belonging to the specified type.
-2. Otherwise, if the property already existed in the original stream, it will be assumed
+1. Otherwise, if the property already existed in the original stream, it will be assumed
    to have the same data type as the original stream.
-3. Otherwise, if no type is detected using the above rules, any new stream properties will
+1. Otherwise, if no type is detected using the above rules, any new stream properties will
    be assumed to be of type `str` .
 
 ## Customized `stream_map` Behaviors
@@ -483,7 +488,7 @@ faker_config:
 
 Be sure to checkout the [`faker` documentation](https://faker.readthedocs.io/en/master/) for all the fake data generation possibilities.
 
-Note that in the example above, `faker` will generate a new random value each time the `first_name()` function is invoked. This means if 3 records have a `first_name` value of `Mike`, then they will each have a different name after being mapped (for example, `Alistair`, `Debra`, `Scooby`).  This can actually lead to issues when developing in the lower environments.
+Note that in the example above, `faker` will generate a new random value each time the `first_name()` function is invoked. This means if 3 records have a `first_name` value of `Mike`, then they will each have a different name after being mapped (for example, `Alistair`, `Debra`, `Scooby`). This can actually lead to issues when developing in the lower environments.
 
 Some users require consistent masking (for example, the first name `Mike` is always masked as `Debra`). Consistent masking preserves the relationship between tables and rows, while still hiding the real value. When a random mask is generated every time, relationships between tables/rows are effectively lost, making it impossible to test things like sql `JOIN`s. This can cause highly unpredictable behavior when running the same code in lower environments vs production.
 
@@ -499,7 +504,7 @@ faker_config:
   locale: en_US
 ```
 
-Remember, these expressions are evaluated by the [`simpleval`](https://github.com/danthedeckie/simpleeval) expression library, which only allows a single python expression (which is the reason for the `or` syntax above).
+Remember, these expressions are evaluated by the [`simpleeval`](https://github.com/danthedeckie/simpleeval) expression library, which only allows a single python expression (which is the reason for the `or` syntax above).
 
 This means if you require more advanced masking logic, which cannot be defined in a single python expression, you may need to consider a custom stream mapper.
 
@@ -749,7 +754,7 @@ excluded at the tap level, then the stream will be skipped exactly as if it were
 in the catalog metadata.
 
 If a stream is specified to be excluded at the target level, or in a standalone mapper
-between the tap and target, the filtering occurs downstream from the tap and therefor cannot
+between the tap and target, the filtering occurs downstream from the tap and therefore cannot
 affect the selection rules of the tap itself. Except in special test cases or in cases where
 runtime is trivial, we highly recommend implementing stream-level exclusions at the tap
 level rather than within the downstream target or mapper plugins.
@@ -779,7 +784,6 @@ the `key_properties` in an extract-load pipeline. For instance, it is common to 
 "append-only" loading behavior in certain targets, as may be required for historical reporting. This does not change the
 underlying nature of the `primary_key` configuration in the upstream source data, only how it will be landed or deduped
 in the downstream source.
-
 
 ### Q: How do I use Meltano environment variables to configure stream maps?
 

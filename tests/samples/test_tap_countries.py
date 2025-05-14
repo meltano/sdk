@@ -99,7 +99,7 @@ def test_with_catalog_entry():
     assert new_schema == stream.schema
 
 
-def test_batch_mode(outdir):
+def test_batch_mode(outdir: Path):
     """Test batch mode."""
     tap = SampleTapCountries(
         config={
@@ -109,14 +109,14 @@ def test_batch_mode(outdir):
                     "compression": "gzip",
                 },
                 "storage": {
-                    "root": outdir,
+                    "root": str(outdir),
                     "prefix": "pytest-countries-",
                 },
             },
         },
     )
 
-    buf = io.StringIO()
+    buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
     with redirect_stdout(buf):
         tap.sync_all()
 
@@ -140,7 +140,7 @@ def test_batch_mode(outdir):
     assert counter["SCHEMA", "countries"] == 1
     assert counter["BATCH", "countries"] == 1
 
-    assert counter["STATE",] == 3
+    assert counter["STATE",] == 2
 
 
 @pytest.mark.snapshot
@@ -150,7 +150,9 @@ def test_write_schema(
 ):
     snapshot.snapshot_dir = snapshot_dir.joinpath("countries_write_schemas")
 
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
+    # TODO: Remote this once support for Python 3.9 and thus Click<8.2 is dropped
+    runner.mix_stderr = False
     result = runner.invoke(SampleTapCountries.cli, ["--test", "schema"])
 
     snapshot_name = "countries_write_schemas"

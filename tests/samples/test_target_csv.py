@@ -16,6 +16,7 @@ from click.testing import CliRunner
 
 from samples.sample_mapper.mapper import StreamTransform
 from samples.sample_tap_countries.countries_tap import SampleTapCountries
+from samples.sample_tap_fake_people.tap import SampleTapFakePeople
 from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk.testing import (
     get_target_test_class,
@@ -67,6 +68,13 @@ def test_countries_to_csv_mapped(csv_config: dict):
     target = SampleTargetCSV(config=csv_config)
     mapper = StreamTransform(config=COUNTRIES_STREAM_MAPS_CONFIG)
     sync_end_to_end(tap, target, mapper)
+
+
+def test_fake_people_to_csv(csv_config: dict):
+    tap = SampleTapFakePeople()
+    target = SampleTargetCSV(config=csv_config)
+    _, _, target_stdout, _ = tap_to_target_sync_test(tap, target)
+    assert not target_stdout.read(), "Target should not emit any bookmarks"
 
 
 def test_target_batching():

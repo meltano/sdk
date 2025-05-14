@@ -1,5 +1,4 @@
-griffe~=1.5
-pip==25.0
-poetry==2.0.1
-pre-commit==4.1.0
-nox==2024.10.9
+griffe~=1.7
+nox==2025.5.1
+pre-commit==4.2.0
+twine==6.1.0

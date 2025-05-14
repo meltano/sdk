@@ -2,6 +2,11 @@ ci:
   autofix_prs: true
   autoupdate_schedule: weekly
   autoupdate_commit_msg: 'chore: pre-commit autoupdate'
+  skip:
+  - uv-lock
+
+default_language_version:
+  python: python3.13
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -37,14 +42,14 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.31.0
+  rev: 0.33.0
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
   - id: check-readthedocs
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.9.3
+  rev: v0.11.9
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]
@@ -58,7 +63,22 @@ repos:
         cookiecutter/.*
       )$
 
-- repo: https://github.com/python-poetry/poetry
-  rev: 2.0.1
+- repo: https://github.com/astral-sh/uv-pre-commit
+  rev: 0.7.3
   hooks:
-  - id: poetry-check
+  - id: uv-lock
+  - id: uv-sync
+
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.4.1
+  hooks:
+  - id: codespell
+
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.22
+  hooks:
+  - id: mdformat
+    exclude: tests/snapshots/about_format/markdown\.snap\.md
+    args: [--extensions, frontmatter]
+    additional_dependencies:
+    - mdformat-frontmatter

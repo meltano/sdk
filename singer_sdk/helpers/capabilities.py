@@ -65,7 +65,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
         description=(
             "Config for the [`Faker`](https://faker.readthedocs.io/en/master/) "
             "instance variable `fake` used within map expressions. Only applicable if "
-            "the plugin specifies `faker` as an addtional dependency (through the "
+            "the plugin specifies `faker` as an additional dependency (through the "
             "`singer-sdk` `faker` extra or directly)."
         ),
     ),
@@ -133,6 +133,18 @@ BATCH_CONFIG = PropertiesList(
                     ),
                 ),
             ),
+        ),
+    ),
+).to_dict()
+SQL_TAP_USE_SINGER_DECIMAL = PropertiesList(
+    Property(
+        "use_singer_decimal",
+        BooleanType(),
+        title="Use Singer Decimal",
+        description=(
+            "Whether to use use strings with `x-singer.decimal` format for "
+            "decimals in the discovered schema. "
+            "This is useful to avoid precision loss when working with large numbers."
         ),
     ),
 ).to_dict()
@@ -340,7 +352,7 @@ class PluginCapabilities(CapabilitiesEnum):
     #: Support :doc:`inline stream map transforms</stream_maps>`.
     STREAM_MAPS = "stream-maps"
 
-    #: Support schema flattening, aka denesting of complex properties.
+    #: Support schema flattening, aka unnesting of complex properties.
     FLATTENING = "schema-flattening"
 
     #: Support the

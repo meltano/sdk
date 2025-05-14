@@ -76,23 +76,22 @@ Follow these instructions to contribute to this project.
 ### Initialize your Development Environment
 
 ```bash
-pipx install poetry
-poetry install
+uv sync
 ```
 
 ### Create and Run Tests
 
 Create tests within the `tests` subfolder and
-  then run:
+then run:
 
 ```bash
-poetry run pytest
+uv run pytest
 ```
 
 You can also test the `tap-dummyjson` CLI interface directly using `poetry run`:
 
 ```bash
-poetry run tap-dummyjson --help
+uv run tap-dummyjson --help
 ```
 
 ### Testing with [Meltano](https://www.meltano.com)

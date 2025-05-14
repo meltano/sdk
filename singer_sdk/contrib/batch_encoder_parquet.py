@@ -1,4 +1,4 @@
-"""Parquet Record Batcher."""
+"""Parquet batch encoder."""
 
 from __future__ import annotations
 
@@ -41,14 +41,13 @@ class ParquetBatcher(BaseBatcher):
             filename = f"{prefix}{sync_id}={i}.parquet"
             if self.batch_config.encoding.compression == "gzip":
                 filename = f"{filename}.gz"
-            with self.batch_config.storage.fs() as fs:
-                with fs.open(filename, "wb") as f:
-                    pylist = list(chunk)
-                    table = pa.Table.from_pylist(pylist)
-                    if self.batch_config.encoding.compression == "gzip":
-                        pq.write_table(table, f, compression="GZIP")
-                    else:
-                        pq.write_table(table, f)
+            storage = self.batch_config.storage
+            with storage.open(filename, "wb") as f:
+                table = pa.Table.from_pylist(list(chunk))
+                if self.batch_config.encoding.compression == "gzip":
+                    pq.write_table(table, f, compression="gzip")
+                else:
+                    pq.write_table(table, f)
 
-                file_url = fs.geturl(filename)
+            file_url = storage.get_url(filename)
             yield [file_url]

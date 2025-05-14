@@ -165,7 +165,7 @@ class FolderTap(Tap, t.Generic[_T]):
                 msg,
                 errors=[f"Missing configuration for filesystem {protocol}"],
             )
-        logger.info("Instantiating filesystem interface: '%s'", protocol)
+        logger.debug("Instantiating filesystem interface: '%s'", protocol)
 
         return fsspec.implementations.dirfs.DirFileSystem(
             path=self.path,

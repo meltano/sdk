@@ -18,7 +18,6 @@ import jsonschema.validators
 from typing_extensions import override
 
 from singer_sdk import metrics
-from singer_sdk._singerlib.json import deserialize_json
 from singer_sdk.exceptions import (
     InvalidJSONSchema,
     InvalidRecord,
@@ -40,6 +39,7 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
 )
+from singer_sdk.singerlib.json import deserialize_json
 from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
 if t.TYPE_CHECKING:
@@ -748,10 +748,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 storage = StorageTarget.from_url(head)
 
             if encoding.format == BatchFileFormat.JSONL:
-                with (
-                    storage.fs(create=False) as batch_fs,
-                    batch_fs.open(tail, mode="rb") as file,
-                ):
+                with storage.open(tail, mode="rb") as file:
                     if encoding.compression == "gzip":
                         with gzip_open(file) as context_file:
                             context = {
@@ -769,10 +766,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             ):
                 import pyarrow.parquet as pq  # noqa: PLC0415
 
-                with (
-                    storage.fs(create=False) as batch_fs,
-                    batch_fs.open(tail, mode="rb") as file,
-                ):
+                with storage.open(tail, mode="rb") as file:
                     table = pq.read_table(file)
                     context = {"records": table.to_pylist()}
                     self.record_counter_metric.increment(len(context["records"]))

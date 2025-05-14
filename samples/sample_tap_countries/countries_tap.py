@@ -13,6 +13,7 @@ from samples.sample_tap_countries.countries_streams import (
     CountriesStream,
 )
 from singer_sdk import Stream, Tap
+from singer_sdk.contrib.msgspec import MsgSpecWriter
 from singer_sdk.typing import PropertiesList
 
 
@@ -21,6 +22,8 @@ class SampleTapCountries(Tap):
 
     name: str = "sample-tap-countries"
     config_jsonschema = PropertiesList().to_dict()
+
+    message_writer_class = MsgSpecWriter
 
     def discover_streams(self) -> list[Stream]:
         """Return a list of discovered streams."""

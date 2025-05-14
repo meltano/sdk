@@ -104,19 +104,19 @@ def test_parent_context_fields_in_child(tap: MyTap):
     messages = _get_messages(tap)
 
     # Parent schema is emitted
-    assert messages[1]
-    assert messages[1]["type"] == SingerMessageType.SCHEMA
-    assert messages[1]["stream"] == parent_stream.name
-    assert messages[1]["schema"] == parent_stream.schema
+    assert messages[0]
+    assert messages[0]["type"] == SingerMessageType.SCHEMA
+    assert messages[0]["stream"] == parent_stream.name
+    assert messages[0]["schema"] == parent_stream.schema
 
     # Child schema is emitted
-    assert messages[2]
-    assert messages[2]["type"] == SingerMessageType.SCHEMA
-    assert messages[2]["stream"] == child_stream.name
-    assert messages[2]["schema"] == child_stream.schema
+    assert messages[1]
+    assert messages[1]["type"] == SingerMessageType.SCHEMA
+    assert messages[1]["stream"] == child_stream.name
+    assert messages[1]["schema"] == child_stream.schema
 
     # Child records are emitted
-    child_record_messages = messages[3:6]
+    child_record_messages = messages[2:5]
     assert child_record_messages
     assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
     assert all(msg["stream"] == child_stream.name for msg in child_record_messages)
@@ -156,13 +156,13 @@ def test_child_deselected_parent(tap_with_deselected_parent: MyTap):
     messages = _get_messages(tap_with_deselected_parent)
 
     # First message is a schema for the child stream, not the parent
-    assert messages[1]
-    assert messages[1]["type"] == SingerMessageType.SCHEMA
-    assert messages[1]["stream"] == child_stream.name
-    assert messages[1]["schema"] == child_stream.schema
+    assert messages[0]
+    assert messages[0]["type"] == SingerMessageType.SCHEMA
+    assert messages[0]["stream"] == child_stream.name
+    assert messages[0]["schema"] == child_stream.schema
 
     # Child records are emitted
-    child_record_messages = messages[2:5]
+    child_record_messages = messages[1:4]
     assert child_record_messages
     assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
     assert all(msg["stream"] == child_stream.name for msg in child_record_messages)
@@ -237,30 +237,30 @@ def test_one_parent_many_children(tap: MyTap):
     messages = _get_messages(tap)
 
     # Parent schema is emitted
-    assert messages[1]
-    assert messages[1]["type"] == SingerMessageType.SCHEMA
-    assert messages[1]["stream"] == parent_stream.name
-    assert messages[1]["schema"] == parent_stream.schema
+    assert messages[0]
+    assert messages[0]["type"] == SingerMessageType.SCHEMA
+    assert messages[0]["stream"] == parent_stream.name
+    assert messages[0]["schema"] == parent_stream.schema
 
     # Child schemas are emitted
-    schema_messages = messages[2:9:3]
+    schema_messages = messages[1:8:3]
     assert schema_messages
     assert all(msg["type"] == SingerMessageType.SCHEMA for msg in schema_messages)
     assert all(msg["stream"] == child_stream.name for msg in schema_messages)
     assert all(msg["schema"] == child_stream.schema for msg in schema_messages)
 
     # Child records are emitted
-    child_record_messages = messages[3:10:3]
+    child_record_messages = messages[2:9:3]
     assert child_record_messages
     assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
     assert all(msg["stream"] == child_stream.name for msg in child_record_messages)
     assert all("pid" in msg["record"] for msg in child_record_messages)
 
     # State messages are emitted
-    state_messages = messages[4:11:3]
+    state_messages = messages[3:10:3]
     assert state_messages
     assert all(msg["type"] == SingerMessageType.STATE for msg in state_messages)
 
     # Parent record is emitted
-    assert messages[11]
-    assert messages[11]["type"] == SingerMessageType.RECORD
+    assert messages[10]
+    assert messages[10]["type"] == SingerMessageType.RECORD
