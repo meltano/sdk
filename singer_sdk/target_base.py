@@ -434,14 +434,14 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     def _process_state_message(self, message_dict: dict) -> None:
         """Process a state message. drain sinks if needed.
 
-        If state is unchanged, no actions will be taken.
+        If state is unchanged or empty, no actions will be taken.
 
         Args:
             message_dict: TODO
         """
         self._assert_line_requires(message_dict, requires={"value"})
         state = message_dict["value"]
-        if self._latest_state == state:
+        if not state or self._latest_state == state:
             return
         self._latest_state = state
 
@@ -511,7 +511,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         if is_endofpipe:
             for sink in self._sinks_active.values():
                 sink.clean_up()
-        self._write_state_message(state)
+        if state:  # avoid emit empty state
+            self._write_state_message(state)
         self._reset_max_record_age()
 
     @t.final
