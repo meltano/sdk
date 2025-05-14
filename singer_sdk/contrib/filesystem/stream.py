@@ -124,7 +124,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
             and mtime is not None
             and mtime < previous_bookmark
         ):
-            self.logger.info("File has not been modified since last read, skipping")
+            self.logger.debug("File has not been modified since last read, skipping")
             return
 
         for record in self.read_file(path):
