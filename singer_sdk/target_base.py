@@ -490,7 +490,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
             for sink in self._sinks_active.values():
                 sink.clean_up()
 
-        if self._latest_state is not None:
+        if self._latest_state:
             self._write_state_message(copy.deepcopy(self._latest_state))
 
         self._reset_max_record_age()
@@ -530,13 +530,10 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         Args:
             state: TODO
         """
-        if state:
-            state_json = json.dumps(state)
-            self.logger.info("Emitting completed target state %s", state_json)
-            sys.stdout.write(f"{state_json}\n")
-            sys.stdout.flush()
-        else:
-            self.logger.info("No state to emit. Skipping.")
+        state_json = json.dumps(state)
+        self.logger.info("Emitting completed target state %s", state_json)
+        sys.stdout.write(f"{state_json}\n")
+        sys.stdout.flush()
 
     # CLI handler
 
