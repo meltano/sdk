@@ -48,6 +48,8 @@ class TapDummyJSON(Tap):
         """
         return [
             streams.Products(self),
+            streams.Users(self),
+            streams.Carts(self),
         ]
 
 

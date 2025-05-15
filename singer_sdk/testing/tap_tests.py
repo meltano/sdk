@@ -209,7 +209,7 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
 
 
 class AttributeIsDateTimeTest(AttributeTestTemplate):
-    """Test a given attribute contains unique values (ignores null values)."""
+    """Test that a given attribute can be parsed as a datetime."""
 
     name = "is_datetime"
 
