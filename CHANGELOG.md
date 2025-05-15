@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.46.2 (2025-05-15)
+
+### 🐛 Fixes
+
+- [#3037](https://github.com/meltano/sdk/issues/3037) Avoid aborting parent stream before child stream is finished in standard tap tests
+- [#3031](https://github.com/meltano/sdk/issues/3031) Avoid emitting message `"No schema for record field."` when "additionalProperties" is set to true in stream schema -- _**Thanks @SidduHussain!**_
+- [#3040](https://github.com/meltano/sdk/issues/3040) Avoid emitting empty state value from target -- _**Thanks @joaopamaral!**_
+
+### ⚙️ Under the Hood
+
+- [#3039](https://github.com/meltano/sdk/issues/3039) Make the filesystem tap and stream logs less noisy
+
+### 📦 Packaging changes
+
+- [#3038](https://github.com/meltano/sdk/issues/3038) Remove license trove classifier and rely on PEP 639
+
 ## v0.46.1 (2025-05-13)
 
 ### 🐛 Fixes
