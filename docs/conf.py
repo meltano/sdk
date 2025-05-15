@@ -29,7 +29,7 @@ copyright = f"{datetime.now().year}, Arch Data, Inc and Contributors"  # noqa: A
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.46.0"
+release = "0.46.1"
 
 
 # -- General configuration -------------------------------------------------------------
