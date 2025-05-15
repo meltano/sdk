@@ -490,7 +490,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
             for sink in self._sinks_active.values():
                 sink.clean_up()
 
-        if self._latest_state is not None:
+        if self._latest_state:
             self._write_state_message(copy.deepcopy(self._latest_state))
 
         self._reset_max_record_age()
