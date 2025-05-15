@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.46.3 (2025-05-15)
 
+### 🐛 Fixes
+
+- [#3042](https://github.com/meltano/sdk/issues/3042) Revert "fix(targets): Avoid emitting message `"No schema for record field."` when "additionalProperties" is set to true in stream schema ([#3031](https://github.com/meltano/sdk/issues/3031))"
+
 ## v0.46.2 (2025-05-15)
 
 ### 🐛 Fixes
