@@ -276,7 +276,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             streams = self.streams.values()
 
         for stream in streams:
-            if not stream.child_streams:
+            if not stream.child_streams:  # pragma: no branch
                 # Initialize streams' record limits before beginning the sync test.
                 stream.ABORT_AT_RECORD_COUNT = dry_run_record_limit
 
