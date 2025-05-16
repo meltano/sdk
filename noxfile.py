@@ -21,6 +21,12 @@ extend-ignore = ["TD002", "TD003", "FIX002"]
 
 COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
 PYPROJECT = nox.project.load_toml()
+UV_SYNC_COMMAND = (
+    "uv",
+    "sync",
+    "--locked",
+    "--no-dev",
+)
 
 package = "singer_sdk"
 python_versions = nox.project.python_versions(PYPROJECT)
@@ -68,10 +74,7 @@ def mypy(session: nox.Session) -> None:
         "testing",
     ]
     session.run_install(
-        "uv",
-        "sync",
-        "--frozen",
-        "--no-dev",
+        *UV_SYNC_COMMAND,
         "--group=typing",
         *(f"--extra={extra}" for extra in extras),
         env=_install_env(session),
@@ -92,10 +95,7 @@ def tests(session: nox.Session) -> None:
         "s3",
     ]
     session.run_install(
-        "uv",
-        "sync",
-        "--frozen",
-        "--no-dev",
+        *UV_SYNC_COMMAND,
         "--group=testing",
         *(f"--extra={extra}" for extra in extras),
         env=_install_env(session),
@@ -126,10 +126,7 @@ def coverage(session: nox.Session) -> None:
     args = session.posargs or ["report", "-m"]
 
     session.run_install(
-        "uv",
-        "sync",
-        "--frozen",
-        "--no-dev",
+        *UV_SYNC_COMMAND,
         "--group=testing",
         env=_install_env(session),
     )
@@ -149,10 +146,7 @@ def benches(session: nox.Session) -> None:
         "s3",
     ]
     session.run_install(
-        "uv",
-        "sync",
-        "--frozen",
-        "--no-dev",
+        *UV_SYNC_COMMAND,
         "--group=testing",
         *(f"--extra={extra}" for extra in extras),
         env=_install_env(session),
@@ -180,11 +174,8 @@ def dependencies(session: nox.Session) -> None:
 
     session.install("deptry")
     session.run_install(
-        "uv",
-        "sync",
-        "--frozen",
+        *UV_SYNC_COMMAND,
         "--inexact",
-        "--no-dev",
         *(f"--extra={extra}" for extra in extras),
         env=_install_env(session),
     )
@@ -206,10 +197,7 @@ def update_snapshots(session: nox.Session) -> None:
     ]
 
     session.run_install(
-        "uv",
-        "sync",
-        "--frozen",
-        "--no-dev",
+        *UV_SYNC_COMMAND,
         "--group=testing",
         *(f"--extra={extra}" for extra in extras),
         env=_install_env(session),
@@ -229,10 +217,7 @@ def doctest(session: nox.Session) -> None:
             args.append("--xdoctest-colored=1")
 
     session.run_install(
-        "uv",
-        "sync",
-        "--frozen",
-        "--no-dev",
+        *UV_SYNC_COMMAND,
         "--group=testing",
         env=_install_env(session),
     )
@@ -247,10 +232,7 @@ def docs(session: nox.Session) -> None:
         args.insert(0, "--color")
 
     session.run_install(
-        "uv",
-        "sync",
-        "--frozen",
-        "--no-dev",
+        *UV_SYNC_COMMAND,
         "--group=docs",
         env=_install_env(session),
     )
@@ -277,11 +259,8 @@ def docs_serve(session: nox.Session) -> None:
     ]
     session.install("sphinx-autobuild")
     session.run_install(
-        "uv",
-        "sync",
-        "--frozen",
+        *UV_SYNC_COMMAND,
         "--inexact",
-        "--no-dev",
         "--group=docs",
         env=_install_env(session),
     )
