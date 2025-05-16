@@ -7,7 +7,7 @@ Taps and targets built on the SDK are automatically compliant with the
 de-facto open source standard for extract and load pipelines.
 </h3>
 
----
+______________________________________________________________________
 
 </br>
 
@@ -45,7 +45,7 @@ de-facto open source standard for extract and load pipelines.
   </a>
 </div>
 
----
+______________________________________________________________________
 
 ## Future-proof extractors and loaders, with less code
 
@@ -56,7 +56,7 @@ capabilities and bug fixes, simply by updating your SDK dependency to the latest
 
 ## Meltano
 
-*Not familiar with Meltano?*  [Meltano](https://docs.meltano.com/getting-started/meltano-at-a-glance) is your CLI for ELT+ that:
+*Not familiar with Meltano?* [Meltano](https://docs.meltano.com/getting-started/meltano-at-a-glance) is your CLI for ELT+ that:
 
 - **Starts simple**: Meltano is pip-installable and comes in a prepackaged docker container, you can have your first ELT pipeline running within minutes.
 - **Has DataOps out-of-the-box**: Meltano provides tools that make DataOps best practices easy to use in every project.
@@ -66,13 +66,14 @@ capabilities and bug fixes, simply by updating your SDK dependency to the latest
 - **Has first class ELT tooling built-in**: Extract data from any data source, load into any target, use inline maps to transform on data on the fly, and test the incoming data, all in one package.
 
 If you want to get started with Meltano, we suggest you:
+
 - head over to the [Installation](https://docs.meltano.com/getting-started/installation)
 - or if you have it installed, go through the [Meltano Tutorial](https://docs.meltano.com/getting-started/part1).
 
 ## Documentation
 
 - See our [online documentation](https://sdk.meltano.com) for instructions on how
-to get started with the SDK.
+  to get started with the SDK.
 
 ## Contributing back to the SDK
 

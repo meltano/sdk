@@ -65,7 +65,6 @@ class MyConnector(SQLConnector):
 
 ### Adapting the type mapping based on user configuration
 
-
 If your type mapping depends on some user-defined configuration, you can also override the `from_config` method to pass the configuration to your custom type mapping:
 
 ```python
@@ -80,7 +79,6 @@ class ConfiguredSQLToJSONSchema(SQLToJSONSchema):
 ```
 
 Then, you can use your custom type mapping in your connector as in the previous example.
-
 
 ### SQL tap support for Singer Decimal string format
 

@@ -6,13 +6,13 @@ Create taps with the SDK requires overriding just two or three classes:
 
 1. The `Tap` class. This class governs configuration, validation,
    and stream discovery.
-2. The stream class. You have different options for your base class depending on the type
+1. The stream class. You have different options for your base class depending on the type
    of data source you are working with:
    - `Stream` - The **generic** base class for streams.
    - `RESTStream` - The base class for **REST**-type streams.
    - `GraphQLStream` - The base class for **GraphQL**-type streams. This class inherits
      from `RESTStream`, since GraphQL is built upon REST.
-3. An optional authenticator class. You can omit this class entirely if you do not require authentication or if you prefer to write custom authentication logic. The supported authenticator classes are:
+1. An optional authenticator class. You can omit this class entirely if you do not require authentication or if you prefer to write custom authentication logic. The supported authenticator classes are:
    - `SimpleAuthenticator` - This class is functionally equivalent to overriding
      `http_headers` property in the stream class.
    - `OAuthAuthenticator` - This class performs an OAuth 2.0 authentication flow.
@@ -25,7 +25,7 @@ Create targets with the SDK requires overriding just two classes:
 
 1. The `Target` class. This class governs configuration, validation,
    and stream discovery.
-2. The `Sink` class. You have two different options depending on whether your target
+1. The `Sink` class. You have two different options depending on whether your target
    prefers writing one record at a time versus writing in batches:
    - `RecordSink` writes one record at a time, via the `process_record()`
      method.
@@ -218,7 +218,6 @@ Also using breakpoints is a great way to become familiar with the internals of t
 Ensure the interpreter you're using in VSCode is set to use the one in the project's virtual environment (usually `.venv` in the project root).
 You can change this by using the command palette to go to interpreter settings.
 Doing this will also help with autocompletion.
-
 
 In order to launch your plugin via it's CLI with the built-in debugger, VSCode requires a [Launch configuration](https://code.visualstudio.com/docs/editor/debugging#_launch-configurations).
 An example launch configuration, added to your `launch.json`, might be as follows:

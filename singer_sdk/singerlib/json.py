@@ -59,5 +59,6 @@ def serialize_json(obj: object, **kwargs: t.Any) -> str:
         use_decimal=True,
         default=_default_encoding,
         separators=(",", ":"),
+        ignore_nan=True,
         **kwargs,
     )

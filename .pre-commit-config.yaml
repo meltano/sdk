@@ -49,7 +49,7 @@ repos:
   - id: check-readthedocs
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.11.7
+  rev: v0.11.9
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]
@@ -64,7 +64,7 @@ repos:
       )$
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.6.17
+  rev: 0.7.3
   hooks:
   - id: uv-lock
   - id: uv-sync
@@ -73,3 +73,12 @@ repos:
   rev: v2.4.1
   hooks:
   - id: codespell
+
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.22
+  hooks:
+  - id: mdformat
+    exclude: tests/snapshots/about_format/markdown\.snap\.md
+    args: [--extensions, frontmatter]
+    additional_dependencies:
+    - mdformat-frontmatter

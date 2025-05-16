@@ -15,7 +15,6 @@ keywords = [
 ]
 classifiers = [
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -35,7 +34,6 @@ dependencies = [
     'backoff>=2.0.0; python_version<"4"',
     'backports-datetime-fromisoformat>=2.0.1; python_version<"3.11"',
     "click~=8.0",
-    "fs>=2.4.16",
     "fsspec>=2024.9.0",
     'importlib-metadata>=5.0; python_version<"3.12"',
     'importlib-resources>=5.12.0,!=6.2.0,!=6.3.0,!=6.3.1; python_version<"3.10"',
@@ -48,50 +46,39 @@ dependencies = [
     "PyYAML>=6.0",
     "referencing>=0.30.0",
     "requests>=2.25.1",
-    # TODO: remove this constraint once we get rid of the `fs` dependency
-    # newer setuptools versions are incompatible with some dependencies (fs)
-    "setuptools<=70.3.0",
     "simpleeval>=0.9.13,!=1.0.1",
     "simplejson>=3.17.6",
     "sqlalchemy>=1.4,<3.0",
     "typing-extensions>=4.5.0",
+    "universal-pathlib>=0.2.6",
 ]
 
 [project.optional-dependencies]
-# File storage dependencies installed as optional 'filesystem' extras
 s3 = [
-    "fs-s3fs>=1.1.1",
     "s3fs>=2024.9.0",
 ]
 
-# Parquet file dependencies installed as optional 'parquet' extras
 parquet = [
-    "numpy>=1.22",
-    "pyarrow>=13",
+    "pyarrow>=15",
 ]
 
-# Testing dependencies installed as optional 'testing' extras
 testing = [
     "pytest>=7.2.1",
 ]
 
-# installed as optional 'faker' extra
 faker = [
     "faker>=22.5",
 ]
 
-# Crypto extras
 jwt = [
     "cryptography>=3.4.6",
     "PyJWT~=2.4",
 ]
 
-# SSH extras
 ssh = [
     "paramiko>=3.3.0",
 ]
 
-# msgspec extras
 msgspec = [
     "msgspec>=0.19.0",
 ]
@@ -142,6 +129,7 @@ testing = [
 ]
 typing = [
     "mypy>=1.9",
+    "pyarrow-stubs>=19.1",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-requests>=2.28.11",
@@ -180,11 +168,15 @@ filterwarnings = [
     "default:Passing a state file path is deprecated:singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
     # TODO: Address this SQLite warning in Python 3.13+
     "ignore::ResourceWarning",
+    # universal-pathlib
+    "default:in a future version of UPath this will be set to None:PendingDeprecationWarning",
 ]
 log_cli_level = "INFO"
 markers = [
     "external: Tests relying on external resources",
     "windows: Tests that only run on Windows",
+    "linux: Tests that only run on Linux",
+    "darwin: Tests that only run on Darwin",
     "snapshot: Tests that use pytest-snapshot",
 ]
 minversion = "7"
@@ -194,7 +186,7 @@ xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.45.11"
+version = "0.46.3"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -256,11 +248,9 @@ PyJWT = "jwt"
 DEP002 = [
     # Transitive constraints
     "numpy",
-    "setuptools",
     "urllib3",
     # Plugins
     "paramiko",
-    "fs-s3fs",
     "s3fs",
     # Legacy dependencies
     "importlib-resources",
@@ -342,7 +332,7 @@ select = [
     "A",    # flake8-builtins
     "COM",  # flake8-commas
     "C4",   # flake8-comprehensions
-    "DTZ",  # flake8-datetimezs
+    "DTZ",  # flake8-datetimez
     "T10",  # flake8-debugger
     "EM",   # flake8-errmsg
     "FA",   # flake8-future-annotations

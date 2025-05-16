@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.46.3 (2025-05-15)
+
+### 🐛 Fixes
+
+- [#3042](https://github.com/meltano/sdk/issues/3042) Revert "fix(targets): Avoid emitting message `"No schema for record field."` when "additionalProperties" is set to true in stream schema ([#3031](https://github.com/meltano/sdk/issues/3031))"
+
+## v0.46.2 (2025-05-15)
+
+### 🐛 Fixes
+
+- [#3037](https://github.com/meltano/sdk/issues/3037) Avoid aborting parent stream before child stream is finished in standard tap tests
+- [#3031](https://github.com/meltano/sdk/issues/3031) Avoid emitting message `"No schema for record field."` when "additionalProperties" is set to true in stream schema -- _**Thanks @SidduHussain!**_
+- [#3040](https://github.com/meltano/sdk/issues/3040) Avoid emitting empty state value from target -- _**Thanks @joaopamaral!**_
+
+### ⚙️ Under the Hood
+
+- [#3039](https://github.com/meltano/sdk/issues/3039) Make the filesystem tap and stream logs less noisy
+
+### 📦 Packaging changes
+
+- [#3038](https://github.com/meltano/sdk/issues/3038) Remove license trove classifier and rely on PEP 639
+
+## v0.46.1 (2025-05-13)
+
+### 🐛 Fixes
+
+- [#3034](https://github.com/meltano/sdk/issues/3034) Avoid emitting an empty state from the target if the tap has not sent any state messages
+- [#3030](https://github.com/meltano/sdk/issues/3030) Bump standard tap tests max records limit from 25 to 150
+
+### 📚 Documentation Improvements
+
+- [#3026](https://github.com/meltano/sdk/issues/3026) Auto-format markdown with `mdformat`
+
+### 📦 Packaging changes
+
+- [#3033](https://github.com/meltano/sdk/issues/3033) Depend on PyArrow >= 15 for parquet batching
+- [#3027](https://github.com/meltano/sdk/issues/3027) Test with click 8.2.x
+
+## v0.46.0 (2025-05-06)
+
+### ✨ New
+
+- [#2162](https://github.com/meltano/sdk/issues/2162) Expose metric dictionary to make logging metrics as JSON easier
+- [#2977](https://github.com/meltano/sdk/issues/2977) Limit extraction to 25 records by default in built-in tap tests
+- [#2989](https://github.com/meltano/sdk/issues/2989) Allow pagination to continue after an empty page
+
+### 🐛 Fixes
+
+- [#3020](https://github.com/meltano/sdk/issues/3020) In SQL targets, use stream name as table name instead of splitting by hyphen if `default_target_schema` is specified
+- [#3019](https://github.com/meltano/sdk/issues/3019) Encode `nan`, `inf` and `-inf` values as `null` in Singer stream
+- [#2999](https://github.com/meltano/sdk/issues/2999) Preserve microsecond precision when comparing datetime replication values
+- [#2986](https://github.com/meltano/sdk/issues/2986) Stop loading package files to allow taps and targets to run as Python scripts
+- [#3009](https://github.com/meltano/sdk/issues/3009) Fix infinite recursion error when resolving JSON schemas with circular references
+
+### ⚙️ Under the Hood
+
+- [#2990](https://github.com/meltano/sdk/issues/2990) Replace filesystem library used for BATCH mode
+- [#3010](https://github.com/meltano/sdk/issues/3010) Use dict instead of `OrderedDict`
+
 ## v0.45.11 (2025-04-28)
 
 ### 🐛 Fixes
@@ -305,7 +364,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 📦 Packaging changes
 
 - [#2694](https://github.com/meltano/sdk/issues/2694) Removed unused backport `importlib_resources` dependency in tap template
-- [#2664](https://github.com/meltano/sdk/issues/2664) Added a constraint on setuptools <= 70.3.0 to fix incompatibility with some dependencies
+- [#2664](https://github.com/meltano/sdk/issues/2664) Added a constraint on setuptools \<= 70.3.0 to fix incompatibility with some dependencies
 
 ## v0.40.0 (2024-09-02)
 
@@ -1104,11 +1163,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fix
 
-- Fix missing typing-extensions for Python<3.10 (#776)
+- Fix missing typing-extensions for Python\<3.10 (#776)
 
 ## 0.6.0 - (2022-06-30)
-
----
 
 ### New
 
@@ -1130,8 +1187,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.5.0 - (2022-05-19)
 
----
-
 ### New
 
 - Tap and Target SDK: The `--config=ENV` option now also considers environment variables from a
@@ -1151,8 +1206,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.4.9 - (2022-05-12)
 
----
-
 ### New
 
 - Tap SDK: Improved helpers for handling rate limits, backoff and retries ([#137](https://gitlab.com/meltano/sdk/-/issues/137), [#140](https://gitlab.com/meltano/sdk/-/issues/140), [!277](https://gitlab.com/meltano/sdk/-/merge_requests/277)) - _Thanks, **[Fred O'Loughlin](https://gitlab.com/fred-oloughlin-fl)**_!
@@ -1168,15 +1221,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.4.8 - (2022-05-05)
 
----
-
 ### Fixes
 
 - Target SDK: Use `maxLength` in SQL targets for string fields if the schema provides it ([#371](https://gitlab.com/meltano/sdk/-/issues/371), [!284](https://gitlab.com/meltano/sdk/-/merge_requests/284)) - _Thanks, **[Thomas Briggs](https://gitlab.com/tbriggs2)**_!
 
 ## 0.4.7 - (2022-04-28)
-
----
 
 ### Fixes
 
@@ -1187,16 +1236,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.4.6 - (2022-04-21)
 
----
-
 ### Fixes
 
 - Raise more descriptive exceptions when wrapped JSON typing classes needs to be instantiated ([#55](https://gitlab.com/meltano/sdk/-/issues/55), [#360](https://gitlab.com/meltano/sdk/-/issues/360), [!270](https://gitlab.com/meltano/sdk/-/merge_requests/270)).
 - Support JSONPath extensions in `records_jsonpath` and `next_page_token_jsonpath` ([#361](https://gitlab.com/meltano/sdk/-/issues/361), [!271](https://gitlab.com/meltano/sdk/-/merge_requests/271)).
 
 ## 0.4.5 - (2022-04-08)
-
----
 
 ### Fixes
 
@@ -1207,15 +1252,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.4.4 - (2022-03-03)
 
----
-
 ### New
 
 - Define all built-in JSON Schema string formats as separate types ([#336](https://gitlab.com/meltano/sdk/-/issues/336), [!250](https://gitlab.com/meltano/sdk/-/merge_requests/250)) - _Thanks, **[Reuben Frankel](https://gitlab.com/ReubenFrankel)**_!
 
 ## 0.4.3 - (2022-02-18)
-
----
 
 ### New
 
@@ -1227,8 +1268,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.4.2 - (2022-02-04)
 
----
-
 ### New
 
 - Add record and schema flattening in Stream Maps ([!236](https://gitlab.com/meltano/sdk/-/merge_requests/236)),
@@ -1239,16 +1278,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.4.1 - (2022-01-27)
 
----
-
 ### Changes
 
 - Always sync one record per stream when invoking with `--test` or `--test=all` ([#311](https://gitlab.com/meltano/sdk/-/issues/311), [!241](https://gitlab.com/meltano/sdk/-/merge_requests/241))
 - Add `--test=schema` option to emit tap SCHEMA messages only ([!218](https://gitlab.com/meltano/sdk/-/merge_requests/218)) - _Thanks, **[Laurent Savaëte](https://gitlab.com/LaurentS)**_!
 
 ## 0.4.0 - (2022-01-21)
-
----
 
 ### New
 
@@ -1257,8 +1292,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Licence tracking to SDK GitLab Project ([#166](https://gitlab.com/meltano/sdk/-/issues/166), [!237](https://gitlab.com/meltano/sdk/-/merge_requests/237))
 
 ## 0.3.18 - (2022-01-13)
-
----
 
 ### New
 
@@ -1272,8 +1305,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.3.17 - (2021-12-16)
 
----
-
 ### New
 
 - Tap SDK: Add configurable timeout for HTTP requests ([#287](https://gitlab.com/meltano/sdk/-/issues/287), [!217](https://gitlab.com/meltano/sdk/-/merge_requests/217), [!225](https://gitlab.com/meltano/sdk/-/merge_requests/225)) -- _Thanks, **[Josh Lloyd](https://gitlab.com/jlloyd3)**!_
@@ -1285,8 +1316,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.3.16 - (2021-12-09)
 
----
-
 ### Fixes
 
 - Tap SDK: Fix datelike type parsing bug with nested schemas ([#283](https://gitlab.com/meltano/sdk/-/issues/283), [!219](https://gitlab.com/meltano/sdk/-/merge_requests/219))
@@ -1294,16 +1323,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.3.15 - (2021-12-03)
 
----
-
 ### Fixes
 
 - Tap SDK: Fixed mapped `__key_properties__` not being passed to the emitted schema message ([#281](https://gitlab.com/meltano/sdk/-/issues/281), [!209](https://gitlab.com/meltano/sdk/-/merge_requests/209))
 - Tap SDK: Fixed missing schema during development causing sync to fail [#284](https://gitlab.com/meltano/sdk/-/issues/284), [!212](https://gitlab.com/meltano/sdk/-/merge_requests/212) -- _Thanks, **[Fred Reimer](https://gitlab.com/freimer)**!_
 
 ## 0.3.14 - (2021-11-18)
-
----
 
 ### New
 
@@ -1320,8 +1345,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.3.13 - (2021-10-28)
 
----
-
 ### New
 
 - Target SDK: CLI flag for targets to read messages from a file instead of stdin ([#249](https://gitlab.com/meltano/sdk/-/issues/249), [!190](https://gitlab.com/meltano/sdk/-/merge_requests/190)) -- _Thanks, **[Charles Julian Knight](https://gitlab.com/rabidaudio)**!_
@@ -1329,8 +1352,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tap and Target SDK: Create expanded list of capabilities ([#186](https://gitlab.com/meltano/sdk/-/issues/186), [!141](https://gitlab.com/meltano/sdk/-/merge_requests/141))
 
 ## 0.3.12 - (2021-10-21)
-
----
 
 ### Fixes
 
@@ -1340,8 +1361,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tap and Target SDK: Allows `--discover` and `--about` execution without requiring settings validation ([#235](https://gitlab.com/meltano/sdk/-/issues/235), [!188](https://gitlab.com/meltano/sdk/-/merge_requests/188))
 
 ## 0.3.11 - (2021-10-07)
-
----
 
 ### New
 
@@ -1359,15 +1378,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.3.10 - (2021-09-30)
 
----
-
 ### Changes
 
 - Tap and Target SDK: Prevents the leaking of sensitive configuration values when JSON schema validation fails ([!173](https://gitlab.com/meltano/sdk/-/merge_requests/173)) -- _Thanks, **[Kevin Mullins](https://gitlab.com/zyzil)**!_.
 
 ## 0.3.9 - (2021-09-23)
-
----
 
 ### New
 
@@ -1383,16 +1398,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.3.8 - (2021-09-16)
 
----
-
 ### Fixes
 
 - Tap and Target SDK: Resolves `2to3` compatibility issues when installed with `setuptools>=58.0`.
 - Resolve issue preventing repo from being cloned on Windows.
 
 ## 0.3.7 - (2021-09-09)
-
----
 
 ### New
 
@@ -1404,8 +1415,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tap SDK: Changed the signature of `Stream.apply_catalog` to reflect new catalog parsing flow ([#161](https://gitlab.com/meltano/sdk/-/issues/161), [!146](https://gitlab.com/meltano/sdk/-/merge_requests/146))
 
 ## 0.3.6 - (2021-08-26)
-
----
 
 ### New
 
@@ -1425,15 +1434,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.3.5 - (2021-08-17)
 
----
-
 ### Fixes
 
 - Tap SDK: Fixed a bug where not using a catalog file resulted in all streams being selected but all properties being removed from the schema and records (#190, !132)
 
 ## v0.3.4
-
----
 
 ### New
 
@@ -1449,8 +1454,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tap SDK: Fixed a bug where replication key signposts were not correctly applied for streams which defined them (#180, !129)
 
 ## v0.3.3
-
----
 
 ### New
 
