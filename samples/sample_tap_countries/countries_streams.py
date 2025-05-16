@@ -17,6 +17,9 @@ from requests_cache.session import CachedSession
 from singer_sdk import typing as th
 from singer_sdk.streams.graphql import GraphQLStream
 
+if t.TYPE_CHECKING:
+    from collections.abc import Iterable
+
 SCHEMAS_DIR = importlib.resources.files(__package__) / "schemas"
 
 
@@ -82,6 +85,18 @@ class CountriesStream(CountriesAPIStream):
             ),
         ),
     ).to_dict()
+
+    # FIXME: revert these changes before merging
+    def request_records(self, context) -> Iterable[dict]:
+        import time  # noqa: PLC0415
+
+        records = super().request_records(context)
+
+        yield next(records)  # Emit the first record
+
+        time.sleep(60)  # Simulate a slow stream
+
+        yield from records  # Emit the rest of the records
 
 
 class ContinentsStream(CountriesAPIStream):
