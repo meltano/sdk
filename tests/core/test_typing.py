@@ -14,6 +14,7 @@ import sqlalchemy as sa
 from singer_sdk.helpers._typing import (
     TypeConformanceLevel,
     _conform_primitive_property,
+    _transform_string_property,
     conform_record_data_types,
 )
 from singer_sdk.typing import (
@@ -357,10 +358,66 @@ def test_conform_object_additional_properties():
         pytest.param(
             decimal.Decimal("nan"), {"type": "number"}, None, id="decimal_nan_to_number"
         ),
+        pytest.param("", {"type": "string"}, "", id="string_empty_to_string"),
+        pytest.param(
+            "",
+            {"type": ["boolean", "null"]},
+            None,
+            id="string_empty_to_any_nullable_non_string",
+        ),
+        pytest.param("true", {"type": "boolean"}, True, id="string_true_to_boolean"),
+        pytest.param(
+            "TRUE",
+            {"type": "boolean"},
+            True,
+            id="string_true_uppercase_to_boolean",
+        ),
+        pytest.param("false", {"type": "boolean"}, False, id="string_false_to_boolean"),
+        pytest.param(
+            "something else",
+            {"type": "boolean"},
+            False,
+            id="string_not_true_to_boolean",
+        ),
+        pytest.param("", {"type": "boolean"}, False, id="string_empty_to_boolean"),
+        pytest.param("3", {"type": "integer"}, 3, id="string_integer_to_integer"),
+        pytest.param("", {"type": "integer"}, 0, id="string_empty_to_integer"),
+        pytest.param(
+            "3.14",
+            {"type": "number"},
+            decimal.Decimal("3.14"),
+            id="string_float_to_number",
+        ),
+        pytest.param("inf", {"type": "number"}, None, id="string_inf_to_number"),
+        pytest.param("nan", {"type": "number"}, None, id="string_nan_to_number"),
+        pytest.param(
+            "",
+            {"type": "number"},
+            decimal.Decimal(0),
+            id="string_empty_to_number",
+        ),
+        pytest.param(
+            "[1, 2, 3]",
+            {"type": "array"},
+            [1, 2, 3],
+            id="string_json_array_to_array",
+        ),
+        pytest.param("", {"type": "array"}, [], id="string_empty_to_array"),
+        pytest.param(
+            '{"a": 1, "b": true, "c": 3.14}',
+            {"type": "object"},
+            {"a": 1, "b": True, "c": 3.14},
+            id="string_json_object_to_object",
+        ),
+        pytest.param("", {"type": "object"}, {}, id="string_empty_to_object"),
     ],
 )
 def test_conform_primitives(value: t.Any, type_dict: dict, expected: t.Any):
     assert _conform_primitive_property(value, type_dict) == expected
+
+
+def test_transform_string_to_string():
+    assert _transform_string_property("test", {"type": "string"}) == "test"
 
 
 @pytest.mark.filterwarnings("ignore:Use `JSONSchemaToSQL` instead.:DeprecationWarning")
