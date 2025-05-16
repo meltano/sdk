@@ -80,7 +80,11 @@ def stream(tap):
     return tap.load_streams()[0]
 
 
-def test_stream_apply_catalog(stream: Stream):
+@pytest.mark.parametrize("no_replication_key", [None, "", False])
+def test_stream_apply_catalog(
+    stream: Stream,
+    no_replication_key: t.Literal[None, "", False],
+):
     """Applying a catalog to a stream should overwrite fields."""
     assert stream.primary_keys == []
     assert stream.replication_key == "updatedAt"
@@ -98,7 +102,7 @@ def test_stream_apply_catalog(stream: Stream):
                         "stream": stream.name,
                         "schema": stream.schema,
                         "replication_method": REPLICATION_FULL_TABLE,
-                        "replication_key": None,
+                        "replication_key": no_replication_key,
                     },
                 ],
             },
