@@ -189,8 +189,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             )
             query = query.order_by(order_by)
 
-            start_val = self.get_starting_replication_key_value(None)
-            if start_val:
+            if start_val := self.get_starting_replication_key_value(None):
                 query = query.where(replication_key_col >= start_val)
 
         if self.ABORT_AT_RECORD_COUNT is not None:
