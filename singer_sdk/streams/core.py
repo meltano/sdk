@@ -516,7 +516,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._schema
 
     @property
-    def primary_keys(self) -> t.Sequence[str] | None:
+    def primary_keys(self) -> t.Sequence[str]:
         """Get primary keys.
 
         Returns:
@@ -525,11 +525,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._primary_keys or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: t.Sequence[str] | None) -> None:
+    def primary_keys(self, new_value: t.Sequence[str]) -> None:
         """Set primary key(s) for the stream.
 
         Args:
-            new_value: TODO
+            new_value: A list or tuple of primary key(s) for the stream.
         """
         self._primary_keys = new_value
 
@@ -1319,9 +1319,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         self._tap_input_catalog = catalog
 
-        if catalog_entry := catalog.get_stream(self.name):
+        if entry := catalog.get_stream(self.name):
             stream_metadata: StreamMetadata | None
-            if stream_metadata := catalog_entry.metadata.get(()):  # type: ignore[assignment]
+            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment]
                 table_key_properties = stream_metadata.table_key_properties
                 table_replication_key = stream_metadata.replication_key
                 table_replication_method = stream_metadata.forced_replication_method
@@ -1330,18 +1330,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 table_replication_key = None
                 table_replication_method = None
 
-            self.primary_keys = catalog_entry.key_properties or table_key_properties
-            self.replication_key = (
-                catalog_entry.replication_key or table_replication_key
-            )
+            self.primary_keys = entry.key_properties or table_key_properties or ()
+            self.replication_key = entry.replication_key or table_replication_key
 
-            replication_method = (
-                catalog_entry.replication_method or table_replication_method
-            )
+            replication_method = entry.replication_method or table_replication_method
             if replication_method:
                 self.forced_replication_method = replication_method
 
-            self._input_schema = catalog_entry.schema.to_dict()
+            self._input_schema = entry.schema.to_dict()
 
     def _get_state_partition_context(
         self,

@@ -37,7 +37,9 @@ def test_config_errors(config_dict: dict, expectation, errors: list[str]):
 
 def test_cli_help():
     """Test the CLI help message."""
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
+    # TODO: Remote this once support for Python 3.9 and thus Click<8.2 is dropped
+    runner.mix_stderr = False
     result = runner.invoke(StreamTransform.cli, ["--help"])
     assert result.exit_code == 0
     assert "Show this message and exit." in result.output
@@ -45,7 +47,9 @@ def test_cli_help():
 
 def test_cli_config_validation(tmp_path):
     """Test the CLI config validation."""
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
+    # TODO: Remote this once support for Python 3.9 and thus Click<8.2 is dropped
+    runner.mix_stderr = False
     config_path = tmp_path / "config.json"
     config_path.write_text(json.dumps({}))
     result = runner.invoke(StreamTransform.cli, ["--config", str(config_path)])
