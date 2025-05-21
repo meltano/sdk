@@ -167,7 +167,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         return super().effective_schema
 
-    def build_query(self) -> sa.Select:
+    def build_query(self, *, context: Context | None = None) -> sa.Select:
         """Build a SQLAlchemy query for the stream.
 
         Returns:
@@ -189,7 +189,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             )
             query = query.order_by(order_by)
 
-            if start_val := self.get_starting_replication_key_value(None):
+            if start_val := self.get_starting_replication_key_value(context):
                 query = query.where(replication_key_col >= start_val)
 
         if self.ABORT_AT_RECORD_COUNT is not None:
@@ -220,12 +220,12 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             NotImplementedError: If partition is passed in context and the stream does
                 not support partitioning.
         """
-        if context:
+        if context:  # pragma: no cover
             msg = f"Stream '{self.name}' does not support partitioning."
             raise NotImplementedError(msg)
 
         with self.connector._connect() as conn:  # noqa: SLF001
-            for record in conn.execute(self.build_query()).mappings():
+            for record in conn.execute(self.build_query(context=context)).mappings():
                 transformed_record = self.post_process(dict(record))
                 if transformed_record is None:
                     # Record filtered out during post_process()
