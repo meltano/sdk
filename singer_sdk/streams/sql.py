@@ -203,7 +203,6 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         Args:
             query: The SQLAlchemy Select object.
-            context: The context object.
 
         Returns:
             A SQLAlchemy Select object.
