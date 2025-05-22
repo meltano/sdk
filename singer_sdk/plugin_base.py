@@ -222,7 +222,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         # Signal handling
         self._setup_signal_handlers()
 
-    def _setup_signal_handlers(self) -> None:
+    def _setup_signal_handlers(self) -> None:  # pragma: no cover
         if threading.current_thread() == threading.main_thread():
             if hasattr(signal, "SIGINT"):
                 signal.signal(signal.SIGINT, self._handle_termination)
