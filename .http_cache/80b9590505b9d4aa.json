@@ -1,0 +1,185 @@
+{
+  "cookies": {
+    "_cfuvid": "vB9t9GFEgu8zreBDsiowZkkm09YACw8_Zt0iSqTTjuI-1747940875361-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:07:55.254162+00:00",
+  "elapsed": 0.384253,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e99655e84eddf-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:07:55 GMT",
+    "ETag": "W/\"30da2db5957b1448c1f3e8fc2e23041a\"",
+    "Link": "<https://gitlab.com/api/v4/groups/12586917/epics/15/issues?epic_iid=15&id=12586917&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/12586917/epics/15/issues?epic_iid=15&id=12586917&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=vB9t9GFEgu8zreBDsiowZkkm09YACw8_Zt0iSqTTjuI-1747940875361-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-57-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-d",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"59e9407bffbb164b3ff0a2d4768a9624\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "59e9407bffbb164b3ff0a2d4768a9624",
+    "x-runtime": "0.191748",
+    "x-total": "1",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/12586917/epics/15/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/12586917/epics/15/issues",
+  "_decoded_content": [
+    {
+      "id": 90222394,
+      "iid": 36,
+      "project_id": 27821563,
+      "title": "Content Pillars for Q3",
+      "description": "Hoping we can decide on 1-2 content pillars we decide to go hard on and promote and hopefully build out content for on our site and content we can share and do mini campaigns around. This will help us build SEO around them, build credibility don't he topics, and keep our efforts focused. \n\nPlease note we will be focusing heavily on owning the singer space already so this does not necessarily need to be a topic as it is very broad and will already be covered by ad spend/ SEO strategy. \n\nNeed to straddle the line between being too broad and too specific. \n\nTopic Options:\n* everything singer\n* DataOps\n* Data Integration\n* Taps and Targets\n* \n* \n\n<!-- Labels to add for triaging -->\n\n\u2506Issue is synchronized with this [Trello card](https://trello.com/c/shFlAMhn) by [Unito](https://www.unito.io)",
+      "state": "closed",
+      "created_at": "2021-07-13T22:10:58.938Z",
+      "updated_at": "2022-03-22T22:22:15.842Z",
+      "closed_at": "2021-07-29T20:04:21.030Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing",
+        "flow::Doing",
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": {
+        "id": 2112412,
+        "iid": 173,
+        "group_id": 2524164,
+        "title": "Fri: July 30, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-06-21T15:33:10.729Z",
+        "updated_at": "2021-08-02T00:51:34.826Z",
+        "due_date": "2021-07-31",
+        "start_date": "2021-07-24",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/173"
+      },
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 4,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2021-07-30",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/36",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/36",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/36/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/36/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#36",
+        "relative": "#36",
+        "full": "meltano/marketing/marketing-general#36"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 15,
+      "epic": {
+        "id": 478202,
+        "iid": 15,
+        "title": "WIP Content Pillars",
+        "url": "/groups/meltano/marketing/-/epics/15",
+        "group_id": 12586917,
+        "human_readable_end_date": "Jul 31, 2021",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1202759,
+      "relative_position": 0
+    }
+  ]
+}

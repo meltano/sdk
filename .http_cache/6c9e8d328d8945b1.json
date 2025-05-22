@@ -1,0 +1,303 @@
+{
+  "cookies": {
+    "_cfuvid": "D.Y95e91y6oqsizXAMqB2wbGCHWYOjo0.Te_PC4__0s-1747940856518-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:07:36.412685+00:00",
+  "elapsed": 0.433715,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e98ef799298a0-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:07:36 GMT",
+    "ETag": "W/\"11fe157a43f15df7df550bb62d111644\"",
+    "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/119/issues?epic_iid=119&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/119/issues?epic_iid=119&id=2524164&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=D.Y95e91y6oqsizXAMqB2wbGCHWYOjo0.Te_PC4__0s-1747940856518-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-10-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-b",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"84cfc880eb1da96fa4f222abf8b2573f\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "84cfc880eb1da96fa4f222abf8b2573f",
+    "x-runtime": "0.194072",
+    "x-total": "2",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/2524164/epics/119/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/2524164/epics/119/issues",
+  "_decoded_content": [
+    {
+      "id": 94568802,
+      "iid": 158,
+      "project_id": 24722673,
+      "title": "What is our desired end state for the Singer Working Group?",
+      "description": "What's the end state we're hoping to get to so that we can lower our investment into the Singer ecosystem.\n\nIn my eyes:\n\n* Separate \"Singer Foundation\" or some neutral entity\n* We're a leader in the org, but others are taking on shared leadership\n* Singer.io is under that entities control and there's a blog and folks can publish neutral content there if we want\n* Singer.io is powered by data from the Hub (or vice versa?)\n* Regular working group meetings and a solid framework for extending and expanding the protocol\n* a v1.0 of the spec is a thing that exists or is coming down the road\n\n@aaronsteers @DouweM @Emily \n\n<!-- Labels to add for triaging -->",
+      "state": "closed",
+      "created_at": "2021-09-29T19:46:16.740Z",
+      "updated_at": "2021-12-13T23:17:58.849Z",
+      "closed_at": "2021-12-10T23:55:57.689Z",
+      "closed_by": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "labels": [
+        "Discussion",
+        "kind::Non-Product",
+        "valuestream::Ecosystem"
+      ],
+      "milestone": {
+        "id": 2286171,
+        "iid": 199,
+        "group_id": 2524164,
+        "title": "Fri: Dec 10, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-10-18T15:20:02.916Z",
+        "updated_at": "2021-12-13T22:48:04.487Z",
+        "due_date": "2021-12-10",
+        "start_date": "2021-12-04",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/199"
+      },
+      "assignees": [
+        {
+          "id": 87854,
+          "username": "DouweM",
+          "public_email": "",
+          "name": "Douwe Maan",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+          "web_url": "https://gitlab.com/DouweM"
+        },
+        {
+          "id": 1942272,
+          "username": "tayloramurphy",
+          "public_email": "",
+          "name": "Taylor A Murphy",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "web_url": "https://gitlab.com/tayloramurphy"
+        }
+      ],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "user_notes_count": 8,
+      "merge_requests_count": 0,
+      "upvotes": 1,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meta/-/issues/158",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/24722673/issues/158",
+        "notes": "https://gitlab.com/api/v4/projects/24722673/issues/158/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/24722673/issues/158/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/24722673",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#158",
+        "relative": "#158",
+        "full": "meltano/meta#158"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 119,
+      "epic": {
+        "id": 331283,
+        "iid": 119,
+        "title": "Pillar 1: Continue to make the Singer ecosystem the leading open-source data interchange spec and community",
+        "url": "/groups/meltano/-/epics/119",
+        "group_id": 2524164,
+        "human_readable_timestamp": "<strong>1512</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 853807,
+      "relative_position": -1539
+    },
+    {
+      "id": 86813182,
+      "iid": 2751,
+      "project_id": 7603319,
+      "title": "Entity selection does not work when stream names have periods in them",
+      "description": "### What is the current *bug* behavior?\nI\u2019ve installed a custom plugin for redshift as an extractor (`pip install tap-redshift`). I had to do some debugging of their code but I got it working all except for the entity selection. When I do a `meltano select tap-redshift --list --all`, I get a list of all the tables in the `schema` set in my config. However, when I try to add model selection to the `meltano.yml` file using the expected syntax (i.e., `database.schema.table.*`), I can\u2019t get any of the entities in that list highlighted in green (\u2018selected\u2019) no matter what I do. It almost feels like the select cli command doesn\u2019t play nice with custom plugins.\n\n\n### What is the expected *correct* behavior?\nIf I enter\n```\nselect:\n- database.schema.table.*\n```\nI would expect all columns in the listed table to be selected in green ('selected') after running a `meltano select --list --all` commmand.\n\n### Steps to reproduce\nHere's my `meltano.yml`\n```\nversion: 1\nplugins:\n  extractors:\n  - name: tap-redshift\n    namespace: tap_redshift\n    pip_url: tap-redshift\n    executable: tap-redshift\n    capabilities:\n    - config\n    - discover\n    - catalog\n    - properties\n    config:\n      host: ############\n      port: 5439\n      dbname: matillion\n      schema: referencedata\n      start_date: 1900-01-01T01:01:01Z\n      user: ########\n      password: #########\n    select:\n    - 'matillion.referencedata.t_ref_score_range.*'\n    metadata:\n      '*':\n        replication-method: FULL_TABLE\n\n```\n\n\n### Relevant logs and/or screenshots\n```\n% meltano select tap-redshift --list --all                                   \nLegend:\n        selected\n        excluded\n        automatic\n\nEnabled patterns:\n        matillion.referencedata.t_ref_score_range.*\n\nSelected attributes:\n        [excluded ] matillion.referencedata.t_ref_code_set.code_set_code\n        [excluded ] matillion.referencedata.t_ref_code_set.code_set_id\n        [excluded ] matillion.referencedata.t_ref_code_set.code_set_name\n        [excluded ] matillion.referencedata.t_ref_code_set.date_modified\n        [excluded ] matillion.referencedata.t_ref_code_set.modified_by\n        [excluded ] matillion.referencedata.t_ref_code_set.owner_name\n        [excluded ] matillion.referencedata.t_ref_code_set.steward_name\n        [excluded ] matillion.referencedata.t_ref_score_range.date_modified\n        [excluded ] matillion.referencedata.t_ref_score_range.lower_bound\n        [excluded ] matillion.referencedata.t_ref_score_range.metric_name\n        [excluded ] matillion.referencedata.t_ref_score_range.score_range_id\n        [excluded ] matillion.referencedata.t_ref_score_range.score_value\n        [excluded ] matillion.referencedata.t_ref_score_range.upper_bound\n```\n\nOn a separate note, the workaround I found was to use quotes and ignore the first couple of dots in the entity name. Specifically:\n```\n    select:\n    - '*t_ref_score_range.*'\n```\ngets me exactly what I want.\n\n\n### Possible fixes\n_If you can, link to the line of code that might be responsible for the problem or suggest a fix_\nNot sure",
+      "state": "closed",
+      "created_at": "2021-05-10T22:00:55.190Z",
+      "updated_at": "2022-05-30T09:16:33.730Z",
+      "closed_at": "2022-05-30T09:16:33.707Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Accepting Merge Requests",
+        "Configuration",
+        "Extract",
+        "flow::Triage",
+        "kind::Bug",
+        "urgency::default",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2286180,
+        "iid": 206,
+        "group_id": 2524164,
+        "title": "Q2-2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-10-18T15:22:10.509Z",
+        "updated_at": "2022-01-24T17:51:23.679Z",
+        "due_date": "2022-06-30",
+        "start_date": "2022-04-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/206"
+      },
+      "assignees": [],
+      "author": {
+        "id": 8784356,
+        "username": "jlloyd3",
+        "public_email": "",
+        "name": "Josh Lloyd",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8784356/avatar.png",
+        "web_url": "https://gitlab.com/jlloyd3"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 2,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2751",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": 4,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2751",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2751/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2751/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2751",
+        "relative": "#2751",
+        "full": "meltano/meltano#2751"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 119,
+      "epic": {
+        "id": 331283,
+        "iid": 119,
+        "title": "Pillar 1: Continue to make the Singer ecosystem the leading open-source data interchange spec and community",
+        "url": "/groups/meltano/-/epics/119",
+        "group_id": 2524164,
+        "human_readable_timestamp": "<strong>1512</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 971341,
+      "relative_position": -2052
+    }
+  ]
+}

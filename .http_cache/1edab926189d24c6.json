@@ -1,0 +1,166 @@
+{
+  "cookies": {
+    "_cfuvid": "_BxL.fve0xf.WQH2mbwowo.EdAv6irZXne9ghrFyhs4-1747940908936-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:08:28.834501+00:00",
+  "elapsed": 0.340173,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e9a378cb83589-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:08:28 GMT",
+    "ETag": "W/\"51cceea9abb599437f3a7844aae94fb4\"",
+    "Link": "<https://gitlab.com/api/v4/groups/12586917/epics/16/issues?epic_iid=16&id=12586917&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/12586917/epics/16/issues?epic_iid=16&id=12586917&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=_BxL.fve0xf.WQH2mbwowo.EdAv6irZXne9ghrFyhs4-1747940908936-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-38-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-c",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"b5a94892c2a02706edd65d70e241787c\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "b5a94892c2a02706edd65d70e241787c",
+    "x-runtime": "0.136730",
+    "x-total": "1",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/12586917/epics/16/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/12586917/epics/16/issues",
+  "_decoded_content": [
+    {
+      "id": 108747795,
+      "iid": 412,
+      "project_id": 27821563,
+      "title": "Meltano Social Media Strategy",
+      "description": "### Activity \nPropose initial social media strategy for Meltano (will probably change the more we learn about our audience/product and should be reviewed and/or updated if needed on at least a quarterly basis).\n\n### Background\nEmily/Laura 1:1 - 5/17/2022\n\n### Todos\n\n- [ ] draft social media strategy\n- [ ] review by Emily/Amanda\n- [ ] update in handbook\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-05-18T13:38:04.733Z",
+      "updated_at": "2022-05-31T18:37:15.207Z",
+      "closed_at": "2022-05-31T18:37:15.198Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 11542635,
+        "username": "laurameltano",
+        "public_email": "laura@meltano.com",
+        "name": "Laura P\u00e9rez",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+        "web_url": "https://gitlab.com/laurameltano"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 11542635,
+        "username": "laurameltano",
+        "public_email": "laura@meltano.com",
+        "name": "Laura P\u00e9rez",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+        "web_url": "https://gitlab.com/laurameltano"
+      },
+      "user_notes_count": 1,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/412",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 3,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/412",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/412/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/412/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#412",
+        "relative": "#412",
+        "full": "meltano/marketing/marketing-general#412"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 16,
+      "epic": {
+        "id": 512841,
+        "iid": 16,
+        "title": "2022 Content Pillars",
+        "url": "/groups/meltano/marketing/-/epics/16",
+        "group_id": 12586917
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1373491,
+      "relative_position": -513
+    }
+  ]
+}

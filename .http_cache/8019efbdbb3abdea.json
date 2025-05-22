@@ -1,0 +1,545 @@
+{
+  "cookies": {
+    "_cfuvid": "k9yjYfcVxhGnbKiBDe.pz_2Jom2Apr._4PI2yw3.yVs-1747940849810-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:07:29.704618+00:00",
+  "elapsed": 0.337076,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e98c5ec4fa0ab-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:07:29 GMT",
+    "ETag": "W/\"26f6259658914ebdd4613d51b371912e\"",
+    "Link": "<https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?id=meltano%2Fsdk&order=default&order_by=created_at&page=3&per_page=20&since=2022-01-01T00%3A00%3A00%2B00%3A00&sort=asc&trailers=false&with_stats=true>; rel=\"prev\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?id=meltano%2Fsdk&order=default&order_by=created_at&page=5&per_page=20&since=2022-01-01T00%3A00%3A00%2B00%3A00&sort=asc&trailers=false&with_stats=true>; rel=\"next\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?id=meltano%2Fsdk&order=default&order_by=created_at&page=1&per_page=20&since=2022-01-01T00%3A00%3A00%2B00%3A00&sort=asc&trailers=false&with_stats=true>; rel=\"first\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=k9yjYfcVxhGnbKiBDe.pz_2Jom2Apr._4PI2yw3.yVs-1747940849810-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-50-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-c",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"feed1c26a58d2cef6c504852aa61ce5d\",\"version\":\"1\"}",
+    "x-next-page": "5",
+    "x-page": "4",
+    "x-per-page": "20",
+    "x-prev-page": "3",
+    "x-request-id": "feed1c26a58d2cef6c504852aa61ce5d",
+    "x-runtime": "0.139685"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?order_by=created_at&page=4&since=2022-01-01T00%3A00%3A00Z&sort=asc&with_stats=true"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?order_by=created_at&page=4&since=2022-01-01T00%3A00%3A00Z&sort=asc&with_stats=true",
+  "_decoded_content": [
+    {
+      "id": "6a554f4000f1a0bfd0aa6bd782906c8dcea52531",
+      "short_id": "6a554f40",
+      "created_at": "2022-04-19T22:14:41.000+00:00",
+      "parent_ids": [
+        "d5f93adf1fd0939ff6952768d29a7b84d709ca54",
+        "5ac30f6015902225d9ce34916d93813c02ef2dde"
+      ],
+      "title": "Merge branch '356-sdk-docs-builds-are-failing' into 'main'",
+      "message": "Merge branch '356-sdk-docs-builds-are-failing' into 'main'\n\nFix failing docs builds\n\nCloses #356\n\nSee merge request meltano/sdk!262",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-19T22:14:41.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-19T22:14:41.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/6a554f4000f1a0bfd0aa6bd782906c8dcea52531",
+      "stats": {
+        "additions": 27,
+        "deletions": 31,
+        "total": 58
+      }
+    },
+    {
+      "id": "5ac30f6015902225d9ce34916d93813c02ef2dde",
+      "short_id": "5ac30f60",
+      "created_at": "2022-04-19T22:14:41.000+00:00",
+      "parent_ids": [
+        "d5f93adf1fd0939ff6952768d29a7b84d709ca54"
+      ],
+      "title": "Fix failing docs builds",
+      "message": "Fix failing docs builds\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-19T22:14:41.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-19T22:14:41.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/5ac30f6015902225d9ce34916d93813c02ef2dde",
+      "stats": {
+        "additions": 27,
+        "deletions": 31,
+        "total": 58
+      }
+    },
+    {
+      "id": "d5f93adf1fd0939ff6952768d29a7b84d709ca54",
+      "short_id": "d5f93adf",
+      "created_at": "2022-04-19T01:32:44.000+00:00",
+      "parent_ids": [
+        "94cc3b21a505105ca5de696e13eee0c737e17cbc",
+        "141bcb7368460b6199de54f780df22d985cf99eb"
+      ],
+      "title": "Merge branch 'cody-code-owners' into 'main'",
+      "message": "Merge branch 'cody-code-owners' into 'main'\n\nAdd Cody to CODEOWNERS\n\nSee merge request meltano/sdk!273",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-19T01:32:44.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-19T01:32:44.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/d5f93adf1fd0939ff6952768d29a7b84d709ca54",
+      "stats": {
+        "additions": 1,
+        "deletions": 1,
+        "total": 2
+      }
+    },
+    {
+      "id": "141bcb7368460b6199de54f780df22d985cf99eb",
+      "short_id": "141bcb73",
+      "created_at": "2022-04-19T01:32:44.000+00:00",
+      "parent_ids": [
+        "94cc3b21a505105ca5de696e13eee0c737e17cbc"
+      ],
+      "title": "Add Cody to CODEOWNERS",
+      "message": "Add Cody to CODEOWNERS\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-19T01:32:44.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-19T01:32:44.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/141bcb7368460b6199de54f780df22d985cf99eb",
+      "stats": {
+        "additions": 1,
+        "deletions": 1,
+        "total": 2
+      }
+    },
+    {
+      "id": "94cc3b21a505105ca5de696e13eee0c737e17cbc",
+      "short_id": "94cc3b21",
+      "created_at": "2022-04-18T18:13:55.000+00:00",
+      "parent_ids": [
+        "0dffa5de524b8bd29d22109687255d03c3ad7095",
+        "b84564cd3ccc89d087f43d1215de402ed75c8b92"
+      ],
+      "title": "Merge branch '361-jsonpath-extensions' into 'main'",
+      "message": "Merge branch '361-jsonpath-extensions' into 'main'\n\nResolve \"JSONPath expressions don't support extensions\"\n\nCloses #361\n\nSee merge request meltano/sdk!271",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-18T18:13:55.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-18T18:13:55.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/94cc3b21a505105ca5de696e13eee0c737e17cbc",
+      "stats": {
+        "additions": 57,
+        "deletions": 4,
+        "total": 61
+      }
+    },
+    {
+      "id": "b84564cd3ccc89d087f43d1215de402ed75c8b92",
+      "short_id": "b84564cd",
+      "created_at": "2022-04-18T18:13:55.000+00:00",
+      "parent_ids": [
+        "241b38e8b6cdfa6f3397d9c70e7b9082b4594554"
+      ],
+      "title": "Resolve \"JSONPath expressions don't support extensions\"",
+      "message": "Resolve \"JSONPath expressions don't support extensions\"\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-18T18:13:55.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-18T18:13:55.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/b84564cd3ccc89d087f43d1215de402ed75c8b92",
+      "stats": {
+        "additions": 57,
+        "deletions": 4,
+        "total": 61
+      }
+    },
+    {
+      "id": "0dffa5de524b8bd29d22109687255d03c3ad7095",
+      "short_id": "0dffa5de",
+      "created_at": "2022-04-18T14:58:34.000+00:00",
+      "parent_ids": [
+        "241b38e8b6cdfa6f3397d9c70e7b9082b4594554",
+        "c868f6952c7bec9b1da1ebd682f741931801244e"
+      ],
+      "title": "Merge branch '360-raise-more-descriptive-exceptions-when-wrapped-json-typing-classes-needs-to-be-instantiated' into 'main'",
+      "message": "Merge branch '360-raise-more-descriptive-exceptions-when-wrapped-json-typing-classes-needs-to-be-instantiated' into 'main'\n\nResolve \"Raise more descriptive exceptions when wrapped JSON typing classes needs to be instantiated\"\n\nCloses #55 and #360\n\nSee merge request meltano/sdk!270",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-18T14:58:34.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-18T14:58:34.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/0dffa5de524b8bd29d22109687255d03c3ad7095",
+      "stats": {
+        "additions": 54,
+        "deletions": 2,
+        "total": 56
+      }
+    },
+    {
+      "id": "c868f6952c7bec9b1da1ebd682f741931801244e",
+      "short_id": "c868f695",
+      "created_at": "2022-04-18T14:58:33.000+00:00",
+      "parent_ids": [
+        "241b38e8b6cdfa6f3397d9c70e7b9082b4594554"
+      ],
+      "title": "Resolve \"Raise more descriptive exceptions when wrapped JSON typing classes needs to be instantiated\"",
+      "message": "Resolve \"Raise more descriptive exceptions when wrapped JSON typing classes needs to be instantiated\"\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-18T14:58:33.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-18T14:58:33.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/c868f6952c7bec9b1da1ebd682f741931801244e",
+      "stats": {
+        "additions": 54,
+        "deletions": 2,
+        "total": 56
+      }
+    },
+    {
+      "id": "241b38e8b6cdfa6f3397d9c70e7b9082b4594554",
+      "short_id": "241b38e8",
+      "created_at": "2022-04-08T22:29:31.000+00:00",
+      "parent_ids": [
+        "e3ea707b8d4d418a740a8e021642c5e88570e80e",
+        "0ad27d6d007db6462596724387f8785c69cbfb6c"
+      ],
+      "title": "Merge branch 'edgar/remove-codeowners-sections' into 'main'",
+      "message": "Merge branch 'edgar/remove-codeowners-sections' into 'main'\n\nRemove Sections from CODEOWNERS file\n\nSee merge request meltano/sdk!269",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-04-08T22:29:31.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-04-08T22:29:31.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/241b38e8b6cdfa6f3397d9c70e7b9082b4594554",
+      "stats": {
+        "additions": 2,
+        "deletions": 3,
+        "total": 5
+      }
+    },
+    {
+      "id": "e3ea707b8d4d418a740a8e021642c5e88570e80e",
+      "short_id": "e3ea707b",
+      "created_at": "2022-04-08T17:57:46.000+00:00",
+      "parent_ids": [
+        "64345409e8fa4379df45ee031ec3dac3cf249b40",
+        "a5a7044439fe980e725c67ffd8a040fba5f277e3"
+      ],
+      "title": "Merge branch 'release/v0.4.5' into 'main'",
+      "message": "Merge branch 'release/v0.4.5' into 'main'\n\nRelease v0.4.5\n\nSee merge request meltano/sdk!268",
+      "author_name": "Alex Marple",
+      "author_email": "alex@meltano.com",
+      "authored_date": "2022-04-08T17:57:46.000+00:00",
+      "committer_name": "Alex Marple",
+      "committer_email": "alex@meltano.com",
+      "committed_date": "2022-04-08T17:57:46.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/e3ea707b8d4d418a740a8e021642c5e88570e80e",
+      "stats": {
+        "additions": 14,
+        "deletions": 8,
+        "total": 22
+      }
+    },
+    {
+      "id": "a5a7044439fe980e725c67ffd8a040fba5f277e3",
+      "short_id": "a5a70444",
+      "created_at": "2022-04-08T17:57:46.000+00:00",
+      "parent_ids": [
+        "64345409e8fa4379df45ee031ec3dac3cf249b40"
+      ],
+      "title": "Release v0.4.5",
+      "message": "Release v0.4.5\n",
+      "author_name": "Alex Marple",
+      "author_email": "alex@meltano.com",
+      "authored_date": "2022-04-08T17:57:46.000+00:00",
+      "committer_name": "Alex Marple",
+      "committer_email": "alex@meltano.com",
+      "committed_date": "2022-04-08T17:57:46.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/a5a7044439fe980e725c67ffd8a040fba5f277e3",
+      "stats": {
+        "additions": 14,
+        "deletions": 8,
+        "total": 22
+      }
+    },
+    {
+      "id": "0ad27d6d007db6462596724387f8785c69cbfb6c",
+      "short_id": "0ad27d6d",
+      "created_at": "2022-04-08T12:38:57.000-05:00",
+      "parent_ids": [
+        "64345409e8fa4379df45ee031ec3dac3cf249b40"
+      ],
+      "title": "chore: Remove sections from CODEOWNERS",
+      "message": "chore: Remove sections from CODEOWNERS\n",
+      "author_name": "Edgar Rami\u0301rez Mondrago\u0301n",
+      "author_email": "edgarrm358@gmail.com",
+      "authored_date": "2022-04-08T12:38:57.000-05:00",
+      "committer_name": "Edgar Rami\u0301rez Mondrago\u0301n",
+      "committer_email": "edgarrm358@gmail.com",
+      "committed_date": "2022-04-08T12:38:57.000-05:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/0ad27d6d007db6462596724387f8785c69cbfb6c",
+      "stats": {
+        "additions": 2,
+        "deletions": 3,
+        "total": 5
+      }
+    },
+    {
+      "id": "64345409e8fa4379df45ee031ec3dac3cf249b40",
+      "short_id": "64345409",
+      "created_at": "2022-04-08T17:22:05.000+00:00",
+      "parent_ids": [
+        "2c9523bcfeed6ec8cc2e489aad1d0ee56b2db5dc",
+        "bc18995b19892728943f060b2508644f5a6bd507"
+      ],
+      "title": "Merge branch '0-4-5-changelog-grooming' into 'main'",
+      "message": "Merge branch '0-4-5-changelog-grooming' into 'main'\n\nUpdate CHANGELOG.md\n\nSee merge request meltano/sdk!267",
+      "author_name": "Alex Marple",
+      "author_email": "alex@meltano.com",
+      "authored_date": "2022-04-08T17:22:05.000+00:00",
+      "committer_name": "Alex Marple",
+      "committer_email": "alex@meltano.com",
+      "committed_date": "2022-04-08T17:22:05.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/64345409e8fa4379df45ee031ec3dac3cf249b40",
+      "stats": {
+        "additions": 2,
+        "deletions": 1,
+        "total": 3
+      }
+    },
+    {
+      "id": "bc18995b19892728943f060b2508644f5a6bd507",
+      "short_id": "bc18995b",
+      "created_at": "2022-04-08T03:11:01.000+00:00",
+      "parent_ids": [
+        "2c9523bcfeed6ec8cc2e489aad1d0ee56b2db5dc"
+      ],
+      "title": "Update CHANGELOG.md",
+      "message": "Update CHANGELOG.md",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-04-08T03:11:01.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-04-08T03:11:01.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/bc18995b19892728943f060b2508644f5a6bd507",
+      "stats": {
+        "additions": 2,
+        "deletions": 1,
+        "total": 3
+      }
+    },
+    {
+      "id": "2c9523bcfeed6ec8cc2e489aad1d0ee56b2db5dc",
+      "short_id": "2c9523bc",
+      "created_at": "2022-04-04T17:24:36.000+00:00",
+      "parent_ids": [
+        "7227db465da8201d97422dbbba4741f509707cf2",
+        "fb3cfefbe4ee0b1a25705d3f881e78f9fe495e6d"
+      ],
+      "title": "Merge branch '352-mapper-null-field-example-not-working-for-me' into 'main'",
+      "message": "Merge branch '352-mapper-null-field-example-not-working-for-me' into 'main'\n\nFix: Setting property to `null` in stream map config fails to remove it\n\nCloses #352\n\nSee merge request meltano/sdk!263",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-04T17:24:36.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-04T17:24:36.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/2c9523bcfeed6ec8cc2e489aad1d0ee56b2db5dc",
+      "stats": {
+        "additions": 16,
+        "deletions": 3,
+        "total": 19
+      }
+    },
+    {
+      "id": "fb3cfefbe4ee0b1a25705d3f881e78f9fe495e6d",
+      "short_id": "fb3cfefb",
+      "created_at": "2022-04-04T17:24:35.000+00:00",
+      "parent_ids": [
+        "7227db465da8201d97422dbbba4741f509707cf2"
+      ],
+      "title": "Fix: Setting property to `null` in stream map config fails to remove it",
+      "message": "Fix: Setting property to `null` in stream map config fails to remove it\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-04T17:24:35.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-04T17:24:35.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/fb3cfefbe4ee0b1a25705d3f881e78f9fe495e6d",
+      "stats": {
+        "additions": 16,
+        "deletions": 3,
+        "total": 19
+      }
+    },
+    {
+      "id": "7227db465da8201d97422dbbba4741f509707cf2",
+      "short_id": "7227db46",
+      "created_at": "2022-04-04T10:20:47.000+00:00",
+      "parent_ids": [
+        "8fb8994b956482c9b6b95c20431d2174d5459bcb",
+        "4cbb178b70c0fecec7285efaa09440a8bf07d652"
+      ],
+      "title": "Merge branch '338_use_stable_poetry_core' into 'main'",
+      "message": "Merge branch '338_use_stable_poetry_core' into 'main'\n\nResolve \"Use a stable poetry-core in cookiecutter templates and recommend it in the docs\"\n\nCloses #338\n\nSee merge request meltano/sdk!260",
+      "author_name": "Ken Payne",
+      "author_email": "ken@meltano.com",
+      "authored_date": "2022-04-04T10:20:47.000+00:00",
+      "committer_name": "Ken Payne",
+      "committer_email": "ken@meltano.com",
+      "committed_date": "2022-04-04T10:20:47.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/7227db465da8201d97422dbbba4741f509707cf2",
+      "stats": {
+        "additions": 11,
+        "deletions": 17,
+        "total": 28
+      }
+    },
+    {
+      "id": "4cbb178b70c0fecec7285efaa09440a8bf07d652",
+      "short_id": "4cbb178b",
+      "created_at": "2022-04-04T10:20:47.000+00:00",
+      "parent_ids": [
+        "b394e1a9c0d68a554640974c05be1c9d548270ee"
+      ],
+      "title": "Resolve \"Use a stable poetry-core in cookiecutter templates and recommend it in the docs\"",
+      "message": "Resolve \"Use a stable poetry-core in cookiecutter templates and recommend it in the docs\"\n",
+      "author_name": "Ken Payne",
+      "author_email": "ken@meltano.com",
+      "authored_date": "2022-04-04T10:20:47.000+00:00",
+      "committer_name": "Ken Payne",
+      "committer_email": "ken@meltano.com",
+      "committed_date": "2022-04-04T10:20:47.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/4cbb178b70c0fecec7285efaa09440a8bf07d652",
+      "stats": {
+        "additions": 11,
+        "deletions": 17,
+        "total": 28
+      }
+    },
+    {
+      "id": "8fb8994b956482c9b6b95c20431d2174d5459bcb",
+      "short_id": "8fb8994b",
+      "created_at": "2022-04-03T20:09:19.000+00:00",
+      "parent_ids": [
+        "9af6497750e93282a56539e10b1806523a64d41d",
+        "86a05fa53f7beb536d634118565470a89c892a54"
+      ],
+      "title": "Merge branch '341-fix-sqlalchemy-warning' into 'main'",
+      "message": "Merge branch '341-fix-sqlalchemy-warning' into 'main'\n\nFix SQLAlchemy warning\n\nCloses #341\n\nSee merge request meltano/sdk!264",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-03T20:09:19.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-03T20:09:19.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/8fb8994b956482c9b6b95c20431d2174d5459bcb",
+      "stats": {
+        "additions": 2,
+        "deletions": 1,
+        "total": 3
+      }
+    },
+    {
+      "id": "86a05fa53f7beb536d634118565470a89c892a54",
+      "short_id": "86a05fa5",
+      "created_at": "2022-04-03T20:09:19.000+00:00",
+      "parent_ids": [
+        "9af6497750e93282a56539e10b1806523a64d41d"
+      ],
+      "title": "Fix SQLAlchemy warning",
+      "message": "Fix SQLAlchemy warning\n",
+      "author_name": "Will Da Silva",
+      "author_email": "will@willdasilva.xyz",
+      "authored_date": "2022-04-03T20:09:19.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-03T20:09:19.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/86a05fa53f7beb536d634118565470a89c892a54",
+      "stats": {
+        "additions": 2,
+        "deletions": 1,
+        "total": 3
+      }
+    }
+  ]
+}
