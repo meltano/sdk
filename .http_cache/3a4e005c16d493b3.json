@@ -1,0 +1,292 @@
+{
+  "cookies": {
+    "_cfuvid": "bRo6guUZuUi6tVaakLu6ynji8JJKgmC9TFIXRY7h5Iw-1747940904181-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:08:24.075047+00:00",
+  "elapsed": 0.373403,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e9a199c773863-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:08:24 GMT",
+    "ETag": "W/\"3ba18fe44c5bd313a252628f5449c723\"",
+    "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/133/issues?epic_iid=133&id=2524164&page=1&per_page=20>; rel=\"prev\", <https://gitlab.com/api/v4/groups/2524164/epics/133/issues?epic_iid=133&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/133/issues?epic_iid=133&id=2524164&page=2&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=bRo6guUZuUi6tVaakLu6ynji8JJKgmC9TFIXRY7h5Iw-1747940904181-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-13-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-b",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"e7914920ffa994e4526f143eb5bf6225\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "2",
+    "x-per-page": "20",
+    "x-prev-page": "1",
+    "x-request-id": "e7914920ffa994e4526f143eb5bf6225",
+    "x-runtime": "0.164260",
+    "x-total": "22",
+    "x-total-pages": "2"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/2524164/epics/133/issues?page=2"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/2524164/epics/133/issues?page=2",
+  "_decoded_content": [
+    {
+      "id": 98672281,
+      "iid": 3108,
+      "project_id": 7603319,
+      "title": "Add new 'inventory' top-level key to register 'resources'",
+      "description": "### tldr;\n\n'Inventory' is akin to [sources](https://docs.getdbt.com/docs/building-a-dbt-project/using-sources) in the dbt world - representations of entities that exist (and can be used in the dbt project context) but are not directly managed by dbt.\n\n### Problem to solve\n\nDuring the deployment of base infrastructure for Meltano to use (using Infrastructure as Code), resources are created that will commonly be referenced by other tools in the Meltano ecosystem (el, dbt, etc.). Today this handoff needs to be done manually - database, warehouse, S3/object storage buckets etc. are all added to `meltano.yml` as static config and in various formats (e.g. URI vs. separate username, password, database). By introducing a first class 'resource' representation in Meltano that can i) be managed using the CLI/in `meltano.yml` and ii) be referenced by its alias/id within Meltano (environments, tap/target configs etc.) we provide a way for tools like Terraform to 'hand-off' resource details (including secrets) to Meltano, and for those details to change (if necessary) without breaking existing references within the Meltano Project (as resources are referenced by their alias/id rather than by hard-coded attributes, servicing use-cases like automated password rotation).\n\n### Proposal\n\n- A yaml spec for 'resources' under a top-level 'inventory' key.\n- CLI additions to manage resources (and secrets), accepting inputs in JSON (on the basis that Terraform can format its output in these formats).\n\n**Note:** the reference syntax below (e.g. `\"{{ .inv... }}\"`) is very much up for debate. We may need to follow the Jinja macro style if we use that engine for templating/referencing. The ones shown are Helm style, which I believe uses the templating language built in to Golang.\n\n```yaml\n# Example definition\ninventory:\n- id: prod-meltano-database\n  type: database_postgres\n  properties:\n    host: \"<hostname>\"\n    port: \"<port>\"\n    username: \"<user name>\"\n    password: \"<default password>\" # ideally this would be a ref to a secret value added separately\n    database: \"<optional: default database>\"\n    schema: \"<optional: default schema>\"\n    uri: \"<optional: sqlalchemy uri>\" # this can maybe be inferred\n\n- id: prod-s3-bucket\n  type: aws_s3_bucket\n  properties:\n    name: \"<s3 bucket name>\"\n    prefix: \"<optional: default prefix>\"\n    profile: \"<optional: aws profile name>\"\n    aws_access_key_id: \"<optional: aws access key id>\" # ideally this would be a ref to a secret value added separately\n    aws_secret_access_key: \"<optional: aws secret access key>\" # ideally this would be a ref to a secret value added separately\n    \n- id: prod-snowflake-load\n  type: snowflake_warehouse\n  properties:\n    account: \"<snowflake account name>\"\n    database: \"<snowflake database name>\"\n    region: \"<warehouse region>\"\n    warehouse: \"<snowflake warehouse name>\"\n    username: \"<user name>\"\n    password: \"<password>\" # ideally this would be a ref to a secret value added separately\n    role: \"<snowflake role>\"\n    session_parameters: \"<session level parameters>\"\n\n# Example usage\nenvironments:\n- name: prod\n  config:\n    plugins:\n      loaders:\n      - name: target-snowflake\n        config:\n          db_name: \"{{ .inv.prod-snowflake-load.database }}\" # References resources defined above\n          account: \"{{ .inv.prod-snowflake-load.account }}\"\n          user: \"{{ .inv.prod-snowflake-load.username }}\"\n          role: \"{{ .inv.prod-snowflake-load.username }}\"\n          load_schema: \"${TAP_NAMESPACE}_raw\"  # Dynamic from the name of the currently-executing tap\n```\n\nIn Terraform, resources may be defined _using the same schema as above_ as regular `output` blocks:\n\n```tf\noutput \"meltano\" {\n  value = [\n    {\n      id = \"prod-meltano-database\"\n      type = \"database_postgres\"\n      properties = {\n        host = module.db.db_instance_endpoint\n        port = module.db.db_instance_port\n        user = module.db.db_instance_username\n        password = {\n          type = \"secret\"\n          value = module.db.db_instance_password\n        }\n        database = module.db.db_instance_name\n      }\n    }\n  ]\n}\n```\n\nThe user experience might be:\n\n```bash\n# make changes to infrastructure\nterraform apply\n# output 'meltano' output name to file 'resources.json'\nterraform output -json meltano > resources.json\n# read 'resources.json'\nmeltano config inventory update -file resources.json\n```\n\nOr, eventually:\n\n```bash\nmeltano invoke -update-resources terraform apply\n```",
+      "state": "closed",
+      "created_at": "2021-12-08T14:02:16.379Z",
+      "updated_at": "2022-05-30T10:00:22.311Z",
+      "closed_at": "2022-05-30T10:00:22.242Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Discussion",
+        "kind::Feature",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 7646034,
+        "username": "kgpayne",
+        "public_email": "",
+        "name": "Ken Payne",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
+        "web_url": "https://gitlab.com/kgpayne"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 24,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3108",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3108",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3108/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3108/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3108",
+        "relative": "#3108",
+        "full": "meltano/meltano#3108"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 133,
+      "epic": {
+        "id": 403473,
+        "iid": 133,
+        "title": "Meltano Config Management Improvement",
+        "url": "/groups/meltano/-/epics/133",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 991587,
+      "relative_position": 0
+    },
+    {
+      "id": 95246721,
+      "iid": 2984,
+      "project_id": 7603319,
+      "title": "Problems with environment variables taking precedence over declared ones",
+      "description": "If a plugin configuration option is set to a specific environment variable, but that config option as a default environment variable it can be configured with, and _both_ are defined, Meltano uses the default one rather than the explicitly declared one.\n\nExample:\n\n```bash\nmeltano init demo\nmeltano add extractor tap-gitlab\nmeltano config tap-gitlab set private_token '$MY_REAL_GITLAB_API_TOKEN'\nexport GITLAB_API_TOKEN=wrong-token\nexport MY_REAL_GITLAB_API_TOKEN=right-token\nmeltano config tap-gitlab\n```\n\n```\n{\n  \"api_url\": \"https://gitlab.com\",\n  \"private_token\": \"wrong-token\",\n  \"groups\": \"\",\n  \"projects\": \"\",\n  \"ultimate_license\": false,\n  \"fetch_merge_request_commits\": false,\n  \"fetch_pipelines_extended\": false\n}\n```\n\nTo me, this is unexpected behavior. I would expect `GITLAB_API_TOKEN` to be used if I hadn't specified anything for `api_url`, but since I explicitly told Meltano to use `MY_REAL_GITLAB_API_TOKEN` I'd expect that to take precedence.\n\n## Proposed Solution (AJ)\n\nI think we should deprecate `env: CUSTOM_ENV_NAME` and `env_aliases: [...]` in favor of the more explicit `<plugin_name>_<setting_name>`. I've created #3120 to track this.",
+      "state": "closed",
+      "created_at": "2021-10-11T22:13:58.040Z",
+      "updated_at": "2022-05-30T09:46:14.570Z",
+      "closed_at": "2022-05-30T09:46:14.531Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Needs Refinement",
+        "flow::Triage",
+        "kind::Bug",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 1134865,
+          "username": "edgarrmondragon",
+          "public_email": "edgar@meltano.com",
+          "name": "Edgar R. Mondrag\u00f3n",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+          "web_url": "https://gitlab.com/edgarrmondragon"
+        }
+      ],
+      "author": {
+        "id": 689351,
+        "username": "rabidaudio",
+        "public_email": "",
+        "name": "Charles Julian Knight",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/b9e26c5bb906d08fc0aec54e121e9a5983534420c3f4568e3971008db3bbea70?s=80&d=identicon",
+        "web_url": "https://gitlab.com/rabidaudio"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 1134865,
+        "username": "edgarrmondragon",
+        "public_email": "edgar@meltano.com",
+        "name": "Edgar R. Mondrag\u00f3n",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "web_url": "https://gitlab.com/edgarrmondragon"
+      },
+      "user_notes_count": 19,
+      "merge_requests_count": 0,
+      "upvotes": 2,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2984",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": 4,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2984",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2984/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2984/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2984",
+        "relative": "#2984",
+        "full": "meltano/meltano#2984"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 133,
+      "epic": {
+        "id": 403473,
+        "iid": 133,
+        "title": "Meltano Config Management Improvement",
+        "url": "/groups/meltano/-/epics/133",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 876681,
+      "relative_position": -6156
+    }
+  ]
+}

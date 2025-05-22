@@ -423,6 +423,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             "url": url,
             "params": params,
             "headers": headers,
+            "auth": self.authenticator,
         }
 
         if self.payload_as_json:

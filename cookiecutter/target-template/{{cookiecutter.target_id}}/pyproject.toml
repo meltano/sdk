@@ -42,7 +42,7 @@ dependencies = [
 
 [project.optional-dependencies]
 s3 = [
-    "fs-s3fs~=1.1.1",
+    "s3fs~=2025.5.0",
 ]
 
 [project.scripts]

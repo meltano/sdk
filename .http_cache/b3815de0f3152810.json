@@ -1,0 +1,644 @@
+{
+  "cookies": {
+    "_cfuvid": "lrM.UZcoZksu5jf_ujyldtsG1luLjHj6MNQisx.x4kk-1747940904629-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:08:24.523419+00:00",
+  "elapsed": 0.432296,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e9a1c0891d89f-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:08:24 GMT",
+    "ETag": "W/\"fda6acaa5aa45316c5fff949511f4b84\"",
+    "Link": "<https://gitlab.com/api/v4/groups/12586917/epics/5/issues?epic_iid=5&id=12586917&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/12586917/epics/5/issues?epic_iid=5&id=12586917&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=lrM.UZcoZksu5jf_ujyldtsG1luLjHj6MNQisx.x4kk-1747940904629-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-52-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-b",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"9ca117ed61503508c2e08997c4930504\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "9ca117ed61503508c2e08997c4930504",
+    "x-runtime": "0.216934",
+    "x-total": "6",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/12586917/epics/5/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/12586917/epics/5/issues",
+  "_decoded_content": [
+    {
+      "id": 94559339,
+      "iid": 140,
+      "project_id": 27821563,
+      "title": "Possible future competition",
+      "description": "The Big Clouds may compete with our paid offering (https://gitlab.com/meltano/meta/-/issues/145) in the future, so it doesn't hurt to have a rough idea of how we'll be differentiated.\n\n<!-- Labels to add for triaging -->",
+      "state": "closed",
+      "created_at": "2021-09-13T13:15:57.580Z",
+      "updated_at": "2022-05-31T18:14:54.293Z",
+      "closed_at": "2022-05-31T18:14:54.273Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Discussion",
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": {
+        "id": 2286180,
+        "iid": 206,
+        "group_id": 2524164,
+        "title": "Q2-2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-10-18T15:22:10.509Z",
+        "updated_at": "2022-01-24T17:51:23.679Z",
+        "due_date": "2022-06-30",
+        "start_date": "2022-04-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/206"
+      },
+      "assignees": [
+        {
+          "id": 87854,
+          "username": "DouweM",
+          "public_email": "",
+          "name": "Douwe Maan",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+          "web_url": "https://gitlab.com/DouweM"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "user_notes_count": 4,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/140",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/140",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/140/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/140/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#140",
+        "relative": "#140",
+        "full": "meltano/marketing/marketing-general#140"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 5,
+      "epic": {
+        "id": 338449,
+        "iid": 5,
+        "title": "Competitive Analysis",
+        "url": "/groups/meltano/marketing/-/epics/5",
+        "group_id": 12586917,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 853394,
+      "relative_position": -2565
+    },
+    {
+      "id": 93092230,
+      "iid": 107,
+      "project_id": 27821563,
+      "title": "Stitch (Owned by Talend) Competetive",
+      "description": "<!-- title issue Name of Competitor + Competitive Analysis-->\n\n### HIgh level info \n<!-- Please propose content we share for the week. Note anything that is time-sensitive with relevant dates. Not all content will be selected and some may be used later. Add any notes on the suggested audience for the content if you have it-->\n* URL:\n* Year founded/ years in market:\n* key tag line:\n* Open source?\n* Funding status:\n\n### Overview of high level messaging/ positioning\n<!-- note high level messaging-->\n\n* \n* \n\n### What are they doing well\n<!-- note any things they are doing well-->\n\n* \n* \n\n### Weak spots\n<!-- What are their weakest points?-->\n* \n* \n\n### Where do we overlap\n* \n* \n\n### :art: Images or videos\n* \n* \n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2021-09-03T17:33:55.127Z",
+      "updated_at": "2022-02-17T23:41:51.329Z",
+      "closed_at": "2022-02-17T23:41:51.321Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 2,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2021-09-10",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/107",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/107",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/107/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/107/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#107",
+        "relative": "#107",
+        "full": "meltano/marketing/marketing-general#107"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 5,
+      "epic": {
+        "id": 338449,
+        "iid": 5,
+        "title": "Competitive Analysis",
+        "url": "/groups/meltano/marketing/-/epics/5",
+        "group_id": 12586917,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 805905,
+      "relative_position": -2052
+    },
+    {
+      "id": 93092186,
+      "iid": 106,
+      "project_id": 27821563,
+      "title": "DataKitchen Competitive",
+      "description": "<!-- title issue Name of Competitor + Competitive Analysis-->\n\n### HIgh level info \n<!-- Please propose content we share for the week. Note anything that is time-sensitive with relevant dates. Not all content will be selected and some may be used later. Add any notes on the suggested audience for the content if you have it-->\n* URL:\n* Year founded/ years in market:\n* key tag line:\n* Open source?\n* Funding status:\n\n### Overview of high level messaging/ positioning\n<!-- note high level messaging-->\n\n* \n* \n\n### What are they doing well\n<!-- note any things they are doing well-->\n\n* \n* \n\n### Weak spots\n<!-- What are their weakest points?-->\n* \n* \n\n### Where do we overlap\n* \n* \n\n### :art: Images or videos\n* \n* \n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2021-09-03T17:32:15.342Z",
+      "updated_at": "2022-05-04T14:04:33.329Z",
+      "closed_at": "2022-05-04T14:04:33.317Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2021-09-10",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/106",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/106",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/106/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/106/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#106",
+        "relative": "#106",
+        "full": "meltano/marketing/marketing-general#106"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 5,
+      "epic": {
+        "id": 338449,
+        "iid": 5,
+        "title": "Competitive Analysis",
+        "url": "/groups/meltano/marketing/-/epics/5",
+        "group_id": 12586917,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 805902,
+      "relative_position": -1539
+    },
+    {
+      "id": 93092176,
+      "iid": 105,
+      "project_id": 27821563,
+      "title": "FiveTran Competitive",
+      "description": "<!-- title issue Name of Competitor + Competitive Analysis-->\n\n### HIgh level info \n<!-- Please propose content we share for the week. Note anything that is time-sensitive with relevant dates. Not all content will be selected and some may be used later. Add any notes on the suggested audience for the content if you have it-->\n* URL:\n* Year founded/ years in market:\n* key tag line:\n* Open source?\n* Funding status:\n\n### Overview of high level messaging/ positioning\n<!-- note high level messaging-->\n\n* \n* \n\n### What are they doing well\n<!-- note any things they are doing well-->\n\n* \n* \n\n### Weak spots\n<!-- What are their weakest points?-->\n* \n* \n\n### Where do we overlap\n* \n* \n\n### :art: Images or videos\n* \n* \n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2021-09-03T17:31:37.287Z",
+      "updated_at": "2022-05-04T14:04:37.335Z",
+      "closed_at": "2022-05-04T14:04:37.326Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2021-09-10",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/105",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/105",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/105/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/105/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#105",
+        "relative": "#105",
+        "full": "meltano/marketing/marketing-general#105"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 5,
+      "epic": {
+        "id": 338449,
+        "iid": 5,
+        "title": "Competitive Analysis",
+        "url": "/groups/meltano/marketing/-/epics/5",
+        "group_id": 12586917,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 805901,
+      "relative_position": -1026
+    },
+    {
+      "id": 93092126,
+      "iid": 104,
+      "project_id": 27821563,
+      "title": "Airbyte competitive",
+      "description": "<!-- title issue Name of Competitor + Competitive Analysis-->\n\n### HIgh-level info \n<!-- Please propose content we share for the week. Note anything that is time-sensitive with relevant dates. Not all content will be selected and some may be used later. Add any notes on the suggested audience for the content if you have it-->\n* URL:\n* Year founded/ years in market:\n* key tag line:\n* Open source?\n* Funding status:\n\nAirByte \n- Values- transparency (shared pitch deck)\n- Key differentiators:\n- Their mission: want to be the open-source solution for data integration\n- Their weaknesses:\n- come across as rude and arrogant, not great relationships on community \n- they are not data people and they were looking for a business problem to solve\n- they are narrowly focused on extracting and loading \n- Diversity (founding crew is all white men)\n- AJ- they chose to bifurcate the community instead of improving what could be improved.\n- Their solution is to recreate every tap/target on a new protocol\n\n### Overview of high level messaging/ positioning\n<!-- note high level messaging-->\n\n* \n* \n\n### What are they doing well\n<!-- note any things they are doing well-->\n\n* \n* \n\n### Weak spots\n<!-- What are their weakest points?-->\n* \n* \n\n### Where do we overlap\n* \n* \n\n### :art: Images or videos\n* \n* \n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2021-09-03T17:30:33.397Z",
+      "updated_at": "2022-05-04T14:04:26.800Z",
+      "closed_at": "2022-05-04T14:04:26.789Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 4,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2021-09-10",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/104",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/104",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/104/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/104/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#104",
+        "relative": "#104",
+        "full": "meltano/marketing/marketing-general#104"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 5,
+      "epic": {
+        "id": 338449,
+        "iid": 5,
+        "title": "Competitive Analysis",
+        "url": "/groups/meltano/marketing/-/epics/5",
+        "group_id": 12586917,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 805900,
+      "relative_position": -513
+    },
+    {
+      "id": 93092004,
+      "iid": 103,
+      "project_id": 27821563,
+      "title": "Keboola Competitive",
+      "description": "<!-- title issue Name of Competitor + Competitive Analysis-->\n\n### HIgh level info \n<!-- Please propose content we share for the week. Note anything that is time-sensitive with relevant dates. Not all content will be selected and some may be used later. Add any notes on the suggested audience for the content if you have it-->\n* URL: https://www.keboola.com/\n* Year founded/ years in market:\n* key tag line: \n* Open source?\n* Funding status:\n\n### Overview of high level messaging/ positioning\n<!-- note any relevant themes-->\n\n* \n* \n\n### What are they doing well\n<!-- note any relevant themes-->\n\n* full-featured. \n* Good messaging on \n  * https://www.keboola.com/product/etl\n  * Build extract-transform-load pipelines in minutes and at no cost. Then add use cases when and as needed - without investing and managing different tools.\n  * Come for ETL. Stay for the whole data stack.\n  * Start with ETL, as your data needs grow, so does Keboola. No need to switch platforms and hire expensive teams.\n  * Unlike tools that lock you out of development, Keboola Connection is a platform friendly to you - the developer. Anyone can become a developer, and use the language of their choice to build new components and functionality. \n\n\n### Weak spots\n<!-- Does this announcement require pitching to journalists or PR? Who should be pitched?-->\n* Not open source or developer focused though\n* \n\n### Where do we overlap\n* \n* \n\n### :art: Images or videos\n* news- https://news.ycombinator.com/item?id=24786007\n* ![Screen_Shot_2021-09-02_at_1.18.42_PM](/uploads/5e8b3559438a126fa6fbd776c1ef56ba/Screen_Shot_2021-09-02_at_1.18.42_PM.png)\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2021-09-03T17:27:04.558Z",
+      "updated_at": "2022-05-04T14:04:42.116Z",
+      "closed_at": "2022-05-04T14:04:42.106Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2021-09-10",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/103",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/103",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/103/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/103/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#103",
+        "relative": "#103",
+        "full": "meltano/marketing/marketing-general#103"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 5,
+      "epic": {
+        "id": 338449,
+        "iid": 5,
+        "title": "Competitive Analysis",
+        "url": "/groups/meltano/marketing/-/epics/5",
+        "group_id": 12586917,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 805892,
+      "relative_position": 0
+    }
+  ]
+}

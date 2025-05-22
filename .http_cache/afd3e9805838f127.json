@@ -1,0 +1,399 @@
+{
+  "cookies": {
+    "_cfuvid": "y7qPbUL6BwRZ_84j8c9nJgtH41xHgBN99uAj8rapwek-1747940850995-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:07:30.888434+00:00",
+  "elapsed": 0.339882,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e98cd592c3589-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:07:30 GMT",
+    "ETag": "W/\"fe05878186767fbbccb3f93d5fd1b2aa\"",
+    "Link": "<https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?id=meltano%2Fsdk&order=default&order_by=created_at&page=6&per_page=20&since=2022-01-01T00%3A00%3A00%2B00%3A00&sort=asc&trailers=false&with_stats=true>; rel=\"prev\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?id=meltano%2Fsdk&order=default&order_by=created_at&page=1&per_page=20&since=2022-01-01T00%3A00%3A00%2B00%3A00&sort=asc&trailers=false&with_stats=true>; rel=\"first\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=y7qPbUL6BwRZ_84j8c9nJgtH41xHgBN99uAj8rapwek-1747940850995-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-03-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-d",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"ac8a257b76bcc139a8e5c8e8e2199a93\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "7",
+    "x-per-page": "20",
+    "x-prev-page": "6",
+    "x-request-id": "ac8a257b76bcc139a8e5c8e8e2199a93",
+    "x-runtime": "0.137506"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?order_by=created_at&page=7&since=2022-01-01T00%3A00%3A00Z&sort=asc&with_stats=true"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?order_by=created_at&page=7&since=2022-01-01T00%3A00%3A00Z&sort=asc&with_stats=true",
+  "_decoded_content": [
+    {
+      "id": "b0342a8699e1e5838005acb4a3b079c58bef8409",
+      "short_id": "b0342a86",
+      "created_at": "2022-01-20T06:39:26.000+00:00",
+      "parent_ids": [
+        "adf42a850becbdcf9be82e181d86e806915a14d8",
+        "c3fbba3eac8f0c4e9ea4eb43f35b7a3a7d208e7a"
+      ],
+      "title": "Merge: Add support for SQL Taps and Targets (#263, #74, !44, !200)",
+      "message": "Merge: Add support for SQL Taps and Targets (#263, #74, !44, !200)",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-20T06:39:26.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-20T06:39:26.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/b0342a8699e1e5838005acb4a3b079c58bef8409",
+      "stats": {
+        "additions": 2657,
+        "deletions": 230,
+        "total": 2887
+      }
+    },
+    {
+      "id": "c3fbba3eac8f0c4e9ea4eb43f35b7a3a7d208e7a",
+      "short_id": "c3fbba3e",
+      "created_at": "2022-01-20T06:39:25.000+00:00",
+      "parent_ids": [
+        "adf42a850becbdcf9be82e181d86e806915a14d8"
+      ],
+      "title": "Add support for SQL Taps and Targets",
+      "message": "Add support for SQL Taps and Targets\n",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-20T06:39:25.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-20T06:39:25.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/c3fbba3eac8f0c4e9ea4eb43f35b7a3a7d208e7a",
+      "stats": {
+        "additions": 2657,
+        "deletions": 230,
+        "total": 2887
+      }
+    },
+    {
+      "id": "adf42a850becbdcf9be82e181d86e806915a14d8",
+      "short_id": "adf42a85",
+      "created_at": "2022-01-19T18:18:03.000+00:00",
+      "parent_ids": [
+        "83dde4fe922f9f91bd3c57277849a2a2daa8f09a",
+        "7beddc5f7c041c6eee9f85951560809bfef2d138"
+      ],
+      "title": "Merge: Resolve #166 track dependency licenses (!237)",
+      "message": "Merge: Resolve #166 track dependency licenses (!237)",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-19T18:18:03.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-19T18:18:03.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/adf42a850becbdcf9be82e181d86e806915a14d8",
+      "stats": {
+        "additions": 31,
+        "deletions": 1,
+        "total": 32
+      }
+    },
+    {
+      "id": "7beddc5f7c041c6eee9f85951560809bfef2d138",
+      "short_id": "7beddc5f",
+      "created_at": "2022-01-19T18:18:03.000+00:00",
+      "parent_ids": [
+        "83dde4fe922f9f91bd3c57277849a2a2daa8f09a"
+      ],
+      "title": "Resolve #166 track dependency licenses",
+      "message": "Resolve #166 track dependency licenses\n",
+      "author_name": "Ken Payne",
+      "author_email": "ken@meltano.com",
+      "authored_date": "2022-01-19T18:18:03.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-19T18:18:03.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/7beddc5f7c041c6eee9f85951560809bfef2d138",
+      "stats": {
+        "additions": 31,
+        "deletions": 1,
+        "total": 32
+      }
+    },
+    {
+      "id": "83dde4fe922f9f91bd3c57277849a2a2daa8f09a",
+      "short_id": "83dde4fe",
+      "created_at": "2022-01-14T00:57:48.000+00:00",
+      "parent_ids": [
+        "5abefa2f0c97d137b85f4f6d0884ce08e81f0658",
+        "2bb034a2ea595da6ea543ac19ce8306fc90d0ab9"
+      ],
+      "title": "Merge branch 'release/v0.3.18' into 'main'",
+      "message": "Merge branch 'release/v0.3.18' into 'main'\n\nResolve \"Release 0.3.18\"\n\nCloses #295\n\nSee merge request meltano/sdk!235",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgarrm358@gmail.com",
+      "authored_date": "2022-01-14T00:57:48.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgarrm358@gmail.com",
+      "committed_date": "2022-01-14T00:57:48.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/83dde4fe922f9f91bd3c57277849a2a2daa8f09a",
+      "stats": {
+        "additions": 18,
+        "deletions": 5,
+        "total": 23
+      }
+    },
+    {
+      "id": "2bb034a2ea595da6ea543ac19ce8306fc90d0ab9",
+      "short_id": "2bb034a2",
+      "created_at": "2022-01-14T00:57:47.000+00:00",
+      "parent_ids": [
+        "5abefa2f0c97d137b85f4f6d0884ce08e81f0658"
+      ],
+      "title": "Release v0.3.18",
+      "message": "Release v0.3.18\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgarrm358@gmail.com",
+      "authored_date": "2022-01-14T00:57:47.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgarrm358@gmail.com",
+      "committed_date": "2022-01-14T00:57:47.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/2bb034a2ea595da6ea543ac19ce8306fc90d0ab9",
+      "stats": {
+        "additions": 18,
+        "deletions": 5,
+        "total": 23
+      }
+    },
+    {
+      "id": "5abefa2f0c97d137b85f4f6d0884ce08e81f0658",
+      "short_id": "5abefa2f",
+      "created_at": "2022-01-13T22:35:00.000+00:00",
+      "parent_ids": [
+        "5cd77124555e6609563dba3dd45bb24ec71623cd",
+        "6a6d9b3cda90d0186d39813a7f777f9be75c6c12"
+      ],
+      "title": "Merge branch '257-create-a-stream-map-connector-for-use-in-composable-pipeline' into 'main'",
+      "message": "Merge branch '257-create-a-stream-map-connector-for-use-in-composable-pipeline' into 'main'\n\nResolve \"Create a stream map connector for use in composable pipeline\"\n\nCloses #257\n\nSee merge request meltano/sdk!234",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgarrm358@gmail.com",
+      "authored_date": "2022-01-13T22:35:00.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgarrm358@gmail.com",
+      "committed_date": "2022-01-13T22:35:00.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/5abefa2f0c97d137b85f4f6d0884ce08e81f0658",
+      "stats": {
+        "additions": 794,
+        "deletions": 154,
+        "total": 948
+      }
+    },
+    {
+      "id": "6a6d9b3cda90d0186d39813a7f777f9be75c6c12",
+      "short_id": "6a6d9b3c",
+      "created_at": "2022-01-13T22:35:00.000+00:00",
+      "parent_ids": [
+        "5cd77124555e6609563dba3dd45bb24ec71623cd"
+      ],
+      "title": "Add support for for stream map plugins",
+      "message": "Add support for for stream map plugins\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgarrm358@gmail.com",
+      "authored_date": "2022-01-13T22:35:00.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgarrm358@gmail.com",
+      "committed_date": "2022-01-13T22:35:00.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/6a6d9b3cda90d0186d39813a7f777f9be75c6c12",
+      "stats": {
+        "additions": 794,
+        "deletions": 154,
+        "total": 948
+      }
+    },
+    {
+      "id": "5cd77124555e6609563dba3dd45bb24ec71623cd",
+      "short_id": "5cd77124",
+      "created_at": "2022-01-12T19:47:30.000+00:00",
+      "parent_ids": [
+        "b0917cb23323d4313858f0d8d322f29a439051e8",
+        "b756164940402d696ffdb510c66bb86312f51862"
+      ],
+      "title": "Support OAuth endpoints which don't return `expires_in` (#297, !232) -- Thanks, @daniel-ferguson!",
+      "message": "Support OAuth endpoints which don't return `expires_in` (#297, !232) -- Thanks, @daniel-ferguson!",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-12T19:47:30.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-12T19:47:30.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/5cd77124555e6609563dba3dd45bb24ec71623cd",
+      "stats": {
+        "additions": 115,
+        "deletions": 2,
+        "total": 117
+      }
+    },
+    {
+      "id": "b756164940402d696ffdb510c66bb86312f51862",
+      "short_id": "b7561649",
+      "created_at": "2022-01-12T19:47:29.000+00:00",
+      "parent_ids": [
+        "b8ec223ec7665dc0cb87eb9b9e9b4ac9dc6d00e5"
+      ],
+      "title": "Support OAuth endpoints which don't return `expires_in`",
+      "message": "Support OAuth endpoints which don't return `expires_in`\n",
+      "author_name": "Daniel Ferguson",
+      "author_email": "danielferguson@me.com",
+      "authored_date": "2022-01-12T19:47:29.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-12T19:47:29.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/b756164940402d696ffdb510c66bb86312f51862",
+      "stats": {
+        "additions": 115,
+        "deletions": 2,
+        "total": 117
+      }
+    },
+    {
+      "id": "b0917cb23323d4313858f0d8d322f29a439051e8",
+      "short_id": "b0917cb2",
+      "created_at": "2022-01-12T19:38:15.000+00:00",
+      "parent_ids": [
+        "b74a66654bb638b9ce9b2a8405e0313b4b280412",
+        "fd25eccb6595e22f56df30c8fc91468f0ee3fb1f"
+      ],
+      "title": "Merge: Fix doc typo for `selected` property (!230) -- Thanks, Bo Lu!",
+      "message": "Merge: Fix doc typo for `selected` property (!230) -- Thanks, Bo Lu!",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-12T19:38:15.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-12T19:38:15.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/b0917cb23323d4313858f0d8d322f29a439051e8",
+      "stats": {
+        "additions": 1,
+        "deletions": 1,
+        "total": 2
+      }
+    },
+    {
+      "id": "b74a66654bb638b9ce9b2a8405e0313b4b280412",
+      "short_id": "b74a6665",
+      "created_at": "2022-01-11T21:57:26.000+00:00",
+      "parent_ids": [
+        "b8ec223ec7665dc0cb87eb9b9e9b4ac9dc6d00e5",
+        "e44523790147ca2475779211ccb0ac37b9e89d06"
+      ],
+      "title": "Merge: Add support for editable installs via prerelease poetry version (#238, !231)",
+      "message": "Merge: Add support for editable installs via prerelease poetry version (#238, !231)",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-11T21:57:26.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-11T21:57:26.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/b74a66654bb638b9ce9b2a8405e0313b4b280412",
+      "stats": {
+        "additions": 52,
+        "deletions": 38,
+        "total": 90
+      }
+    },
+    {
+      "id": "e44523790147ca2475779211ccb0ac37b9e89d06",
+      "short_id": "e4452379",
+      "created_at": "2022-01-11T21:57:26.000+00:00",
+      "parent_ids": [
+        "b8ec223ec7665dc0cb87eb9b9e9b4ac9dc6d00e5"
+      ],
+      "title": "Add support for editable installs via poetry prerelease version",
+      "message": "Add support for editable installs via poetry prerelease version\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgarrm358@gmail.com",
+      "authored_date": "2022-01-11T21:57:26.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-11T21:57:26.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/e44523790147ca2475779211ccb0ac37b9e89d06",
+      "stats": {
+        "additions": 52,
+        "deletions": 38,
+        "total": 90
+      }
+    },
+    {
+      "id": "b8ec223ec7665dc0cb87eb9b9e9b4ac9dc6d00e5",
+      "short_id": "b8ec223e",
+      "created_at": "2022-01-07T20:32:10.000+00:00",
+      "parent_ids": [
+        "8f8ee44e043c83917d3fe63ec646a13bad4014bf",
+        "844fbe36d126e847671f56d6203cc5532044d46a"
+      ],
+      "title": "Merge branch 'output_dir' into 'main'",
+      "message": "Merge branch 'output_dir' into 'main'\n\nAdd output directory for target-jsonl\n\nSee merge request meltano/sdk!228",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-07T20:32:10.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-07T20:32:10.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/b8ec223ec7665dc0cb87eb9b9e9b4ac9dc6d00e5",
+      "stats": {
+        "additions": 4,
+        "deletions": 0,
+        "total": 4
+      }
+    }
+  ]
+}
