@@ -20,7 +20,6 @@ class GitlabGraphQLStream(GraphQLStream):
 
     url_base = SITE_URL
 
-    @property
     def http_headers(self) -> dict:
         """Return headers dict to be used for HTTP requests.
 

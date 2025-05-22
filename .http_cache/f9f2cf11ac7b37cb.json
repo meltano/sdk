@@ -1,0 +1,1178 @@
+{
+  "cookies": {
+    "_cfuvid": "CIyPPKbcxfXYlc47tcm30SW28r.M3N5I9uYVh6vlJsE-1747940870753-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:07:50.646319+00:00",
+  "elapsed": 0.41519,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e9948484079f6-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:07:50 GMT",
+    "ETag": "W/\"262c843f8fcdd034865a751a198e115a\"",
+    "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/99/issues?epic_iid=99&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/99/issues?epic_iid=99&id=2524164&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=CIyPPKbcxfXYlc47tcm30SW28r.M3N5I9uYVh6vlJsE-1747940870753-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-17-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-c",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"ceeb272663a0299e54f32236ce2e80d4\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "ceeb272663a0299e54f32236ce2e80d4",
+    "x-runtime": "0.226417",
+    "x-total": "9",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/2524164/epics/99/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/2524164/epics/99/issues",
+  "_decoded_content": [
+    {
+      "id": 98197256,
+      "iid": 176,
+      "project_id": 25921808,
+      "title": "Add `transferwise` variant of `target-bigquery`",
+      "description": "https://github.com/transferwise/pipelinewise-target-bigquery/",
+      "state": "closed",
+      "created_at": "2020-10-29T23:22:07.084Z",
+      "updated_at": "2021-12-14T22:29:44.257Z",
+      "closed_at": "2021-12-14T22:29:44.218Z",
+      "closed_by": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "labels": [
+        "Load",
+        "flow::Review",
+        "kind::Feature",
+        "valuestream::Hub"
+      ],
+      "milestone": {
+        "id": 2286172,
+        "iid": 200,
+        "group_id": 2524164,
+        "title": "Fri: Dec 17, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-10-18T15:20:21.743Z",
+        "updated_at": "2022-01-04T16:10:50.410Z",
+        "due_date": "2021-12-17",
+        "start_date": "2021-12-11",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/200"
+      },
+      "assignees": [
+        {
+          "id": 8668050,
+          "username": "pnadolny13",
+          "public_email": "",
+          "name": "Pat Nadolny",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+          "web_url": "https://gitlab.com/pnadolny13"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "user_notes_count": 3,
+      "merge_requests_count": 1,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/hub/-/issues/176",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/25921808/issues/176",
+        "notes": "https://gitlab.com/api/v4/projects/25921808/issues/176/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/25921808/issues/176/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/25921808",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#176",
+        "relative": "#176",
+        "full": "meltano/hub#176"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 99,
+      "epic": {
+        "id": 249376,
+        "iid": 99,
+        "title": "MeltanoHub - Singer Target Variants",
+        "url": "/groups/meltano/-/epics/99",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 17, 2021",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 285274,
+      "relative_position": -2052
+    },
+    {
+      "id": 97373719,
+      "iid": 3060,
+      "project_id": 7603319,
+      "title": "Set tap-fastly default variant to splitio",
+      "description": "The tap-fastly default variant is still https://gitlab.com/meltano/tap-fastly which hasnt been updated in 2 years. We should replace it with the splitio variant which seems to be based off the meltano variant but has more recent maitenance https://github.com/splitio/tap-fastly.\n\nThen we're free to archive the meltano variant repo.\n\ncc @tayloramurphy",
+      "state": "closed",
+      "created_at": "2021-11-15T17:05:35.774Z",
+      "updated_at": "2021-11-29T16:13:16.132Z",
+      "closed_at": "2021-11-29T16:13:16.113Z",
+      "closed_by": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "labels": [
+        "flow::Review",
+        "kind::Feature",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2286169,
+        "iid": 197,
+        "group_id": 2524164,
+        "title": "Fri: Nov 26, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-10-18T15:19:17.403Z",
+        "updated_at": "2021-11-29T16:18:19.341Z",
+        "due_date": "2021-11-26",
+        "start_date": "2021-11-20",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/197"
+      },
+      "assignees": [
+        {
+          "id": 8668050,
+          "username": "pnadolny13",
+          "public_email": "",
+          "name": "Pat Nadolny",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+          "web_url": "https://gitlab.com/pnadolny13"
+        }
+      ],
+      "author": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "user_notes_count": 1,
+      "merge_requests_count": 1,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3060",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3060",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3060/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3060/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3060",
+        "relative": "#3060",
+        "full": "meltano/meltano#3060"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 99,
+      "epic": {
+        "id": 249376,
+        "iid": 99,
+        "title": "MeltanoHub - Singer Target Variants",
+        "url": "/groups/meltano/-/epics/99",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 17, 2021",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 941796,
+      "relative_position": -3591
+    },
+    {
+      "id": 80129376,
+      "iid": 2622,
+      "project_id": 7603319,
+      "title": "Add fork of `singer-io/target-csv` as new default variant",
+      "description": "- All forks: https://github.com/singer-io/target-csv/network\n- Promising candidate: https://github.com/hotgluexyz/target-csv",
+      "state": "closed",
+      "created_at": "2021-03-02T23:46:30.995Z",
+      "updated_at": "2021-06-16T14:32:25.607Z",
+      "closed_at": "2021-06-16T14:32:25.539Z",
+      "closed_by": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "labels": [
+        "Accepting Merge Requests",
+        "Extract",
+        "flow::Review"
+      ],
+      "milestone": {
+        "id": 2061618,
+        "iid": 166,
+        "group_id": 2524164,
+        "title": "Fri: June 18, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-05-17T20:02:41.585Z",
+        "updated_at": "2021-06-21T17:09:07.484Z",
+        "due_date": "2021-06-19",
+        "start_date": "2021-06-12",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/166"
+      },
+      "assignees": [
+        {
+          "id": 1942272,
+          "username": "tayloramurphy",
+          "public_email": "",
+          "name": "Taylor A Murphy",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "web_url": "https://gitlab.com/tayloramurphy"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "user_notes_count": 6,
+      "merge_requests_count": 1,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2622",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2622",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2622/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2622/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2622",
+        "relative": "#2622",
+        "full": "meltano/meltano#2622"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 99,
+      "epic": {
+        "id": 249376,
+        "iid": 99,
+        "title": "MeltanoHub - Singer Target Variants",
+        "url": "/groups/meltano/-/epics/99",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 17, 2021",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 456366,
+      "relative_position": -3078
+    },
+    {
+      "id": 73944617,
+      "iid": 2433,
+      "project_id": 7603319,
+      "title": "Add `datamill-co` variant of `target-postgres`",
+      "description": "It would be nice to add out-of-the-box support for https://github.com/datamill-co/target-postgres, for users who already started using it before finding Meltano, or who may prefer it over our own variant.\n\nWe can consider making it the default like we did with https://github.com/datamill-co/target-snowflake.",
+      "state": "closed",
+      "created_at": "2020-11-05T23:30:36.759Z",
+      "updated_at": "2021-04-12T20:13:02.068Z",
+      "closed_at": "2020-11-07T00:20:26.686Z",
+      "closed_by": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "labels": [
+        "Accepting Merge Requests",
+        "Load",
+        "flow::Review"
+      ],
+      "milestone": {
+        "id": 1653879,
+        "iid": 131,
+        "group_id": 2524164,
+        "title": "Fri: Nov 6, 2020",
+        "description": "",
+        "state": "closed",
+        "created_at": "2020-09-30T21:49:54.260Z",
+        "updated_at": "2020-11-06T23:54:09.901Z",
+        "due_date": "2020-11-07",
+        "start_date": "2020-10-31",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/131"
+      },
+      "assignees": [
+        {
+          "id": 87854,
+          "username": "DouweM",
+          "public_email": "",
+          "name": "Douwe Maan",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+          "web_url": "https://gitlab.com/DouweM"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 1,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2433",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2433",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2433/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2433/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2433",
+        "relative": "#2433",
+        "full": "meltano/meltano#2433"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 99,
+      "epic": {
+        "id": 249376,
+        "iid": 99,
+        "title": "MeltanoHub - Singer Target Variants",
+        "url": "/groups/meltano/-/epics/99",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 17, 2021",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 292744,
+      "relative_position": -1026
+    },
+    {
+      "id": 73944308,
+      "iid": 2427,
+      "project_id": 7603319,
+      "title": "Add `transferwise` variant of `target-s3-csv`",
+      "description": "- https://github.com/transferwise/pipelinewise-target-s3-csv\n- https://transferwise.github.io/pipelinewise/connectors/targets/s3-csv.html",
+      "state": "closed",
+      "created_at": "2020-11-05T23:14:27.804Z",
+      "updated_at": "2022-05-30T06:35:52.117Z",
+      "closed_at": "2022-05-30T06:35:52.094Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Accepting Merge Requests",
+        "Load"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 1,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2427",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2427",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2427/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2427/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2427",
+        "relative": "#2427",
+        "full": "meltano/meltano#2427"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 99,
+      "epic": {
+        "id": 249376,
+        "iid": 99,
+        "title": "MeltanoHub - Singer Target Variants",
+        "url": "/groups/meltano/-/epics/99",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 17, 2021",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 292722,
+      "relative_position": -2565
+    },
+    {
+      "id": 73944305,
+      "iid": 2426,
+      "project_id": 7603319,
+      "title": "Add `transferwise` variant of `target-redshift`",
+      "description": "- https://github.com/transferwise/pipelinewise-target-redshift\n- https://transferwise.github.io/pipelinewise/connectors/targets/redshift.html",
+      "state": "closed",
+      "created_at": "2020-11-05T23:14:24.465Z",
+      "updated_at": "2021-04-21T07:10:10.863Z",
+      "closed_at": "2021-04-21T07:10:10.771Z",
+      "closed_by": {
+        "id": 8245693,
+        "username": "i_klose",
+        "public_email": "",
+        "name": "Ingo Klose",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/6d8ebf77cf103413ed50bf0451aae421b9317748681641e4475400edd9793ee3?s=80&d=identicon",
+        "web_url": "https://gitlab.com/i_klose"
+      },
+      "labels": [
+        "Accepting Merge Requests",
+        "Load",
+        "flow::Review"
+      ],
+      "milestone": {
+        "id": 1943872,
+        "iid": 155,
+        "group_id": 2524164,
+        "title": "Fri: Apr 23, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-03-15T16:24:26.086Z",
+        "updated_at": "2021-04-26T15:48:44.941Z",
+        "due_date": "2021-04-24",
+        "start_date": "2021-04-17",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/155"
+      },
+      "assignees": [
+        {
+          "id": 8245693,
+          "username": "i_klose",
+          "public_email": "",
+          "name": "Ingo Klose",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://secure.gravatar.com/avatar/6d8ebf77cf103413ed50bf0451aae421b9317748681641e4475400edd9793ee3?s=80&d=identicon",
+          "web_url": "https://gitlab.com/i_klose"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 8245693,
+        "username": "i_klose",
+        "public_email": "",
+        "name": "Ingo Klose",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/6d8ebf77cf103413ed50bf0451aae421b9317748681641e4475400edd9793ee3?s=80&d=identicon",
+        "web_url": "https://gitlab.com/i_klose"
+      },
+      "user_notes_count": 1,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2426",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2426",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2426/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2426/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2426",
+        "relative": "#2426",
+        "full": "meltano/meltano#2426"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 99,
+      "epic": {
+        "id": 249376,
+        "iid": 99,
+        "title": "MeltanoHub - Singer Target Variants",
+        "url": "/groups/meltano/-/epics/99",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 17, 2021",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 292720,
+      "relative_position": -1795
+    },
+    {
+      "id": 73944303,
+      "iid": 2425,
+      "project_id": 7603319,
+      "title": "Add `transferwise` variant of `target-postgres`",
+      "description": "- https://github.com/transferwise/pipelinewise-target-postgres\n- https://transferwise.github.io/pipelinewise/connectors/targets/postgres.html",
+      "state": "closed",
+      "created_at": "2020-11-05T23:14:23.363Z",
+      "updated_at": "2021-04-12T20:13:01.668Z",
+      "closed_at": "2020-11-07T00:20:26.815Z",
+      "closed_by": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "labels": [
+        "Accepting Merge Requests",
+        "Load",
+        "flow::Review"
+      ],
+      "milestone": {
+        "id": 1653879,
+        "iid": 131,
+        "group_id": 2524164,
+        "title": "Fri: Nov 6, 2020",
+        "description": "",
+        "state": "closed",
+        "created_at": "2020-09-30T21:49:54.260Z",
+        "updated_at": "2020-11-06T23:54:09.901Z",
+        "due_date": "2020-11-07",
+        "start_date": "2020-10-31",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/131"
+      },
+      "assignees": [
+        {
+          "id": 87854,
+          "username": "DouweM",
+          "public_email": "",
+          "name": "Douwe Maan",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+          "web_url": "https://gitlab.com/DouweM"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 1,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2425",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2425",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2425/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2425/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2425",
+        "relative": "#2425",
+        "full": "meltano/meltano#2425"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 99,
+      "epic": {
+        "id": 249376,
+        "iid": 99,
+        "title": "MeltanoHub - Singer Target Variants",
+        "url": "/groups/meltano/-/epics/99",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 17, 2021",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 292719,
+      "relative_position": -513
+    },
+    {
+      "id": 72215686,
+      "iid": 2374,
+      "project_id": 7603319,
+      "title": "Add `target-bigquery` loader",
+      "description": "Variants:\n- https://github.com/RealSelf/target-bigquery\n- https://github.com/adswerve/target-bigquery (fork of RealSelf)\n- https://github.com/transferwise/pipelinewise-target-bigquery",
+      "state": "closed",
+      "created_at": "2020-10-05T20:50:50.925Z",
+      "updated_at": "2021-04-12T20:13:30.663Z",
+      "closed_at": "2020-11-02T18:21:50.099Z",
+      "closed_by": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "labels": [
+        "Accepting Merge Requests",
+        "flow::Review"
+      ],
+      "milestone": {
+        "id": 1653879,
+        "iid": 131,
+        "group_id": 2524164,
+        "title": "Fri: Nov 6, 2020",
+        "description": "",
+        "state": "closed",
+        "created_at": "2020-09-30T21:49:54.260Z",
+        "updated_at": "2020-11-06T23:54:09.901Z",
+        "due_date": "2020-11-07",
+        "start_date": "2020-10-31",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/131"
+      },
+      "assignees": [
+        {
+          "id": 4066270,
+          "username": "ra-one",
+          "public_email": "",
+          "name": "Nil",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://secure.gravatar.com/avatar/f7fede0d7d6b3ca0782be65307fcfe56fbf7f66d124c3d94c1ead924b99c4d1b?s=80&d=identicon",
+          "web_url": "https://gitlab.com/ra-one"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 4066270,
+        "username": "ra-one",
+        "public_email": "",
+        "name": "Nil",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/f7fede0d7d6b3ca0782be65307fcfe56fbf7f66d124c3d94c1ead924b99c4d1b?s=80&d=identicon",
+        "web_url": "https://gitlab.com/ra-one"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 1,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2374",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2374",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2374/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2374/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2374",
+        "relative": "#2374",
+        "full": "meltano/meltano#2374"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 99,
+      "epic": {
+        "id": 249376,
+        "iid": 99,
+        "title": "MeltanoHub - Singer Target Variants",
+        "url": "/groups/meltano/-/epics/99",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 17, 2021",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 254725,
+      "relative_position": -1539
+    },
+    {
+      "id": 71888580,
+      "iid": 2368,
+      "project_id": 7603319,
+      "title": "Add `transferwise` and `datamill-co` variants of `target-snowflake`",
+      "description": "Depends on https://gitlab.com/meltano/meltano/-/issues/2134, related to https://gitlab.com/meltano/meltano/-/issues/2357.\n\n---\n\nhttps://github.com/datamill-co/target-snowflake and https://github.com/transferwise/pipelinewise-target-snowflake are both more mature and battle-tested than our own https://gitlab.com/meltano/target-snowflake.\n\nAs described in target-snowflake#27, our version is currently incompatible with macOS Catalina. Instead of investing the time to address that, we may very well be better off recommending users use one of the other versions instead.",
+      "state": "closed",
+      "created_at": "2020-09-29T17:40:00.874Z",
+      "updated_at": "2021-04-12T20:13:01.326Z",
+      "closed_at": "2020-10-30T18:07:54.891Z",
+      "closed_by": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "labels": [
+        "Load",
+        "flow::Review"
+      ],
+      "milestone": {
+        "id": 1646014,
+        "iid": 130,
+        "group_id": 2524164,
+        "title": "Fri: Oct 30, 2020",
+        "description": "",
+        "state": "closed",
+        "created_at": "2020-09-25T23:08:57.027Z",
+        "updated_at": "2020-10-30T23:43:15.913Z",
+        "due_date": "2020-10-31",
+        "start_date": "2020-10-24",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/130"
+      },
+      "assignees": [
+        {
+          "id": 87854,
+          "username": "DouweM",
+          "public_email": "",
+          "name": "Douwe Maan",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+          "web_url": "https://gitlab.com/DouweM"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 1,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2368",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2368",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2368/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2368/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2368",
+        "relative": "#2368",
+        "full": "meltano/meltano#2368"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 99,
+      "epic": {
+        "id": 249376,
+        "iid": 99,
+        "title": "MeltanoHub - Singer Target Variants",
+        "url": "/groups/meltano/-/epics/99",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 17, 2021",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 247987,
+      "relative_position": 0
+    }
+  ]
+}
