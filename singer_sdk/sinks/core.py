@@ -164,7 +164,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._config = dict(target.config)
         self._pending_batch: dict | None = None
         self.stream_name = stream_name
-        self.logger.info(
+        self.logger.debug(
             "Initializing target sink for stream '%s'...",
             stream_name,
         )
@@ -710,7 +710,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Setup is executed once per Sink instance, after instantiation. If a Schema
         change is detected, a new Sink is instantiated and this method is called again.
         """
-        self.logger.info("Setting up %s", self.stream_name)
+        self.logger.debug("Setting up %s", self.stream_name)
 
     def clean_up(self) -> None:
         """Perform any clean up actions required at end of a stream.
@@ -719,7 +719,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         that may be in use from other instances of the same sink. Stream name alone
         should not be relied on, it's recommended to use a uuid as well.
         """
-        self.logger.info("Cleaning up %s", self.stream_name)
+        self.logger.debug("Cleaning up %s", self.stream_name)
         self.record_counter_metric.exit()
 
     def process_batch_files(
