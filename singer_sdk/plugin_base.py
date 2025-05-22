@@ -7,6 +7,7 @@ import logging
 import os
 import signal
 import sys
+import threading
 import time
 import typing as t
 import warnings
@@ -219,8 +220,14 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self.__initialized_at = int(time.time() * 1000)
 
         # Signal handling
-        signal.signal(signal.SIGINT, self._handle_termination)
-        signal.signal(signal.SIGTERM, self._handle_termination)
+        self._setup_signal_handlers()
+
+    def _setup_signal_handlers(self) -> None:
+        if threading.current_thread() == threading.main_thread():
+            if hasattr(signal, "SIGINT"):
+                signal.signal(signal.SIGINT, self._handle_termination)
+            if hasattr(signal, "SIGTERM"):
+                signal.signal(signal.SIGTERM, self._handle_termination)
 
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
