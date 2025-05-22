@@ -553,8 +553,10 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
             "Received termination signal %d, draining all sinks...",
             signum,
         )
-        self.drain_all(is_endofpipe=True)
-        super()._handle_termination(signum, frame)
+        try:
+            self.drain_all(is_endofpipe=True)
+        finally:
+            super()._handle_termination(signum, frame)
 
     @classmethod
     def invoke(  # type: ignore[override]

@@ -512,8 +512,10 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         # Emit a final state message to ensure the state is written to the output
         # even if the process is terminated by a signal.
-        self.write_message(StateMessage(value=self.state))
-        super()._handle_termination(signum, frame)
+        try:
+            self.write_message(StateMessage(value=self.state))
+        finally:
+            super()._handle_termination(signum, frame)
 
     @classmethod
     def invoke(  # type: ignore[override]
