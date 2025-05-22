@@ -1,0 +1,373 @@
+{
+  "cookies": {
+    "_cfuvid": "gmT9qFcCwdAsEpFs7dRSRgdPn7i44YLeZpn8b_l6ooE-1747940858086-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:07:37.993024+00:00",
+  "elapsed": 0.519847,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e98f88d36ac50-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:07:38 GMT",
+    "ETag": "W/\"5a687036d08a343dca18569117fd31e1\"",
+    "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/138/issues?epic_iid=138&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/138/issues?epic_iid=138&id=2524164&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=gmT9qFcCwdAsEpFs7dRSRgdPn7i44YLeZpn8b_l6ooE-1747940858086-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-06-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-d",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"d411016b6e91816f3306fd05f2b23e86\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "d411016b6e91816f3306fd05f2b23e86",
+    "x-runtime": "0.225475",
+    "x-total": "3",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/2524164/epics/138/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/2524164/epics/138/issues",
+  "_decoded_content": [
+    {
+      "id": 102703109,
+      "iid": 3258,
+      "project_id": 7603319,
+      "title": "Linting in pre-commit hooks and Makefile produce different results to the CI pipeline",
+      "description": "After our move away from `flakehell` I am finding that the git pre-commit linting, as well as `make show_lint_python` produce different results. Specifically, the pre-commit lint step will pass, but CI/CD will fail. If I try to run `make show_lint_python` locally to see the failures (with clickable links) I get results from the whole repo and not just my changes (which is huge at the moment).",
+      "state": "closed",
+      "created_at": "2022-02-18T18:33:20.658Z",
+      "updated_at": "2022-05-05T13:56:41.190Z",
+      "closed_at": "2022-05-05T13:56:41.170Z",
+      "closed_by": {
+        "id": 7646034,
+        "username": "kgpayne",
+        "public_email": "",
+        "name": "Ken Payne",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
+        "web_url": "https://gitlab.com/kgpayne"
+      },
+      "labels": [
+        "kind::Bug",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 7646034,
+        "username": "kgpayne",
+        "public_email": "",
+        "name": "Ken Payne",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
+        "web_url": "https://gitlab.com/kgpayne"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 3,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3258",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3258",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3258/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3258/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3258",
+        "relative": "#3258",
+        "full": "meltano/meltano#3258"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 138,
+      "epic": {
+        "id": 449530,
+        "iid": 138,
+        "title": "Linting / Flake8 Cleanup",
+        "url": "/groups/meltano/-/epics/138",
+        "group_id": 2524164,
+        "human_readable_timestamp": "<strong>2278</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1139649,
+      "relative_position": -1026
+    },
+    {
+      "id": 102573452,
+      "iid": 3252,
+      "project_id": 7603319,
+      "title": "Should we do one-time flake8 cleanup?",
+      "description": "The move to pep8 and file-level criteria for flake8 review is causing larger than usual MRs. Should we dedicate a little time to work through some key submodules to get these passing the flake8 tests?\n\nWe could do this per a few high-usage modules or submodules, or specific files. Probably would not make sense to try to tackle the entire repo.",
+      "state": "closed",
+      "created_at": "2022-02-16T21:09:33.088Z",
+      "updated_at": "2022-05-30T10:18:28.387Z",
+      "closed_at": "2022-05-30T10:18:28.369Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "kind::Tech Debt",
+        "urgency::low",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2252673,
+        "iid": 193,
+        "group_id": 2524164,
+        "title": "Internal WIP",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-09-27T19:02:31.281Z",
+        "updated_at": "2021-09-28T18:29:26.781Z",
+        "due_date": null,
+        "start_date": null,
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/193"
+      },
+      "assignees": [],
+      "author": {
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 3,
+      "merge_requests_count": 0,
+      "upvotes": 2,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3252",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3252",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3252/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3252/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3252",
+        "relative": "#3252",
+        "full": "meltano/meltano#3252"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 138,
+      "epic": {
+        "id": 449530,
+        "iid": 138,
+        "title": "Linting / Flake8 Cleanup",
+        "url": "/groups/meltano/-/epics/138",
+        "group_id": 2524164,
+        "human_readable_timestamp": "<strong>2278</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1139647,
+      "relative_position": -513
+    },
+    {
+      "id": 101906718,
+      "iid": 3215,
+      "project_id": 7603319,
+      "title": "Release flake8 diff causes lint failure on missing docstring",
+      "description": "This lint failure happens when the MR 'touches' one of the bumpversion files. We should be able to resolve this by fixing the missing docstring or anything else the linter finds in that file.\n\n```console\nlint run-test: commands[2] | poetry run flake8 --statistics src/meltano/__init__.py\nsrc/meltano/__init__.py:0:1: WPS412 Found `__init__.py` module with logic\nsrc/meltano/__init__.py:1:1: D104 Missing docstring in public package\n# Managed by bumpversion\n^\n1     D104 Missing docstring in public package\n1     WPS412 Found `__init__.py` module with logic\nERROR: InvocationError for command /usr/local/bin/poetry run flake8 --statistics src/meltano/__init__.py (exited with code 1)\n___________________________________ summary ____________________________________\nERROR:   lint: commands failed\nmake: *** [Makefile:167: show_lint_python] Error 1\n```\n\nhttps://gitlab.com/meltano/meltano/-/jobs/2056311759\n\n!2519",
+      "state": "closed",
+      "created_at": "2022-02-04T19:08:51.126Z",
+      "updated_at": "2022-05-30T10:13:56.400Z",
+      "closed_at": "2022-05-30T10:13:56.370Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "kind::Bug",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2252673,
+        "iid": 193,
+        "group_id": 2524164,
+        "title": "Internal WIP",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-09-27T19:02:31.281Z",
+        "updated_at": "2021-09-28T18:29:26.781Z",
+        "due_date": null,
+        "start_date": null,
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/193"
+      },
+      "assignees": [],
+      "author": {
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 1,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3215",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3215",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3215/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3215/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3215",
+        "relative": "#3215",
+        "full": "meltano/meltano#3215"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 138,
+      "epic": {
+        "id": 449530,
+        "iid": 138,
+        "title": "Linting / Flake8 Cleanup",
+        "url": "/groups/meltano/-/epics/138",
+        "group_id": 2524164,
+        "human_readable_timestamp": "<strong>2278</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1139646,
+      "relative_position": 0
+    }
+  ]
+}

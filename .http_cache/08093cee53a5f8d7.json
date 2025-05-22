@@ -1,0 +1,791 @@
+{
+  "cookies": {
+    "_cfuvid": "KJoCmB5C7mXFe4j_zVPomN_rABcWhDta9o1HHhGRNVw-1747940852847-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:07:32.743501+00:00",
+  "elapsed": 0.417884,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e98d88eb8ac56-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:07:32 GMT",
+    "ETag": "W/\"10f407255809df5361dc7c999d37f79d\"",
+    "Link": "<https://gitlab.com/api/v4/groups/12586917/epics/8/issues?epic_iid=8&id=12586917&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/12586917/epics/8/issues?epic_iid=8&id=12586917&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=KJoCmB5C7mXFe4j_zVPomN_rABcWhDta9o1HHhGRNVw-1747940852847-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-25-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-b",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"602178b85283b4fcd75e035491f7ba6b\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "602178b85283b4fcd75e035491f7ba6b",
+    "x-runtime": "0.189599",
+    "x-total": "6",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/12586917/epics/8/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/12586917/epics/8/issues",
+  "_decoded_content": [
+    {
+      "id": 96761500,
+      "iid": 186,
+      "project_id": 27821563,
+      "title": "Requesting Feedback on Web Designs",
+      "description": "### Activity \nWe are looking for high-level feedback on these pages. We cannot make major design changes at this stage without significant disruption to cost and timelines. Therefore we are more looking for feedback on anything off, minor changes that would make a big difference, things that might not be resonating or make sense...\n\nWhen leaving feedback please state the page you are referencing, and the copy or portion you are referring to along with the suggested fix. \n\nAll feedback is due EOD Monday Nov 8th. We will compile all feedback then to send to the agency. \n\n<details><summary>Embedded Designs - Click to expand</summary>\n\n\n### Templates/ Pages:\n- [**Homepage**](https://designrushinc-my.sharepoint.com/personal/gabriel_digitalsilk_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW%2FHome%20Page%20%2Ejpg&parent=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW)![Home_Page_](/uploads/47c7b983ba89022db97be42354a6b8f7/Home_Page_.jpg)\n\n\n\n- [**How Meltano works**](https://designrushinc-my.sharepoint.com/personal/gabriel_digitalsilk_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW%2FHow%20Meltano%20works%2Ejpg&parent=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW)\n![How_Meltano_works__1_](/uploads/4db057e6c34b6dd7141342e0a1a1208f/How_Meltano_works__1_.jpg)\n\n\n\n- [Article page](https://designrushinc-my.sharepoint.com/personal/gabriel_digitalsilk_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW%2FArticle%20page%2Ejpg&parent=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW)\n![Article_page](/uploads/c279694ca5542530fb8b1abead15d2a2/Article_page.jpg)\n\n\n\n- [Resources overview page](https://designrushinc-my.sharepoint.com/personal/gabriel_digitalsilk_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW%2FResources%2Ejpg&parent=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW)\n![Resources](/uploads/3bb696a55cb1f530c8b9a9939f502e6f/Resources.jpg)\n\n\n\n- [Product tour](https://designrushinc-my.sharepoint.com/personal/gabriel_digitalsilk_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW%2FProduct%20Tour%2Ejpg&parent=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW)\n![Product_Tour](/uploads/b5e68b2adbb57f2531158d1e6598b7e4/Product_Tour.jpg)\n\n\n\n- [Popular ways to use Meltano](https://designrushinc-my.sharepoint.com/personal/gabriel_digitalsilk_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW%2FPopular%20ways%20to%20use%2Ejpg&parent=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW)\n![Popular_ways_to_use](/uploads/3cdc109ff6eaebd22641a53862a377a7/Popular_ways_to_use.jpg)\n\n\n\n- [About](https://designrushinc-my.sharepoint.com/personal/gabriel_digitalsilk_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW%2FAbout%2Ejpg&parent=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW)\n![About](/uploads/f6caff4f7a025b546ce1b228adafa43f/About.jpg)\n\n\n\n- [Documentation cover page](https://designrushinc-my.sharepoint.com/personal/gabriel_digitalsilk_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW%2FDocumentation%20Overview%2Ejpg&parent=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW)\n![Documentation_Overview](/uploads/2aaaa2d1323217baccb0951f8fd8ba8c/Documentation_Overview.jpg)\n\n\n\n- [Connectors](https://designrushinc-my.sharepoint.com/personal/gabriel_digitalsilk_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW%2FConnectors%2Ejpg&parent=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW)\n![Connectors](/uploads/41b29035c72d03dd22f190dc962b0443/Connectors.jpg)\n\n\n\n- [Partners](https://designrushinc-my.sharepoint.com/personal/gabriel_digitalsilk_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW%2FPartners%5Fpop%2Dup%20with%20info%2Ejpg&parent=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW) +  [**one more full page**](https://designrushinc-my.sharepoint.com/personal/gabriel_digitalsilk_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW%2FPartners%2D1%2Ejpg&parent=%2Fpersonal%2Fgabriel%5Fdigitalsilk%5Fcom%2FDocuments%2FClients%2FMeltano%2FDesign%2FDESIGN%20PREVIEW)\n![Partners-1](/uploads/77e8a86a6616be2acb41e52b30872e1a/Partners-1.jpg)![Partners_pop-up_with_info](/uploads/eaad6c818beafc59ca5e3f65369da85d/Partners_pop-up_with_info.jpg)\n\n</details>\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2021-11-04T22:21:34.180Z",
+      "updated_at": "2021-11-22T17:15:41.941Z",
+      "closed_at": "2021-11-22T17:15:41.923Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Content",
+        "Marketing",
+        "kind::Non-Product"
+      ],
+      "milestone": {
+        "id": 2286168,
+        "iid": 196,
+        "group_id": 2524164,
+        "title": "Fri: Nov 19, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-10-18T15:19:00.146Z",
+        "updated_at": "2021-11-29T16:16:54.736Z",
+        "due_date": "2021-11-19",
+        "start_date": "2021-11-13",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/196"
+      },
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 3,
+      "merge_requests_count": 0,
+      "upvotes": 1,
+      "downvotes": 0,
+      "due_date": "2021-11-08",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/186",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/186",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/186/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/186/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#186",
+        "relative": "#186",
+        "full": "meltano/marketing/marketing-general#186"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 8,
+      "epic": {
+        "id": 374800,
+        "iid": 8,
+        "title": "New Website campaign launch",
+        "url": "/groups/meltano/marketing/-/epics/8",
+        "group_id": 12586917,
+        "human_readable_end_date": "Jan 21, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 954079,
+      "relative_position": -3078
+    },
+    {
+      "id": 96189992,
+      "iid": 178,
+      "project_id": 27821563,
+      "title": "New Site Contest Giveaway",
+      "description": "### Activity \n(Summarize activity)\n\n### Background\n(Why/ how did we get here?)\n\n### Todos\n\n- [ ] xyz\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2021-10-26T17:55:56.492Z",
+      "updated_at": "2022-01-06T20:47:36.378Z",
+      "closed_at": "2022-01-06T20:47:36.370Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 394049,
+          "username": "afolson",
+          "public_email": "",
+          "name": "Amanda Folson",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "web_url": "https://gitlab.com/afolson"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2021-12-01",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/178",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 1,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/178",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/178/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/178/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#178",
+        "relative": "#178",
+        "full": "meltano/marketing/marketing-general#178"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 8,
+      "epic": {
+        "id": 374800,
+        "iid": 8,
+        "title": "New Website campaign launch",
+        "url": "/groups/meltano/marketing/-/epics/8",
+        "group_id": 12586917,
+        "human_readable_end_date": "Jan 21, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 904423,
+      "relative_position": -2565
+    },
+    {
+      "id": 96189876,
+      "iid": 177,
+      "project_id": 27821563,
+      "title": "PR- Media about new site",
+      "description": "Overview:\n\nNeed to have media going out as one site launches after the testing period.\n\nWorth talking about maybe:\n- new partnerships\n- progress on the vision\n- new documentation \n- V1 SDK and what this men's for the community and network \n- interviews (get someone on end of year pannel)\n- attempt to break a record \n\n\n## Recording information:\n\n- Recording link\n- Host\n- Contact\n\n## Getting the most out of every episode/ process:\nOnce booked the following checklist needs to happen...\n- [x] send cal invite for podcast and add Emily and Amanda to the invite so we know when recording is happening and we can plan social \n- [ ] communicate to marketing launch date and when we will get video. transcript (add cal invite whenever possible)\n- [ ] possible strategy call before recording to discuss key positioning, points, and CTA\n\n#### on podcast\n- [ ] push CTA and key points\n- [ ] if it is a potential investor sourcing opportunity... \"Mention in the interview we are preparing to raise a round of funding and describe out ideal investor relationship and how much money you need.\"\n- [ ] thanks the host and let them know we will be promoting the episode and ask if there is anything else we can do to help\n- [ ] ask when it will go live\n- [ ] if there is a connection say you would like to stay in touch if possible (needs to be followed up with a personal email a couple of days later)\n\n#### for marketing post podcast\n- [ ] schedule and craft social plans (must tag host and podcast name in posts)\n- [ ] Collect video snippets and any relevant artwork \n- [ ] collect key quotes for promotion\n- [ ] craft plan for continued promotion and content creation opportunities\n   - [ ] repurpose video/ audio\n   - [ ] transcribe text\n   - [ ] create blog posts/ newsletter from content \n   - [ ] create PR pitch for future\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2021-10-26T17:53:50.702Z",
+      "updated_at": "2021-11-16T16:59:19.716Z",
+      "closed_at": "2021-11-16T16:59:19.709Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 1,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2021-12-01",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/177",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 16,
+        "completed_count": 1
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/177",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/177/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/177/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#177",
+        "relative": "#177",
+        "full": "meltano/marketing/marketing-general#177"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 8,
+      "epic": {
+        "id": 374800,
+        "iid": 8,
+        "title": "New Website campaign launch",
+        "url": "/groups/meltano/marketing/-/epics/8",
+        "group_id": 12586917,
+        "human_readable_end_date": "Jan 21, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 904419,
+      "relative_position": -2052
+    },
+    {
+      "id": 96189087,
+      "iid": 176,
+      "project_id": 27821563,
+      "title": "Meet Melty Name Your Dragon Quiz for launch",
+      "description": "### Activity \n\nCreate quiz to bring attention to new website and Meltano around Melty \n![melty_quiz](/uploads/8f9e6178b26b8e60161cd8369703fb9d/melty_quiz.png)\n\n### Background\n(Why/ how did we get here?)\n\n### Todos\n\n- [ ] xyz\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2021-10-26T17:37:51.163Z",
+      "updated_at": "2022-01-06T20:47:41.749Z",
+      "closed_at": "2022-01-06T20:47:41.733Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 1985266,
+          "username": "suripatel",
+          "public_email": "",
+          "name": "Suri Patel",
+          "state": "blocked",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1985266/avatar.png",
+          "web_url": "https://gitlab.com/suripatel"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 2,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2021-11-30",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/176",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 1,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/176",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/176/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/176/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#176",
+        "relative": "#176",
+        "full": "meltano/marketing/marketing-general#176"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 8,
+      "epic": {
+        "id": 374800,
+        "iid": 8,
+        "title": "New Website campaign launch",
+        "url": "/groups/meltano/marketing/-/epics/8",
+        "group_id": 12586917,
+        "human_readable_end_date": "Jan 21, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 904383,
+      "relative_position": -1539
+    },
+    {
+      "id": 96188824,
+      "iid": 174,
+      "project_id": 27821563,
+      "title": "Web launch promo",
+      "description": "### Activity \n(Summarize activity)\n\n### Background\n(Why/ how did we get here?)\n\n### Todos\n\n- [ ] xyz\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2021-10-26T17:32:51.187Z",
+      "updated_at": "2022-02-18T22:54:40.227Z",
+      "closed_at": "2022-02-18T22:54:40.213Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing",
+        "flow::Blocked",
+        "kind::Non-Product"
+      ],
+      "milestone": {
+        "id": 2363645,
+        "iid": 216,
+        "group_id": 2524164,
+        "title": "Fri: Jan 28, 2022",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-12-06T17:19:34.985Z",
+        "updated_at": "2022-01-31T16:59:52.796Z",
+        "due_date": "2022-01-28",
+        "start_date": "2022-01-22",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/216"
+      },
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 4,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2021-12-01",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/174",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 1,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/174",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/174/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/174/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#174",
+        "relative": "#174",
+        "full": "meltano/marketing/marketing-general#174"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 8,
+      "epic": {
+        "id": 374800,
+        "iid": 8,
+        "title": "New Website campaign launch",
+        "url": "/groups/meltano/marketing/-/epics/8",
+        "group_id": 12586917,
+        "human_readable_end_date": "Jan 21, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 904366,
+      "relative_position": -513
+    },
+    {
+      "id": 95827862,
+      "iid": 168,
+      "project_id": 27821563,
+      "title": "Draft: Champions Program",
+      "description": "Misc Notes:\n\nRewards/Perks:\n- Annual swag pack/quarterly t-shirt\n- Opportunity to speak at events\n- Name/company listed on our portal (portal TBD, probably a landing page)\n- Mailing list/private channel/exclusive updates\n- Access to beta programs (no plans for these at the moment but could be something we do in the future)\n- Access to specific repos (I don't know how to do this in a safe way but GitLab managed somehow)\n- Badges (LinkedIn?)\n\nLevels:\nAll contributions are created equal but some people have more of them. Is it worth setting up different contributor tiers?\n\n- Contributor\n  - 1 MR to docs/project OR\n  - Feedback/user interview OR\n  - Meetup attendee\n- Some sort of higher level\n  - 3+ MRs OR\n  - Active on issue tracker OR\n  - Regular DD/OH attendee OR\n  - Active on Slack\n- Upper Level\n  - Contribute to core/hella plugins\n  - Supports on Slack\n  - Posts/writes content\n- There's probably some discretionary group as well. Not everyone's contributions will fall neatly into buckets and we should have a way to recognize folks who truly go above and beyond. You've already thought of someone as you're reading this. :)\n- Partners\n  - Head of Partnerships will likely cover most of this, but I think partners should still be rewarded in a similar manner since partners are often contributors. I'll work with whoever heads that up to make sure partners get some love.\n  - At some point we might want to track how many folks partners refer to us\n  - We're already tracking how many taps/targets they build and maintain but we can probably call more attention to this for them.\n\n<!-- Labels to add for triaging -->",
+      "state": "closed",
+      "created_at": "2021-10-21T00:03:54.530Z",
+      "updated_at": "2022-05-31T18:17:14.011Z",
+      "closed_at": "2022-05-31T18:17:13.992Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing",
+        "flow::To Do",
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 394049,
+          "username": "afolson",
+          "public_email": "",
+          "name": "Amanda Folson",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "web_url": "https://gitlab.com/afolson"
+        }
+      ],
+      "author": {
+        "id": 394049,
+        "username": "afolson",
+        "public_email": "",
+        "name": "Amanda Folson",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "web_url": "https://gitlab.com/afolson"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 394049,
+        "username": "afolson",
+        "public_email": "",
+        "name": "Amanda Folson",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "web_url": "https://gitlab.com/afolson"
+      },
+      "user_notes_count": 2,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/168",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/168",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/168/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/168/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#168",
+        "relative": "#168",
+        "full": "meltano/marketing/marketing-general#168"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 8,
+      "epic": {
+        "id": 374800,
+        "iid": 8,
+        "title": "New Website campaign launch",
+        "url": "/groups/meltano/marketing/-/epics/8",
+        "group_id": 12586917,
+        "human_readable_end_date": "Jan 21, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 904362,
+      "relative_position": 0
+    }
+  ]
+}

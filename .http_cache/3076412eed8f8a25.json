@@ -1,0 +1,535 @@
+{
+  "cookies": {
+    "_cfuvid": "Q.v4OY01SKDjapqdWbDUmXDirQvIydV_AmCc46FBBIU-1747940883065-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:08:02.962829+00:00",
+  "elapsed": 0.757976,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e99933f154cc7-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:08:03 GMT",
+    "ETag": "W/\"3fd67da0404fb1b64e5300c77fd65496\"",
+    "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/122/issues?epic_iid=122&id=2524164&page=1&per_page=20>; rel=\"prev\", <https://gitlab.com/api/v4/groups/2524164/epics/122/issues?epic_iid=122&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/122/issues?epic_iid=122&id=2524164&page=2&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=Q.v4OY01SKDjapqdWbDUmXDirQvIydV_AmCc46FBBIU-1747940883065-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-50-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-c",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"f95502f5d5ab56a8cc9698811028916f\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "2",
+    "x-per-page": "20",
+    "x-prev-page": "1",
+    "x-request-id": "f95502f5d5ab56a8cc9698811028916f",
+    "x-runtime": "0.463474",
+    "x-total": "24",
+    "x-total-pages": "2"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/2524164/epics/122/issues?page=2"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/2524164/epics/122/issues?page=2",
+  "_decoded_content": [
+    {
+      "id": 95815630,
+      "iid": 2999,
+      "project_id": 7603319,
+      "title": "Google Analytics failure shows in install logs",
+      "description": "It looks like this is non-blocking but we should look into this.\n\n```\nInstalled loader 'target-jsonl'\nInstalled extractor 'tap-rest-api-msdk'\nInstalled 2/2 plugins\nExpecting value: line 1 column 1 (char 0)\n```\n\nStack trace:\n\n```\n[2021-10-20 11:20:53,971] [15357|MainThread|meltano.cli.utils] [DEBUG] Expecting value: line 1 column 1 (char 0)\nTraceback (most recent call last):\n  File \"/usr/local/lib/python3.9/site-packages/meltano/cli/__init__.py\", line 44, in main\n    cli(obj={\"project\": None})\n  File \"/usr/local/lib/python3.9/site-packages/click/core.py\", line 829, in __call__\n    return self.main(*args, **kwargs)\n  File \"/usr/local/lib/python3.9/site-packages/click/core.py\", line 782, in main\n    rv = self.invoke(ctx)\n  File \"/usr/local/lib/python3.9/site-packages/click/core.py\", line 1259, in invoke\n    return _process_result(sub_ctx.command.invoke(sub_ctx))\n  File \"/usr/local/lib/python3.9/site-packages/click/core.py\", line 1066, in invoke\n    return ctx.invoke(self.callback, **ctx.params)\n  File \"/usr/local/lib/python3.9/site-packages/click/core.py\", line 610, in invoke\n    return callback(*args, **kwargs)\n  File \"/usr/local/lib/python3.9/site-packages/meltano/cli/params.py\", line 23, in decorate\n    return func(*args, **kwargs)\n  File \"/usr/local/lib/python3.9/site-packages/meltano/cli/params.py\", line 56, in decorate\n    func(project, *args, **kwargs)\n  File \"/usr/local/lib/python3.9/site-packages/meltano/cli/install.py\", line 60, in install\n    tracker = GoogleAnalyticsTracker(project)\n  File \"/usr/local/lib/python3.9/site-packages/meltano/core/tracking/ga_tracker.py\", line 28, in __init__\n    self.client_id = self.load_client_id()\n  File \"/usr/local/lib/python3.9/site-packages/meltano/core/tracking/ga_tracker.py\", line 61, in load_client_id\n    file_data = json.load(file)\n  File \"/usr/local/Cellar/python@3.9/3.9.7_1/Frameworks/Python.framework/Versions/3.9/lib/python3.9/json/__init__.py\", line 293, in load\n    return loads(fp.read(),\n  File \"/usr/local/Cellar/python@3.9/3.9.7_1/Frameworks/Python.framework/Versions/3.9/lib/python3.9/json/__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n  File \"/usr/local/Cellar/python@3.9/3.9.7_1/Frameworks/Python.framework/Versions/3.9/lib/python3.9/json/decoder.py\", line 337, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n  File \"/usr/local/Cellar/python@3.9/3.9.7_1/Frameworks/Python.framework/Versions/3.9/lib/python3.9/json/decoder.py\", line 355, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/usr/local/lib/python3.9/site-packages/meltano/cli/__init__.py\", line 52, in main\n    raise CliError(str(err)) from err\nmeltano.cli.utils.CliError: Expecting value: line 1 column 1 (char 0)\n```\n\nSlack thread: https://meltano.slack.com/archives/C01TCRBBJD7/p1634750806055600?thread_ts=1634748981.054900&cid=C01TCRBBJD7\n\nAbove thread confirms that `.meltano/analytics.json` file is indeed blank.",
+      "state": "closed",
+      "created_at": "2021-10-20T17:44:51.579Z",
+      "updated_at": "2022-05-30T09:47:50.380Z",
+      "closed_at": "2022-05-30T09:47:50.354Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "kind::Bug",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 1,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2999",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2999",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2999/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2999/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2999",
+        "relative": "#2999",
+        "full": "meltano/meltano#2999"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 122,
+      "epic": {
+        "id": 337730,
+        "iid": 122,
+        "title": "Enhance Telemetry across Meltano, SDK, and Hub",
+        "url": "/groups/meltano/-/epics/122",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 893605,
+      "relative_position": -1539
+    },
+    {
+      "id": 94710825,
+      "iid": 2972,
+      "project_id": 7603319,
+      "title": "Draft Proposal for Updating Telemetry in Meltano",
+      "description": "## Idea/Problem Statement\n\nCurrently, we use Google Analytics (GA) to collect anonymous telemetry data from Meltano and the Hub. We need to upgrade our telemetry strategy to get the most out of it, including: events we send, our collection and processing infrastructure, and how we share and use this data. The goal is to be fully anonymous, openly share the data, and make it easy to opt-out. All of this will set us up for success to most efficiently listen to what our users want as our ecosystem grows.\n\n\n## Data Usage Strategy\n\nThe purpose of collecting this data is to use it for insights to improve the product and ecosystem as a whole. \n\nWe want to analyze the telemetry data from Meltano, the Hub, and the SDK to help make product decisions. What features are most used or not used? Do we need to focus more engineering effort in certain areas?\n\nWe also want to make as much of this data useful for the users in our community. For now this can come in the form of extra data to enrich the hub, raw S3 data sets for the community (if they want to do their own analysis), and aggregated usage metrics to ensure users that the ecosystem is healthy and growing.\n\n\n## Event Collection Strategy\n\nWe already collect telemetry data from Meltano and the Hub, we want to continue doing that with some improvements to fill existing gaps and also layer on events coming from SDK based connectors. Meltano should collect events about how users are running Meltano and how its performing at the job level, while the SDK should collect events at the data level.\n\n- Meltano:\n    - EL job start/stop timestamps\n    - T job start/stop timestamps\n    - Exit codes\n    - Meltano version\n    - Caller script (Airflow, Dagster, direct, etc.)\n    - Environment\n    - Installed features - orchestrators (Airflow, Dagster), dbt, Utilities (Lightdash/Superset), Files (Docker)\n    - Plugin variant, name, pip_url, version\n- SDK:\n    - Start/stop timestamps\n    - Record counts\n    - New spec features and capabilities (ACTIVATE_VERSION and BATCH)\n    - Exceptions\n    - Tests run\n    - SDK version\n    - Input arguments/capabilities used\n- Hub: ?\n\n\n## Technical Design\n\n### Implementation Considerations\n\nAs an open source focused team we wanted to choose a telemetry platform that is open source and can be run in our own environment so that we can ensure the safe keeping of our users anonymous data.\n\n#### Snowplow Deployment\n\nA self hosted Snowplow deployment running on AWS which writes to S3 and use Athena for [DBT transformations](https://github.com/dbt-labs/snowplow). The intended design is inspired and based on [Gitlab's implementation](https://about.gitlab.com/handbook/business-technology/data-team/platform/snowplow/).\n\n- We will use Snowplow as our event processing tool. It was evaluated against others in the space but its preferred because its open source, scalable, flexible (web vs cli vs etc.).\n- AWS will be the cloud provider since mostly everyone is familiar with it and a common Snowplow deployment uses some AWS specific services like Kinesis.\n\n#### Event Publishing Changes\n\nThe following things needs to be done by the event producing systems, probably in this order unless 1/3 are combined.\n1. The current GA events need to be converted to Snowplow events in Meltano and the Hub.\n1. The SDK needs to implement Snowplow tracking events.\n1. Meltano and the Hub need to add the additional events that were missing from the GA implementation.\n\n### Operational Considerations\n\n#### Automation\n\nAll of the AWS infrastructure is managed using Terraform.\n\n####  Monitoring\n\nLogs need to be collected (cloudwatch?) and alerts need to be set up so we can ensure that we are aware of any issues with the platform.\n\n\n#### Testing Environment\n\nA non-production testing environment needs to be available for testing new changes to the Snowplow setup or for testing new tracking events without interfering with production data. This would probably just an ephemeral environment but the terraform needs to support multiple deployments.\n\n## Open Items/Questions\n\n- [ ] Where should Terraform infrastructure live?\n- [ ] What Hub events are we not tracking right now?\n- [ ] How should we monitor our infrastructure? Cloudwatch?\n- [ ] How do we feel about the testing environment?\n- [ ] Do we want to run GA in parallel with Snowplow for any reason? Realtime dashboards for the Hub?\n\n\n## Things to Consider\n\n- We need to know if a `add plugin` was custom or not. Right now its not tracked.\n- Singer variants and versions",
+      "state": "closed",
+      "created_at": "2021-10-02T00:45:34.882Z",
+      "updated_at": "2022-03-08T22:14:20.844Z",
+      "closed_at": "2021-10-25T19:52:49.891Z",
+      "closed_by": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "labels": [
+        "flow::Review",
+        "kind::Feature",
+        "urgency::high",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2241597,
+        "iid": 192,
+        "group_id": 2524164,
+        "title": "Fri: Oct 29, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-09-20T18:58:47.263Z",
+        "updated_at": "2021-11-01T17:41:24.211Z",
+        "due_date": "2021-10-29",
+        "start_date": "2021-10-23",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/192"
+      },
+      "assignees": [
+        {
+          "id": 1942272,
+          "username": "tayloramurphy",
+          "public_email": "",
+          "name": "Taylor A Murphy",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "web_url": "https://gitlab.com/tayloramurphy"
+        },
+        {
+          "id": 8668050,
+          "username": "pnadolny13",
+          "public_email": "",
+          "name": "Pat Nadolny",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+          "web_url": "https://gitlab.com/pnadolny13"
+        }
+      ],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "user_notes_count": 14,
+      "merge_requests_count": 0,
+      "upvotes": 1,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2972",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 5,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2972",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2972/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2972/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2972",
+        "relative": "#2972",
+        "full": "meltano/meltano#2972"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 122,
+      "epic": {
+        "id": 337730,
+        "iid": 122,
+        "title": "Enhance Telemetry across Meltano, SDK, and Hub",
+        "url": "/groups/meltano/-/epics/122",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 858876,
+      "relative_position": -1026
+    },
+    {
+      "id": 93024881,
+      "iid": 2917,
+      "project_id": 7603319,
+      "title": "Convert Usage Stats to open source solution, document uses",
+      "description": "We currently use Google Analytics for anonymous usage stats - https://meltano.com/docs/settings.html#send-anonymous-usage-stats\n\nWe should use an open source solution and give users full transparency on how the data is used and the processing steps it goes through.\n\nKey points:\n* Should still remain completely anonymous\n* Easy to opt out\n* Capture more information about success / failures on specific actions\n\nWe would want to have the raw data, store it in our own infra, and resurface the information for users on the Hub.",
+      "state": "closed",
+      "created_at": "2021-09-02T17:12:41.495Z",
+      "updated_at": "2021-10-25T19:52:03.808Z",
+      "closed_at": "2021-10-25T19:52:03.795Z",
+      "closed_by": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "labels": [
+        "Office Hours::To Discuss",
+        "kind::Feature",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2286166,
+        "iid": 194,
+        "group_id": 2524164,
+        "title": "Fri: Nov 5, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-10-18T15:18:13.737Z",
+        "updated_at": "2021-11-08T18:35:10.866Z",
+        "due_date": "2021-11-05",
+        "start_date": "2021-10-30",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/194"
+      },
+      "assignees": [],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 1,
+      "merge_requests_count": 0,
+      "upvotes": 2,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2917",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2917",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2917/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2917/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2917",
+        "relative": "#2917",
+        "full": "meltano/meltano#2917"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 122,
+      "epic": {
+        "id": 337730,
+        "iid": 122,
+        "title": "Enhance Telemetry across Meltano, SDK, and Hub",
+        "url": "/groups/meltano/-/epics/122",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 803490,
+      "relative_position": -513
+    },
+    {
+      "id": 88418953,
+      "iid": 141,
+      "project_id": 22672923,
+      "title": "Consider adding telemetry to SDK",
+      "description": "We currently have anonymous usage data on for Meltano and on websites. As the SDK is part of the Meltano family, it would be useful to have some basic level of metrics from the SDK and potentially connectors that are made using the SDK. \n\nKey features:\n\n- truly anonymous\n- opt-out, but easy to do\n- minimal data gathering\n- transparent about use\n\nQuestions we'd like answered:\n\n- frequency of usage of the SDK\n- frequency of usage of connectors built using the SDK (we'd hopefully get some of this with Meltano too)\n- invocation frequency of the different options and flags\n\nWe _could_ do this with Google Analytics, but I think it'd be better to go with a more true open source option such as Snowplow or Matomo. This would require some investment to setup a collection end point though.\n\n@aaronsteers @DouweM what are your thoughts on this?",
+      "state": "closed",
+      "created_at": "2021-06-08T21:34:34.930Z",
+      "updated_at": "2021-10-25T19:32:02.216Z",
+      "closed_at": "2021-10-25T19:32:02.200Z",
+      "closed_by": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "labels": [
+        "Discussion",
+        "flow::To Do",
+        "kind::Feature",
+        "valuestream::SDK"
+      ],
+      "milestone": {
+        "id": 2136620,
+        "iid": 176,
+        "group_id": 2524164,
+        "title": "Staging",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-07-07T19:00:49.676Z",
+        "updated_at": "2021-07-07T19:00:49.676Z",
+        "due_date": null,
+        "start_date": null,
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/176"
+      },
+      "assignees": [
+        {
+          "id": 1942272,
+          "username": "tayloramurphy",
+          "public_email": "",
+          "name": "Taylor A Murphy",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "web_url": "https://gitlab.com/tayloramurphy"
+        }
+      ],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "user_notes_count": 6,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/sdk/-/issues/141",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/22672923/issues/141",
+        "notes": "https://gitlab.com/api/v4/projects/22672923/issues/141/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/22672923/issues/141/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/22672923",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#141",
+        "relative": "#141",
+        "full": "meltano/sdk#141"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 122,
+      "epic": {
+        "id": 337730,
+        "iid": 122,
+        "title": "Enhance Telemetry across Meltano, SDK, and Hub",
+        "url": "/groups/meltano/-/epics/122",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 645689,
+      "relative_position": 0
+    }
+  ]
+}

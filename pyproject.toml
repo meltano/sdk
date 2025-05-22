@@ -430,5 +430,5 @@ max-args = 9
 required-version = ">=0.5.19"
 
 [tool.codespell]
-skip = "*.csv,samples/aapl/*.json,samples/*/schemas/*.json"
+skip = "*.csv,samples/aapl/*.json,samples/*/schemas/*.json,.http_cache/*.json"
 ignore-words-list = "fo,intoto"

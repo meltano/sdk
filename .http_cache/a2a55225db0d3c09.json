@@ -1,0 +1,316 @@
+{
+  "cookies": {
+    "_cfuvid": "ba63n3ZNYx6XbKp4xv9Qa56UD.MdTIDXNxIDcTu1RrI-1747940857047-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:07:36.941303+00:00",
+  "elapsed": 0.500569,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e98f24c8ede87-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:07:37 GMT",
+    "ETag": "W/\"bc5abd5d071a81a1abed8cd7e0cc3354\"",
+    "Link": "<https://gitlab.com/api/v4/groups/12586917/epics/1/issues?epic_iid=1&id=12586917&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/12586917/epics/1/issues?epic_iid=1&id=12586917&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=ba63n3ZNYx6XbKp4xv9Qa56UD.MdTIDXNxIDcTu1RrI-1747940857047-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-46-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-b",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"5c17aa2a6005c551f956bfa7f54ddb60\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "5c17aa2a6005c551f956bfa7f54ddb60",
+    "x-runtime": "0.195331",
+    "x-total": "2",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/12586917/epics/1/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/12586917/epics/1/issues",
+  "_decoded_content": [
+    {
+      "id": 92465955,
+      "iid": 91,
+      "project_id": 27821563,
+      "title": "Video Hosting solution for academy",
+      "description": "### Activity \nneed video hoption opton for Acadmey\n\n### Background\nConsiderations/ assumptions made in selecting a tool\n- content: longer form\n- audience: this is a warm audience \n- what you want to get from viewers: what is the function of video and what do you want them to do\n- don't want people clicking away from training- don't want the distraction of ads\n- might want options to gate content at some point\n- want the ability to reupload new version of video but keep out stats on the video\n- easy to embed in wordpress\n\n\n### Options considered\n\n- [X] youtube\n- [X] Wistia\n- [X] Facebook or other social media\n- [X] Vimeo\n- [X] Jetpack with WP\n- [x] Sprout video \n- [x] vidyard\n- [x] brightcove\n\n### Final verdict\n* If we have to make a decision today we should use vimeo. If we have a couple weeks we should eval JetPack more thoroughly.\n\n\n----\n### Notes on each platfrom:\n#### Wistia\nIs more of a digital marketing solution than it is a video hosting website. Sure, you can use it to upload your videos and embed them on your site, but that\u2019s not their main selling point.\nWistia offers advanced features like embedding lead capture forms or other CTAs within the video player itself\n\n**Pros**\n\n- No ads.\n- 100% customizable embed player.\n- Highlight other videos from your channel (no external video recommendations).\n- Capture leads from within the video.\n- Custom branding.\n- CRM integrations.\n- heat-map for analytics\n- you can tie a video to an email address so you can track specific people \n\n**Cons/ other:**\n- $99/month\u00a0for just ten videos\n- you need a very robust and sophisticated digital and ops team to get the most of a team\n- best use case for people coming to your site, in campaigns, late in funnel video\n- would love to use this when we have a more robust marketing team and can get more form the tool\n\n#### Vimeo- Vimeo\u00a0is a video hosting/collaboration suite aimed at professionals.\n\n**Pros**\n\n- No ads.\n- Discreet, customizable video embeds.\n- Create professional social media videos with Vimeo Create.\n- Advertise your creative services on the platform.\n- Can enable video downloads.\n- Pro plans start at just $7 a month.\n- more privacy options\n- can replace file with a new video- can do edits (you get to keep stats)\n- folks can download videos\n- Can create paygate or have passwords\n- good embedding options\n- good for courses\n\n**Cons:**\n- free entry level option- data limits\n- hard to search \n- no built in audeince\n\n#### youtube- \n- not optimal for businesses \n- YouTube\u2019s most significant advantage is that it\u2019s the most proven place to build an audience online with\u00a0examples\u00a0over 100,000,000 subscribers.\n- limited analytics\n\n**Suitable For:**\n\n- Content creators who want to build an audience on a social platform.\n- Businesses who want to use video to\u00a0drive more traffic to their website\u00a0and reach new audiences through video.\nuse for SEO content \n\n### vidyard\n- video as sales tactic- about lead gen and video\n\n### Sprout video \n- roles based permissions \n- security and privacy options\n\n### Jetpack\n- $9 a month starting pricing\n- no bandwidth issues\n- native WP embed- built for WP\n- made by automatic \n- leverage power of servers at WP\n- does much more than video \n- people can subscribe to your blog\n- you can add ads to site\n- add stats to site\n- While there\u2019s a cap on storage with Jetpack Premium, the Professional has no such limits\n- videopress?\n- survey capability \n- $11 for unlimited video hosting\n- has a CRM\n- might be worth considering for other features we might need for the site and blog. \n- need to get more info. Only hindrance I see right now is can we get it out quickly enough?\n\n### brightcove\n- lesser known\n- strong analytics\n- couple hundred a month- pricey\n\n\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2021-08-23T23:39:00.350Z",
+      "updated_at": "2022-02-18T19:57:52.513Z",
+      "closed_at": "2021-09-03T13:58:00.161Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing",
+        "flow::Doing",
+        "valuestream::Academy"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 394049,
+          "username": "afolson",
+          "public_email": "",
+          "name": "Amanda Folson",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "web_url": "https://gitlab.com/afolson"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2021-08-27",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/91",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 8,
+        "completed_count": 8
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/91",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/91/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/91/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#91",
+        "relative": "#91",
+        "full": "meltano/marketing/marketing-general#91"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 1,
+      "epic": {
+        "id": 311408,
+        "iid": 1,
+        "title": "Education initatives",
+        "url": "/groups/meltano/marketing/-/epics/1",
+        "group_id": 12586917,
+        "human_readable_timestamp": "<strong>2278</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 783240,
+      "relative_position": -513
+    },
+    {
+      "id": 90525521,
+      "iid": 42,
+      "project_id": 27821563,
+      "title": "DataOps Course",
+      "description": "Hoping we can repurpose the Academy content into some skill-up courses on some other platforms. To legitimize us, drum up awareness, and build legitimacy around DataOps as a necessary and upcoming skill in the workplace. \n\nSome areas to possibly target:\n- [ ] Linkedin learning (barrier to entry \n- [ ] coursera (has high bar but could be long play)\n- [ ] edX - offer professional certification on DataOps\n- [ ] Alison \n- [ ] Udacity- usually has the latest trends\n- [ ] Codecademy- we might be a good partner since it is all on the CLI\n- [ ] General Assembly- we might be too niche or technical right now?\n- [ ] Udemy\n- [ ] create a University kit for getting started\n\n What is also nice is we can easily use this content again as a pitch for hands-on learning workshops as well. \n\n## Note:\nThis is a long-term play and will take a while to get off the ground, thus want to do research and put our feelers now so we can build up to this. I do not expect to have anything out till next year. Goal to start sussing requirements and building relationships now. \n\n## Platforms:\n### Linkedin learning \n* Barrier to entry high- they seek you out based on influencer status (who are the top people on our platform, who\u2019s been trending in the last six months, who\u2019s growing at a fast rate, etc.\u00a0)\n* They work with the instructors to figure out:\n  - What are you going to teach?\n  - What are your main points?\n  - Are you going to keep it short and sweet?\n  - How are you going to make it an actionable, stand-alone video?\n \n\n\n<!-- Labels to add for triaging -->",
+      "state": "closed",
+      "created_at": "2021-07-19T22:07:19.386Z",
+      "updated_at": "2022-05-31T18:07:37.880Z",
+      "closed_at": "2022-05-31T18:07:37.854Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing",
+        "OKR: Be the DataOps OS",
+        "flow::Review",
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 394049,
+          "username": "afolson",
+          "public_email": "",
+          "name": "Amanda Folson",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "web_url": "https://gitlab.com/afolson"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 7,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-12-31",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/42",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 9,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/42",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/42/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/42/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#42",
+        "relative": "#42",
+        "full": "meltano/marketing/marketing-general#42"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 1,
+      "epic": {
+        "id": 311408,
+        "iid": 1,
+        "title": "Education initatives",
+        "url": "/groups/meltano/marketing/-/epics/1",
+        "group_id": 12586917,
+        "human_readable_timestamp": "<strong>2278</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 712241,
+      "relative_position": 0
+    }
+  ]
+}
