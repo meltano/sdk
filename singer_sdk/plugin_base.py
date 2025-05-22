@@ -460,13 +460,9 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             signum: Signal number.
             frame: Frame.
-
-        Raises:
-            click.Abort: If the termination signal is received.
         """
         self.logger.info("Gracefully shutting down...")
-        errmsg = "Received termination signal"
-        raise click.Abort(errmsg)
+        sys.exit(0)
 
     @classmethod
     def print_version(
