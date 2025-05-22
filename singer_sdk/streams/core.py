@@ -1255,7 +1255,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
             msg += f" with context: {context}"
-        self.logger.debug("%s...", msg)
+        self.logger.info(msg)
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
