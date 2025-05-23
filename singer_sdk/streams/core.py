@@ -116,6 +116,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     selected_by_default: bool = True
     """Whether this stream is selected by default in the catalog."""
 
+    QUEUE_MAX_SIZE: int = 1000
+    """Maximum number of contexts to queue before syncing child streams."""
+
     def __init__(
         self,
         tap: Tap,
@@ -162,6 +165,13 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._last_emitted_state: dict | None = None
         self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
+
+        # Single queue for all child contexts
+        # Use a simple list for the context queue. Thread safety is not needed because
+        # the queue is only accessed from a single thread during sync. Using a list is
+        # more efficient and simpler than queue.Queue for this use case.
+        self._child_context_queue: list[types.Context] = []
+
         if schema:
             if isinstance(schema, (PathLike, str)):
                 if not Path(schema).is_file():
@@ -1214,6 +1224,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 if current_context == state_partition_context:
                     # Finalize per-partition state only if 1:1 with context
                     self._finalize_state(state)
+            # FLUSH any remaining child contexts at the end of parent sync
+            self._flush_child_context_queue()
 
         if not context:
             # Finalize total stream only if we have the full context.
@@ -1291,9 +1303,27 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             )
             return
 
-        for child_stream in self.child_streams:
-            if child_stream.selected or child_stream.has_selected_descendents:
-                child_stream.sync(context=child_context)
+        self._child_context_queue.append(child_context)
+        if len(self._child_context_queue) >= self.QUEUE_MAX_SIZE:
+            self._flush_child_context_queue()
+
+    def _flush_child_context_queue(self) -> None:
+        """Sync all child streams for each context, then clear the queue."""
+        if not self._child_context_queue or not self.child_streams:
+            return
+
+        self.logger.info(
+            "Flushing %d child contexts for stream '%s'",
+            len(self._child_context_queue),
+            self.name,
+        )
+
+        for context in self._child_context_queue:
+            for child_stream in self.child_streams:
+                if child_stream.selected or child_stream.has_selected_descendents:
+                    child_stream.sync(context=context)
+
+        self._child_context_queue = []
 
     # Overridable Methods
 
