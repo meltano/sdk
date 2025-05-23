@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import datetime
 import decimal
+import functools
 import json
 import logging
 import math
@@ -13,6 +14,8 @@ import uuid
 from enum import Enum
 from functools import lru_cache
 
+from cachetools import cached
+
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
 JSONSCHEMA_ANNOTATION_SECRET = "secret"  # noqa: S105
@@ -20,6 +23,11 @@ JSONSCHEMA_ANNOTATION_WRITEONLY = "writeOnly"
 UTC = datetime.timezone.utc
 
 logger = logging.getLogger(__name__)
+
+
+@functools.wraps
+def cached_schema():  # noqa: ANN202
+    return cached({}, key=lambda schema: json.dumps(schema, sort_keys=True))
 
 
 class DatetimeErrorTreatmentEnum(Enum):
@@ -79,6 +87,7 @@ def append_type(type_dict: dict, new_type: str) -> dict:
     return result
 
 
+@cached_schema
 def is_secret_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition appears to be a secret.
 
@@ -109,6 +118,7 @@ def is_secret_type(type_dict: dict) -> bool:
     return False
 
 
+@cached_schema
 def is_object_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is an object or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
@@ -122,6 +132,7 @@ def is_object_type(property_schema: dict) -> bool | None:
     )
 
 
+@cached_schema
 def is_uniform_list(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is an array with a single schema.
 
@@ -136,6 +147,7 @@ def is_uniform_list(property_schema: dict) -> bool | None:
     )
 
 
+@cached_schema
 def is_datetime_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition is a 'date-time' type.
 
@@ -155,6 +167,7 @@ def is_datetime_type(type_dict: dict) -> bool:
     raise ValueError(msg)
 
 
+@cached_schema
 def is_date_or_datetime_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition is a 'date'/'date-time' type.
 
@@ -186,6 +199,7 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
     raise ValueError(msg)
 
 
+@cached_schema
 def get_datelike_property_type(property_schema: dict) -> str | None:
     """Return one of 'date-time', 'time', or 'date' if property is date-like.
 
@@ -200,6 +214,7 @@ def get_datelike_property_type(property_schema: dict) -> str | None:
     return None
 
 
+@cached_schema
 def _is_string_with_format(type_dict: dict[str, t.Any]) -> bool | None:
     if "string" in type_dict.get("type", []) and type_dict.get("format") in {
         "date-time",
@@ -236,6 +251,7 @@ def handle_invalid_timestamp_in_record(
     raise ValueError(msg)
 
 
+@cached_schema
 def is_string_array_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition is a string array."""
     if not type_dict:
@@ -254,6 +270,7 @@ def is_string_array_type(type_dict: dict) -> bool:
     return "array" in type_dict["type"] and bool(is_string_type(type_dict["items"]))
 
 
+@cached_schema
 def is_array_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type is an array."""
     if not type_dict:
@@ -272,6 +289,7 @@ def is_array_type(type_dict: dict) -> bool:
     return "array" in type_dict["type"]
 
 
+@cached_schema
 def is_boolean_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is a boolean or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
@@ -287,6 +305,7 @@ def is_boolean_type(property_schema: dict) -> bool | None:
     return False
 
 
+@cached_schema
 def _is_exclusive_boolean_type(property_schema: dict) -> bool:
     if "type" not in property_schema:
         return False
@@ -298,6 +317,7 @@ def _is_exclusive_boolean_type(property_schema: dict) -> bool:
     )
 
 
+@cached_schema
 def is_integer_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is an integer or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
@@ -313,6 +333,7 @@ def is_integer_type(property_schema: dict) -> bool | None:
     return False
 
 
+@cached_schema
 def is_string_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is a string or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
@@ -328,6 +349,7 @@ def is_string_type(property_schema: dict) -> bool | None:
     return False
 
 
+@cached_schema
 def is_null_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is a null or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
@@ -343,6 +365,7 @@ def is_null_type(property_schema: dict) -> bool | None:
     return False
 
 
+@cached_schema
 def is_number_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is a number or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
