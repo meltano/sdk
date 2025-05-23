@@ -1,0 +1,286 @@
+{
+  "cookies": {
+    "_cfuvid": "VrVUUK4hGB9kSqI1MlcP3QI68Kle.ZLyFzP16dG9n60-1747940808869-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:06:48.767458+00:00",
+  "elapsed": 0.428135,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e97c5a8f0649a-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:06:48 GMT",
+    "ETag": "W/\"7f466f2aceb0b1ac28be8cee9e51c04b\"",
+    "Link": "<https://gitlab.com/api/v4/projects/meltano%2Fsdk/releases?id=meltano%2Fsdk&order_by=released_at&page=1&per_page=20&sort=desc>; rel=\"first\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/releases?id=meltano%2Fsdk&order_by=released_at&page=1&per_page=20&sort=desc>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=VrVUUK4hGB9kSqI1MlcP3QI68Kle.ZLyFzP16dG9n60-1747940808869-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-29-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-c",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"adfccc75bcd8b65692c2413e1273b766\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "adfccc75bcd8b65692c2413e1273b766",
+    "x-runtime": "0.210308",
+    "x-total": "3",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/meltano%2Fsdk/releases"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/projects/meltano%2Fsdk/releases",
+  "_decoded_content": [
+    {
+      "name": "v0.5.0",
+      "tag_name": "v0.5.0",
+      "description": "## 0.5.0 - (2022-05-19)\r\n\r\n### New\r\n\r\n- Tap and Target SDK: The `--config=ENV` option now also considers environment variables from a\r\n  dotenv (`.env`) file if present ([#384](https://gitlab.com/meltano/sdk/-/issues/384), [!293](https://gitlab.com/meltano/sdk/-/merge_requests/293)).\r\n\r\n### Changes\r\n\r\n- Target SDK:  Use generic SQLALchemy markers for parameterized queries in SQL targets ([#376](https://gitlab.com/meltano/sdk/-/issues/376), [!287](https://gitlab.com/meltano/sdk/-/merge_requests/287)) - _Thanks, **[Thomas Briggs](https://gitlab.com/tbriggs2)**_!\r\n\r\n- Target SDK:  Explicitly specify column names when inserting rows in SQL targets ([#385](https://gitlab.com/meltano/sdk/-/issues/385), [!294](https://gitlab.com/meltano/sdk/-/merge_requests/294)) - _Thanks, **[Thomas Briggs](https://gitlab.com/tbriggs2)**_!\r\n\r\n### Fixes\r\n\r\n- Target SDK: Fixes bug where an `activate_version` message caused an error when destination table does not exist ([#372](https://gitlab.com/meltano/sdk/-/issues/372), [!285](https://gitlab.com/meltano/sdk/-/merge_requests/285)) - _Thanks, **[Thomas Briggs](https://gitlab.com/tbriggs2)**_!\r\n\r\n- Tap and Target SDK: Do not fail `--about` option if tap or target is not configured ([#379](https://gitlab.com/meltano/sdk/-/issues/379), [!291](https://gitlab.com/meltano/sdk/-/merge_requests/291)).\r\n",
+      "created_at": "2022-05-19T21:15:57.785Z",
+      "released_at": "2022-05-19T21:15:57.785Z",
+      "upcoming_release": false,
+      "author": {
+        "id": 1134865,
+        "username": "edgarrmondragon",
+        "public_email": "edgar@meltano.com",
+        "name": "Edgar R. Mondrag\u00f3n",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "web_url": "https://gitlab.com/edgarrmondragon"
+      },
+      "commit": {
+        "id": "0ba8c1974eef6c5f0b3155fb106dabd4da627a7c",
+        "short_id": "0ba8c197",
+        "created_at": "2022-05-19T20:59:22.000+00:00",
+        "parent_ids": [
+          "aaea2c86f921a52ce727ea5fb295f01deee04659"
+        ],
+        "title": "Bump version: 0.4.9 \u2192 0.5.0",
+        "message": "Bump version: 0.4.9 \u2192 0.5.0\n",
+        "author_name": "Gitlab CI (bot)",
+        "author_email": "hello@meltano.com",
+        "authored_date": "2022-05-19T20:59:22.000+00:00",
+        "committer_name": "Gitlab CI (bot)",
+        "committer_email": "hello@meltano.com",
+        "committed_date": "2022-05-19T20:59:22.000+00:00",
+        "trailers": {},
+        "extended_trailers": {},
+        "web_url": "https://gitlab.com/meltano/sdk/-/commit/0ba8c1974eef6c5f0b3155fb106dabd4da627a7c"
+      },
+      "commit_path": "/meltano/sdk/-/commit/0ba8c1974eef6c5f0b3155fb106dabd4da627a7c",
+      "tag_path": "/meltano/sdk/-/tags/v0.5.0",
+      "assets": {
+        "count": 4,
+        "sources": [
+          {
+            "format": "zip",
+            "url": "https://gitlab.com/meltano/sdk/-/archive/v0.5.0/sdk-v0.5.0.zip"
+          },
+          {
+            "format": "tar.gz",
+            "url": "https://gitlab.com/meltano/sdk/-/archive/v0.5.0/sdk-v0.5.0.tar.gz"
+          },
+          {
+            "format": "tar.bz2",
+            "url": "https://gitlab.com/meltano/sdk/-/archive/v0.5.0/sdk-v0.5.0.tar.bz2"
+          },
+          {
+            "format": "tar",
+            "url": "https://gitlab.com/meltano/sdk/-/archive/v0.5.0/sdk-v0.5.0.tar"
+          }
+        ],
+        "links": []
+      },
+      "evidences": [
+        {
+          "sha": "ef01ddbfd12301fe6cfc54ebdb069b2a8119ec28fced",
+          "filepath": "https://gitlab.com/meltano/sdk/-/releases/v0.5.0/evidences/2650659.json",
+          "collected_at": "2022-05-19T21:15:58.071Z"
+        }
+      ],
+      "_links": {
+        "closed_issues_url": "https://gitlab.com/meltano/sdk/-/issues?release_tag=v0.5.0&scope=all&state=closed",
+        "closed_merge_requests_url": "https://gitlab.com/meltano/sdk/-/merge_requests?release_tag=v0.5.0&scope=all&state=closed",
+        "merged_merge_requests_url": "https://gitlab.com/meltano/sdk/-/merge_requests?release_tag=v0.5.0&scope=all&state=merged",
+        "opened_issues_url": "https://gitlab.com/meltano/sdk/-/issues?release_tag=v0.5.0&scope=all&state=opened",
+        "opened_merge_requests_url": "https://gitlab.com/meltano/sdk/-/merge_requests?release_tag=v0.5.0&scope=all&state=opened",
+        "self": "https://gitlab.com/meltano/sdk/-/releases/v0.5.0"
+      }
+    },
+    {
+      "name": "v0.1.2",
+      "tag_name": "v0.1.2",
+      "description": "# Release Notes\n\nFixes bug in state handling, adds improvevements to documentation.\n\n### Documentation\n\n* Streamlined Dev Guide (!56)\n* Added Code Samples page, including dynamic schema discovery examples (#33, !56)\n* Added links to external sdk-based taps (#32, !56)\n* Added static/dynamic property documentation (#86, !56)\n* Added \"implementation\" docs for debugging and troubleshooting (#71, !41)\n\n### Fixed\n\n* Fixes bug in `Stream.get_starting_timestamp()` using incorrect state key (#94, !58)\n",
+      "created_at": "2021-04-19T17:48:43.191Z",
+      "released_at": "2021-04-19T17:48:43.191Z",
+      "upcoming_release": false,
+      "author": {
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
+      },
+      "commit": {
+        "id": "22b7536b6d47d6382166c67aadba9a60974a80cd",
+        "short_id": "22b7536b",
+        "created_at": "2021-04-12T21:09:29.000+00:00",
+        "parent_ids": [
+          "6b3f940f160e3677ea382107292a99c01521e8e1",
+          "1ebf47461d86edc10ba2409f325709c198661d5c"
+        ],
+        "title": "Release 0.1.2 (!59)",
+        "message": "Release 0.1.2 (!59)",
+        "author_name": "AJ Steers",
+        "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+        "authored_date": "2021-04-12T21:09:29.000+00:00",
+        "committer_name": "AJ Steers",
+        "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+        "committed_date": "2021-04-12T21:09:29.000+00:00",
+        "trailers": {},
+        "extended_trailers": {},
+        "web_url": "https://gitlab.com/meltano/sdk/-/commit/22b7536b6d47d6382166c67aadba9a60974a80cd"
+      },
+      "commit_path": "/meltano/sdk/-/commit/22b7536b6d47d6382166c67aadba9a60974a80cd",
+      "tag_path": "/meltano/sdk/-/tags/v0.1.2",
+      "assets": {
+        "count": 4,
+        "sources": [
+          {
+            "format": "zip",
+            "url": "https://gitlab.com/meltano/sdk/-/archive/v0.1.2/sdk-v0.1.2.zip"
+          },
+          {
+            "format": "tar.gz",
+            "url": "https://gitlab.com/meltano/sdk/-/archive/v0.1.2/sdk-v0.1.2.tar.gz"
+          },
+          {
+            "format": "tar.bz2",
+            "url": "https://gitlab.com/meltano/sdk/-/archive/v0.1.2/sdk-v0.1.2.tar.bz2"
+          },
+          {
+            "format": "tar",
+            "url": "https://gitlab.com/meltano/sdk/-/archive/v0.1.2/sdk-v0.1.2.tar"
+          }
+        ],
+        "links": []
+      },
+      "evidences": [
+        {
+          "sha": "0df3e65d9bba84ee8522eb3be0a7cf5f1f8997abf5cd",
+          "filepath": "https://gitlab.com/meltano/sdk/-/releases/v0.1.2/evidences/954143.json",
+          "collected_at": "2021-04-19T17:48:43.390Z"
+        }
+      ],
+      "_links": {
+        "closed_issues_url": "https://gitlab.com/meltano/sdk/-/issues?release_tag=v0.1.2&scope=all&state=closed",
+        "closed_merge_requests_url": "https://gitlab.com/meltano/sdk/-/merge_requests?release_tag=v0.1.2&scope=all&state=closed",
+        "merged_merge_requests_url": "https://gitlab.com/meltano/sdk/-/merge_requests?release_tag=v0.1.2&scope=all&state=merged",
+        "opened_issues_url": "https://gitlab.com/meltano/sdk/-/issues?release_tag=v0.1.2&scope=all&state=opened",
+        "opened_merge_requests_url": "https://gitlab.com/meltano/sdk/-/merge_requests?release_tag=v0.1.2&scope=all&state=opened",
+        "self": "https://gitlab.com/meltano/sdk/-/releases/v0.1.2"
+      }
+    },
+    {
+      "name": "v0.1.1",
+      "tag_name": "v0.1.1",
+      "description": "# Release Notes\n\nDocumentation and cookiecutter template improvements.\n\n## Added\n\n* Added 'admin_name' field in cookiecutter, streamline poetry setup (!25)\n* Added meltano integration and testing options (#47, !52)\n* Added new cookiecutter `.sh` script to ease testing during development (!52)\n\n### Changes\n\n* Improved cookiecutter readme template with examples (#76, !53)\n",
+      "created_at": "2021-04-19T17:46:18.621Z",
+      "released_at": "2021-04-19T17:46:18.621Z",
+      "upcoming_release": false,
+      "author": {
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
+      },
+      "commit": {
+        "id": "6b3f940f160e3677ea382107292a99c01521e8e1",
+        "short_id": "6b3f940f",
+        "created_at": "2021-04-07T18:55:11.000+00:00",
+        "parent_ids": [
+          "b1ba63b1116b25674fe30956aecadea56821ea3b"
+        ],
+        "title": "version bump to 0.1.1",
+        "message": "version bump to 0.1.1",
+        "author_name": "AJ Steers",
+        "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+        "authored_date": "2021-04-07T18:55:11.000+00:00",
+        "committer_name": "AJ Steers",
+        "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+        "committed_date": "2021-04-07T18:55:11.000+00:00",
+        "trailers": {},
+        "extended_trailers": {},
+        "web_url": "https://gitlab.com/meltano/sdk/-/commit/6b3f940f160e3677ea382107292a99c01521e8e1"
+      },
+      "commit_path": "/meltano/sdk/-/commit/6b3f940f160e3677ea382107292a99c01521e8e1",
+      "tag_path": "/meltano/sdk/-/tags/v0.1.1",
+      "assets": {
+        "count": 4,
+        "sources": [
+          {
+            "format": "zip",
+            "url": "https://gitlab.com/meltano/sdk/-/archive/v0.1.1/sdk-v0.1.1.zip"
+          },
+          {
+            "format": "tar.gz",
+            "url": "https://gitlab.com/meltano/sdk/-/archive/v0.1.1/sdk-v0.1.1.tar.gz"
+          },
+          {
+            "format": "tar.bz2",
+            "url": "https://gitlab.com/meltano/sdk/-/archive/v0.1.1/sdk-v0.1.1.tar.bz2"
+          },
+          {
+            "format": "tar",
+            "url": "https://gitlab.com/meltano/sdk/-/archive/v0.1.1/sdk-v0.1.1.tar"
+          }
+        ],
+        "links": []
+      },
+      "evidences": [
+        {
+          "sha": "9ce226853cb56bd03365252d7415351aef7d0ee7918d",
+          "filepath": "https://gitlab.com/meltano/sdk/-/releases/v0.1.1/evidences/954134.json",
+          "collected_at": "2021-04-19T17:46:18.698Z"
+        }
+      ],
+      "_links": {
+        "closed_issues_url": "https://gitlab.com/meltano/sdk/-/issues?release_tag=v0.1.1&scope=all&state=closed",
+        "closed_merge_requests_url": "https://gitlab.com/meltano/sdk/-/merge_requests?release_tag=v0.1.1&scope=all&state=closed",
+        "merged_merge_requests_url": "https://gitlab.com/meltano/sdk/-/merge_requests?release_tag=v0.1.1&scope=all&state=merged",
+        "opened_issues_url": "https://gitlab.com/meltano/sdk/-/issues?release_tag=v0.1.1&scope=all&state=opened",
+        "opened_merge_requests_url": "https://gitlab.com/meltano/sdk/-/merge_requests?release_tag=v0.1.1&scope=all&state=opened",
+        "self": "https://gitlab.com/meltano/sdk/-/releases/v0.1.1"
+      }
+    }
+  ]
+}

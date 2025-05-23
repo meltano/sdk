@@ -107,7 +107,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self._singer_catalog_entry.tap_stream_id
 
     @property
-    def primary_keys(self) -> t.Sequence[str] | None:
+    def primary_keys(self) -> t.Sequence[str]:
         """Get primary keys from the catalog entry definition.
 
         Returns:

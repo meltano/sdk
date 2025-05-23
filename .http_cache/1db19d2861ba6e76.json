@@ -1,0 +1,544 @@
+{
+  "cookies": {
+    "_cfuvid": "oRYOvnRufq9Kzm56sjBYwna90iWRA6yrfxp38G5Zxl4-1747940849426-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:07:29.350626+00:00",
+  "elapsed": 0.356373,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e98c3ab7a38ef-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:07:29 GMT",
+    "ETag": "W/\"9d6fc95dcfd5475ad66183bf9e43064d\"",
+    "Link": "<https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?id=meltano%2Fsdk&order=default&order_by=created_at&page=2&per_page=20&since=2022-01-01T00%3A00%3A00%2B00%3A00&sort=asc&trailers=false&with_stats=true>; rel=\"prev\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?id=meltano%2Fsdk&order=default&order_by=created_at&page=4&per_page=20&since=2022-01-01T00%3A00%3A00%2B00%3A00&sort=asc&trailers=false&with_stats=true>; rel=\"next\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?id=meltano%2Fsdk&order=default&order_by=created_at&page=1&per_page=20&since=2022-01-01T00%3A00%3A00%2B00%3A00&sort=asc&trailers=false&with_stats=true>; rel=\"first\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=oRYOvnRufq9Kzm56sjBYwna90iWRA6yrfxp38G5Zxl4-1747940849426-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-40-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-b",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"3474c53d00623d2103c56b2b207bcee7\",\"version\":\"1\"}",
+    "x-next-page": "4",
+    "x-page": "3",
+    "x-per-page": "20",
+    "x-prev-page": "2",
+    "x-request-id": "3474c53d00623d2103c56b2b207bcee7",
+    "x-runtime": "0.119340"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?order_by=created_at&page=3&since=2022-01-01T00%3A00%3A00Z&sort=asc&with_stats=true"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?order_by=created_at&page=3&since=2022-01-01T00%3A00%3A00Z&sort=asc&with_stats=true",
+  "_decoded_content": [
+    {
+      "id": "ca8905497cbdb612ab0c8a16b2f8f7dd2bf9db9a",
+      "short_id": "ca890549",
+      "created_at": "2022-05-05T21:37:13.000+00:00",
+      "parent_ids": [
+        "86e6b0a49b380bae7791ad5ff5ec0b0f64596dbb"
+      ],
+      "title": "Fix: Setting stream map property to `null` does not remove it from SCHEMA message",
+      "message": "Fix: Setting stream map property to `null` does not remove it from SCHEMA message\n",
+      "author_name": "Ryan Whitten",
+      "author_email": "rwhitten577@gmail.com",
+      "authored_date": "2022-05-05T21:37:13.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-05T21:37:13.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/ca8905497cbdb612ab0c8a16b2f8f7dd2bf9db9a",
+      "stats": {
+        "additions": 141,
+        "deletions": 3,
+        "total": 144
+      }
+    },
+    {
+      "id": "86e6b0a49b380bae7791ad5ff5ec0b0f64596dbb",
+      "short_id": "86e6b0a4",
+      "created_at": "2022-05-04T22:59:08.000+00:00",
+      "parent_ids": [
+        "51bec196dc4f1c7bb3b60283028930a1661f7c67",
+        "a6fb813aeda3e91959a0c91f452eefd3338fc58f"
+      ],
+      "title": "Merge branch '371-use-maxlength-if-provided' into 'main'",
+      "message": "Merge branch '371-use-maxlength-if-provided' into 'main'\n\nUse `maxLength` for string fields if the schema provides it\n\nCloses #371\n\nSee merge request meltano/sdk!284",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-05-04T22:59:08.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-04T22:59:08.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/86e6b0a49b380bae7791ad5ff5ec0b0f64596dbb",
+      "stats": {
+        "additions": 34,
+        "deletions": 13,
+        "total": 47
+      }
+    },
+    {
+      "id": "a6fb813aeda3e91959a0c91f452eefd3338fc58f",
+      "short_id": "a6fb813a",
+      "created_at": "2022-05-04T22:59:08.000+00:00",
+      "parent_ids": [
+        "51bec196dc4f1c7bb3b60283028930a1661f7c67"
+      ],
+      "title": "Use `maxLength` for string fields if the schema provides it",
+      "message": "Use `maxLength` for string fields if the schema provides it\n",
+      "author_name": "Thomas Briggs",
+      "author_email": "tbriggs@allego.com",
+      "authored_date": "2022-05-04T22:59:08.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-04T22:59:08.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/a6fb813aeda3e91959a0c91f452eefd3338fc58f",
+      "stats": {
+        "additions": 34,
+        "deletions": 13,
+        "total": 47
+      }
+    },
+    {
+      "id": "51bec196dc4f1c7bb3b60283028930a1661f7c67",
+      "short_id": "51bec196",
+      "created_at": "2022-05-03T16:17:47.000+00:00",
+      "parent_ids": [
+        "2e04e7ecb2e47d802ca945e2df233d75edd61fa3",
+        "ae0fa9055806372cbe749859fbcac24f9baf97c7"
+      ],
+      "title": "Merge branch 'parametrize-cookiecutter-tests' into 'main'",
+      "message": "Merge branch 'parametrize-cookiecutter-tests' into 'main'\n\nParametrize cookiecutter tests for better reporting\n\nSee merge request meltano/sdk!278",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-05-03T16:17:47.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-03T16:17:47.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/51bec196dc4f1c7bb3b60283028930a1661f7c67",
+      "stats": {
+        "additions": 56,
+        "deletions": 45,
+        "total": 101
+      }
+    },
+    {
+      "id": "ae0fa9055806372cbe749859fbcac24f9baf97c7",
+      "short_id": "ae0fa905",
+      "created_at": "2022-05-03T16:17:47.000+00:00",
+      "parent_ids": [
+        "11638bbd4cf20e9c0cdd43884c705c79e6c5aa01"
+      ],
+      "title": "Parametrize cookiecutter tests for better reporting",
+      "message": "Parametrize cookiecutter tests for better reporting\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-05-03T16:17:47.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-03T16:17:47.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/ae0fa9055806372cbe749859fbcac24f9baf97c7",
+      "stats": {
+        "additions": 57,
+        "deletions": 46,
+        "total": 103
+      }
+    },
+    {
+      "id": "2e04e7ecb2e47d802ca945e2df233d75edd61fa3",
+      "short_id": "2e04e7ec",
+      "created_at": "2022-04-29T18:54:59.000+00:00",
+      "parent_ids": [
+        "d0702ec7a0a52288a8a1ab7f9fd8ee0b1ccba43f",
+        "59e9333c25ac8bd9af1022c58755675c6d1733b0"
+      ],
+      "title": "Merge branch 'test-jwt-auth' into 'main'",
+      "message": "Merge branch 'test-jwt-auth' into 'main'\n\nTest JWT authenticator\n\nSee merge request meltano/sdk!283",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-29T18:54:59.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-29T18:54:59.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/2e04e7ecb2e47d802ca945e2df233d75edd61fa3",
+      "stats": {
+        "additions": 61,
+        "deletions": 2,
+        "total": 63
+      }
+    },
+    {
+      "id": "59e9333c25ac8bd9af1022c58755675c6d1733b0",
+      "short_id": "59e9333c",
+      "created_at": "2022-04-29T18:54:58.000+00:00",
+      "parent_ids": [
+        "d0702ec7a0a52288a8a1ab7f9fd8ee0b1ccba43f"
+      ],
+      "title": "Test JWT authenticator",
+      "message": "Test JWT authenticator\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-29T18:54:58.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-29T18:54:58.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/59e9333c25ac8bd9af1022c58755675c6d1733b0",
+      "stats": {
+        "additions": 61,
+        "deletions": 2,
+        "total": 63
+      }
+    },
+    {
+      "id": "d0702ec7a0a52288a8a1ab7f9fd8ee0b1ccba43f",
+      "short_id": "d0702ec7",
+      "created_at": "2022-04-28T21:46:22.000+00:00",
+      "parent_ids": [
+        "0e2d8c187dcef5a98222b53274beafdf2d5c50dc",
+        "1830a55da54bf8fb2c731760454678fa8046b4de"
+      ],
+      "title": "Merge branch 'release/v0.4.7' into 'main'",
+      "message": "Merge branch 'release/v0.4.7' into 'main'\n\nRelease/v0.4.7\n\nSee merge request meltano/sdk!282",
+      "author_name": "Florian",
+      "author_email": "syn@ronin.io",
+      "authored_date": "2022-04-28T21:46:22.000+00:00",
+      "committer_name": "Florian",
+      "committer_email": "syn@ronin.io",
+      "committed_date": "2022-04-28T21:46:22.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/d0702ec7a0a52288a8a1ab7f9fd8ee0b1ccba43f",
+      "stats": {
+        "additions": 13,
+        "deletions": 7,
+        "total": 20
+      }
+    },
+    {
+      "id": "1830a55da54bf8fb2c731760454678fa8046b4de",
+      "short_id": "1830a55d",
+      "created_at": "2022-04-28T21:46:22.000+00:00",
+      "parent_ids": [
+        "0e2d8c187dcef5a98222b53274beafdf2d5c50dc"
+      ],
+      "title": "Release/v0.4.7",
+      "message": "Release/v0.4.7\n",
+      "author_name": "Florian",
+      "author_email": "syn@ronin.io",
+      "authored_date": "2022-04-28T21:46:22.000+00:00",
+      "committer_name": "Florian",
+      "committer_email": "syn@ronin.io",
+      "committed_date": "2022-04-28T21:46:22.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/1830a55da54bf8fb2c731760454678fa8046b4de",
+      "stats": {
+        "additions": 13,
+        "deletions": 7,
+        "total": 20
+      }
+    },
+    {
+      "id": "0e2d8c187dcef5a98222b53274beafdf2d5c50dc",
+      "short_id": "0e2d8c18",
+      "created_at": "2022-04-28T21:01:24.000+00:00",
+      "parent_ids": [
+        "72e7e2be7271d37c9d2c40ae0d0be3785c243876",
+        "ebd15e9b8c1b15897217530544d4b694069222d4"
+      ],
+      "title": "Merge branch '366-if-parent-stream-added-automatically-schema-is-empty' into 'main'",
+      "message": "Merge branch '366-if-parent-stream-added-automatically-schema-is-empty' into 'main'\n\nResolve \"If Parent Stream added automatically Schema is empty\"\n\nCloses #366\n\nSee merge request meltano/sdk!280",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-28T21:01:24.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-28T21:01:24.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/0e2d8c187dcef5a98222b53274beafdf2d5c50dc",
+      "stats": {
+        "additions": 168,
+        "deletions": 7,
+        "total": 175
+      }
+    },
+    {
+      "id": "ebd15e9b8c1b15897217530544d4b694069222d4",
+      "short_id": "ebd15e9b",
+      "created_at": "2022-04-28T21:01:24.000+00:00",
+      "parent_ids": [
+        "72e7e2be7271d37c9d2c40ae0d0be3785c243876"
+      ],
+      "title": "Resolve \"If Parent Stream added automatically Schema is empty\"",
+      "message": "Resolve \"If Parent Stream added automatically Schema is empty\"\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-28T21:01:24.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-28T21:01:24.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/ebd15e9b8c1b15897217530544d4b694069222d4",
+      "stats": {
+        "additions": 168,
+        "deletions": 7,
+        "total": 175
+      }
+    },
+    {
+      "id": "72e7e2be7271d37c9d2c40ae0d0be3785c243876",
+      "short_id": "72e7e2be",
+      "created_at": "2022-04-27T22:04:50.000+00:00",
+      "parent_ids": [
+        "11638bbd4cf20e9c0cdd43884c705c79e6c5aa01",
+        "7041235f3f103dc9db042bdcee785babd29f0b5d"
+      ],
+      "title": "Merge branch 'fix-typo' into 'main'",
+      "message": "Merge branch 'fix-typo' into 'main'\n\nUpgrade pyjwt to 2.3.0\n\nSee merge request meltano/sdk!281",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-27T22:04:50.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-27T22:04:50.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/72e7e2be7271d37c9d2c40ae0d0be3785c243876",
+      "stats": {
+        "additions": 38,
+        "deletions": 11,
+        "total": 49
+      }
+    },
+    {
+      "id": "7041235f3f103dc9db042bdcee785babd29f0b5d",
+      "short_id": "7041235f",
+      "created_at": "2022-04-27T22:04:50.000+00:00",
+      "parent_ids": [
+        "11638bbd4cf20e9c0cdd43884c705c79e6c5aa01"
+      ],
+      "title": "Upgrade pyjwt to 2.3.0",
+      "message": "Upgrade pyjwt to 2.3.0\n",
+      "author_name": "Eric Boucher",
+      "author_email": "eric.p.boucher@gmail.com",
+      "authored_date": "2022-04-27T22:04:50.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-27T22:04:50.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/7041235f3f103dc9db042bdcee785babd29f0b5d",
+      "stats": {
+        "additions": 38,
+        "deletions": 11,
+        "total": 49
+      }
+    },
+    {
+      "id": "259b1416607aaddb818005147c1cda0d4aa87207",
+      "short_id": "259b1416",
+      "created_at": "2022-04-27T15:58:14.000+03:00",
+      "parent_ids": [
+        "11638bbd4cf20e9c0cdd43884c705c79e6c5aa01"
+      ],
+      "title": "Remove \"0 errors\" from logging output",
+      "message": "Remove \"0 errors\" from logging output\n",
+      "author_name": "Laurent Savaete",
+      "author_email": "laurent@where.tf",
+      "authored_date": "2022-04-27T15:58:14.000+03:00",
+      "committer_name": "Laurent Savaete",
+      "committer_email": "laurent@where.tf",
+      "committed_date": "2022-04-27T15:58:14.000+03:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/259b1416607aaddb818005147c1cda0d4aa87207",
+      "stats": {
+        "additions": 1,
+        "deletions": 3,
+        "total": 4
+      }
+    },
+    {
+      "id": "11638bbd4cf20e9c0cdd43884c705c79e6c5aa01",
+      "short_id": "11638bbd",
+      "created_at": "2022-04-26T02:48:35.000+00:00",
+      "parent_ids": [
+        "e408258ce3361fe63ed0fe8ee1aa13848fc19122",
+        "63c4dd09f586dacb8838cc45ac763fcc439f7194"
+      ],
+      "title": "Merge branch '354-cookiecutter-client-file-logic-overwrite-fix' into 'main'",
+      "message": "Merge branch '354-cookiecutter-client-file-logic-overwrite-fix' into 'main'\n\nChanged cookiecutter template for non rest graphql client.py to evaluate equals other\n\nCloses #354\n\nSee merge request meltano/sdk!276",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-26T02:48:35.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-26T02:48:35.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/11638bbd4cf20e9c0cdd43884c705c79e6c5aa01",
+      "stats": {
+        "additions": 10,
+        "deletions": 8,
+        "total": 18
+      }
+    },
+    {
+      "id": "63c4dd09f586dacb8838cc45ac763fcc439f7194",
+      "short_id": "63c4dd09",
+      "created_at": "2022-04-26T02:48:34.000+00:00",
+      "parent_ids": [
+        "e408258ce3361fe63ed0fe8ee1aa13848fc19122"
+      ],
+      "title": "Changed cookiecutter template for non rest graphql client.py to evaluate equals other",
+      "message": "Changed cookiecutter template for non rest graphql client.py to evaluate equals other\n",
+      "author_name": "Dan Norman",
+      "author_email": "buzzcutnorman@gmail.com",
+      "authored_date": "2022-04-26T02:48:34.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-26T02:48:34.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/63c4dd09f586dacb8838cc45ac763fcc439f7194",
+      "stats": {
+        "additions": 10,
+        "deletions": 8,
+        "total": 18
+      }
+    },
+    {
+      "id": "e408258ce3361fe63ed0fe8ee1aa13848fc19122",
+      "short_id": "e408258c",
+      "created_at": "2022-04-22T15:58:47.000+00:00",
+      "parent_ids": [
+        "a1092632d48374451dca436beea301926db507f3",
+        "1d7d8ab5afe38d16b7e849f3fa9fa8433dc5af64"
+      ],
+      "title": "Merge branch '353_tap_cookiecutter_not_assigning_SQLTap_class_for_SQL_streams' into 'main'",
+      "message": "Merge branch '353_tap_cookiecutter_not_assigning_SQLTap_class_for_SQL_streams' into 'main'\n\nIssue 353 Changed 'SQL' check for class Tap() to look at stream_type not source_name\n\nCloses #353\n\nSee merge request meltano/sdk!275",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-22T15:58:47.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-22T15:58:47.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/e408258ce3361fe63ed0fe8ee1aa13848fc19122",
+      "stats": {
+        "additions": 3,
+        "deletions": 1,
+        "total": 4
+      }
+    },
+    {
+      "id": "1d7d8ab5afe38d16b7e849f3fa9fa8433dc5af64",
+      "short_id": "1d7d8ab5",
+      "created_at": "2022-04-22T15:58:47.000+00:00",
+      "parent_ids": [
+        "a1092632d48374451dca436beea301926db507f3"
+      ],
+      "title": "Issue 353 Changed 'SQL' check for class Tap() to look at stream_type not source_name",
+      "message": "Issue 353 Changed 'SQL' check for class Tap() to look at stream_type not source_name\n",
+      "author_name": "Dan Norman",
+      "author_email": "buzzcutnorman@gmail.com",
+      "authored_date": "2022-04-22T15:58:47.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-22T15:58:47.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/1d7d8ab5afe38d16b7e849f3fa9fa8433dc5af64",
+      "stats": {
+        "additions": 3,
+        "deletions": 1,
+        "total": 4
+      }
+    },
+    {
+      "id": "a1092632d48374451dca436beea301926db507f3",
+      "short_id": "a1092632",
+      "created_at": "2022-04-21T19:41:24.000+00:00",
+      "parent_ids": [
+        "6a554f4000f1a0bfd0aa6bd782906c8dcea52531",
+        "e507af76d455b4785b9d08d5757838b8bab7aae7"
+      ],
+      "title": "Merge branch 'release/v0.4.6' into 'main'",
+      "message": "Merge branch 'release/v0.4.6' into 'main'\n\nRelease v0.4.6\n\nSee merge request meltano/sdk!274",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-04-21T19:41:24.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-21T19:41:24.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/a1092632d48374451dca436beea301926db507f3",
+      "stats": {
+        "additions": 14,
+        "deletions": 7,
+        "total": 21
+      }
+    },
+    {
+      "id": "e507af76d455b4785b9d08d5757838b8bab7aae7",
+      "short_id": "e507af76",
+      "created_at": "2022-04-21T19:41:24.000+00:00",
+      "parent_ids": [
+        "6a554f4000f1a0bfd0aa6bd782906c8dcea52531"
+      ],
+      "title": "Release v0.4.6",
+      "message": "Release v0.4.6\n",
+      "author_name": "Ken Payne",
+      "author_email": "ken@meltano.com",
+      "authored_date": "2022-04-21T19:41:24.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-04-21T19:41:24.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/e507af76d455b4785b9d08d5757838b8bab7aae7",
+      "stats": {
+        "additions": 14,
+        "deletions": 7,
+        "total": 21
+      }
+    }
+  ]
+}

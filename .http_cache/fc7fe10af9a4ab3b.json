@@ -1,0 +1,503 @@
+{
+  "cookies": {
+    "_cfuvid": "skwSRgCxBUHLnU4uNsJBbT_Y_WLYDV25Bw3ZaMh54_E-1747940854180-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:07:34.082838+00:00",
+  "elapsed": 0.375157,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e98e1191eeef2-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:07:34 GMT",
+    "ETag": "W/\"6672c2ae0941c30f82fc73a07f8c40aa\"",
+    "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/127/issues?epic_iid=127&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/127/issues?epic_iid=127&id=2524164&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=skwSRgCxBUHLnU4uNsJBbT_Y_WLYDV25Bw3ZaMh54_E-1747940854180-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-44-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-c",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"b725c41ee6e8e51a1d9b36161da0c919\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "b725c41ee6e8e51a1d9b36161da0c919",
+    "x-runtime": "0.157908",
+    "x-total": "4",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/2524164/epics/127/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/2524164/epics/127/issues",
+  "_decoded_content": [
+    {
+      "id": 95982632,
+      "iid": 255,
+      "project_id": 22672923,
+      "title": "Have CTA or template for adding metadata about the tap",
+      "description": "We probably don't want to do this during the cookiecutter part of the SDK, but as part of the #TODO checklist it'd be good to prompt users to update a YAML file and png for their connector. \n\nWe could have a template yml and png file that are built by the cookiecutter and fill it out based on what we know. Then using https://gitlab.com/meltano/sdk/-/issues/254 users could update it in place. Then for submission to the Hub they could update it further. If everything lived in their repo, perhaps under a `.singer` directory, we could just pull that info for the hub with only a simple MR for them to update.",
+      "state": "closed",
+      "created_at": "2021-10-22T18:14:39.407Z",
+      "updated_at": "2022-05-29T23:58:57.815Z",
+      "closed_at": "2022-05-29T23:58:57.766Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "kind::Feature",
+        "valuestream::Hub"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 1,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/sdk/-/issues/255",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/22672923/issues/255",
+        "notes": "https://gitlab.com/api/v4/projects/22672923/issues/255/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/22672923/issues/255/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/22672923",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#255",
+        "relative": "#255",
+        "full": "meltano/sdk#255"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 127,
+      "epic": {
+        "id": 372915,
+        "iid": 127,
+        "title": "Generate YAML for MeltanoHub",
+        "url": "/groups/meltano/-/epics/127",
+        "group_id": 2524164,
+        "human_readable_end_date": "Feb 28, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 898306,
+      "relative_position": -1539
+    },
+    {
+      "id": 95982506,
+      "iid": 153,
+      "project_id": 25921808,
+      "title": "Re-think domain and descriptions for Singer connectors",
+      "description": "Currently we have this sort of structure for the definitions of taps and targets:\n\n```yaml\ndescription: Cloud-based Warehouse Management System (WMS)\ndomain:\n  description: Cloud-based Warehouse Management System (WMS)\n  name: 3PLCentral API\n  type: api\n  url: https://www.3plcentral.com\n```\n\nMy original intent with `domain` was to be able to bucket similar taps based on some sort of hierarchy. Facebook is a good example where we have 4 different taps that would be nice to see under a general \"Facebook\" page with links to the specific ads, pages, posts, and reviews taps. \n\nAs it turns out, neither of the `description` keys are used anywhere on MeltanoHub currently. The `name` under the domain is used in the description sentence of a connector as follows:\n\n`The <tap_name> Singer Target pulls data from the <domain.name> that can then be sent to a destination using a Singer Target.`\n\nSo it's not really even a name, technically. \n\nMy general proposal (which I'm 100% open to changing) is to rename `domain` to something else and then use something else to bucket similar connectors. We should also drop unnecessary and duplicate descriptions (I think my original thought is that people could better understand what a tool was but honestly there's google for that).\n\n```yaml\n# Old\ndescription: Advertising Platform\ndomain:\n  description: Advertising Platform\n  name: Facebook Ads API\n  type: api\n  url: https://developers.facebook.com/docs/marketing-apis\nlabel: Facebook Ads\nname: facebook\nsinger_name: tap-facebook\ntype: tap\nvariants:\n```\n\nAnd maybe we could add a domains.yml file as a separate thing (though it's not super necessary right now).\n\n```yaml\n# facebook.yml\nmeta:\n  title: Facebook Ads API\n  domain: facebook\n  type: api\n  url: https://developers.facebook.com/docs/marketing-apis\nlabel: Facebook Ads\nname: facebook #unrelated to the domain - this was just the first facebook tap and it happens to be for Ads.\nsinger_name: tap-facebook\ntype: tap\nvariants:\n...\n\n# domains.yml\nfacebook:\n  label: Facebook\n  url: https://facebook.com\n  description: <optional>\n```\n\n@pnadolny13 @aaronsteers what do you think about this?",
+      "state": "closed",
+      "created_at": "2021-10-22T18:11:34.712Z",
+      "updated_at": "2021-11-12T20:42:52.374Z",
+      "closed_at": "2021-11-12T20:42:52.334Z",
+      "closed_by": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "labels": [
+        "Discussion",
+        "flow::Review",
+        "kind::Feature",
+        "valuestream::Hub"
+      ],
+      "milestone": {
+        "id": 2286167,
+        "iid": 195,
+        "group_id": 2524164,
+        "title": "Fri: Nov 12, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-10-18T15:18:36.195Z",
+        "updated_at": "2021-11-15T15:49:12.319Z",
+        "due_date": "2021-11-12",
+        "start_date": "2021-11-06",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/195"
+      },
+      "assignees": [
+        {
+          "id": 8668050,
+          "username": "pnadolny13",
+          "public_email": "",
+          "name": "Pat Nadolny",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+          "web_url": "https://gitlab.com/pnadolny13"
+        }
+      ],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "user_notes_count": 4,
+      "merge_requests_count": 1,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/hub/-/issues/153",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/25921808/issues/153",
+        "notes": "https://gitlab.com/api/v4/projects/25921808/issues/153/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/25921808/issues/153/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/25921808",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#153",
+        "relative": "#153",
+        "full": "meltano/hub#153"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 127,
+      "epic": {
+        "id": 372915,
+        "iid": 127,
+        "title": "Generate YAML for MeltanoHub",
+        "url": "/groups/meltano/-/epics/127",
+        "group_id": 2524164,
+        "human_readable_end_date": "Feb 28, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 898301,
+      "relative_position": -2565
+    },
+    {
+      "id": 95981921,
+      "iid": 254,
+      "project_id": 22672923,
+      "title": "Either add a new command or an addition `format` for structuring data for the Hub",
+      "description": "I don't have strong opinions about what would be the best here, but either having an option so that users can output a YAML file for the Hub a la `--about --format=hub`, or if having a separate command `--publish` would work.\n\nGoal is to output a YAML file similar to https://gitlab.com/meltano/hub/-/blob/main/_data/taps/3plcentral.yml for a given connector.\n\nOf importance is the need for the `variants` key and structure so that's it's easy to either add as a variant or submit the whole defition.\n\n* file would be the tap name with `tap-`\n* YAML",
+      "state": "closed",
+      "created_at": "2021-10-22T17:58:56.667Z",
+      "updated_at": "2022-05-29T23:58:50.132Z",
+      "closed_at": "2022-05-29T23:58:50.105Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "kind::Feature",
+        "valuestream::SDK"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 7,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/sdk/-/issues/254",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/22672923/issues/254",
+        "notes": "https://gitlab.com/api/v4/projects/22672923/issues/254/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/22672923/issues/254/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/22672923",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#254",
+        "relative": "#254",
+        "full": "meltano/sdk#254"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 127,
+      "epic": {
+        "id": 372915,
+        "iid": 127,
+        "title": "Generate YAML for MeltanoHub",
+        "url": "/groups/meltano/-/epics/127",
+        "group_id": 2524164,
+        "human_readable_end_date": "Feb 28, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 898268,
+      "relative_position": -1795
+    },
+    {
+      "id": 95981855,
+      "iid": 253,
+      "project_id": 22672923,
+      "title": "Add `meltano_sdk: true` to --about",
+      "description": "When taps are built with the SDK, we should have a flag to match what's expected by MeltanoHub",
+      "state": "closed",
+      "created_at": "2021-10-22T17:55:36.777Z",
+      "updated_at": "2022-05-29T23:58:42.446Z",
+      "closed_at": "2022-05-29T23:58:42.425Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "kind::Feature",
+        "valuestream::SDK"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 1,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/sdk/-/issues/253",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/22672923/issues/253",
+        "notes": "https://gitlab.com/api/v4/projects/22672923/issues/253/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/22672923/issues/253/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/22672923",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#253",
+        "relative": "#253",
+        "full": "meltano/sdk#253"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 127,
+      "epic": {
+        "id": 372915,
+        "iid": 127,
+        "title": "Generate YAML for MeltanoHub",
+        "url": "/groups/meltano/-/epics/127",
+        "group_id": 2524164,
+        "human_readable_end_date": "Feb 28, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 898265,
+      "relative_position": 0
+    }
+  ]
+}

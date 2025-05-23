@@ -1,0 +1,83 @@
+{
+  "created_at": "2025-05-22T17:35:47.820406+00:00",
+  "elapsed": 0.358153,
+  "encoding": "utf-8",
+  "headers": {
+    "Connection": "keep-alive",
+    "Content-Length": "137",
+    "accept-ranges": "bytes",
+    "access-control-allow-credentials": "true",
+    "access-control-allow-headers": "*",
+    "access-control-allow-methods": "POST, GET, HEAD, OPTIONS",
+    "access-control-allow-origin": "*",
+    "access-control-expose-headers": "*",
+    "access-control-max-age": "600",
+    "age": "203846",
+    "alt-svc": "h3=\":443\"; ma=86400",
+    "cache-control": "public, s-maxage=2628000, stale-while-revalidate=2628000",
+    "content-encoding": "gzip",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Tue, 20 May 2025 08:58:23 GMT",
+    "gcdn-cache": "HIT",
+    "server-timing": "cfL4;desc=\"?proto=TCP&rtt=2548&min_rtt=2464&rtt_var=984&sent=5&recv=6&lost=0&retrans=0&sent_bytes=2861&recv_bytes=1564&delivery_rate=1641233&cwnd=252&unsent_bytes=0&cid=7de4230e4efae718&ts=110&x=0\"",
+    "stellate-rate-limit-budget-remaining": "49",
+    "stellate-rate-limit-budget-required": "6",
+    "stellate-rate-limit-decision": "pass",
+    "stellate-rate-limit-rules": "\"IP limit\";type=\"RequestCount\";budget=50;limited=?0;remaining=49;refill=60",
+    "vary": "Accept-Encoding",
+    "x-cache": "HIT",
+    "x-cache-hits": "454",
+    "x-powered-by": "Stellate",
+    "x-served-by": "cache-dfw-ktki8620054-DFW"
+  },
+  "reason": "",
+  "request": {
+    "body": "dm?dlWpa5UIv^r(b!BpSAbTKVZ*FvHZe?zCb0B*lV{c?-AZ}r8WgvYZeIhI%B6eYNX<=e)Wpg4rAbWj%",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Content-Length": "64",
+      "Content-Type": "application/json",
+      "User-Agent": "sample-tap-countries/[could not be detected]"
+    },
+    "method": "POST",
+    "url": "https://countries.trevorblades.com/"
+  },
+  "status_code": 200,
+  "url": "https://countries.trevorblades.com/",
+  "_decoded_content": {
+    "data": {
+      "continents": [
+        {
+          "code": "AF",
+          "name": "Africa"
+        },
+        {
+          "code": "AN",
+          "name": "Antarctica"
+        },
+        {
+          "code": "AS",
+          "name": "Asia"
+        },
+        {
+          "code": "EU",
+          "name": "Europe"
+        },
+        {
+          "code": "NA",
+          "name": "North America"
+        },
+        {
+          "code": "OC",
+          "name": "Oceania"
+        },
+        {
+          "code": "SA",
+          "name": "South America"
+        }
+      ]
+    }
+  }
+}
