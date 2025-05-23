@@ -6,6 +6,7 @@ import abc
 import copy
 import datetime
 import json
+import time
 import typing as t
 import warnings
 from os import PathLike
@@ -147,6 +148,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._config: dict = dict(tap.config)
         self._tap = tap
         self._tap_state = tap.state
+        self._stream_version: int | None = None
+        self._initialized_at = tap.initialized_at
         self._tap_input_catalog: singer.Catalog | None = None
         self._input_schema: dict | None = None
         self._stream_maps: list[StreamMap] | None = None
@@ -495,7 +498,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             Max allowable bookmark value for this stream's replication key.
         """
-        return utc_now() if self.is_timestamp_replication_key else None
+        return (
+            datetime.datetime.fromtimestamp(
+                self._initialized_at,
+                tz=datetime.timezone.utc,
+            )
+            if self.is_timestamp_replication_key
+            else None
+        )
 
     @property
     def schema_filepath(self) -> Path | Traversable | None:
@@ -855,6 +865,15 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             self._last_emitted_state = copy.deepcopy(self.tap_state)
             self._is_state_flushed = True
 
+    def _write_activate_version_message(self, full_table_version: int) -> None:
+        """Write out an ACTIVATE_VERSION message."""
+        singer.write_message(
+            singer.ActivateVersionMessage(
+                self.name,
+                full_table_version,
+            )
+        )
+
     def _generate_schema_messages(
         self,
     ) -> t.Generator[singer.SchemaMessage, None, None]:
@@ -921,7 +940,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 yield singer.RecordMessage(
                     stream=stream_map.stream_alias,
                     record=mapped_record,
-                    version=None,
+                    version=self._stream_version,
                     time_extracted=utc_now(),
                 )
 
@@ -1266,6 +1285,10 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         # Send a SCHEMA message to the downstream target:
         if self.selected:
             self._write_schema_message()
+
+        if self.replication_method == REPLICATION_FULL_TABLE:
+            self._stream_version = int(time.time())
+            self._write_activate_version_message(self._stream_version)
 
         try:
             batch_config = self.get_batch_config(self.config)
