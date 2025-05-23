@@ -167,6 +167,62 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         return super().effective_schema
 
+    def apply_replication_filter(
+        self,
+        query: sa.Select,
+        table: sa.Table,
+        *,
+        context: Context | None = None,
+    ) -> sa.Select:
+        """Apply a replication filter to the query.
+
+        Args:
+            query: The SQLAlchemy Select object.
+            table: The SQLAlchemy Table object.
+            context: The context object.
+
+        Returns:
+            A SQLAlchemy Select object.
+        """
+        if self.replication_key:
+            column = table.columns[self.replication_key]
+            order_by = (
+                sa.nulls_first(column.asc())
+                if self.supports_nulls_first
+                else column.asc()
+            )
+            query = query.order_by(order_by)
+
+            if start_val := self.get_starting_replication_key_value(context):
+                query = query.where(column >= start_val)
+
+        return query
+
+    def apply_abort_query_limit(self, query: sa.Select) -> sa.Select:
+        """Apply a limit filter to the query.
+
+        Args:
+            query: The SQLAlchemy Select object.
+
+        Returns:
+            A SQLAlchemy Select object.
+        """
+        if self.ABORT_AT_RECORD_COUNT is not None:
+            query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
+
+        return query
+
+    def build_query(self, table: sa.Table) -> sa.Select:  # noqa: PLR6301
+        """Build a SQLAlchemy query for the stream.
+
+        Args:
+            table: The SQLAlchemy Table object.
+
+        Returns:
+            A SQLAlchemy Select object.
+        """
+        return table.select()
+
     # Get records from stream
     def get_records(self, context: Context | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
@@ -186,7 +242,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             NotImplementedError: If partition is passed in context and the stream does
                 not support partitioning.
         """
-        if context:
+        if context:  # pragma: no cover
             msg = f"Stream '{self.name}' does not support partitioning."
             raise NotImplementedError(msg)
 
@@ -195,27 +251,9 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             full_table_name=self.fully_qualified_name,
             column_names=selected_column_names,
         )
-        query = table.select()
-
-        if self.replication_key:
-            replication_key_col = table.columns[self.replication_key]
-            order_by = (
-                sa.nulls_first(replication_key_col.asc())
-                if self.supports_nulls_first
-                else replication_key_col.asc()
-            )
-            query = query.order_by(order_by)
-
-            start_val = self.get_starting_replication_key_value(context)
-            if start_val:
-                query = query.where(replication_key_col >= start_val)
-
-        if self.ABORT_AT_RECORD_COUNT is not None:
-            # Limit record count to one greater than the abort threshold. This ensures
-            # `MaxRecordsLimitException` exception is properly raised by caller
-            # `Stream._sync_records()` if more records are available than can be
-            # processed.
-            query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
+        query = self.build_query(table)
+        query = self.apply_replication_filter(query, table, context=context)
+        query = self.apply_abort_query_limit(query)
 
         with self.connector._connect() as conn:  # noqa: SLF001
             for record in conn.execute(query).mappings():
