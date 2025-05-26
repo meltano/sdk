@@ -172,6 +172,7 @@ filterwarnings = [
     "default:in a future version of UPath this will be set to None:PendingDeprecationWarning",
 ]
 log_cli_level = "INFO"
+log_format = "%(levelname)s %(name)s %(message)s"
 markers = [
     "external: Tests relying on external resources",
     "windows: Tests that only run on Windows",
