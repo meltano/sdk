@@ -5,13 +5,15 @@ from __future__ import annotations
 import abc
 import logging
 import os
+import signal
 import sys
+import threading
 import time
 import typing as t
 import warnings
 from importlib import metadata
 from pathlib import Path, PurePath
-from types import MappingProxyType
+from types import FrameType, MappingProxyType
 
 import click
 
@@ -216,6 +218,16 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         # Initialization timestamp
         self.__initialized_at = int(time.time() * 1000)
+
+        # Signal handling
+        self._setup_signal_handlers()
+
+    def _setup_signal_handlers(self) -> None:  # pragma: no cover
+        if threading.current_thread() == threading.main_thread():
+            if hasattr(signal, "SIGINT"):
+                signal.signal(signal.SIGINT, self._handle_termination)
+            if hasattr(signal, "SIGTERM"):
+                signal.signal(signal.SIGTERM, self._handle_termination)
 
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
@@ -444,6 +456,20 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             self.logger.warning(summary)
 
         return errors
+
+    def _handle_termination(  # pragma: no cover
+        self,
+        signum: int,  # noqa: ARG002
+        frame: FrameType | None,  # noqa: ARG002
+    ) -> None:
+        """Handle termination signal.
+
+        Args:
+            signum: Signal number.
+            frame: Frame.
+        """
+        self.logger.info("Gracefully shutting down...")
+        sys.exit(0)
 
     @classmethod
     def print_version(
