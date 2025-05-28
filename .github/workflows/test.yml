@@ -25,6 +25,7 @@ on:
       - "uv.lock"
       - ".github/workflows/test.yml"
       - ".github/workflows/resources/requirements.txt"
+  merge_group:
   workflow_dispatch:
     inputs: {}
 
