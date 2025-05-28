@@ -19,6 +19,8 @@ DATETIME = datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc)
 class Parent(Stream):
     """A parent stream."""
 
+    QUEUE_MAX_SIZE = 2
+
     name = "parent"
     schema: t.ClassVar[dict] = {
         "type": "object",
