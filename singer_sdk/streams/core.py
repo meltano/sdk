@@ -207,7 +207,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         if self._tap.mapper is not None:
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
-            self.logger.info(
+            self.logger.debug(
                 "Tap has custom mapper. Using %d provided map(s).",
                 len(self.stream_maps),
             )
@@ -1255,7 +1255,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
             msg += f" with context: {context}"
-        self.logger.info("%s...", msg)
+        self.logger.info(msg)
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
