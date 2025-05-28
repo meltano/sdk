@@ -122,14 +122,6 @@ def set_catalog_stream_selected(
     breadcrumb is the path to a property within the stream.
     """
     breadcrumb = breadcrumb or ()
-    if not isinstance(breadcrumb, tuple):  # pragma: no cover
-        msg = (  # type: ignore[unreachable]
-            f"Expected tuple value for breadcrumb '{breadcrumb}'. Got "
-            f"{type(breadcrumb).__name__}"
-        )
-        # TODO: this should be a ValueError, but it's a breaking change.
-        raise ValueError(msg)  # noqa: TRY004
-
     catalog_entry = catalog.get_stream(stream_name)
     if not catalog_entry:
         msg = f"Catalog entry missing for '{stream_name}'. Skipping."
