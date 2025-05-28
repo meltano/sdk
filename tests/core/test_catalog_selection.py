@@ -293,3 +293,14 @@ def test_set_catalog_stream_selected(catalog_entry_obj: singer.CatalogEntry):
         catalog, stream_name, selected=True, breadcrumb=breadcrumb
     )
     assert catalog_entry_obj.metadata[breadcrumb].selected is True
+
+    with pytest.raises(
+        ValueError,
+        match="Catalog entry missing for 'non-existent-stream'",
+    ):
+        set_catalog_stream_selected(
+            catalog,
+            "non-existent-stream",
+            selected=True,
+            breadcrumb=breadcrumb,
+        )
