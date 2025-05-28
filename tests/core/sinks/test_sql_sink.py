@@ -99,14 +99,14 @@ class TestDuckDBSink:
             pytest.param(
                 "foo-bar",  # stream_name
                 "test",  # default_target_schema
-                "foo-bar",  # expected_table_name
+                "bar",  # expected_table_name
                 "test",  # expected_schema_name
                 id="default-schema-2-part",
             ),
             pytest.param(
                 "foo-bar-baz",  # stream_name
                 "test",  # default_target_schema
-                "foo-bar-baz",  # expected_table_name
+                "baz",  # expected_table_name
                 "test",  # expected_schema_name
                 id="default-schema-3-part",
             ),
