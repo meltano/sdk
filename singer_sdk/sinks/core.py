@@ -737,18 +737,14 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             NotImplementedError: If the batch file encoding is not supported.
         """
         file: GzipFile | t.IO
-        storage: StorageTarget | None = None
+        storage = self.batch_config.storage if self.batch_config else None
 
         for path in files:
             head, tail = StorageTarget.split_url(path)
-
-            if self.batch_config:
-                storage = self.batch_config.storage
-            else:
-                storage = StorageTarget.from_url(head)
+            file_storage = storage or StorageTarget.from_url(head)
 
             if encoding.format == BatchFileFormat.JSONL:
-                with storage.open(tail, mode="rb") as file:
+                with file_storage.open(tail, mode="rb") as file:
                     if encoding.compression == "gzip":
                         with gzip_open(file) as context_file:
                             context = {
@@ -766,7 +762,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             ):
                 import pyarrow.parquet as pq  # noqa: PLC0415
 
-                with storage.open(tail, mode="rb") as file:
+                with file_storage.open(tail, mode="rb") as file:
                     table = pq.read_table(file)
                     context = {"records": table.to_pylist()}
                     self.record_counter_metric.increment(len(context["records"]))
