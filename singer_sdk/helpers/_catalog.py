@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import typing as t
 from copy import deepcopy
 
@@ -9,6 +10,9 @@ from singer_sdk.helpers._typing import is_object_type
 
 if t.TYPE_CHECKING:
     from singer_sdk.singerlib import Catalog, SelectionMask
+
+
+logger = logging.getLogger(__name__)
 
 
 # TODO: this was previously cached using the `memoization` library. However, the
@@ -63,6 +67,14 @@ def _pop_deselected_schema(
         selected = mask[property_breadcrumb]
         if not selected:
             schema_at_breadcrumb["properties"].pop(property_name, None)
+            if property_name in schema_at_breadcrumb.get("required", []):
+                logger.warning(
+                    "Property '%s' is required but not selected for '%s'. "
+                    "It will be removed from the list of required properties.",
+                    property_name,
+                    stream_name,
+                )
+                schema_at_breadcrumb["required"].remove(property_name)
             continue
 
         if is_object_type(property_def):

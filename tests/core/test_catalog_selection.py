@@ -201,9 +201,17 @@ def test_schema_selection(
     schema: dict,
     mask: singer.SelectionMask,
     stream_name: str,
+    caplog: pytest.LogCaptureFixture,
 ):
     """Test that schema selection rules are correctly applied to SCHEMA messages."""
-    selected_schema = get_selected_schema(stream_name, schema, mask)
+    with caplog.at_level(logging.WARNING):
+        selected_schema = get_selected_schema(stream_name, schema, mask)
+
+    assert caplog.messages == [
+        "Property 'col_b' is required but not selected for 'test_stream_a'. It will be removed from the list of required properties.",  # noqa: E501
+        "Property 'col_c' is required but not selected for 'test_stream_a'. It will be removed from the list of required properties.",  # noqa: E501
+    ]
+
     assert (
         selected_schema
         == PropertiesList(
