@@ -59,7 +59,7 @@ def schema():
         Property(
             "col_a",
             ObjectType(
-                Property("col_a_1", StringType),
+                Property("col_a_1", StringType, required=True),
                 Property("col_a_2", StringType),
                 Property("col_a_3", StringType),
             ),
@@ -218,7 +218,7 @@ def test_schema_selection(
             Property(
                 "col_a",
                 ObjectType(
-                    Property("col_a_1", StringType),
+                    Property("col_a_1", StringType, required=True),
                     Property("col_a_3", StringType),
                 ),
                 required=True,
