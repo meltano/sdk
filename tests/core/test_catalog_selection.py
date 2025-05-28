@@ -265,18 +265,59 @@ def test_record_property_pop(
     )
 
 
-def test_deselect_all_streams(catalog_entry_obj: singer.CatalogEntry):
+def test_deselect_all_streams():
     """Test that deselect_all_streams sets all streams to not selected."""
-    catalog = singer.Catalog({catalog_entry_obj.tap_stream_id: catalog_entry_obj})
+    catalog = singer.Catalog.from_dict(
+        {
+            "streams": [
+                {
+                    "tap_stream_id": "test_stream_a",
+                    "stream": "test_stream_a",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "col_a": {
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "metadata": [
+                        {
+                            "breadcrumb": (),
+                            "metadata": {"selected": True},
+                        },
+                    ],
+                },
+                {
+                    "tap_stream_id": "test_stream_b",
+                    "stream": "test_stream_b",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "col_a": {
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "metadata": [
+                        {
+                            "breadcrumb": (),
+                            "metadata": {"selected": True},
+                        },
+                    ],
+                },
+            ],
+        }
+    )
 
     # Stream is selected
-    assert (
-        catalog_entry_obj.metadata.root.selected is True
-        or catalog_entry_obj.metadata.root.selected is None
-    )
+    assert catalog["test_stream_a"].metadata.root.selected is True
+    assert catalog["test_stream_b"].metadata.root.selected is True
+
     deselect_all_streams(catalog)
     # After deselection, should be False
-    assert catalog_entry_obj.metadata.root.selected is False
+    assert catalog["test_stream_a"].metadata.root.selected is False
+    assert catalog["test_stream_b"].metadata.root.selected is False
 
 
 def test_set_catalog_stream_selected(catalog_entry_obj: singer.CatalogEntry):
