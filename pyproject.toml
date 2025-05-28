@@ -186,7 +186,7 @@ xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.46.3"
+version = "0.46.4"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
