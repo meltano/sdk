@@ -92,6 +92,9 @@ class SDKBatchMessage(Message):
     manifest: list[str] = field(default_factory=list)
     """The manifest of files in the batch."""
 
+    version: int | None = None
+    """If syncing in FULL_TABLE mode, the start time as an epoch timestamp int."""
+
     def __post_init__(self) -> None:
         if isinstance(self.encoding, dict):
             self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
