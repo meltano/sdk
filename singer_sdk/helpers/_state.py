@@ -67,7 +67,7 @@ def get_state_if_exists(
 
 def get_state_partitions_list(tap_state: dict, tap_stream_id: str) -> list[dict] | None:
     """Return a list of partitions defined in the state, or None if not defined."""
-    return (get_state_if_exists(tap_state, tap_stream_id) or {}).get("partitions", None)  # type: ignore[no-any-return]
+    return (get_state_if_exists(tap_state, tap_stream_id) or {}).get("partitions", None)
 
 
 def _find_in_partitions_list(
