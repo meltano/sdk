@@ -36,6 +36,9 @@ class SelectionMask(dict[Breadcrumb, bool]):
         return self[breadcrumb[:-2]] if len(breadcrumb) >= 2 else True  # noqa: PLR2004
 
 
+_M = t.TypeVar("_M", bound="Metadata")
+
+
 @dataclass
 class Metadata:
     """Base stream or property metadata."""
@@ -52,7 +55,7 @@ class Metadata:
     selected_by_default: bool | None = None
 
     @classmethod
-    def from_dict(cls: type[Metadata], value: dict[str, t.Any]) -> Metadata:
+    def from_dict(cls: type[_M], value: dict[str, t.Any]) -> _M:
         """Parse metadata dictionary.
 
         Args:
