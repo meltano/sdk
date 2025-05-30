@@ -48,7 +48,7 @@ dependencies = [
     "requests>=2.25.1",
     "simpleeval>=0.9.13,!=1.0.1",
     "simplejson>=3.17.6",
-    "sqlalchemy>=1.4,<3.0",
+    "sqlalchemy>=2",
     "typing-extensions>=4.5.0",
     "universal-pathlib>=0.2.6",
 ]
