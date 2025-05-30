@@ -129,7 +129,7 @@ testing = [
     "xdoctest[colors]>=1.1.1",
 ]
 typing = [
-    "mypy>=1.9",
+    "mypy>=1.16",
     "pyarrow-stubs>=19.1",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",

@@ -605,7 +605,7 @@ class ArrayType(JSONTypeHelper[list], t.Generic[W]):
         super().__init__(**kwargs)
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -700,7 +700,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         self.kwargs = kwargs
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -862,7 +862,7 @@ class ObjectType(JSONTypeHelper):
         super().__init__(**kwargs)
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -936,7 +936,7 @@ class OneOf(JSONTypeHelper):
         self.wrapped = types
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -993,7 +993,7 @@ class AllOf(JSONTypeHelper):
         self.wrapped = types
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -1024,7 +1024,7 @@ class Constant(JSONTypeHelper):
         self.value = value
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -1116,7 +1116,7 @@ class CustomType(JSONTypeHelper):
         self._jsonschema_type_dict = jsonschema_type_dict
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -1213,7 +1213,7 @@ class PropertiesList(ObjectType):
         self.wrapped[property.name] = property
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:

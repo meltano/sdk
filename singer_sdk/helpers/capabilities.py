@@ -238,6 +238,8 @@ TARGET_LOAD_METHOD_CONFIG = PropertiesList(
 class DeprecatedEnum(Enum):
     """Base class for capabilities enumeration."""
 
+    deprecation: str | None
+
     def __new__(
         cls,
         value: _EnumMemberT,
@@ -264,7 +266,6 @@ class DeprecatedEnum(Enum):
         Returns:
             Deprecation message.
         """
-        self.deprecation: str | None
         return self.deprecation
 
     def emit_warning(self) -> None:
