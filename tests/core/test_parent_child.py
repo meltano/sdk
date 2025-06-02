@@ -1,14 +1,19 @@
 from __future__ import annotations
 
+import datetime
 import io
-import json
 import typing as t
 from contextlib import redirect_stdout
 
 import pytest
+import time_machine
 
 from singer_sdk import Stream, Tap
-from singer_sdk.io_base import SingerMessageType
+
+if t.TYPE_CHECKING:
+    from pytest_snapshot.plugin import Snapshot
+
+DATETIME = datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc)
 
 
 class Parent(Stream):
@@ -87,45 +92,28 @@ def tap_with_deselected_parent(tap: MyTap):
     tap.catalog["parent"].metadata[()].selected = original
 
 
-def _get_messages(tap: Tap):
-    """Redirect stdout to a buffer."""
-    buf = io.StringIO()
-    with redirect_stdout(buf):
-        tap.sync_all()
-    buf.seek(0)
-    lines = buf.read().splitlines()
-    return [json.loads(line) for line in lines]
-
-
-def test_parent_context_fields_in_child(tap: MyTap):
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_parent_context_fields_in_child(
+    tap: MyTap,
+    caplog: pytest.LogCaptureFixture,
+    snapshot: Snapshot,
+):
     """Test that parent context fields are available in child streams."""
-    parent_stream = tap.streams["parent"]
-    child_stream = tap.streams["child"]
-    messages = _get_messages(tap)
+    buf = io.StringIO()
+    with redirect_stdout(buf), caplog.at_level("INFO"):
+        tap.sync_all()
 
-    # Parent schema is emitted
-    assert messages[0]
-    assert messages[0]["type"] == SingerMessageType.SCHEMA
-    assert messages[0]["stream"] == parent_stream.name
-    assert messages[0]["schema"] == parent_stream.schema
-
-    # Child schema is emitted
-    assert messages[1]
-    assert messages[1]["type"] == SingerMessageType.SCHEMA
-    assert messages[1]["stream"] == child_stream.name
-    assert messages[1]["schema"] == child_stream.schema
-
-    # Child records are emitted
-    child_record_messages = messages[2:5]
-    assert child_record_messages
-    assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
-    assert all(msg["stream"] == child_stream.name for msg in child_record_messages)
-    assert all("pid" in msg["record"] for msg in child_record_messages)
+    buf.seek(0)
+    snapshot.assert_match(buf.read(), "singer.jsonl")
+    snapshot.assert_match(caplog.text, "stderr.log")
 
 
+@pytest.mark.snapshot
 def test_skip_deleted_parent_child_streams(
     tap: MyTap,
     caplog: pytest.LogCaptureFixture,
+    snapshot: Snapshot,
 ):
     """Test tap output with parent stream deselected."""
     parent_stream = tap.streams["parent"]
@@ -137,39 +125,39 @@ def test_skip_deleted_parent_child_streams(
     buf.seek(0)
 
     assert not buf.read().splitlines()
-    assert len(caplog.records) == 1
-    assert caplog.records[0].levelname == "WARNING"
-    assert caplog.records[0].message == (
-        "Context for child streams of 'parent' is null, "
-        "skipping sync of any child streams"
-    )
+    snapshot.assert_match(caplog.text, "stderr.log")
 
 
-def test_child_deselected_parent(tap_with_deselected_parent: MyTap):
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_child_deselected_parent(
+    tap_with_deselected_parent: MyTap,
+    caplog: pytest.LogCaptureFixture,
+    snapshot: Snapshot,
+):
     """Test tap output with parent stream deselected."""
     parent_stream = tap_with_deselected_parent.streams["parent"]
-    child_stream = tap_with_deselected_parent.streams["child"]
 
     assert not parent_stream.selected
     assert parent_stream.has_selected_descendents
 
-    messages = _get_messages(tap_with_deselected_parent)
+    buf = io.StringIO()
+    with redirect_stdout(buf), caplog.at_level("INFO"):
+        tap_with_deselected_parent.sync_all()
 
-    # First message is a schema for the child stream, not the parent
-    assert messages[0]
-    assert messages[0]["type"] == SingerMessageType.SCHEMA
-    assert messages[0]["stream"] == child_stream.name
-    assert messages[0]["schema"] == child_stream.schema
+    buf.seek(0)
 
-    # Child records are emitted
-    child_record_messages = messages[1:4]
-    assert child_record_messages
-    assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
-    assert all(msg["stream"] == child_stream.name for msg in child_record_messages)
-    assert all("pid" in msg["record"] for msg in child_record_messages)
+    snapshot.assert_match(buf.read(), "singer.jsonl")
+    snapshot.assert_match(caplog.text, "stderr.log")
 
 
-def test_one_parent_many_children(tap: MyTap):
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_one_parent_many_children(
+    tap: MyTap,
+    caplog: pytest.LogCaptureFixture,
+    snapshot: Snapshot,
+):
     """Test tap output with parent stream deselected."""
 
     class ParentMany(Stream):
@@ -231,36 +219,12 @@ def test_one_parent_many_children(tap: MyTap):
             ]
 
     tap = MyTapMany()
-    parent_stream = tap.streams["parent_many"]
-    child_stream = tap.streams["child_many"]
 
-    messages = _get_messages(tap)
+    buf = io.StringIO()
+    with redirect_stdout(buf), caplog.at_level("INFO"):
+        tap.sync_all()
 
-    # Parent schema is emitted
-    assert messages[0]
-    assert messages[0]["type"] == SingerMessageType.SCHEMA
-    assert messages[0]["stream"] == parent_stream.name
-    assert messages[0]["schema"] == parent_stream.schema
+    buf.seek(0)
 
-    # Child schemas are emitted
-    schema_messages = messages[1:8:3]
-    assert schema_messages
-    assert all(msg["type"] == SingerMessageType.SCHEMA for msg in schema_messages)
-    assert all(msg["stream"] == child_stream.name for msg in schema_messages)
-    assert all(msg["schema"] == child_stream.schema for msg in schema_messages)
-
-    # Child records are emitted
-    child_record_messages = messages[2:9:3]
-    assert child_record_messages
-    assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
-    assert all(msg["stream"] == child_stream.name for msg in child_record_messages)
-    assert all("pid" in msg["record"] for msg in child_record_messages)
-
-    # State messages are emitted
-    state_messages = messages[3:10:3]
-    assert state_messages
-    assert all(msg["type"] == SingerMessageType.STATE for msg in state_messages)
-
-    # Parent record is emitted
-    assert messages[10]
-    assert messages[10]["type"] == SingerMessageType.RECORD
+    snapshot.assert_match(buf.read(), "singer.jsonl")
+    snapshot.assert_match(caplog.text, "stderr.log")

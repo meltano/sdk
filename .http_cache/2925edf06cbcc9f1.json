@@ -1,0 +1,271 @@
+{
+  "cookies": {
+    "_cfuvid": "2sC6sRDVDZW_1IhFRjWnRyXdYy.ktte2PoCOXlow__s-1747940909762-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:08:29.658238+00:00",
+  "elapsed": 0.461997,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e9a3bfabbf949-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:08:29 GMT",
+    "ETag": "W/\"e4b3d9782856c2e43962736e8a0c8a6a\"",
+    "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/134/issues?epic_iid=134&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/134/issues?epic_iid=134&id=2524164&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=2sC6sRDVDZW_1IhFRjWnRyXdYy.ktte2PoCOXlow__s-1747940909762-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-16-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-b",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"9a205833d90ade348ab8e22c8a4425d6\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "9a205833d90ade348ab8e22c8a4425d6",
+    "x-runtime": "0.240953",
+    "x-total": "2",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/2524164/epics/134/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/2524164/epics/134/issues",
+  "_decoded_content": [
+    {
+      "id": 102488452,
+      "iid": 3246,
+      "project_id": 7603319,
+      "title": "Investigate setup.py post-install scripts for initialising plugin project files",
+      "description": "As per [this discussion](https://gitlab.com/meltano/meltano/-/merge_requests/2517#note_839891893), it would be useful in cases where plugins have their own facilities to generate a required directory structure and files to be able to call `<plugin name> init` after installation as a Meltano Utility, File Bundle or Plugin. This is especially the case when tools generate project-specific files or values (UUIDs etc.) during initialisation (e.g. Great Expectations).",
+      "state": "closed",
+      "created_at": "2022-02-15T15:19:08.148Z",
+      "updated_at": "2022-05-30T10:17:44.039Z",
+      "closed_at": "2022-05-30T10:17:44.021Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Discussion",
+        "Plugin Management",
+        "kind::Feature",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2286180,
+        "iid": 206,
+        "group_id": 2524164,
+        "title": "Q2-2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-10-18T15:22:10.509Z",
+        "updated_at": "2022-01-24T17:51:23.679Z",
+        "due_date": "2022-06-30",
+        "start_date": "2022-04-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/206"
+      },
+      "assignees": [],
+      "author": {
+        "id": 7646034,
+        "username": "kgpayne",
+        "public_email": "",
+        "name": "Ken Payne",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
+        "web_url": "https://gitlab.com/kgpayne"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 2,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3246",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3246",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3246/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3246/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3246",
+        "relative": "#3246",
+        "full": "meltano/meltano#3246"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 134,
+      "epic": {
+        "id": 403551,
+        "iid": 134,
+        "title": "Support a Python-based Plugin Architecture",
+        "url": "/groups/meltano/-/epics/134",
+        "group_id": 2524164,
+        "human_readable_timestamp": "<strong>2278</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1123042,
+      "relative_position": -513
+    },
+    {
+      "id": 96523498,
+      "iid": 3035,
+      "project_id": 7603319,
+      "title": "Proposed Meltano Product Architecture",
+      "description": "This issue is an effort to close #2987, #2998 and #3004 by turning them into a concrete proposal.\n\n**Note:** All names TBD \ud83d\ude05\n\nI propose we split Meltano into 3 distinct components, of increasing abstraction:\n\n- Meltano ELT CLI & Service (MELT)\n- Meltano Project CLI (& Service?)\n- Meltano Tower (Service or SaaS)\n\n## 1. Meltano ELT CLI & Service (MELT)\n\n### Overview\n\nAs per the ['pivot blog post'](https://meltano.com/blog/revisiting-the-meltano-strategy-a-return-to-our-roots/), this encompasses everything required to make a great \"open source self-hosted platform for running data integration and transformation (ELT) pipelines\".\n\n- Melt can be installed and run independently of a Meltano Project, though we think melt will be the first and most popular plugin added to any new Meltano Project.\n- The core construct of melt is pipelines of ELT plugins, responsible for moving data from source to destination. This might include tap, stream-map(s), target, transform and validation steps. Crucially these pipelines are tightly coupled - i.e. although steps are defined individually, the failure of any one step results in the failure of the overall execution (unlike the nodes in a Project DAG, discussed below). This is in keeping with expectations within the Singer ecosystem. Steps may choose to warn in stead of hard-failing (e.g. dbt or Great Expectations).\n- Users are free to define these pipelines directly in yaml form (as named entities to be run via the `melt run --pipeline 'pipeline_name'` CLI) or pipelines can be constructed on the fly by specifying individual steps.\n- Melt is responsible for collecting and returning its own results/telemetry.\n- Melt has its own database and UI, which can be deployed independently or more easily as part of a Meltano Project.\n- Scheduling is not handled by melt at all. It is, like dbt, purely a tool for composing and executing ELT pipelines.\n- Melt can be executed within your Meltano Project in the same way you might execute any other Project plugin; `meltano invoke melt run --pipeline 'pipeline_name'`.\n\n### Benefits\n\n- Melt remains independent, tightly-scoped and approachable to new users.\n- It becomes much harder to bleed abstractions across Meltano component boundaries (e.g. workflows/DAGs vs ELT pipelines).\n- By making the installation and deployment of melt as convenient as possible _using the Meltano Project CLI_ we open end users to the idea that they can deploy other tools and services using the same mechanism.\n- Similarly, by having a plugin in our control, we can demonstrate the value of Meltano Project support to other Open Source (and eventually commercial) tools and services.\n- It is more likely to attract contributors as a smaller, tightly-scoped tool rather that an integrated component of a much larger tool.\n- Ditto, it will be easier to add layers of abstraction on top of the base pipeline construct (i.e. Melturbo and Sync Strategies) within the contract of a single executable step.\n\n### Risks\n\n- Refactoring to allow melt to exist as a standalone tool may not be trivial.\n- Reuse of similar functionality (e.g. the `meltano config` CLI) becomes a bit harder. We may choose to write common modules for creating virtual-envs and managing YAML files that can be consumed by both the MELT and Meltano Project codebases.\n\nBeing difficult isn't a reason to not do it if the benefits outweigh the costs \ud83d\ude05\n\n## 2. Meltano Project CLI (& Service?)\n\n### Overview\n\nMeltano Project is our main vehicle for fulfilling our mission: \"...to enable everyone to realise the full potential of their data\". It encompasses all the features required to:\n\n- Centralise configuration of an entire data stack.\n- Install and run (wrapped) data tools (dbt, Great Expectation, sqlfluff), and deploy (pre-configured) data services (e.g. Airflow, Superset, Lightdash).\n- Manage multiple environments of the above.\n\nA Meltano Project is a 'deployable unit', and is made up of a few core constructs:\n\n- Project Config (in YAML format). This includes top-level config elements like environments as well as nested plugin-specific config. Secrets are supported and managed in the same way as regular config.\n- Plugins, both tools and services, such as MELT, dbt, Airflow, Superset, Lightdash etc. The Project CLI is able to install tools (into virtual-envs) and deploy services.\n- DAGs made up of Plugin steps, with scheduling information and associated retry logic etc. DAGs can be defined directly in Config or in the native format of the specific orchestrator of your choice. Steps work best when wrapped with `meltano invoke ...`, allowing for config to be injected and logs/outputs/metrics to be collected and stored.\n- Datasets, being the outcomes of DAG's\n\n### Benefits\n\n- Meltano Project CLI makes it as convenient as possible to configure deploy a data stack made up of Open Source (and possibly commercial) tools and services.\n- DAGs defined in config lowers the barrier to entry for those less able to write DAGs in an orchestrator directly, but by supporting native DAG's too we don't compromise the capabilities of power-users.\n- By wrapping Steps, Meltano can perform pre and post run actions in order to inject configuration and collect results.\n- By removing low-level EL and constructs building a formal Project abstraction as a single-deployable unit, we solidify opportunities to provide SaaS Project hosting regardless of EL provider (i.e. people come to Meltano regardless of their existing EL technology, for the value added by Meltano Project on top of EL - a new lead stream entirely).\n\n### Risks\n\n- By supporting DAGs in config we risk building yet another workflow engine. However it _is_ important that end-users be able to run DAGs locally. This is doable with both Airflow and Dagster however, so may still be plugin-driven.\n- By separating MELT and Meltano Project, we risk reducing contribution to Meltano Project functionality in the short term (as many users currently care more about ELT than Project). However in the long run this should actually broaden the types of contributor (e.g. ones who care more about deployment than low-level EL specifics) and therefore increase overall contribution.\n\n## 3. Meltano Tower (Service or SaaS)\n\nMeltano Control Tower (named somewhat analogously to Ansible Tower, and also in reference to an Amazon tool called Isengard for managing internal AWS Accounts) is a service that helps you view, deploy, administer and interconnect multiple projects within your organisation. It has the following features:\n\n- Provides a single pain of glass for Data Governance within your organisation.\n- A UI to view the status of your deployed projects (running services, alerts, escalations etc.).\n- SSO and Role Based Access Control (RBAC) at a Project level.\n- Tools to enable your teams to publish Datasets between Meltano Projects (with an approvals process and audit log built in).\n\nThis is most likely a paid offering.\n\n### Benefits\n\n- Small organisations might choose to deploy and self-manage a single Meltano Project. Larger organisations with multiple data-focused teams/divisions/organisations will want tools and services to help them maintain visibility and governance across multiple Projects.\n- By introducing and making popular a formal Project abstraction (as a deployable unit), we can build new capabilities (like some of those listed) on top.\n\n### Risks\n\n- The attractiveness of multi-project functionality depends on the success of Meltano Project, and our ability to successfully define and build a viable Project abstraction.",
+      "state": "closed",
+      "created_at": "2021-11-01T16:43:51.606Z",
+      "updated_at": "2022-05-31T18:50:10.324Z",
+      "closed_at": "2022-05-31T18:50:10.307Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Discussion",
+        "flow::Doing",
+        "kind::Feature",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 7646034,
+        "username": "kgpayne",
+        "public_email": "",
+        "name": "Ken Payne",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
+        "web_url": "https://gitlab.com/kgpayne"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 23,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3035",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3035",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3035/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3035/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3035",
+        "relative": "#3035",
+        "full": "meltano/meltano#3035"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 134,
+      "epic": {
+        "id": 403551,
+        "iid": 134,
+        "title": "Support a Python-based Plugin Architecture",
+        "url": "/groups/meltano/-/epics/134",
+        "group_id": 2524164,
+        "human_readable_timestamp": "<strong>2278</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 996488,
+      "relative_position": 0
+    }
+  ]
+}

@@ -207,7 +207,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         if self._tap.mapper is not None:
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
-            self.logger.info(
+            self.logger.debug(
                 "Tap has custom mapper. Using %d provided map(s).",
                 len(self.stream_maps),
             )
@@ -1145,13 +1145,16 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Yields:
             Each record from the source.
         """
+        # Type definitions
+        context_element: types.Context | None
+        record: types.Record | None
+        context_list: list[types.Context] | list[dict] | None
+
         # Initialize metrics
         record_counter = metrics.record_counter(self.name)
         timer = metrics.sync_timer(self.name)
 
         record_index = 0
-        context_element: types.Context | None
-        context_list: list[types.Context] | list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
@@ -1186,6 +1189,10 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                         record, child_context = record_result
                     else:
                         record = record_result
+
+                    record = self.post_process(record, current_context)
+                    if record is None:
+                        continue
 
                     try:
                         self._process_record(
@@ -1264,7 +1271,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
             msg += f" with context: {context}"
-        self.logger.info("%s...", msg)
+        self.logger.info(msg)
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
@@ -1424,7 +1431,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def get_records(
         self,
         context: types.Context | None,
-    ) -> t.Iterable[dict | tuple[dict, dict | None]]:
+    ) -> t.Iterable[types.Record | tuple[dict, dict | None]]:
         """Abstract record generator function. Must be overridden by the child class.
 
         Each record emitted should be a dictionary of property names to their values.
@@ -1499,7 +1506,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self,
         row: types.Record,
         context: types.Context | None = None,  # noqa: ARG002
-    ) -> dict | None:
+    ) -> types.Record | None:
         """As needed, append or transform raw data to match expected structure.
 
         Optional. This method gives developers an opportunity to "clean up" the results

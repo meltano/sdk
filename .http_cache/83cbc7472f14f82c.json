@@ -1,0 +1,2573 @@
+{
+  "cookies": {
+    "_cfuvid": "lPjFASxbHyvsallh6VsjGp.paEzLzQdR_nORAT2Xszw-1747940906028-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:08:25.959785+00:00",
+  "elapsed": 0.815548,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e9a229c75a0ab-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:08:26 GMT",
+    "ETag": "W/\"e7ff87104d17bfe7b9623c52b05a2883\"",
+    "Link": "<https://gitlab.com/api/v4/groups/12586917/epics/17/issues?epic_iid=17&id=12586917&page=2&per_page=20>; rel=\"next\", <https://gitlab.com/api/v4/groups/12586917/epics/17/issues?epic_iid=17&id=12586917&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/12586917/epics/17/issues?epic_iid=17&id=12586917&page=2&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=lPjFASxbHyvsallh6VsjGp.paEzLzQdR_nORAT2Xszw-1747940906028-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-51-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-d",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"51a1db83e83ee70707fd94a943967d1f\",\"version\":\"1\"}",
+    "x-next-page": "2",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "51a1db83e83ee70707fd94a943967d1f",
+    "x-runtime": "0.546474",
+    "x-total": "21",
+    "x-total-pages": "2"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/12586917/epics/17/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/12586917/epics/17/issues",
+  "_decoded_content": [
+    {
+      "id": 109044656,
+      "iid": 421,
+      "project_id": 27821563,
+      "title": "Script for 2.0 animated video",
+      "description": "### Activity \nscript for 2.0 video to be produced by the Agency. [Animation style/video reference](https://www.youtube.com/watch?v=ZMrXrGigTes).\n\n[Script doc](https://docs.google.com/document/d/1ATaToM5kLl133hezK2zpX0_qBac-bLKGb0sFziprpE8/edit?usp=sharing)\n\n### Background\nagency asked for the content during the 5/24/2022 weekly meeting\n\n### Todos\n\n- [x] draft script\n- [x] @Emily /team review\n- [ ] send to agency\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-05-24T14:37:23.022Z",
+      "updated_at": "2022-05-31T18:38:01.508Z",
+      "closed_at": "2022-05-31T18:38:01.488Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Content",
+        "Marketing"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 11542635,
+        "username": "laurameltano",
+        "public_email": "laura@meltano.com",
+        "name": "Laura P\u00e9rez",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+        "web_url": "https://gitlab.com/laurameltano"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 11542635,
+        "username": "laurameltano",
+        "public_email": "laura@meltano.com",
+        "name": "Laura P\u00e9rez",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+        "web_url": "https://gitlab.com/laurameltano"
+      },
+      "user_notes_count": 8,
+      "merge_requests_count": 0,
+      "upvotes": 1,
+      "downvotes": 0,
+      "due_date": "2022-05-25",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/421",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 3,
+        "completed_count": 2
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/421",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/421/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/421/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#421",
+        "relative": "#421",
+        "full": "meltano/marketing/marketing-general#421"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1386333,
+      "relative_position": -10260
+    },
+    {
+      "id": 108516130,
+      "iid": 402,
+      "project_id": 27821563,
+      "title": "Social media clean up",
+      "description": "### Activity \nUpdate basic information and graphics on our social channels\n\n### Background\nAs we're moving towards better using our social channels (and the 2.0 launch), a \"clean up\" or general update would be ideal.\n\n### Todos\n\n- [x] Profile picture (better quality, uniformity between channels, include only the icon, as the \"Meltano\" is already in titles/username)\n- [x] [Bios/descriptions](https://docs.google.com/document/d/1-S-g1PYTqZq7T3Pz5EH_UnNOZ0KKhIC-6x73Dqgmgdw/edit?usp=sharing) (to update what we do now)\n- [x] Biolink (to include not only our website but also call to actions, e.g \"Contribute to the project\", \"Join slack\", \"Careers\")\n- [ ] Banners (later to be updated with upcoming 2.0 graphics) \n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-05-13T15:05:15.486Z",
+      "updated_at": "2022-05-23T17:59:44.773Z",
+      "closed_at": "2022-05-23T13:22:49.448Z",
+      "closed_by": {
+        "id": 11542635,
+        "username": "laurameltano",
+        "public_email": "laura@meltano.com",
+        "name": "Laura P\u00e9rez",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+        "web_url": "https://gitlab.com/laurameltano"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 11542635,
+        "username": "laurameltano",
+        "public_email": "laura@meltano.com",
+        "name": "Laura P\u00e9rez",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+        "web_url": "https://gitlab.com/laurameltano"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 11542635,
+        "username": "laurameltano",
+        "public_email": "laura@meltano.com",
+        "name": "Laura P\u00e9rez",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+        "web_url": "https://gitlab.com/laurameltano"
+      },
+      "user_notes_count": 21,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-05-20",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/402",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 4,
+        "completed_count": 3
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/402",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/402/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/402/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#402",
+        "relative": "#402",
+        "full": "meltano/marketing/marketing-general#402"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1363072,
+      "relative_position": -8208
+    },
+    {
+      "id": 108402075,
+      "iid": 400,
+      "project_id": 27821563,
+      "title": "Blog from Ethan (Venrock) on Funding and future of space (live June 8th)",
+      "description": "### Brief \n\n* Due Date: June 8th\n* Type: Though leadership Blog\n* Draft: https://docs.google.com/document/d/1yk6_Aa8pxB8rDXm5h9GVj9ZrKQvZyJ1iM1PLt4QOKx0/edit\n\n### Todos\n\n- [x] review copy\n- [ ] draft for posting\n- [ ] add Ethan ad guest poster \n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-05-11T22:30:02.876Z",
+      "updated_at": "2022-05-31T18:36:22.025Z",
+      "closed_at": "2022-05-31T18:36:22.018Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Content",
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 11457501,
+          "username": "victoria66",
+          "public_email": "victoria@meltano.com",
+          "name": "Victoria Gayton",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11457501/avatar.png",
+          "web_url": "https://gitlab.com/victoria66"
+        },
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 8,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-06-08",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/400",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 3,
+        "completed_count": 1
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/400",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/400/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/400/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#400",
+        "relative": "#400",
+        "full": "meltano/marketing/marketing-general#400"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1357470,
+      "relative_position": -7182
+    },
+    {
+      "id": 108394480,
+      "iid": 399,
+      "project_id": 27821563,
+      "title": "Youtube re-organization",
+      "description": "When I land on Youtube or the google videos view I see a bunch of content with deprecated features in them. For example when I search on youtube for meltano I see \"A Tour with Meltano v1.0\" https://www.youtube.com/watch?v=tf_EIbwDmXk as a top video.\n\nFor 2.0 it would be awesome to hide all the legacy content from before we were a dataops OS or put it in under a legacy playlist or tag. I'm sort of in favor of hiding it because people might still land on those videos through google searches and get confused.\n\nI thought I created an issue for this already but wasnt able find it. Happy to close this if its already logged somewhere else.\n\ncc @Emily @afolson\n\n<!-- Labels to add for triaging -->",
+      "state": "closed",
+      "created_at": "2022-05-11T18:55:11.074Z",
+      "updated_at": "2022-05-31T18:36:14.678Z",
+      "closed_at": "2022-05-31T18:36:14.671Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing",
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 11542635,
+        "username": "laurameltano",
+        "public_email": "laura@meltano.com",
+        "name": "Laura P\u00e9rez",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+        "web_url": "https://gitlab.com/laurameltano"
+      },
+      "user_notes_count": 13,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/399",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/399",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/399/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/399/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#399",
+        "relative": "#399",
+        "full": "meltano/marketing/marketing-general#399"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1357468,
+      "relative_position": -6669
+    },
+    {
+      "id": 108244609,
+      "iid": 393,
+      "project_id": 27821563,
+      "title": "Demo Day: June 9, 2022",
+      "description": "## Todos\n\n- [ ] Monday: Add this ticket to Kickoff doc\n- [ ] Monday: Source demos from the community and confirm Meltano's demos with Engineering/Product\n- [ ] Monday: Draft Tweets for the week\n   - [ ] For Monday or Tuesday: Announce time, mention a specific demo, and encourage folks to join us on Slack.\n   - [ ] For Thursday an hour before DD: Announce that demo day is in one hour, encourage people to come see us, inform that we'll post the YouTube link soon\n   - [ ] For Thursday when we go live: Create a draft announcing that we're live with a placeholder for the YouTube Link.\n- [ ] Monday: Draft Slack Announcements and schedule\n  - [ ] Monday or Tuesday: Post to #demo-day and \"Share\" post to #announcements\n  - [ ] Thursday an hour before DD: Post to #demo-day that we start in an hour.\n  - [ ] Thursday when we go live: `@channel` mention that we're live and post a link to the Zoom URL\n- [ ] Before: Create/clean up [Demo Day deck](https://docs.google.com/presentation/d/1Pp56ORBQeFd6JvLuzIERr0GaSps5n2fJmjxvd5mmP3E/edit?usp=sharing)\n- [ ] Thursday - 1hr before: Double check that announcements were posted to #demo-day and #announcements\n- [ ] Thursday: Set up stream per instructions here: https://meltano.com/handbook/marketing/community.html#streaming-from-zoom-to-youtube\n- [ ] Thursday: Tweet out when YouTube stream is live (if you can't, make sure someone is on deck to tweet)\n- [ ] Thursday: Post Zoom link to #demo-day/#announcements Slack channels when stream is live (if you can't, make sure someone is on deck to post)\n- [ ] Thursday: Edit live stream video per instructions here: https://meltano.com/handbook/marketing/community.html#after-the-livestream-session-ends\n- [ ] Thursday: Thank community folks who joined the call with us in #demo-day\n- [ ] Thursday: Write recap blog post with highlights from Demo Day\n- [ ] Thursday: Open next week's issue.\n- [ ] Thursday: Tag YouTube video with appropriate tags\n- [ ] Friday: Tweet a link to the blog post during peak hours",
+      "state": "closed",
+      "created_at": "2022-05-09T13:19:25.573Z",
+      "updated_at": "2022-05-31T18:35:52.166Z",
+      "closed_at": "2022-05-31T18:35:52.157Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing",
+        "v2.0"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 394049,
+          "username": "afolson",
+          "public_email": "",
+          "name": "Amanda Folson",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "web_url": "https://gitlab.com/afolson"
+        }
+      ],
+      "author": {
+        "id": 394049,
+        "username": "afolson",
+        "public_email": "",
+        "name": "Amanda Folson",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "web_url": "https://gitlab.com/afolson"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 394049,
+        "username": "afolson",
+        "public_email": "",
+        "name": "Amanda Folson",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "web_url": "https://gitlab.com/afolson"
+      },
+      "user_notes_count": 3,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/393",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 21,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/393",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/393/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/393/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#393",
+        "relative": "#393",
+        "full": "meltano/marketing/marketing-general#393"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1360000,
+      "relative_position": -7695
+    },
+    {
+      "id": 108017881,
+      "iid": 384,
+      "project_id": 27821563,
+      "title": "Getting Started Cleanup",
+      "description": "### Brief \n(Summarize activity)\n* Due Date: May 26\n* Type: documentation \n\n### For Draft.dev\n- Description: Need to create a streamlined version of our getting started guide\n- Audience: technical users \n- Writer resources: https://docs.meltano.com/getting-started\n\n\n### Todos\n\nMisc Musings:\n- [ ] Search should be obvious on home page\n- [ ] Update speedrun, remove links and references to \"code on website\" since those steps are no longer there.\n- [ ] CSS: Spacing after code blocks and numbered lists is wonky.\n- [ ] Add TOC/3 column layout with a sticky TOC\n\nGetting Started Guide:\n- [ ] Goal: trim down the guide and make it more user friendly\n- [ ] Remove links to home page samples\n- [ ] Consider moving away from tap-gitlab as this requires creating an account. Is tap-github a better choice here? Most power users (our current target audience) will likely have an account. Consider taps that don't require auth as well.\n- [ ] List installation methods and link to those sections in the Installation Guide. Having this info in two places means remembering to update it in 2 places :grimacing: We should choose the least complicated path to installation for this example but tell them that other options are available if they need them. Figure out if Docker installation or local installation is easier?\n- [ ] Use a consistent example project name\n- [ ] We mention \"discoverable\" plugins early on but don't really define what that means. Make sure this ends up in the glossary that we still need to make :grimacing: \n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-05-04T14:58:58.034Z",
+      "updated_at": "2022-05-31T18:35:13.563Z",
+      "closed_at": "2022-05-31T18:35:13.554Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Content",
+        "Marketing",
+        "v2.0"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 394049,
+          "username": "afolson",
+          "public_email": "",
+          "name": "Amanda Folson",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "web_url": "https://gitlab.com/afolson"
+        },
+        {
+          "id": 11457501,
+          "username": "victoria66",
+          "public_email": "victoria@meltano.com",
+          "name": "Victoria Gayton",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11457501/avatar.png",
+          "web_url": "https://gitlab.com/victoria66"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 394049,
+        "username": "afolson",
+        "public_email": "",
+        "name": "Amanda Folson",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "web_url": "https://gitlab.com/afolson"
+      },
+      "user_notes_count": 4,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-05-26",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/384",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 10,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/384",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/384/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/384/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#384",
+        "relative": "#384",
+        "full": "meltano/marketing/marketing-general#384"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1338588,
+      "relative_position": -5643
+    },
+    {
+      "id": 108017453,
+      "iid": 383,
+      "project_id": 27821563,
+      "title": "2.0 Blog (live June 9th)",
+      "description": "### Brief \n(Summarize activity)\n* Due Date: May 26th\n* Type: Blog\n* Draft: \n\n### outline\n- What 2.0 means (end to end)\n  - Version 2.0 is the Minimum Viable Product (MVP) release of Meltano as a full DataOps OS\n  - Beyond ELT, ELT as a Wedge\n  - Mention funding to support end to end vision\n- New in Meltano 2.0 \n  - Features Snowflake as the primary data warehouse vendor and the following open source components (talk about happy path): \n     - Singer taps and targets for data replication\n     - dbt for data transformations\n     - Airflow for orchestration\n     - Great Expectations for data quality\n     - Superset for analysis\n- Highlights of Meltano 2.0 include:\n  - Improved flexibility in how jobs are defined and scheduled to take full advantage of our composable pipelines\n  - Inline transformations for Singer-based plugins to enable on-the-fly data transformations\n  - Greater stability in Meltano projects with the addition of the Meltano lockfile.\n  - Easier configuration experience for new users via an interactive CLI for updating settings.\n  - Enhancements to Meltano Environments, including sensible defaults and clarified environment variable inheritance patterns\n  - Routine maintenance, bug squashing, deprecation of legacy features and elimination of technical debt.\n  - Include demo video is we have it\n- Hub updates\n  - Release also elevates MeltanoHub to be the complete resource for plugins available for use with Meltano. This includes the large library of Singer plugins, along with alternative analysis tools like Lightdash and Evidence and data utilities like SQLFluff. Users are also able to add more plugins to the Hub and have them immediately discoverable and usable within Meltano.\n- Looking forward \n  - Roadmap (include big milestones)\n  - Managed Meltano\n\n- CTA- try 2.0\n\n\n### Todos\n\n- [ ] xyz\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-05-04T14:53:46.111Z",
+      "updated_at": "2022-05-31T18:34:13.156Z",
+      "closed_at": "2022-05-31T18:34:13.131Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Content",
+        "Marketing",
+        "flow::Review"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 1942272,
+          "username": "tayloramurphy",
+          "public_email": "",
+          "name": "Taylor A Murphy",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "web_url": "https://gitlab.com/tayloramurphy"
+        },
+        {
+          "id": 11457501,
+          "username": "victoria66",
+          "public_email": "victoria@meltano.com",
+          "name": "Victoria Gayton",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11457501/avatar.png",
+          "web_url": "https://gitlab.com/victoria66"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 15,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-05-26",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/383",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 1,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/383",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/383/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/383/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#383",
+        "relative": "#383",
+        "full": "meltano/marketing/marketing-general#383"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": {
+        "id": 56416,
+        "iid": 56,
+        "sequence": 3,
+        "group_id": 2524164,
+        "title": null,
+        "description": null,
+        "state": 3,
+        "created_at": "2022-05-13T20:04:48.839Z",
+        "updated_at": "2022-05-30T00:05:02.370Z",
+        "start_date": "2022-05-23",
+        "due_date": "2022-05-29",
+        "web_url": "https://gitlab.com/groups/meltano/-/iterations/56416"
+      },
+      "health_status": null,
+      "epic_issue_id": 1338572,
+      "relative_position": -5130
+    },
+    {
+      "id": 108016359,
+      "iid": 382,
+      "project_id": 27821563,
+      "title": "Social Promotion for 2.0",
+      "description": "### Activity \nplanning all social for 2.0\n\n[Social content planner in Google Sheets](https://docs.google.com/spreadsheets/d/1WMaHN58Tns-DW-QcWFGnev8D5tV2Tm2xunzyENxUPck/edit?usp=sharing)\n\n### Todos\n\n- [ ] draft copy for all platforms\n- [ ] prep related visual assets \n- [ ] schedule posts \n- [ ] create suggested copy for team to promote \n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-05-04T14:39:00.014Z",
+      "updated_at": "2022-05-31T18:34:05.629Z",
+      "closed_at": "2022-05-31T18:34:05.619Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Content",
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 10,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/382",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 4,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/382",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/382/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/382/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#382",
+        "relative": "#382",
+        "full": "meltano/marketing/marketing-general#382"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1338513,
+      "relative_position": -4617
+    },
+    {
+      "id": 108015191,
+      "iid": 381,
+      "project_id": 27821563,
+      "title": "Web updates needed for 2.0",
+      "description": "# Activity \nall web updates needed before 2.0 launch\n\n[Messaging framework to build from](https://docs.google.com/presentation/d/1Pn0-M88B-kSUoS3eHb2m8An_EGa6zMEh-qZDG1JLWeo/edit#slide=id.g12c24edafc2_0_12)\n\n**One-pager copy**- coming soon\n\n## Todos\n\n- [ ] copy refresh (see more details below)\n- [ ] add new video \n- [ ] new animation\n- [ ] managed Meltano page / beta conversion page\n- [ ] Features page with maturity (Product page)\n- [x] investors to be added to site\n- [ ] event banner \n- [x] add pop up to website at top promoting try 2.0\n\n## Copy refresh details \n| Laura | Victoria | Emily |\n| ------ | ------ | ------ |\n| Press | Home | Product (New) |\n| Contact | ELT | Managed Meltano (New) | \n| Community | About |  | \n| Partners | Meltano at Scale |   | \n| Documentation Overview | DataOps OS |   | \n| Terms of Service | Popular ways to use |   | \n| Resources | How Meltano Works |   | \n|   |   |   | \n\n### Copy refresh checklist / focuses\n- SEO (Set Key phases, linking, previews)\n- Updated and more compelling CTA's\n- Grammar and typos\n- Check flow on all forms and links\n- Ignore any pages that is in draft stage\n- Embed new videos when the time comes\n- Copy refresh to match updated capabilities (end to end dataops)\n\n### If there is time...\nQuick review of blogs (SEO (metatiles and URLs), compelling titles, update CTA with check us out on GitHub- once link is live)\n\n![Screen_Shot_2022-05-25_at_2.53.10_PM](/uploads/cd07307d95d48cf43789fb3d8e109855/Screen_Shot_2022-05-25_at_2.53.10_PM.png)\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-05-04T14:29:54.619Z",
+      "updated_at": "2022-05-31T18:33:58.053Z",
+      "closed_at": "2022-05-31T18:33:58.044Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 11457501,
+          "username": "victoria66",
+          "public_email": "victoria@meltano.com",
+          "name": "Victoria Gayton",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11457501/avatar.png",
+          "web_url": "https://gitlab.com/victoria66"
+        },
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 5,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/381",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 8,
+        "completed_count": 2
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/381",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/381/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/381/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#381",
+        "relative": "#381",
+        "full": "meltano/marketing/marketing-general#381"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1338481,
+      "relative_position": -4104
+    },
+    {
+      "id": 108014985,
+      "iid": 380,
+      "project_id": 27821563,
+      "title": "Design related things for 2.0",
+      "description": "### Activity \nFor all design related things for 2.0 launch\n\n### Todos\n\n- [ ] zoom backgrounds\n- [ ] social assets \n- [ ] V2 animation for homepage \n- [ ] swag - Meltano run shirts\n- [ ] animated video \n  - [ ] creation\n  - [ ] add to youtube\n  - [ ] embed on home page\n  - [ ] promote on social \n  - [ ] get video still for promotion \n  - [ ] possibly turn into pdf asset that is gated \n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-05-04T14:27:22.039Z",
+      "updated_at": "2022-05-31T18:33:50.570Z",
+      "closed_at": "2022-05-31T18:33:50.556Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 2,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-05-31",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/380",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 11,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/380",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/380/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/380/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#380",
+        "relative": "#380",
+        "full": "meltano/marketing/marketing-general#380"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1338468,
+      "relative_position": -3591
+    },
+    {
+      "id": 107962890,
+      "iid": 21,
+      "project_id": 33569975,
+      "title": "Create beta sign up form for Meltano 2.0 launch",
+      "description": "@Emily what fields should it include?",
+      "state": "closed",
+      "created_at": "2022-05-03T22:31:49.254Z",
+      "updated_at": "2022-05-31T18:39:16.092Z",
+      "closed_at": "2022-05-31T18:39:16.074Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "hubspot",
+        "mktgops::uat",
+        "p1-mktgops"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 1243277,
+        "username": "ghost1",
+        "public_email": "",
+        "name": "Ghost User",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/79783106d88279c6c8f94f1f4dec22bdb9f90a8d14c9d6c6628a11430e236cbf?s=80&d=identicon",
+        "web_url": "https://gitlab.com/ghost1"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 8,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-05-31",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-operations/-/issues/21",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/33569975/issues/21",
+        "notes": "https://gitlab.com/api/v4/projects/33569975/issues/21/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/33569975/issues/21/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/33569975",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#21",
+        "relative": "#21",
+        "full": "meltano/marketing/marketing-operations#21"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1377443,
+      "relative_position": -9747
+    },
+    {
+      "id": 107957201,
+      "iid": 378,
+      "project_id": 27821563,
+      "title": "Meltano 2.0 user quotes  (Due May 20)",
+      "description": "### Activity \nLooking for good user quotes to add to press releases and use to promote the launch \n\nIt can be a short sentence or just a few words long. Need to be able to use their name, and either title or company.\n\nLooking for a variety of users and partners from different companies. Looking for people who are excited about this end-to-end future and those who have already found success with Meltnao. \n\n### Todos\n\n- [ ] @DouweM can you maybe try to get some from angel investors or any partners or thought leaders you talk to who are excited about this DatOpS OS and why it is needed.  \n- [x] @tayloramurphy same ask but more for users and design partners. \n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-05-03T20:00:25.560Z",
+      "updated_at": "2022-05-31T18:33:43.574Z",
+      "closed_at": "2022-05-31T18:33:43.435Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing",
+        "flow::To Do"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 87854,
+          "username": "DouweM",
+          "public_email": "",
+          "name": "Douwe Maan",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+          "web_url": "https://gitlab.com/DouweM"
+        },
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "user_notes_count": 9,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-05-20",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/378",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 2,
+        "completed_count": 1
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/378",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/378/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/378/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#378",
+        "relative": "#378",
+        "full": "meltano/marketing/marketing-general#378"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": {
+        "id": 56416,
+        "iid": 56,
+        "sequence": 3,
+        "group_id": 2524164,
+        "title": null,
+        "description": null,
+        "state": 3,
+        "created_at": "2022-05-13T20:04:48.839Z",
+        "updated_at": "2022-05-30T00:05:02.370Z",
+        "start_date": "2022-05-23",
+        "due_date": "2022-05-29",
+        "web_url": "https://gitlab.com/groups/meltano/-/iterations/56416"
+      },
+      "health_status": null,
+      "epic_issue_id": 1336307,
+      "relative_position": -513
+    },
+    {
+      "id": 104913129,
+      "iid": 14,
+      "project_id": 33127193,
+      "title": "Add investors to website (about page?)",
+      "description": "There was a suggestion to add investors to the team page during Assemble. We have some big names, this would add credibility :muscle: \n\ncc @DouweM @Emily",
+      "state": "closed",
+      "created_at": "2022-03-16T10:27:12.790Z",
+      "updated_at": "2022-05-31T18:40:11.082Z",
+      "closed_at": "2022-05-31T18:40:11.058Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "flow::Blocked",
+        "v2.0"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 394049,
+          "username": "afolson",
+          "public_email": "",
+          "name": "Amanda Folson",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "web_url": "https://gitlab.com/afolson"
+        }
+      ],
+      "author": {
+        "id": 394049,
+        "username": "afolson",
+        "public_email": "",
+        "name": "Amanda Folson",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "web_url": "https://gitlab.com/afolson"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 394049,
+        "username": "afolson",
+        "public_email": "",
+        "name": "Amanda Folson",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "web_url": "https://gitlab.com/afolson"
+      },
+      "user_notes_count": 8,
+      "merge_requests_count": 0,
+      "upvotes": 1,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/website/-/issues/14",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/33127193/issues/14",
+        "notes": "https://gitlab.com/api/v4/projects/33127193/issues/14/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/33127193/issues/14/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/33127193",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#14",
+        "relative": "#14",
+        "full": "meltano/marketing/website#14"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1338447,
+      "relative_position": -3078
+    },
+    {
+      "id": 104913111,
+      "iid": 337,
+      "project_id": 27821563,
+      "title": "Add Board Members to website",
+      "description": "Brought up by @DouweM during Assemble. Not sure where it should go - on the team page maybe?\n\n@Emily @afolson \n\n<!-- Labels to add for triaging -->",
+      "state": "closed",
+      "created_at": "2022-03-16T10:26:37.097Z",
+      "updated_at": "2022-05-31T18:31:04.252Z",
+      "closed_at": "2022-05-31T18:31:04.241Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing",
+        "flow::Blocked",
+        "kind::Non-Product",
+        "v2.0",
+        "valuestream::Business Operation"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 394049,
+          "username": "afolson",
+          "public_email": "",
+          "name": "Amanda Folson",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "web_url": "https://gitlab.com/afolson"
+        }
+      ],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 394049,
+        "username": "afolson",
+        "public_email": "",
+        "name": "Amanda Folson",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "web_url": "https://gitlab.com/afolson"
+      },
+      "user_notes_count": 4,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/337",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/337",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/337/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/337/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#337",
+        "relative": "#337",
+        "full": "meltano/marketing/marketing-general#337"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1368596,
+      "relative_position": -9234
+    },
+    {
+      "id": 104555892,
+      "iid": 325,
+      "project_id": 27821563,
+      "title": "Meltano 2.0 Drop Campaign Planning",
+      "description": "### Activity \n- What features do we have coming that could be considered OS features that ungates roadblock to begin DataOps OS.  \n- We can rally around this product capability / can crate launch around this- point at which it can now be scaled\n\n\n### Suggested moments\n- Meltano 2.0 - April / May\n- MeltanoHub as source of truth for OS - April / May\n- UI- Q3\n- API- things need to be more API driven behind the scenes (starts this month but will be a big process to get this fixed)\n- Run, enviro, stream maps- big tent pole features (big differentiators and point in DataOps OS direction)\n- If meltano manages your single sign on- there would need to be changes in those tools to support \n\n\n### Todos\n\n- [ ] pick moments that we want to highlight, package them as props (narratively), create camapign around them \n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-03-10T14:46:27.196Z",
+      "updated_at": "2022-05-03T19:48:13.446Z",
+      "closed_at": "2022-05-03T19:48:13.435Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 2,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-04-01",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/325",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 1,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/325",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/325/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/325/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#325",
+        "relative": "#325",
+        "full": "meltano/marketing/marketing-general#325"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1336285,
+      "relative_position": 0
+    },
+    {
+      "id": 102173859,
+      "iid": 290,
+      "project_id": 27821563,
+      "title": "Prep Materials for Funding and 2.0 PR",
+      "description": "#Announcement \nFor when we announce the funding. The more info we have sooner to pitch media the better. We need allt he data we have to show traction. talk growth, features- want tight chronicle of progress that has been made. Need to have a message that is of interest beyond data verticals. \n\nWe will need to consult with lead investors to make sure they feel heard and we collaborate any efforts. \n\n### Writing guide\n[Template](https://docs.google.com/document/d/1-ja8DGp_CPvfieuxDk8kPZpXbVFoO4rKATX--S7Xuog/edit) we need to complete\n[**Draft of Release**](https://docs.google.com/document/d/1p6z331oEwvntYwxj9vmaQE6H3ntZJKqjUh7RMd6cEXo/edit)\n\n### Key materials \n\n- [x] [Pitch deck](https://docs.google.com/presentation/d/1ttdCNrS90CggY3KjSNWCm6Nr3TBHSv-ylUF37B-eAhU/edit#slide=id.geea40cfd73_0_324)\n- [x] Metrics- community, product usage, adoption, contributors. Things to show virality and scope.\n- [x] High level messaging (Emily working on new one-pager)\n- [ ] estimated market size\n- [ ] Hiring pitch (include what we are specifically looking for)\n- [x] review near term priorities\n- [ ] quote from Ethan\n- [ ] start thinking about someone from the community who might be able to offer a [quote](https://gitlab.com/meltano/marketing/marketing-general/-/issues/378) \n\n### Key Details\n#### Blurb: \nMeltano (https://meltano.com) is the open source DataOps OS that bridges the gap between DevOps and the modern data stack. It lets data teams manage all their data tools in one place and treat their entire data platform like a coherent internal software product, unlocking best practices such as version control and CI/CD that enable more effective collaboration and rapid iteration to meet the ever-evolving needs of the organization so it can keep its data edge.\n#### Why now: \nThe modern data stack continues to expand, and the lack of infrastructure tooling to manage the increasing complexity leaves organizations unable to move fast and make the most of their data. Software development best practices such as DevOps provide many answers, but cannot be applied directly to a set of tools held together by ad-hoc integrations (i.e. duct tape).\nDifferentiation: Meltano was founded inside GitLab, who build the leading open source DevOps platform, and spun out in 2021 by its first engineering manager and data lead. Building an open source developer tool in constant collaboration with a thriving community of contributors is in their DNA, and they see the parallels between data engineering and software development and the opportunity to bridge them more clearly than anyone else.\n#### Traction:\n- https://gitlab.com/meltano/meltano\n- 2100+ Slack members\n- 378 contributions in 2021\n- 2000+ monthly active projects\n- 370k+ monthly pipeline runs\n- Used by thousands of organizations including Netlify, Zapier, HackerOne, Remote, GitLab, Twilio, VOX Media\n\n#### Team: \nCompany was founded by Douwe Maan (CEO), who was GitLab employee #10, became its first engineering manager in 2016, took over the internal Meltano project in 2020, and spun it out in 2021. He is joined by GitLab\u2019s first data, marketing, community, and technical sales people, as well as software and data engineers coming from Amazon, Slalom Consulting, Rackspace, and Netlify.\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-02-09T22:51:55.666Z",
+      "updated_at": "2022-05-19T19:36:47.374Z",
+      "closed_at": "2022-05-19T19:36:47.365Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing",
+        "Social"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 4,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-02-16",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/290",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 8,
+        "completed_count": 4
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/290",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/290/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/290/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#290",
+        "relative": "#290",
+        "full": "meltano/marketing/marketing-general#290"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1338347,
+      "relative_position": -1026
+    },
+    {
+      "id": 102023851,
+      "iid": 277,
+      "project_id": 27821563,
+      "title": "DataOps with Meltano Video",
+      "description": "### Activity \nDataOps with Meltano intro video \n\n### Background\n- Goal: quick explainer video of what DataOps is, What Meltnao does/problems it solves for\n- Audience: Data Engineers and DevOps practitioners working in Data\n- Budget and timeline: 6 weeks, 10k (needs to be evergreen- usable for 12 months). Avoid specific product shots and anything that will not age as the product rapidly evolved. Stay to high-level unchanging things. \n- Style: simple, quick informative\n- Duration: 30  seconds to 1 min\n- Animation vs live action: prefer animated or graphical over live action\n- Script (see below)\n- Voice over needed- yes\n- where will the video live: website (explore pages, social, youtube static video)\n\n### Inspiration: \n- [Airtable](https://youtu.be/r0lsyTaAuJE)\n- [King Arthur video](https://www.youtube.com/watch?v=RBsY88Lir-A) like this illustrative style and kind of comic book feel. Would like to adopt with our primary colors strategically placed.\n\n### Script outline:\n* DevOps intro\n* We are in Data Era\n* DataOps intro\n* Where Meltano fits in\n\n## Concepting:\n* data and dev meet-cute - they become creative partners\n* The missing piece but for DataOps (the epic quest)\n* overcoming the monster (monster being the current situation of tooling)\n* misunderstood Melty (the mellow dragon) - hero's journey or quest \n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-02-07T21:39:14.190Z",
+      "updated_at": "2022-05-26T15:34:15.699Z",
+      "closed_at": "2022-05-23T17:22:35.479Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Content",
+        "Marketing",
+        "kind::Non-Product"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 15,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-02-25",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/277",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/277",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/277/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/277/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#277",
+        "relative": "#277",
+        "full": "meltano/marketing/marketing-general#277"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1126050,
+      "relative_position": -2052
+    },
+    {
+      "id": 98709816,
+      "iid": 223,
+      "project_id": 27821563,
+      "title": "Homepage Animation/ Image (V2)",
+      "description": "### Activity \ncarrying over the thread from slack https://meltano.slack.com/archives/C027405T4G1/p1639001478141800\n\n### Background\nPivot from having an image that shows ELT offering and evolve it to rep DataOps OS. please add thought on how to get there. \n\nCurrent animation focusing on ELT offering:\n\n![Meltano_V7](/uploads/bdab82b46d9fd3b31536be9ce75183f4/Meltano_V7.mp4)\n\n<details><summary>Suggestions already being addressed</summary>\n\nTaylors suggestions:\n>>>\nI love the animation, my only concern is with the logos. Having snowplow at the top is very misleading and could cause a lot of questions. we\u2019re also listing grouparoo, great expectations, and lightdash which we don\u2019t support (yet)\u2026\n\n- Move the singer logo to the Red\n- Bring the lightdash logo to yellow\n- Have the Dagster logo replace where lightdash was\n- Drop the grouparoo logo (kangaroo)\n- Replace the Grouparoo logo with the Soda SQL logo https://github.com/sodadata/soda-sql\nOr, alternatively, move all of the plugins we intend to integrate with to the yellow (lightdash, dagster, great expectations, singer) and have the bottom be Airflow and dbt. with Singer at the top.\n>>>\n\nDouwe's suggestions:\n>>>\nThe animation looks cool, but I think the \u201cYour sources\u201d, \u201cYour Meltano project\u201d and \u201cYour destination\u201d labels are confusing in these places, especially with the Meltano logo on the left and the laptop on the right.\n\nI would move the laptop to the bottom left and turn it so that the pipeline takes place behind the screen, as if the person at the laptop sees it run from left to right. And I think the Meltano logo would make most sense on the red \u201cMeltano project\u201d chip\n>>>\n</details>\n\n### Todos\n\n- [ ] xyz\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2021-12-08T22:58:48.122Z",
+      "updated_at": "2022-05-31T18:22:05.406Z",
+      "closed_at": "2022-05-31T18:22:05.392Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 33,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-06-03",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/223",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 1,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/223",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/223/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/223/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#223",
+        "relative": "#223",
+        "full": "meltano/marketing/marketing-general#223"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1001405,
+      "relative_position": -1539
+    },
+    {
+      "id": 97832917,
+      "iid": 209,
+      "project_id": 27821563,
+      "title": "Blog/Webpage - Meltano Key Features Comparison",
+      "description": "Airbyte's Meltano [comparison page](https://airbyte.io/etl-tools/meltano-alternative-airbyte) calls out a matrix of features that it values. Most of those are very ELT specific and are disconnected from what features we value as a DataOps platform.\n\nIt would be good to have a matrix of our own that can highlight features in a more DataOps focused way. Maybe we have a section of a matrix for ELT and Singer but fill the majority of the matrix with DataOps features that Meltano has and other ELT tools dont. Like versioning, CI, separate environments, code reviews, testability, etc.\n\nThis could maybe be a blog post highlighting the features and then maybe an evergreen page on the website.\n\nConsiderations:\n- we should think about avoiding directly comparing to companies like \"Meltano vs Airbyte/Fivetran/etc.\" because it might encourage people to think of us as just an ELT tool thats directly competing\n\n<!-- Labels to add for triaging -->",
+      "state": "closed",
+      "created_at": "2021-11-23T19:22:38.053Z",
+      "updated_at": "2022-05-19T15:40:55.536Z",
+      "closed_at": "2022-05-19T15:30:52.755Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing",
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 8668050,
+          "username": "pnadolny13",
+          "public_email": "",
+          "name": "Pat Nadolny",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+          "web_url": "https://gitlab.com/pnadolny13"
+        }
+      ],
+      "author": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 22,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/209",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/209",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/209/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/209/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#209",
+        "relative": "#209",
+        "full": "meltano/marketing/marketing-general#209"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": {
+        "id": 56415,
+        "iid": 55,
+        "sequence": 2,
+        "group_id": 2524164,
+        "title": null,
+        "description": null,
+        "state": 3,
+        "created_at": "2022-05-13T20:04:48.838Z",
+        "updated_at": "2022-05-23T00:05:02.513Z",
+        "start_date": "2022-05-16",
+        "due_date": "2022-05-22",
+        "web_url": "https://gitlab.com/groups/meltano/-/iterations/56415"
+      },
+      "health_status": null,
+      "epic_issue_id": 1032119,
+      "relative_position": -6156
+    },
+    {
+      "id": 97825512,
+      "iid": 207,
+      "project_id": 27821563,
+      "title": "Create a landing page for a SaaS-solution",
+      "description": "It's come up a few times where users have questions about whether we're planning on offering a managed Meltano service. It may be useful to have a landing page where we can explain our current focus and point them to the roadmap. It could also be useful to gather some emails or Slack ids to communicate to these folks once we're in a place to offer a SaaS.\n\n@Emily @afolson thoughts on where this could live on the site?\n\n---\n- Url: https://meltano.com/saas might also want a similar enterprise page\n- Location (nesting): nest under \"Product\"\n- H1: Managed Meltano\n- H2: Managed hosting for your data stack / managed hosted DataOps platform\n- Key Words: Enterprise, SaaS, Hosted, hosting, managed, Managed Meltano\n\n### Structure\n![Screen_Shot_2022-02-16_at_9.36.02_AM](/uploads/1812a5ea8eacbdcb623fdf762cf19bbb/Screen_Shot_2022-02-16_at_9.36.02_AM.png)\n\n![Screen_Shot_2022-02-16_at_9.35.15_AM](/uploads/f2332f984bac05772682cb404df67695/Screen_Shot_2022-02-16_at_9.35.15_AM.png)\n\n![Screen_Shot_2022-02-16_at_9.35.40_AM](/uploads/a2f300be02bd79497ed3a6f49db3603d/Screen_Shot_2022-02-16_at_9.35.40_AM.png)\n\n\n### Suggested copy highlights\n* managed hosting\n* Buyer-based open core\n* Add in workflows\n* enterprise features:\n  - Support\n  - SLA\n  - platform-wide RBAC\n  - SSO\n  - Audit Logs\n* need support now- contact our partners\n\n### For later:\n![Screen_Shot_2022-02-16_at_9.27.07_AM](/uploads/f07dd913f2983186e3ad0740f14497da/Screen_Shot_2022-02-16_at_9.27.07_AM.png)\n\n\n\n\n\n\n<!-- Labels to add for triaging -->",
+      "state": "closed",
+      "created_at": "2021-11-23T16:44:30.514Z",
+      "updated_at": "2022-05-31T18:20:49.436Z",
+      "closed_at": "2022-05-31T18:20:49.417Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing",
+        "flow::Triage",
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 394049,
+          "username": "afolson",
+          "public_email": "",
+          "name": "Amanda Folson",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "web_url": "https://gitlab.com/afolson"
+        }
+      ],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 9,
+      "merge_requests_count": 0,
+      "upvotes": 2,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/207",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/207",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/207/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/207/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#207",
+        "relative": "#207",
+        "full": "meltano/marketing/marketing-general#207"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 17,
+      "epic": {
+        "id": 512842,
+        "iid": 17,
+        "title": "Meltano 2.0 Drop Campaign Planning- June 8th",
+        "url": "/groups/meltano/marketing/-/epics/17",
+        "group_id": 12586917,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": {
+        "id": 56416,
+        "iid": 56,
+        "sequence": 3,
+        "group_id": 2524164,
+        "title": null,
+        "description": null,
+        "state": 3,
+        "created_at": "2022-05-13T20:04:48.839Z",
+        "updated_at": "2022-05-30T00:05:02.370Z",
+        "start_date": "2022-05-23",
+        "due_date": "2022-05-29",
+        "web_url": "https://gitlab.com/groups/meltano/-/iterations/56416"
+      },
+      "health_status": null,
+      "epic_issue_id": 956475,
+      "relative_position": -2565
+    }
+  ]
+}

@@ -252,7 +252,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         Returns:
             A new sink for the stream.
         """
-        self.logger.info("Initializing '%s' target sink...", self.name)
+        self.logger.debug("Initializing '%s' target sink...", self.name)
         sink_class = self.get_sink_class(stream_name=stream_name)
         sink = sink_class(
             target=self,
@@ -531,7 +531,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
             state: TODO
         """
         state_json = json.dumps(state)
-        self.logger.info("Emitting completed target state %s", state_json)
+        self.logger.debug("Emitting completed target state %s", state_json)
         sys.stdout.write(f"{state_json}\n")
         sys.stdout.flush()
 
@@ -718,7 +718,7 @@ class SQLTarget(Target):
         Returns:
             A new sink for the stream.
         """
-        self.logger.info("Initializing '%s' target sink...", self.name)
+        self.logger.debug("Initializing '%s' target sink...", self.name)
         sink_class = self.get_sink_class(stream_name=stream_name)
         sink = sink_class(
             target=self,
