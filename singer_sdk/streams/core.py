@@ -1176,8 +1176,16 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 for idx, record_result in enumerate(self.get_records(current_context)):
                     self._check_max_record_limit(current_record_index=record_index)
 
-                    if isinstance(record_result, tuple):
+                    if isinstance(record_result, tuple):  # pragma: no cover
                         # Tuple items should be the record and the child context
+                        warnings.warn(
+                            "Yielding a tuple of (record, child_context) is "
+                            "deprecated and will be removed in version 0.49 "
+                            "at the earliest. "
+                            "Please yield a single item instead.",
+                            SingerSDKDeprecationWarning,
+                            stacklevel=2,
+                        )
                         record, child_context = record_result
                     else:
                         record = record_result
@@ -1448,6 +1456,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         the child records can no longer be synced.
 
         More info: :doc:`/parent_streams`
+
+        .. versionchanged:: 0.47.0
+           Deprecated support for returning a tuple of (record, child_context).
 
         Args:
             context: Stream partition or context dictionary.
