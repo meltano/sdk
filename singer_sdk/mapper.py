@@ -451,7 +451,7 @@ class CustomStreamMap(StreamMap):
         if stream_map and MAPPER_FILTER_OPTION in stream_map:
             filter_rule = stream_map.pop(MAPPER_FILTER_OPTION)
             try:
-                filter_rule_parsed: ast.Expr = ast.parse(filter_rule).body[0]  # type: ignore[arg-type,assignment]
+                filter_rule_parsed: ast.Expr = ast.parse(filter_rule).body[0]  # type: ignore[assignment]
             except (SyntaxError, IndexError) as ex:
                 msg = f"Failed to parse expression {filter_rule}."
                 raise MapExpressionError(msg) from ex

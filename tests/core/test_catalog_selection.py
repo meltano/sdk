@@ -9,8 +9,10 @@ import pytest
 
 import singer_sdk._singerlib as singer
 from singer_sdk.helpers._catalog import (
+    deselect_all_streams,
     get_selected_schema,
     pop_deselected_record_properties,
+    set_catalog_stream_selected,
 )
 from singer_sdk.typing import ObjectType, PropertiesList, Property, StringType
 
@@ -57,10 +59,11 @@ def schema():
         Property(
             "col_a",
             ObjectType(
-                Property("col_a_1", StringType),
+                Property("col_a_1", StringType, required=True),
                 Property("col_a_2", StringType),
                 Property("col_a_3", StringType),
             ),
+            required=True,
         ),
         Property(
             "col_b",
@@ -68,14 +71,17 @@ def schema():
                 Property("col_b_1", StringType),
                 Property("col_b_2", StringType),
             ),
+            required=True,
         ),
         Property(
             "col_c",
             StringType,
+            required=True,
         ),
         Property(
             "col_d",
             StringType,
+            required=True,
         ),
         Property(
             "col_e",
@@ -199,19 +205,20 @@ def test_schema_selection(
     """Test that schema selection rules are correctly applied to SCHEMA messages."""
     selected_schema = get_selected_schema(stream_name, schema, mask)
     assert (
-        selected_schema["properties"]
+        selected_schema
         == PropertiesList(
             Property(
                 "col_a",
                 ObjectType(
-                    Property("col_a_1", StringType),
+                    Property("col_a_1", StringType, required=True),
                     Property("col_a_3", StringType),
                 ),
+                required=True,
             ),
-            Property("col_d", StringType),
+            Property("col_d", StringType, required=True),
             Property("col_e", StringType),
             Property("col_f", StringType),
-        ).to_dict()["properties"]
+        ).to_dict()
     )
 
 
@@ -248,3 +255,93 @@ def test_record_property_pop(
     assert record_pop == record_selected, (
         f"Expected record={record_selected}, got {record_pop}"
     )
+
+
+def test_deselect_all_streams():
+    """Test that deselect_all_streams sets all streams to not selected."""
+    catalog = singer.Catalog.from_dict(
+        {
+            "streams": [
+                {
+                    "tap_stream_id": "test_stream_a",
+                    "stream": "test_stream_a",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "col_a": {
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "metadata": [
+                        {
+                            "breadcrumb": (),
+                            "metadata": {"selected": True},
+                        },
+                    ],
+                },
+                {
+                    "tap_stream_id": "test_stream_b",
+                    "stream": "test_stream_b",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "col_a": {
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "metadata": [
+                        {
+                            "breadcrumb": (),
+                            "metadata": {"selected": True},
+                        },
+                    ],
+                },
+            ],
+        }
+    )
+
+    # Stream is selected
+    assert catalog["test_stream_a"].metadata.root.selected is True
+    assert catalog["test_stream_b"].metadata.root.selected is True
+
+    deselect_all_streams(catalog)
+    # After deselection, should be False
+    assert catalog["test_stream_a"].metadata.root.selected is False
+    assert catalog["test_stream_b"].metadata.root.selected is False
+
+
+def test_set_catalog_stream_selected(catalog_entry_obj: singer.CatalogEntry):
+    """Test set_catalog_stream_selected for stream and property selection."""
+    catalog = singer.Catalog({catalog_entry_obj.tap_stream_id: catalog_entry_obj})
+    stream_name = catalog_entry_obj.tap_stream_id
+
+    # Set stream to not selected
+    set_catalog_stream_selected(catalog, stream_name, selected=False)
+    assert catalog_entry_obj.metadata.root.selected is False
+    # Set stream to selected
+    set_catalog_stream_selected(catalog, stream_name, selected=True)
+    assert catalog_entry_obj.metadata.root.selected is True
+    # Set a property to not selected
+    breadcrumb = ("properties", "col_a")
+    set_catalog_stream_selected(
+        catalog, stream_name, selected=False, breadcrumb=breadcrumb
+    )
+    assert catalog_entry_obj.metadata[breadcrumb].selected is False
+    # Set a property to selected
+    set_catalog_stream_selected(
+        catalog, stream_name, selected=True, breadcrumb=breadcrumb
+    )
+    assert catalog_entry_obj.metadata[breadcrumb].selected is True
+
+    with pytest.raises(
+        ValueError,
+        match="Catalog entry missing for 'non-existent-stream'",
+    ):
+        set_catalog_stream_selected(
+            catalog,
+            "non-existent-stream",
+            selected=True,
+            breadcrumb=breadcrumb,
+        )

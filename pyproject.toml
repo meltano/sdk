@@ -118,6 +118,7 @@ testing = [
     "moto>=5.0.14",
     "pytest>=7.2.1",
     "pytest-benchmark>=4.0.0",
+    "pytest-github-actions-annotate-failures>=0.3.0",
     "pytest-snapshot>=0.9.0",
     "pytest-subtests>=0.13.1",
     "pytz>=2022.2.1",
@@ -128,7 +129,7 @@ testing = [
     "xdoctest[colors]>=1.1.1",
 ]
 typing = [
-    "mypy>=1.9",
+    "mypy>=1.16",
     "pyarrow-stubs>=19.1",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
@@ -187,7 +188,7 @@ xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.46.3"
+version = "0.46.4"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -384,7 +385,7 @@ unfixable = [
     "INP",      # Allow implicit namespace packages in tests
     "PLR2004",
     "S101",
-    "SLF001",
+    "SLF001",   # Allow private method access in tests
     "PLC2701",  # Allow usage of private members in tests
     "PLR6301",  # Don't suggest making test methods static, etc.
 ]
