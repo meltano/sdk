@@ -10,7 +10,7 @@ from click.testing import CliRunner
 
 from samples.sample_tap_sqlite import SQLiteTap
 from samples.sample_target_csv.csv_target import SampleTargetCSV
-from singer_sdk._singerlib import MetadataMapping, StreamMetadata
+from singer_sdk.singerlib import MetadataMapping, StreamMetadata
 from singer_sdk.testing import (
     get_standard_tap_tests,
     tap_sync_test,

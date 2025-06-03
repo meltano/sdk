@@ -25,7 +25,7 @@ from singer_sdk.testing import (
 )
 
 if t.TYPE_CHECKING:
-    from singer_sdk._singerlib import Catalog
+    from singer_sdk.singerlib import Catalog
     from singer_sdk.tap_base import SQLTap
     from singer_sdk.target_base import SQLTarget
 

@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import pytest
 
-from singer_sdk._singerlib import SingerMessageType
 from singer_sdk.helpers._batch import (
     JSONLinesEncoding,
     ParquetEncoding,
     SDKBatchMessage,
 )
+from singer_sdk.singerlib import SingerMessageType
 
 
 @pytest.mark.parametrize(
