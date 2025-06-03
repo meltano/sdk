@@ -77,6 +77,7 @@ def test_countries_to_csv_mapped(
 ):
     tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
     target = SampleTargetCSV(config=csv_config)
+    target.max_parallelism = 1
     mapper = StreamTransform(config=COUNTRIES_STREAM_MAPS_CONFIG)
 
     tap_io = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
@@ -98,6 +99,7 @@ def test_countries_to_csv_mapped(
     snapshot.assert_match(mapper_output, "mapper.jsonl")
     snapshot.assert_match(caplog.text, "mapper.log")
 
+    mapper_io.seek(0)
     target_io = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
     with redirect_stdout(target_io), caplog.at_level("INFO"):
         target.listen(mapper_io)
