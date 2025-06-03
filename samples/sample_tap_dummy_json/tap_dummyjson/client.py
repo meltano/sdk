@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from requests_cache import CachedSession
 from singer_sdk.pagination import BaseOffsetPaginator
 from singer_sdk.streams import RESTStream
 
@@ -18,6 +19,14 @@ class DummyJSONStream(RESTStream):
     @property
     def url_base(self):
         return self.config["api_url"]
+
+    @property
+    def requests_session(self) -> CachedSession:
+        return CachedSession(
+            ".http_cache",
+            backend="filesystem",
+            serializer="json",
+        )
 
     @property
     def authenticator(self):

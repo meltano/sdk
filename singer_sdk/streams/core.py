@@ -210,7 +210,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         if self._tap.mapper is not None:
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
-            self.logger.info(
+            self.logger.debug(
                 "Tap has custom mapper. Using %d provided map(s).",
                 len(self.stream_maps),
             )
@@ -1164,13 +1164,16 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Yields:
             Each record from the source.
         """
+        # Type definitions
+        context_element: types.Context | None
+        record: types.Record | None
+        context_list: list[types.Context] | list[dict] | None
+
         # Initialize metrics
         record_counter = metrics.record_counter(self.name)
         timer = metrics.sync_timer(self.name)
 
         record_index = 0
-        context_element: types.Context | None
-        context_list: list[types.Context] | list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
@@ -1192,11 +1195,24 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 for idx, record_result in enumerate(self.get_records(current_context)):
                     self._check_max_record_limit(current_record_index=record_index)
 
-                    if isinstance(record_result, tuple):
+                    if isinstance(record_result, tuple):  # pragma: no cover
                         # Tuple items should be the record and the child context
+                        warnings.warn(
+                            "Yielding a tuple of (record, child_context) is "
+                            "deprecated and will be removed in version 0.49 "
+                            "at the earliest. "
+                            "Please yield a single item instead.",
+                            SingerSDKDeprecationWarning,
+                            stacklevel=2,
+                        )
                         record, child_context = record_result
                     else:
                         record = record_result
+
+                    record = self.post_process(record, current_context)
+                    if record is None:
+                        continue
+
                     try:
                         self._process_record(
                             record,
@@ -1274,7 +1290,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
             msg += f" with context: {context}"
-        self.logger.info("%s...", msg)
+        self.logger.info(msg)
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
@@ -1438,7 +1454,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def get_records(
         self,
         context: types.Context | None,
-    ) -> t.Iterable[dict | tuple[dict, dict | None]]:
+    ) -> t.Iterable[types.Record | tuple[dict, dict | None]]:
         """Abstract record generator function. Must be overridden by the child class.
 
         Each record emitted should be a dictionary of property names to their values.
@@ -1463,6 +1479,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         the child records can no longer be synced.
 
         More info: :doc:`/parent_streams`
+
+        .. versionchanged:: 0.47.0
+           Deprecated support for returning a tuple of (record, child_context).
 
         Args:
             context: Stream partition or context dictionary.
@@ -1510,7 +1529,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self,
         row: types.Record,
         context: types.Context | None = None,  # noqa: ARG002
-    ) -> dict | None:
+    ) -> types.Record | None:
         """As needed, append or transform raw data to match expected structure.
 
         Optional. This method gives developers an opportunity to "clean up" the results

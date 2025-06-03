@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import abc
 import importlib.resources
-import typing as t
 
 from requests_cache.session import CachedSession
 
@@ -28,9 +27,14 @@ class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
 
     url_base = "https://countries.trevorblades.com/"
 
-    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
-        super().__init__(*args, **kwargs)
-        self._requests_session = CachedSession()
+    @property
+    def requests_session(self) -> CachedSession:
+        return CachedSession(
+            ".http_cache",
+            backend="filesystem",
+            serializer="json",
+            allowable_methods=("POST", "HEAD"),
+        )
 
 
 class CountriesStream(CountriesAPIStream):
