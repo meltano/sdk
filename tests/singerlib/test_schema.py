@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from singer_sdk._singerlib import Schema, resolve_schema_references
+from singer_sdk.singerlib import Schema, resolve_schema_references
 
 STRING_SCHEMA = Schema(type="string", maxLength=32, default="")
 STRING_DICT = {"type": "string", "maxLength": 32, "default": ""}
