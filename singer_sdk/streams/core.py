@@ -500,7 +500,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         return (
             datetime.datetime.fromtimestamp(
-                self._initialized_at,
+                self._initialized_at / 1000.0,
                 tz=datetime.timezone.utc,
             )
             if self.is_timestamp_replication_key
