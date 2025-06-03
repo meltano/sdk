@@ -6,7 +6,6 @@ import abc
 import copy
 import datetime
 import json
-import time
 import typing as t
 import warnings
 from os import PathLike
@@ -1303,8 +1302,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             self._write_schema_message()
 
         if self.selected and self.replication_method == REPLICATION_FULL_TABLE:
-            self._stream_version = int(time.time())
-            self._write_activate_version_message(self._initialized_at // 1000)
+            self._stream_version = self._initialized_at // 1000
+            self._write_activate_version_message(self._stream_version)
 
         try:
             batch_config = self.get_batch_config(self.config)
