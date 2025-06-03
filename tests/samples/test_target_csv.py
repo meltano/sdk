@@ -62,10 +62,23 @@ COUNTRIES_STREAM_MAPS_CONFIG: dict[str, t.Any] = {
 }
 
 
-def test_countries_to_csv(csv_config: dict):
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_countries_to_csv(
+    csv_config: dict,
+    snapshot: Snapshot,
+    caplog: pytest.LogCaptureFixture,
+):
     tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
     target = SampleTargetCSV(config=csv_config)
-    tap_to_target_sync_test(tap, target)
+    target.max_parallelism = 1
+
+    with caplog.at_level("INFO"):
+        tap_stdout, _, target_stdout, _ = tap_to_target_sync_test(tap, target)
+
+    snapshot.assert_match(tap_stdout.read(), "tap.jsonl")
+    snapshot.assert_match(target_stdout.read(), "target.jsonl")
+    snapshot.assert_match(caplog.text, "singer.log")
 
 
 @time_machine.travel(DATETIME, tick=False)
@@ -110,11 +123,23 @@ def test_countries_to_csv_mapped(
     snapshot.assert_match(caplog.text, "target.log")
 
 
-def test_fake_people_to_csv(csv_config: dict):
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_fake_people_to_csv(
+    csv_config: dict,
+    snapshot: Snapshot,
+    caplog: pytest.LogCaptureFixture,
+):
     tap = SampleTapFakePeople()
     target = SampleTargetCSV(config=csv_config)
-    _, _, target_stdout, _ = tap_to_target_sync_test(tap, target)
-    assert not target_stdout.read(), "Target should not emit any bookmarks"
+    target.max_parallelism = 1
+
+    with caplog.at_level("INFO"):
+        tap_stdout, _, target_stdout, _ = tap_to_target_sync_test(tap, target)
+
+    snapshot.assert_match(tap_stdout.read(), "tap.jsonl")
+    snapshot.assert_match(target_stdout.read(), "target.jsonl")
+    snapshot.assert_match(caplog.text, "singer.log")
 
 
 def test_target_batching():
