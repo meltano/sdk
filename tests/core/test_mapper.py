@@ -14,9 +14,9 @@ from decimal import Decimal
 import pytest
 import time_machine
 
-from singer_sdk._singerlib import Catalog
 from singer_sdk.exceptions import MapExpressionError
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
+from singer_sdk.singerlib import Catalog
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
