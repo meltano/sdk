@@ -1,4 +1,3 @@
-{"type":"ACTIVATE_VERSION","stream":"parent","version":1640995200}
 {"type":"SCHEMA","stream":"child","schema":{"properties":{"id":{"type":"integer"},"pid":{"type":"integer"}},"type":"object"},"key_properties":[]}
 {"type":"ACTIVATE_VERSION","stream":"child","version":1640995200}
 {"type":"RECORD","stream":"child","record":{"id":1,"pid":1},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}

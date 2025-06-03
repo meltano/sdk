@@ -78,6 +78,7 @@ class MyTap(Tap):
 
 
 @pytest.fixture
+@time_machine.travel(DATETIME, tick=False)
 def tap():
     """A tap with streams having a parent-child relationship."""
     return MyTap()
