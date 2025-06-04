@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import re
 import typing as t
-from logging import WARNING
 from textwrap import dedent
 
 import pytest
@@ -167,25 +166,19 @@ def test_to_json():
     )
 
 
-def test_any_type(caplog: pytest.LogCaptureFixture):
+def test_any_type():
     schema = PropertiesList(
         Property("any_type", AnyType, description="Can be anything"),
     )
-    with caplog.at_level(WARNING):
-        assert schema.to_dict() == {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-                "any_type": {
-                    "description": "Can be anything",
-                },
+    assert schema.to_dict() == {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+            "any_type": {
+                "description": "Can be anything",
             },
-        }
-        assert caplog.records[0].levelname == "WARNING"
-        assert caplog.records[0].message == (
-            "Could not append type because the JSON schema for the dictionary `{}` "
-            "appears to be invalid."
-        )
+        },
+    }
 
 
 def test_nested_complex_objects():
@@ -977,33 +970,173 @@ def test_discriminated_union():
     )
 
 
-def test_is_datetime_type():
-    assert is_datetime_type({"type": "string", "format": "date-time"})
-    assert not is_datetime_type({"type": "string"})
-
-    assert is_datetime_type({"anyOf": [{"type": "string", "format": "date-time"}]})
-    assert not is_datetime_type({"anyOf": [{"type": "string"}]})
-
-    assert is_datetime_type({"allOf": [{"type": "string", "format": "date-time"}]})
-    assert not is_datetime_type({"allOf": [{"type": "string"}]})
-
-
-def test_is_date_or_datetime_type():
-    assert is_date_or_datetime_type({"type": "string", "format": "date"})
-    assert is_date_or_datetime_type({"type": "string", "format": "date-time"})
-    assert not is_date_or_datetime_type({"type": "string"})
-
-    assert is_date_or_datetime_type(
-        {"anyOf": [{"type": "string", "format": "date-time"}]},
+def test_schema_dependencies():
+    th = ObjectType(
+        # username/password
+        Property("username", StringType, requires_properties=["password"]),
+        Property("password", StringType, secret=True),
+        # OAuth
+        Property(
+            "client_id",
+            StringType,
+            requires_properties=["client_secret", "refresh_token"],
+        ),
+        Property("client_secret", StringType, secret=True),
+        Property("refresh_token", StringType, secret=True),
     )
-    assert is_date_or_datetime_type({"anyOf": [{"type": "string", "format": "date"}]})
-    assert not is_date_or_datetime_type({"anyOf": [{"type": "string"}]})
 
-    assert is_date_or_datetime_type(
-        {"allOf": [{"type": "string", "format": "date-time"}]},
+    validator = DEFAULT_JSONSCHEMA_VALIDATOR(th.to_dict())
+
+    assert validator.is_valid(
+        {
+            "username": "foo",
+            "password": "bar",
+        },
     )
-    assert is_date_or_datetime_type({"allOf": [{"type": "string", "format": "date"}]})
-    assert not is_date_or_datetime_type({"allOf": [{"type": "string"}]})
+
+    assert validator.is_valid(
+        {
+            "client_id": "foo",
+            "client_secret": "bar",
+            "refresh_token": "baz",
+        },
+    )
+
+    assert not validator.is_valid(
+        {
+            "username": "foo",
+        },
+    )
+
+    assert not validator.is_valid(
+        {
+            "client_id": "foo",
+            "client_secret": "bar",
+        },
+    )
+
+
+@pytest.mark.parametrize(
+    "schema,expected",
+    [
+        pytest.param(
+            {"type": "string", "format": "date-time"},
+            True,
+            id="datetime_type",
+        ),
+        pytest.param(
+            {"type": "string"},
+            False,
+            id="plain_string_type",
+        ),
+        pytest.param(
+            {"anyOf": [{"type": "string", "format": "date-time"}]},
+            True,
+            id="anyof_datetime",
+        ),
+        pytest.param(
+            {"anyOf": [{"type": "string"}]},
+            False,
+            id="anyof_string",
+        ),
+        pytest.param(
+            {"allOf": [{"type": "string", "format": "date-time"}]},
+            True,
+            id="allof_datetime",
+        ),
+        pytest.param(
+            {"allOf": [{"type": "string"}]},
+            False,
+            id="allof_string",
+        ),
+        pytest.param(
+            {"oneOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+            True,
+            id="oneof_datetime",
+        ),
+        pytest.param(
+            {"oneOf": [{"type": "string"}, {"type": "null"}]},
+            False,
+            id="oneof_string_or_null",
+        ),
+    ],
+)
+def test_is_datetime_type(schema, expected):
+    assert is_datetime_type(schema) == expected
+
+
+@pytest.mark.parametrize(
+    "schema,expected",
+    [
+        pytest.param(
+            {"type": "string", "format": "date"},
+            True,
+            id="date_type",
+        ),
+        pytest.param(
+            {"type": "string", "format": "date-time"},
+            True,
+            id="datetime_type",
+        ),
+        pytest.param(
+            {"type": "string"},
+            False,
+            id="plain_string_type",
+        ),
+        pytest.param(
+            {"anyOf": [{"type": "string", "format": "date-time"}]},
+            True,
+            id="anyof_datetime",
+        ),
+        pytest.param(
+            {"anyOf": [{"type": "string", "format": "date"}]},
+            True,
+            id="anyof_date",
+        ),
+        pytest.param(
+            {"anyOf": [{"type": "string"}]},
+            False,
+            id="anyof_string",
+        ),
+        pytest.param(
+            {"allOf": [{"type": "string", "format": "date-time"}]},
+            True,
+            id="allof_datetime",
+        ),
+        pytest.param(
+            {"allOf": [{"type": "string", "format": "date"}]},
+            True,
+            id="allof_date",
+        ),
+        pytest.param(
+            {"allOf": [{"type": "string"}]},
+            False,
+            id="allof_string",
+        ),
+        pytest.param(
+            {"oneOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+            True,
+            id="oneof_datetime",
+        ),
+        pytest.param(
+            {
+                "oneOf": [
+                    {"type": "null"},
+                    {
+                        "oneOf": [
+                            {"type": "string", "format": "date-time"},
+                            {"type": "string"},
+                        ],
+                    },
+                ],
+            },
+            True,
+            id="nested_oneof_datetime",
+        ),
+    ],
+)
+def test_is_date_or_datetime_type(schema, expected):
+    assert is_date_or_datetime_type(schema) == expected
 
 
 def test_is_string_array_type():

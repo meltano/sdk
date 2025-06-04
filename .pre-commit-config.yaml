@@ -42,14 +42,14 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.31.2
+  rev: 0.33.0
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
   - id: check-readthedocs
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.9.7
+  rev: v0.11.12
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]
@@ -64,61 +64,21 @@ repos:
       )$
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.6.2
+  rev: 0.7.9
   hooks:
   - id: uv-lock
   - id: uv-sync
-  - id: uv-export
-    name: Export docs requirements
-    args:
-    - "--no-emit-project"
-    - "--frozen"
-    - "--no-dev"
-    - "--group"
-    - "docs"
-    - "--output-file"
-    - "requirements/requirements.docs.txt"
-  - id: uv-export
-    name: Export package requirements, including extras
-    args:
-    - "--no-emit-project"
-    - "--frozen"
-    - "--all-extras"
-    - "--no-dev"
-    - "--output-file"
-    - "requirements/requirements.txt"
-  - id: uv-export
-    name: Export testing requirements
-    args:
-    - "--no-emit-project"
-    - "--frozen"
-    - "--only-group"
-    - "testing"
-    - "--output-file"
-    - "requirements/requirements.test.txt"
-  - id: uv-export
-    name: Export typing requirements
-    args:
-    - "--no-emit-project"
-    - "--frozen"
-    - "--only-group"
-    - "typing"
-    - "--output-file"
-    - "requirements/requirements.typing.txt"
-  - id: uv-export
-    name: Export Codspeed requirements
-    args:
-    - "--no-editable"
-    - "--frozen"
-    - "--no-hashes"
-    - "--no-dev"
-    - "--all-extras"
-    - "--group"
-    - "benchmark"
-    - "--output-file"
-    - "requirements/requirements.codspeed.txt"
 
 - repo: https://github.com/codespell-project/codespell
   rev: v2.4.1
   hooks:
   - id: codespell
+
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.22
+  hooks:
+  - id: mdformat
+    exclude: tests/snapshots/about_format/markdown\.snap\.md
+    args: [--extensions, frontmatter]
+    additional_dependencies:
+    - mdformat-frontmatter

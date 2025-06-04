@@ -136,6 +136,18 @@ BATCH_CONFIG = PropertiesList(
         ),
     ),
 ).to_dict()
+SQL_TAP_USE_SINGER_DECIMAL = PropertiesList(
+    Property(
+        "use_singer_decimal",
+        BooleanType(),
+        title="Use Singer Decimal",
+        description=(
+            "Whether to use use strings with `x-singer.decimal` format for "
+            "decimals in the discovered schema. "
+            "This is useful to avoid precision loss when working with large numbers."
+        ),
+    ),
+).to_dict()
 TARGET_SCHEMA_CONFIG = PropertiesList(
     Property(
         "default_target_schema",
@@ -226,6 +238,8 @@ TARGET_LOAD_METHOD_CONFIG = PropertiesList(
 class DeprecatedEnum(Enum):
     """Base class for capabilities enumeration."""
 
+    deprecation: str | None
+
     def __new__(
         cls,
         value: _EnumMemberT,
@@ -252,7 +266,6 @@ class DeprecatedEnum(Enum):
         Returns:
             Deprecation message.
         """
-        self.deprecation: str | None
         return self.deprecation
 
     def emit_warning(self) -> None:

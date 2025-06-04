@@ -510,6 +510,14 @@ def test_custom_type_to_jsonschema():
     assert m.to_jsonschema(sa.types.BOOLEAN()) == {"type": ["boolean"]}
 
 
+def test_numeric_to_singer_decimal():
+    converter = SQLToJSONSchema(use_singer_decimal=True)
+    assert converter.to_jsonschema(sa.types.NUMERIC()) == {
+        "type": ["string"],
+        "format": "singer.decimal",
+    }
+
+
 class TestJSONSchemaToSQL:  # noqa: PLR0904
     @pytest.fixture
     def json_schema_to_sql(self) -> JSONSchemaToSQL:
@@ -637,6 +645,18 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
         assert isinstance(result, sa.types.INTEGER)
 
+    def test_anyof_json(self):
+        json_schema_to_sql = JSONSchemaToSQL()
+        json_schema_to_sql.register_type_handler("object", sa.types.JSON)
+        jsonschema_type = {
+            "anyOf": [
+                {"type": "null"},
+                {"type": "object"},
+            ],
+        }
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.JSON)
+
     def test_anyof_unknown(self, json_schema_to_sql: JSONSchemaToSQL):
         jsonschema_type = {
             "anyOf": [
@@ -651,6 +671,11 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         "jsonschema_type,expected_type",
         [
             pytest.param(
+                {"type": ["unknown", "null"]},
+                sa.types.VARCHAR,
+                id="unknown",
+            ),
+            pytest.param(
                 {"type": ["array", "object", "boolean", "null"]},
                 sa.types.VARCHAR,
                 id="array-first",
@@ -662,7 +687,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
             ),
         ],
     )
-    def test_complex(
+    def test_multiple_types(
         self,
         json_schema_to_sql: JSONSchemaToSQL,
         jsonschema_type: dict,
@@ -670,6 +695,22 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
     ):
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
         assert isinstance(result, expected_type)
+
+    def test_multiple_types_custom_handler(self):
+        class CustomJSONSchemaToSQL(JSONSchemaToSQL):
+            def handle_multiple_types(self, types: list[str]) -> sa.types.TypeEngine:
+                if "object" in types or "array" in types:
+                    return sa.types.JSON()
+                return super().handle_multiple_types(types)
+
+        json_schema_to_sql = CustomJSONSchemaToSQL()
+        jsonschema_type = {"type": ["object", "array", "string", "null"]}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.JSON)
+
+        jsonschema_type = {"type": ["string", "number", "null"]}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.VARCHAR)
 
     def test_unknown_type(self, json_schema_to_sql: JSONSchemaToSQL):
         jsonschema_type = {"cannot": "compute"}
@@ -682,7 +723,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         assert isinstance(result, sa.types.VARCHAR)
 
     def test_custom_fallback(self):
-        json_schema_to_sql = JSONSchemaToSQL()
+        json_schema_to_sql = JSONSchemaToSQL(max_varchar_length=None)
         json_schema_to_sql.fallback_type = sa.types.CHAR
         jsonschema_type = {"cannot": "compute"}
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
@@ -696,7 +737,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
 
                 return super().handle_raw_string(schema)
 
-        json_schema_to_sql = CustomJSONSchemaToSQL()
+        json_schema_to_sql = CustomJSONSchemaToSQL(max_varchar_length=None)
 
         vanilla = {"type": ["string"]}
         result = json_schema_to_sql.to_sql_type(vanilla)
@@ -716,6 +757,52 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         }
         result = json_schema_to_sql.to_sql_type(image_type)
         assert isinstance(result, sa.types.LargeBinary)
+
+    def test_singer_decimal(self):
+        json_schema_to_sql = JSONSchemaToSQL()
+        jsonschema_type = {"type": ["string"], "format": "x-singer.decimal"}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.DECIMAL)
+
+    def test_singer_decimal_with_precision_scale(self):
+        json_schema_to_sql = JSONSchemaToSQL()
+        precision, scale = 12, 3
+        jsonschema_type = {
+            "type": ["string"],
+            "format": "x-singer.decimal",
+            "precision": precision,
+            "scale": scale,
+        }
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.DECIMAL)
+        assert result.precision == precision
+        assert result.scale == scale
+
+    def test_handle_singer_decimal_missing_precision(self):
+        json_schema_to_sql = JSONSchemaToSQL(max_varchar_length=None)
+        schema = {
+            "type": ["string"],
+            "format": "x-singer.decimal",
+            # 'precision' is missing
+            "scale": 2,
+        }
+        result = json_schema_to_sql.to_sql_type(schema)
+        assert isinstance(result, sa.types.DECIMAL)
+        assert result.precision is None
+        assert result.scale == 2
+
+    def test_handle_singer_decimal_missing_scale(self):
+        json_schema_to_sql = JSONSchemaToSQL(max_varchar_length=None)
+        schema = {
+            "type": ["string"],
+            "format": "x-singer.decimal",
+            "precision": 10,
+            # 'scale' is missing
+        }
+        result = json_schema_to_sql.to_sql_type(schema)
+        assert isinstance(result, sa.types.DECIMAL)
+        assert result.precision == 10
+        assert result.scale is None
 
     def test_annotation_sql_datatype(self):
         json_schema_to_sql = JSONSchemaToSQL()

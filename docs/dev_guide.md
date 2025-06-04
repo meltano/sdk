@@ -6,13 +6,13 @@ Create taps with the SDK requires overriding just two or three classes:
 
 1. The `Tap` class. This class governs configuration, validation,
    and stream discovery.
-2. The stream class. You have different options for your base class depending on the type
+1. The stream class. You have different options for your base class depending on the type
    of data source you are working with:
    - `Stream` - The **generic** base class for streams.
    - `RESTStream` - The base class for **REST**-type streams.
    - `GraphQLStream` - The base class for **GraphQL**-type streams. This class inherits
      from `RESTStream`, since GraphQL is built upon REST.
-3. An optional authenticator class. You can omit this class entirely if you do not require authentication or if you prefer to write custom authentication logic. The supported authenticator classes are:
+1. An optional authenticator class. You can omit this class entirely if you do not require authentication or if you prefer to write custom authentication logic. The supported authenticator classes are:
    - `SimpleAuthenticator` - This class is functionally equivalent to overriding
      `http_headers` property in the stream class.
    - `OAuthAuthenticator` - This class performs an OAuth 2.0 authentication flow.
@@ -25,7 +25,7 @@ Create targets with the SDK requires overriding just two classes:
 
 1. The `Target` class. This class governs configuration, validation,
    and stream discovery.
-2. The `Sink` class. You have two different options depending on whether your target
+1. The `Sink` class. You have two different options depending on whether your target
    prefers writing one record at a time versus writing in batches:
    - `RecordSink` writes one record at a time, via the `process_record()`
      method.
@@ -219,7 +219,6 @@ Ensure the interpreter you're using in VSCode is set to use the one in the proje
 You can change this by using the command palette to go to interpreter settings.
 Doing this will also help with autocompletion.
 
-
 In order to launch your plugin via it's CLI with the built-in debugger, VSCode requires a [Launch configuration](https://code.visualstudio.com/docs/editor/debugging#_launch-configurations).
 An example launch configuration, added to your `launch.json`, might be as follows:
 
@@ -263,54 +262,4 @@ This is automatically included in the most recent version of the tap and target 
 
 ### Testing performance
 
-We've had success using [`viztracer`](https://github.com/gaogaotiantian/viztracer) to create flame graphs for SDK-based packages and find if there are any serious performance bottlenecks.
-
-You can start doing the same in your package. Start by installing `viztracer`.
-
-````{tab} Poetry
-```console
-$ poetry add --group dev viztracer
-```
-````
-
-````{tab} uv
-```console
-$ uv add --group dev viztracer
-```
-````
-
-Then simply run your package's CLI as normal, preceded by the `viztracer` command
-
-````{tab} Poetry
-```console
-$ poetry run viztracer my-tap
-$ poetry run viztracer -- my-target --config=config.json --input=messages.json
-```
-````
-
-````{tab} uv
-```console
-$ uv run viztracer my-tap
-$ uv run viztracer -- my-target --config=config.json --input=messages.json
-```
-````
-
-That command will produce a `result.json` file which you can explore with the `vizviewer` tool.
-
-````{tab} Poetry
-```console
-$ poetry run vizviewer result.json
-```
-````
-
-````{tab} uv
-```console
-$ uv run vizviewer result.json
-```
-````
-
-The output should look like this
-
-![SDK Flame Graph](https://gitlab.com/meltano/sdk/uploads/07633ba1217de6eb1bb0e018133c608d/_write_record_message.png)
-
-**Note**: Chrome seems to work best for running the `vizviewer` app.
+Moved to a separate page: [Measuring Performance](./guides/performance.md#measuring-performance).

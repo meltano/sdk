@@ -13,7 +13,7 @@ from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
 
-import singer_sdk._singerlib as singer
+import singer_sdk.singerlib as singer
 from singer_sdk import metrics
 from singer_sdk.batch import Batcher
 from singer_sdk.exceptions import (
@@ -57,9 +57,9 @@ from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, Stream
 if t.TYPE_CHECKING:
     import logging
 
-    from singer_sdk._singerlib.catalog import StreamMetadata
     from singer_sdk.helpers import types
     from singer_sdk.helpers._compat import Traversable
+    from singer_sdk.singerlib.catalog import StreamMetadata
     from singer_sdk.tap_base import Tap
 
 # Replication methods
@@ -107,6 +107,12 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """
 
     ignore_parent_replication_key: bool = False
+    """Set to `True` if the parent stream's replication key are not updated when child
+    items are changed.
+
+    This is used to indicate that a child stream should be synced regardless of the
+    parent stream's state.
+    """
 
     selected_by_default: bool = True
     """Whether this stream is selected by default in the catalog."""
@@ -148,6 +154,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._tap = tap
         self._tap_state = tap.state
         self._tap_input_catalog: singer.Catalog | None = None
+        self._input_schema: dict | None = None
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
@@ -204,14 +211,18 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if self._stream_maps:
             return self._stream_maps
 
-        if not self.__abstract__ and self._tap.mapper:  # type: ignore[truthy-bool]
+        if not self.__abstract__ and self._tap.mapper is not None:
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
-            self.logger.info(
+            self.logger.debug(
                 "Tap has custom mapper. Using %d provided map(s).",
                 len(self.stream_maps),
             )
-        else:
-            self.logger.info(
+
+        # TODO: A tap mapper is always registered so this code is unreachable.
+        # Consider removing it.
+        # https://github.com/meltano/sdk/blob/c6672eb70002c7430f5db30fba05bb21cf9f0c11/singer_sdk/mapper.py#L768-L778
+        else:  # pragma: no cover
+            self.logger.info(  # type: ignore[unreachable]
                 "No custom mapper provided for '%s'. Using SameRecordTransform.",
                 self.name,
             )
@@ -242,10 +253,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         if not self.replication_key:
             return False
-        type_dict = self.schema.get("properties", {}).get(self.replication_key)
+
+        schema = self.effective_schema
+        type_dict = schema.get("properties", {}).get(self.replication_key)
+
         if type_dict is None:
             msg = f"Field '{self.replication_key}' is not in schema for stream '{self.name}'"  # noqa: E501
             raise InvalidReplicationKeyException(msg)
+
         return is_datetime_type(type_dict)
 
     def get_starting_replication_key_value(
@@ -367,6 +382,21 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         for child in self.child_streams:
             result += child.descendent_streams or []
         return result
+
+    @property
+    def effective_schema(self) -> dict:
+        """The schema used to prune deselected properties and conform types.
+
+        If an input schema is provided, it will be used instead of the stream's
+        schema.
+
+        Override this ONLY if you need to unconditionally apply changes on top of,
+        or ignore, the input schema.
+
+        Returns:
+            JSON Schema dictionary for this stream.
+        """
+        return self._input_schema if self._input_schema is not None else self.schema
 
     def _write_replication_key_signpost(
         self,
@@ -495,7 +525,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._schema
 
     @property
-    def primary_keys(self) -> t.Sequence[str] | None:
+    def primary_keys(self) -> t.Sequence[str]:
         """Get primary keys.
 
         Returns:
@@ -504,11 +534,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._primary_keys or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: t.Sequence[str] | None) -> None:
+    def primary_keys(self, new_value: t.Sequence[str]) -> None:
         """Set primary key(s) for the stream.
 
         Args:
-            new_value: TODO
+            new_value: A list or tuple of primary key(s) for the stream.
         """
         self._primary_keys = new_value
 
@@ -726,8 +756,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             A partitioned context state if applicable; else returns stream state.
             A blank state will be created in none exists.
         """
-        state_partition_context = self._get_state_partition_context(context)
-        if state_partition_context:
+        if state_partition_context := self._get_state_partition_context(context):
             return get_writeable_state_dict(
                 self.tap_state,
                 self.name,
@@ -885,11 +914,12 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Yields:
             Record message objects.
         """
+        schema = self.effective_schema
         pop_deselected_record_properties(record, self.schema, self.mask)
         record = conform_record_data_types(
             stream_name=self.name,
             record=record,
-            schema=self.schema,
+            schema=schema,
             level=self.TYPE_CONFORMANCE_LEVEL,
             logger=self.logger,
         )
@@ -1124,13 +1154,16 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Yields:
             Each record from the source.
         """
+        # Type definitions
+        context_element: types.Context | None
+        record: types.Record | None
+        context_list: list[types.Context] | list[dict] | None
+
         # Initialize metrics
         record_counter = metrics.record_counter(self.name)
         timer = metrics.sync_timer(self.name)
 
         record_index = 0
-        context_element: types.Context | None
-        context_list: list[types.Context] | list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
@@ -1152,11 +1185,24 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 for idx, record_result in enumerate(self.get_records(current_context)):
                     self._check_max_record_limit(current_record_index=record_index)
 
-                    if isinstance(record_result, tuple):
+                    if isinstance(record_result, tuple):  # pragma: no cover
                         # Tuple items should be the record and the child context
+                        warnings.warn(
+                            "Yielding a tuple of (record, child_context) is "
+                            "deprecated and will be removed in version 0.49 "
+                            "at the earliest. "
+                            "Please yield a single item instead.",
+                            SingerSDKDeprecationWarning,
+                            stacklevel=2,
+                        )
                         record, child_context = record_result
                     else:
                         record = record_result
+
+                    record = self.post_process(record, current_context)
+                    if record is None:
+                        continue
+
                     try:
                         self._process_record(
                             record,
@@ -1234,7 +1280,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
             msg += f" with context: {context}"
-        self.logger.info("%s...", msg)
+        self.logger.info(msg)
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
@@ -1289,10 +1335,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         self._tap_input_catalog = catalog
 
-        catalog_entry = catalog.get_stream(self.name)
-        if catalog_entry:
+        if entry := catalog.get_stream(self.name):
             stream_metadata: StreamMetadata | None
-            if stream_metadata := catalog_entry.metadata.get(()):  # type: ignore[assignment]
+            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment]
                 table_key_properties = stream_metadata.table_key_properties
                 table_replication_key = stream_metadata.replication_key
                 table_replication_method = stream_metadata.forced_replication_method
@@ -1301,16 +1346,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 table_replication_key = None
                 table_replication_method = None
 
-            self.primary_keys = catalog_entry.key_properties or table_key_properties
-            self.replication_key = (
-                catalog_entry.replication_key or table_replication_key
-            )
+            self.primary_keys = entry.key_properties or table_key_properties or ()
+            self.replication_key = entry.replication_key or table_replication_key
 
-            replication_method = (
-                catalog_entry.replication_method or table_replication_method
-            )
+            replication_method = entry.replication_method or table_replication_method
             if replication_method:
                 self.forced_replication_method = replication_method
+
+            self._input_schema = entry.schema.to_dict()
 
     def _get_state_partition_context(
         self,
@@ -1397,7 +1440,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def get_records(
         self,
         context: types.Context | None,
-    ) -> t.Iterable[dict | tuple[dict, dict | None]]:
+    ) -> t.Iterable[types.Record | tuple[dict, dict | None]]:
         """Abstract record generator function. Must be overridden by the child class.
 
         Each record emitted should be a dictionary of property names to their values.
@@ -1422,6 +1465,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         the child records can no longer be synced.
 
         More info: :doc:`/parent_streams`
+
+        .. versionchanged:: 0.47.0
+           Deprecated support for returning a tuple of (record, child_context).
 
         Args:
             context: Stream partition or context dictionary.
@@ -1469,7 +1515,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self,
         row: types.Record,
         context: types.Context | None = None,  # noqa: ARG002
-    ) -> dict | None:
+    ) -> types.Record | None:
         """As needed, append or transform raw data to match expected structure.
 
         Optional. This method gives developers an opportunity to "clean up" the results

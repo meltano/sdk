@@ -8,7 +8,7 @@ from copy import deepcopy
 from singer_sdk.helpers._typing import is_object_type
 
 if t.TYPE_CHECKING:
-    from singer_sdk._singerlib import Catalog, SelectionMask
+    from singer_sdk.singerlib import Catalog, SelectionMask
 
 
 # TODO: this was previously cached using the `memoization` library. However, the
@@ -63,6 +63,8 @@ def _pop_deselected_schema(
         selected = mask[property_breadcrumb]
         if not selected:
             schema_at_breadcrumb["properties"].pop(property_name, None)
+            if property_name in schema_at_breadcrumb.get("required", []):
+                schema_at_breadcrumb["required"].remove(property_name)
             continue
 
         if is_object_type(property_def):
@@ -122,14 +124,6 @@ def set_catalog_stream_selected(
     breadcrumb is the path to a property within the stream.
     """
     breadcrumb = breadcrumb or ()
-    if not isinstance(breadcrumb, tuple):  # pragma: no cover
-        msg = (  # type: ignore[unreachable]
-            f"Expected tuple value for breadcrumb '{breadcrumb}'. Got "
-            f"{type(breadcrumb).__name__}"
-        )
-        # TODO: this should be a ValueError, but it's a breaking change.
-        raise ValueError(msg)  # noqa: TRY004
-
     catalog_entry = catalog.get_stream(stream_name)
     if not catalog_entry:
         msg = f"Catalog entry missing for '{stream_name}'. Skipping."

@@ -40,7 +40,7 @@ if t.TYPE_CHECKING:
     else:
         from typing_extensions import TypeAlias
 
-    from singer_sdk._singerlib.catalog import Catalog
+    from singer_sdk.singerlib.catalog import Catalog
 
 
 MAPPER_ELSE_OPTION = "__else__"
@@ -414,6 +414,9 @@ class CustomStreamMap(StreamMap):
         if expr.startswith("bool("):
             return th.BooleanType()
 
+        if expr.startswith("json.dumps("):
+            return th.StringType()
+
         if expr.startswith(("datetime.date.", "datetime.date(")) or expr.endswith(
             ".date()"
         ):
@@ -448,7 +451,7 @@ class CustomStreamMap(StreamMap):
         if stream_map and MAPPER_FILTER_OPTION in stream_map:
             filter_rule = stream_map.pop(MAPPER_FILTER_OPTION)
             try:
-                filter_rule_parsed: ast.Expr = ast.parse(filter_rule).body[0]  # type: ignore[arg-type,assignment]
+                filter_rule_parsed: ast.Expr = ast.parse(filter_rule).body[0]  # type: ignore[assignment]
             except (SyntaxError, IndexError) as ex:
                 msg = f"Failed to parse expression {filter_rule}."
                 raise MapExpressionError(msg) from ex
@@ -535,7 +538,9 @@ class CustomStreamMap(StreamMap):
                 )
                 if "Faker" in prop_def:
                     warnings.warn(
-                        "Class 'Faker' is deprecated in stream maps. Use instance methods, like 'fake.seed_instance.'",  # noqa: E501
+                        "Class 'Faker' is deprecated in stream maps and will be "
+                        "removed by August 2025. "
+                        "Use instance methods, like 'fake.seed_instance.'",
                         DeprecationWarning,
                         stacklevel=2,
                     )

@@ -7,21 +7,21 @@ prefix `poetry run`.
 
 - Note: CLI mapping is performed in `pyproject.toml` and shims are recreated during `poetry install`:
 
-    ````{tab} Poetry
-    ```toml
-    ...
-    [tool.poetry.scripts]
-    tap-mysource = 'singer_sdk.tests.sample_tap_parquet.parquet_tap:cli'
-    ```
-    ````
+  ````{tab} Poetry
+  ```toml
+  ...
+  [tool.poetry.scripts]
+  tap-mysource = 'singer_sdk.tests.sample_tap_parquet.parquet_tap:cli'
+  ```
+  ````
 
-    ````{tab} uv
-    ```toml
-    ...
-    [project.scripts]
-    tap-mysource = 'singer_sdk.tests.sample_tap_parquet.parquet_tap:cli'
-    ```
-    ````
+  ````{tab} uv
+  ```toml
+  ...
+  [project.scripts]
+  tap-mysource = 'singer_sdk.tests.sample_tap_parquet.parquet_tap:cli'
+  ```
+  ````
 
 The CLI commands defined here will be configured automatically when the python library is installed by a user.
 
@@ -293,12 +293,12 @@ plugins:
 
 ### Comparison
 
-|                     | native/shell/`poetry`/`uv`                                                                  |                          `meltano`                                   |
+| | native/shell/`poetry`/`uv` | `meltano` |
 | ------------------- | :-----------------------------------------------------------------------------------------: | :------------------------------------------------------------------: |
 | Configuration store | Config JSON file (`--config=path/to/config.json`) or environment variables (`--config=ENV`) | `meltano.yml`, `.env`, environment variables, or Meltano's system db |
-| Simple invocation   | `my-tap --config=...`                                                                       | `meltano invoke my-tap`                                              |
-| Other CLI options   | `my-tap --about --format=json`                                                              | `meltano invoke my-tap --about --format=json`                        |
-| ELT                 | `my-tap --config=... \| path/to/target-jsonl --config=...`                                  | `meltano run my-tap target-jsonl`                                    |
+| Simple invocation | `my-tap --config=...` | `meltano invoke my-tap` |
+| Other CLI options | `my-tap --about --format=json` | `meltano invoke my-tap --about --format=json` |
+| ELT | `my-tap --config=... \| path/to/target-jsonl --config=...` | `meltano run my-tap target-jsonl` |
 
-[Meltano]: https://www.meltano.com
 [declare settings]: https://docs.meltano.com/reference/command-line-interface#how-to-use-2
+[meltano]: https://www.meltano.com

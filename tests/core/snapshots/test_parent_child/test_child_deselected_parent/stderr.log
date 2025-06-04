@@ -1,0 +1,4 @@
+INFO my-tap.parent Beginning full_table sync of 'parent'
+INFO my-tap.child Beginning full_table sync of 'child' with context: {'pid': 1}
+INFO my-tap.child Beginning full_table sync of 'child' with context: {'pid': 2}
+INFO my-tap.child Beginning full_table sync of 'child' with context: {'pid': 3}

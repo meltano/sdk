@@ -346,10 +346,8 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
         name = "my-api-stream"
         url_base = "https://my.api.test"
         path = "/path/to/resource"
+        records_jsonpath = "$.data[*]"
         schema = {"type": "object", "properties": {"id": {"type": "integer"}}}  # noqa: RUF012
-
-        def parse_response(self, response: Response) -> t.Iterable[dict]:
-            return response.json()
 
         def get_new_paginator(self) -> BasePageNumberPaginator:
             return BasePageNumberPaginator(1)
@@ -376,14 +374,13 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
             query = parse_qs(parsed.query)
 
             if query.get("page", ["1"]) == ["1"]:
-                r._content = json.dumps(
-                    [
-                        {"id": 1},
-                        {"id": 2},
-                    ]
-                ).encode()
+                r._content = json.dumps({"data": [{"id": 1}, {"id": 2}]}).encode()
+            elif query.get("page", ["2"]) == ["2"]:
+                r._content = json.dumps({"data": []}).encode()
+            elif query.get("page", ["3"]) == ["3"]:
+                r._content = json.dumps({"data": [{"id": 3}, {"id": 4}]}).encode()
             else:
-                r._content = json.dumps([]).encode()
+                r._content = json.dumps({"data": []}).encode()
 
             return r
 
@@ -391,9 +388,90 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
 
     records_iter = stream.request_records(context=None)
 
-    next(records_iter)
-    next(records_iter)
+    assert next(records_iter) == {"id": 1}
+    assert next(records_iter) == {"id": 2}
+
+    with pytest.raises(StopIteration):
+        assert next(records_iter) == {"id": 3}
+
+    with pytest.raises(StopIteration):
+        assert next(records_iter) == {"id": 4}
+
     with pytest.raises(StopIteration):
         next(records_iter)
 
     assert "Pagination stopped after 1 pages" in caplog.text
+
+
+def test_continue_if_empty(tap: Tap):
+    class _TestPaginator(BasePageNumberPaginator):
+        def has_more(self, response: Response) -> bool:
+            return response.json().get("hasMore", False)
+
+        def continue_if_empty(self, response: Response) -> bool:  # noqa: ARG002
+            return True
+
+    class MyAPIStream(RESTStream[int]):
+        """My API stream."""
+
+        name = "my-api-stream"
+        url_base = "https://my.api.test"
+        path = "/path/to/resource"
+        records_jsonpath = "$.data[*]"
+        schema = {"type": "object", "properties": {"id": {"type": "integer"}}}  # noqa: RUF012
+
+        def get_new_paginator(self) -> BasePageNumberPaginator:
+            return _TestPaginator(1)
+
+        def get_url_params(
+            self,
+            context: dict | None,  # noqa: ARG002
+            next_page_token: int | None,
+        ) -> dict[str, t.Any] | str:
+            params = {}
+            if next_page_token:
+                params["page"] = next_page_token
+            return params
+
+        def _request(
+            self,
+            prepared_request: PreparedRequest,
+            context: dict | None,  # noqa: ARG002
+        ) -> Response:
+            r = Response()
+            r.status_code = 200
+
+            parsed = urlparse(prepared_request.url)
+            query = parse_qs(parsed.query)
+
+            if query.get("page", ["1"]) == ["1"]:
+                r._content = json.dumps(
+                    {
+                        "data": [{"id": 1}, {"id": 2}],
+                        "hasMore": True,
+                    }
+                ).encode()
+            elif query.get("page", ["2"]) == ["2"]:
+                r._content = json.dumps({"data": [], "hasMore": True}).encode()
+            elif query.get("page", ["3"]) == ["3"]:
+                r._content = json.dumps(
+                    {
+                        "data": [{"id": 3}, {"id": 4}],
+                        "hasMore": True,
+                    }
+                ).encode()
+            else:
+                r._content = json.dumps({"data": [], "hasMore": False}).encode()
+
+            return r
+
+    stream = MyAPIStream(tap=tap)
+    records_iter = stream.request_records(context=None)
+
+    assert next(records_iter) == {"id": 1}
+    assert next(records_iter) == {"id": 2}
+    assert next(records_iter) == {"id": 3}
+    assert next(records_iter) == {"id": 4}
+
+    with pytest.raises(StopIteration):
+        next(records_iter)

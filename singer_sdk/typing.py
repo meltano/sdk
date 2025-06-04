@@ -448,6 +448,12 @@ class RegexType(StringType):
     string_format = "regex"
 
 
+class SingerDecimalType(StringType):
+    """Decimal type."""
+
+    string_format = "singer.decimal"
+
+
 class BooleanType(JSONTypeHelper[bool]):
     """Boolean type.
 
@@ -599,7 +605,7 @@ class ArrayType(JSONTypeHelper[list], t.Generic[W]):
         super().__init__(**kwargs)
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -650,6 +656,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         nullable: bool | None = None,
         title: str | None = None,
         deprecated: bool | None = None,
+        requires_properties: list[str] | None = None,
         **kwargs: t.Any,
     ) -> None:
         """Initialize Property object.
@@ -674,6 +681,8 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
             nullable: If True, the property may be null.
             title: Optional. A short, human-readable title for the property.
             deprecated: If True, mark this property as deprecated.
+            requires_properties: A list of property names that must also be present if
+                this property is present.
             **kwargs: Additional keyword arguments to pass to the parent class.
         """
         self.name = name
@@ -687,10 +696,11 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         self.nullable = nullable
         self.title = title
         self.deprecated = deprecated
+        self.requires_properties = requires_properties
         self.kwargs = kwargs
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -852,7 +862,7 @@ class ObjectType(JSONTypeHelper):
         super().__init__(**kwargs)
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -860,10 +870,14 @@ class ObjectType(JSONTypeHelper):
         """
         merged_props = {}
         required = []
+        dependent_required: dict[str, list[str]] = {}
         for w in self.wrapped.values():
             merged_props.update(w.to_dict())
             if not w.optional:
                 required.append(w.name)
+            if w.requires_properties:
+                dependent_required[w.name] = w.requires_properties
+
         result: dict[str, t.Any] = {
             "type": ["object", "null"] if self.nullable else "object",
             "properties": merged_props,
@@ -871,6 +885,9 @@ class ObjectType(JSONTypeHelper):
 
         if required:
             result["required"] = required
+
+        if dependent_required:
+            result["dependentRequired"] = dependent_required
 
         if self.additional_properties is not None:
             if isinstance(self.additional_properties, bool):
@@ -919,7 +936,7 @@ class OneOf(JSONTypeHelper):
         self.wrapped = types
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -976,7 +993,7 @@ class AllOf(JSONTypeHelper):
         self.wrapped = types
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -1007,7 +1024,7 @@ class Constant(JSONTypeHelper):
         self.value = value
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -1099,7 +1116,7 @@ class CustomType(JSONTypeHelper):
         self._jsonschema_type_dict = jsonschema_type_dict
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -1109,7 +1126,75 @@ class CustomType(JSONTypeHelper):
 
 
 class PropertiesList(ObjectType):
-    """Properties list. A convenience wrapper around the ObjectType class."""
+    """Properties list. A convenience wrapper around the ObjectType class.
+
+    Examples:
+        >>> schema = PropertiesList(
+        ...     # username/password
+        ...     Property("username", StringType, requires_properties=["password"]),
+        ...     Property("password", StringType, secret=True),
+        ...     # OAuth
+        ...     Property(
+        ...         "client_id",
+        ...         StringType,
+        ...         requires_properties=["client_secret", "refresh_token"],
+        ...     ),
+        ...     Property("client_secret", StringType, secret=True),
+        ...     Property("refresh_token", StringType, secret=True),
+        ... )
+        >>> print(schema.to_json(indent=2))
+        {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "password": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "secret": true,
+              "writeOnly": true
+            },
+            "client_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "client_secret": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "secret": true,
+              "writeOnly": true
+            },
+            "refresh_token": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "secret": true,
+              "writeOnly": true
+            }
+          },
+          "dependentRequired": {
+            "username": [
+              "password"
+            ],
+            "client_id": [
+              "client_secret",
+              "refresh_token"
+            ]
+          },
+          "$schema": "https://json-schema.org/draft/2020-12/schema"
+        }
+    """
 
     def items(self) -> t.ItemsView[str, Property]:
         """Get wrapped properties.
@@ -1128,7 +1213,7 @@ class PropertiesList(ObjectType):
         self.wrapped[property.name] = property
 
     @property
-    def type_dict(self) -> dict:  # type: ignore[override]
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:

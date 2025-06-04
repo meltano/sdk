@@ -16,6 +16,7 @@ if t.TYPE_CHECKING:
 
     from singer_sdk import Tap, Target
     from singer_sdk.helpers._compat import Traversable
+    from singer_sdk.helpers.types import Record
 
 
 class SingerTestRunner(metaclass=abc.ABCMeta):
@@ -46,7 +47,7 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
         self.schema_messages: list[dict] = []
         self.record_messages: list[dict] = []
         self.state_messages: list[dict] = []
-        self.records: defaultdict = defaultdict(list)
+        self.records: defaultdict[str, list[Record]] = defaultdict(list)
 
     @staticmethod
     def _clean_sync_output(raw_records: str) -> list[dict]:
@@ -141,11 +142,9 @@ class TapTestRunner(SingerTestRunner):
             True if dry run test passes, else False.
         """
         new_tap = self.new_tap()
-        dry_run_record_limit = None
-        if self.suite_config.max_records_limit is not None:
-            dry_run_record_limit = self.suite_config.max_records_limit
-
-        return new_tap.run_sync_dry_run(dry_run_record_limit=dry_run_record_limit)
+        return new_tap.run_sync_dry_run(
+            dry_run_record_limit=self.suite_config.max_records_limit,
+        )
 
     def sync_all(self, **kwargs: t.Any) -> None:  # noqa: ARG002
         """Run a full tap sync, assigning output to the runner object.
@@ -184,8 +183,8 @@ class TapTestRunner(SingerTestRunner):
         Returns:
             A 2-item tuple with StringIO buffers from the Tap's output: (stdout, stderr)
         """
-        stdout_buf = io.StringIO()
-        stderr_buf = io.StringIO()
+        stdout_buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
+        stderr_buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
         with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
             self.run_sync_dry_run()
         stdout_buf.seek(0)
@@ -281,7 +280,7 @@ class TargetTestRunner(SingerTestRunner):
         target_input: t.IO[str],
         *,
         finalize: bool = True,
-    ) -> tuple[io.StringIO, io.StringIO]:
+    ) -> tuple[io.TextIOWrapper[io.BytesIO], io.TextIOWrapper[io.BytesIO]]:
         """Invoke the target with the provided input.
 
         Args:
@@ -294,14 +293,14 @@ class TargetTestRunner(SingerTestRunner):
             A 2-item tuple with StringIO buffers from the Target's output:
                 (stdout, stderr)
         """
-        stdout_buf = io.StringIO()
-        stderr_buf = io.StringIO()
+        stdout_buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
+        stderr_buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
 
         with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
             if target_input is not None:
-                target._process_lines(target_input)  # noqa: SLF001
+                target.process_lines(target_input)
             if finalize:
-                target._process_endofpipe()  # noqa: SLF001
+                target.process_endofpipe()
 
         stdout_buf.seek(0)
         stderr_buf.seek(0)

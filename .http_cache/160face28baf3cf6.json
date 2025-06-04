@@ -1,0 +1,1120 @@
+{
+  "cookies": {
+    "_cfuvid": "9Ywty8TBiDZFP1OSyJwPSwt1GBLfNNAbOhpjf.Foato-1747940857558-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:07:37.450403+00:00",
+  "elapsed": 0.486809,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e98f58e5fede1-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:07:37 GMT",
+    "ETag": "W/\"2e524a573c2e1d03457657446d5224f3\"",
+    "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/80/issues?epic_iid=80&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/80/issues?epic_iid=80&id=2524164&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=9Ywty8TBiDZFP1OSyJwPSwt1GBLfNNAbOhpjf.Foato-1747940857558-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-03-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-d",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"898008e69b79dfc22c9f5486691fc6ee\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "898008e69b79dfc22c9f5486691fc6ee",
+    "x-runtime": "0.256497",
+    "x-total": "9",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/2524164/epics/80/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/2524164/epics/80/issues",
+  "_decoded_content": [
+    {
+      "id": 102835472,
+      "iid": 3268,
+      "project_id": 7603319,
+      "title": "Flake8 --diff not working as expected from forks",
+      "description": "Following from the latest on community-contributed MR !2540, it seems the default branch targeting implemented in !2543 is not working as expected from a fork. Rather than compare `upstream/master` with `forkname/branchname`, the pipeline seems to be comparing `forkname/master` with `forkname/branchname`.\n\n```\n$ git fetch origin $CI_DEFAULT_BRANCH; # collapsed multi-line command\nFrom https://gitlab.com/vischous/meltano\n * branch                master     -> FETCH_HEAD\nComparing to master\n$ declare FILES=$(git diff --name-only ${CI_COMMIT_SHA} $REF | grep \"\\.py$\")\n$ if [ -n \"${FILES}\" ]; then # collapsed multi-line command\nChanged files are\\nsrc/meltano/__init__.py\nsrc/meltano/api/app.py\nsrc/meltano/api/controllers/orchestrations.py\nsrc/meltano/api/security/forms.py\nsrc/meltano/cli/__init__.py\nsrc/meltano/cli/add.py\nsrc/meltano/cli/cli.py\n...\n```\n\nTo resolve this, we probably need to somehow explicitly compare with `upstream/master` or a similar reference, and to do so in a way that also works on the main `meltano` repo, which would not have an `upstream` reference.\n\nCc @edgarrmondragon, @pandemicsyn",
+      "state": "closed",
+      "created_at": "2022-02-22T05:29:58.241Z",
+      "updated_at": "2022-04-07T15:04:06.346Z",
+      "closed_at": "2022-04-07T15:04:05.027Z",
+      "closed_by": {
+        "id": 7646034,
+        "username": "kgpayne",
+        "public_email": "",
+        "name": "Ken Payne",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
+        "web_url": "https://gitlab.com/kgpayne"
+      },
+      "labels": [
+        "kind::Bug",
+        "urgency::high",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2351598,
+        "iid": 208,
+        "group_id": 2524164,
+        "title": "April 2022",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-11-29T21:38:06.797Z",
+        "updated_at": "2022-05-02T14:53:27.097Z",
+        "due_date": "2022-04-30",
+        "start_date": "2022-04-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/208"
+      },
+      "assignees": [
+        {
+          "id": 7646034,
+          "username": "kgpayne",
+          "public_email": "",
+          "name": "Ken Payne",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
+          "web_url": "https://gitlab.com/kgpayne"
+        }
+      ],
+      "author": {
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 7646034,
+        "username": "kgpayne",
+        "public_email": "",
+        "name": "Ken Payne",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
+        "web_url": "https://gitlab.com/kgpayne"
+      },
+      "user_notes_count": 3,
+      "merge_requests_count": 1,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3268",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": 2,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3268",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3268/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3268/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3268",
+        "relative": "#3268",
+        "full": "meltano/meltano#3268"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 80,
+      "epic": {
+        "id": 60081,
+        "iid": 80,
+        "title": "Encourage more contributions to Meltano",
+        "url": "/groups/meltano/-/epics/80",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1139442,
+      "relative_position": 1073736271
+    },
+    {
+      "id": 101681928,
+      "iid": 3201,
+      "project_id": 7603319,
+      "title": "Consider a revised new user experience for graphically setting up their first project",
+      "description": "Breaking these into steps:\n\n\n### 1. Installation and project creation\n\nCurrently, this is something like `pipx install meltano && meltano init <new-project-name> && cd <new-project-name>`\n\n**Graphical alternative:**\n\nPrereqs:\n\n- A GitHub account\n- A container runtime like Docker, Podman, or Rancher Desktop\n- VS Code\n- The VS Code Remote Containers extension\n\nSteps:\n\n1. Navigate to a template project in GitHub\n2. Click through the GitHub \"Clone\" option to clone the project.\n3. VS Code prompts your re-launch in a container that already has everything installed. (Based on dev-containers.json inherited from the template project.)\n\n\n### 2. Creating and running your first pipeline\n\nCurrently, this is a series of CLI commands:\n- one CLI command per extractor and loader to install\n- one per setting that is needed in any plugin\n- one to invoke the `elt` pipeline\n\n**Graphical alternative (A):**\n\nPrereqs:\n\n- Already running in a container (as described above) _OR_ running something other than Windows.\n\nSteps:\n\n1. Run `meltano ui` from any terminal. (If containerized, this is easiest to do in VS Code terminal.)\n1. Click on (or copy-paste) the Meltano UI URL to open the link in a browser.\n1. Setup your extractor and loader in the Web UI.\n    - One interactive screen per each plugin's setting.\n2. Create a 'pipeline' and test in the Web UI.",
+      "state": "closed",
+      "created_at": "2022-02-01T19:27:00.953Z",
+      "updated_at": "2022-05-30T10:12:18.112Z",
+      "closed_at": "2022-05-30T10:12:18.092Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "flow::To Do",
+        "kind::Feature",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2351602,
+        "iid": 211,
+        "group_id": 2524164,
+        "title": "Q3-2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:39:41.523Z",
+        "updated_at": "2021-11-29T21:39:41.523Z",
+        "due_date": "2022-09-30",
+        "start_date": "2022-07-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/211"
+      },
+      "assignees": [],
+      "author": {
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 3,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3201",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3201",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3201/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3201/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3201",
+        "relative": "#3201",
+        "full": "meltano/meltano#3201"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 80,
+      "epic": {
+        "id": 60081,
+        "iid": 80,
+        "title": "Encourage more contributions to Meltano",
+        "url": "/groups/meltano/-/epics/80",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1103420,
+      "relative_position": 1073736784
+    },
+    {
+      "id": 81130015,
+      "iid": 2655,
+      "project_id": 7603319,
+      "title": "Add Community Page",
+      "description": "",
+      "state": "closed",
+      "created_at": "2021-03-17T19:22:48.882Z",
+      "updated_at": "2021-03-22T15:29:19.202Z",
+      "closed_at": "2021-03-22T15:29:18.987Z",
+      "closed_by": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "labels": [
+        "Community",
+        "Documentation",
+        "flow::Review"
+      ],
+      "milestone": {
+        "id": 1893434,
+        "iid": 151,
+        "group_id": 2524164,
+        "title": "Fri: Mar 26, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-02-15T22:28:29.414Z",
+        "updated_at": "2021-03-29T16:19:24.949Z",
+        "due_date": "2021-03-27",
+        "start_date": "2021-03-20",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/151"
+      },
+      "assignees": [
+        {
+          "id": 1942272,
+          "username": "tayloramurphy",
+          "public_email": "",
+          "name": "Taylor A Murphy",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "web_url": "https://gitlab.com/tayloramurphy"
+        }
+      ],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 1,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2655",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": 1,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2655",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2655/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2655/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2655",
+        "relative": "#2655",
+        "full": "meltano/meltano#2655"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 80,
+      "epic": {
+        "id": 60081,
+        "iid": 80,
+        "title": "Encourage more contributions to Meltano",
+        "url": "/groups/meltano/-/epics/80",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 491210,
+      "relative_position": 1073737297
+    },
+    {
+      "id": 81123846,
+      "iid": 18,
+      "project_id": 24722673,
+      "title": "Setup Community Guidelines for Meltano Slack",
+      "description": "Can just lift and shift the good bits from many of these communities.\n\n* dbt has great rules: https://docs.getdbt.com/docs/contributing/slack-rules-of-the-road\n* Locally Optimistic: https://locallyoptimistic.com/community/\n* PyPA Code of conduct  https://www.pypa.io/en/latest/code-of-conduct/",
+      "state": "closed",
+      "created_at": "2021-03-17T17:01:04.187Z",
+      "updated_at": "2021-03-22T15:29:18.800Z",
+      "closed_at": "2021-03-22T15:29:18.540Z",
+      "closed_by": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "labels": [
+        "Community",
+        "Documentation",
+        "flow::To Do"
+      ],
+      "milestone": {
+        "id": 1893434,
+        "iid": 151,
+        "group_id": 2524164,
+        "title": "Fri: Mar 26, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-02-15T22:28:29.414Z",
+        "updated_at": "2021-03-29T16:19:24.949Z",
+        "due_date": "2021-03-27",
+        "start_date": "2021-03-20",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/151"
+      },
+      "assignees": [
+        {
+          "id": 1942272,
+          "username": "tayloramurphy",
+          "public_email": "",
+          "name": "Taylor A Murphy",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "web_url": "https://gitlab.com/tayloramurphy"
+        }
+      ],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "user_notes_count": 1,
+      "merge_requests_count": 1,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meta/-/issues/18",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": 1,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/24722673/issues/18",
+        "notes": "https://gitlab.com/api/v4/projects/24722673/issues/18/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/24722673/issues/18/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/24722673",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#18",
+        "relative": "#18",
+        "full": "meltano/meta#18"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 80,
+      "epic": {
+        "id": 60081,
+        "iid": 80,
+        "title": "Encourage more contributions to Meltano",
+        "url": "/groups/meltano/-/epics/80",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 490994,
+      "relative_position": 1073737810
+    },
+    {
+      "id": 35141192,
+      "iid": 2074,
+      "project_id": 7603319,
+      "title": "Clean up issue tracker, close old epics and issues",
+      "description": "",
+      "state": "closed",
+      "created_at": "2020-05-28T20:59:52.324Z",
+      "updated_at": "2021-04-05T21:07:19.752Z",
+      "closed_at": "2021-04-05T21:07:19.655Z",
+      "closed_by": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "labels": [
+        "flow::Doing"
+      ],
+      "milestone": {
+        "id": 1905065,
+        "iid": 153,
+        "group_id": 2524164,
+        "title": "Fri: Apr 9, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-02-22T16:18:44.960Z",
+        "updated_at": "2021-04-12T14:19:59.626Z",
+        "due_date": "2021-04-10",
+        "start_date": "2021-04-03",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/153"
+      },
+      "assignees": [
+        {
+          "id": 1942272,
+          "username": "tayloramurphy",
+          "public_email": "",
+          "name": "Taylor A Murphy",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "web_url": "https://gitlab.com/tayloramurphy"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "user_notes_count": 2,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2074",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2074",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2074/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2074/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2074",
+        "relative": "#2074",
+        "full": "meltano/meltano#2074"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 80,
+      "epic": {
+        "id": 60081,
+        "iid": 80,
+        "title": "Encourage more contributions to Meltano",
+        "url": "/groups/meltano/-/epics/80",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 130253,
+      "relative_position": 1073739323
+    },
+    {
+      "id": 35141186,
+      "iid": 2073,
+      "project_id": 7603319,
+      "title": "Add \"Accepting Merge Requests\" labels to issues",
+      "description": "",
+      "state": "closed",
+      "created_at": "2020-05-28T20:59:28.741Z",
+      "updated_at": "2021-09-03T16:33:46.475Z",
+      "closed_at": "2021-09-03T16:33:46.457Z",
+      "closed_by": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "labels": [
+        "Documentation"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [
+        {
+          "id": 1942272,
+          "username": "tayloramurphy",
+          "public_email": "",
+          "name": "Taylor A Murphy",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "web_url": "https://gitlab.com/tayloramurphy"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "user_notes_count": 1,
+      "merge_requests_count": 0,
+      "upvotes": 1,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2073",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2073",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2073/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2073/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2073",
+        "relative": "#2073",
+        "full": "meltano/meltano#2073"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 80,
+      "epic": {
+        "id": 60081,
+        "iid": 80,
+        "title": "Encourage more contributions to Meltano",
+        "url": "/groups/meltano/-/epics/80",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 130252,
+      "relative_position": 1073740323
+    },
+    {
+      "id": 34475841,
+      "iid": 2022,
+      "project_id": 7603319,
+      "title": "Add \"Contributing to Meltano\" guide to homepage",
+      "description": "Split out off https://gitlab.com/meltano/meltano/-/issues/2016",
+      "state": "closed",
+      "created_at": "2020-05-12T23:52:54.727Z",
+      "updated_at": "2020-08-28T23:12:06.833Z",
+      "closed_at": "2020-08-12T17:40:21.114Z",
+      "closed_by": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "labels": [
+        "flow::Triage"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 87854,
+          "username": "DouweM",
+          "public_email": "",
+          "name": "Douwe Maan",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+          "web_url": "https://gitlab.com/DouweM"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "user_notes_count": 1,
+      "merge_requests_count": 1,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2022",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2022",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2022/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2022/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2022",
+        "relative": "#2022",
+        "full": "meltano/meltano#2022"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 80,
+      "epic": {
+        "id": 60081,
+        "iid": 80,
+        "title": "Encourage more contributions to Meltano",
+        "url": "/groups/meltano/-/epics/80",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 120607,
+      "relative_position": 1073738323
+    },
+    {
+      "id": 34132196,
+      "iid": 2009,
+      "project_id": 7603319,
+      "title": "Improve MR and issue templates",
+      "description": "",
+      "state": "closed",
+      "created_at": "2020-05-04T23:23:53.664Z",
+      "updated_at": "2022-05-30T05:44:18.163Z",
+      "closed_at": "2022-05-30T05:44:18.132Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Accepting Merge Requests",
+        "flow::To Do",
+        "kind::Non-Product",
+        "valuestream::Ecosystem"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 1,
+      "merge_requests_count": 0,
+      "upvotes": 1,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2009",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2009",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2009/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2009/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2009",
+        "relative": "#2009",
+        "full": "meltano/meltano#2009"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 80,
+      "epic": {
+        "id": 60081,
+        "iid": 80,
+        "title": "Encourage more contributions to Meltano",
+        "url": "/groups/meltano/-/epics/80",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 111854,
+      "relative_position": 1073739198
+    },
+    {
+      "id": 33599028,
+      "iid": 1967,
+      "project_id": 7603319,
+      "title": "Make contributing docs great again",
+      "description": "",
+      "state": "closed",
+      "created_at": "2020-04-21T22:24:11.650Z",
+      "updated_at": "2020-08-12T17:40:04.077Z",
+      "closed_at": "2020-08-12T17:40:04.046Z",
+      "closed_by": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "labels": [
+        "flow::Triage"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 2,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/1967",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/1967",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/1967/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/1967/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#1967",
+        "relative": "#1967",
+        "full": "meltano/meltano#1967"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 80,
+      "epic": {
+        "id": 60081,
+        "iid": 80,
+        "title": "Encourage more contributions to Meltano",
+        "url": "/groups/meltano/-/epics/80",
+        "group_id": 2524164,
+        "human_readable_end_date": "Sep 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 102461,
+      "relative_position": 1073738823
+    }
+  ]
+}

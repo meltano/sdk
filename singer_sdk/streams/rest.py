@@ -34,8 +34,8 @@ if t.TYPE_CHECKING:
 
     from backoff.types import Details
 
-    from singer_sdk._singerlib import Schema
     from singer_sdk.helpers.types import Auth, Context
+    from singer_sdk.singerlib import Schema
     from singer_sdk.tap_base import Tap
 
 DEFAULT_PAGE_SIZE = 1000
@@ -97,12 +97,12 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             path: URL path for this entity stream.
             http_method: HTTP method to use for requests.
         """
-        super().__init__(name=name, schema=schema, tap=tap)
         if path:
             self.path = path
-        self._http_headers: dict = {"User-Agent": self.user_agent}
+        self._http_headers: dict[str, str] = {}
         self._http_method = http_method
         self._requests_session = requests.Session()
+        super().__init__(name=name, schema=schema, tap=tap)
 
     @staticmethod
     def _url_encode(val: str | datetime | bool | int | list[str]) -> str:  # noqa: FBT001
@@ -137,6 +137,21 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         return url
 
     # HTTP Request functions
+
+    @property
+    def http_headers(self) -> dict:
+        """Return headers dict to be used for HTTP requests.
+
+        If an authenticator is also specified, the authenticator's headers will be
+        combined with `http_headers` when making HTTP requests.
+
+        Returns:
+            Dictionary of HTTP headers to use as a base for every request.
+        """
+        return {
+            "User-Agent": self.user_agent,
+            **self._http_headers,
+        }
 
     @property
     def http_method(self) -> str:
@@ -251,10 +266,15 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             else "Server"
         )
 
-        return (
+        msg = (
             f"{response.status_code} {error_type} Error: "
             f"{response.reason} for path: {full_path}"
         )
+
+        if response.content:
+            msg += f", content is {response.text}"
+
+        return msg
 
     def request_decorator(self, func: t.Callable) -> t.Callable:
         """Instantiate a decorator for handling request failures.
@@ -403,6 +423,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             "url": url,
             "params": params,
             "headers": headers,
+            "auth": self.authenticator,
         }
 
         if self.payload_as_json:
@@ -442,6 +463,10 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
                 try:
                     first_record = next(records)
                 except StopIteration:
+                    if paginator.continue_if_empty(resp):
+                        paginator.advance(resp)
+                        continue
+
                     self.logger.info(
                         "Pagination stopped after %d pages because no records were "
                         "found in the last response",
@@ -575,18 +600,6 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         """
 
     @property
-    def http_headers(self) -> dict:
-        """Return headers dict to be used for HTTP requests.
-
-        If an authenticator is also specified, the authenticator's headers will be
-        combined with `http_headers` when making HTTP requests.
-
-        Returns:
-            Dictionary of HTTP headers to use as a base for every request.
-        """
-        return self._http_headers
-
-    @property
     def timeout(self) -> int:
         """Return the request timeout limit in seconds.
 
@@ -610,12 +623,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         Yields:
             One item per (possibly processed) record in the API.
         """
-        for record in self.request_records(context):
-            transformed_record = self.post_process(record, context)
-            if transformed_record is None:
-                # Record filtered out during post_process()
-                continue
-            yield transformed_record
+        yield from self.request_records(context)
 
     # Abstract methods:
 

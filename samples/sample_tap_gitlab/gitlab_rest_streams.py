@@ -5,6 +5,8 @@ from __future__ import annotations
 import importlib.resources
 import typing as t
 
+from requests_cache import CachedSession
+
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.pagination import SimpleHeaderPaginator
 from singer_sdk.streams.rest import RESTStream
@@ -33,6 +35,16 @@ class GitlabStream(RESTStream[str]):
     def url_base(self) -> str:
         """Return the base GitLab URL."""
         return self.config.get("api_url", DEFAULT_URL_BASE)
+
+    @property
+    def requests_session(self) -> CachedSession:
+        return CachedSession(
+            ".http_cache",
+            backend="filesystem",
+            serializer="json",
+            ignored_parameters=["Private-Token"],
+            match_headers=True,
+        )
 
     @property
     def authenticator(self) -> SimpleAuthenticator:

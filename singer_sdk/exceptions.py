@@ -5,7 +5,7 @@ from __future__ import annotations
 import abc
 import typing as t
 
-from singer_sdk._singerlib.exceptions import InvalidInputLine  # noqa: F401
+from singer_sdk.singerlib.exceptions import InvalidInputLine  # noqa: F401
 
 if t.TYPE_CHECKING:
     import requests

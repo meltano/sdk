@@ -1,0 +1,270 @@
+{
+  "cookies": {
+    "_cfuvid": "H.k4K555NdY_0x65HCdWFwi_XJjBMJIlpE95CF9Kb9I-1747940897232-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:08:17.127776+00:00",
+  "elapsed": 0.622596,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e99ec9de3a634-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:08:17 GMT",
+    "ETag": "W/\"3cd3a24e3565b98f3deba6a5b5c99f52\"",
+    "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/123/issues?epic_iid=123&id=2524164&page=3&per_page=20>; rel=\"prev\", <https://gitlab.com/api/v4/groups/2524164/epics/123/issues?epic_iid=123&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/123/issues?epic_iid=123&id=2524164&page=4&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=H.k4K555NdY_0x65HCdWFwi_XJjBMJIlpE95CF9Kb9I-1747940897232-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-02-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-c",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"eb31a6041aa1bc7c4364ef3e26fcc791\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "4",
+    "x-per-page": "20",
+    "x-prev-page": "3",
+    "x-request-id": "eb31a6041aa1bc7c4364ef3e26fcc791",
+    "x-runtime": "0.330912",
+    "x-total": "62",
+    "x-total-pages": "4"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/2524164/epics/123/issues?page=4"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/2524164/epics/123/issues?page=4",
+  "_decoded_content": [
+    {
+      "id": 26052317,
+      "iid": 1151,
+      "project_id": 7603319,
+      "title": "Quick Actions definition file for VS Code",
+      "description": "### Problem to solve\n\nIt's difficult currently to get started for new users and the setup is still very dependent on copy-pasting CLI commands. The proposal would create one or more [tasks.json](https://code.visualstudio.com/Docs/editor/tasks) definition files for VS Code that would give a point-and-click option for users to perform tasks such as launching/stopping the server, initializing a project, etc.\n\n\n### Target audience\n\nNew Meltano users who are using VS Code as their editor, especially less technical roles such as data analysts.\n\n\n### Further details\n\nVS Code \"Tasks\" are documented here: https://code.visualstudio.com/Docs/editor/tasks\n\nThis proposal would add common command-line actions (Tasks) into VS Code that a user of any platform could select from a menu, rather than having to research and copy-paste the appropriate CLI command.\n\n\n### Proposal\n\n\nWhen significant differences exist in command execution, there may be a different set of commands for windows users, Ubuntu users, and Win/Lin users running via docker. These could be surfaced in one of the following ways (progressively more robust):\n1. A code block in the documentation page that a user can copy-paste into their [tasks.json](https://code.visualstudio.com/Docs/editor/tasks) definition file.\n2. A set of files (one for each OS/platform) that a user can download and move into their project folder.\n3. A sample git repo or a GitHub [template](https://help.github.com/en/articles/creating-a-template-repository) that has the actions definition file already. Also could be included in this is README.md file and VS Code extension recommendations.\n4. A VS Code extension could be created for Meltano that does most/all of the above without any work from the user.\n\n\n### What does success look like, and how can we measure that?\n\nProposal option 1 (copy-paste json doc) could be measured by tracking page hits and shared on the docs page.\nProposal option 2 (tasks.json file download) could be measured by tracking download counts.\nProposal option 3 (repo template) could be measured by github stats.\nProposal option 4 (extension) could be measured by Extension download metrics and ratings.\n\n### Regression test\n(Ensure the feature doesn't cause any regressions)\n- [ ] Write adequate test cases and submit test results\n- [ ] Test results should be reviewed by a person from the team\n\n### Links / references\n\n_Please note that this was taken from GitLab, to be changed accordingly_",
+      "state": "closed",
+      "created_at": "2019-10-17T17:56:20.263Z",
+      "updated_at": "2022-05-30T04:00:21.684Z",
+      "closed_at": "2022-05-30T04:00:21.565Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Accepting Merge Requests",
+        "kind::Feature",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 6,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/1151",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 2,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/1151",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/1151/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/1151/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#1151",
+        "relative": "#1151",
+        "full": "meltano/meltano#1151"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 123,
+      "epic": {
+        "id": 338495,
+        "iid": 123,
+        "title": "Improve CLI User Experience",
+        "url": "/groups/meltano/-/epics/123",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 805942,
+      "relative_position": -4617
+    },
+    {
+      "id": 15296074,
+      "iid": 141,
+      "project_id": 7603319,
+      "title": "Installing plugin into dedicated venv fails when Meltano was installed using pipenv",
+      "description": "Meltano relies on creating enviroments within meltano to install packages in isolation. \n\nCreation of virtual envs from within a venv created by virtualenv or pipenv will work when sub env is created with python -m venv venv.\n\nReproduce:\n```bash\n\u276f mkvirtualenv meltano\nUsing base prefix '/usr'\nNew python executable in /home/micael/.venvs/meltano/bin/python\nInstalling setuptools, pip, wheel...done.\nvirtualenvwrapper.user_scripts creating /home/micael/.venvs/meltano/bin/predeactivate\nvirtualenvwrapper.user_scripts creating /home/micael/.venvs/meltano/bin/postdeactivate\nvirtualenvwrapper.user_scripts creating /home/micael/.venvs/meltano/bin/preactivate\nvirtualenvwrapper.user_scripts creating /home/micael/.venvs/meltano/bin/postactivate\nvirtualenvwrapper.user_scripts creating /home/micael/.venvs/meltano/bin/get_env_details\n\n~\n(meltano) \u276f python -m venv sub\n\n~\n(meltano) \u276f tree sub\nsub\n\u251c\u2500\u2500 bin\n\u2502   \u251c\u2500\u2500 activate\n\u2502   \u251c\u2500\u2500 activate.csh\n\u2502   \u251c\u2500\u2500 activate.fish\n\u2502   \u251c\u2500\u2500 python -> /home/micael/.venvs/meltano/bin/python\n\u2502   \u2514\u2500\u2500 python3 -> python\n\u251c\u2500\u2500 include\n\u251c\u2500\u2500 lib\n\u2502   \u2514\u2500\u2500 python3.7\n\u2502       \u2514\u2500\u2500 site-packages\n\u251c\u2500\u2500 lib64 -> lib\n\u2514\u2500\u2500 pyvenv.cfg\n\n6 directories, 6 files\n\n~\n(meltano) \u276f \n```\n\nhttps://gitlab.slack.com/archives/C7HD6Q0RE/p1540559152000400\n\npipenv has the same problem.\n\nNotice that subvenv is missing `pip`",
+      "state": "closed",
+      "created_at": "2018-10-26T15:44:14.406Z",
+      "updated_at": "2022-05-30T01:52:41.545Z",
+      "closed_at": "2022-05-30T01:52:41.531Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Accepting Merge Requests",
+        "kind::Bug",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 300478,
+        "username": "jschatz1",
+        "public_email": "",
+        "name": "Jacob Schatz",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/300478/avatar.png",
+        "web_url": "https://gitlab.com/jschatz1"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 4,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/141",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/141",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/141/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/141/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#141",
+        "relative": "#141",
+        "full": "meltano/meltano#141"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 123,
+      "epic": {
+        "id": 338495,
+        "iid": 123,
+        "title": "Improve CLI User Experience",
+        "url": "/groups/meltano/-/epics/123",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 805956,
+      "relative_position": -5130
+    }
+  ]
+}

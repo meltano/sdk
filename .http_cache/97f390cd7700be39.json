@@ -1,0 +1,543 @@
+{
+  "cookies": {
+    "_cfuvid": "DeIpdBPACbFowBa.U9kRsEyynY4g.InDzJshhknGxG0-1747940850637-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:07:30.533438+00:00",
+  "elapsed": 0.416778,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e98caa85fcdac-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:07:30 GMT",
+    "ETag": "W/\"bf65b01f0eadb1d1c0c1a6681970131a\"",
+    "Link": "<https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?id=meltano%2Fsdk&order=default&order_by=created_at&page=5&per_page=20&since=2022-01-01T00%3A00%3A00%2B00%3A00&sort=asc&trailers=false&with_stats=true>; rel=\"prev\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?id=meltano%2Fsdk&order=default&order_by=created_at&page=7&per_page=20&since=2022-01-01T00%3A00%3A00%2B00%3A00&sort=asc&trailers=false&with_stats=true>; rel=\"next\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?id=meltano%2Fsdk&order=default&order_by=created_at&page=1&per_page=20&since=2022-01-01T00%3A00%3A00%2B00%3A00&sort=asc&trailers=false&with_stats=true>; rel=\"first\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=DeIpdBPACbFowBa.U9kRsEyynY4g.InDzJshhknGxG0-1747940850637-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-33-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-d",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"9a0fa1f943d719efd6f5f97c51f1e9d3\",\"version\":\"1\"}",
+    "x-next-page": "7",
+    "x-page": "6",
+    "x-per-page": "20",
+    "x-prev-page": "5",
+    "x-request-id": "9a0fa1f943d719efd6f5f97c51f1e9d3",
+    "x-runtime": "0.133527"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?order_by=created_at&page=6&since=2022-01-01T00%3A00%3A00Z&sort=asc&with_stats=true"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?order_by=created_at&page=6&since=2022-01-01T00%3A00%3A00Z&sort=asc&with_stats=true",
+  "_decoded_content": [
+    {
+      "id": "d8b634c01f1e4223918241d9a7d8051005ab2dca",
+      "short_id": "d8b634c0",
+      "created_at": "2022-02-04T18:39:58.000+00:00",
+      "parent_ids": [
+        "e5b3ae7224bfec63fc5048496f27697cd851db9c"
+      ],
+      "title": "Release/v0.4.2",
+      "message": "Release/v0.4.2\n",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-02-04T18:39:58.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-02-04T18:39:58.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/d8b634c01f1e4223918241d9a7d8051005ab2dca",
+      "stats": {
+        "additions": 17,
+        "deletions": 8,
+        "total": 25
+      }
+    },
+    {
+      "id": "e5b3ae7224bfec63fc5048496f27697cd851db9c",
+      "short_id": "e5b3ae72",
+      "created_at": "2022-02-04T00:46:53.000+00:00",
+      "parent_ids": [
+        "41b1b659e3aa1d103d792d28957110ae92c8d3af"
+      ],
+      "title": "Update CHANGELOG.md",
+      "message": "Update CHANGELOG.md",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-02-04T00:46:53.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-02-04T00:46:53.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/e5b3ae7224bfec63fc5048496f27697cd851db9c",
+      "stats": {
+        "additions": 4,
+        "deletions": 0,
+        "total": 4
+      }
+    },
+    {
+      "id": "41b1b659e3aa1d103d792d28957110ae92c8d3af",
+      "short_id": "41b1b659",
+      "created_at": "2022-02-04T00:27:37.000+00:00",
+      "parent_ids": [
+        "6232d3eec4f02263acb8db6a26775c2ae1adda70",
+        "010b41eb80a00cd06251e5976e05d666887982f3"
+      ],
+      "title": "Merge branch 'aj-flattener-2' into 'main'",
+      "message": "Merge branch 'aj-flattener-2' into 'main'\n\nAdd record and schema flattener in Stream Maps\n\nSee merge request meltano/sdk!236",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-02-04T00:27:37.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-02-04T00:27:37.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/41b1b659e3aa1d103d792d28957110ae92c8d3af",
+      "stats": {
+        "additions": 564,
+        "deletions": 143,
+        "total": 707
+      }
+    },
+    {
+      "id": "010b41eb80a00cd06251e5976e05d666887982f3",
+      "short_id": "010b41eb",
+      "created_at": "2022-02-04T00:27:37.000+00:00",
+      "parent_ids": [
+        "6232d3eec4f02263acb8db6a26775c2ae1adda70"
+      ],
+      "title": "Add record and schema flattener in Stream Maps",
+      "message": "Add record and schema flattener in Stream Maps\n",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-02-04T00:27:37.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-02-04T00:27:37.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/010b41eb80a00cd06251e5976e05d666887982f3",
+      "stats": {
+        "additions": 564,
+        "deletions": 143,
+        "total": 707
+      }
+    },
+    {
+      "id": "6232d3eec4f02263acb8db6a26775c2ae1adda70",
+      "short_id": "6232d3ee",
+      "created_at": "2022-02-01T22:08:35.000+00:00",
+      "parent_ids": [
+        "599dc6c232000537e472f722450810b970083262",
+        "c7c8d3938a157d4ca65baefb66905f019faac310"
+      ],
+      "title": "Merge branch 'match-sdk-site-to-brand-guidelines' into 'main'",
+      "message": "Merge branch 'match-sdk-site-to-brand-guidelines' into 'main'\n\nUpdate SDK site to match brand guidelines\n\nSee merge request meltano/sdk!245",
+      "author_name": "Alex Marple",
+      "author_email": "alex@meltano.com",
+      "authored_date": "2022-02-01T22:08:35.000+00:00",
+      "committer_name": "Alex Marple",
+      "committer_email": "alex@meltano.com",
+      "committed_date": "2022-02-01T22:08:35.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/6232d3eec4f02263acb8db6a26775c2ae1adda70",
+      "stats": {
+        "additions": 11,
+        "deletions": 11,
+        "total": 22
+      }
+    },
+    {
+      "id": "c7c8d3938a157d4ca65baefb66905f019faac310",
+      "short_id": "c7c8d393",
+      "created_at": "2022-02-01T12:57:49.000-08:00",
+      "parent_ids": [
+        "ab5caef5f505b520045770f1cef195a53fe497db"
+      ],
+      "title": "Update SDK site to match brand guidelines",
+      "message": "Update SDK site to match brand guidelines\n",
+      "author_name": "Alex Marple",
+      "author_email": "alexmarple@gmail.com",
+      "authored_date": "2022-02-01T12:57:49.000-08:00",
+      "committer_name": "Alex Marple",
+      "committer_email": "alexmarple@gmail.com",
+      "committed_date": "2022-02-01T12:57:49.000-08:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/c7c8d3938a157d4ca65baefb66905f019faac310",
+      "stats": {
+        "additions": 11,
+        "deletions": 11,
+        "total": 22
+      }
+    },
+    {
+      "id": "599dc6c232000537e472f722450810b970083262",
+      "short_id": "599dc6c2",
+      "created_at": "2022-02-01T18:54:25.000+00:00",
+      "parent_ids": [
+        "84b36ca2f5f9b072626066b9fc3f92f5ae6c96f1",
+        "9e0c32162f1be551b251ecb279cb6db36c00a34c"
+      ],
+      "title": "Merge: Resolve issues when aliasing stream maps using keywords `__alias__`, `__source__`, or `__else__` (#302, #301, !243)",
+      "message": "Merge: Resolve issues when aliasing stream maps using keywords `__alias__`, `__source__`, or `__else__` (#302, #301, !243)",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-02-01T18:54:25.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-02-01T18:54:25.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/599dc6c232000537e472f722450810b970083262",
+      "stats": {
+        "additions": 90,
+        "deletions": 28,
+        "total": 118
+      }
+    },
+    {
+      "id": "9e0c32162f1be551b251ecb279cb6db36c00a34c",
+      "short_id": "9e0c3216",
+      "created_at": "2022-02-01T18:54:24.000+00:00",
+      "parent_ids": [
+        "84b36ca2f5f9b072626066b9fc3f92f5ae6c96f1"
+      ],
+      "title": "Resolve issues when aliasing stream maps using keywords `__alias__`, `__source__`, or `__else__`",
+      "message": "Resolve issues when aliasing stream maps using keywords `__alias__`, `__source__`, or `__else__`\n",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-02-01T18:54:24.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-02-01T18:54:24.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/9e0c32162f1be551b251ecb279cb6db36c00a34c",
+      "stats": {
+        "additions": 90,
+        "deletions": 28,
+        "total": 118
+      }
+    },
+    {
+      "id": "84b36ca2f5f9b072626066b9fc3f92f5ae6c96f1",
+      "short_id": "84b36ca2",
+      "created_at": "2022-01-28T00:42:26.000+00:00",
+      "parent_ids": [
+        "4f481b0bf9443ec6cfd4818c7ccbe546fed2e883",
+        "5fb94df4197c6511dee0d11bad76672b70a0b756"
+      ],
+      "title": "Merge branch 'release/v0.4.1' into 'main'",
+      "message": "Merge branch 'release/v0.4.1' into 'main'\n\nRelease/v0.4.1\n\nSee merge request meltano/sdk!242",
+      "author_name": "Florian",
+      "author_email": "syn@ronin.io",
+      "authored_date": "2022-01-28T00:42:26.000+00:00",
+      "committer_name": "Florian",
+      "committer_email": "syn@ronin.io",
+      "committed_date": "2022-01-28T00:42:26.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/84b36ca2f5f9b072626066b9fc3f92f5ae6c96f1",
+      "stats": {
+        "additions": 13,
+        "deletions": 7,
+        "total": 20
+      }
+    },
+    {
+      "id": "5fb94df4197c6511dee0d11bad76672b70a0b756",
+      "short_id": "5fb94df4",
+      "created_at": "2022-01-28T00:42:26.000+00:00",
+      "parent_ids": [
+        "4f481b0bf9443ec6cfd4818c7ccbe546fed2e883"
+      ],
+      "title": "Release v0.4.1",
+      "message": "Release v0.4.1\n",
+      "author_name": "Florian",
+      "author_email": "syn@ronin.io",
+      "authored_date": "2022-01-28T00:42:26.000+00:00",
+      "committer_name": "Florian",
+      "committer_email": "syn@ronin.io",
+      "committed_date": "2022-01-28T00:42:26.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/5fb94df4197c6511dee0d11bad76672b70a0b756",
+      "stats": {
+        "additions": 13,
+        "deletions": 7,
+        "total": 20
+      }
+    },
+    {
+      "id": "4f481b0bf9443ec6cfd4818c7ccbe546fed2e883",
+      "short_id": "4f481b0b",
+      "created_at": "2022-01-27T22:42:13.000+00:00",
+      "parent_ids": [
+        "6bc48e8bf395ccabb914829ffb4d68c3b5829a53",
+        "ef3f26467b218a721d1d9736f5e61dd160f22aa7"
+      ],
+      "title": "Add `--test=schema` option to emit tap SCHEMA messages only (!218) - Thanks, @LaurentS!",
+      "message": "Add `--test=schema` option to emit tap SCHEMA messages only (!218) - Thanks, @LaurentS!",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-27T22:42:13.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-27T22:42:13.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/4f481b0bf9443ec6cfd4818c7ccbe546fed2e883",
+      "stats": {
+        "additions": 28,
+        "deletions": 5,
+        "total": 33
+      }
+    },
+    {
+      "id": "ef3f26467b218a721d1d9736f5e61dd160f22aa7",
+      "short_id": "ef3f2646",
+      "created_at": "2022-01-27T21:07:47.000+00:00",
+      "parent_ids": [
+        "3168f3ce794a196523e80e36ca55ab50dc4e38b8"
+      ],
+      "title": "Apply 1 suggestion(s) to 1 file(s)",
+      "message": "Apply 1 suggestion(s) to 1 file(s)",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-27T21:07:47.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-27T21:07:47.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/ef3f26467b218a721d1d9736f5e61dd160f22aa7",
+      "stats": {
+        "additions": 5,
+        "deletions": 1,
+        "total": 6
+      }
+    },
+    {
+      "id": "6bc48e8bf395ccabb914829ffb4d68c3b5829a53",
+      "short_id": "6bc48e8b",
+      "created_at": "2022-01-26T19:48:43.000+00:00",
+      "parent_ids": [
+        "ab5caef5f505b520045770f1cef195a53fe497db",
+        "2c8a34041e47a03b1c762af9bc2310aca2b4c44c"
+      ],
+      "title": "Always sync 1 record per stream when using `--test` or `--test=all` (#311, !241)",
+      "message": "Always sync 1 record per stream when using `--test` or `--test=all` (#311, !241)",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-26T19:48:43.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-26T19:48:43.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/6bc48e8bf395ccabb914829ffb4d68c3b5829a53",
+      "stats": {
+        "additions": 3,
+        "deletions": 1,
+        "total": 4
+      }
+    },
+    {
+      "id": "2c8a34041e47a03b1c762af9bc2310aca2b4c44c",
+      "short_id": "2c8a3404",
+      "created_at": "2022-01-26T19:06:32.000+00:00",
+      "parent_ids": [
+        "1ffe94e8a5933d797dca64f6833001fe88f9bae0"
+      ],
+      "title": "Update CHANGELOG.md",
+      "message": "Update CHANGELOG.md",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-26T19:06:32.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-26T19:06:32.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/2c8a34041e47a03b1c762af9bc2310aca2b4c44c",
+      "stats": {
+        "additions": 2,
+        "deletions": 0,
+        "total": 2
+      }
+    },
+    {
+      "id": "1ffe94e8a5933d797dca64f6833001fe88f9bae0",
+      "short_id": "1ffe94e8",
+      "created_at": "2022-01-26T19:05:16.000+00:00",
+      "parent_ids": [
+        "ab5caef5f505b520045770f1cef195a53fe497db"
+      ],
+      "title": "always sync one record",
+      "message": "always sync one record",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-26T19:05:16.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-26T19:05:16.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/1ffe94e8a5933d797dca64f6833001fe88f9bae0",
+      "stats": {
+        "additions": 1,
+        "deletions": 1,
+        "total": 2
+      }
+    },
+    {
+      "id": "ab5caef5f505b520045770f1cef195a53fe497db",
+      "short_id": "ab5caef5",
+      "created_at": "2022-01-21T16:36:18.000+00:00",
+      "parent_ids": [
+        "fa526f72930c66d76dcbc84e5e699f2990e2cc3b",
+        "429769d22225423f8b2b0efef043567b12a6ec2c"
+      ],
+      "title": "Release v0.4.0",
+      "message": "Release v0.4.0",
+      "author_name": "Ken Payne",
+      "author_email": "ken@meltano.com",
+      "authored_date": "2022-01-21T16:36:18.000+00:00",
+      "committer_name": "Ken Payne",
+      "committer_email": "ken@meltano.com",
+      "committed_date": "2022-01-21T16:36:18.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/ab5caef5f505b520045770f1cef195a53fe497db",
+      "stats": {
+        "additions": 14,
+        "deletions": 8,
+        "total": 22
+      }
+    },
+    {
+      "id": "429769d22225423f8b2b0efef043567b12a6ec2c",
+      "short_id": "429769d2",
+      "created_at": "2022-01-21T16:36:18.000+00:00",
+      "parent_ids": [
+        "fa526f72930c66d76dcbc84e5e699f2990e2cc3b"
+      ],
+      "title": "Release v0.4.0",
+      "message": "Release v0.4.0\n",
+      "author_name": "Ken Payne",
+      "author_email": "ken@meltano.com",
+      "authored_date": "2022-01-21T16:36:18.000+00:00",
+      "committer_name": "Ken Payne",
+      "committer_email": "ken@meltano.com",
+      "committed_date": "2022-01-21T16:36:18.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/429769d22225423f8b2b0efef043567b12a6ec2c",
+      "stats": {
+        "additions": 14,
+        "deletions": 8,
+        "total": 22
+      }
+    },
+    {
+      "id": "fa526f72930c66d76dcbc84e5e699f2990e2cc3b",
+      "short_id": "fa526f72",
+      "created_at": "2022-01-20T23:04:26.000-08:00",
+      "parent_ids": [
+        "6b44354ef948b3e7654d093ad2670a03acf474a1"
+      ],
+      "title": "update changelog",
+      "message": "update changelog\n",
+      "author_name": "Aaron (\"AJ\") Steers",
+      "author_email": "aj@meltano.com",
+      "authored_date": "2022-01-20T23:04:26.000-08:00",
+      "committer_name": "Aaron (\"AJ\") Steers",
+      "committer_email": "aj@meltano.com",
+      "committed_date": "2022-01-20T23:04:26.000-08:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/fa526f72930c66d76dcbc84e5e699f2990e2cc3b",
+      "stats": {
+        "additions": 3,
+        "deletions": 0,
+        "total": 3
+      }
+    },
+    {
+      "id": "6b44354ef948b3e7654d093ad2670a03acf474a1",
+      "short_id": "6b44354e",
+      "created_at": "2022-01-20T06:59:16.000+00:00",
+      "parent_ids": [
+        "b0342a8699e1e5838005acb4a3b079c58bef8409",
+        "453fd9e12afba642aa3a454cc6d8990a63cd1fa6"
+      ],
+      "title": "Merge branch 'fix-sort-order-for-sql-types' into 'main'",
+      "message": "Merge branch 'fix-sort-order-for-sql-types' into 'main'\n\nFix sort order for sql types\n\nSee merge request meltano/sdk!239",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-20T06:59:16.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-20T06:59:16.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/6b44354ef948b3e7654d093ad2670a03acf474a1",
+      "stats": {
+        "additions": 7,
+        "deletions": 5,
+        "total": 12
+      }
+    },
+    {
+      "id": "453fd9e12afba642aa3a454cc6d8990a63cd1fa6",
+      "short_id": "453fd9e1",
+      "created_at": "2022-01-20T06:59:16.000+00:00",
+      "parent_ids": [
+        "b0342a8699e1e5838005acb4a3b079c58bef8409"
+      ],
+      "title": "Fix sort order for sql types",
+      "message": "Fix sort order for sql types\n",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-01-20T06:59:16.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-01-20T06:59:16.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/453fd9e12afba642aa3a454cc6d8990a63cd1fa6",
+      "stats": {
+        "additions": 7,
+        "deletions": 5,
+        "total": 12
+      }
+    }
+  ]
+}

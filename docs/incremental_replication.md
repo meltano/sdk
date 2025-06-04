@@ -15,7 +15,7 @@ class CommentsStream(RESTStream):
     is_sorted = True
 
     schema = th.PropertiesList(
-        th.Property("date_gmt", th.DateTimeType, description="date"),
+        th.Property("date_gmt", th.DateTimeType(nullable=True), description="Date"),
     ).to_dict()
 
     def get_url_params(self, context, next_page_token):
@@ -34,9 +34,9 @@ class CommentsStream(RESTStream):
 
 1. First we inform the SDK of the `replication_key`, which automatically triggers incremental import mode.
 
-2. Second, optionally, set `is_sorted` to true if the records are monotonically increasing (i.e. newer records always come later). With this setting, the sync will be resumable if it's interrupted at any point and the state file will reflect this. Otherwise, the tap has to run to completion so the state can safely reflect the largest replication value seen.
+1. Second, optionally, set `is_sorted` to true if the records are monotonically increasing (i.e. newer records always come later). With this setting, the sync will be resumable if it's interrupted at any point and the state file will reflect this. Otherwise, the tap has to run to completion so the state can safely reflect the largest replication value seen.
 
-3. Last, we have to adapt the query to the remote system, in this example by adding a query parameter with the ISO timestamp.
+1. Last, we have to adapt the query to the remote system, in this example by adding a query parameter with the ISO timestamp.
 
    The [`get_starting_timestamp`](singer_sdk.Stream.get_starting_timestamp) method and the related [`get_starting_replication_key_value`](singer_sdk.Stream.get_starting_replication_key_value) method, are provided by the SDK and return the last replication key value seen in the previous run. If the tap is run for the first time and the value for the `start_date` setting is null, the method will return `None`.
 

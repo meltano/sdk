@@ -35,9 +35,9 @@ license-files = [ "LICENSE" ]
 requires-python = ">=3.9"
 dependencies = [
     {%- if extras %}
-    "singer-sdk[{{ extras|join(',') }}]~=0.44.3",
+    "singer-sdk[{{ extras|join(',') }}]~=0.46.4",
     {%- else %}
-    "singer-sdk~=0.44.3",
+    "singer-sdk~=0.46.4",
     {%- endif %}
     {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
     "requests~=2.32.3",
@@ -49,7 +49,7 @@ dependencies = [
 
 [project.optional-dependencies]
 s3 = [
-    "fs-s3fs~=1.1.1",
+    "s3fs~=2025.5.0",
 ]
 
 [project.scripts]
@@ -81,7 +81,6 @@ addopts = [
 ]
 
 [tool.mypy]
-python_version = "3.12"
 warn_unused_configs = true
 {#- TODO: Remove this after support for SQLAlchemy 1 is dropped in v1 -#}
 {#- https://github.com/meltano/sdk/pull/1931 -#}
