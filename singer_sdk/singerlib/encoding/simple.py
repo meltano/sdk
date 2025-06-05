@@ -6,6 +6,7 @@ import json
 import logging
 import sys
 import typing as t
+from collections.abc import Mapping  # noqa: TC003
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
@@ -173,7 +174,7 @@ class SchemaMessage(Message):
 class StateMessage(Message):
     """Singer state message."""
 
-    value: dict[str, t.Any]
+    value: Mapping[str, t.Any]
     """The state value."""
 
     def __post_init__(self) -> None:
