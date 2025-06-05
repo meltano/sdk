@@ -169,7 +169,7 @@ def test_deselected_child(
     caplog: pytest.LogCaptureFixture,
     snapshot: Snapshot,
 ):
-    """Test tap output with parent stream deselected."""
+    """Test tap output when a child stream is deselected."""
     child_stream = tap_with_deselected_child.streams["child"]
 
     assert not child_stream.selected
