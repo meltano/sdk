@@ -24,7 +24,7 @@ logger = logging.getLogger("singer_sdk")
 
 
 def get_state_if_exists(
-    tap_state: dict,
+    tap_state: types.TapState,
     tap_stream_id: str,
     state_partition_context: dict | None = None,
     key: str | None = None,
@@ -65,7 +65,10 @@ def get_state_if_exists(
     return matched_partition.get(key, None) if key else matched_partition
 
 
-def get_state_partitions_list(tap_state: dict, tap_stream_id: str) -> list[dict] | None:
+def get_state_partitions_list(
+    tap_state: types.TapState,
+    tap_stream_id: str,
+) -> list[dict] | None:
     """Return a list of partitions defined in the state, or None if not defined."""
     return (get_state_if_exists(tap_state, tap_stream_id) or {}).get("partitions", None)
 
@@ -99,7 +102,7 @@ def _create_in_partitions_list(
 
 
 def get_writeable_state_dict(
-    tap_state: dict,
+    tap_state: types.TapState,
     tap_stream_id: str,
     state_partition_context: types.Context | None = None,
 ) -> dict:
@@ -125,7 +128,7 @@ def get_writeable_state_dict(
         tap_state["bookmarks"] = {}
     if tap_stream_id not in tap_state["bookmarks"]:
         tap_state["bookmarks"][tap_stream_id] = {}
-    stream_state = t.cast("dict", tap_state["bookmarks"][tap_stream_id])
+    stream_state = tap_state["bookmarks"][tap_stream_id]
     if not state_partition_context:
         return stream_state
 
@@ -142,7 +145,7 @@ def get_writeable_state_dict(
 
 
 def write_stream_state(
-    tap_state: dict,
+    tap_state: types.TapState,
     tap_stream_id: str,
     key: str,
     val: t.Any,  # noqa: ANN401

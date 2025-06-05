@@ -37,6 +37,7 @@ if t.TYPE_CHECKING:
     from pathlib import PurePath
 
     from singer_sdk.connectors import SQLConnector
+    from singer_sdk.helpers import types
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.singerlib.encoding.base import GenericSingerWriter
     from singer_sdk.streams import SQLStream, Stream
@@ -103,7 +104,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         # Declare private members
         self._streams: dict[str, Stream] | None = None
         self._input_catalog: Catalog | None = None
-        self._state: dict[str, Stream] = {}
+        self._state: types.TapState = {}
         self._catalog: Catalog | None = None  # Tap's working catalog
 
         # Process input catalog
@@ -161,7 +162,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._streams
 
     @property
-    def state(self) -> dict:
+    def state(self) -> types.TapState:
         """Get tap state.
 
         Returns:

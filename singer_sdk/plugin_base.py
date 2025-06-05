@@ -374,7 +374,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     # Abstract methods:
 
     @property
-    def state(self) -> dict:
+    def state(self) -> t.Mapping[str, t.Any]:
         """Get state.
 
         Raises:
