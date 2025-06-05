@@ -1084,6 +1084,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             state: State object to promote progress markers with.
         """
+        if not self.selected:
+            return
+
         if state is None or state == {}:
             for child_stream in self.child_streams or []:
                 child_stream.finalize_state_progress_markers()

@@ -3,5 +3,3 @@
 {"type":"RECORD","stream":"parent","record":{"id":2},"time_extracted":"2022-01-01T00:00:00+00:00"}
 {"type":"RECORD","stream":"parent","record":{"id":3},"time_extracted":"2022-01-01T00:00:00+00:00"}
 {"type":"STATE","value":{"bookmarks":{"parent":{}}}}
-{"type":"STATE","value":{"bookmarks":{"parent":{},"child":{}}}}
-{"type":"STATE","value":{"bookmarks":{"parent":{},"child":{}}}}
