@@ -86,16 +86,17 @@ def tap():
 @pytest.fixture
 def tap_with_deselected_parent(tap: MyTap):
     """A tap with a parent stream deselected."""
-    original = tap.catalog["parent"].metadata[()].selected
-    tap.catalog["parent"].metadata[()].selected = False
+    stream_metadata = tap.catalog["parent"].metadata.root
+    original = stream_metadata.selected
+    stream_metadata.selected = False
     yield tap
-    tap.catalog["parent"].metadata[()].selected = original
+    stream_metadata.selected = original
 
 
 @pytest.fixture
 def tap_with_deselected_child(tap: MyTap):
     """A tap with a child stream deselected."""
-    stream_metadata = tap.catalog["child"].metadata[()]
+    stream_metadata = tap.catalog["child"].metadata.root
     original = stream_metadata.selected
     stream_metadata.selected = False
     yield tap
