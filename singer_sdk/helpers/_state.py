@@ -26,7 +26,7 @@ logger = logging.getLogger("singer_sdk")
 def get_state_if_exists(
     tap_state: types.TapState,
     tap_stream_id: str,
-    state_partition_context: dict | None = None,
+    state_partition_context: types.Context | None = None,
     key: str | None = None,
 ) -> t.Any | None:  # noqa: ANN401
     """Return the stream or partition state, creating a new one if it does not exist.
@@ -150,7 +150,7 @@ def write_stream_state(
     key: str,
     val: t.Any,  # noqa: ANN401
     *,
-    state_partition_context: dict | None = None,
+    state_partition_context: types.Context | None = None,
 ) -> None:
     """Write stream state."""
     state_dict = get_writeable_state_dict(
