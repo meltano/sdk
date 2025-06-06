@@ -148,7 +148,10 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._tap = tap
         self._tap_state = tap.state
         self._stream_version: int | None = None
-        self._initialized_at = tap.initialized_at
+
+        # Epoch timestamp in milliseconds
+        self._initialized_at: int = tap.initialized_at
+
         self._tap_input_catalog: singer.Catalog | None = None
         self._input_schema: dict | None = None
         self._stream_maps: list[StreamMap] | None = None
