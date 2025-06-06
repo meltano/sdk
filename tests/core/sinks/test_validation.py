@@ -167,6 +167,11 @@ def default_draft_sink_continue():
                 "created_at_date": {"type": "string", "format": "date"},
                 "created_at_time": {"type": "string", "format": "time"},
                 "invalid_datetime": {"type": "string", "format": "date-time"},
+                "additional_properties": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": True,
+                },
             },
         },
         ["id"],
@@ -194,6 +199,7 @@ def test_validate_record_jsonschema_format_checking_enabled_stop_on_error(
 
 
 def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
+    caplog: pytest.LogCaptureFixture,
     capsys: pytest.CaptureFixture,
     default_draft_sink_continue,
 ):
@@ -206,10 +212,15 @@ def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
         "created_at_time": "00:01:00+00:00",
         "missing_datetime": "2021-01-01T00:00:00+00:00",
         "invalid_datetime": "not a datetime",
+        "additional_properties": {
+            "string": "nested_string",
+            "datetime": "2021-01-01T00:00:00+00:00",
+        },
     }
 
-    updated_record = sink._validate_and_parse(record)
-    captured = capsys.readouterr()
+    with caplog.at_level("WARNING"):
+        updated_record = sink._validate_and_parse(record)
+        captured = capsys.readouterr()
 
     assert updated_record["created_at"] == datetime.datetime(
         2021,
@@ -231,7 +242,12 @@ def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
     )
     assert updated_record["missing_datetime"] == "2021-01-01T00:00:00+00:00"
     assert updated_record["invalid_datetime"] == "9999-12-31 23:59:59.999999"
+    assert "No schema for record field 'missing_datetime'" in caplog.messages
     assert "Record Message Validation Error" in captured.err
+
+    nested = updated_record["additional_properties"]
+    assert nested["datetime"] == "2021-01-01T00:00:00+00:00"
+    assert "No schema for record field 'datetime'" not in captured.err
 
 
 @pytest.fixture
