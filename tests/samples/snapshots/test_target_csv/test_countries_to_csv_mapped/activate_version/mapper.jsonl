@@ -1,0 +1,11 @@
+{"type":"SCHEMA","stream":"continents","schema":{"properties":{"code":{"type":["string","null"]},"name":{"type":["string","null"]}},"type":"object"},"key_properties":["code"],"bookmark_properties":[]}
+{"type":"ACTIVATE_VERSION","stream":"continents","version":1640995200}
+{"type":"RECORD","stream":"continents","record":{"code":"AF","name":"Africa"},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"continents","record":{"code":"AN","name":"Antarctica"},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"continents","record":{"code":"AS","name":"Asia"},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"continents","record":{"code":"EU","name":"Europe"},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"continents","record":{"code":"NA","name":"North America"},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"continents","record":{"code":"OC","name":"Oceania"},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"continents","record":{"code":"SA","name":"South America"},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"continents":{}}}}
+{"type":"STATE","value":{"bookmarks":{"continents":{},"countries":{}}}}

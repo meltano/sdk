@@ -83,12 +83,24 @@ def test_countries_to_csv(
 
 @time_machine.travel(DATETIME, tick=False)
 @pytest.mark.snapshot
+@pytest.mark.parametrize(
+    "emit_activate_version_messages",
+    [True, False],
+    ids=["activate_version", "no_activate_version"],
+)
 def test_countries_to_csv_mapped(
     snapshot: Snapshot,
     csv_config: dict,
     caplog: pytest.LogCaptureFixture,
+    emit_activate_version_messages: bool,
 ):
-    tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
+    tap = SampleTapCountries(
+        config={
+            **SAMPLE_TAP_CONFIG,
+            "emit_activate_version_messages": emit_activate_version_messages,
+        },
+        state=None,
+    )
     target = SampleTargetCSV(config=csv_config)
     target.max_parallelism = 1
     mapper = StreamTransform(config=COUNTRIES_STREAM_MAPS_CONFIG)
