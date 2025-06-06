@@ -161,7 +161,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
         self._is_state_flushed: bool = True
-        self._last_emitted_state: dict | None = None
+        self._last_emitted_state: types.TapState | None = None
         self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
         if schema:
@@ -714,7 +714,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     # State properties:
 
     @property
-    def tap_state(self) -> dict:
+    def tap_state(self) -> types.TapState:
         """Return a writeable state dict for the entire tap.
 
         Note: This dictionary is shared (and writable) across all streams.
@@ -1102,6 +1102,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             state: State object to promote progress markers with.
         """
+        if not self.selected:
+            return
+
         if state is None or state == {}:
             for child_stream in self.child_streams or []:
                 child_stream.finalize_state_progress_markers()

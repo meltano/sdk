@@ -22,3 +22,9 @@ __all__ = [
 Context: TypeAlias = Mapping[str, t.Any]
 Record: TypeAlias = dict[str, t.Any]
 Auth: TypeAlias = t.Callable[[requests.PreparedRequest], requests.PreparedRequest]
+
+
+class TapState(t.TypedDict, total=False):
+    """Tap state."""
+
+    bookmarks: dict[str, dict[str, t.Any]]
