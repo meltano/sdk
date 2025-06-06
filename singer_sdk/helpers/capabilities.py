@@ -156,6 +156,18 @@ TARGET_SCHEMA_CONFIG = PropertiesList(
         description="The default target database schema name to use for all streams.",
     ),
 ).to_dict()
+EMIT_ACTIVATE_VERSION_CONFIG = PropertiesList(
+    Property(
+        "emit_activate_version_messages",
+        BooleanType,
+        default=False,
+        title="Emit `ACTIVATE_VERSION` messages",
+        description=(
+            "Whether to emit `ACTIVATE_VERSION` messages. If set to `True`, "
+            "the tap will emit `ACTIVATE_VERSION` messages for each stream."
+        ),
+    ),
+).to_dict()
 ACTIVATE_VERSION_CONFIG = PropertiesList(
     Property(
         "process_activate_version_messages",
@@ -388,6 +400,9 @@ class TapCapabilities(CapabilitiesEnum):
 
     #: Deprecated. Please use :attr:`~TapCapabilities.CATALOG` instead.
     PROPERTIES = "properties", "Please use CATALOG instead."
+
+    #: Support for ``ACTIVATE_VERSION`` messages.
+    ACTIVATE_VERSION = "activate-version"
 
 
 class TargetCapabilities(CapabilitiesEnum):

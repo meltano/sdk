@@ -711,6 +711,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             return REPLICATION_INCREMENTAL
         return REPLICATION_FULL_TABLE
 
+    @property
+    def emit_activate_version_messages(self) -> bool:
+        """Get whether to emit `ACTIVATE_VERSION` messages."""
+        return self.config.get("emit_activate_version_messages", False)
+
     # State properties:
 
     @property
@@ -1304,7 +1309,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if self.selected:
             self._write_schema_message()
 
-        if self.selected and self.replication_method == REPLICATION_FULL_TABLE:
+        if (
+            self.selected
+            and self.replication_method == REPLICATION_FULL_TABLE
+            and self.emit_activate_version_messages
+        ):
             self._stream_version = self._initialized_at // 1000
             self._write_activate_version_message(self._stream_version)
 
