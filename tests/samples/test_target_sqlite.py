@@ -706,8 +706,6 @@ def test_hostile_to_sqlite(
     )
     columns = {res[0] for res in cursor.fetchall()}
     assert columns == {
-        "_sdc_deleted_at",
-        "_sdc_table_version",
         "name_with_spaces",
         "nameiscamelcase",
         "name_with_dashes",
