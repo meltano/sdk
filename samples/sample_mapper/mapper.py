@@ -155,6 +155,8 @@ class StreamTransform(InlineMapper):
 
         stream_id: str = message_dict["stream"]
         for stream_map in self.mapper.stream_maps[stream_id]:
+            if isinstance(stream_map, RemoveRecordTransform):
+                continue
             yield singer.ActivateVersionMessage(
                 stream=stream_map.stream_alias,
                 version=message_dict["version"],

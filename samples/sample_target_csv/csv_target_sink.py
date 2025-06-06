@@ -26,13 +26,13 @@ class SampleCSVTargetSink(BatchSink):
     def process_batch(self, context: dict) -> None:
         """Write `records_to_drain` out to file."""
         records_to_drain = context["records"]
-        self.logger.info("Draining records...")
+        self.logger.debug("Draining records...")
         records_written = 0
         newfile = False
         openmode = "a"
         outpath = self.target_filepath.absolute()
         if not outpath.is_file():
-            self.logger.info("Writing to new file: %s", outpath)
+            self.logger.debug("Writing to new file: %s", outpath)
             newfile = True
             openmode = "w"
         with outpath.open(openmode, newline="\n", encoding="utf-8") as csvfile:

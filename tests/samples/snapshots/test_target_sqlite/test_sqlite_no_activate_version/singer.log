@@ -1,0 +1,2 @@
+WARNING target-sqlite-sample `ACTIVATE_VERSION` messages are not enabled for 'zzz_tmp_test_sqlite_no_activate_version'. Ignoring.
+INFO target-sqlite-sample.zzz_tmp_test_sqlite_no_activate_version Inserting with SQL: INSERT INTO zzz_tmp_test_sqlite_no_activate_version (col_a) VALUES (:col_a)
