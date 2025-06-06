@@ -213,6 +213,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             TapCapabilities.CATALOG,
             TapCapabilities.STATE,
             TapCapabilities.DISCOVER,
+            TapCapabilities.ACTIVATE_VERSION,
             PluginCapabilities.ABOUT,
             PluginCapabilities.STREAM_MAPS,
             PluginCapabilities.FLATTENING,
