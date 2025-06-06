@@ -1,0 +1,1 @@
+INFO target-sqlite-sample.test_stream Inserting with SQL: INSERT INTO test_stream (id, name) VALUES (:id, :name)

@@ -164,7 +164,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._config = dict(target.config)
         self._pending_batch: dict | None = None
         self.stream_name = stream_name
-        self.logger.info(
+        self.logger.debug(
             "Initializing target sink for stream '%s'...",
             stream_name,
         )
@@ -710,7 +710,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Setup is executed once per Sink instance, after instantiation. If a Schema
         change is detected, a new Sink is instantiated and this method is called again.
         """
-        self.logger.info("Setting up %s", self.stream_name)
+        self.logger.debug("Setting up %s", self.stream_name)
 
     def clean_up(self) -> None:
         """Perform any clean up actions required at end of a stream.
@@ -719,7 +719,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         that may be in use from other instances of the same sink. Stream name alone
         should not be relied on, it's recommended to use a uuid as well.
         """
-        self.logger.info("Cleaning up %s", self.stream_name)
+        self.logger.debug("Cleaning up %s", self.stream_name)
         self.record_counter_metric.exit()
 
     def process_batch_files(
@@ -737,18 +737,14 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             NotImplementedError: If the batch file encoding is not supported.
         """
         file: GzipFile | t.IO
-        storage: StorageTarget | None = None
+        storage = self.batch_config.storage if self.batch_config else None
 
         for path in files:
             head, tail = StorageTarget.split_url(path)
-
-            if self.batch_config:
-                storage = self.batch_config.storage
-            else:
-                storage = StorageTarget.from_url(head)
+            file_storage = storage or StorageTarget.from_url(head)
 
             if encoding.format == BatchFileFormat.JSONL:
-                with storage.open(tail, mode="rb") as file:
+                with file_storage.open(tail, mode="rb") as file:
                     if encoding.compression == "gzip":
                         with gzip_open(file) as context_file:
                             context = {
@@ -766,7 +762,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             ):
                 import pyarrow.parquet as pq  # noqa: PLC0415
 
-                with storage.open(tail, mode="rb") as file:
+                with file_storage.open(tail, mode="rb") as file:
                     table = pq.read_table(file)
                     context = {"records": table.to_pylist()}
                     self.record_counter_metric.increment(len(context["records"]))
