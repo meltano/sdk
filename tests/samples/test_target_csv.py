@@ -73,6 +73,8 @@ def test_countries_to_csv(
     target = SampleTargetCSV(config=csv_config)
     target.max_parallelism = 1
 
+    caplog.set_level("ERROR", "singer_sdk.metrics")
+
     with caplog.at_level("INFO"):
         tap_stdout, _, target_stdout, _ = tap_to_target_sync_test(tap, target)
 
@@ -105,6 +107,8 @@ def test_countries_to_csv_mapped(
     target.max_parallelism = 1
     mapper = StreamTransform(config=COUNTRIES_STREAM_MAPS_CONFIG)
 
+    caplog.set_level("ERROR", "singer_sdk.metrics")
+
     tap_io = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
     with redirect_stdout(tap_io), caplog.at_level("INFO"):
         tap.sync_all()
@@ -112,7 +116,6 @@ def test_countries_to_csv_mapped(
     tap_io.seek(0)
     tap_output = tap_io.read()
     snapshot.assert_match(tap_output, "tap.jsonl")
-    snapshot.assert_match(caplog.text, "tap.log")
 
     tap_io.seek(0)
     mapper_io = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
@@ -122,7 +125,6 @@ def test_countries_to_csv_mapped(
     mapper_io.seek(0)
     mapper_output = mapper_io.read()
     snapshot.assert_match(mapper_output, "mapper.jsonl")
-    snapshot.assert_match(caplog.text, "mapper.log")
 
     mapper_io.seek(0)
     target_io = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
@@ -132,7 +134,7 @@ def test_countries_to_csv_mapped(
     target_io.seek(0)
     target_output = target_io.read()
     snapshot.assert_match(target_output, "target.jsonl")
-    snapshot.assert_match(caplog.text, "target.log")
+    snapshot.assert_match(caplog.text, "singer.log")
 
 
 @time_machine.travel(DATETIME, tick=False)
@@ -145,6 +147,8 @@ def test_fake_people_to_csv(
     tap = SampleTapFakePeople()
     target = SampleTargetCSV(config=csv_config)
     target.max_parallelism = 1
+
+    caplog.set_level("ERROR", "singer_sdk.metrics")
 
     with caplog.at_level("INFO"):
         tap_stdout, _, target_stdout, _ = tap_to_target_sync_test(tap, target)

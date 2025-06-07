@@ -8,17 +8,14 @@ import json
 import logging
 import logging.config
 import os
-import sys
 import typing as t
 from dataclasses import dataclass, field
-from pathlib import Path
 from time import time
 
 if t.TYPE_CHECKING:
     from types import TracebackType
 
     from singer_sdk.helpers import types
-    from singer_sdk.helpers._compat import Traversable
 
 
 DEFAULT_LOG_INTERVAL = 60.0
@@ -389,75 +386,3 @@ def sync_timer(stream: str, **tags: t.Any) -> Timer:
     """
     tags[Tag.STREAM] = stream
     return Timer(Metric.SYNC_DURATION, tags)
-
-
-def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN401 # pragma: no cover
-    """Load the logging config from the YAML file.
-
-    Args:
-        path: A path to the YAML file.
-
-    Returns:
-        The logging config.
-    """
-    import yaml  # noqa: PLC0415
-
-    with path.open() as f:
-        return yaml.safe_load(f)
-
-
-def _setup_logging(config: t.Mapping[str, t.Any]) -> None:
-    """Setup logging.
-
-    Args:
-        package: The package name to get the logging configuration for.
-        config: A plugin configuration dictionary.
-    """
-    logging.config.dictConfig(
-        {
-            "version": 1,
-            "disable_existing_loggers": False,
-            "formatters": {
-                "console": {
-                    "format": "{asctime:23s} | {levelname:8s} | {name:20s} | {message}",
-                    "style": "{",
-                },
-                "metrics": {
-                    "()": SingerMetricsFormatter,
-                    "format": "{asctime:23s} | {levelname:8s} | {name:20s} | {message}: {metric_json}",  # noqa: E501
-                    "style": "{",
-                },
-            },
-            "handlers": {
-                "default": {
-                    "()": logging.StreamHandler,
-                    "formatter": "console",
-                    "stream": sys.stderr,
-                },
-                "metrics": {
-                    "()": logging.StreamHandler,
-                    "formatter": "metrics",
-                    "stream": sys.stderr,
-                },
-            },
-            "root": {
-                "level": logging.INFO,
-                "handlers": ["default"],
-            },
-            "loggers": {
-                "singer_sdk.metrics": {
-                    "level": logging.INFO,
-                    "handlers": ["metrics"],
-                    "propagate": False,
-                },
-            },
-        },
-    )
-
-    config = config or {}
-    metrics_log_level = config.get(METRICS_LOG_LEVEL_SETTING, "INFO").upper()
-    logging.getLogger(METRICS_LOGGER_NAME).setLevel(metrics_log_level)
-
-    if "SINGER_SDK_LOG_CONFIG" in os.environ:
-        log_config_path = Path(os.environ["SINGER_SDK_LOG_CONFIG"])
-        logging.config.dictConfig(_load_yaml_logging_config(log_config_path))

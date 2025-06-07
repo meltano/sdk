@@ -1,0 +1,12 @@
+INFO sample-tap-countries Skipping parse of env var settings...
+INFO target-csv Skipping parse of env var settings...
+INFO meltano-map-transformer Skipping parse of env var settings...
+INFO root Found '__else__=None' default mapper. Unmapped streams will be excluded from output.
+INFO sample-tap-countries.continents Beginning full_table sync of 'continents'
+INFO singer_sdk.helpers.jsonpath JSONPath $.data.continents[*] match count: 7
+INFO sample-tap-countries.countries Beginning full_table sync of 'countries'
+INFO singer_sdk.helpers.jsonpath JSONPath $.data.countries[*] match count: 250
+INFO meltano-map-transformer Reader 'meltano-map-transformer' completed processing 263 lines of input (2 schemas, 257 records, 0 batch manifests, 2 state messages, 2 activate version messages).
+WARNING target-csv The `ACTIVATE_VERSION` feature uses the `_sdc_deleted_at` and `_sdc_deleted_at` metadata properties so they will be added to the schema for '%s' even though `add_record_metadata` is disabled.
+WARNING target-csv.continents ACTIVATE_VERSION message received but not implemented by this target. Ignoring.
+INFO target-csv Reader 'target-csv' completed processing 11 lines of input (1 schemas, 7 records, 0 batch manifests, 2 state messages, 1 activate version messages).

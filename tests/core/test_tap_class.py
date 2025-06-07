@@ -89,18 +89,23 @@ def test_cli(tap_class: type[Tap]):
     assert "Show this message and exit." in result.output
 
 
-def test_cli_config_validation(tap_class: type[Tap], tmp_path):
+def test_cli_config_validation(
+    tap_class: type[Tap],
+    tmp_path,
+    caplog: pytest.LogCaptureFixture,
+):
     """Test the CLI config validation."""
     runner = CliRunner()
     # TODO: Remote this once support for Python 3.9 and thus Click<8.2 is dropped
     runner.mix_stderr = False
     config_path = tmp_path / "config.json"
     config_path.write_text(json.dumps({}))
-    result = runner.invoke(tap_class.cli, ["--config", str(config_path)])
+    with caplog.at_level("ERROR"):
+        result = runner.invoke(tap_class.cli, ["--config", str(config_path)])
     assert result.exit_code == 1
     assert not result.stdout
-    assert "'username' is a required property" in result.stderr
-    assert "'password' is a required property" in result.stderr
+    assert "'username' is a required property" in caplog.text
+    assert "'password' is a required property" in caplog.text
 
 
 def test_cli_discover(tap_class: type[Tap], tmp_path):
