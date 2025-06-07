@@ -310,6 +310,8 @@ def test_sqlite_activate_version(
         ]
     )
 
+    caplog.set_level("ERROR", "singer_sdk.metrics")
+
     with caplog.at_level("INFO"):
         stdout1, _ = target_sync_test(
             sqlite_sample_target,
@@ -371,6 +373,8 @@ def test_sqlite_no_activate_version(
         ]
     )
 
+    caplog.set_level("ERROR", "singer_sdk.metrics")
+
     with caplog.at_level("INFO"):
         stdout, _ = target_sync_test(
             sqlite_sample_target_no_activate_version,
@@ -423,6 +427,8 @@ def test_sqlite_add_record_metadata(
             },
         ]
     )
+
+    caplog.set_level("ERROR", "singer_sdk.metrics")
 
     with caplog.at_level("INFO"):
         stdout, _ = target_sync_test(
@@ -666,6 +672,9 @@ def test_record_with_missing_properties(
             },
         ]
     )
+
+    caplog.set_level("ERROR", "singer_sdk.metrics")
+
     with caplog.at_level("INFO"):
         target_stdout, _ = target_sync_test(
             sqlite_sample_target,
