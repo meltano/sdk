@@ -25,7 +25,7 @@ def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN40
         return yaml.safe_load(f)
 
 
-def _setup_console_logging(*, log_level: str | None = None) -> None:
+def _setup_console_logging(*, log_level: str | int | None = None) -> None:
     """Setup logging.
 
     Args:
