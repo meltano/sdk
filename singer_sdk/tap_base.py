@@ -30,6 +30,7 @@ from singer_sdk.plugin_base import BaseSingerWriter, PluginBase, _ConfigInput
 from singer_sdk.singerlib import Catalog
 
 if t.TYPE_CHECKING:
+    from collections.abc import Iterable
     from pathlib import PurePath
     from types import FrameType
 
@@ -163,13 +164,14 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             A mapping of names to streams, using discovery or a provided catalog.
         """
         if self._streams is None:
-            self._streams = {}
             input_catalog = self.input_catalog
-
-            for stream in self.load_streams():
-                if input_catalog is not None:
+            if input_catalog is None:
+                self._streams = {stream.name: stream for stream in self.load_streams()}
+            else:
+                self._streams = {}
+                for stream in self.load_streams_from_catalog(input_catalog):
                     stream.apply_catalog(input_catalog)
-                self._streams[stream.name] = stream
+                    self._streams[stream.name] = stream
         return self._streams
 
     @property
@@ -408,6 +410,19 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             key=lambda x: x.name,
             reverse=False,
         )
+
+    def load_streams_from_catalog(self, catalog: Catalog) -> Iterable[Stream]:  # noqa: ARG002
+        """Recreate streams from the input catalog.
+
+        Returns:
+            Iterable[Stream]: An iterable of Stream objects recreated from the input
+                catalog.
+        For backwards compatibility calls `self.load_streams()`
+
+        Returns:
+            A mapping of names to streams, using provided catalog.
+        """
+        return self.load_streams()
 
     # Bookmarks and state management
 
