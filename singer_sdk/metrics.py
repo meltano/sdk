@@ -9,8 +9,11 @@ import logging
 import logging.config
 import os
 import typing as t
+import warnings
 from dataclasses import dataclass, field
 from time import time
+
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 
 if t.TYPE_CHECKING:
     from types import TracebackType
@@ -79,8 +82,32 @@ class Point(t.Generic[_TVal]):
         }
 
 
+def _to_json(point: dict) -> str:
+    """Convert this measure to a JSON string.
+
+    Returns:
+        A JSON string.
+    """
+    return json.dumps(point, default=str)
+
+
 class SingerMetricsFormatter(logging.Formatter):
     """Logging formatter that adds a ``metric_json`` field to the log record."""
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
+        """Initialize a formatter.
+
+        Args:
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
+        """
+        warnings.warn(
+            "SingerMetricsFormatter is deprecated and will be removed in a future "
+            "version. Use a different formatter.",
+            SingerSDKDeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
 
     def format(self, record: logging.LogRecord) -> str:
         """Format a log record.
@@ -92,7 +119,7 @@ class SingerMetricsFormatter(logging.Formatter):
             A formatted log record.
         """
         point = record.__dict__.get("point")
-        record.__dict__["metric_json"] = json.dumps(point, default=str) if point else ""
+        record.__dict__["metric_json"] = _to_json(point) if point else ""
         return super().format(record)
 
 
@@ -103,7 +130,8 @@ def log(logger: logging.Logger, point: Point) -> None:
         logger: An logger instance.
         point: A measurement.
     """
-    logger.info("METRIC", extra={"point": point.to_dict()})
+    point_dict = point.to_dict()
+    logger.info("METRIC: %s", _to_json(point_dict), extra={"point": point_dict})
 
 
 class Meter(metaclass=abc.ABCMeta):

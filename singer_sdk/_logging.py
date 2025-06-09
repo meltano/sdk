@@ -6,7 +6,7 @@ import sys
 import typing as t
 from pathlib import Path
 
-from singer_sdk.metrics import METRICS_LOGGER_NAME, SingerMetricsFormatter
+from singer_sdk.metrics import METRICS_LOGGER_NAME
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
@@ -43,16 +43,8 @@ def _setup_console_logging() -> None:
     handler = logging.StreamHandler(sys.stderr)
     handler.setFormatter(root_formatter)
     root.addHandler(handler)
-
     metrics_logger = logging.getLogger(METRICS_LOGGER_NAME)
     metrics_logger.setLevel(logging.INFO)
-    metrics_formatter = SingerMetricsFormatter(
-        "{asctime:23s} | {levelname:8s} | {name:20s} | {message}: {metric_json}",
-        style="{",
-    )
-    metrics_handler = logging.StreamHandler(sys.stderr)
-    metrics_handler.setFormatter(metrics_formatter)
-    metrics_logger.addHandler(metrics_handler)
 
     if "SINGER_SDK_LOG_CONFIG" in os.environ:  # pragma: no cover
         log_config_path = Path(os.environ["SINGER_SDK_LOG_CONFIG"])
