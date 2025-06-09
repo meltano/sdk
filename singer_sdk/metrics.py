@@ -102,8 +102,8 @@ class SingerMetricsFormatter(logging.Formatter):
             **kwargs: Keyword arguments.
         """
         warnings.warn(
-            "SingerMetricsFormatter is deprecated and will be removed in a future "
-            "version. Use a different formatter.",
+            "SingerMetricsFormatter is deprecated and will be removed by September "
+            "2025. Use a different formatter.",
             SingerSDKDeprecationWarning,
             stacklevel=2,
         )

@@ -42,11 +42,6 @@ from singer_sdk.typing import (
     extend_validator_with_defaults,
 )
 
-if sys.version_info >= (3, 11):
-    _LOG_LEVELS_MAPPING = logging.getLevelNamesMapping()
-else:
-    _LOG_LEVELS_MAPPING = logging._nameToLevel  # noqa: SLF001
-
 if t.TYPE_CHECKING:
     from jsonschema import ValidationError
 
