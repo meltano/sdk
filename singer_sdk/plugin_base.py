@@ -223,7 +223,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             warnings.warn(
                 f"Using {metrics.METRICS_LOG_LEVEL_SETTING} to set metrics log level "
                 "is deprecated and will be removed by September 2025. "
-                "Please use the the logging level environment variables "
+                "Please use the logging level environment variables "
                 "or a custom logging configuration file.",
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
