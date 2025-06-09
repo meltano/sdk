@@ -215,8 +215,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if metrics_level := self.config.get(
             metrics.METRICS_LOG_LEVEL_SETTING
         ):  # pragma: no cover
-            level_name = logging.getLevelName(metrics_level)
-            self.metrics_logger.setLevel(level_name)
+            self.metrics_logger.setLevel(metrics_level)
 
         self._validate_config(raise_errors=validate_config)
         self._mapper: PluginMapper | None = None
