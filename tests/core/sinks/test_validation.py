@@ -205,6 +205,7 @@ def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
         "created_at_date": "2021-01-01",
         "created_at_time": "00:01:00+00:00",
         "missing_datetime": "2021-01-01T00:00:00+00:00",
+        "missing_null": None,
         "invalid_datetime": "not a datetime",
     }
 
@@ -230,8 +231,10 @@ def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
         tzinfo=datetime.timezone.utc,
     )
     assert updated_record["missing_datetime"] == "2021-01-01T00:00:00+00:00"
+    assert updated_record["missing_null"] is None
     assert updated_record["invalid_datetime"] == "9999-12-31 23:59:59.999999"
     assert "Record Message Validation Error" in caplog.text
+    assert "No schema for record field 'missing_datetime'" in caplog.text
 
 
 @pytest.fixture
