@@ -194,7 +194,7 @@ def test_validate_record_jsonschema_format_checking_enabled_stop_on_error(
 
 
 def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
-    capsys: pytest.CaptureFixture,
+    caplog: pytest.LogCaptureFixture,
     default_draft_sink_continue,
 ):
     sink: BatchSinkMock = default_draft_sink_continue
@@ -208,8 +208,8 @@ def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
         "invalid_datetime": "not a datetime",
     }
 
-    updated_record = sink._validate_and_parse(record)
-    captured = capsys.readouterr()
+    with caplog.at_level("WARNING"):
+        updated_record = sink._validate_and_parse(record)
 
     assert updated_record["created_at"] == datetime.datetime(
         2021,
@@ -231,7 +231,7 @@ def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
     )
     assert updated_record["missing_datetime"] == "2021-01-01T00:00:00+00:00"
     assert updated_record["invalid_datetime"] == "9999-12-31 23:59:59.999999"
-    assert "Record Message Validation Error" in captured.err
+    assert "Record Message Validation Error" in caplog.text
 
 
 @pytest.fixture

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import io
+import logging
 import typing as t
 from contextlib import redirect_stdout
 
@@ -113,7 +114,11 @@ def test_parent_context_fields_in_child(
 ):
     """Test that parent context fields are available in child streams."""
     buf = io.StringIO()
-    with redirect_stdout(buf), caplog.at_level("INFO"):
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap.name)),
+    ):
         tap.sync_all()
 
     buf.seek(0)
@@ -154,7 +159,11 @@ def test_child_deselected_parent(
     assert parent_stream.has_selected_descendents
 
     buf = io.StringIO()
-    with redirect_stdout(buf), caplog.at_level("INFO"):
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap_with_deselected_parent.name)),
+    ):
         tap_with_deselected_parent.sync_all()
 
     buf.seek(0)
@@ -176,7 +185,11 @@ def test_deselected_child(
     assert not child_stream.selected
 
     buf = io.StringIO()
-    with redirect_stdout(buf), caplog.at_level("INFO"):
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap_with_deselected_child.name)),
+    ):
         tap_with_deselected_child.sync_all()
 
     buf.seek(0)
@@ -255,7 +268,11 @@ def test_one_parent_many_children(
     tap = MyTapMany()
 
     buf = io.StringIO()
-    with redirect_stdout(buf), caplog.at_level("INFO"):
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap.name)),
+    ):
         tap.sync_all()
 
     buf.seek(0)

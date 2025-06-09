@@ -18,6 +18,7 @@ from types import FrameType, MappingProxyType
 import click
 
 from singer_sdk import about, metrics
+from singer_sdk._logging import _setup_console_logging
 from singer_sdk.cli import plugin_cli
 from singer_sdk.configuration._dict_config import (
     merge_missing_config_jsonschema,
@@ -210,8 +211,11 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
-        metrics._setup_logging(self.config)  # noqa: SLF001
         self.metrics_logger = metrics.get_metrics_logger()
+        if metrics_level := self.config.get(
+            metrics.METRICS_LOG_LEVEL_SETTING
+        ):  # pragma: no cover
+            self.metrics_logger.setLevel(metrics_level)
 
         self._validate_config(raise_errors=validate_config)
         self._mapper: PluginMapper | None = None
@@ -673,6 +677,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             A callable CLI object.
         """
+        _setup_console_logging()
         return cls.get_singer_command()
 
 
@@ -761,14 +766,15 @@ class BaseSingerReader(BaseSingerIO, metaclass=abc.ABCMeta):
         line_count = sum(counter.values())
 
         self.logger.info(
-            "Target '%s' completed reading %d lines of input "
-            "(%d schemas, %d records, %d batch manifests, %d state messages).",
+            "Reader '%s' completed processing %d lines of input "
+            "(%d schemas, %d records, %d batch manifests, %d state messages, %d activate version messages).",  # noqa: E501
             self.name,
             line_count,
             counter[SingerMessageType.SCHEMA],
             counter[SingerMessageType.RECORD],
             counter[SingerMessageType.BATCH],
             counter[SingerMessageType.STATE],
+            counter[SingerMessageType.ACTIVATE_VERSION],
         )
         self.process_endofpipe()
 
