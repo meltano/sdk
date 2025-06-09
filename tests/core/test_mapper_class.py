@@ -45,14 +45,17 @@ def test_cli_help():
     assert "Show this message and exit." in result.output
 
 
-def test_cli_config_validation(tmp_path):
+def test_cli_config_validation(tmp_path, caplog: pytest.LogCaptureFixture):
     """Test the CLI config validation."""
     runner = CliRunner()
     # TODO: Remote this once support for Python 3.9 and thus Click<8.2 is dropped
     runner.mix_stderr = False
     config_path = tmp_path / "config.json"
     config_path.write_text(json.dumps({}))
-    result = runner.invoke(StreamTransform.cli, ["--config", str(config_path)])
+
+    with caplog.at_level("ERROR"):
+        result = runner.invoke(StreamTransform.cli, ["--config", str(config_path)])
+
     assert result.exit_code == 1
     assert not result.stdout
-    assert "'stream_maps' is a required property" in result.stderr
+    assert "'stream_maps' is a required property" in caplog.text

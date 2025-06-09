@@ -56,7 +56,7 @@ disable_existing_loggers: false
 formatters:
   metrics:
     (): pythonjsonlogger.jsonlogger.JsonFormatter
-    format: "{created} {message} {point}"
+    format: "{created} {point}"
     style: "{"
 handlers:
   metrics:
@@ -73,14 +73,14 @@ loggers:
 This will send metrics to a `metrics.jsonl`:
 
 ```json
-{"created": 1705709074.883021, "message": "METRIC", "point": {"type": "timer", "metric": "http_request_duration", "value": 0.501743, "tags": {"stream": "continents", "endpoint": "", "http_status_code": 200, "status": "succeeded"}}}
-{"created": 1705709074.897184, "message": "METRIC", "point": {"type": "counter", "metric": "http_request_count", "value": 1, "tags": {"stream": "continents", "endpoint": ""}}}
-{"created": 1705709074.897256, "message": "METRIC", "point": {"type": "timer", "metric": "sync_duration", "value": 0.7397160530090332, "tags": {"stream": "continents", "context": {}, "status": "succeeded"}}}
-{"created": 1705709074.897292, "message": "METRIC", "point": {"type": "counter", "metric": "record_count", "value": 7, "tags": {"stream": "continents", "context": {}}}}
-{"created": 1705709075.397254, "message": "METRIC", "point": {"type": "timer", "metric": "http_request_duration", "value": 0.392148, "tags": {"stream": "countries", "endpoint": "", "http_status_code": 200, "status": "succeeded"}}}
-{"created": 1705709075.421888, "message": "METRIC", "point": {"type": "counter", "metric": "http_request_count", "value": 1, "tags": {"stream": "countries", "endpoint": ""}}}
-{"created": 1705709075.422001, "message": "METRIC", "point": {"type": "timer", "metric": "sync_duration", "value": 0.5258760452270508, "tags": {"stream": "countries", "context": {}, "status": "succeeded"}}}
-{"created": 1705709075.422047, "message": "METRIC", "point": {"type": "counter", "metric": "record_count", "value": 250, "tags": {"stream": "countries", "context": {}}}}
+{"created": 1705709074.883021, "point": {"type": "timer", "metric": "http_request_duration", "value": 0.501743, "tags": {"stream": "continents", "endpoint": "", "http_status_code": 200, "status": "succeeded"}}}
+{"created": 1705709074.897184, "point": {"type": "counter", "metric": "http_request_count", "value": 1, "tags": {"stream": "continents", "endpoint": ""}}}
+{"created": 1705709074.897256, "point": {"type": "timer", "metric": "sync_duration", "value": 0.7397160530090332, "tags": {"stream": "continents", "context": {}, "status": "succeeded"}}}
+{"created": 1705709074.897292, "point": {"type": "counter", "metric": "record_count", "value": 7, "tags": {"stream": "continents", "context": {}}}}
+{"created": 1705709075.397254, "point": {"type": "timer", "metric": "http_request_duration", "value": 0.392148, "tags": {"stream": "countries", "endpoint": "", "http_status_code": 200, "status": "succeeded"}}}
+{"created": 1705709075.421888, "point": {"type": "counter", "metric": "http_request_count", "value": 1, "tags": {"stream": "countries", "endpoint": ""}}}
+{"created": 1705709075.422001, "point": {"type": "timer", "metric": "sync_duration", "value": 0.5258760452270508, "tags": {"stream": "countries", "context": {}, "status": "succeeded"}}}
+{"created": 1705709075.422047, "point": {"type": "counter", "metric": "record_count", "value": 250, "tags": {"stream": "countries", "context": {}}}}
 ```
 
 ## For package developers

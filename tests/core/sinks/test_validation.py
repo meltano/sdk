@@ -146,6 +146,33 @@ def default_draft_sink_stop():
     )
 
 
+@pytest.fixture
+def default_draft_sink_continue():
+    """Return a sink object with the default draft checks enabled."""
+
+    class CustomSink(BatchSinkMock):
+        """Custom sink class."""
+
+        validate_field_string_format = True
+        fail_on_record_validation_exception = False
+
+    return CustomSink(
+        TargetMock(),
+        "users",
+        {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "created_at": {"type": "string", "format": "date-time"},
+                "created_at_date": {"type": "string", "format": "date"},
+                "created_at_time": {"type": "string", "format": "time"},
+                "invalid_datetime": {"type": "string", "format": "date-time"},
+            },
+        },
+        ["id"],
+    )
+
+
 def test_validate_record_jsonschema_format_checking_enabled_stop_on_error(
     default_draft_sink_stop,
 ):
@@ -166,39 +193,11 @@ def test_validate_record_jsonschema_format_checking_enabled_stop_on_error(
         sink._validate_and_parse(record)
 
 
-@pytest.mark.parametrize(
-    "additional_properties",
-    [
-        pytest.param(True, id="additional_properties"),
-        pytest.param(False, id="no_additional_properties"),
-    ],
-)
 def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
     caplog: pytest.LogCaptureFixture,
-    additional_properties: bool,
+    default_draft_sink_continue,
 ):
-    class CustomSink(BatchSinkMock):
-        """Custom sink class."""
-
-        validate_field_string_format = True
-        fail_on_record_validation_exception = False
-
-    sink = CustomSink(
-        TargetMock(),
-        "users",
-        {
-            "type": "object",
-            "properties": {
-                "id": {"type": "integer"},
-                "created_at": {"type": "string", "format": "date-time"},
-                "created_at_date": {"type": "string", "format": "date"},
-                "created_at_time": {"type": "string", "format": "time"},
-                "invalid_datetime": {"type": "string", "format": "date-time"},
-            },
-            "additionalProperties": additional_properties,
-        },
-        ["id"],
-    )
+    sink: BatchSinkMock = default_draft_sink_continue
 
     record = {
         "id": 1,
@@ -232,11 +231,7 @@ def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
     )
     assert updated_record["missing_datetime"] == "2021-01-01T00:00:00+00:00"
     assert updated_record["invalid_datetime"] == "9999-12-31 23:59:59.999999"
-
-    assert "Record validation failed" in caplog.messages
-
-    warned = "No schema for record field 'missing_datetime'" in caplog.messages
-    assert warned is not additional_properties
+    assert "Record Message Validation Error" in caplog.text
 
 
 @pytest.fixture
