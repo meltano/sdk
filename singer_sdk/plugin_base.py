@@ -56,6 +56,7 @@ if t.TYPE_CHECKING:
     )
 
 SDK_PACKAGE_NAME = "singer_sdk"
+DEFAULT_LOG_LEVEL = "INFO"
 
 JSONSchemaValidator = extend_validator_with_defaults(DEFAULT_JSONSCHEMA_VALIDATOR)
 
@@ -122,6 +123,20 @@ def _format_validation_error(error: ValidationError) -> str:
     return result
 
 
+def _plugin_log_level(*, plugin_name: str) -> str:
+    """Get the log level for a plugin.
+
+    Args:
+        plugin_name: The name of the plugin.
+
+    Returns:
+        The log level.
+    """
+    prefix = f"{plugin_name.upper().replace('-', '_')}_"
+    level = os.environ.get(f"{prefix}LOGLEVEL") or os.environ.get("LOGLEVEL")
+    return level.upper() if level is not None else DEFAULT_LOG_LEVEL
+
+
 class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for taps."""
 
@@ -143,18 +158,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             Plugin logger.
         """
-        # Get the level from <PLUGIN_NAME>_LOGLEVEL or LOGLEVEL environment variables
-        plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
-        log_level = os.environ.get(f"{plugin_env_prefix}LOGLEVEL") or os.environ.get(
-            "LOGLEVEL",
-        )
-
-        logger = logging.getLogger(cls.name)
-
-        if log_level is not None and log_level.upper() in _LOG_LEVELS_MAPPING:
-            logger.setLevel(log_level.upper())
-
-        return logger
+        return logging.getLogger(cls.name)
 
     # Constructor
 
@@ -213,9 +217,19 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._config = config_dict
         self.metrics_logger = metrics.get_metrics_logger()
         if metrics_level := self.config.get(
-            metrics.METRICS_LOG_LEVEL_SETTING
+            metrics.METRICS_LOG_LEVEL_SETTING,
         ):  # pragma: no cover
             self.metrics_logger.setLevel(metrics_level)
+            warnings.warn(
+                f"Using {metrics.METRICS_LOG_LEVEL_SETTING} to set metrics log level "
+                "is deprecated and will be removed by September 2025. "
+                "Please use the the logging level environment variables "
+                "or a custom logging configuration file.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
+        else:
+            self.metrics_logger.setLevel(_plugin_log_level(plugin_name=self.name))
 
         self._validate_config(raise_errors=validate_config)
         self._mapper: PluginMapper | None = None
@@ -677,7 +691,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             A callable CLI object.
         """
-        _setup_console_logging()
+        _setup_console_logging(log_level=_plugin_log_level(plugin_name=cls.name))
         return cls.get_singer_command()
 
 

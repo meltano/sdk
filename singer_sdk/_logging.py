@@ -6,8 +6,6 @@ import sys
 import typing as t
 from pathlib import Path
 
-from singer_sdk.metrics import METRICS_LOGGER_NAME
-
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
 
@@ -27,15 +25,15 @@ def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN40
         return yaml.safe_load(f)
 
 
-def _setup_console_logging() -> None:
+def _setup_console_logging(*, log_level: str | None = None) -> None:
     """Setup logging.
 
     Args:
-        package: The package name to get the logging configuration for.
-        config: A plugin configuration dictionary.
+        log_level: The log level to set.
     """
+    level = log_level or logging.INFO
     root = logging.getLogger()
-    root.setLevel(logging.INFO)
+    root.setLevel(level)
     root_formatter = logging.Formatter(
         "{asctime:23s} | {levelname:8s} | {name:20s} | {message}",
         style="{",
@@ -43,8 +41,6 @@ def _setup_console_logging() -> None:
     handler = logging.StreamHandler(sys.stderr)
     handler.setFormatter(root_formatter)
     root.addHandler(handler)
-    metrics_logger = logging.getLogger(METRICS_LOGGER_NAME)
-    metrics_logger.setLevel(logging.INFO)
 
     if "SINGER_SDK_LOG_CONFIG" in os.environ:  # pragma: no cover
         log_config_path = Path(os.environ["SINGER_SDK_LOG_CONFIG"])
