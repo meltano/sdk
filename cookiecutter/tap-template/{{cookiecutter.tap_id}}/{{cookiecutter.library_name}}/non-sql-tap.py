@@ -15,6 +15,9 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
 
 class Tap{{ cookiecutter.source_name }}(Tap):
     """Singer tap for {{ cookiecutter.source_name }}."""
@@ -73,6 +76,7 @@ class Tap{{ cookiecutter.source_name }}(Tap):
             streams.GroupsStream(self),
             streams.UsersStream(self),
         ]
+{%- endif %}
 
 
 if __name__ == "__main__":

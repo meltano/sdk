@@ -432,3 +432,15 @@ class Catalog(dict[str, CatalogEntry]):
             The stream entry if found, otherwise None.
         """
         return self.get(stream_id)
+
+    def has_stream_selected(self, stream_id: str) -> bool:
+        """Returns true if the stream is selected.
+
+        Args:
+            stream_id: The ID/name of the stream.
+        """
+        if stream := self.get_stream(stream_id):
+            mask = stream.metadata.resolve_selection()
+            return mask[()]
+
+        return False
