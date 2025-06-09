@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from singer_sdk import {{ 'SQL' if cookiecutter.stream_type == 'SQL' else '' }}Tap
 from singer_sdk import typing as th  # JSON schema typing helpers
 
@@ -13,6 +15,9 @@ from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }
 # TODO: Import your custom stream types here:
 from {{ cookiecutter.library_name }} import streams
 {%- endif %}
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 'SQL' else '' }}Tap):
@@ -76,6 +81,18 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
             streams.GroupsStream(self),
             streams.UsersStream(self),
         ]
+
+    def load_streams_from_catalog(self) -> Iterable[streams.{{cookiecutter.source_name}}Stream]:
+        """Return a list of streams based on the input catalog.
+
+        Returns:
+            A list of requested streams.
+        """
+
+        if "groups" in self.input_catalog:
+            yield streams.GroupsStream(self)
+        if "users" in self.input_catalog:
+            yield streams.UsersStream(self)
 {%- endif %}
 
 
