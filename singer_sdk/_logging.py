@@ -50,8 +50,9 @@ def _setup_console_logging() -> None:
         "{asctime:23s} | {levelname:8s} | {name:20s} | {message}: {metric_json}",
         style="{",
     )
-    handler.setFormatter(metrics_formatter)
-    metrics_logger.addHandler(handler)
+    metrics_handler = logging.StreamHandler(sys.stderr)
+    metrics_handler.setFormatter(metrics_formatter)
+    metrics_logger.addHandler(metrics_handler)
 
     if "SINGER_SDK_LOG_CONFIG" in os.environ:  # pragma: no cover
         log_config_path = Path(os.environ["SINGER_SDK_LOG_CONFIG"])
