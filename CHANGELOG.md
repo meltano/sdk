@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.46.4 (2025-05-28)
+
+### 🐛 Fixes
+
+- [#3066](https://github.com/meltano/sdk/issues/3066) Revert table name splitting by `-` in SQL targets when `default_target_schema` is set, introduced in #3020
+
 ## v0.46.3 (2025-05-15)
 
 ### 🐛 Fixes

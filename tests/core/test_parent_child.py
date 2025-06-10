@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import io
+import logging
 import typing as t
 from contextlib import redirect_stdout
 
@@ -80,6 +81,7 @@ class MyTap(Tap):
 
 
 @pytest.fixture
+@time_machine.travel(DATETIME, tick=False)
 def tap():
     """A tap with streams having a parent-child relationship."""
     return MyTap()
@@ -88,10 +90,21 @@ def tap():
 @pytest.fixture
 def tap_with_deselected_parent(tap: MyTap):
     """A tap with a parent stream deselected."""
-    original = tap.catalog["parent"].metadata[()].selected
-    tap.catalog["parent"].metadata[()].selected = False
+    stream_metadata = tap.catalog["parent"].metadata.root
+    original = stream_metadata.selected
+    stream_metadata.selected = False
     yield tap
-    tap.catalog["parent"].metadata[()].selected = original
+    stream_metadata.selected = original
+
+
+@pytest.fixture
+def tap_with_deselected_child(tap: MyTap):
+    """A tap with a child stream deselected."""
+    stream_metadata = tap.catalog["child"].metadata.root
+    original = stream_metadata.selected
+    stream_metadata.selected = False
+    yield tap
+    stream_metadata.selected = original
 
 
 @time_machine.travel(DATETIME, tick=False)
@@ -103,7 +116,11 @@ def test_parent_context_fields_in_child(
 ):
     """Test that parent context fields are available in child streams."""
     buf = io.StringIO()
-    with redirect_stdout(buf), caplog.at_level("INFO"):
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap.name)),
+    ):
         tap.sync_all()
 
     buf.seek(0)
@@ -144,8 +161,38 @@ def test_child_deselected_parent(
     assert parent_stream.has_selected_descendents
 
     buf = io.StringIO()
-    with redirect_stdout(buf), caplog.at_level("INFO"):
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap_with_deselected_parent.name)),
+    ):
         tap_with_deselected_parent.sync_all()
+
+    buf.seek(0)
+
+    snapshot.assert_match(buf.read(), "singer.jsonl")
+    snapshot.assert_match(caplog.text, "stderr.log")
+
+
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_deselected_child(
+    tap_with_deselected_child: MyTap,
+    caplog: pytest.LogCaptureFixture,
+    snapshot: Snapshot,
+):
+    """Test tap output when a child stream is deselected."""
+    child_stream = tap_with_deselected_child.streams["child"]
+
+    assert not child_stream.selected
+
+    buf = io.StringIO()
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap_with_deselected_child.name)),
+    ):
+        tap_with_deselected_child.sync_all()
 
     buf.seek(0)
 
@@ -223,7 +270,11 @@ def test_one_parent_many_children(
     tap = MyTapMany()
 
     buf = io.StringIO()
-    with redirect_stdout(buf), caplog.at_level("INFO"):
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap.name)),
+    ):
         tap.sync_all()
 
     buf.seek(0)

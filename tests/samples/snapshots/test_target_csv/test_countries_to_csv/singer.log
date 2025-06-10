@@ -1,0 +1,6 @@
+INFO sample-tap-countries Skipping parse of env var settings...
+INFO target-csv Skipping parse of env var settings...
+INFO sample-tap-countries.continents Beginning full_table sync of 'continents'
+INFO singer_sdk.helpers.jsonpath JSONPath $.data.continents[*] match count: 7
+INFO sample-tap-countries.countries Beginning full_table sync of 'countries'
+INFO singer_sdk.helpers.jsonpath JSONPath $.data.countries[*] match count: 250

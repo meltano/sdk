@@ -34,6 +34,7 @@ from singer_sdk.plugin_base import BaseSingerReader
 if t.TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import PurePath
+    from types import FrameType
 
     from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
@@ -252,7 +253,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         Returns:
             A new sink for the stream.
         """
-        self.logger.info("Initializing '%s' target sink...", self.name)
+        self.logger.debug("Initializing '%s' target sink...", self.name)
         sink_class = self.get_sink_class(stream_name=stream_name)
         sink = sink_class(
             target=self,
@@ -531,11 +532,31 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
             state: TODO
         """
         state_json = json.dumps(state)
-        self.logger.info("Emitting completed target state %s", state_json)
+        self.logger.debug("Emitting completed target state %s", state_json)
         sys.stdout.write(f"{state_json}\n")
         sys.stdout.flush()
 
     # CLI handler
+
+    def _handle_termination(  # pragma: no cover
+        self,
+        signum: int,
+        frame: FrameType | None,
+    ) -> None:
+        """Handle termination signals.
+
+        Args:
+            signum: Signal number.
+            frame: Frame object.
+        """
+        self.logger.info(
+            "Received termination signal %d, draining all sinks...",
+            signum,
+        )
+        try:
+            self.drain_all(is_endofpipe=True)
+        finally:
+            super()._handle_termination(signum, frame)
 
     @classmethod
     def invoke(  # type: ignore[override]
@@ -718,7 +739,7 @@ class SQLTarget(Target):
         Returns:
             A new sink for the stream.
         """
-        self.logger.info("Initializing '%s' target sink...", self.name)
+        self.logger.debug("Initializing '%s' target sink...", self.name)
         sink_class = self.get_sink_class(stream_name=stream_name)
         sink = sink_class(
             target=self,

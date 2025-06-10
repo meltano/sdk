@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import datetime
 import importlib.resources
+import io
 import json
 import shutil
 import typing as t
 import uuid
+from contextlib import redirect_stdout
 from pathlib import Path
 
 import pytest
@@ -20,15 +22,18 @@ from samples.sample_tap_fake_people.tap import SampleTapFakePeople
 from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk.testing import (
     get_target_test_class,
-    sync_end_to_end,
     tap_sync_test,
     tap_to_target_sync_test,
     target_sync_test,
 )
 from tests.conftest import TargetMock
 
+if t.TYPE_CHECKING:
+    from pytest_snapshot.plugin import Snapshot
+
 TEST_OUTPUT_DIR = Path(f".output/test_{uuid.uuid4()}/")
 SAMPLE_CONFIG = {"target_folder": f"{TEST_OUTPUT_DIR}/"}
+DATETIME = datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc)
 
 
 StandardTests = get_target_test_class(
@@ -57,24 +62,100 @@ COUNTRIES_STREAM_MAPS_CONFIG: dict[str, t.Any] = {
 }
 
 
-def test_countries_to_csv(csv_config: dict):
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_countries_to_csv(
+    csv_config: dict,
+    snapshot: Snapshot,
+    caplog: pytest.LogCaptureFixture,
+):
     tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
     target = SampleTargetCSV(config=csv_config)
-    tap_to_target_sync_test(tap, target)
+    target.max_parallelism = 1
+
+    caplog.set_level("ERROR", "singer_sdk.metrics")
+
+    with caplog.at_level("INFO"):
+        tap_stdout, _, target_stdout, _ = tap_to_target_sync_test(tap, target)
+
+    snapshot.assert_match(tap_stdout.read(), "tap.jsonl")
+    snapshot.assert_match(target_stdout.read(), "target.jsonl")
+    snapshot.assert_match(caplog.text, "singer.log")
 
 
-def test_countries_to_csv_mapped(csv_config: dict):
-    tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+@pytest.mark.parametrize(
+    "emit_activate_version_messages",
+    [True, False],
+    ids=["activate_version", "no_activate_version"],
+)
+def test_countries_to_csv_mapped(
+    snapshot: Snapshot,
+    csv_config: dict,
+    caplog: pytest.LogCaptureFixture,
+    emit_activate_version_messages: bool,
+):
+    tap = SampleTapCountries(
+        config={
+            **SAMPLE_TAP_CONFIG,
+            "emit_activate_version_messages": emit_activate_version_messages,
+        },
+        state=None,
+    )
     target = SampleTargetCSV(config=csv_config)
+    target.max_parallelism = 1
     mapper = StreamTransform(config=COUNTRIES_STREAM_MAPS_CONFIG)
-    sync_end_to_end(tap, target, mapper)
+
+    caplog.set_level("ERROR", "singer_sdk.metrics")
+
+    tap_io = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
+    with redirect_stdout(tap_io), caplog.at_level("INFO"):
+        tap.sync_all()
+
+    tap_io.seek(0)
+    tap_output = tap_io.read()
+    snapshot.assert_match(tap_output, "tap.jsonl")
+
+    tap_io.seek(0)
+    mapper_io = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
+    with redirect_stdout(mapper_io), caplog.at_level("INFO"):
+        mapper.listen(tap_io)
+
+    mapper_io.seek(0)
+    mapper_output = mapper_io.read()
+    snapshot.assert_match(mapper_output, "mapper.jsonl")
+
+    mapper_io.seek(0)
+    target_io = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
+    with redirect_stdout(target_io), caplog.at_level("INFO"):
+        target.listen(mapper_io)
+
+    target_io.seek(0)
+    target_output = target_io.read()
+    snapshot.assert_match(target_output, "target.jsonl")
+    snapshot.assert_match(caplog.text, "singer.log")
 
 
-def test_fake_people_to_csv(csv_config: dict):
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_fake_people_to_csv(
+    csv_config: dict,
+    snapshot: Snapshot,
+    caplog: pytest.LogCaptureFixture,
+):
     tap = SampleTapFakePeople()
     target = SampleTargetCSV(config=csv_config)
-    _, _, target_stdout, _ = tap_to_target_sync_test(tap, target)
-    assert not target_stdout.read(), "Target should not emit any bookmarks"
+    target.max_parallelism = 1
+
+    caplog.set_level("ERROR", "singer_sdk.metrics")
+
+    with caplog.at_level("INFO"):
+        tap_stdout, _, target_stdout, _ = tap_to_target_sync_test(tap, target)
+
+    snapshot.assert_match(tap_stdout.read(), "tap.jsonl")
+    snapshot.assert_match(target_stdout.read(), "target.jsonl")
+    snapshot.assert_match(caplog.text, "singer.log")
 
 
 def test_target_batching():

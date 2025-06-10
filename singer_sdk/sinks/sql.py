@@ -90,9 +90,6 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Returns:
             The target table name.
         """
-        if self.default_target_schema:
-            return self.stream_name
-
         parts = self.stream_name.split("-")
         table = self.stream_name if len(parts) == 1 else parts[-1]
         return self.conform_name(table, "table")

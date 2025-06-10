@@ -237,7 +237,11 @@ def tap_to_target_sync_test(
     return tap_stdout, tap_stderr, target_stdout, target_stderr
 
 
-def sync_end_to_end(tap: Tap, target: Target, *mappers: InlineMapper) -> None:
+def sync_end_to_end(
+    tap: Tap,
+    target: Target,
+    *mappers: InlineMapper,
+) -> None:  # pragma: no cover
     """Test and end-to-end sink from the tap to the target.
 
     Args:
