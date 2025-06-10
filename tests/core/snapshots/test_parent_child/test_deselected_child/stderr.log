@@ -1,0 +1,2 @@
+INFO my-tap Skipping deselected stream 'child'.
+INFO my-tap.parent Beginning full_table sync of 'parent'

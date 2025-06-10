@@ -1,0 +1,545 @@
+{
+  "cookies": {
+    "_cfuvid": "cdu.VVMJQFvjzODZOJHGY7TWo_LCZoaKdwMkuuEeB1M-1747940848507-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:07:28.410773+00:00",
+  "elapsed": 0.442064,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e98bd3d45a0a0-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:07:28 GMT",
+    "ETag": "W/\"75629fd7ba59144acc9ef407e2dbb480\"",
+    "Link": "<https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?id=meltano%2Fsdk&order=default&order_by=created_at&page=2&per_page=20&since=2022-01-01T00%3A00%3A00%2B00%3A00&sort=asc&trailers=false&with_stats=true>; rel=\"next\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?id=meltano%2Fsdk&order=default&order_by=created_at&page=1&per_page=20&since=2022-01-01T00%3A00%3A00%2B00%3A00&sort=asc&trailers=false&with_stats=true>; rel=\"first\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=cdu.VVMJQFvjzODZOJHGY7TWo_LCZoaKdwMkuuEeB1M-1747940848507-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-43-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-b",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"26b3d70a40a6a2c6f1658b65cc32efd0\",\"version\":\"1\"}",
+    "x-next-page": "2",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "26b3d70a40a6a2c6f1658b65cc32efd0",
+    "x-runtime": "0.149301"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?order_by=created_at&since=2022-01-01T00%3A00%3A00Z&sort=asc&with_stats=true"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/projects/meltano%2Fsdk/repository/commits?order_by=created_at&since=2022-01-01T00%3A00%3A00Z&sort=asc&with_stats=true",
+  "_decoded_content": [
+    {
+      "id": "050f604a190866fb16cc2fd1c5697d56010f0216",
+      "short_id": "050f604a",
+      "created_at": "2022-05-29T04:53:42.000+00:00",
+      "parent_ids": [
+        "6b89cf209551988a10d2f9fd9a1c9a7da3678e3a",
+        "a3f64db222f9f046fff16910a024680979335790"
+      ],
+      "title": "Merge branch 'improve-loglevels' into 'main'",
+      "message": "Merge branch 'improve-loglevels' into 'main'\n\nImprove logs for unmapped properties and allow users to set tap LOGLEVEL\n\nSee merge request meltano/sdk!300",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-05-29T04:53:42.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-05-29T04:53:42.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/050f604a190866fb16cc2fd1c5697d56010f0216",
+      "stats": {
+        "additions": 22,
+        "deletions": 7,
+        "total": 29
+      }
+    },
+    {
+      "id": "a3f64db222f9f046fff16910a024680979335790",
+      "short_id": "a3f64db2",
+      "created_at": "2022-05-29T04:53:42.000+00:00",
+      "parent_ids": [
+        "913ede0184830d89e41f93cfe612937aef65acd9"
+      ],
+      "title": "Improve logs for unmapped properties and allow users to set tap LOGLEVEL",
+      "message": "Improve logs for unmapped properties and allow users to set tap LOGLEVEL\n",
+      "author_name": "Eric Boucher",
+      "author_email": "eric.p.boucher@gmail.com",
+      "authored_date": "2022-05-29T04:53:42.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-05-29T04:53:42.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/a3f64db222f9f046fff16910a024680979335790",
+      "stats": {
+        "additions": 22,
+        "deletions": 7,
+        "total": 29
+      }
+    },
+    {
+      "id": "6b89cf209551988a10d2f9fd9a1c9a7da3678e3a",
+      "short_id": "6b89cf20",
+      "created_at": "2022-05-29T04:52:12.000+00:00",
+      "parent_ids": [
+        "913ede0184830d89e41f93cfe612937aef65acd9",
+        "16a08775dab3bf38f9f3be92f0db878374fd501e"
+      ],
+      "title": "Merge branch 'fix-sql-connector-echo' into 'main'",
+      "message": "Merge branch 'fix-sql-connector-echo' into 'main'\n\nfix: Do not write SQLAlchemy logs to stdout\n\nSee merge request meltano/sdk!303",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-05-29T04:52:12.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-05-29T04:52:12.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/6b89cf209551988a10d2f9fd9a1c9a7da3678e3a",
+      "stats": {
+        "additions": 1,
+        "deletions": 1,
+        "total": 2
+      }
+    },
+    {
+      "id": "16a08775dab3bf38f9f3be92f0db878374fd501e",
+      "short_id": "16a08775",
+      "created_at": "2022-05-29T04:52:12.000+00:00",
+      "parent_ids": [
+        "913ede0184830d89e41f93cfe612937aef65acd9"
+      ],
+      "title": "fix: Do not write SQLAlchemy logs to stdout",
+      "message": "fix: Do not write SQLAlchemy logs to stdout\n",
+      "author_name": "Andrey Tatarinov",
+      "author_email": "a@tatarinov.co",
+      "authored_date": "2022-05-29T04:52:12.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-05-29T04:52:12.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/16a08775dab3bf38f9f3be92f0db878374fd501e",
+      "stats": {
+        "additions": 1,
+        "deletions": 1,
+        "total": 2
+      }
+    },
+    {
+      "id": "913ede0184830d89e41f93cfe612937aef65acd9",
+      "short_id": "913ede01",
+      "created_at": "2022-05-26T02:16:58.000+00:00",
+      "parent_ids": [
+        "1576b5c290396e8875c1daca8e8d920497467486",
+        "7f459c1ac6054b3dad7d1539d506ba4398a5e16f"
+      ],
+      "title": "Merge branch '396-vulnerability-in-pyjwt-dependency' into 'main'",
+      "message": "Merge branch '396-vulnerability-in-pyjwt-dependency' into 'main'\n\nchore: Bump PyJWT to ~=2.4\n\nCloses #396\n\nSee merge request meltano/sdk!302",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-05-26T02:16:58.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-26T02:16:58.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/913ede0184830d89e41f93cfe612937aef65acd9",
+      "stats": {
+        "additions": 7,
+        "deletions": 5,
+        "total": 12
+      }
+    },
+    {
+      "id": "7f459c1ac6054b3dad7d1539d506ba4398a5e16f",
+      "short_id": "7f459c1a",
+      "created_at": "2022-05-26T02:16:58.000+00:00",
+      "parent_ids": [
+        "1576b5c290396e8875c1daca8e8d920497467486"
+      ],
+      "title": "chore: Bump PyJWT to ~=2.4",
+      "message": "chore: Bump PyJWT to ~=2.4\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-05-26T02:16:58.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-26T02:16:58.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/7f459c1ac6054b3dad7d1539d506ba4398a5e16f",
+      "stats": {
+        "additions": 7,
+        "deletions": 5,
+        "total": 12
+      }
+    },
+    {
+      "id": "1576b5c290396e8875c1daca8e8d920497467486",
+      "short_id": "1576b5c2",
+      "created_at": "2022-05-25T00:21:59.000+00:00",
+      "parent_ids": [
+        "7c8433605eebe9f79e38ac6a008081bcf6fa421c",
+        "81b99a108b9bae49eb17035c4b9e2abbbb31b321"
+      ],
+      "title": "Merge branch 'revamp-docs' into 'main'",
+      "message": "Merge branch 'revamp-docs' into 'main'\n\nRevamp and fix docs\n\nCloses #391, #388, and #387\n\nSee merge request meltano/sdk!296",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-05-25T00:21:59.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-25T00:21:59.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/1576b5c290396e8875c1daca8e8d920497467486",
+      "stats": {
+        "additions": 239,
+        "deletions": 152,
+        "total": 391
+      }
+    },
+    {
+      "id": "81b99a108b9bae49eb17035c4b9e2abbbb31b321",
+      "short_id": "81b99a10",
+      "created_at": "2022-05-25T00:21:59.000+00:00",
+      "parent_ids": [
+        "7c8433605eebe9f79e38ac6a008081bcf6fa421c"
+      ],
+      "title": "Revamp and fix docs",
+      "message": "Revamp and fix docs\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-05-25T00:21:59.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-25T00:21:59.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/81b99a108b9bae49eb17035c4b9e2abbbb31b321",
+      "stats": {
+        "additions": 239,
+        "deletions": 152,
+        "total": 391
+      }
+    },
+    {
+      "id": "7c8433605eebe9f79e38ac6a008081bcf6fa421c",
+      "short_id": "7c843360",
+      "created_at": "2022-05-24T22:59:10.000+00:00",
+      "parent_ids": [
+        "4d7e7dc23de3b239d51f8ae3e6f922b6f5bea987",
+        "eadbc15d122a4dce5a0df1df0a43c738f8db3f89"
+      ],
+      "title": "Merge branch 'aj-record-duplication-docs' into 'main'",
+      "message": "Merge branch 'aj-record-duplication-docs' into 'main'\n\nAdd 'at least once' implementation info to SDK docs\n\nSee merge request meltano/sdk!301",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-05-24T22:59:10.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-05-24T22:59:10.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/7c8433605eebe9f79e38ac6a008081bcf6fa421c",
+      "stats": {
+        "additions": 72,
+        "deletions": 0,
+        "total": 72
+      }
+    },
+    {
+      "id": "eadbc15d122a4dce5a0df1df0a43c738f8db3f89",
+      "short_id": "eadbc15d",
+      "created_at": "2022-05-24T22:59:09.000+00:00",
+      "parent_ids": [
+        "4d7e7dc23de3b239d51f8ae3e6f922b6f5bea987"
+      ],
+      "title": "Add 'at least once' implementation info to SDK docs",
+      "message": "Add 'at least once' implementation info to SDK docs\n",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-05-24T22:59:09.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-05-24T22:59:09.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/eadbc15d122a4dce5a0df1df0a43c738f8db3f89",
+      "stats": {
+        "additions": 72,
+        "deletions": 0,
+        "total": 72
+      }
+    },
+    {
+      "id": "4d7e7dc23de3b239d51f8ae3e6f922b6f5bea987",
+      "short_id": "4d7e7dc2",
+      "created_at": "2022-05-23T15:11:21.000+00:00",
+      "parent_ids": [
+        "b8bcaf5fd25d977142a9295bdc60083e206c96cc",
+        "cbc2c8ff6417be123beacd787425de4b4c494fd3"
+      ],
+      "title": "Merge branch 'update-release-template' into 'main'",
+      "message": "Merge branch 'update-release-template' into 'main'\n\nUpdate release template with link using pre-filled values\n\nSee merge request meltano/sdk!254",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-05-23T15:11:21.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-23T15:11:21.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/4d7e7dc23de3b239d51f8ae3e6f922b6f5bea987",
+      "stats": {
+        "additions": 1,
+        "deletions": 1,
+        "total": 2
+      }
+    },
+    {
+      "id": "cbc2c8ff6417be123beacd787425de4b4c494fd3",
+      "short_id": "cbc2c8ff",
+      "created_at": "2022-05-23T15:11:21.000+00:00",
+      "parent_ids": [
+        "791a48c3b9633cb75f44ead5894cd73b760137d9"
+      ],
+      "title": "Update release template with link using pre-filled values",
+      "message": "Update release template with link using pre-filled values\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-05-23T15:11:21.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-23T15:11:21.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/cbc2c8ff6417be123beacd787425de4b4c494fd3",
+      "stats": {
+        "additions": 1,
+        "deletions": 1,
+        "total": 2
+      }
+    },
+    {
+      "id": "b8bcaf5fd25d977142a9295bdc60083e206c96cc",
+      "short_id": "b8bcaf5f",
+      "created_at": "2022-05-20T18:14:47.000+00:00",
+      "parent_ids": [
+        "360ce5dc7d31cab9d129c6cb5beaf7df9d530f51",
+        "9f55fa056ca4dd2f8ba2d81b33cad85542af8ba4"
+      ],
+      "title": "Merge branch '392-confusing-unhelpful-message-operator-__else__-none-was-not-found-unmapped-streams-will-be' into 'main'",
+      "message": "Merge branch '392-confusing-unhelpful-message-operator-__else__-none-was-not-found-unmapped-streams-will-be' into 'main'\n\nRemove logging message 'Unmapped streams will be included in output.'\n\nCloses #392\n\nSee merge request meltano/sdk!299",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-05-20T18:14:47.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-05-20T18:14:47.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/b8bcaf5fd25d977142a9295bdc60083e206c96cc",
+      "stats": {
+        "additions": 1,
+        "deletions": 1,
+        "total": 2
+      }
+    },
+    {
+      "id": "9f55fa056ca4dd2f8ba2d81b33cad85542af8ba4",
+      "short_id": "9f55fa05",
+      "created_at": "2022-05-20T18:14:47.000+00:00",
+      "parent_ids": [
+        "360ce5dc7d31cab9d129c6cb5beaf7df9d530f51"
+      ],
+      "title": "Remove logging message 'Unmapped streams will be included in output.'",
+      "message": "Remove logging message 'Unmapped streams will be included in output.'\n",
+      "author_name": "AJ Steers",
+      "author_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "authored_date": "2022-05-20T18:14:47.000+00:00",
+      "committer_name": "AJ Steers",
+      "committer_email": "4809760-aaronsteers@users.noreply.gitlab.com",
+      "committed_date": "2022-05-20T18:14:47.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/9f55fa056ca4dd2f8ba2d81b33cad85542af8ba4",
+      "stats": {
+        "additions": 1,
+        "deletions": 1,
+        "total": 2
+      }
+    },
+    {
+      "id": "360ce5dc7d31cab9d129c6cb5beaf7df9d530f51",
+      "short_id": "360ce5dc",
+      "created_at": "2022-05-19T22:04:48.000+00:00",
+      "parent_ids": [
+        "aaea2c86f921a52ce727ea5fb295f01deee04659",
+        "263b7047b805e68749572e3f05edf03be2188964"
+      ],
+      "title": "Merge branch 'release/v0.5.0' into 'main'",
+      "message": "Merge branch 'release/v0.5.0' into 'main'\n\nRelease v0.5.0\n\nCloses #383\n\nSee merge request meltano/sdk!298",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-05-19T22:04:48.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-19T22:04:48.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/360ce5dc7d31cab9d129c6cb5beaf7df9d530f51",
+      "stats": {
+        "additions": 17,
+        "deletions": 7,
+        "total": 24
+      }
+    },
+    {
+      "id": "263b7047b805e68749572e3f05edf03be2188964",
+      "short_id": "263b7047",
+      "created_at": "2022-05-19T22:04:48.000+00:00",
+      "parent_ids": [
+        "aaea2c86f921a52ce727ea5fb295f01deee04659"
+      ],
+      "title": "Release v0.5.0",
+      "message": "Release v0.5.0\n",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-05-19T22:04:48.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-19T22:04:48.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/263b7047b805e68749572e3f05edf03be2188964",
+      "stats": {
+        "additions": 17,
+        "deletions": 7,
+        "total": 24
+      }
+    },
+    {
+      "id": "aaea2c86f921a52ce727ea5fb295f01deee04659",
+      "short_id": "aaea2c86",
+      "created_at": "2022-05-19T20:51:12.000+00:00",
+      "parent_ids": [
+        "60c5b6a054dd4dfd41c94f5195a1be65a9ca55d8",
+        "6c817a87634387e0c72f98ab0ba5105a2fa6e151"
+      ],
+      "title": "Merge branch '376-activate-version-parameter-markers' into 'main'",
+      "message": "Merge branch '376-activate-version-parameter-markers' into 'main'\n\nUse generic parameter markers to update _sdc_deleted_at (when processing activate_version record)\n\nCloses #376\n\nSee merge request meltano/sdk!287",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-05-19T20:51:12.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-19T20:51:12.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/aaea2c86f921a52ce727ea5fb295f01deee04659",
+      "stats": {
+        "additions": 44,
+        "deletions": 7,
+        "total": 51
+      }
+    },
+    {
+      "id": "6c817a87634387e0c72f98ab0ba5105a2fa6e151",
+      "short_id": "6c817a87",
+      "created_at": "2022-05-19T20:51:12.000+00:00",
+      "parent_ids": [
+        "60c5b6a054dd4dfd41c94f5195a1be65a9ca55d8"
+      ],
+      "title": "Use generic parameter markers to update _sdc_deleted_at (when processing activate_version record)",
+      "message": "Use generic parameter markers to update _sdc_deleted_at (when processing activate_version record)\n",
+      "author_name": "Thomas Briggs",
+      "author_email": "tbriggs@allego.com",
+      "authored_date": "2022-05-19T20:51:12.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-19T20:51:12.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/6c817a87634387e0c72f98ab0ba5105a2fa6e151",
+      "stats": {
+        "additions": 44,
+        "deletions": 7,
+        "total": 51
+      }
+    },
+    {
+      "id": "60c5b6a054dd4dfd41c94f5195a1be65a9ca55d8",
+      "short_id": "60c5b6a0",
+      "created_at": "2022-05-19T20:27:58.000+00:00",
+      "parent_ids": [
+        "081ca96de4d042939cf51fe8a18af61ac1b52298",
+        "2bdd599078b6b718da8dd7ef2577085e15afd528"
+      ],
+      "title": "Merge branch '385-column-names-in-inserts' into 'main'",
+      "message": "Merge branch '385-column-names-in-inserts' into 'main'\n\nExplicitly specify column names when inserting rows\n\nCloses #385\n\nSee merge request meltano/sdk!294",
+      "author_name": "Edgar R. Mondrag\u00f3n",
+      "author_email": "edgar@meltano.com",
+      "authored_date": "2022-05-19T20:27:58.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-19T20:27:58.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/60c5b6a054dd4dfd41c94f5195a1be65a9ca55d8",
+      "stats": {
+        "additions": 6,
+        "deletions": 1,
+        "total": 7
+      }
+    },
+    {
+      "id": "2bdd599078b6b718da8dd7ef2577085e15afd528",
+      "short_id": "2bdd5990",
+      "created_at": "2022-05-19T20:27:58.000+00:00",
+      "parent_ids": [
+        "794b85e495a9f205052d39f21246d4800dbe1fad"
+      ],
+      "title": "Explicitly specify column names when inserting rows",
+      "message": "Explicitly specify column names when inserting rows\n",
+      "author_name": "Thomas Briggs",
+      "author_email": "tbriggs@allego.com",
+      "authored_date": "2022-05-19T20:27:58.000+00:00",
+      "committer_name": "Edgar R. Mondrag\u00f3n",
+      "committer_email": "edgar@meltano.com",
+      "committed_date": "2022-05-19T20:27:58.000+00:00",
+      "trailers": {},
+      "extended_trailers": {},
+      "web_url": "https://gitlab.com/meltano/sdk/-/commit/2bdd599078b6b718da8dd7ef2577085e15afd528",
+      "stats": {
+        "additions": 6,
+        "deletions": 1,
+        "total": 7
+      }
+    }
+  ]
+}

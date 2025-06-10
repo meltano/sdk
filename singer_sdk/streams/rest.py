@@ -423,6 +423,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             "url": url,
             "params": params,
             "headers": headers,
+            "auth": self.authenticator,
         }
 
         if self.payload_as_json:
@@ -622,12 +623,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         Yields:
             One item per (possibly processed) record in the API.
         """
-        for record in self.request_records(context):
-            transformed_record = self.post_process(record, context)
-            if transformed_record is None:
-                # Record filtered out during post_process()
-                continue
-            yield transformed_record
+        yield from self.request_records(context)
 
     # Abstract methods:
 

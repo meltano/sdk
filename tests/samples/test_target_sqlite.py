@@ -25,7 +25,8 @@ from singer_sdk.testing import (
 )
 
 if t.TYPE_CHECKING:
-    from singer_sdk._singerlib import Catalog
+    from pytest_snapshot.plugin import Snapshot
+
     from singer_sdk.tap_base import SQLTap
     from singer_sdk.target_base import SQLTarget
 
@@ -109,7 +110,6 @@ def sqlite_sample_target_batch(sqlite_target_test_config):
 def test_sync_sqlite_to_sqlite(
     sqlite_sample_tap: SQLTap,
     sqlite_sample_target: SQLTarget,
-    sqlite_sample_db_catalog: Catalog,
 ):
     """End-to-end-to-end test for SQLite tap and target.
 
@@ -127,11 +127,10 @@ def test_sync_sqlite_to_sqlite(
         sqlite_sample_target,
     )
     orig_stdout.seek(0)
-    tapped_config = dict(sqlite_sample_target.config)
     tapped_target = SQLiteTap(
-        config=tapped_config,
+        config=dict(sqlite_sample_target.config),
         state=initial_state,
-        catalog=sqlite_sample_db_catalog.to_dict(),
+        catalog=sqlite_sample_tap.catalog,
     )
     new_stdout, _ = tap_sync_test(tapped_target)
 
@@ -275,9 +274,13 @@ def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_c), finalize=True)
 
 
+@pytest.mark.snapshot
 def test_sqlite_activate_version(
+    request: pytest.FixtureRequest,
     sqlite_sample_target: SQLTarget,
     sqlite_sample_target_hard_delete: SQLTarget,
+    snapshot: Snapshot,
+    caplog: pytest.LogCaptureFixture,
 ):
     """Test handling the activate_version message for the SQLite target.
 
@@ -286,7 +289,7 @@ def test_sqlite_activate_version(
     - Sends an activate_version message for a table that doesn't exist (which should
       have no effect)
     """
-    test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
+    test_tbl = f"zzz_tmp_{request.node.name}"
     schema_msg = {
         "type": "SCHEMA",
         "stream": test_tbl,
@@ -307,12 +310,23 @@ def test_sqlite_activate_version(
         ]
     )
 
-    target_sync_test(sqlite_sample_target, input=StringIO(tap_output), finalize=True)
-    target_sync_test(
-        sqlite_sample_target_hard_delete,
-        input=StringIO(tap_output),
-        finalize=True,
-    )
+    caplog.set_level("ERROR", "singer_sdk.metrics")
+
+    with caplog.at_level("INFO"):
+        stdout1, _ = target_sync_test(
+            sqlite_sample_target,
+            input=StringIO(tap_output),
+            finalize=True,
+        )
+        stdout2, _ = target_sync_test(
+            sqlite_sample_target_hard_delete,
+            input=StringIO(tap_output),
+            finalize=True,
+        )
+
+    snapshot.assert_match(stdout1.read(), "target.jsonl")
+    snapshot.assert_match(stdout2.read(), "target_hard_delete.jsonl")
+    snapshot.assert_match(caplog.text, "singer.log")
 
     # Check that the record metadata was added
     table = get_table(sqlite_sample_target_hard_delete.config, test_tbl)
@@ -324,8 +338,12 @@ def test_sqlite_activate_version(
     assert type(table.columns["_sdc_deleted_at"].type) is sa.DATETIME
 
 
+@pytest.mark.snapshot
 def test_sqlite_no_activate_version(
+    request: pytest.FixtureRequest,
     sqlite_sample_target_no_activate_version: SQLTarget,
+    snapshot: Snapshot,
+    caplog: pytest.LogCaptureFixture,
 ):
     """Test handling the activate_version message for the SQLite target.
 
@@ -334,7 +352,7 @@ def test_sqlite_no_activate_version(
     - Sends an activate_version message for a table that doesn't exist (which should
       have no effect)
     """
-    test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
+    test_tbl = f"zzz_tmp_{request.node.name}"
     schema_msg = {
         "type": "SCHEMA",
         "stream": test_tbl,
@@ -355,11 +373,17 @@ def test_sqlite_no_activate_version(
         ]
     )
 
-    target_sync_test(
-        sqlite_sample_target_no_activate_version,
-        input=StringIO(tap_output),
-        finalize=True,
-    )
+    caplog.set_level("ERROR", "singer_sdk.metrics")
+
+    with caplog.at_level("INFO"):
+        stdout, _ = target_sync_test(
+            sqlite_sample_target_no_activate_version,
+            input=StringIO(tap_output),
+            finalize=True,
+        )
+
+    snapshot.assert_match(stdout.read(), "target.jsonl")
+    snapshot.assert_match(caplog.text, "singer.log")
 
     # Check that the record metadata was added
     table = get_table(sqlite_sample_target_no_activate_version.config, test_tbl)
@@ -369,7 +393,13 @@ def test_sqlite_no_activate_version(
     assert "_sdc_deleted_at" not in table.columns
 
 
-def test_sqlite_add_record_metadata(sqlite_target_add_record_metadata: SQLTarget):
+@pytest.mark.snapshot
+def test_sqlite_add_record_metadata(
+    request: pytest.FixtureRequest,
+    sqlite_target_add_record_metadata: SQLTarget,
+    snapshot: Snapshot,
+    caplog: pytest.LogCaptureFixture,
+):
     """Test handling the activate_version message for the SQLite target.
 
     Test performs the following actions:
@@ -377,7 +407,7 @@ def test_sqlite_add_record_metadata(sqlite_target_add_record_metadata: SQLTarget
     - Sends an activate_version message for a table that doesn't exist (which should
       have no effect)
     """
-    test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
+    test_tbl = f"zzz_tmp_{request.node.name}"
     schema_msg = {
         "type": "SCHEMA",
         "stream": test_tbl,
@@ -398,11 +428,17 @@ def test_sqlite_add_record_metadata(sqlite_target_add_record_metadata: SQLTarget
         ]
     )
 
-    target_sync_test(
-        sqlite_target_add_record_metadata,
-        input=StringIO(tap_output),
-        finalize=True,
-    )
+    caplog.set_level("ERROR", "singer_sdk.metrics")
+
+    with caplog.at_level("INFO"):
+        stdout, _ = target_sync_test(
+            sqlite_target_add_record_metadata,
+            input=StringIO(tap_output),
+            finalize=True,
+        )
+
+    snapshot.assert_match(stdout.read(), "target.jsonl")
+    snapshot.assert_match(caplog.text, "singer.log")
 
     # Check that the record metadata was added
     table = get_table(sqlite_target_add_record_metadata.config, test_tbl)
@@ -607,8 +643,11 @@ def test_sqlite_column_no_morph(sqlite_sample_target: SQLTarget):
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_b), finalize=True)
 
 
+@pytest.mark.snapshot
 def test_record_with_missing_properties(
     sqlite_sample_target: SQLTarget,
+    snapshot: Snapshot,
+    caplog: pytest.LogCaptureFixture,
 ):
     """Test handling of records with missing properties."""
     tap_output = "\n".join(
@@ -633,7 +672,17 @@ def test_record_with_missing_properties(
             },
         ]
     )
-    target_sync_test(sqlite_sample_target, input=StringIO(tap_output), finalize=True)
+
+    caplog.set_level("ERROR", "singer_sdk.metrics")
+
+    with caplog.at_level("INFO"):
+        target_stdout, _ = target_sync_test(
+            sqlite_sample_target,
+            input=StringIO(tap_output),
+            finalize=True,
+        )
+    snapshot.assert_match(target_stdout.read(), "target.jsonl")
+    snapshot.assert_match(caplog.text, "singer.log")
 
 
 @pytest.mark.parametrize(

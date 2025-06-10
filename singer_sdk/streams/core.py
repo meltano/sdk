@@ -147,6 +147,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._config: dict = dict(tap.config)
         self._tap = tap
         self._tap_state = tap.state
+        self._stream_version: int | None = None
+
+        # Epoch timestamp in milliseconds
+        self._initialized_at: int = tap.initialized_at
+
         self._tap_input_catalog: singer.Catalog | None = None
         self._input_schema: dict | None = None
         self._stream_maps: list[StreamMap] | None = None
@@ -159,7 +164,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
         self._is_state_flushed: bool = True
-        self._last_emitted_state: dict | None = None
+        self._last_emitted_state: types.TapState | None = None
         self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
         if schema:
@@ -207,7 +212,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         if self._tap.mapper is not None:
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
-            self.logger.info(
+            self.logger.debug(
                 "Tap has custom mapper. Using %d provided map(s).",
                 len(self.stream_maps),
             )
@@ -495,7 +500,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             Max allowable bookmark value for this stream's replication key.
         """
-        return utc_now() if self.is_timestamp_replication_key else None
+        return (
+            datetime.datetime.fromtimestamp(
+                self._initialized_at / 1000.0,
+                tz=datetime.timezone.utc,
+            )
+            if self.is_timestamp_replication_key
+            else None
+        )
 
     @property
     def schema_filepath(self) -> Path | Traversable | None:
@@ -516,7 +528,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._schema
 
     @property
-    def primary_keys(self) -> t.Sequence[str] | None:
+    def primary_keys(self) -> t.Sequence[str]:
         """Get primary keys.
 
         Returns:
@@ -525,11 +537,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._primary_keys or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: t.Sequence[str] | None) -> None:
+    def primary_keys(self, new_value: t.Sequence[str]) -> None:
         """Set primary key(s) for the stream.
 
         Args:
-            new_value: TODO
+            new_value: A list or tuple of primary key(s) for the stream.
         """
         self._primary_keys = new_value
 
@@ -702,10 +714,15 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             return REPLICATION_INCREMENTAL
         return REPLICATION_FULL_TABLE
 
+    @property
+    def emit_activate_version_messages(self) -> bool:
+        """Get whether to emit `ACTIVATE_VERSION` messages."""
+        return self.config.get("emit_activate_version_messages", False)
+
     # State properties:
 
     @property
-    def tap_state(self) -> dict:
+    def tap_state(self) -> types.TapState:
         """Return a writeable state dict for the entire tap.
 
         Note: This dictionary is shared (and writable) across all streams.
@@ -855,6 +872,15 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             self._last_emitted_state = copy.deepcopy(self.tap_state)
             self._is_state_flushed = True
 
+    def _write_activate_version_message(self, full_table_version: int) -> None:
+        """Write out an ACTIVATE_VERSION message."""
+        singer.write_message(
+            singer.ActivateVersionMessage(
+                self.name,
+                full_table_version,
+            )
+        )
+
     def _generate_schema_messages(
         self,
     ) -> t.Generator[singer.SchemaMessage, None, None]:
@@ -921,7 +947,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 yield singer.RecordMessage(
                     stream=stream_map.stream_alias,
                     record=mapped_record,
-                    version=None,
+                    version=self._stream_version,
                     time_extracted=utc_now(),
                 )
 
@@ -1084,6 +1110,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             state: State object to promote progress markers with.
         """
+        if not self.selected:
+            return
+
         if state is None or state == {}:
             for child_stream in self.child_streams or []:
                 child_stream.finalize_state_progress_markers()
@@ -1145,13 +1174,16 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Yields:
             Each record from the source.
         """
+        # Type definitions
+        context_element: types.Context | None
+        record: types.Record | None
+        context_list: list[types.Context] | list[dict] | None
+
         # Initialize metrics
         record_counter = metrics.record_counter(self.name)
         timer = metrics.sync_timer(self.name)
 
         record_index = 0
-        context_element: types.Context | None
-        context_list: list[types.Context] | list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
@@ -1173,11 +1205,24 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 for idx, record_result in enumerate(self.get_records(current_context)):
                     self._check_max_record_limit(current_record_index=record_index)
 
-                    if isinstance(record_result, tuple):
+                    if isinstance(record_result, tuple):  # pragma: no cover
                         # Tuple items should be the record and the child context
+                        warnings.warn(
+                            "Yielding a tuple of (record, child_context) is "
+                            "deprecated and will be removed in version 0.49 "
+                            "at the earliest. "
+                            "Please yield a single item instead.",
+                            SingerSDKDeprecationWarning,
+                            stacklevel=2,
+                        )
                         record, child_context = record_result
                     else:
                         record = record_result
+
+                    record = self.post_process(record, current_context)
+                    if record is None:
+                        continue
+
                     try:
                         self._process_record(
                             record,
@@ -1255,7 +1300,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
             msg += f" with context: {context}"
-        self.logger.info("%s...", msg)
+        self.logger.info(msg)
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
@@ -1266,6 +1311,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         # Send a SCHEMA message to the downstream target:
         if self.selected:
             self._write_schema_message()
+
+        if (
+            self.selected
+            and self.replication_method == REPLICATION_FULL_TABLE
+            and self.emit_activate_version_messages
+        ):
+            self._stream_version = self._initialized_at // 1000
+            self._write_activate_version_message(self._stream_version)
 
         try:
             batch_config = self.get_batch_config(self.config)
@@ -1310,9 +1363,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         self._tap_input_catalog = catalog
 
-        if catalog_entry := catalog.get_stream(self.name):
+        if entry := catalog.get_stream(self.name):
             stream_metadata: StreamMetadata | None
-            if stream_metadata := catalog_entry.metadata.get(()):  # type: ignore[assignment]
+            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment]
                 table_key_properties = stream_metadata.table_key_properties
                 table_replication_key = stream_metadata.replication_key
                 table_replication_method = stream_metadata.forced_replication_method
@@ -1321,18 +1374,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 table_replication_key = None
                 table_replication_method = None
 
-            self.primary_keys = catalog_entry.key_properties or table_key_properties
-            self.replication_key = (
-                catalog_entry.replication_key or table_replication_key
-            )
+            self.primary_keys = entry.key_properties or table_key_properties or ()
+            self.replication_key = entry.replication_key or table_replication_key
 
-            replication_method = (
-                catalog_entry.replication_method or table_replication_method
-            )
+            replication_method = entry.replication_method or table_replication_method
             if replication_method:
                 self.forced_replication_method = replication_method
 
-            self._input_schema = catalog_entry.schema.to_dict()
+            self._input_schema = entry.schema.to_dict()
 
     def _get_state_partition_context(
         self,
@@ -1419,7 +1468,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def get_records(
         self,
         context: types.Context | None,
-    ) -> t.Iterable[dict | tuple[dict, dict | None]]:
+    ) -> t.Iterable[types.Record | tuple[dict, dict | None]]:
         """Abstract record generator function. Must be overridden by the child class.
 
         Each record emitted should be a dictionary of property names to their values.
@@ -1444,6 +1493,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         the child records can no longer be synced.
 
         More info: :doc:`/parent_streams`
+
+        .. versionchanged:: 0.47.0
+           Deprecated support for returning a tuple of (record, child_context).
 
         Args:
             context: Stream partition or context dictionary.
@@ -1491,7 +1543,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self,
         row: types.Record,
         context: types.Context | None = None,  # noqa: ARG002
-    ) -> dict | None:
+    ) -> types.Record | None:
         """As needed, append or transform raw data to match expected structure.
 
         Optional. This method gives developers an opportunity to "clean up" the results

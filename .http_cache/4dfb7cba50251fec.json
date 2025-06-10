@@ -1,0 +1,1404 @@
+{
+  "cookies": {
+    "_cfuvid": "7H2Qihw7he_LZsV6galeWzKLktDVzcXBITNP_IghwWo-1747940900210-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:08:20.117594+00:00",
+  "elapsed": 0.55947,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e99ffe9ff2667-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:08:20 GMT",
+    "ETag": "W/\"d2d5ef5e063192d394c10b4a6749ade1\"",
+    "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/144/issues?epic_iid=144&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/144/issues?epic_iid=144&id=2524164&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=7H2Qihw7he_LZsV6galeWzKLktDVzcXBITNP_IghwWo-1747940900210-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-05-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-c",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"a78a9b6ebbea1d3e6d9fb55b35750a80\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "a78a9b6ebbea1d3e6d9fb55b35750a80",
+    "x-runtime": "0.305206",
+    "x-total": "11",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/2524164/epics/144/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/2524164/epics/144/issues",
+  "_decoded_content": [
+    {
+      "id": 109110437,
+      "iid": 3525,
+      "project_id": 7603319,
+      "title": "Move oppty assessment issue template to marketing?",
+      "description": "https://gitlab.com/meltano/meltano/-/blob/master/.gitlab/issue_templates/opportunity-assessment.md\n\nThis seems valuable but I don't think we want it in this repo anymore. Should we move it to a Marketing or Product project?\n\ncc @Emily @tayloramurphy",
+      "state": "closed",
+      "created_at": "2022-05-25T14:47:32.992Z",
+      "updated_at": "2022-05-31T18:52:07.008Z",
+      "closed_at": "2022-05-31T18:52:06.989Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing",
+        "flow::To Do",
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 394049,
+          "username": "afolson",
+          "public_email": "",
+          "name": "Amanda Folson",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "web_url": "https://gitlab.com/afolson"
+        }
+      ],
+      "author": {
+        "id": 394049,
+        "username": "afolson",
+        "public_email": "",
+        "name": "Amanda Folson",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "web_url": "https://gitlab.com/afolson"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 394049,
+        "username": "afolson",
+        "public_email": "",
+        "name": "Amanda Folson",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "web_url": "https://gitlab.com/afolson"
+      },
+      "user_notes_count": 3,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-05-27",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3525",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3525",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3525/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3525/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3525",
+        "relative": "#3525",
+        "full": "meltano/meltano#3525"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 144,
+      "epic": {
+        "id": 518923,
+        "iid": 144,
+        "title": "Move Meltano to GitHub",
+        "url": "/groups/meltano/-/epics/144",
+        "group_id": 2524164,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1389581,
+      "relative_position": -4104
+    },
+    {
+      "id": 108890582,
+      "iid": 252,
+      "project_id": 24722673,
+      "title": "Switch main branch from `master` to `main`",
+      "description": "Since all contributors will need to update their git remotes anyway, this would be a minor change for them. It's the default name for the main branch on GitHub and GitLab, and so it makes a repository look/feel more modern.",
+      "state": "closed",
+      "created_at": "2022-05-20T19:17:53.759Z",
+      "updated_at": "2022-05-30T22:59:37.775Z",
+      "closed_at": "2022-05-30T22:59:37.767Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 1522656,
+          "username": "WillDaSilva",
+          "public_email": "will@willdasilva.xyz",
+          "name": "Will Da Silva",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+          "web_url": "https://gitlab.com/WillDaSilva"
+        }
+      ],
+      "author": {
+        "id": 1522656,
+        "username": "WillDaSilva",
+        "public_email": "will@willdasilva.xyz",
+        "name": "Will Da Silva",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+        "web_url": "https://gitlab.com/WillDaSilva"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 1522656,
+        "username": "WillDaSilva",
+        "public_email": "will@willdasilva.xyz",
+        "name": "Will Da Silva",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+        "web_url": "https://gitlab.com/WillDaSilva"
+      },
+      "user_notes_count": 9,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meta/-/issues/252",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/24722673/issues/252",
+        "notes": "https://gitlab.com/api/v4/projects/24722673/issues/252/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/24722673/issues/252/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/24722673",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#252",
+        "relative": "#252",
+        "full": "meltano/meta#252"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 144,
+      "epic": {
+        "id": 518923,
+        "iid": 144,
+        "title": "Move Meltano to GitHub",
+        "url": "/groups/meltano/-/epics/144",
+        "group_id": 2524164,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": {
+        "id": 56417,
+        "iid": 57,
+        "sequence": 4,
+        "group_id": 2524164,
+        "title": null,
+        "description": null,
+        "state": 3,
+        "created_at": "2022-05-13T20:04:48.843Z",
+        "updated_at": "2022-06-06T00:05:02.119Z",
+        "start_date": "2022-05-30",
+        "due_date": "2022-06-05",
+        "web_url": "https://gitlab.com/groups/meltano/-/iterations/56417"
+      },
+      "health_status": null,
+      "epic_issue_id": 1380227,
+      "relative_position": -3591
+    },
+    {
+      "id": 108838650,
+      "iid": 417,
+      "project_id": 27821563,
+      "title": "Transition some CTA's from slack to GitHub",
+      "description": "### Activity \nIn an effort to get more traction on GitHub once we transition we want to make more of our CTA's about checking us out on GitHub or engaging with the growing community on GitHub...\n\n### Todos\n\n- [ ] Update most popular blogs from past 3 months \n- [ ] update selected pages on website\n- [ ] change CTA on paid ads\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-05-19T22:43:45.901Z",
+      "updated_at": "2022-05-31T18:37:48.295Z",
+      "closed_at": "2022-05-31T18:37:48.288Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Content",
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 11457501,
+          "username": "victoria66",
+          "public_email": "victoria@meltano.com",
+          "name": "Victoria Gayton",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11457501/avatar.png",
+          "web_url": "https://gitlab.com/victoria66"
+        },
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 5,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-05-31",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/417",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 3,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/417",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/417/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/417/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#417",
+        "relative": "#417",
+        "full": "meltano/marketing/marketing-general#417"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 144,
+      "epic": {
+        "id": 518923,
+        "iid": 144,
+        "title": "Move Meltano to GitHub",
+        "url": "/groups/meltano/-/epics/144",
+        "group_id": 2524164,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1390726,
+      "relative_position": -4617
+    },
+    {
+      "id": 108834137,
+      "iid": 415,
+      "project_id": 27821563,
+      "title": "Add GitHub embed to website and all headers",
+      "description": "see example\n\n![Screen_Shot_2022-05-19_at_10.20.01_AM](/uploads/a122fb69bc947c71d0986426749403b2/Screen_Shot_2022-05-19_at_10.20.01_AM.png)\n\n\n<!-- Labels to add for triaging -->",
+      "state": "closed",
+      "created_at": "2022-05-19T20:03:09.624Z",
+      "updated_at": "2022-05-31T18:37:34.585Z",
+      "closed_at": "2022-05-31T18:37:34.577Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing",
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": null,
+      "assignees": [],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 6,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-06-07",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/415",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/415",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/415/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/415/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#415",
+        "relative": "#415",
+        "full": "meltano/marketing/marketing-general#415"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 144,
+      "epic": {
+        "id": 518923,
+        "iid": 144,
+        "title": "Move Meltano to GitHub",
+        "url": "/groups/meltano/-/epics/144",
+        "group_id": 2524164,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1377522,
+      "relative_position": -3078
+    },
+    {
+      "id": 108833254,
+      "iid": 414,
+      "project_id": 27821563,
+      "title": "Comms coordination with GitLab",
+      "description": "## Brief \n* Gitlab is good with our overall message and timing \n* High level messaging: GitHub is for developers vs Gitlab more enterprises/community vs commercial  \n\n## Timeline\n- May 30th: Migration\n- May 31st: [blog launch](https://gitlab.com/meltano/marketing/marketing-general/-/issues/397) and social promoting being on GitHub\n- May 31st: monitor HN and social channels and coordinate with GitLab PR and the community team if there is any noise. \n\n## To Do:\n\n- [ ] send them our draft announcement blog + social copy for review \n- [ ] plan for anything that needs to be addressed on Hacker News\n- [ ] do we need an FAQ?\n\n\n### notes from the call with Natasha \n- do we need an FAQ\n- pitch it as an exclusive sit down and do long for an interview- have full-blown discussion on it\n  - comes out times half-hour before press release \n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-05-19T19:36:18.778Z",
+      "updated_at": "2022-05-31T18:37:28.197Z",
+      "closed_at": "2022-05-31T18:37:28.187Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Content",
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 5,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-05-30",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/414",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 3,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/414",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/414/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/414/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#414",
+        "relative": "#414",
+        "full": "meltano/marketing/marketing-general#414"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 144,
+      "epic": {
+        "id": 518923,
+        "iid": 144,
+        "title": "Move Meltano to GitHub",
+        "url": "/groups/meltano/-/epics/144",
+        "group_id": 2524164,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1377460,
+      "relative_position": -2565
+    },
+    {
+      "id": 108635274,
+      "iid": 3493,
+      "project_id": 7603319,
+      "title": "Update project README for 2.0 launch (Due May 30)",
+      "description": "Once Meltano is on GitHub, the README will be an opportunity for better marketing and info about what Meltano is and does. \n\nIt'd be good to update this to have more information and _possibly_ have some of the getting started instructions. Would be good to get our logo and maybe the website image on there?\n\n@Emily @afolson how do y'all want to think of the readme? cc @aaronsteers \n\n-------------------------\n\n[Draft of the README document](https://docs.google.com/document/d/1cuWAi4D1sDoTrkYX6eRUTfmW_xv0iNIqA00bdKQn3iE/edit?usp=sharing)\n\n## Places that need updated copy:\n* https://github.com/meltano\n* https://github.com/meltano/meltano",
+      "state": "closed",
+      "created_at": "2022-05-16T18:28:12.136Z",
+      "updated_at": "2022-05-31T18:51:47.155Z",
+      "closed_at": "2022-05-31T18:51:47.126Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing",
+        "kind::Non-Product",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 11542635,
+        "username": "laurameltano",
+        "public_email": "laura@meltano.com",
+        "name": "Laura P\u00e9rez",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+        "web_url": "https://gitlab.com/laurameltano"
+      },
+      "user_notes_count": 10,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-05-31",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3493",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3493",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3493/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3493/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3493",
+        "relative": "#3493",
+        "full": "meltano/meltano#3493"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 144,
+      "epic": {
+        "id": 518923,
+        "iid": 144,
+        "title": "Move Meltano to GitHub",
+        "url": "/groups/meltano/-/epics/144",
+        "group_id": 2524164,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1368543,
+      "relative_position": -5130
+    },
+    {
+      "id": 108533194,
+      "iid": 246,
+      "project_id": 24722673,
+      "title": "Create the \"Melty-bot\" GitHub user",
+      "description": "\nFor https://gitlab.com/groups/meltano/-/epics/144 we'll need a migration bot user. This issue tracks the work of creating the user and adding login info to 1Pass.\n\ncc @pnadolny13 \n\n<!-- Labels to add for triaging -->",
+      "state": "closed",
+      "created_at": "2022-05-13T20:45:05.695Z",
+      "updated_at": "2022-05-19T23:14:50.175Z",
+      "closed_at": "2022-05-19T23:13:34.004Z",
+      "closed_by": {
+        "id": 1522656,
+        "username": "WillDaSilva",
+        "public_email": "will@willdasilva.xyz",
+        "name": "Will Da Silva",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+        "web_url": "https://gitlab.com/WillDaSilva"
+      },
+      "labels": [
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 1522656,
+          "username": "WillDaSilva",
+          "public_email": "will@willdasilva.xyz",
+          "name": "Will Da Silva",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+          "web_url": "https://gitlab.com/WillDaSilva"
+        }
+      ],
+      "author": {
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 1522656,
+        "username": "WillDaSilva",
+        "public_email": "will@willdasilva.xyz",
+        "name": "Will Da Silva",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+        "web_url": "https://gitlab.com/WillDaSilva"
+      },
+      "user_notes_count": 2,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meta/-/issues/246",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/24722673/issues/246",
+        "notes": "https://gitlab.com/api/v4/projects/24722673/issues/246/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/24722673/issues/246/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/24722673",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#246",
+        "relative": "#246",
+        "full": "meltano/meta#246"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 144,
+      "epic": {
+        "id": 518923,
+        "iid": 144,
+        "title": "Move Meltano to GitHub",
+        "url": "/groups/meltano/-/epics/144",
+        "group_id": 2524164,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": {
+        "id": 56415,
+        "iid": 55,
+        "sequence": 2,
+        "group_id": 2524164,
+        "title": null,
+        "description": null,
+        "state": 3,
+        "created_at": "2022-05-13T20:04:48.838Z",
+        "updated_at": "2022-05-23T00:05:02.513Z",
+        "start_date": "2022-05-16",
+        "due_date": "2022-05-22",
+        "web_url": "https://gitlab.com/groups/meltano/-/iterations/56415"
+      },
+      "health_status": null,
+      "epic_issue_id": 1364426,
+      "relative_position": -2052
+    },
+    {
+      "id": 108374536,
+      "iid": 190,
+      "project_id": 26437117,
+      "title": "Setting up Paid GitHub",
+      "description": "@tayloramurphy, @xyzzy, @Emily, @DouweM \n\nIn order to migrate private repositories over to GitHub, we'll require a paid plan. In reveiving the pricing last night, I saw that the Enterprise had a \"free 30 day trial\" button, which I went ahead and pressed so that we could start test driving certain features and planning for the migration. https://github.com/Meltano\n\nGitHub did not request any payment info from me and I assume we'll revert to the free tier in case that we did not upgrade the organization.\n\n\n@xyzzy - No need to tackle this today, but wanted to put this on your radar for on/before June 8.\n\nThere are two discussions we probably need to answer:\n\n1. How many orgs?\n   - I didn't see a \"sub-organization\" construct such as GitLab has for nesting groups of orgs under the same license agreement. \n2. Which payment tier?\n   - My guess is that Enterprise is probably the right category but I'll leave that for us to discuss in comments below or in other discussions.",
+      "state": "closed",
+      "created_at": "2022-05-11T13:52:50.640Z",
+      "updated_at": "2022-05-30T18:46:00.245Z",
+      "closed_at": "2022-05-30T18:46:00.234Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": null,
+      "assignees": [],
+      "author": {
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 7,
+      "merge_requests_count": 0,
+      "upvotes": 2,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/administration/-/issues/190",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/26437117/issues/190",
+        "notes": "https://gitlab.com/api/v4/projects/26437117/issues/190/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/26437117/issues/190/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/26437117",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#190",
+        "relative": "#190",
+        "full": "meltano/administration#190"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 144,
+      "epic": {
+        "id": 518923,
+        "iid": 144,
+        "title": "Move Meltano to GitHub",
+        "url": "/groups/meltano/-/epics/144",
+        "group_id": 2524164,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1356122,
+      "relative_position": -1539
+    },
+    {
+      "id": 108325546,
+      "iid": 242,
+      "project_id": 24722673,
+      "title": "Dry run of GitHub repo migration",
+      "description": "Logging this as a step towards #239+.\n\nhttps://github.com/piceaTech/node-gitlab-2-github\n\n## Planning Phase\n\n### Migration Process (\"Runbook\")\n\n- [x] TODO: Document the execution steps here.\n\nRunbook Steps:\n\n- [x] Create GitLab->GitHub user map for all Meltano team members.\n- [x] Create a GitLab->GitHub project map for all projects we intend to migrate.\n- [x] Create a migration user in GitHub who will be the defacto owner/creator of the migrated issues and MRs.\n- [x] Setup repo mirroring between GitLab and GitHub: https://github.com/piceaTech/node-gitlab-2-github#preliminaries\n- [x] Make sure the target repo is set to \"Private\" visibility until migration is complete.\n- [x] Configure the `settings.ts` file: https://github.com/piceaTech/node-gitlab-2-github#where-to-find-info-for-the-settingsts\n- [x] Run the tool. (Non-interactive, lots of logs generated while running.)\n- [x] Review, revise settings, repeat.\n- [ ] If necessary, delete confidential issues or delete the whole repo and restart if \"catastrophic failure\" occurs. :bomb: \n- [ ] When everything looks okay, toggle repo visibility to Public.\n\n### Assumptions and Expectations\n\n- [x] TODO: Document important assumptions and expectations here.\n\nIssues:\n\n- Issues will all have the same author after migration, the \"Melty\" or \"Melty-Bot\" user.\n- We expect assignees will translate accordingly, but likely only for the core Meltano team. \n- There are no confidential issues in GitHub.\n  - [x] TODO: What action is needed to keep confidential issues from migrating over?\n  - If projects are migrated first to Private repos, then we can delete/review confidential issues (if present) before toggling back to Public visiblity.\n- [x] UNKNOWN: Do cross-issue references within a project carry over? \n- [x] UNKNOWN: Same question for issues across projects. :point_up: \n\nPull Requests:\n\n- In GitHub, PRs are a subset of Issues, meaning they share an ID numbering domain and PRs are retrievable from the \"Issues\" API endpoints. (\"All PRs are Issues but not all Issues are PRs.\")\n- Closed PRs will be pulled over as regular closed issues, with a label that indicates they are actually from a closed-PR.\n\nCI/CD:\n\n- We expect we will keep GitLab CI running remotely for the migrated GitHub projects.\n  - We expect the GitLab CI will have notifications (success, failure, etc.) posted back to the GitHub PR UI.\n\nGitLab and GitHub API Rate Limits:\n\n- There's a risk we will run into rate limits on one or both APIs.\n  - We may have the process fail and we may need to get creative on how to resume/throttle if so.\n  - https://github.com/piceaTech/node-gitlab-2-github#import-limit\n  - https://github.com/piceaTech/node-gitlab-2-github#user-content-feature-suggestions--ideas\n  - We may need to get creative on what groupings of projects sync together - so like, Meta and Admin probably won't hit the rate limits - but Hub and SDK and Meltano at the same time probably will.\n\nMessage Spamming:\n\n- We expect a LOT of notification messages as these issues are created. We may be able to mitigate this but probably cannot eliminate it.\n\n## Execution Phase\n\n- [x] TODO: Perform the dry run migration.\n- [x] TODO: Log process, duration of steps, and anything unexpected.\n- [x] TODO: Update runbook and assumptions/expectations as needed to prepare for #239 \n\n## Forking `node-gitlab-2-github` and Adding Features\n\n- Optionally, we could consider forking https://github.com/piceaTech/node-gitlab-2-github and contributing features that we think are necessary/valuable to our migration.\n\n\n\n<!-- Labels to add for triaging -->",
+      "state": "closed",
+      "created_at": "2022-05-10T17:50:57.611Z",
+      "updated_at": "2022-05-30T20:47:51.695Z",
+      "closed_at": "2022-05-30T20:47:51.677Z",
+      "closed_by": {
+        "id": 1522656,
+        "username": "WillDaSilva",
+        "public_email": "will@willdasilva.xyz",
+        "name": "Will Da Silva",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+        "web_url": "https://gitlab.com/WillDaSilva"
+      },
+      "labels": [
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 1522656,
+          "username": "WillDaSilva",
+          "public_email": "will@willdasilva.xyz",
+          "name": "Will Da Silva",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+          "web_url": "https://gitlab.com/WillDaSilva"
+        }
+      ],
+      "author": {
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 1522656,
+        "username": "WillDaSilva",
+        "public_email": "will@willdasilva.xyz",
+        "name": "Will Da Silva",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+        "web_url": "https://gitlab.com/WillDaSilva"
+      },
+      "user_notes_count": 41,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meta/-/issues/242",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 18,
+        "completed_count": 16
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/24722673/issues/242",
+        "notes": "https://gitlab.com/api/v4/projects/24722673/issues/242/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/24722673/issues/242/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/24722673",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#242",
+        "relative": "#242",
+        "full": "meltano/meta#242"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 144,
+      "epic": {
+        "id": 518923,
+        "iid": 144,
+        "title": "Move Meltano to GitHub",
+        "url": "/groups/meltano/-/epics/144",
+        "group_id": 2524164,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": {
+        "id": 56416,
+        "iid": 56,
+        "sequence": 3,
+        "group_id": 2524164,
+        "title": null,
+        "description": null,
+        "state": 3,
+        "created_at": "2022-05-13T20:04:48.839Z",
+        "updated_at": "2022-05-30T00:05:02.370Z",
+        "start_date": "2022-05-23",
+        "due_date": "2022-05-29",
+        "web_url": "https://gitlab.com/groups/meltano/-/iterations/56416"
+      },
+      "health_status": null,
+      "epic_issue_id": 1353435,
+      "relative_position": -1026
+    },
+    {
+      "id": 108315195,
+      "iid": 397,
+      "project_id": 27821563,
+      "title": "Blog: Moving Meltano to GitHub (launch May 31st am)",
+      "description": "[**Blog Draft**](https://docs.google.com/document/d/1bnyNPq0gw9zqehgY0oq_5paYkUfJPH1Q_kgT4KznZgY/edit)\n\n[Social promotion draft proposal](https://docs.google.com/document/d/1F8OFxAoh0YlHg_k9kdiwqcxcEq4dTgU_hReDZ_yipco/edit?usp=sharing)\n\n## To cover:\n- Rationale (lower barrier to contribution, make the most of new eyeballs following 2.0)\n- Process\n- Address GitLab as our founding company and continued investor and partnership...\n\nPosting review before Launch:\n- [ ] GitLab PR group and possibly legal - Emily to send copy in advance",
+      "state": "closed",
+      "created_at": "2022-05-10T14:27:28.708Z",
+      "updated_at": "2022-05-31T18:36:07.549Z",
+      "closed_at": "2022-05-31T18:36:07.533Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "flow::To Do"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 87854,
+          "username": "DouweM",
+          "public_email": "",
+          "name": "Douwe Maan",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+          "web_url": "https://gitlab.com/DouweM"
+        },
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "user_notes_count": 19,
+      "merge_requests_count": 0,
+      "upvotes": 1,
+      "downvotes": 0,
+      "due_date": "2022-05-31",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/397",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 1,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/397",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/397/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/397/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#397",
+        "relative": "#397",
+        "full": "meltano/marketing/marketing-general#397"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 144,
+      "epic": {
+        "id": 518923,
+        "iid": 144,
+        "title": "Move Meltano to GitHub",
+        "url": "/groups/meltano/-/epics/144",
+        "group_id": 2524164,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1352630,
+      "relative_position": -513
+    },
+    {
+      "id": 108041121,
+      "iid": 239,
+      "project_id": 24722673,
+      "title": "Migrate Gitlab projects to GitHub (Discussion + Reasoning)",
+      "description": "We logged #200+ a while back when we knew we were going to have workloads crossing both GitHub and GitLab. Today we basically already are dealing with this as we have `MeltanoLabs` repos and separately are managing our main repos on GitLab.\n\nI think it's time to revisit this and start working on a migration timeline to move our biggest projects over to GitHub.\n\n_The largest benefit would be a significantly reduced cost/friction for users to be become contributors - and just in general a higher level of engagement and awareness of our products overall._\n\n99.5% of our taps and targets are on GitHub. Most popular open source projects are on GitHub. To me, at least, it increasingly feels like is the right long-term move, just more of a question of when we want to rip off the bandaid. (If we were starting from scratch today on a new open source project, it would likely be hard to get leadership approval to host on GitLab: not because its a worse product but because it doesn't have the network effect we would want and need to build momentum as a new open source project.)\n\nAnecdotal, but one of our partners, https://Ovio.org, built their entire model (\"Your Matchmaker Between GitHub Projects And Talented Contributors\") without including GitLab support. (I think they are adding it now but the vast majority of their projects and contributions are on GitHub.)\n\nOther benefits:\n\n- GitHub becomes the primary home for all of our codebase, without needing to manage code in two places.\n- We can use GitHub Boards and Project Management features for planning, triage, and prioritization.\n- We are better situated for something like `meltano login` to accept a github OAuth tokens and for `meltano publish` to auto-submit PRs against the GitHub repo (for instance).\n- We can take advantage of GitHub features like tags for \"best first issue\" and other items.\n- We have frequent issues from not having the \"Use my administrator access to 'delete'/'merge'/'push'\" checkbox that GitHub provides. (When CI goes awry, we have to fully disable tests and processed, then merge, then remember to reenable all the settings.)\n\n## Re: timing\n\nI'm not sure whether this should be a 2022 thing or a 2023 migration, but I do think we should start thinking of this in terms of \"when\" not \"if\".\n\n## Best reasons not to migrate\n\n1. Effort of migrating issues and MRs \n   - Although we have experience now doing automated migrations with the `MeltanoLabs` projects\n1. Need to rewrite CI yamls\n   - This will be easier for the younger projects, SDK and Hub.\n   - Apparently, GitLab can still be used as the CI engine even for GitHub projects. This could give us a buffer of time between migration and when we'd need CI rewritten.\n1. GitHub Learning curve.\n   - Especially our founding members will need to retrain on GitHub and this will take time.\n   - Conversely: the problem is actually reversed for all of our new hires (and most of our recent hires) who already have GitHub experience and for them _GitLab training and learning curve_ is actually the thing we deal with more.\n   - Most of the engineering team is at least fairly familiar with GitHub at this point.\n1. New PM prioritization and planning tools (boards, milestones, etc.).\n   - We'll have to get used to a new set of planning and prioritization tools.\n   - This probably needs to be addressed anyway as we have `MeltanoLabs` items there already.\n1. Related issues and epics may become unlinked during migration.\n1. Full migration would require migrating _all_ our projects.\n\n\nResources:\n\n- GitHub official Migration Docs: https://docs.github.com/en/actions/migrating-to-github-actions/migrating-from-gitlab-cicd-to-github-actions\n- Migrator tool: https://github.com/piceaTech/node-gitlab-2-github\n- Blog with some general info: https://dev.to/oneadvanced/migrating-from-gitlab-to-github-4men\n\n<!-- Labels to add for triaging -->",
+      "state": "closed",
+      "created_at": "2022-05-04T23:52:21.287Z",
+      "updated_at": "2022-05-30T22:58:14.460Z",
+      "closed_at": "2022-05-30T22:58:14.445Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Discussion",
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 87854,
+          "username": "DouweM",
+          "public_email": "",
+          "name": "Douwe Maan",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+          "web_url": "https://gitlab.com/DouweM"
+        }
+      ],
+      "author": {
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "user_notes_count": 40,
+      "merge_requests_count": 0,
+      "upvotes": 4,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meta/-/issues/239",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/24722673/issues/239",
+        "notes": "https://gitlab.com/api/v4/projects/24722673/issues/239/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/24722673/issues/239/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/24722673",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#239",
+        "relative": "#239",
+        "full": "meltano/meta#239"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 144,
+      "epic": {
+        "id": 518923,
+        "iid": 144,
+        "title": "Move Meltano to GitHub",
+        "url": "/groups/meltano/-/epics/144",
+        "group_id": 2524164,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1352473,
+      "relative_position": 0
+    }
+  ]
+}

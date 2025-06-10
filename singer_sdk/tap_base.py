@@ -35,8 +35,10 @@ from singer_sdk.singerlib import Catalog, StateMessage
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
+    from types import FrameType
 
     from singer_sdk.connectors import SQLConnector
+    from singer_sdk.helpers import types
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.singerlib.encoding.base import GenericSingerWriter
     from singer_sdk.streams import SQLStream, Stream
@@ -103,7 +105,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         # Declare private members
         self._streams: dict[str, Stream] | None = None
         self._input_catalog: Catalog | None = None
-        self._state: dict[str, Stream] = {}
+        self._state: types.TapState = {}
         self._catalog: Catalog | None = None  # Tap's working catalog
 
         # Process input catalog
@@ -161,7 +163,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._streams
 
     @property
-    def state(self) -> dict:
+    def state(self) -> types.TapState:
         """Get tap state.
 
         Returns:
@@ -212,6 +214,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             TapCapabilities.CATALOG,
             TapCapabilities.STATE,
             TapCapabilities.DISCOVER,
+            TapCapabilities.ACTIVATE_VERSION,
             PluginCapabilities.ABOUT,
             PluginCapabilities.STREAM_MAPS,
             PluginCapabilities.FLATTENING,
@@ -497,6 +500,24 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             stream.log_sync_costs()
 
     # Command Line Execution
+
+    def _handle_termination(  # pragma: no cover
+        self,
+        signum: int,
+        frame: FrameType | None,
+    ) -> None:
+        """Handle termination signal.
+
+        Args:
+            signum: Signal number.
+            frame: Frame.
+        """
+        # Emit a final state message to ensure the state is written to the output
+        # even if the process is terminated by a signal.
+        try:
+            self.write_message(StateMessage(value=self.state))
+        finally:
+            super()._handle_termination(signum, frame)
 
     @classmethod
     def invoke(  # type: ignore[override]

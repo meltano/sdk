@@ -1,0 +1,425 @@
+{
+  "cookies": {
+    "_cfuvid": "UW77RT6l5Z5BkQyTku3blgX5qcyffa37Pp1ZwdGdARE-1747940906946-0.0.1.1-604800000"
+  },
+  "created_at": "2025-05-22T19:08:26.847791+00:00",
+  "elapsed": 0.417374,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "943e9a2a990ca0a0-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Encoding": "gzip",
+    "Content-Type": "application/json",
+    "Date": "Thu, 22 May 2025 19:08:26 GMT",
+    "ETag": "W/\"ff34c42c9ed8d4447b75abcb366778d8\"",
+    "Link": "<https://gitlab.com/api/v4/groups/12586917/epics/11/issues?epic_iid=11&id=12586917&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/12586917/epics/11/issues?epic_iid=11&id=12586917&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=UW77RT6l5Z5BkQyTku3blgX5qcyffa37Pp1ZwdGdARE-1747940906946-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Transfer-Encoding": "chunked",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-35-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-c",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"881439f3cacdd64e3f6c80c18640f23b\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "881439f3cacdd64e3f6c80c18640f23b",
+    "x-runtime": "0.209478",
+    "x-total": "3",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "sample-tap-gitlab/[could not be detected]"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/12586917/epics/11/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/12586917/epics/11/issues",
+  "_decoded_content": [
+    {
+      "id": 102504253,
+      "iid": 295,
+      "project_id": 27821563,
+      "title": "Go to market motions + packaging",
+      "description": "## Activity \nPlans for how to go to market. \n\n## Goal: Try to create 2 flywheels...\n* bottoms-up Product led Growth motion \n* sales-assisted for expansion + user outreach\n\n### Approach\nPackaging based on customer profiles and build back from there. Value-based pricing based on value to dev (As they consume more, value should increase, so should price).\n* persona development\n* research and info gathering with \"buyer\" profile \n* feature bundling + develop messages based on buyer needs- pick 1-3 units to build pricing off- should align to incentives\n* bundle naming (names based on user profile who will benefit from tier)- Individuals vs teams vs enterprises )figure out units to base this off.)\n* Develop and document support plans and expectations\n\n### Things we need to get right and that people care about\n- scale (nail how we prove this and talk about it)\n- uptime\n- stability \n- address complexity and fragility\n- build to be cloud-agnostic from day one\n\n### On packaging what we need to offer, in order:\n* **Managed Commercial:** Open core feature set, hosted in our infrastructure, managed by us, including support\n* **Managed Enterprise:** Enterprise feature set (open core + RBAC, SSO, SOC2), hosted in customer's own infrastructure, managed by us, including support\n* **Self-Managed Enterprise:** Enterprise feature set *via license key*, hosted in customer's own infrastructure, *managed by them*, including support -- for those enterprises that can't move our to our fully managed solution yet, but still need the enterprise functionality\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-02-15T20:47:22.640Z",
+      "updated_at": "2022-05-31T18:27:57.943Z",
+      "closed_at": "2022-05-31T18:27:57.936Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 7,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": "2022-04-29",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/295",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/295",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/295/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/295/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#295",
+        "relative": "#295",
+        "full": "meltano/marketing/marketing-general#295"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 11,
+      "epic": {
+        "id": 437189,
+        "iid": 11,
+        "title": "Revenue Readiness Prep",
+        "url": "/groups/meltano/marketing/-/epics/11",
+        "group_id": 12586917,
+        "human_readable_timestamp": "<strong>2278</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1130443,
+      "relative_position": -1539
+    },
+    {
+      "id": 102023143,
+      "iid": 276,
+      "project_id": 27821563,
+      "title": "Customer Hero Video (What we enable)",
+      "description": "### Activity \nVideo to highlight the outcomes of Meltnao through customer stories. \n\n### Background\nhttps://youtu.be/W4AViRgrgkU\n\n### Todos\n\n- [ ] xyz\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-02-07T21:15:43.825Z",
+      "updated_at": "2022-05-31T18:26:12.317Z",
+      "closed_at": "2022-05-31T18:26:12.294Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Content",
+        "Marketing"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 1,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/276",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 1,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/276",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/276/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/276/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#276",
+        "relative": "#276",
+        "full": "meltano/marketing/marketing-general#276"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 11,
+      "epic": {
+        "id": 437189,
+        "iid": 11,
+        "title": "Revenue Readiness Prep",
+        "url": "/groups/meltano/marketing/-/epics/11",
+        "group_id": 12586917,
+        "human_readable_timestamp": "<strong>2278</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1103337,
+      "relative_position": 0
+    },
+    {
+      "id": 94558755,
+      "iid": 139,
+      "project_id": 27821563,
+      "title": "Add Request Demo (A/B test)",
+      "description": "### Activity \nWhile we don't have a sales team I would love to test out a button or request a demo path for folks. this seems to be an expectation for folks looking for proprietary solutions. It might also be a great way to get a list of leads from companies who could be buyers later. \n\n### Background\n* self-service install CTA is only great for one specific audience - some folks might not want to install something they just want to learn more about no matter how easy getting started it\n* need better try before you use option\n* could help us practice our demo skills and hone in on what is still sticky and what resonates. \n\n### Todos\n\n- [ ] decide on style of demo-  90 sec elt would be good to replicate \n- [ ] who will give it\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2021-09-29T15:51:22.734Z",
+      "updated_at": "2022-05-05T21:35:56.106Z",
+      "closed_at": "2022-05-04T20:16:54.746Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Marketing"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 394049,
+          "username": "afolson",
+          "public_email": "",
+          "name": "Amanda Folson",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "web_url": "https://gitlab.com/afolson"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 4,
+      "merge_requests_count": 0,
+      "upvotes": 1,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/139",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 2,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": 0,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/139",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/139/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/139/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#139",
+        "relative": "#139",
+        "full": "meltano/marketing/marketing-general#139"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 11,
+      "epic": {
+        "id": 437189,
+        "iid": 11,
+        "title": "Revenue Readiness Prep",
+        "url": "/groups/meltano/marketing/-/epics/11",
+        "group_id": 12586917,
+        "human_readable_timestamp": "<strong>2278</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1329211,
+      "relative_position": -2052
+    }
+  ]
+}

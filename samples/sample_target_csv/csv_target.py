@@ -13,7 +13,11 @@ class SampleTargetCSV(Target):
     name = "target-csv"
     config_jsonschema = th.PropertiesList(
         th.Property(
-            "target_folder", th.StringType, required=True, title="Target Folder"
+            "target_folder",
+            th.StringType,
+            default="output",
+            required=False,  # Default value will be used if not provided
+            title="Target Folder",
         ),
         th.Property("file_naming_scheme", th.StringType, title="File Naming Scheme"),
     ).to_dict()

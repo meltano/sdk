@@ -1,0 +1,7 @@
+INFO my-tap-many Skipping parse of env var settings...
+INFO my-tap-many Added 'child_many' as child stream to 'parent_many'
+INFO my-tap-many.parent_many Beginning full_table sync of 'parent_many'
+INFO my-tap-many.child_many Beginning full_table sync of 'child_many' with context: {'child_id': 1, 'pid': '1'}
+WARNING my-tap-many.child_many Properties ('composite_id', 'child_id') were present in the 'child_many' stream but not found in catalog schema. Ignoring.
+INFO my-tap-many.child_many Beginning full_table sync of 'child_many' with context: {'child_id': 2, 'pid': '1'}
+INFO my-tap-many.child_many Beginning full_table sync of 'child_many' with context: {'child_id': 3, 'pid': '1'}
