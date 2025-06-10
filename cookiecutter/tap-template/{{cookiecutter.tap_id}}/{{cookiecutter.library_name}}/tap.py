@@ -77,7 +77,6 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
         Returns:
             A list of discovered streams.
         """
-
         return [
             streams.GroupsStream(self),
             streams.UsersStream(self),
