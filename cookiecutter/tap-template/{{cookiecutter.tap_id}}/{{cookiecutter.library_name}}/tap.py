@@ -85,12 +85,11 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
 
     def load_streams_from_catalog(self) -> Iterable[streams.{{cookiecutter.source_name}}Stream]:
         """
-        Return a list of streams based on the input catalog.
+        Return streams based on the input catalog.
 
         Returns:
             An iterable of requested streams.
         """
-
         if "groups" in self.input_catalog:
             yield streams.GroupsStream(self)
         if "users" in self.input_catalog:
