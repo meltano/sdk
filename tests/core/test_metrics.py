@@ -8,6 +8,7 @@ import pytest
 import time_machine
 
 from singer_sdk import metrics
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 
 
 class CustomObject:
@@ -20,7 +21,8 @@ class CustomObject:
 
 
 def test_singer_metrics_formatter():
-    formatter = metrics.SingerMetricsFormatter(fmt="{metric_json}", style="{")
+    with pytest.warns(SingerSDKDeprecationWarning):
+        formatter = metrics.SingerMetricsFormatter(fmt="{metric_json}", style="{")
 
     record = logging.LogRecord(
         name="test",

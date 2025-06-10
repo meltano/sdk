@@ -161,7 +161,7 @@ filterwarnings = [
     "ignore:No records were available to test:UserWarning",
     # https://github.com/meltano/sdk/issues/1354
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
-    "once:.*singer_sdk._singerlib.*:singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
+    "ignore:.*singer_sdk._singerlib.*:singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
     # https://github.com/meltano/sdk/issues/2744
     "default:Passing a config file path is deprecated:singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
     "default:Passing a list of config file paths is deprecated:singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
@@ -432,5 +432,5 @@ max-args = 9
 required-version = ">=0.5.19"
 
 [tool.codespell]
-skip = "*.csv,samples/aapl/*.json,samples/*/schemas/*.json,.http_cache/*.json"
+skip = "*.csv,samples/aapl/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"
 ignore-words-list = "fo,intoto"

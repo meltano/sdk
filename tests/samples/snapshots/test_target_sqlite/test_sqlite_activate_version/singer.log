@@ -1,0 +1,4 @@
+WARNING target-sqlite-sample The `ACTIVATE_VERSION` feature uses the `_sdc_deleted_at` and `_sdc_deleted_at` metadata properties so they will be added to the schema for '%s' even though `add_record_metadata` is disabled.
+INFO target-sqlite-sample.zzz_tmp_test_sqlite_activate_version Inserting with SQL: INSERT INTO zzz_tmp_test_sqlite_activate_version (col_a) VALUES (:col_a)
+WARNING target-sqlite-sample The `ACTIVATE_VERSION` feature uses the `_sdc_deleted_at` and `_sdc_deleted_at` metadata properties so they will be added to the schema for '%s' even though `add_record_metadata` is disabled.
+INFO target-sqlite-sample.zzz_tmp_test_sqlite_activate_version Inserting with SQL: INSERT INTO zzz_tmp_test_sqlite_activate_version (col_a) VALUES (:col_a)

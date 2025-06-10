@@ -125,7 +125,6 @@ class StreamTransform(InlineMapper):
                     version=message_dict.get("version"),
                     time_extracted=utc_now(),
                 )
-                self.logger.info(stream_map.stream_alias)
                 yield record_message
 
     def map_state_message(self, message_dict: dict) -> list[singer.Message]:  # noqa: PLR6301
@@ -155,6 +154,8 @@ class StreamTransform(InlineMapper):
 
         stream_id: str = message_dict["stream"]
         for stream_map in self.mapper.stream_maps[stream_id]:
+            if isinstance(stream_map, RemoveRecordTransform):
+                continue
             yield singer.ActivateVersionMessage(
                 stream=stream_map.stream_alias,
                 version=message_dict["version"],

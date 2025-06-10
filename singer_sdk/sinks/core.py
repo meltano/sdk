@@ -583,12 +583,13 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             treatment: TODO
         """
         for key, value in record.items():
+            additional_properties = schema.get("additionalProperties", False)
             if key not in schema["properties"]:
-                if value is not None:
+                if value is not None and not additional_properties:
                     self.logger.warning("No schema for record field '%s'", key)
                 continue
-            datelike_type = get_datelike_property_type(schema["properties"][key])
-            if datelike_type:
+
+            if datelike_type := get_datelike_property_type(schema["properties"][key]):
                 date_val = value
                 try:
                     if value is not None:

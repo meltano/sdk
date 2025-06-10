@@ -5,17 +5,20 @@ from __future__ import annotations
 import abc
 import logging
 import os
+import signal
 import sys
+import threading
 import time
 import typing as t
 import warnings
 from importlib import metadata
 from pathlib import Path, PurePath
-from types import MappingProxyType
+from types import FrameType, MappingProxyType
 
 import click
 
 from singer_sdk import about, metrics
+from singer_sdk._logging import _setup_console_logging
 from singer_sdk.cli import plugin_cli
 from singer_sdk.configuration._dict_config import (
     merge_missing_config_jsonschema,
@@ -39,11 +42,6 @@ from singer_sdk.typing import (
     extend_validator_with_defaults,
 )
 
-if sys.version_info >= (3, 11):
-    _LOG_LEVELS_MAPPING = logging.getLevelNamesMapping()
-else:
-    _LOG_LEVELS_MAPPING = logging._nameToLevel  # noqa: SLF001
-
 if t.TYPE_CHECKING:
     from jsonschema import ValidationError
 
@@ -53,6 +51,7 @@ if t.TYPE_CHECKING:
     )
 
 SDK_PACKAGE_NAME = "singer_sdk"
+DEFAULT_LOG_LEVEL = "INFO"
 
 JSONSchemaValidator = extend_validator_with_defaults(DEFAULT_JSONSCHEMA_VALIDATOR)
 
@@ -119,6 +118,20 @@ def _format_validation_error(error: ValidationError) -> str:
     return result
 
 
+def _plugin_log_level(*, plugin_name: str) -> str:
+    """Get the log level for a plugin.
+
+    Args:
+        plugin_name: The name of the plugin.
+
+    Returns:
+        The log level.
+    """
+    prefix = f"{plugin_name.upper().replace('-', '_')}_"
+    level = os.environ.get(f"{prefix}LOGLEVEL") or os.environ.get("LOGLEVEL")
+    return level.upper() if level is not None else DEFAULT_LOG_LEVEL
+
+
 class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for taps."""
 
@@ -140,18 +153,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             Plugin logger.
         """
-        # Get the level from <PLUGIN_NAME>_LOGLEVEL or LOGLEVEL environment variables
-        plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
-        log_level = os.environ.get(f"{plugin_env_prefix}LOGLEVEL") or os.environ.get(
-            "LOGLEVEL",
-        )
-
-        logger = logging.getLogger(cls.name)
-
-        if log_level is not None and log_level.upper() in _LOG_LEVELS_MAPPING:
-            logger.setLevel(log_level.upper())
-
-        return logger
+        return logging.getLogger(cls.name)
 
     # Constructor
 
@@ -208,14 +210,37 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
-        metrics._setup_logging(self.config)  # noqa: SLF001
         self.metrics_logger = metrics.get_metrics_logger()
+        if metrics_level := self.config.get(
+            metrics.METRICS_LOG_LEVEL_SETTING,
+        ):  # pragma: no cover
+            self.metrics_logger.setLevel(metrics_level)
+            warnings.warn(
+                f"Using {metrics.METRICS_LOG_LEVEL_SETTING} to set metrics log level "
+                "is deprecated and will be removed by September 2025. "
+                "Please use the logging level environment variables "
+                "or a custom logging configuration file.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
+        else:
+            self.metrics_logger.setLevel(_plugin_log_level(plugin_name=self.name))
 
         self._validate_config(raise_errors=validate_config)
         self._mapper: PluginMapper | None = None
 
         # Initialization timestamp
         self.__initialized_at = int(time.time() * 1000)
+
+        # Signal handling
+        self._setup_signal_handlers()
+
+    def _setup_signal_handlers(self) -> None:  # pragma: no cover
+        if threading.current_thread() == threading.main_thread():
+            if hasattr(signal, "SIGINT"):
+                signal.signal(signal.SIGINT, self._handle_termination)
+            if hasattr(signal, "SIGTERM"):
+                signal.signal(signal.SIGTERM, self._handle_termination)
 
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
@@ -374,7 +399,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     # Abstract methods:
 
     @property
-    def state(self) -> dict:
+    def state(self) -> t.Mapping[str, t.Any]:
         """Get state.
 
         Raises:
@@ -444,6 +469,20 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             self.logger.warning(summary)
 
         return errors
+
+    def _handle_termination(  # pragma: no cover
+        self,
+        signum: int,  # noqa: ARG002
+        frame: FrameType | None,  # noqa: ARG002
+    ) -> None:
+        """Handle termination signal.
+
+        Args:
+            signum: Signal number.
+            frame: Frame.
+        """
+        self.logger.info("Gracefully shutting down...")
+        sys.exit(0)
 
     @classmethod
     def print_version(
@@ -647,6 +686,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             A callable CLI object.
         """
+        _setup_console_logging(log_level=_plugin_log_level(plugin_name=cls.name))
         return cls.get_singer_command()
 
 
@@ -735,14 +775,15 @@ class BaseSingerReader(BaseSingerIO, metaclass=abc.ABCMeta):
         line_count = sum(counter.values())
 
         self.logger.info(
-            "Target '%s' completed reading %d lines of input "
-            "(%d schemas, %d records, %d batch manifests, %d state messages).",
+            "Reader '%s' completed processing %d lines of input "
+            "(%d schemas, %d records, %d batch manifests, %d state messages, %d activate version messages).",  # noqa: E501
             self.name,
             line_count,
             counter[SingerMessageType.SCHEMA],
             counter[SingerMessageType.RECORD],
             counter[SingerMessageType.BATCH],
             counter[SingerMessageType.STATE],
+            counter[SingerMessageType.ACTIVATE_VERSION],
         )
         self.process_endofpipe()
 
