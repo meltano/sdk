@@ -247,9 +247,6 @@ PyJWT = "jwt"
 
 [tool.deptry.per_rule_ignores]
 DEP002 = [
-    # Transitive constraints
-    "numpy",
-    "urllib3",
     # Plugins
     "paramiko",
     "s3fs",
