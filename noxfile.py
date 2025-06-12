@@ -132,14 +132,13 @@ def test_lowest_requirements(session: nox.Session) -> None:
         "s3",
     ]
 
+    install_env = _install_env(session)
+
     session.run_install(
-        "uv",
-        "sync",
-        "--frozen",
-        "--no-dev",
+        *UV_SYNC_COMMAND,
         "--group=testing",
         *(f"--extra={extra}" for extra in extras),
-        env=_install_env(session),
+        env=install_env,
     )
     tmpdir = session.create_tmp()
 
@@ -154,9 +153,10 @@ def test_lowest_requirements(session: nox.Session) -> None:
         "--universal",
         "--resolution=lowest-direct",
         f"-o={tmpdir}/requirements.txt",
+        env=install_env,
     )
 
-    session.install("-r", f"{tmpdir}/requirements.txt")
+    session.install("-r", f"{tmpdir}/requirements.txt", env=install_env)
     session.run("pytest", *session.posargs)
 
 
