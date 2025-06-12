@@ -174,7 +174,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         *,
         context: Context | None = None,
     ) -> sa.Select:
-        """Apply WHERE clauses to the query.
+        """Apply WHERE and ORDER BY clauses to the query.
 
         By default, this method applies a replication filter to the query
         and orders the results by the replication key, if a replication key is set.
