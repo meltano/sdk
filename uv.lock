@@ -2525,7 +2525,7 @@ requires-dist = [
     { name = "paramiko", marker = "extra == 'ssh'", specifier = ">=3.3.0" },
     { name = "pyarrow", marker = "extra == 'parquet'", specifier = ">=15" },
     { name = "pyjwt", marker = "extra == 'jwt'", specifier = "~=2.4" },
-    { name = "pytest", marker = "extra == 'testing'", specifier = ">=7.2.1" },
+    { name = "pytest", marker = "extra == 'testing'", specifier = ">=7.5" },
     { name = "python-dotenv", specifier = ">=0.20" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "referencing", specifier = ">=0.30.0" },
