@@ -196,7 +196,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             )
             query = query.order_by(order_by)
 
-            if start_val := self.get_starting_replication_key_value(context):
+            start_val = self.get_starting_replication_key_value(context)
+            if start_val is not None:
                 query = query.where(column >= start_val)
 
         return query
