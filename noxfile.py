@@ -149,10 +149,10 @@ def test_lowest_requirements(session: nox.Session) -> None:
         "compile",
         "pyproject.toml",
         f"--python={session.python}",
+        "--group=testing",
         "--all-extras",
         "--universal",
-        "--resolution",
-        "lowest-direct",
+        "--resolution=lowest-direct",
         f"-o={tmpdir}/requirements.txt",
     )
 
