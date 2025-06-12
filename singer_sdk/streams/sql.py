@@ -208,6 +208,11 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         By default, this method applies a limit filter to the query
         if the stream has an ABORT_AT_RECORD_COUNT value set.
 
+        The ABORT_AT_RECORD_COUNT limit is incremented by 1 to ensure that the
+        `MaxRecordsLimitException` exception is properly raised by caller
+        `Stream._sync_records()` if more records are available than can be
+        processed.
+
         Args:
             query: The SQLAlchemy Select object.
 
@@ -215,6 +220,10 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             A SQLAlchemy Select object.
         """
         if self.ABORT_AT_RECORD_COUNT is not None:
+            # Limit record count to one greater than the abort threshold. This ensures
+            # `MaxRecordsLimitException` exception is properly raised by caller
+            # `Stream._sync_records()` if more records are available than can be
+            # processed.
             query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
 
         return query
