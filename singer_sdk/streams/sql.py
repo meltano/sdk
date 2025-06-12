@@ -167,14 +167,17 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         return super().effective_schema
 
-    def apply_replication_filter(
+    def apply_query_filters(
         self,
         query: sa.Select,
         table: sa.Table,
         *,
         context: Context | None = None,
     ) -> sa.Select:
-        """Apply a replication filter to the query.
+        """Apply WHERE clauses to the query.
+
+        By default, this method applies a replication filter to the query
+        and orders the results by the replication key, if a replication key is set.
 
         Args:
             query: The SQLAlchemy Select object.
@@ -198,8 +201,11 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         return query
 
-    def apply_abort_query_limit(self, query: sa.Select) -> sa.Select:
-        """Apply a limit filter to the query.
+    def apply_query_limit(self, query: sa.Select) -> sa.Select:
+        """Apply LIMIT clause to the query.
+
+        By default, this method applies a limit filter to the query
+        if the stream has an ABORT_AT_RECORD_COUNT value set.
 
         Args:
             query: The SQLAlchemy Select object.
@@ -211,17 +217,6 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
 
         return query
-
-    def build_query(self, table: sa.Table) -> sa.Select:  # noqa: PLR6301
-        """Build a SQLAlchemy query for the stream.
-
-        Args:
-            table: The SQLAlchemy Table object.
-
-        Returns:
-            A SQLAlchemy Select object.
-        """
-        return table.select()
 
     # Get records from stream
     def get_records(self, context: Context | None) -> t.Iterable[Record]:
@@ -251,9 +246,9 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             full_table_name=self.fully_qualified_name,
             column_names=selected_column_names,
         )
-        query = self.build_query(table)
-        query = self.apply_replication_filter(query, table, context=context)
-        query = self.apply_abort_query_limit(query)
+        query = table.select()
+        query = self.apply_query_filters(query, table, context=context)
+        query = self.apply_query_limit(query)
 
         with self.connector._connect() as conn:  # noqa: SLF001
             for row in conn.execute(query).mappings():
