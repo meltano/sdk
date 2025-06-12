@@ -169,11 +169,11 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
     def apply_query_filters(
         self,
-        query: sa.Select,
+        query: sa.sql.Select,
         table: sa.Table,
         *,
         context: Context | None = None,
-    ) -> sa.Select:
+    ) -> sa.sql.Select:
         """Apply WHERE and ORDER BY clauses to the query.
 
         By default, this method applies a replication filter to the query
@@ -202,7 +202,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         return query
 
-    def apply_query_limit(self, query: sa.Select) -> sa.Select:
+    def apply_query_limit(self, query: sa.sql.Select) -> sa.sql.Select:
         """Apply LIMIT clause to the query.
 
         By default, this method applies a limit filter to the query
@@ -228,7 +228,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         return query
 
-    def build_query(self, context: Context | None) -> sa.Select:
+    def build_query(self, *, context: Context | None = None) -> sa.sql.Select:
         """Build a SQLAlchemy Select object for the stream.
 
         - Apply WHERE and ORDER BY clauses to the query.
@@ -273,7 +273,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             raise NotImplementedError(msg)
 
         with self.connector._connect() as conn:  # noqa: SLF001
-            for row in conn.execute(self.build_query(context)).mappings():
+            for row in conn.execute(self.build_query(context=context)).mappings():
                 # https://github.com/sqlalchemy/sqlalchemy/discussions/10053#discussioncomment-6344965
                 yield dict(row)
 
