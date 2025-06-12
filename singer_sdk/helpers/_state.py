@@ -45,9 +45,7 @@ def get_state_if_exists(
     Raises:
         ValueError: Raised if state is invalid or cannot be parsed.
     """
-    if "bookmarks" not in tap_state:
-        return None
-    if tap_stream_id not in tap_state["bookmarks"]:
+    if "bookmarks" not in tap_state or tap_stream_id not in tap_state["bookmarks"]:
         return None
 
     stream_state = tap_state["bookmarks"][tap_stream_id]
@@ -124,16 +122,14 @@ def get_writeable_state_dict(
         msg = "Cannot write state to missing state dictionary."  # type: ignore[unreachable]
         raise ValueError(msg)
 
-    if "bookmarks" not in tap_state:
-        tap_state["bookmarks"] = {}
-    if tap_stream_id not in tap_state["bookmarks"]:
-        tap_state["bookmarks"][tap_stream_id] = {}
+    tap_state.setdefault("bookmarks", {})
+    tap_state["bookmarks"].setdefault(tap_stream_id, {})
+
     stream_state = tap_state["bookmarks"][tap_stream_id]
     if not state_partition_context:
         return stream_state
 
-    if "partitions" not in stream_state:
-        stream_state["partitions"] = []
+    stream_state.setdefault("partitions", [])
     stream_state_partitions: list[dict] = stream_state["partitions"]
     if found := _find_in_partitions_list(
         stream_state_partitions,
