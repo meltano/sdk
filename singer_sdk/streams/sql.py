@@ -228,6 +228,27 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         return query
 
+    def build_query(self, context: Context | None) -> sa.Select:
+        """Build a SQLAlchemy Select object for the stream.
+
+        - Apply WHERE and ORDER BY clauses to the query.
+        - Apply a LIMIT clause to the query.
+
+        Args:
+            context: The context object.
+
+        Returns:
+            A SQLAlchemy Select object.
+        """
+        selected_column_names = self.get_selected_schema()["properties"].keys()
+        table = self.connector.get_table(
+            full_table_name=self.fully_qualified_name,
+            column_names=selected_column_names,
+        )
+        query = table.select()
+        query = self.apply_query_filters(query, table, context=context)
+        return self.apply_query_limit(query)
+
     # Get records from stream
     def get_records(self, context: Context | None) -> t.Iterable[Record]:
         """Return a generator of record-type dictionary objects.
@@ -251,17 +272,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             msg = f"Stream '{self.name}' does not support partitioning."
             raise NotImplementedError(msg)
 
-        selected_column_names = self.get_selected_schema()["properties"].keys()
-        table = self.connector.get_table(
-            full_table_name=self.fully_qualified_name,
-            column_names=selected_column_names,
-        )
-        query = table.select()
-        query = self.apply_query_filters(query, table, context=context)
-        query = self.apply_query_limit(query)
-
         with self.connector._connect() as conn:  # noqa: SLF001
-            for row in conn.execute(query).mappings():
+            for row in conn.execute(self.build_query(context)).mappings():
                 # https://github.com/sqlalchemy/sqlalchemy/discussions/10053#discussioncomment-6344965
                 yield dict(row)
 
