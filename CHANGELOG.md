@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.47.0 (2025-06-13)
+
+### ✨ New
+
+- [#3050](https://github.com/meltano/sdk/issues/3050) Allow SQL stream implementations to override the `SELECT` statement filter and limit clauses without modifying extraction logic
+- [#3087](https://github.com/meltano/sdk/issues/3087) Honor `<APP_NAME>_LOGLEVEL` and `LOGLEVEL` environment variables across all default logging
+- [#2620](https://github.com/meltano/sdk/issues/2620) Interruption and termination signals are handled in taps and targets
+- [#2686](https://github.com/meltano/sdk/issues/2686) Taps can now opt-in to emitting `ACTIVATE_VERSION` messages for streams with `FULL_TABLE` replication
+- [#3023](https://github.com/meltano/sdk/issues/3023) Apply `post_process` automatically to all stream types
+
+### 🐛 Fixes
+
+- [#3091](https://github.com/meltano/sdk/issues/3091) Correctly resolve JSON schema references when mulitple properties use the same reference
+- [#3048](https://github.com/meltano/sdk/issues/3048) Avoid emitting message "No schema for record field." when "additionalProperties" is set to true in stream schema -- _**Thanks @SidduHussain!**_
+- [#3080](https://github.com/meltano/sdk/issues/3080) Delay setting up console logging until the CLI is invoked and test log output snapshots
+- [#3077](https://github.com/meltano/sdk/issues/3077) Only finalize state for selected streams
+- [#3063](https://github.com/meltano/sdk/issues/3063) Remove deselected properties from the `required` properties list in the JSON schema
+- [#3069](https://github.com/meltano/sdk/issues/3069) Update Cookiecutter templates
+- [#3065](https://github.com/meltano/sdk/issues/3065) Revert table name splitting by `-` in SQL targets when `default_target_schema` is set, introduced in #3020
+- [#3055](https://github.com/meltano/sdk/issues/3055) Fixed the S3 `BATCH` extra dependency in templates
+- [#3054](https://github.com/meltano/sdk/issues/3054) Pass `auth` callable/tuple to each tap API request
+- [#3044](https://github.com/meltano/sdk/issues/3044) Formalize setting any _falsy_ replication key as a way to force full-table replication
+
+### ⚙️ Under the Hood
+
+- [#3097](https://github.com/meltano/sdk/issues/3097) Rely on `dict.setdefault` to fill in state dictionary
+- [#3096](https://github.com/meltano/sdk/issues/3096) Move Tox configuration to `pyproject.toml` in tap, mapper and target templates
+- [#3094](https://github.com/meltano/sdk/issues/3094) Make `context` parameter of `SQLStream.build_query` a keyword-only argument
+- [#3093](https://github.com/meltano/sdk/issues/3093) Group all SQL tap query-building steps into `SQLStream.build_query`
+- [#3078](https://github.com/meltano/sdk/issues/3078) Introduce basic `TypedDict` for tap state
+- [#3024](https://github.com/meltano/sdk/issues/3024) Deprecate returning tuples of (record, child context) from `Stream.get_records`
+- [#3056](https://github.com/meltano/sdk/issues/3056) Quiet down some tap and target logs from `INFO` to `DEBUG`
+- [#3061](https://github.com/meltano/sdk/issues/3061) Retrieve `BATCH` storage object only once per set of files
+- [#3049](https://github.com/meltano/sdk/issues/3049) Fix the expected type of `Stream.primary_keys` to always be a sequence
+
+### 📚 Documentation Improvements
+
+- [#3095](https://github.com/meltano/sdk/issues/3095) Clarify that using `--discover` and `--catalog=<catalog file>` together is not supported
+- [#3083](https://github.com/meltano/sdk/issues/3083) Update supported python versions in the contribution guide -- _**Thanks @rafalkrupinski!**_
+
 ## v0.46.4 (2025-05-28)
 
 ### 🐛 Fixes
