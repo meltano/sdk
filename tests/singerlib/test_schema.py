@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import typing as t
+from dataclasses import dataclass
+
 import pytest
 
 from singer_sdk.singerlib import Schema, resolve_schema_references
@@ -88,16 +91,26 @@ def test_schema_from_dict(pydict, expected):
     assert Schema.from_dict(pydict) == expected
 
 
+@dataclass
+class _ResolutionArgs:
+    schema: dict[str, t.Any]
+    refs: dict[str, dict[str, t.Any]] | None = None
+
+    # TODO: Make this KW_ONLY when Python 3.9 support is dropped
+    normalize: bool = False
+
+
 @pytest.mark.parametrize(
-    "schema,refs,expected",
+    "args,expected",
     [
         pytest.param(
-            {
-                "type": "object",
-                "definitions": {"string_type": {"type": "string"}},
-                "properties": {"name": {"$ref": "#/definitions/string_type"}},
-            },
-            None,
+            _ResolutionArgs(
+                {
+                    "type": "object",
+                    "definitions": {"string_type": {"type": "string"}},
+                    "properties": {"name": {"$ref": "#/definitions/string_type"}},
+                },
+            ),
             {
                 "type": "object",
                 "definitions": {"string_type": {"type": "string"}},
@@ -106,13 +119,19 @@ def test_schema_from_dict(pydict, expected):
             id="resolve_schema_references",
         ),
         pytest.param(
-            {
-                "type": "object",
-                "properties": {
-                    "name": {"$ref": "references.json#/definitions/string_type"},
+            _ResolutionArgs(
+                {
+                    "type": "object",
+                    "properties": {
+                        "name": {"$ref": "references.json#/definitions/string_type"},
+                    },
                 },
-            },
-            {"references.json": {"definitions": {"string_type": {"type": "string"}}}},
+                {
+                    "references.json": {
+                        "definitions": {"string_type": {"type": "string"}}
+                    }
+                },
+            ),
             {
                 "type": "object",
                 "properties": {"name": {"type": "string"}},
@@ -120,12 +139,13 @@ def test_schema_from_dict(pydict, expected):
             id="resolve_schema_references_with_refs",
         ),
         pytest.param(
-            {
-                "type": "object",
-                "definitions": {"string_type": {"type": "string"}},
-                "patternProperties": {".+": {"$ref": "#/definitions/string_type"}},
-            },
-            None,
+            _ResolutionArgs(
+                {
+                    "type": "object",
+                    "definitions": {"string_type": {"type": "string"}},
+                    "patternProperties": {".+": {"$ref": "#/definitions/string_type"}},
+                },
+            ),
             {
                 "type": "object",
                 "definitions": {"string_type": {"type": "string"}},
@@ -134,23 +154,28 @@ def test_schema_from_dict(pydict, expected):
             id="resolve_schema_references_with_pattern_properties",
         ),
         pytest.param(
-            {
-                "type": "object",
-                "properties": {
-                    "dogs": {"type": "array", "items": {"$ref": "doggie.json#/dogs"}},
-                },
-            },
-            {
-                "doggie.json": {
-                    "dogs": {
-                        "type": "object",
-                        "properties": {
-                            "breed": {"type": "string"},
-                            "name": {"type": "string"},
+            _ResolutionArgs(
+                {
+                    "type": "object",
+                    "properties": {
+                        "dogs": {
+                            "type": "array",
+                            "items": {"$ref": "doggie.json#/dogs"},
                         },
                     },
                 },
-            },
+                {
+                    "doggie.json": {
+                        "dogs": {
+                            "type": "object",
+                            "properties": {
+                                "breed": {"type": "string"},
+                                "name": {"type": "string"},
+                            },
+                        },
+                    },
+                },
+            ),
             {
                 "type": "object",
                 "properties": {
@@ -169,20 +194,26 @@ def test_schema_from_dict(pydict, expected):
             id="resolve_schema_references_with_items",
         ),
         pytest.param(
-            {
-                "type": "object",
-                "properties": {
-                    "thing": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "$ref": "references.json#/definitions/string_type",
+            _ResolutionArgs(
+                {
+                    "type": "object",
+                    "properties": {
+                        "thing": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "$ref": "references.json#/definitions/string_type",
+                                },
                             },
                         },
                     },
                 },
-            },
-            {"references.json": {"definitions": {"string_type": {"type": "string"}}}},
+                {
+                    "references.json": {
+                        "definitions": {"string_type": {"type": "string"}}
+                    }
+                },
+            ),
             {
                 "type": "object",
                 "properties": {
@@ -195,32 +226,42 @@ def test_schema_from_dict(pydict, expected):
             id="resolve_schema_nested_references",
         ),
         pytest.param(
-            {
-                "type": "object",
-                "properties": {
-                    "name": {"$ref": "references.json#/definitions/string_type"},
+            _ResolutionArgs(
+                {
+                    "type": "object",
+                    "properties": {
+                        "name": {"$ref": "references.json#/definitions/string_type"},
+                    },
                 },
-            },
-            {
-                "references.json": {
-                    "definitions": {"string_type": {"$ref": "second_reference.json"}},
+                {
+                    "references.json": {
+                        "definitions": {
+                            "string_type": {"$ref": "second_reference.json"}
+                        },
+                    },
+                    "second_reference.json": {"type": "string"},
                 },
-                "second_reference.json": {"type": "string"},
-            },
+            ),
             {"type": "object", "properties": {"name": {"type": "string"}}},
             id="resolve_schema_indirect_references",
         ),
         pytest.param(
-            {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "$ref": "references.json#/definitions/string_type",
-                        "still_here": "yep",
+            _ResolutionArgs(
+                {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "$ref": "references.json#/definitions/string_type",
+                            "still_here": "yep",
+                        },
                     },
                 },
-            },
-            {"references.json": {"definitions": {"string_type": {"type": "string"}}}},
+                {
+                    "references.json": {
+                        "definitions": {"string_type": {"type": "string"}}
+                    }
+                },
+            ),
             {
                 "type": "object",
                 "properties": {"name": {"type": "string", "still_here": "yep"}},
@@ -228,57 +269,63 @@ def test_schema_from_dict(pydict, expected):
             id="resolve_schema_preserves_existing_fields",
         ),
         pytest.param(
-            {
-                "anyOf": [
-                    {"$ref": "references.json#/definitions/first_type"},
-                    {"$ref": "references.json#/definitions/second_type"},
-                ],
-            },
-            {
-                "references.json": {
-                    "definitions": {
-                        "first_type": {"type": "string"},
-                        "second_type": {"type": "integer"},
+            _ResolutionArgs(
+                {
+                    "anyOf": [
+                        {"$ref": "references.json#/definitions/first_type"},
+                        {"$ref": "references.json#/definitions/second_type"},
+                    ],
+                },
+                {
+                    "references.json": {
+                        "definitions": {
+                            "first_type": {"type": "string"},
+                            "second_type": {"type": "integer"},
+                        },
                     },
                 },
-            },
+            ),
             {"anyOf": [{"type": "string"}, {"type": "integer"}]},
             id="resolve_schema_any_of",
         ),
         pytest.param(
-            {
-                "allOf": [
-                    {"$ref": "references.json#/definitions/first_type"},
-                    {"$ref": "references.json#/definitions/second_type"},
-                ],
-            },
-            {
-                "references.json": {
-                    "definitions": {
-                        "first_type": {"type": "string"},
-                        "second_type": {"type": "integer"},
+            _ResolutionArgs(
+                {
+                    "allOf": [
+                        {"$ref": "references.json#/definitions/first_type"},
+                        {"$ref": "references.json#/definitions/second_type"},
+                    ],
+                },
+                {
+                    "references.json": {
+                        "definitions": {
+                            "first_type": {"type": "string"},
+                            "second_type": {"type": "integer"},
+                        },
                     },
                 },
-            },
+            ),
             {"allOf": [{"type": "string"}, {"type": "integer"}]},
             id="resolve_schema_all_of",
         ),
         pytest.param(
-            {
-                "oneOf": [
-                    {"$ref": "references.json#/definitions/first_type"},
-                    {"$ref": "references.json#/definitions/second_type"},
-                ],
-                "title": "A Title",
-            },
-            {
-                "references.json": {
-                    "definitions": {
-                        "first_type": {"type": "string", "title": "First Type"},
-                        "second_type": {"type": "integer", "title": "Second Type"},
-                    }
+            _ResolutionArgs(
+                {
+                    "oneOf": [
+                        {"$ref": "references.json#/definitions/first_type"},
+                        {"$ref": "references.json#/definitions/second_type"},
+                    ],
+                    "title": "A Title",
                 },
-            },
+                {
+                    "references.json": {
+                        "definitions": {
+                            "first_type": {"type": "string", "title": "First Type"},
+                            "second_type": {"type": "integer", "title": "Second Type"},
+                        }
+                    },
+                },
+            ),
             {
                 "oneOf": [
                     {"type": "string", "title": "First Type"},
@@ -289,49 +336,51 @@ def test_schema_from_dict(pydict, expected):
             id="resolve_schema_one_of",
         ),
         pytest.param(
-            {
-                "type": "object",
-                "properties": {
-                    "product_price": {
-                        "oneOf": [
-                            {"$ref": "components#/schemas/LegacyProductPrice"},
-                            {"$ref": "components#/schemas/ProductPrice"},
-                        ],
-                        "title": "Product Price",
+            _ResolutionArgs(
+                {
+                    "type": "object",
+                    "properties": {
+                        "product_price": {
+                            "oneOf": [
+                                {"$ref": "components#/schemas/LegacyProductPrice"},
+                                {"$ref": "components#/schemas/ProductPrice"},
+                            ],
+                            "title": "Product Price",
+                        },
                     },
                 },
-            },
-            {
-                "components": {
-                    "schemas": {
-                        "LegacyProductPrice": {
-                            "type": "object",
-                            "properties": {"price": {"type": "number"}},
-                            "title": "Legacy Product Price",
-                        },
-                        "ProductPrice": {
-                            "oneOf": [
-                                {
-                                    "$ref": "components#/schemas/ProductPriceFixed",
-                                },
-                                {
-                                    "$ref": "components#/schemas/ProductPriceFree",
-                                },
-                            ],
-                        },
-                        "ProductPriceFixed": {
-                            "type": "object",
-                            "properties": {"price": {"type": "number"}},
-                            "title": "Product Price Fixed",
-                        },
-                        "ProductPriceFree": {
-                            "type": "object",
-                            "properties": {"price": {"type": "number", "const": 0}},
-                            "title": "Product Price Free",
-                        },
-                    }
+                {
+                    "components": {
+                        "schemas": {
+                            "LegacyProductPrice": {
+                                "type": "object",
+                                "properties": {"price": {"type": "number"}},
+                                "title": "Legacy Product Price",
+                            },
+                            "ProductPrice": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "components#/schemas/ProductPriceFixed",
+                                    },
+                                    {
+                                        "$ref": "components#/schemas/ProductPriceFree",
+                                    },
+                                ],
+                            },
+                            "ProductPriceFixed": {
+                                "type": "object",
+                                "properties": {"price": {"type": "number"}},
+                                "title": "Product Price Fixed",
+                            },
+                            "ProductPriceFree": {
+                                "type": "object",
+                                "properties": {"price": {"type": "number", "const": 0}},
+                                "title": "Product Price Free",
+                            },
+                        }
+                    },
                 },
-            },
+            ),
             {
                 "type": "object",
                 "properties": {
@@ -366,35 +415,37 @@ def test_schema_from_dict(pydict, expected):
             id="resolve_nested_one_of",
         ),
         pytest.param(
-            {
-                "type": "object",
-                "properties": {
-                    "filter": {
-                        "$ref": "components#/schemas/Filter",
+            _ResolutionArgs(
+                {
+                    "type": "object",
+                    "properties": {
+                        "filter": {
+                            "$ref": "components#/schemas/Filter",
+                        },
                     },
                 },
-            },
-            {
-                "components": {
-                    "schemas": {
-                        "Filter": {
-                            "properties": {
-                                "name": {
-                                    "type": "string",
-                                    "title": "Name",
-                                },
-                                "clauses": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "components#/schemas/Filter",
+                {
+                    "components": {
+                        "schemas": {
+                            "Filter": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "title": "Name",
                                     },
-                                    "title": "Clauses",
+                                    "clauses": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "components#/schemas/Filter",
+                                        },
+                                        "title": "Clauses",
+                                    },
                                 },
                             },
                         },
                     },
                 },
-            },
+            ),
             {
                 "type": "object",
                 "properties": {
@@ -416,20 +467,48 @@ def test_schema_from_dict(pydict, expected):
             id="resolve_schema_references_with_circular_references",
         ),
         pytest.param(
-            {
-                "type": "object",
-                "properties": {
-                    "min_compute_units": {"$ref": "components#/schemas/ComputeUnit"},
-                    "max_compute_units": {"$ref": "components#/schemas/ComputeUnit"},
-                },
-            },
-            {
-                "components": {
-                    "schemas": {
-                        "ComputeUnit": {"type": "number"},
+            _ResolutionArgs(
+                {
+                    "type": "object",
+                    "properties": {
+                        "not": {"$ref": "components#/schemas/Not"},
                     },
                 },
+                {
+                    "components": {
+                        "schemas": {
+                            "Not": {"type": "string", "enum": ["a", "b"]},
+                        },
+                    },
+                },
+            ),
+            {
+                "type": "object",
+                "properties": {"not": {"type": "string", "enum": ["a", "b"]}},
             },
+            id="resolve_schema_with_not_keyword",
+        ),
+        pytest.param(
+            _ResolutionArgs(
+                {
+                    "type": "object",
+                    "properties": {
+                        "min_compute_units": {
+                            "$ref": "components#/schemas/ComputeUnit"
+                        },
+                        "max_compute_units": {
+                            "$ref": "components#/schemas/ComputeUnit"
+                        },
+                    },
+                },
+                {
+                    "components": {
+                        "schemas": {
+                            "ComputeUnit": {"type": "number"},
+                        },
+                    },
+                },
+            ),
             {
                 "type": "object",
                 "properties": {
@@ -439,8 +518,56 @@ def test_schema_from_dict(pydict, expected):
             },
             id="resolve_schema_multiple_properties_with_same_reference",
         ),
+        pytest.param(
+            _ResolutionArgs(
+                {
+                    "properties": {
+                        "extensions": {
+                            "anyOf": [
+                                {"$ref": "components#/schemas/Extension"},
+                            ],
+                        },
+                        "merged": {
+                            "allOf": [
+                                {"$ref": "components#/schemas/Base"},
+                            ],
+                        },
+                        "compute_units": {
+                            "oneOf": [
+                                {"$ref": "components#/schemas/ComputeUnit"},
+                            ],
+                        },
+                    },
+                },
+                {
+                    "components": {
+                        "schemas": {
+                            "Base": {"type": "object", "properties": {}},
+                            "ComputeUnit": {"type": "number"},
+                            "Extension": {"type": "string"},
+                        },
+                    },
+                },
+                normalize=True,
+            ),
+            {
+                "properties": {
+                    "extensions": {"type": "string"},
+                    "merged": {"type": "object", "properties": {}},
+                    "compute_units": {"type": "number"},
+                },
+            },
+            id="resolve_schema_composition_with_single_element",
+        ),
     ],
 )
-def test_resolve_schema_references(schema, refs, expected):
+def test_resolve_schema_references(args: _ResolutionArgs, expected: dict[str, t.Any]):
     """Test resolving schema references."""
-    assert resolve_schema_references(schema, refs) == expected
+    assert (
+        resolve_schema_references(
+            args.schema,
+            args.refs,
+            normalize=args.normalize,
+        )
+        == expected
+    )

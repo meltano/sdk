@@ -219,11 +219,14 @@ class _SchemaKey:
     any_of = "anyOf"
     all_of = "allOf"
     one_of = "oneOf"
+    not_ = "not"
 
 
 def resolve_schema_references(
     schema: dict[str, t.Any],
     refs: dict[str, str] | None = None,
+    *,
+    normalize: bool = False,
 ) -> dict:
     """Resolves and replaces json-schema $refs with the appropriate dict.
 
@@ -235,6 +238,8 @@ def resolve_schema_references(
     Args:
         schema: The schema dict
         refs: A dict of <string, dict> which forms a store of referenced schemata.
+        normalize: Whether to normalize the schema by flattening combined schemas
+            (oneOf, allOf, etc.) into the most appropriate flat schema.
 
     Returns:
         A schema dict with all $refs replaced with the appropriate dict.
@@ -248,13 +253,15 @@ def resolve_schema_references(
     )
 
     resolver = registry.resolver()
-    return _resolve_schema_references(schema, resolver)
+    return _resolve_schema_references(schema, resolver, normalize=normalize)
 
 
 def _resolve_schema_references(  # noqa: C901, PLR0912
     schema: dict[str, t.Any],
     resolver: Resolver,
+    *,
     visited_refs: tuple[str, ...] | None = None,
+    normalize: bool = False,
 ) -> dict[str, t.Any]:
     """Recursively resolve schema references while handling circular references.
 
@@ -263,6 +270,9 @@ def _resolve_schema_references(  # noqa: C901, PLR0912
         resolver: The JSON Schema resolver to use
         visited_refs: Tuple of already visited reference paths in the current call stack
             to prevent infinite recursion
+        normalize: Whether to normalize the schema by flattening combined schemas
+            (oneOf, allOf, etc.) into the most appropriate flat schema in a best-effort
+            manner.
 
     Returns:
         The schema with all references resolved
@@ -281,14 +291,19 @@ def _resolve_schema_references(  # noqa: C901, PLR0912
         new_visited_refs = (*visited_refs, reference_path)
         resolved = resolver.lookup(reference_path)
         schema.update(resolved.contents)
-        return _resolve_schema_references(schema, resolver, new_visited_refs)
+        return _resolve_schema_references(
+            schema,
+            resolver,
+            visited_refs=new_visited_refs,
+        )
 
     if _SchemaKey.properties in schema:
         for k, val in schema[_SchemaKey.properties].items():
             schema[_SchemaKey.properties][k] = _resolve_schema_references(
                 val,
                 resolver,
-                visited_refs,
+                visited_refs=visited_refs,
+                normalize=normalize,
             )
 
     if _SchemaKey.pattern_properties in schema:
@@ -296,38 +311,144 @@ def _resolve_schema_references(  # noqa: C901, PLR0912
             schema[_SchemaKey.pattern_properties][k] = _resolve_schema_references(
                 val,
                 resolver,
-                visited_refs,
+                visited_refs=visited_refs,
+                normalize=normalize,
             )
 
     if _SchemaKey.items in schema:
         schema[_SchemaKey.items] = _resolve_schema_references(
             schema[_SchemaKey.items],
             resolver,
-            visited_refs,
+            visited_refs=visited_refs,
+            normalize=normalize,
         )
 
     if _SchemaKey.any_of in schema:
+        if normalize:
+            return _normalize_any_of(
+                schema[_SchemaKey.any_of],
+                resolver,
+                visited_refs=visited_refs,
+            )
+
         for i, element in enumerate(schema[_SchemaKey.any_of]):
             schema[_SchemaKey.any_of][i] = _resolve_schema_references(
                 element,
                 resolver,
-                visited_refs,
+                visited_refs=visited_refs,
+                normalize=normalize,
             )
 
     if _SchemaKey.all_of in schema:
+        if normalize:
+            return _normalize_all_of(
+                schema[_SchemaKey.all_of],
+                resolver,
+                visited_refs=visited_refs,
+            )
         for i, element in enumerate(schema[_SchemaKey.all_of]):
             schema[_SchemaKey.all_of][i] = _resolve_schema_references(
                 element,
                 resolver,
-                visited_refs,
+                visited_refs=visited_refs,
+                normalize=normalize,
             )
 
     if _SchemaKey.one_of in schema:
+        if normalize:
+            return _normalize_one_of(
+                schema[_SchemaKey.one_of],
+                resolver,
+                visited_refs=visited_refs,
+            )
+
         for i, element in enumerate(schema[_SchemaKey.one_of]):
             schema[_SchemaKey.one_of][i] = _resolve_schema_references(
                 element,
                 resolver,
-                visited_refs,
+                visited_refs=visited_refs,
+                normalize=normalize,
             )
 
+    if _SchemaKey.not_ in schema:
+        schema[_SchemaKey.not_] = _resolve_schema_references(
+            schema[_SchemaKey.not_],
+            resolver,
+            visited_refs=visited_refs,
+            normalize=normalize,
+        )
+
     return schema
+
+
+def _normalize_all_of(
+    subschemas: list[dict[str, t.Any]],
+    resolver: Resolver,
+    *,
+    visited_refs: tuple[str, ...] | None = None,
+) -> dict[str, t.Any]:
+    # If the allOf array has only one element, just flatten it.
+    if len(subschemas) == 1:
+        return _resolve_schema_references(
+            subschemas[0],
+            resolver,
+            visited_refs=visited_refs,
+            normalize=True,
+        )
+
+    # TODO: merge subschemas:
+    # - Combining all properties
+    # - Taking the most restrictive constraints for each property
+    # - Merging required arrays
+    # - Handling type intersections carefully
+    return subschemas
+
+
+def _normalize_one_of(
+    subschemas: list[dict[str, t.Any]],
+    resolver: Resolver,
+    *,
+    visited_refs: tuple[str, ...] | None = None,
+) -> dict[str, t.Any]:
+    # If the oneOf array has only one element, just flatten it.
+    if len(subschemas) == 1:
+        return _resolve_schema_references(
+            subschemas[0],
+            resolver,
+            visited_refs=visited_refs,
+            normalize=True,
+        )
+
+    # TODO: resolve this by creating a union type or identify common properties and
+    # make conflicting ones optional. However, complete resolution isn't always
+    # possible without losing semantic meaning.
+    return subschemas
+
+
+def _normalize_any_of(
+    subschemas: list[dict[str, t.Any]],
+    resolver: Resolver,
+    *,
+    visited_refs: tuple[str, ...] | None = None,
+) -> dict[str, t.Any]:
+    # If the anyOf array has only one element, just flatten it.
+    if len(subschemas) == 1:
+        return _resolve_schema_references(
+            subschemas[0],
+            resolver,
+            visited_refs=visited_refs,
+            normalize=True,
+        )
+
+    # TODO: Resolve this.
+    # This is the most complex and often cannot be safely flattened without losing the
+    # exclusive constraint. You might need to preserve some form of conditional logic.
+    # Safe Resolution Strategies:
+    # - Property Merging: Combine properties from multiple schemas, handling conflicts
+    #   by taking the most restrictive valid combination.
+    # - Constraint Intersection: For numeric constraints, take overlapping ranges. For
+    #   string patterns, combine them logically.
+    # - Type Resolution: Handle type unions and intersections appropriately.
+    # - Validation Preservation: Ensure the resolved schema accepts exactly the same set
+    #   of valid documents as the original.
+    return subschemas
