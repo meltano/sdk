@@ -388,6 +388,10 @@ def _normalize_all_of(
     *,
     visited_refs: tuple[str, ...] | None = None,
 ) -> dict[str, t.Any]:
+    # If the allOf array has no elements, return an empty schema.
+    if len(subschemas) == 0:
+        return {}
+
     # If the allOf array has only one element, just flatten it.
     if len(subschemas) == 1:
         return _resolve_schema_references(
@@ -411,6 +415,10 @@ def _normalize_one_of(
     *,
     visited_refs: tuple[str, ...] | None = None,
 ) -> dict[str, t.Any]:
+    # If the oneOf array has no elements, return an empty schema.
+    if len(subschemas) == 0:
+        return {}
+
     # If the oneOf array has only one element, just flatten it.
     if len(subschemas) == 1:
         return _resolve_schema_references(
@@ -432,6 +440,10 @@ def _normalize_any_of(
     *,
     visited_refs: tuple[str, ...] | None = None,
 ) -> dict[str, t.Any]:
+    # If the anyOf array has no elements, return an empty schema.
+    if len(subschemas) == 0:
+        return {}
+
     # If the anyOf array has only one element, just flatten it.
     if len(subschemas) == 1:
         return _resolve_schema_references(

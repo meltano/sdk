@@ -559,6 +559,21 @@ class _ResolutionArgs:
             },
             id="resolve_schema_composition_with_single_element",
         ),
+        pytest.param(
+            _ResolutionArgs({"allOf": []}, normalize=True),
+            {},
+            id="resolve_schema_all_of_with_no_elements",
+        ),
+        pytest.param(
+            _ResolutionArgs({"oneOf": []}, normalize=True),
+            {},
+            id="resolve_schema_one_of_with_no_elements",
+        ),
+        pytest.param(
+            _ResolutionArgs({"anyOf": []}, normalize=True),
+            {},
+            id="resolve_schema_any_of_with_no_elements",
+        ),
     ],
 )
 def test_resolve_schema_references(args: _ResolutionArgs, expected: dict[str, t.Any]):
