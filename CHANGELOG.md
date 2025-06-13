@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
-- [#3091](https://github.com/meltano/sdk/issues/3091) Correctly resolve JSON schema references when mulitple properties use the same reference
+- [#3091](https://github.com/meltano/sdk/issues/3091) Correctly resolve JSON schema references when multiple properties use the same reference
 - [#3048](https://github.com/meltano/sdk/issues/3048) Avoid emitting message "No schema for record field." when "additionalProperties" is set to true in stream schema -- _**Thanks @SidduHussain!**_
 - [#3080](https://github.com/meltano/sdk/issues/3080) Delay setting up console logging until the CLI is invoked and test log output snapshots
 - [#3077](https://github.com/meltano/sdk/issues/3077) Only finalize state for selected streams
@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 📚 Documentation Improvements
 
 - [#3095](https://github.com/meltano/sdk/issues/3095) Clarify that using `--discover` and `--catalog=<catalog file>` together is not supported
-- [#3083](https://github.com/meltano/sdk/issues/3083) Update supported python versions in the contribution guide -- _**Thanks @rafalkrupinski!**_
+- [#3083](https://github.com/meltano/sdk/issues/3083) Update supported Python versions in the contribution guide -- _**Thanks @rafalkrupinski!**_
 
 ## v0.46.4 (2025-05-28)
 
