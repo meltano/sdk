@@ -432,20 +432,17 @@ def _normalize_one_of(
             normalize=True,
         )
 
-    # TODO: resolve this by creating a union type or identify common properties and
-    # make conflicting ones optional. However, complete resolution isn't always
-    # possible without losing semantic meaning.
-    result: dict[str, t.Any] = {}
-    for subschema in subschemas:
-        if type_ := subschema.get("type"):
-            if isinstance(type_, str):
-                type_ = [type_]
-            merged_type = list(set(type_ + result.get("type", [])))
-        else:
-            merged_type = result.get("type", [])
-
-        result = {**subschema, "type": merged_type}
-
+    # TODO: Resolve this.
+    # This is the most complex and often cannot be safely flattened without losing the
+    # exclusive constraint. You might need to preserve some form of conditional logic.
+    # Safe Resolution Strategies:
+    # - Property Merging: Combine properties from multiple schemas, handling conflicts
+    #   by taking the most restrictive valid combination.
+    # - Constraint Intersection: For numeric constraints, take overlapping ranges. For
+    #   string patterns, combine them logically.
+    # - Type Resolution: Handle type unions and intersections appropriately.
+    # - Validation Preservation: Ensure the resolved schema accepts exactly the same set
+    #   of valid documents as the original.
     return subschemas[0]
 
 
@@ -468,15 +465,19 @@ def _normalize_any_of(
             normalize=True,
         )
 
-    # TODO: Resolve this.
-    # This is the most complex and often cannot be safely flattened without losing the
-    # exclusive constraint. You might need to preserve some form of conditional logic.
-    # Safe Resolution Strategies:
-    # - Property Merging: Combine properties from multiple schemas, handling conflicts
-    #   by taking the most restrictive valid combination.
-    # - Constraint Intersection: For numeric constraints, take overlapping ranges. For
-    #   string patterns, combine them logically.
-    # - Type Resolution: Handle type unions and intersections appropriately.
-    # - Validation Preservation: Ensure the resolved schema accepts exactly the same set
-    #   of valid documents as the original.
-    return subschemas[0]
+    # TODO: resolve this by creating a union type or identify common properties and
+    # make conflicting ones optional. However, complete resolution isn't always
+    # possible without losing semantic meaning.
+    result: dict[str, t.Any] = {}
+    for subschema in subschemas:
+        if type_ := subschema.get("type"):
+            if isinstance(type_, str):
+                type_ = [type_]
+            merged_type = list(set(type_ + result.get("type", [])))
+        else:
+            merged_type = result.get("type", [])
+
+        result |= subschema
+        result["type"] = merged_type
+
+    return result
