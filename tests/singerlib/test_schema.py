@@ -598,7 +598,7 @@ def test_resolve_schema_references(args: _ResolutionArgs, expected: dict[str, t.
             {"allOf": [{"type": "string"}, {"maxLength": 5}]},
             "too long",
             False,
-            id="all_of_merged_fails",
+            id="all_of_fails",
         ),
         pytest.param(
             {
@@ -632,7 +632,6 @@ def test_resolve_schema_references(args: _ResolutionArgs, expected: dict[str, t.
             12,
             True,
             id="any_of_second_passes",
-            marks=pytest.mark.xfail(reason="Not implemented"),
         ),
         pytest.param(
             {
@@ -666,7 +665,7 @@ def test_resolve_schema_references(args: _ResolutionArgs, expected: dict[str, t.
             9,
             True,
             id="one_of_second_passes",
-            marks=pytest.mark.xfail(reason="Not implemented"),
+            marks=pytest.mark.xfail(reason="Not implemented", strict=True),
         ),
         pytest.param(
             {
@@ -689,12 +688,15 @@ def test_resolve_schema_references(args: _ResolutionArgs, expected: dict[str, t.
             15,
             False,
             id="one_of_both_fails",
-            marks=pytest.mark.xfail(reason="Not implemented"),
+            marks=pytest.mark.xfail(reason="Not implemented", strict=True),
         ),
     ],
 )
 def test_schema_normalization(schema: dict[str, t.Any], data: t.Any, passes: bool):
     """Test schema decomposition."""
+    schema_validator = Draft202012Validator(schema)
+    assert schema_validator.is_valid(data) is passes
+
     resolved = resolve_schema_references(schema, normalize=True)
-    validator = Draft202012Validator(resolved)
-    assert validator.is_valid(data) is passes
+    resolved_validator = Draft202012Validator(resolved)
+    assert resolved_validator.is_valid(data) is passes
