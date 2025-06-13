@@ -470,10 +470,7 @@ class _ResolutionArgs:
         pytest.param(
             _ResolutionArgs(
                 {
-                    "type": "object",
-                    "properties": {
-                        "not": {"$ref": "components#/schemas/Not"},
-                    },
+                    "not": {"$ref": "components#/schemas/Not"},
                 },
                 {
                     "components": {
@@ -484,8 +481,7 @@ class _ResolutionArgs:
                 },
             ),
             {
-                "type": "object",
-                "properties": {"not": {"type": "string", "enum": ["a", "b"]}},
+                "not": {"type": "string", "enum": ["a", "b"]},
             },
             id="resolve_schema_with_not_keyword",
         ),
