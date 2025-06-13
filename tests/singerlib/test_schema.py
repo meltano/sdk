@@ -4,6 +4,7 @@ import typing as t
 from dataclasses import dataclass
 
 import pytest
+from jsonschema import Draft202012Validator
 
 from singer_sdk.singerlib import Schema, resolve_schema_references
 
@@ -586,3 +587,118 @@ def test_resolve_schema_references(args: _ResolutionArgs, expected: dict[str, t.
         )
         == expected
     )
+
+
+@pytest.mark.parametrize(
+    "schema,data,passes",
+    [
+        pytest.param(
+            {"allOf": [{"type": "string"}, {"maxLength": 5}]},
+            "short",
+            True,
+            id="all_of_passes",
+        ),
+        pytest.param(
+            {"allOf": [{"type": "string"}, {"maxLength": 5}]},
+            "too long",
+            False,
+            id="all_of_merged_fails",
+        ),
+        pytest.param(
+            {
+                "anyOf": [
+                    {"type": "string", "maxLength": 5},
+                    {"type": "number", "minimum": 0},
+                ]
+            },
+            "short",
+            True,
+            id="any_of_first_passes",
+        ),
+        pytest.param(
+            {
+                "anyOf": [
+                    {"type": "string", "maxLength": 5},
+                    {"type": "number", "minimum": 0},
+                ]
+            },
+            "too long",
+            False,
+            id="any_of_first_fails",
+        ),
+        pytest.param(
+            {
+                "anyOf": [
+                    {"type": "string", "maxLength": 5},
+                    {"type": "number", "minimum": 0},
+                ]
+            },
+            12,
+            True,
+            id="any_of_second_passes",
+            marks=pytest.mark.xfail(reason="Not implemented"),
+        ),
+        pytest.param(
+            {
+                "anyOf": [
+                    {"type": "string", "maxLength": 5},
+                    {"type": "number", "minimum": 0},
+                ]
+            },
+            -5,
+            False,
+            id="any_of_second_fails",  # TODO: Address this false negative
+        ),
+        pytest.param(
+            {
+                "oneOf": [
+                    {"type": "number", "multipleOf": 5},
+                    {"type": "number", "multipleOf": 3},
+                ]
+            },
+            10,
+            True,
+            id="one_of_first_passes",
+        ),
+        pytest.param(
+            {
+                "oneOf": [
+                    {"type": "number", "multipleOf": 5},
+                    {"type": "number", "multipleOf": 3},
+                ]
+            },
+            9,
+            True,
+            id="one_of_second_passes",
+            marks=pytest.mark.xfail(reason="Not implemented"),
+        ),
+        pytest.param(
+            {
+                "oneOf": [
+                    {"type": "number", "multipleOf": 5},
+                    {"type": "number", "multipleOf": 3},
+                ]
+            },
+            2,
+            False,
+            id="one_of_neither_fails",
+        ),
+        pytest.param(
+            {
+                "oneOf": [
+                    {"type": "number", "multipleOf": 5},
+                    {"type": "number", "multipleOf": 3},
+                ]
+            },
+            15,
+            False,
+            id="one_of_both_fails",
+            marks=pytest.mark.xfail(reason="Not implemented"),
+        ),
+    ],
+)
+def test_schema_normalization(schema: dict[str, t.Any], data: t.Any, passes: bool):
+    """Test schema decomposition."""
+    resolved = resolve_schema_references(schema, normalize=True)
+    validator = Draft202012Validator(resolved)
+    assert validator.is_valid(data) is passes

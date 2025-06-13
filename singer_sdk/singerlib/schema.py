@@ -406,7 +406,11 @@ def _normalize_all_of(
     # - Taking the most restrictive constraints for each property
     # - Merging required arrays
     # - Handling type intersections carefully
-    return subschemas[0]
+    result: dict[str, t.Any] = {}
+    for subschema in subschemas:
+        result |= subschema
+
+    return result
 
 
 def _normalize_one_of(
@@ -431,6 +435,17 @@ def _normalize_one_of(
     # TODO: resolve this by creating a union type or identify common properties and
     # make conflicting ones optional. However, complete resolution isn't always
     # possible without losing semantic meaning.
+    result: dict[str, t.Any] = {}
+    for subschema in subschemas:
+        if type_ := subschema.get("type"):
+            if isinstance(type_, str):
+                type_ = [type_]
+            merged_type = list(set(type_ + result.get("type", [])))
+        else:
+            merged_type = result.get("type", [])
+
+        result = {**subschema, "type": merged_type}
+
     return subschemas[0]
 
 
