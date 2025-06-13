@@ -295,6 +295,7 @@ def _resolve_schema_references(  # noqa: C901, PLR0912
             schema,
             resolver,
             visited_refs=new_visited_refs,
+            normalize=normalize,
         )
 
     if _SchemaKey.properties in schema:
