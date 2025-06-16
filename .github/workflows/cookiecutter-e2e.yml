@@ -70,6 +70,9 @@ jobs:
           !cookiecutter-output/tap-*/.git/
           !cookiecutter-output/target-*/.git/
           !cookiecutter-output/mapper-*/.git/
+          !cookiecutter-output/tap-*/.mypy_cache/
+          !cookiecutter-output/target-*/.mypy_cache/
+          !cookiecutter-output/mapper-*/.mypy_cache/
           !cookiecutter-output/tap-*/.ruff_cache/
           !cookiecutter-output/target-*/.ruff_cache/
           !cookiecutter-output/mapper-*/.ruff_cache/
