@@ -67,9 +67,12 @@ jobs:
           cookiecutter-output/tap-*
           cookiecutter-output/target-*
           cookiecutter-output/mapper-*
-          !cookiecutter-output/tap-*/.mypy_cache/
-          !cookiecutter-output/target-*/.mypy_cache/
-          !cookiecutter-output/mapper-*/.mypy_cache/
-          !cookiecutter-output/tap-*/.tox/
-          !cookiecutter-output/target-*/.tox/
-          !cookiecutter-output/mapper-*/.tox/
+          !cookiecutter-output/tap-*/.git/
+          !cookiecutter-output/target-*/.git/
+          !cookiecutter-output/mapper-*/.git/
+          !cookiecutter-output/tap-*/.ruff_cache/
+          !cookiecutter-output/target-*/.ruff_cache/
+          !cookiecutter-output/mapper-*/.ruff_cache/
+          !cookiecutter-output/tap-*/.venv/
+          !cookiecutter-output/target-*/.venv/
+          !cookiecutter-output/mapper-*/.venv/
