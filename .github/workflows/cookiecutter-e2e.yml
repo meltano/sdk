@@ -63,12 +63,12 @@ jobs:
       with:
         name: cookiecutter-ubuntu-latest-py3x
         path: |
-          /tmp/tap-*
-          /tmp/target-*
-          /tmp/mapper-*
-          !/tmp/tap-*/.mypy_cache/
-          !/tmp/target-*/.mypy_cache/
-          !/tmp/mapper-*/.mypy_cache/
-          !/tmp/tap-*/.tox/
-          !/tmp/target-*/.tox/
-          !/tmp/mapper-*/.tox/
+          cookiecutter-output/tap-*
+          cookiecutter-output/target-*
+          cookiecutter-output/mapper-*
+          !cookiecutter-output/tap-*/.mypy_cache/
+          !cookiecutter-output/target-*/.mypy_cache/
+          !cookiecutter-output/mapper-*/.mypy_cache/
+          !cookiecutter-output/tap-*/.tox/
+          !cookiecutter-output/target-*/.tox/
+          !cookiecutter-output/mapper-*/.tox/

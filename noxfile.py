@@ -279,7 +279,7 @@ def templates(session: nox.Session, replay_file_path: Path) -> None:
 
     Runs the lint task on the created test project.
     """
-    cc_build_path = Path(session.create_tmp())
+    cc_build_path = Path("./cookiecutter-output")
     folder_base_path = Path("./cookiecutter")
     replay_file = replay_file_path.resolve()
 
