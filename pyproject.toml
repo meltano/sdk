@@ -1,7 +1,7 @@
 [project]
 name = "singer-sdk"
 dynamic = [
-    "version"
+    "version",
 ]
 description = "A framework for building Singer taps"
 authors = [{ name = "Meltano Team and Contributors", email = "hello@meltano.com" }]
