@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   build:
+    name: Build Wheel and SDist
     runs-on: ubuntu-latest
     outputs:
       name: {{ '${{ steps.baipp.outputs.package_name }}' }}
