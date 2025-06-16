@@ -269,7 +269,7 @@ def test_object_arrays_remove_types(caplog: pytest.LogCaptureFixture):
         )
 
 
-def test_conform_object_additional_properties():
+def test_conform_object_additional_properties(caplog: pytest.LogCaptureFixture):
     schema = PropertiesList(
         Property(
             "object",
@@ -280,14 +280,17 @@ def test_conform_object_additional_properties():
     record = {"object": {"extra": "value"}}
     expected_output = {"object": {"extra": "value"}}
 
-    actual_output = conform_record_data_types(
-        "test_stream",
-        record,
-        schema,
-        TypeConformanceLevel.RECURSIVE,
-        logger,
-    )
-    assert actual_output == expected_output
+    with caplog.at_level(logging.WARNING):
+        actual_output = conform_record_data_types(
+            "test_stream",
+            record,
+            schema,
+            TypeConformanceLevel.RECURSIVE,
+            logger,
+        )
+
+        assert actual_output == expected_output
+        assert not caplog.records
 
 
 @pytest.mark.parametrize(
