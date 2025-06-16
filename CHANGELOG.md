@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.47.1 (2025-06-16)
+
+### 🐛 Fixes
+
+- [#3106](https://github.com/meltano/sdk/issues/3106) Apply `.upper()` to `metrics_log_level` setting value
+- [#3102](https://github.com/meltano/sdk/issues/3102) Bump "build and inspect python package" action in templates and use the name output for the PyPI url
+
 ## v0.47.0 (2025-06-13)
 
 ### ✨ New
