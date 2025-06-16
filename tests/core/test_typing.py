@@ -290,10 +290,7 @@ def test_conform_object_additional_properties(caplog: pytest.LogCaptureFixture):
         )
 
         assert actual_output == expected_output
-        assert caplog.records[0].message == (
-            "Properties ('object.extra',) were present in the 'test_stream' stream but "
-            "not found in catalog schema. Ignoring."
-        )
+        assert not caplog.records
 
 
 @pytest.mark.parametrize(
