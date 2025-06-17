@@ -14,7 +14,6 @@ import sqlalchemy as sa
 from singer_sdk.helpers._typing import (
     TypeConformanceLevel,
     _conform_primitive_property,
-    _warn_unmapped_properties,
     conform_record_data_types,
 )
 from singer_sdk.typing import (
@@ -31,12 +30,6 @@ if t.TYPE_CHECKING:
     from pytest_benchmark.fixture import BenchmarkFixture
 
 logger = logging.getLogger("log")
-
-
-@pytest.fixture(autouse=True)
-def reset__warn_unmapped_properties_log_cache():
-    yield
-    _warn_unmapped_properties.cache_clear()
 
 
 def test_simple_schema_conforms_types():
@@ -300,11 +293,18 @@ def test_conform_object_additional_properties(caplog: pytest.LogCaptureFixture):
         assert not caplog.records
 
 
-@pytest.mark.parametrize("additional_properties", [False, None])
+@pytest.mark.parametrize(
+    "additional_properties",
+    [False, None],
+    ids=["false", "unspecified"],
+)
 def test_conform_object_no_additional_properties(
+    request: pytest.FixtureRequest,
     caplog: pytest.LogCaptureFixture,
     additional_properties: bool | None,
 ):
+    stream_name = f"test-stream-{request.node.callspec.id}"
+
     schema = PropertiesList(
         Property(
             "object",
@@ -317,7 +317,7 @@ def test_conform_object_no_additional_properties(
 
     with caplog.at_level(logging.WARNING):
         actual_output = conform_record_data_types(
-            "test_stream",
+            stream_name,
             record,
             schema,
             TypeConformanceLevel.RECURSIVE,
@@ -326,8 +326,8 @@ def test_conform_object_no_additional_properties(
 
         assert actual_output == expected_output
         assert caplog.records[0].message == (
-            "Properties ('object.extra',) were present in the 'test_stream' stream but "
-            "not found in catalog schema. Ignoring."
+            f"Properties ('object.extra',) were present in the '{stream_name}' stream "
+            "but not found in catalog schema. Ignoring."
         )
 
 
