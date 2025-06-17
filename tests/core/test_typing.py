@@ -294,6 +294,44 @@ def test_conform_object_additional_properties(caplog: pytest.LogCaptureFixture):
 
 
 @pytest.mark.parametrize(
+    "additional_properties",
+    [False, None],
+    ids=["false", "unspecified"],
+)
+def test_conform_object_no_additional_properties(
+    request: pytest.FixtureRequest,
+    caplog: pytest.LogCaptureFixture,
+    additional_properties: bool | None,
+):
+    stream_name = f"test-stream-{request.node.callspec.id}"
+
+    schema = PropertiesList(
+        Property(
+            "object",
+            PropertiesList(additional_properties=additional_properties),
+        ),
+    ).to_dict()
+
+    record = {"object": {"extra": "value"}}
+    expected_output = {"object": {}}
+
+    with caplog.at_level(logging.WARNING):
+        actual_output = conform_record_data_types(
+            stream_name,
+            record,
+            schema,
+            TypeConformanceLevel.RECURSIVE,
+            logger,
+        )
+
+        assert actual_output == expected_output
+        assert caplog.records[0].message == (
+            f"Properties ('object.extra',) were present in the '{stream_name}' stream "
+            "but not found in catalog schema. Ignoring."
+        )
+
+
+@pytest.mark.parametrize(
     "value,type_dict,expected",
     [
         # Datetime conversions
