@@ -1110,14 +1110,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             state: State object to promote progress markers with.
         """
-        if not self.selected:
-            return
-
         if state is None or state == {}:
             for child_stream in self.child_streams or []:
-                child_stream.finalize_state_progress_markers()
+                if child_stream.selected:
+                    child_stream.finalize_state_progress_markers()
 
-            context: types.Context | None
+            if not self.selected:
+                return
+
             for context in self.partitions or [{}]:
                 state = self.get_context_state(context or None)
                 self._finalize_state(state)
@@ -1193,7 +1193,6 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 timer.context = context_element
 
                 current_context = context_element or None
-                state = self.get_context_state(current_context)
                 state_partition_context = self._get_state_partition_context(
                     current_context,
                 )
@@ -1258,6 +1257,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
                 if current_context == state_partition_context:
                     # Finalize per-partition state only if 1:1 with context
+                    state = self.get_context_state(current_context)
                     self._finalize_state(state)
 
         if not context:
