@@ -9,11 +9,13 @@ import typing as t
 
 from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.helpers._typing import to_json_compatible
+from singer_sdk.singerlib.encoding.simple import StateMessage
 
 if t.TYPE_CHECKING:
     import datetime
 
     from singer_sdk.helpers import types
+    from singer_sdk.singerlib.encoding.base import GenericSingerWriter
 
     _T = t.TypeVar("_T", datetime.datetime, str, int, float)
 
@@ -318,7 +320,7 @@ class StateWriter:
     has actually changed.
     """
 
-    def __init__(self, message_writer: t.Any) -> None:
+    def __init__(self, message_writer: GenericSingerWriter) -> None:
         """Initialize the StateWriter.
 
         Args:
@@ -346,9 +348,6 @@ class StateWriter:
         with self._lock:
             # Check if state has changed since last emission
             if self._last_emitted_state is None or state != self._last_emitted_state:
-                # Import here to avoid circular imports
-                from singer_sdk.singerlib.encoding.simple import StateMessage
-
                 self._message_writer.write_message(StateMessage(value=state))
                 self._last_emitted_state = copy.deepcopy(state)
 
