@@ -88,9 +88,6 @@ warn_unused_configs = true
 plugins = "sqlmypy"
 {%- endif %}
 
-[tool.ruff]
-target-version = "py39"
-
 [tool.ruff.lint]
 ignore = [
     "COM812",  # missing-trailing-comma
