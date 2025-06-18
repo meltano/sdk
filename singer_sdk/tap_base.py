@@ -107,7 +107,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._input_catalog: Catalog | None = None
         self._state: types.TapState = {}
         self._catalog: Catalog | None = None  # Tap's working catalog
-        self._state_writer: StateWriter = StateWriter(self)
+        self._state_writer: StateWriter = StateWriter(self.message_writer)
 
         # Process input catalog
         if isinstance(catalog, Catalog):
