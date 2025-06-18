@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import logging
 import typing as t
 
@@ -305,3 +306,64 @@ def log_sort_error(
         msg += f"Context was {current_context!s}. "
     msg += str(ex)
     log_fn(msg)
+
+
+class StateWriter:
+    """Centralized state message writer that prevents duplicate state emissions.
+
+    This class manages the writing of STATE messages to ensure that duplicate
+    state messages are not emitted across multiple streams or tap-level operations.
+    It tracks the last emitted state and only writes new messages when the state
+    has actually changed.
+    """
+
+    def __init__(self, message_writer: t.Any) -> None:
+        """Initialize the StateWriter.
+
+        Args:
+            message_writer: The message writer instance (typically from tap)
+                           that has a write_message method.
+        """
+        self._message_writer = message_writer
+        self._last_emitted_state: types.TapState | None = None
+        self._logger = logging.getLogger("singer_sdk.state_writer")
+
+    def write_state(self, state: types.TapState) -> None:
+        """Write a state message if the state has changed.
+
+        This method checks if the provided state is different from the last
+        emitted state and only writes a STATE message if there are changes.
+
+        Args:
+            state: The current tap state to potentially emit.
+        """
+        if not state:
+            return
+
+        # Check if state has changed since last emission
+        if self._last_emitted_state is None or state != self._last_emitted_state:
+            # Import here to avoid circular imports
+            from singer_sdk.singerlib.encoding.simple import StateMessage
+
+            self._message_writer.write_message(StateMessage(value=state))
+            self._last_emitted_state = copy.deepcopy(state)
+            self._logger.debug("State message written")
+        else:
+            self._logger.debug("State unchanged, skipping duplicate state message")
+
+    def reset_last_emitted_state(self) -> None:
+        """Reset the tracking of last emitted state.
+
+        This can be useful when you want to force the next state write
+        regardless of whether it appears to be a duplicate.
+        """
+        self._last_emitted_state = None
+
+    @property
+    def last_emitted_state(self) -> types.TapState | None:
+        """Get the last emitted state for inspection purposes."""
+        return (
+            copy.deepcopy(self._last_emitted_state)
+            if self._last_emitted_state
+            else None
+        )
