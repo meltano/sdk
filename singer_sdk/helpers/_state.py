@@ -327,7 +327,6 @@ class StateWriter:
         """
         self._message_writer = message_writer
         self._last_emitted_state: types.TapState | None = None
-        self._logger = logging.getLogger("singer_sdk.state_writer")
         self._lock = threading.Lock()
 
     def write_state(self, state: types.TapState) -> None:
@@ -352,9 +351,6 @@ class StateWriter:
 
                 self._message_writer.write_message(StateMessage(value=state))
                 self._last_emitted_state = copy.deepcopy(state)
-                self._logger.debug("State message written")
-            else:
-                self._logger.debug("State unchanged, skipping duplicate state message")
 
     def reset_last_emitted_state(self) -> None:
         """Reset the tracking of last emitted state.
