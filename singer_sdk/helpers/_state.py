@@ -338,31 +338,7 @@ class StateWriter:
         Args:
             state: The current tap state to potentially emit.
         """
-        if not state:
-            return
-
         # Check if state has changed since last emission
         if self._last_emitted_state is None or state != self._last_emitted_state:
             self._message_writer.write_message(StateMessage(value=state))
             self._last_emitted_state = copy.deepcopy(state)
-
-    def reset_last_emitted_state(self) -> None:
-        """Reset the tracking of last emitted state.
-
-        This can be useful when you want to force the next state write
-        regardless of whether it appears to be a duplicate.
-        """
-        self._last_emitted_state = None
-
-    @property
-    def last_emitted_state(self) -> types.TapState | None:
-        """Get the last emitted state for inspection purposes.
-
-        Returns:
-            A deep copy of the last emitted state, or None if no state has been emitted.
-        """
-        return (
-            copy.deepcopy(self._last_emitted_state)
-            if self._last_emitted_state
-            else None
-        )
