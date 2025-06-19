@@ -164,7 +164,6 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
         self._is_state_flushed: bool = True
-        self._last_emitted_state: types.TapState | None = None
         self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
         if schema:
@@ -863,13 +862,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def _write_state_message(self) -> None:
         """Write out a STATE message with the latest state."""
-        if (
-            (not self._is_state_flushed)
-            and self.tap_state
-            and (self.tap_state != self._last_emitted_state)
-        ):
-            self._tap.write_message(singer.StateMessage(value=self.tap_state))
-            self._last_emitted_state = copy.deepcopy(self.tap_state)
+        if not self._is_state_flushed and self.tap_state:
+            self._tap.state_writer.write_state(self.tap_state)
             self._is_state_flushed = True
 
     def _write_activate_version_message(self, full_table_version: int) -> None:

@@ -99,3 +99,4 @@
 {"type":"RECORD","stream":"people","record":{"id":97,"name":"Alicia Miller","email":"jamesjoe@example.org","phone":"408-377-5354","address":"Unit 5905 Box 3700\nDPO AP 51100"},"time_extracted":"2022-01-01T00:00:00+00:00"}
 {"type":"RECORD","stream":"people","record":{"id":98,"name":"James Ramos","email":"thomashaynes@example.net","phone":"606.891.5645","address":"2064 Miller Harbor Suite 747\nWest James, NE 28488"},"time_extracted":"2022-01-01T00:00:00+00:00"}
 {"type":"RECORD","stream":"people","record":{"id":99,"name":"Dylan Johnson","email":"yjennings@example.net","phone":"001-745-528-7595x79930","address":"476 Lewis Lights\nMelissaville, MP 78914"},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"people":{}}}}

@@ -2,16 +2,19 @@
 
 from __future__ import annotations
 
+import copy
 import logging
 import typing as t
 
 from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.helpers._typing import to_json_compatible
+from singer_sdk.singerlib.encoding.simple import StateMessage
 
 if t.TYPE_CHECKING:
     import datetime
 
     from singer_sdk.helpers import types
+    from singer_sdk.singerlib.encoding.base import GenericSingerWriter
 
     _T = t.TypeVar("_T", datetime.datetime, str, int, float)
 
@@ -305,3 +308,37 @@ def log_sort_error(
         msg += f"Context was {current_context!s}. "
     msg += str(ex)
     log_fn(msg)
+
+
+class StateWriter:
+    """Centralized state message writer that prevents duplicate state emissions.
+
+    This class manages the writing of STATE messages to ensure that duplicate
+    state messages are not emitted across multiple streams or tap-level operations.
+    It tracks the last emitted state and only writes new messages when the state
+    has actually changed.
+    """
+
+    def __init__(self, message_writer: GenericSingerWriter) -> None:
+        """Initialize the StateWriter.
+
+        Args:
+            message_writer: The message writer instance (typically from tap)
+                           that has a write_message method.
+        """
+        self._message_writer = message_writer
+        self._last_emitted_state: types.TapState | None = None
+
+    def write_state(self, state: types.TapState) -> None:
+        """Write a state message if the state has changed.
+
+        This method checks if the provided state is different from the last
+        emitted state and only writes a STATE message if there are changes.
+
+        Args:
+            state: The current tap state to potentially emit.
+        """
+        # Check if state has changed since last emission
+        if self._last_emitted_state is None or state != self._last_emitted_state:
+            self._message_writer.write_message(StateMessage(value=state))
+            self._last_emitted_state = copy.deepcopy(state)
