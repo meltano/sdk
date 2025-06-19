@@ -1544,21 +1544,29 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         row: types.Record,
         context: types.Context | None = None,  # noqa: ARG002
     ) -> types.Record | None:
-        """As needed, append or transform raw data to match expected structure.
+        """Process individual records after extraction from the source.
 
-        Optional. This method gives developers an opportunity to "clean up" the results
-        prior to returning records to the downstream tap - for instance: cleaning,
-        renaming, or appending properties to the raw record result returned from the
-        API.
+        This method provides an opportunity to clean, transform, or validate records
+        before they are emitted. Common use cases include:
 
-        Developers may also return `None` from this method to filter out
-        invalid or not-applicable records from the stream.
+        - Cleaning or normalizing field values
+        - Renaming fields to match expected schema
+        - Adding computed or derived fields
+        - Filtering out invalid or unwanted records
+
+        Developers may return `None` from this method to exclude records from the
+        stream output.
+
+        .. versionchanged:: 0.47.0
+           This method is now automatically executed for all stream types during
+           record processing. You should not call this method directly in custom
+           `get_records` implementations.
 
         Args:
-            row: Individual record in the stream.
+            row: Individual record from the stream.
             context: Stream partition or context dictionary.
 
         Returns:
-            The resulting record dict, or `None` if the record should be excluded.
+            The processed record dict, or `None` to exclude the record.
         """
         return row
