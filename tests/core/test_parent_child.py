@@ -16,6 +16,9 @@ if t.TYPE_CHECKING:
 
 DATETIME = datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc)
 
+if t.TYPE_CHECKING:
+    from pytest_snapshot.plugin import Snapshot
+
 
 class Parent(Stream):
     """A parent stream."""
@@ -201,7 +204,6 @@ def test_deselected_child(
 @time_machine.travel(DATETIME, tick=False)
 @pytest.mark.snapshot
 def test_one_parent_many_children(
-    tap: MyTap,
     caplog: pytest.LogCaptureFixture,
     snapshot: Snapshot,
 ):
@@ -279,3 +281,60 @@ def test_one_parent_many_children(
 
     snapshot.assert_match(buf.read(), "singer.jsonl")
     snapshot.assert_match(caplog.text, "stderr.log")
+
+
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_abstract_parent_streams(snapshot: Snapshot):
+    """Test that abstract parent streams are skipped."""
+
+    class AbstractParent(Stream):
+        """An abstract parent stream."""
+
+        __abstract__ = True
+
+        def get_records(self, context):  # noqa: ARG002
+            yield {"id": 1}
+            yield {"id": 2}
+
+        def generate_child_contexts(self, record, context):  # noqa: ARG002
+            yield {"pid": record["id"]}
+
+    class ChildOfAbstract(Stream):
+        """A child stream of an abstract parent."""
+
+        name = "child_of_abstract"
+        parent_stream_type = AbstractParent
+
+        schema = {  # noqa: RUF012
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "pid": {"type": "integer"},
+            },
+        }
+
+        def get_records(self, context):  # noqa: ARG002
+            yield {"id": 1}
+            yield {"id": 2}
+
+    class MyTapAbstract(Tap):
+        """A tap with streams having a parent-child relationship."""
+
+        name = "my-tap-abstract"
+
+        def discover_streams(self):
+            """Discover streams."""
+            return [
+                AbstractParent(self),
+                ChildOfAbstract(self),
+            ]
+
+    tap = MyTapAbstract()
+
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        tap.sync_all()
+
+    buf.seek(0)
+    snapshot.assert_match(buf.read(), "singer.jsonl")
