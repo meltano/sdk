@@ -20,7 +20,7 @@ from singer_sdk.exceptions import (
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
-from singer_sdk.helpers._state import write_stream_state
+from singer_sdk.helpers._state import StateWriter, write_stream_state
 from singer_sdk.helpers._util import dump_json, read_json_file
 from singer_sdk.helpers.capabilities import (
     BATCH_CONFIG,
@@ -31,7 +31,7 @@ from singer_sdk.helpers.capabilities import (
 )
 from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import BaseSingerWriter, PluginBase
-from singer_sdk.singerlib import Catalog, StateMessage
+from singer_sdk.singerlib import Catalog
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -107,6 +107,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._input_catalog: Catalog | None = None
         self._state: types.TapState = {}
         self._catalog: Catalog | None = None  # Tap's working catalog
+        self._state_writer: StateWriter = StateWriter(self.message_writer)
 
         # Process input catalog
         if isinstance(catalog, Catalog):
@@ -185,6 +186,15 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             Catalog dictionary input, or None if not provided.
         """
         return self._input_catalog
+
+    @property
+    def state_writer(self) -> StateWriter:
+        """Get the centralized state writer for this tap.
+
+        Returns:
+            The StateWriter instance for coordinated state message writing.
+        """
+        return self._state_writer
 
     @property
     def catalog(self) -> Catalog:
@@ -473,7 +483,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
         if self.state:
-            self.write_message(StateMessage(value=self.state))
+            self._state_writer.write_state(self.state)
 
         stream: Stream
         for stream in self.streams.values():
@@ -515,7 +525,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         # Emit a final state message to ensure the state is written to the output
         # even if the process is terminated by a signal.
         try:
-            self.write_message(StateMessage(value=self.state))
+            self._state_writer.write_state(self.state)
         finally:
             super()._handle_termination(signum, frame)
 
