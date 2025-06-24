@@ -30,6 +30,10 @@ If you are porting over a SQL tap... skip ahead now to the [Installing Dependenc
 
 Continue until just before you reach the "Pagination" section, at which point you are probably done! 🚀 Optionally, you can further optimize performance by overriding `get_records()` with a sync method native to your SQL operations.
 
+```{note}
+As of SDK v0.47.0, the `post_process` method is automatically executed for all stream types. If your legacy tap includes manual calls to `post_process` within custom `get_records` implementations, you should remove these calls to avoid duplicate processing.
+```
+
 ## Authentication
 
 1. Open the `auth.py` or `client.py` file (depending on auth method) and locate the authentication logic.
