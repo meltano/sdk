@@ -93,6 +93,7 @@ class SingerCommand(click.Command):
             The result of the command invocation.
         """
         logging.captureWarnings(capture=True)
+        warnings.filterwarnings("once", category=DeprecationWarning)
         try:
             return super().invoke(ctx)
         except ConfigValidationError as exc:
