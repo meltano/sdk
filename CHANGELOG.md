@@ -134,6 +134,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#2990](https://github.com/meltano/sdk/issues/2990) Replace filesystem library used for BATCH mode
 - [#3010](https://github.com/meltano/sdk/issues/3010) Use dict instead of `OrderedDict`
 
+## v0.45.12 (2025-06-24)
+
+### 🐛 Fixes
+
+- [#3132](https://github.com/meltano/sdk/issues/3132) Ensure Singer SDK warnings are logged
+
 ## v0.45.11 (2025-04-28)
 
 ### 🐛 Fixes
