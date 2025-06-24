@@ -800,7 +800,7 @@ name = "exceptiongroup"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0b/9f/a65090624ecf468cdca03533906e7c69ed7588582240cfe7cc9e770b50eb/exceptiongroup-1.3.0.tar.gz", hash = "sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88", size = 29749, upload-time = "2025-05-10T17:42:51.123Z" }
 wheels = [
@@ -2543,7 +2543,7 @@ provides-extras = ["faker", "jwt", "msgspec", "parquet", "s3", "ssh", "testing"]
 benchmark = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.4" },
     { name = "duckdb", specifier = ">=0.8.0" },
-    { name = "duckdb-engine", specifier = ">=0.9.4" },
+    { name = "duckdb-engine", specifier = ">=0.13" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
     { name = "moto", specifier = ">=5.0.14" },
     { name = "pytest", specifier = ">=7.2.1" },
@@ -2563,7 +2563,7 @@ dev = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.4" },
     { name = "deptry", specifier = ">=0.15.0" },
     { name = "duckdb", specifier = ">=0.8.0" },
-    { name = "duckdb-engine", specifier = ">=0.9.4" },
+    { name = "duckdb-engine", specifier = ">=0.13" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
     { name = "furo", specifier = ">=2024.5.6" },
     { name = "moto", specifier = ">=5.0.14" },
@@ -2571,6 +2571,7 @@ dev = [
     { name = "myst-parser", specifier = ">=3" },
     { name = "pyarrow-stubs", specifier = ">=19.1" },
     { name = "pytest", specifier = ">=7.2.1" },
+    { name = "pytest", specifier = ">=8" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
     { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
@@ -2595,7 +2596,7 @@ dev = [
 docs = [
     { name = "furo", specifier = ">=2024.5.6" },
     { name = "myst-parser", specifier = ">=3" },
-    { name = "pytest", specifier = ">=7.2.1" },
+    { name = "pytest", specifier = ">=8" },
     { name = "sphinx", specifier = ">=7" },
     { name = "sphinx-copybutton", specifier = ">=0.5.2" },
     { name = "sphinx-inline-tabs", specifier = ">=2023.4.21" },
@@ -2605,7 +2606,7 @@ docs = [
 testing = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.4" },
     { name = "duckdb", specifier = ">=0.8.0" },
-    { name = "duckdb-engine", specifier = ">=0.9.4" },
+    { name = "duckdb-engine", specifier = ">=0.13" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
     { name = "moto", specifier = ">=5.0.14" },
     { name = "pytest", specifier = ">=7.2.1" },
