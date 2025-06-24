@@ -116,7 +116,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self._singer_catalog_entry.metadata.root.table_key_properties or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: t.Sequence[str]) -> None:
+    def primary_keys(self, new_value: t.Sequence[str] | None) -> None:
         """Set or reset the primary key(s) in the stream's catalog entry.
 
         Args:

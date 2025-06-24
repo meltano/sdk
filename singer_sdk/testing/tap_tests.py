@@ -160,7 +160,7 @@ class StreamRecordMatchesStreamSchema(StreamTestTemplate):
         schema = self.stream.schema
         default = DEFAULT_JSONSCHEMA_VALIDATOR
         validator = validators.validator_for(schema, default=default)(schema)
-        validator.format_checker = default.FORMAT_CHECKER
+        validator.format_checker = default.FORMAT_CHECKER  # type: ignore[attr-defined]
 
         for record in self.stream_records:
             errors = list(validator.iter_errors(record))

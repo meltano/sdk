@@ -253,7 +253,7 @@ class DeprecatedEnum(Enum):
             Deprecation message.
         """
         self.deprecation: str | None
-        return self.deprecation
+        return self.deprecation  # type: ignore[no-any-return]
 
     def emit_warning(self) -> None:
         """Emit deprecation warning."""

@@ -46,7 +46,7 @@ class ParquetBatcher(BaseBatcher):
                     pylist = list(chunk)
                     table = pa.Table.from_pylist(pylist)
                     if self.batch_config.encoding.compression == "gzip":
-                        pq.write_table(table, f, compression="GZIP")
+                        pq.write_table(table, f, compression="gzip")
                     else:
                         pq.write_table(table, f)
 

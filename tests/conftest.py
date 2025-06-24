@@ -36,7 +36,7 @@ def pytest_collection_modifyitems(config: Config, items: list[pytest.Item]):
             item.add_marker("external")
 
 
-def pytest_runtest_setup(item):
+def pytest_runtest_setup(item: pytest.Item):
     supported_systems = SYSTEMS.intersection(mark.name for mark in item.iter_markers())
     system = platform.system().lower()
     if supported_systems and system not in supported_systems:
