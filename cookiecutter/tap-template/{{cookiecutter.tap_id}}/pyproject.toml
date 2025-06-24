@@ -35,9 +35,9 @@ license-files = [ "LICENSE" ]
 requires-python = ">=3.9"
 dependencies = [
     {%- if extras %}
-    "singer-sdk[{{ extras|join(',') }}]~=0.46.4",
+    "singer-sdk[{{ extras|join(',') }}]~=0.47.3",
     {%- else %}
-    "singer-sdk~=0.46.4",
+    "singer-sdk~=0.47.3",
     {%- endif %}
     {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
     "requests~=2.32.3",
@@ -87,9 +87,6 @@ warn_unused_configs = true
 {%- if cookiecutter.stream_type == 'SQL' %}
 plugins = "sqlmypy"
 {%- endif %}
-
-[tool.ruff]
-target-version = "py39"
 
 [tool.ruff.lint]
 ignore = [

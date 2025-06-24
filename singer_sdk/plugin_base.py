@@ -214,7 +214,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if metrics_level := self.config.get(
             metrics.METRICS_LOG_LEVEL_SETTING,
         ):  # pragma: no cover
-            self.metrics_logger.setLevel(metrics_level)
+            self.metrics_logger.setLevel(metrics_level.upper())
             warnings.warn(
                 f"Using {metrics.METRICS_LOG_LEVEL_SETTING} to set metrics log level "
                 "is deprecated and will be removed by September 2025. "

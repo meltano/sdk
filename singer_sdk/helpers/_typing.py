@@ -450,7 +450,8 @@ def _conform_record_data_types(
         if property_name not in schema["properties"]:
             if schema.get("additionalProperties"):
                 output_object[property_name] = elem
-            unmapped_properties.append(property_path)
+            else:
+                unmapped_properties.append(property_path)
             continue
 
         property_schema = schema["properties"][property_name]

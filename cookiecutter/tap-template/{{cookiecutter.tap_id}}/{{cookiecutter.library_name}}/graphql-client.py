@@ -72,6 +72,9 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     ) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
 
+        Note: As of SDK v0.47.0, this method is automatically executed for all stream types.
+        You should not need to call this method directly in custom `get_records` implementations.
+
         Args:
             row: An individual record from the stream.
             context: The stream context.

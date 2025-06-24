@@ -27,6 +27,7 @@ class FakePeopleStream(Stream):
 
     def get_records(self, context: dict) -> Iterable[Record]:  # noqa: ARG002, PLR6301
         faker = Faker()
+        faker.seed_instance(42)
         for i in range(100):
             yield {
                 "id": i,

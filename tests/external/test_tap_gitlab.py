@@ -3,9 +3,9 @@ from __future__ import annotations
 import warnings
 
 from samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
-from singer_sdk._singerlib import Catalog
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers import _catalog
+from singer_sdk.singerlib import Catalog
 from singer_sdk.testing import get_tap_test_class
 
 from .conftest import gitlab_config
