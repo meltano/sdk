@@ -5,7 +5,7 @@ from __future__ import annotations
 import typing as t
 
 import singer_sdk.typing as th
-from singer_sdk import _singerlib as singer
+from singer_sdk import singerlib as singer
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.mapper_base import InlineMapper
 

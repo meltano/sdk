@@ -161,7 +161,6 @@ filterwarnings = [
     "ignore:No records were available to test:UserWarning",
     # https://github.com/meltano/sdk/issues/1354
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
-    "ignore:.*singer_sdk._singerlib.*:singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
     # https://github.com/meltano/sdk/issues/2744
     "default:Passing a config file path is deprecated:singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
     "default:Passing a list of config file paths is deprecated:singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
@@ -217,7 +216,6 @@ relative_files = true  # This allows coverage to be measured in Windows
 omit = [
     "tests/*",
     "samples/*",
-    "singer_sdk/_singerlib/*",
     "singer_sdk/helpers/_compat.py",
     "singer_sdk/helpers/types.py",
 ]
