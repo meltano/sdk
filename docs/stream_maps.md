@@ -263,14 +263,6 @@ To use the `fake` object, the `faker` library must be installed.
 The `faker` object.
 :::
 
-:::{versionadded} 0.40.0
-The `Faker` class.
-:::
-
-:::{versionchanged} 0.41.0
-The `Faker` class was deprecated in favor of instance methods on the `fake` object.
-:::
-
 :::{versionadded} 0.42.0
 The `__stream_name__` variable.
 :::
