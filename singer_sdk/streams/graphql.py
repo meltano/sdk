@@ -27,7 +27,7 @@ class GraphQLStream(RESTStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     http_method = "POST"
 
     @classproperty
-    def records_jsonpath(cls) -> str:  # type: ignore[override] # noqa: N805
+    def records_jsonpath(cls) -> str:  # noqa: N805
         """Get the JSONPath expression to extract records from an API response.
 
         Returns:
