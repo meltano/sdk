@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.45.12 (2025-06-24)
+
+### 🐛 Fixes
+
+- [#3132](https://github.com/meltano/sdk/issues/3132) Ensure Singer SDK warnings are logged
+
 ## v0.45.11 (2025-04-28)
 
 ### 🐛 Fixes
