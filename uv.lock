@@ -2533,7 +2533,7 @@ requires-dist = [
     { name = "s3fs", marker = "extra == 's3'", specifier = ">=2024.9.0" },
     { name = "simpleeval", specifier = ">=0.9.13,!=1.0.1" },
     { name = "simplejson", specifier = ">=3.17.6" },
-    { name = "sqlalchemy", specifier = ">=1.4,<3.0" },
+    { name = "sqlalchemy", specifier = ">=2" },
     { name = "typing-extensions", specifier = ">=4.5.0" },
     { name = "universal-pathlib", specifier = ">=0.2.6" },
 ]
