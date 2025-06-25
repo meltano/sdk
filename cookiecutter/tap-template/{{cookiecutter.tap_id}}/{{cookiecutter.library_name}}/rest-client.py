@@ -139,7 +139,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 {%- endif %}
         return {}
 
-    def get_new_paginator(self) -> BaseAPIPaginator:
+    def get_new_paginator(self) -> BaseAPIPaginator | None:
         """Create a new pagination helper instance.
 
         If the source API can make use of the `next_page_token_jsonpath`
@@ -150,7 +150,8 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         other approaches, please read the guide: https://sdk.meltano.com/en/v0.25.0/guides/pagination-classes.html.
 
         Returns:
-            A pagination helper instance.
+            A pagination helper instance, or ``None`` to indicate pagination
+            is not supported.
         """
         return super().get_new_paginator()
 
