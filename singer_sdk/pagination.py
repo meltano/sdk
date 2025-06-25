@@ -446,3 +446,19 @@ class LegacyStreamPaginator(
                 the end of pagination.
         """
         return self.stream.get_next_page_token(response, self.current_value)
+
+
+class NoOpPaginator(BaseAPIPaginator):
+    """No-op paginator intended for use with REST streams that do not support pagination."""  # noqa: E501
+
+    def __init__(self) -> None:
+        """Create a new paginator."""
+        super().__init__(None)
+
+    @override
+    def has_more(self, response: requests.Response) -> bool:
+        return False
+
+    @override
+    def get_next(self, response: requests.Response) -> None:
+        return None
