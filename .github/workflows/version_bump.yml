@@ -33,7 +33,7 @@ on:
 
 jobs:
   version_bump:
-
+    name: Bump the package version
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
