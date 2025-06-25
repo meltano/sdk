@@ -459,6 +459,8 @@ class NoOpPaginator(BaseAPIPaginator):
     def has_more(self, response: requests.Response) -> bool:
         return False
 
+    # necessary to satisfy BaseAPIPaginator interface - in practice this is never called
+    # (see BaseAPIPaginator.advance)
     @override
-    def get_next(self, response: requests.Response) -> None:
+    def get_next(self, response: requests.Response) -> None:  # pragma: no cover
         return None
