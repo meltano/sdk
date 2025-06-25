@@ -150,8 +150,8 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         other approaches, please read the guide: https://sdk.meltano.com/en/v0.25.0/guides/pagination-classes.html.
 
         Returns:
-            A pagination helper instance, or ``None`` to indicate paginator is
-            not supported.
+            A pagination helper instance, or ``None`` to indicate pagination
+            is not supported.
         """
         return super().get_new_paginator()
 
