@@ -69,6 +69,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#3095](https://github.com/meltano/sdk/issues/3095) Clarify that using `--discover` and `--catalog=<catalog file>` together is not supported
 - [#3083](https://github.com/meltano/sdk/issues/3083) Update supported Python versions in the contribution guide -- _**Thanks @rafalkrupinski!**_
 
+## v0.46.5 (2025-06-24)
+
+### 🐛 Fixes
+
+- [#3135](https://github.com/meltano/sdk/issues/3135) Ensure Singer SDK warnings are logged
+
 ## v0.46.4 (2025-05-28)
 
 ### 🐛 Fixes
