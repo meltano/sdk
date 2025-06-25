@@ -24,8 +24,8 @@ from singer_sdk.pagination import (
     BaseAPIPaginator,
     JSONPathPaginator,
     LegacyStreamPaginator,
-    NoOpPaginator,
     SimpleHeaderPaginator,
+    SinglePagePaginator,
 )
 from singer_sdk.streams.core import Stream
 
@@ -445,7 +445,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         Yields:
             An item for every record in the response.
         """
-        paginator = self.get_new_paginator() or NoOpPaginator()
+        paginator = self.get_new_paginator() or SinglePagePaginator()
         decorated_request = self.request_decorator(self._request)
         pages = 0
 
