@@ -62,12 +62,15 @@ def serialize_jsonl(obj: object, **kwargs: t.Any) -> bytes:  # noqa: ARG001
     return _jsonl_msg_buffer
 
 
-class MsgSpecReader(GenericSingerReader[str]):
+class MsgSpecReader(GenericSingerReader[bytes]):
     """Base class for all plugins reading Singer messages as strings from stdin."""
 
-    default_input = sys.stdin
+    @property
+    def default_input(self) -> t.IO[bytes]:
+        """Default input stream for the reader."""
+        return sys.stdin.buffer
 
-    def deserialize_json(self, line: str) -> dict:  # noqa: PLR6301
+    def deserialize_json(self, line: bytes) -> dict:  # noqa: PLR6301
         """Deserialize a line of json.
 
         Args:
@@ -83,7 +86,7 @@ class MsgSpecReader(GenericSingerReader[str]):
             return decoder.decode(line)  # type: ignore[no-any-return]
         except msgspec.DecodeError as exc:
             logger.exception("Unable to parse:\n%s", line)
-            msg = f"Unable to parse line as JSON: {line}"
+            msg = f"Unable to parse line as JSON: {line!r}"
             raise InvalidInputLine(msg) from exc
 
 
