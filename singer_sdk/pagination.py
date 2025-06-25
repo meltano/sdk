@@ -176,6 +176,18 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
         super().__init__(None, *args, **kwargs)
 
     @override
+    def has_more(self, response: requests.Response) -> bool:
+        """A single page should not have any more pages.
+
+        Args:
+            response: API response object.
+
+        Returns:
+            `False` to indicate pagination is complete after the first page.
+        """
+        return False
+
+    @override
     def get_next(self, response: requests.Response) -> None:
         """Always return None to indicate pagination is complete after the first page.
 
@@ -446,21 +458,3 @@ class LegacyStreamPaginator(
                 the end of pagination.
         """
         return self.stream.get_next_page_token(response, self.current_value)
-
-
-class NoOpPaginator(BaseAPIPaginator):
-    """No-op paginator intended for use with REST streams that do not support pagination."""  # noqa: E501
-
-    def __init__(self) -> None:
-        """Create a new paginator."""
-        super().__init__(None)
-
-    @override
-    def has_more(self, response: requests.Response) -> bool:
-        return False
-
-    # necessary to satisfy BaseAPIPaginator interface - in practice this is never called
-    # (see BaseAPIPaginator.advance)
-    @override
-    def get_next(self, response: requests.Response) -> None:  # pragma: no cover
-        return None
