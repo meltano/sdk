@@ -550,10 +550,10 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         super().invoke(about=about, about_format=about_format)
         cls.print_version(print_fn=cls.logger.info)
-        config_files, parse_env_config = cls.config_from_cli_args(*config)
+        config_dict, parse_env_config = cls.config_from_cli_args(*config)
 
         tap = cls(
-            config=config_files,  # type: ignore[arg-type]
+            config=config_dict,
             state=None if state is None else load_json(state.read()),
             catalog=None if catalog is None else load_json(catalog.read()),
             parse_env_config=parse_env_config,
@@ -579,10 +579,11 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             return
 
         config_args = ctx.params.get("config", ())
-        config_files, parse_env_config = cls.config_from_cli_args(*config_args)
+        config_dict, parse_env_config = cls.config_from_cli_args(*config_args)
+
         try:
             tap = cls(
-                config=config_files,  # type: ignore[arg-type]
+                config=config_dict,
                 parse_env_config=parse_env_config,
                 validate_config=cls.dynamic_catalog,
                 setup_mapper=False,
@@ -612,9 +613,10 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             return
 
         config_args = ctx.params.get("config", ())
-        config_files, parse_env_config = cls.config_from_cli_args(*config_args)
+        config_dict, parse_env_config = cls.config_from_cli_args(*config_args)
+
         tap = cls(
-            config=config_files,  # type: ignore[arg-type]
+            config=config_dict,
             parse_env_config=parse_env_config,
             validate_config=True,
         )
