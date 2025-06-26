@@ -9,6 +9,8 @@ from pathlib import Path
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
 
+logger = logging.getLogger(__name__)
+
 
 def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN401 # pragma: no cover
     """Load the logging config from the YAML file.
@@ -44,4 +46,7 @@ def _setup_console_logging(*, log_level: str | int | None = None) -> None:
 
     if "SINGER_SDK_LOG_CONFIG" in os.environ:  # pragma: no cover
         log_config_path = Path(os.environ["SINGER_SDK_LOG_CONFIG"])
-        logging.config.dictConfig(_load_yaml_logging_config(log_config_path))
+        try:
+            logging.config.dictConfig(_load_yaml_logging_config(log_config_path))
+        except FileNotFoundError:
+            logger.warning("Logging config file not found: %s", log_config_path)
