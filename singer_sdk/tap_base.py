@@ -551,7 +551,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         super().invoke(about=about, about_format=about_format)
         cls.print_version(print_fn=cls.logger.info)
         config_files, parse_env_config = cls.config_from_cli_args(*config)
-        config_dict = {}
+        config_dict: dict[str, t.Any] = {}
         for config_file in config_files:
             config_dict |= read_json_file(config_file)
 
@@ -583,7 +583,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         config_args = ctx.params.get("config", ())
         config_files, parse_env_config = cls.config_from_cli_args(*config_args)
-        config_dict = {}
+        config_dict: dict[str, t.Any] = {}
         for config_file in config_files:
             config_dict |= read_json_file(config_file)
 
@@ -620,7 +620,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         config_args = ctx.params.get("config", ())
         config_files, parse_env_config = cls.config_from_cli_args(*config_args)
-        config_dict = {}
+        config_dict: dict[str, t.Any] = {}
         for config_file in config_files:
             config_dict |= read_json_file(config_file)
 
