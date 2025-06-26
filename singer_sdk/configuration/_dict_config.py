@@ -83,6 +83,35 @@ def parse_environment_config(
     return result
 
 
+def deep_merge(a: dict[str, t.Any], b: dict[str, t.Any]) -> dict[str, t.Any]:
+    """Deep merge two dictionaries.
+
+    Args:
+        a: The first dictionary.
+        b: The second dictionary.
+
+    Returns:
+        A new dictionary with the merged contents of `a` and `b`.
+
+    Example:
+        >>> a = {"a": 1, "b": {"c": 2}}
+        >>> b = {"b": {"d": 3}, "e": 4}
+        >>> deep_merge(a, b)
+        {'a': 1, 'b': {'c': 2, 'd': 3}, 'e': 4}
+
+        >>> a = {"a": 1, "b": {"c": 2}}
+        >>> b = {"b": {"d": 3}, "e": 4}
+        >>> deep_merge(a, b)
+        {'a': 1, 'b': {'c': 2, 'd': 3}, 'e': 4}
+    """
+    for key, value in b.items():
+        if key in a and isinstance(a[key], dict) and isinstance(value, dict):
+            a[key] = deep_merge(a[key], value)
+        else:
+            a[key] = value
+    return a
+
+
 def merge_config_sources(
     inputs: t.Iterable[str],
     config_schema: dict[str, t.Any],
@@ -112,7 +141,7 @@ def merge_config_sources(
 
         if not config_path.is_file():
             msg = (
-                f"Could not locate config file at '{config_path}'.Please check that "
+                f"Could not locate config file at '{config_path}'. Please check that "
                 "the file exists."
             )
             raise FileNotFoundError(msg)

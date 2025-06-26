@@ -21,6 +21,7 @@ from singer_sdk import about, metrics
 from singer_sdk._logging import _setup_console_logging
 from singer_sdk.cli import plugin_cli
 from singer_sdk.configuration._dict_config import (
+    deep_merge,
     merge_missing_config_jsonschema,
     parse_environment_config,
 )
@@ -190,7 +191,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             for config_path in config:
                 # Read each config file sequentially. Settings from files later in the
                 # list will override those of earlier ones.
-                config_dict.update(read_json_file(config_path))
+                config_dict = deep_merge(config_dict, read_json_file(config_path))
             warnings.warn(
                 "Passing a list of config file paths is deprecated. Please pass the "
                 "config as a dictionary instead.",
@@ -557,7 +558,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         print(formatter.format_about(info))  # noqa: T201
 
     @staticmethod
-    def config_from_cli_args(*args: str) -> tuple[list[Path], bool]:
+    def config_from_cli_args(*args: str) -> tuple[dict[str, t.Any], bool]:
         """Parse CLI arguments into a config dictionary.
 
         Args:
@@ -589,23 +590,9 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
             config_files.append(Path(config_path))
 
-        return config_files, parse_env_config
-
-    @classmethod
-    def _config_from_cli_args(cls, *args: str) -> tuple[dict[str, t.Any], bool]:
-        """Parse CLI arguments into a config dictionary.
-
-        Args:
-            args: CLI arguments.
-
-        Returns:
-            A tuple containing the config dictionary and a boolean indicating
-            environment variables should be parsed.
-        """
-        config_files, parse_env_config = cls.config_from_cli_args(*args)
         config_dict: dict[str, t.Any] = {}
         for config_file in config_files:
-            config_dict |= read_json_file(config_file)
+            deep_merge(config_dict, read_json_file(config_file))
 
         return config_dict, parse_env_config
 

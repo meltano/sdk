@@ -148,7 +148,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
         """
         super().invoke(about=about, about_format=about_format)
         cls.print_version(print_fn=cls.logger.info)
-        config_dict, parse_env_config = cls._config_from_cli_args(*config)
+        config_dict, parse_env_config = cls.config_from_cli_args(*config)
 
         mapper = cls(
             config=config_dict,
