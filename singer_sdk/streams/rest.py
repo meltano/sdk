@@ -645,7 +645,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         """Get a fresh paginator for this endpoint.
 
         Returns:
-            A paginator instance.
+            A paginator instance, or ``None`` to indicate pagination is not supported.
         """
         ...
 
