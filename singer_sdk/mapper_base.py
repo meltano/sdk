@@ -152,7 +152,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
         config_files, parse_env_config = cls.config_from_cli_args(*config)
         config_dict = {}
         for config_file in config_files:
-            config_dict.update(read_json_file(config_file))
+            config_dict |= read_json_file(config_file)
 
         mapper = cls(
             config=config_dict,

@@ -553,7 +553,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         config_files, parse_env_config = cls.config_from_cli_args(*config)
         config_dict = {}
         for config_file in config_files:
-            config_dict.update(read_json_file(config_file))
+            config_dict |= read_json_file(config_file)
 
         tap = cls(
             config=config_dict,
@@ -585,7 +585,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         config_files, parse_env_config = cls.config_from_cli_args(*config_args)
         config_dict = {}
         for config_file in config_files:
-            config_dict.update(read_json_file(config_file))
+            config_dict |= read_json_file(config_file)
 
         try:
             tap = cls(
@@ -622,7 +622,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         config_files, parse_env_config = cls.config_from_cli_args(*config_args)
         config_dict = {}
         for config_file in config_files:
-            config_dict.update(read_json_file(config_file))
+            config_dict |= read_json_file(config_file)
 
         tap = cls(
             config=config_dict,
