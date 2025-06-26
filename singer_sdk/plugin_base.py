@@ -567,8 +567,8 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             FileNotFoundError: If the config file does not exist.
 
         Returns:
-            A tuple containing the config dictionary and a boolean indicating whether
-            the config file was found.
+            A tuple containing the config dictionary and a boolean indicating
+            whether environment variables should be parsed.
         """
         config_files = []
         parse_env_config = False
@@ -582,7 +582,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             # Validate config file paths before adding to list
             if not Path(config_path).is_file():
                 msg = (
-                    f"Could not locate config file at '{config_path}'.Please check "
+                    f"Could not locate config file at '{config_path}'. Please check "
                     "that the file exists."
                 )
                 raise FileNotFoundError(msg)
@@ -590,6 +590,24 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             config_files.append(Path(config_path))
 
         return config_files, parse_env_config
+
+    @classmethod
+    def _config_from_cli_args(cls, *args: str) -> tuple[dict[str, t.Any], bool]:
+        """Parse CLI arguments into a config dictionary.
+
+        Args:
+            args: CLI arguments.
+
+        Returns:
+            A tuple containing the config dictionary and a boolean indicating
+            environment variables should be parsed.
+        """
+        config_files, parse_env_config = cls.config_from_cli_args(*args)
+        config_dict: dict[str, t.Any] = {}
+        for config_file in config_files:
+            config_dict |= read_json_file(config_file)
+
+        return config_dict, parse_env_config
 
     @classmethod
     def invoke(

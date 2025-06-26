@@ -15,7 +15,6 @@ from joblib import Parallel, delayed, parallel_config
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
     ACTIVATE_VERSION_CONFIG,
     ADD_RECORD_METADATA_CONFIG,
@@ -579,10 +578,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         """
         super().invoke(about=about, about_format=about_format)
         cls.print_version(print_fn=cls.logger.info)
-        config_files, parse_env_config = cls.config_from_cli_args(*config)
-        config_dict: dict[str, t.Any] = {}
-        for config_file in config_files:
-            config_dict |= read_json_file(config_file)
+        config_dict, parse_env_config = cls._config_from_cli_args(*config)
 
         target = cls(
             config=config_dict,
