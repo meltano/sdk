@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import abc
 import contextlib
-import pathlib
 import typing as t
 import warnings
 from enum import Enum
@@ -21,7 +20,7 @@ from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._state import StateWriter, write_stream_state
-from singer_sdk.helpers._util import dump_json, read_json_file
+from singer_sdk.helpers._util import dump_json, load_json, read_json_file
 from singer_sdk.helpers.capabilities import (
     BATCH_CONFIG,
     SQL_TAP_USE_SINGER_DECIMAL,
@@ -536,8 +535,8 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         about: bool = False,
         about_format: str | None = None,
         config: tuple[str, ...] = (),
-        state: pathlib.Path | None = None,
-        catalog: pathlib.Path | None = None,
+        state: t.IO[str] | None = None,
+        catalog: t.IO[str] | None = None,
     ) -> None:
         """Invoke the tap's command line interface.
 
@@ -552,11 +551,14 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         super().invoke(about=about, about_format=about_format)
         cls.print_version(print_fn=cls.logger.info)
         config_files, parse_env_config = cls.config_from_cli_args(*config)
+        config_dict = {}
+        for config_file in config_files:
+            config_dict.update(read_json_file(config_file))
 
         tap = cls(
-            config=config_files,  # type: ignore[arg-type]
-            state=state,
-            catalog=catalog,
+            config=config_dict,
+            state=None if state is None else load_json(state.read()),
+            catalog=None if catalog is None else load_json(catalog.read()),
             parse_env_config=parse_env_config,
             validate_config=True,
         )
@@ -581,9 +583,13 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         config_args = ctx.params.get("config", ())
         config_files, parse_env_config = cls.config_from_cli_args(*config_args)
+        config_dict = {}
+        for config_file in config_files:
+            config_dict.update(read_json_file(config_file))
+
         try:
             tap = cls(
-                config=config_files,  # type: ignore[arg-type]
+                config=config_dict,
                 parse_env_config=parse_env_config,
                 validate_config=cls.dynamic_catalog,
                 setup_mapper=False,
@@ -614,8 +620,12 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         config_args = ctx.params.get("config", ())
         config_files, parse_env_config = cls.config_from_cli_args(*config_args)
+        config_dict = {}
+        for config_file in config_files:
+            config_dict.update(read_json_file(config_file))
+
         tap = cls(
-            config=config_files,  # type: ignore[arg-type]
+            config=config_dict,
             parse_env_config=parse_env_config,
             validate_config=True,
         )
@@ -661,20 +671,12 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
                 click.Option(
                     ["--catalog"],
                     help="Use a Singer catalog file with the tap.",
-                    type=click.Path(
-                        path_type=pathlib.Path,
-                        exists=True,
-                        dir_okay=False,
-                    ),
+                    type=click.File(),
                 ),
                 click.Option(
                     ["--state"],
                     help="Use a bookmarks file for incremental replication.",
-                    type=click.Path(
-                        path_type=pathlib.Path,
-                        exists=True,
-                        dir_okay=False,
-                    ),
+                    type=click.File(),
                 ),
             ],
         )

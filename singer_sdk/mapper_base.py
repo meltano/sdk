@@ -8,6 +8,7 @@ import typing as t
 import click
 
 from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.plugin_base import BaseSingerReader, BaseSingerWriter
 
@@ -149,9 +150,12 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
         super().invoke(about=about, about_format=about_format)
         cls.print_version(print_fn=cls.logger.info)
         config_files, parse_env_config = cls.config_from_cli_args(*config)
+        config_dict = {}
+        for config_file in config_files:
+            config_dict.update(read_json_file(config_file))
 
         mapper = cls(
-            config=config_files,  # type: ignore[arg-type]
+            config=config_dict,
             validate_config=True,
             parse_env_config=parse_env_config,
         )
