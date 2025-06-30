@@ -9,6 +9,7 @@ permissions: {}
 
 jobs:
   pr-preview-links:
+    name: Read the Docs Pull Request Preview
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
