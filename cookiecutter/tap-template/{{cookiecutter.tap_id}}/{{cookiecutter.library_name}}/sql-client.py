@@ -10,6 +10,9 @@ import typing as t
 import sqlalchemy  # noqa: TC002
 from singer_sdk import SQLConnector, SQLStream
 
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers.types import Context
+
 
 class {{ cookiecutter.source_name }}Connector(SQLConnector):
     """Connects to the {{ cookiecutter.source_name }} SQL source."""
@@ -32,8 +35,8 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
             f"s3_staging_dir={config['s3_staging_dir']}"
         )
 
-    @staticmethod
     def to_jsonschema_type(
+        self,
         from_type: str
         | sqlalchemy.types.TypeEngine
         | type[sqlalchemy.types.TypeEngine],
@@ -52,10 +55,9 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
         """
         # Optionally, add custom logic before calling the parent SQLConnector method.
         # You may delete this method if overrides are not needed.
-        return SQLConnector.to_jsonschema_type(from_type)
+        return super().to_jsonschema_type(from_type)
 
-    @staticmethod
-    def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+    def to_sql_type(self, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
         """Returns a JSON Schema equivalent for the given SQL type.
 
         Developers may optionally add custom logic before calling the default
@@ -69,7 +71,7 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
         """
         # Optionally, add custom logic before calling the parent SQLConnector method.
         # You may delete this method if overrides are not needed.
-        return SQLConnector.to_sql_type(jsonschema_type)
+        return super().to_sql_type(jsonschema_type)
 
 
 class {{ cookiecutter.source_name }}Stream(SQLStream):
@@ -77,7 +79,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
 
     connector_class = {{ cookiecutter.source_name }}Connector
 
-    def get_records(self, partition: dict | None) -> t.Iterable[dict[str, t.Any]]:
+    def get_records(self, partition: Context | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
 
         Developers may optionally add custom logic before calling the default
