@@ -60,6 +60,14 @@ test = [
     {%- endif %}
     "singer-sdk[testing]",
 ]
+typing = [
+    "mypy>=1.16.0",
+    {%- if cookiecutter.serialization_method == "SQL" %}
+    "sqlalchemy-stubs",
+    {%- else %}
+    "types-requests",
+    {%- endif %}
+]
 
 {%- if cookiecutter.variant != "None (Skip)" %}
 [tool.hatch.build.targets.wheel]
@@ -97,6 +105,7 @@ requires = [
     "tox-uv",
 ]
 env_list = [
+    "typing",
     "py313",
     "py312",
     "py311",
@@ -114,3 +123,7 @@ pass_env = [
 ]
 dependency_groups = [ "test" ]
 commands = [ [ "pytest", { replace = "posargs", default = [ "tests" ], extend = true } ] ]
+
+[tool.tox.env.typing]
+dependency_groups = [ "test", "typing" ]
+commands = [ [ "mypy", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ] ]
