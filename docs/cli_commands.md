@@ -96,6 +96,11 @@ uv run tap-mysource --discover \
 
 ## Run in discovery mode with a passed catalog file
 
+```{warning}
+This pattern may not be supported by all connectors. By default and in general, the
+`--catalog` option is not used during discovery mode.
+```
+
 ````{tab} Poetry
 ```bash
 poetry install && \

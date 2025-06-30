@@ -9,4 +9,3 @@
 {"type":"SCHEMA","stream":"child_many","schema":{"properties":{"id":{"type":"integer"},"pid":{"type":"integer"}},"type":"object"},"key_properties":[]}
 {"type":"RECORD","stream":"child_many","record":{"id":3,"pid":"1"},"time_extracted":"2022-01-01T00:00:00+00:00"}
 {"type":"STATE","value":{"bookmarks":{"parent_many":{},"child_many":{"partitions":[{"context":{"child_id":1,"pid":"1"}},{"context":{"child_id":2,"pid":"1"}},{"context":{"child_id":3,"pid":"1"}}]}}}}
-{"type":"STATE","value":{"bookmarks":{"parent_many":{},"child_many":{"partitions":[{"context":{"child_id":1,"pid":"1"}},{"context":{"child_id":2,"pid":"1"}},{"context":{"child_id":3,"pid":"1"}}]}}}}

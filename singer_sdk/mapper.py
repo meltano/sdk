@@ -16,7 +16,6 @@ import json
 import logging
 import sys
 import typing as t
-import warnings
 
 import simpleeval  # type: ignore[import-untyped]
 
@@ -353,10 +352,7 @@ class CustomStreamMap(StreamMap):
         names["__stream_name__"] = self.stream_alias  # Access stream name in transform
 
         if self.fake:
-            from faker import Faker  # noqa: PLC0415
-
             names["fake"] = self.fake
-            names["Faker"] = Faker
 
         if property_name and property_name in record:
             # Allow access to original property value if applicable
@@ -536,14 +532,6 @@ class CustomStreamMap(StreamMap):
                         self._eval_type(prop_def, default=default_type),
                     ).to_dict(),
                 )
-                if "Faker" in prop_def:
-                    warnings.warn(
-                        "Class 'Faker' is deprecated in stream maps and will be "
-                        "removed by August 2025. "
-                        "Use instance methods, like 'fake.seed_instance.'",
-                        DeprecationWarning,
-                        stacklevel=2,
-                    )
                 try:
                     parsed_def: ast.Expr = ast.parse(prop_def).body[0]  # type: ignore[assignment]
                     stream_map_parsed.append((prop_key, prop_def, parsed_def))

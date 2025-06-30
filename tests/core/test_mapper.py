@@ -14,9 +14,9 @@ from decimal import Decimal
 import pytest
 import time_machine
 
-from singer_sdk._singerlib import Catalog
 from singer_sdk.exceptions import MapExpressionError
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
+from singer_sdk.singerlib import Catalog
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
@@ -909,26 +909,6 @@ class MappedTap(Tap):
             },
             "fake_credit_card_number.jsonl",
             id="fake_credit_card_number",
-        ),
-        pytest.param(
-            {
-                "mystream": {
-                    "email": "Faker.seed(email) or fake.email()",
-                    "__else__": None,
-                },
-            },
-            {
-                "flattening_enabled": False,
-                "flattening_max_depth": 0,
-                "faker_config": {
-                    "locale": "en_US",
-                },
-            },
-            "fake_email_seed_class.jsonl",
-            id="fake_email_seed_class",
-            marks=pytest.mark.filterwarnings(
-                "default:Class 'Faker' is deprecated:DeprecationWarning"
-            ),
         ),
         pytest.param(
             {

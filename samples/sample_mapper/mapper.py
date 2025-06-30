@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import typing as t
 
-import singer_sdk._singerlib as singer  # noqa: PLC2701
+import singer_sdk.singerlib as singer
 import singer_sdk.typing as th
 from singer_sdk.helpers._util import utc_now  # noqa: PLC2701
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform

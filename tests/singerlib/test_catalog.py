@@ -4,7 +4,7 @@ import typing as t
 
 import pytest
 
-from singer_sdk._singerlib import (
+from singer_sdk.singerlib import (
     Catalog,
     CatalogEntry,
     Metadata,

@@ -7,7 +7,7 @@ permissions: {}
 
 jobs:
   build:
-    name: Build artifacts
+    name: Build Wheel and SDist
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.baipp.outputs.package_version }}
@@ -18,7 +18,7 @@ jobs:
       with:
         fetch-depth: 0
         persist-credentials: false
-    - uses: hynek/build-and-inspect-python-package@b5076c307dc91924a82ad150cdd1533b444d3310 # v2.12.0
+    - uses: hynek/build-and-inspect-python-package@c52c3a4710070b50470d903818a7b25115dcd076 # v2.13.0
       id: baipp
 
   provenance:
@@ -36,7 +36,7 @@ jobs:
       with:
         name: Packages
         path: dist
-    - uses: actions/attest-build-provenance@db473fddc028af60658334401dc6fa3ffd8669fd # v2.3.0
+    - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
       id: attest
       with:
         subject-path: "./dist/singer_sdk*"

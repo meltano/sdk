@@ -13,7 +13,6 @@ import pytest
 import requests
 import requests_mock.adapter as requests_mock_adapter
 
-from singer_sdk._singerlib import Catalog, MetadataMapping
 from singer_sdk.exceptions import (
     FatalAPIError,
     InvalidReplicationKeyException,
@@ -22,6 +21,7 @@ from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._compat import datetime_fromisoformat as parse
 from singer_sdk.helpers.jsonpath import _compile_jsonpath
+from singer_sdk.singerlib import Catalog, MetadataMapping
 from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream

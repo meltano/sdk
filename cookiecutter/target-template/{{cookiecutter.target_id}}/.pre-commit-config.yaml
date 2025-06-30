@@ -20,32 +20,22 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.33.0
+  rev: 0.33.1
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
   - id: check-meltano
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.11.13
+  rev: v0.12.1
   hooks:
   - id: ruff-check
-    args: [--fix, --exit-non-zero-on-fix, --show-fixes]
+    args: [--diff]
   - id: ruff-format
-
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.16.0
-  hooks:
-  - id: mypy
-    additional_dependencies:
-    {%- if cookiecutter.serialization_method != "SQL" %}
-    - sqlalchemy-stubs
-    {%- else %}
-    - types-requests
-    {%- endif %}
+    args: [--diff]
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.7.12
+  rev: 0.7.17
   hooks:
   - id: uv-lock
   - id: uv-sync

@@ -176,6 +176,18 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
         super().__init__(None, *args, **kwargs)
 
     @override
+    def has_more(self, response: requests.Response) -> bool:
+        """A single page should not have any more pages.
+
+        Args:
+            response: API response object.
+
+        Returns:
+            `False` to indicate pagination is complete after the first page.
+        """
+        return False
+
+    @override
     def get_next(self, response: requests.Response) -> None:
         """Always return None to indicate pagination is complete after the first page.
 
