@@ -35,6 +35,7 @@ permissions: {}
 
 jobs:
   benchmarks:
+    name: Run benchmarks
     runs-on: ubuntu-latest
     permissions:
       contents: read
