@@ -13,4 +13,3 @@
 {"type":"RECORD","stream":"child","record":{"id":2,"pid":3},"time_extracted":"2022-01-01T00:00:00+00:00"}
 {"type":"RECORD","stream":"child","record":{"id":3,"pid":3},"time_extracted":"2022-01-01T00:00:00+00:00"}
 {"type":"STATE","value":{"bookmarks":{"parent":{},"child":{"partitions":[{"context":{"pid":1}},{"context":{"pid":2}},{"context":{"pid":3}}]}}}}
-{"type":"STATE","value":{"bookmarks":{"parent":{},"child":{"partitions":[{"context":{"pid":1}},{"context":{"pid":2}},{"context":{"pid":3}}]}}}}
