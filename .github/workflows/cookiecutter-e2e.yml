@@ -79,3 +79,6 @@ jobs:
           !cookiecutter-output/tap-*/.venv/
           !cookiecutter-output/target-*/.venv/
           !cookiecutter-output/mapper-*/.venv/
+          !cookiecutter-output/tap-*/.tox/
+          !cookiecutter-output/target-*/.tox/
+          !cookiecutter-output/mapper-*/.tox/
