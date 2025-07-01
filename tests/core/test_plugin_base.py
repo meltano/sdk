@@ -3,6 +3,7 @@ from __future__ import annotations
 import typing as t
 
 import pytest
+import simplejson
 
 from singer_sdk.plugin_base import (
     SDK_PACKAGE_NAME,
@@ -119,3 +120,19 @@ def test_config_from_cli_args_invalid_file(tmp_path: Path):
         _ConfigInput.from_cli_args(str(missing_path), "ENV")
     # Assert the error message includes the specific file path
     assert str(missing_path) in str(exc_info.value)
+
+
+def test_config_from_cli_args_invalid_json(tmp_path):
+    """Test that invalid JSON raises a JSONDecodeError."""
+    config_path = tmp_path / "invalid.json"
+    config_path.write_text('{"prop1": "hello", "prop2": 123')  # missing closing }
+    with pytest.raises((simplejson.JSONDecodeError, ValueError)):
+        _ConfigInput.from_cli_args(config_path)
+
+
+def test_config_from_cli_args_non_dict_json(tmp_path):
+    """Test that non-dict JSON raises a TypeError."""
+    config_path = tmp_path / "not_a_dict.json"
+    config_path.write_text('["not", "a", "dict"]')
+    with pytest.raises(ValueError, match="dictionary update sequence"):
+        _ConfigInput.from_cli_args(config_path)
