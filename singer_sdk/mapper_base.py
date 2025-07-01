@@ -9,7 +9,7 @@ import click
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
-from singer_sdk.plugin_base import BaseSingerReader, BaseSingerWriter
+from singer_sdk.plugin_base import BaseSingerReader, BaseSingerWriter, _ConfigInput
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -134,7 +134,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
         *,
         about: bool = False,
         about_format: str | None = None,
-        config: tuple[str, ...] = (),
+        config: _ConfigInput | None = None,
         file_input: t.IO[str] | None = None,
     ) -> None:
         """Invoke the mapper.
@@ -148,12 +148,12 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
         """
         super().invoke(about=about, about_format=about_format)
         cls.print_version(print_fn=cls.logger.info)
-        config_files, parse_env_config = cls.config_from_cli_args(*config)
+        config = config or _ConfigInput()
 
         mapper = cls(
-            config=config_files,  # type: ignore[arg-type]
+            config=config.config,
             validate_config=True,
-            parse_env_config=parse_env_config,
+            parse_env_config=config.parse_env,
         )
         mapper.listen(file_input)
 

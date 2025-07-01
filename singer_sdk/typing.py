@@ -53,12 +53,12 @@ Note:
 from __future__ import annotations
 
 import json
-import sys
 import typing as t
 
 import sqlalchemy as sa
 from jsonschema import ValidationError, validators
 
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
     JSONSCHEMA_ANNOTATION_WRITEONLY,
@@ -66,13 +66,9 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
 )
 
-if sys.version_info < (3, 13):
-    from typing_extensions import deprecated
-else:
-    from warnings import deprecated  # pragma: no cover
-
-
 if t.TYPE_CHECKING:
+    import sys
+
     from jsonschema.protocols import Validator
 
     if sys.version_info >= (3, 10):
@@ -1297,7 +1293,7 @@ class PropertiesList(ObjectType):
 
 @deprecated(
     "Use `SQLToJSONSchema` instead.",
-    category=DeprecationWarning,
+    category=SingerSDKDeprecationWarning,
 )
 def to_jsonschema_type(
     from_type: str | sa.types.TypeEngine | type[sa.types.TypeEngine],
@@ -1378,7 +1374,7 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
 
 @deprecated(
     "Use `JSONSchemaToSQL` instead.",
-    category=DeprecationWarning,
+    category=SingerSDKDeprecationWarning,
 )
 def to_sql_type(  # noqa: PLR0911, C901
     jsonschema_type: dict,

@@ -17,15 +17,10 @@ from sqlalchemy.engine import reflection
 
 from singer_sdk import typing as th
 from singer_sdk.exceptions import ConfigValidationError
-from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
 from singer_sdk.singerlib import CatalogEntry, MetadataMapping, Schema
-
-if sys.version_info < (3, 13):
-    from typing_extensions import deprecated
-else:
-    from warnings import deprecated
 
 if sys.version_info < (3, 10):
     from typing_extensions import TypeAlias
@@ -650,7 +645,7 @@ class SQLConnector:  # noqa: PLR0904
         "If you need to execute something that isn't available "
         "on the connector currently, make a child class and "
         "add your required method on that connector.",
-        category=DeprecationWarning,
+        category=SingerSDKDeprecationWarning,
         stacklevel=1,
     )
     def create_sqlalchemy_connection(self) -> sa.engine.Connection:
@@ -677,7 +672,7 @@ class SQLConnector:  # noqa: PLR0904
     @deprecated(
         "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override "
         "`_engine` or `sqlalchemy_url` instead.",
-        category=DeprecationWarning,
+        category=SingerSDKDeprecationWarning,
         stacklevel=1,
     )
     def create_sqlalchemy_engine(self) -> Engine:
@@ -706,7 +701,7 @@ class SQLConnector:  # noqa: PLR0904
             "`SQLConnector.connection` is deprecated. If you need to execute something "
             "that isn't available on the connector currently, make a child "
             "class and add your required method on that connector.",
-            DeprecationWarning,
+            SingerSDKDeprecationWarning,
             stacklevel=2,
         )
         return self.create_sqlalchemy_connection()
@@ -782,7 +777,7 @@ class SQLConnector:  # noqa: PLR0904
             warnings.warn(
                 "Passing string types to `to_jsonschema_type` is deprecated. "
                 "Please pass a SQLAlchemy type object instead.",
-                DeprecationWarning,
+                SingerSDKDeprecationWarning,
                 stacklevel=2,
             )
             return th.to_jsonschema_type(sql_type)
@@ -791,7 +786,7 @@ class SQLConnector:  # noqa: PLR0904
             warnings.warn(
                 "Passing type classes to `to_jsonschema_type` is deprecated. "
                 "Please pass a SQLAlchemy type object instead.",
-                DeprecationWarning,
+                SingerSDKDeprecationWarning,
                 stacklevel=2,
             )
             if issubclass(sql_type, sa.types.TypeEngine):

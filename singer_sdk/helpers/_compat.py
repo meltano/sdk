@@ -6,6 +6,11 @@ import datetime
 import sys
 from importlib import resources as importlib_resources
 
+if sys.version_info < (3, 13):
+    from typing_extensions import deprecated
+else:
+    from warnings import deprecated
+
 if sys.version_info < (3, 12):
     from importlib.abc import Traversable
 else:
@@ -35,6 +40,7 @@ __all__ = [
     "Traversable",
     "date_fromisoformat",
     "datetime_fromisoformat",
+    "deprecated",
     "entry_points",
     "importlib_resources",
     "time_fromisoformat",
