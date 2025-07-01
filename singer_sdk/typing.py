@@ -902,7 +902,10 @@ class ObjectType(JSONTypeHelper):
 class AnyOf(JSONTypeHelper):
     """AnyOf type.
 
-    This type allows for a value to be ONE AND ONLY ONE of a set of types.
+    This type allows for a value to match at least one of a set of types.
+    In JSON Schema, 'anyOf' means the value is valid if it matches any (one or more) of
+    the given schemas. By contrast, 'oneOf' (see the OneOf class) requires the value to
+    match exactly one schema.
 
     Examples:
         >>> t = AnyOf(StringType, IntegerType)
