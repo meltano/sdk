@@ -553,7 +553,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         config = config or _ConfigInput()
 
         tap = cls(
-            config=config.files,  # type: ignore[arg-type]
+            config=config.config,
             state=None if state is None else load_json(state.read()),
             catalog=None if catalog is None else load_json(catalog.read()),
             parse_env_config=config.parse_env,
@@ -581,7 +581,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         config: _ConfigInput = ctx.params.get("config", _ConfigInput())
         try:
             tap = cls(
-                config=config.files,  # type: ignore[arg-type]
+                config=config.config,
                 parse_env_config=config.parse_env,
                 validate_config=cls.dynamic_catalog,
                 setup_mapper=False,
@@ -612,7 +612,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         config: _ConfigInput = ctx.params.get("config", _ConfigInput())
         tap = cls(
-            config=config.files,  # type: ignore[arg-type]
+            config=config.config,
             parse_env_config=config.parse_env,
             validate_config=True,
         )

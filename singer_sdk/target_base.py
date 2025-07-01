@@ -581,7 +581,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         config = config or _ConfigInput()
 
         target = cls(
-            config=config.files,  # type: ignore[arg-type]
+            config=config.config,
             validate_config=True,
             parse_env_config=config.parse_env,
         )
