@@ -29,7 +29,7 @@ from singer_sdk.helpers.capabilities import (
     TargetCapabilities,
 )
 from singer_sdk.io_base import SingerReader
-from singer_sdk.plugin_base import BaseSingerReader
+from singer_sdk.plugin_base import BaseSingerReader, _ConfigInput
 
 if t.TYPE_CHECKING:
     from collections.abc import Iterable
@@ -564,7 +564,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         *,
         about: bool = False,
         about_format: str | None = None,
-        config: tuple[str, ...] = (),
+        config: _ConfigInput | None = None,
         file_input: t.IO[str] | None = None,
     ) -> None:
         """Invoke the target.
@@ -578,12 +578,12 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         """
         super().invoke(about=about, about_format=about_format)
         cls.print_version(print_fn=cls.logger.info)
-        config_files, parse_env_config = cls.config_from_cli_args(*config)
+        config = config or _ConfigInput()
 
         target = cls(
-            config=config_files,  # type: ignore[arg-type]
+            config=config.files,  # type: ignore[arg-type]
             validate_config=True,
-            parse_env_config=parse_env_config,
+            parse_env_config=config.parse_env,
         )
         target.listen(file_input)
 
