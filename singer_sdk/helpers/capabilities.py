@@ -31,28 +31,36 @@ STREAM_MAPS_CONFIG = PropertiesList(
         ObjectType(
             Property(
                 "__else__",
-                StringType(allowed_values=["__NULL__"]),
+                Constant("__NULL__"),
                 nullable=True,
                 required=False,
+                title="Other streams",
+                description=(
+                    "Currently, only setting this to `__NULL__` is supported. "
+                    "This will remove all other streams."
+                ),
             ),
             # Stream names → Stream map config
             additional_properties=AnyOf(
-                StringType(allowed_values=["__NULL__"]),
-                NullType(),
-                ObjectType(
+                Constant("__NULL__"),  # Remove the stream.
+                NullType(),  # Remove the stream.
+                ObjectType(  # Map the stream using this configuration.
                     Property(
                         "__alias__",
                         StringType,
                         title="Stream Alias",
-                        description="Alias to use for the stream",
+                        description="Alias to use for the stream.",
                         nullable=False,
                         required=False,
                     ),
                     Property(
                         "__else__",
                         AnyOf(Constant("__NULL__"), NullType()),
-                        title="Stream ID",
-                        description="ID to use for the stream",
+                        title="Other properties",
+                        description=(
+                            "Currently, only setting this to `__NULL__` is supported. "
+                            "This will remove all other properties from the stream."
+                        ),
                         required=False,
                         nullable=False,
                     ),
@@ -73,22 +81,22 @@ STREAM_MAPS_CONFIG = PropertiesList(
                         "__key_properties__",
                         ArrayType(StringType),
                         title="Key Properties",
-                        description="Primary key properties for the stream",
+                        description="Primary key properties for the stream.",
                         nullable=False,
                         required=False,
                     ),
                     Property(
                         "__source__",
                         StringType,
-                        description="Create a new stream from this source stream",
+                        description="Create a new stream from this source stream.",
                         nullable=False,
                         required=False,
                     ),
                     # Property names → Property map config
                     additional_properties=AnyOf(
-                        Constant("__NULL__"),
-                        NullType(),
-                        StringType(),
+                        Constant("__NULL__"),  # Remove the property from the stream.
+                        NullType(),  # Remove the property from the stream.
+                        StringType(),  # Compute the property using this expression.
                     ),
                 ),
             ),
