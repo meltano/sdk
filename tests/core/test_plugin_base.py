@@ -107,5 +107,11 @@ def test_config_from_cli_args_env(tmp_path: Path):
 
 def test_config_from_cli_args_invalid_file(tmp_path: Path):
     """Test that invalid file paths raise an error."""
-    with pytest.raises(FileNotFoundError, match="Could not locate config file at"):
-        _ConfigInput.from_cli_args(tmp_path / "config.json", "ENV")
+    missing_path = tmp_path / "config.json"
+    with pytest.raises(
+        FileNotFoundError,
+        match="Could not locate config file at",
+    ) as exc_info:
+        _ConfigInput.from_cli_args(missing_path, "ENV")
+    # Assert the error message includes the specific file path
+    assert str(missing_path) in str(exc_info.value)
