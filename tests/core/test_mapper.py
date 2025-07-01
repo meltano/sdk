@@ -13,8 +13,10 @@ from decimal import Decimal
 
 import pytest
 import time_machine
+from jsonschema.validators import Draft202012Validator
 
 from singer_sdk.exceptions import MapExpressionError
+from singer_sdk.helpers.capabilities import STREAM_MAPS_CONFIG
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
 from singer_sdk.singerlib import Catalog
 from singer_sdk.streams.core import Stream
@@ -675,6 +677,11 @@ class MappedTap(Tap):
         return [MappedStream(self)]
 
 
+def validate_stream_maps(stream_maps: dict) -> None:
+    validator = Draft202012Validator(STREAM_MAPS_CONFIG)
+    validator.validate({"stream_maps": stream_maps})
+
+
 @time_machine.travel(
     datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc),
     tick=False,
@@ -953,6 +960,18 @@ class MappedTap(Tap):
             "json_dumps.jsonl",
             id="json_dumps",
         ),
+        pytest.param(
+            {"mystream": {"__filter__": "bool(count < 20)"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "filter_records.jsonl",
+            id="filter_records",
+        ),
+        pytest.param(
+            {"mystream": "__NULL__"},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "remove_stream.jsonl",
+            id="remove_stream",
+        ),
     ],
 )
 def test_mapped_stream(
@@ -970,6 +989,7 @@ def test_mapped_stream(
         tap.sync_all()
 
     buf.seek(0)
+    validate_stream_maps(stream_maps)
     snapshot.assert_match(buf.read(), snapshot_name)
 
 

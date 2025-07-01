@@ -903,6 +903,48 @@ class ObjectType(JSONTypeHelper):
         return result
 
 
+class AnyOf(JSONTypeHelper):
+    """AnyOf type.
+
+    This type allows for a value to be ONE AND ONLY ONE of a set of types.
+
+    Examples:
+        >>> t = AnyOf(StringType, IntegerType)
+        >>> print(t.to_json(indent=2))
+        {
+            "anyOf": [
+                {
+                    "type": [
+                        "string"
+                    ]
+                },
+                {
+                    "type": [
+                        "integer"
+                    ]
+                }
+            ]
+        }
+    """
+
+    def __init__(self, *types: W | type[W]) -> None:
+        """Initialize AnyOf type.
+
+        Args:
+            types: Types to choose from.
+        """
+        self.wrapped = types
+
+    @property
+    def type_dict(self) -> dict:
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        return {"anyOf": [t.type_dict for t in self.wrapped]}
+
+
 class OneOf(JSONTypeHelper):
     """OneOf type.
 
@@ -1102,6 +1144,27 @@ class DiscriminatedUnion(OneOf):
                 for k, v in options.items()
             ),
         )
+
+
+class NullType(JSONTypeHelper[None]):
+    """A null type.
+
+    Examples:
+        >>> t = NullType()
+        >>> print(t.to_json(indent=2))
+        {
+            "type": "null"
+        }
+    """
+
+    @property
+    def type_dict(self) -> dict:
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        return {"type": "null"}
 
 
 class CustomType(JSONTypeHelper):
