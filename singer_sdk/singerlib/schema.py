@@ -254,33 +254,34 @@ def resolve_schema_references(
 def _resolve_schema_references(  # noqa: C901, PLR0912
     schema: dict[str, t.Any],
     resolver: Resolver,
-    visited_refs: set[str] | None = None,
+    visited_refs: tuple[str, ...] | None = None,
 ) -> dict[str, t.Any]:
     """Recursively resolve schema references while handling circular references.
 
     Args:
         schema: The schema dict to resolve references in
         resolver: The JSON Schema resolver to use
-        visited_refs: Set of already visited reference paths to prevent infinite
-            recursion
+        visited_refs: Tuple of already visited reference paths in the current call stack
+            to prevent infinite recursion
 
     Returns:
         The schema with all references resolved
     """
     if visited_refs is None:
-        visited_refs = set()
+        visited_refs = ()
 
     if _SchemaKey.ref in schema:
         reference_path = schema.pop(_SchemaKey.ref, None)
         if reference_path in visited_refs:
-            # We've already seen this reference, return the schema as-is
-            # to prevent infinite recursion
+            # We've already seen this reference in the current call stack, return
+            # the schema as-is to prevent infinite recursion
             return schema
 
-        visited_refs.add(reference_path)
+        # Add this reference to the current call stack
+        new_visited_refs = (*visited_refs, reference_path)
         resolved = resolver.lookup(reference_path)
         schema.update(resolved.contents)
-        return _resolve_schema_references(schema, resolver, visited_refs)
+        return _resolve_schema_references(schema, resolver, new_visited_refs)
 
     if _SchemaKey.properties in schema:
         for k, val in schema[_SchemaKey.properties].items():

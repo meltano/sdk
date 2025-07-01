@@ -1,7 +1,7 @@
 [project]
 name = "singer-sdk"
 dynamic = [
-    "version"
+    "version",
 ]
 description = "A framework for building Singer taps"
 authors = [{ name = "Meltano Team and Contributors", email = "hello@meltano.com" }]
@@ -31,9 +31,9 @@ license-files = ["LICENSE"]
 requires-python = ">=3.9"
 
 dependencies = [
-    'backoff>=2.0.0; python_version<"4"',
+    "backoff>=2.0.0",
     'backports-datetime-fromisoformat>=2.0.1; python_version<"3.11"',
-    "click~=8.0",
+    "click>=8.0,<9",
     "fsspec>=2024.9.0",
     'importlib-metadata>=5.0; python_version<"3.12"',
     'importlib-resources>=5.12.0,!=6.2.0,!=6.3.0,!=6.3.1; python_version<"3.10"',
@@ -48,7 +48,7 @@ dependencies = [
     "requests>=2.25.1",
     "simpleeval>=0.9.13,!=1.0.1",
     "simplejson>=3.17.6",
-    "sqlalchemy>=1.4,<3.0",
+    "sqlalchemy>=2",
     "typing-extensions>=4.5.0",
     "universal-pathlib>=0.2.6",
 ]
@@ -63,7 +63,7 @@ parquet = [
 ]
 
 testing = [
-    "pytest>=7.2.1",
+    "pytest>=7.5",
 ]
 
 faker = [
@@ -72,7 +72,7 @@ faker = [
 
 jwt = [
     "cryptography>=3.4.6",
-    "PyJWT~=2.4",
+    "PyJWT>=2.4.0",
 ]
 
 ssh = [
@@ -103,7 +103,7 @@ dev = [
 docs = [
     "furo>=2024.5.6",
     "myst-parser>=3",
-    "pytest>=7.2.1",
+    "pytest>=8",
     "sphinx>=7",
     "sphinx-copybutton>=0.5.2",
     "sphinx-inline-tabs>=2023.4.21",
@@ -113,7 +113,7 @@ docs = [
 testing = [
     "coverage[toml]>=7.4",
     "duckdb>=0.8.0",
-    "duckdb-engine>=0.9.4; python_version<'4'",
+    "duckdb-engine>=0.13",
     "fastjsonschema>=2.19.1",
     "moto>=5.0.14",
     "pytest>=7.2.1",
@@ -161,12 +161,6 @@ filterwarnings = [
     "ignore:No records were available to test:UserWarning",
     # https://github.com/meltano/sdk/issues/1354
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
-    "ignore:.*singer_sdk._singerlib.*:singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
-    # https://github.com/meltano/sdk/issues/2744
-    "default:Passing a config file path is deprecated:singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
-    "default:Passing a list of config file paths is deprecated:singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
-    "default:Passing a catalog file path is deprecated:singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
-    "default:Passing a state file path is deprecated:singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
     # TODO: Address this SQLite warning in Python 3.13+
     "ignore::ResourceWarning",
     # universal-pathlib
@@ -188,7 +182,7 @@ xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.46.4"
+version = "0.47.4"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -217,7 +211,6 @@ relative_files = true  # This allows coverage to be measured in Windows
 omit = [
     "tests/*",
     "samples/*",
-    "singer_sdk/_singerlib/*",
     "singer_sdk/helpers/_compat.py",
     "singer_sdk/helpers/types.py",
 ]
@@ -247,9 +240,6 @@ PyJWT = "jwt"
 
 [tool.deptry.per_rule_ignores]
 DEP002 = [
-    # Transitive constraints
-    "numpy",
-    "urllib3",
     # Plugins
     "paramiko",
     "s3fs",

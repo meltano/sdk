@@ -35,9 +35,9 @@ license-files = [ "LICENSE" ]
 requires-python = ">=3.9"
 dependencies = [
     {%- if extras %}
-    "singer-sdk[{{ extras|join(',') }}]~=0.46.4",
+    "singer-sdk[{{ extras|join(',') }}]~=0.47.4",
     {%- else %}
-    "singer-sdk~=0.46.4",
+    "singer-sdk~=0.47.4",
     {%- endif %}
     {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
     "requests~=2.32.3",
@@ -67,6 +67,14 @@ test = [
     {%- endif %}
     "singer-sdk[testing]",
 ]
+typing = [
+    "mypy>=1.16.0",
+    {%- if cookiecutter.stream_type == "SQL" %}
+    "sqlalchemy-stubs",
+    {%- else %}
+    "types-requests",
+    {%- endif %}
+]
 
 {%- if cookiecutter.variant != "None (Skip)" %}
 [tool.hatch.build.targets.wheel]
@@ -88,9 +96,6 @@ warn_unused_configs = true
 plugins = "sqlmypy"
 {%- endif %}
 
-[tool.ruff]
-target-version = "py39"
-
 [tool.ruff.lint]
 ignore = [
     "COM812",  # missing-trailing-comma
@@ -108,3 +113,34 @@ requires = [
     "hatchling>=1,<2",
 ]
 build-backend = "hatchling.build"
+
+# This configuration can be used to customize tox tests as well as other test frameworks like flake8 and mypy
+[tool.tox]
+min_version = "4.22"
+requires = [
+    "tox>=4.22",
+    "tox-uv",
+]
+env_list = [
+    "typing",
+    "py313",
+    "py312",
+    "py311",
+    "py310",
+    "py39",
+]
+
+[tool.tox.env_run_base]
+runner = "uv-venv-lock-runner"
+pass_env = [
+    {%- if cookiecutter.include_ci_files == "GitHub" %}
+    "GITHUB_*",
+    {%- endif %}
+    "{{cookiecutter.tap_id.replace('-', '_').upper()}}_*",
+]
+dependency_groups = [ "test" ]
+commands = [ [ "pytest", { replace = "posargs", default = [ "tests" ], extend = true } ] ]
+
+[tool.tox.env.typing]
+dependency_groups = [ "test", "typing" ]
+commands = [ [ "mypy", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ] ]

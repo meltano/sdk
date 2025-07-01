@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from singer_sdk._singerlib import Schema, resolve_schema_references
+from singer_sdk.singerlib import Schema, resolve_schema_references
 
 STRING_SCHEMA = Schema(type="string", maxLength=32, default="")
 STRING_DICT = {"type": "string", "maxLength": 32, "default": ""}
@@ -414,6 +414,30 @@ def test_schema_from_dict(pydict, expected):
                 },
             },
             id="resolve_schema_references_with_circular_references",
+        ),
+        pytest.param(
+            {
+                "type": "object",
+                "properties": {
+                    "min_compute_units": {"$ref": "components#/schemas/ComputeUnit"},
+                    "max_compute_units": {"$ref": "components#/schemas/ComputeUnit"},
+                },
+            },
+            {
+                "components": {
+                    "schemas": {
+                        "ComputeUnit": {"type": "number"},
+                    },
+                },
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "min_compute_units": {"type": "number"},
+                    "max_compute_units": {"type": "number"},
+                },
+            },
+            id="resolve_schema_multiple_properties_with_same_reference",
         ),
     ],
 )

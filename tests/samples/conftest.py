@@ -8,7 +8,7 @@ import pytest
 import sqlalchemy as sa
 
 from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
-from singer_sdk._singerlib import Catalog
+from singer_sdk.singerlib import Catalog
 from singer_sdk.testing import _get_tap_catalog
 
 

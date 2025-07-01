@@ -33,7 +33,7 @@ can contain schemas.
 
 from __future__ import annotations
 
-from singer_sdk._singerlib import Schema
+from singer_sdk.singerlib import Schema
 
 
 def test_simple_schema():

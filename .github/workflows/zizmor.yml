@@ -24,15 +24,20 @@ jobs:
           persist-credentials: false
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@f0ec1fc3b38f5e7cd731bb6ce540c5af426746bb # v6.1.0
+        uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6.3.1
         with:
-          version: ">=0.6,<0.7"
+          version: ">=0.7,<0.8"
 
       - name: Run zizmor 🌈
-        run: uvx zizmor --pedantic --format sarif .github > results.sarif
+        run: >
+          uvx zizmor
+          --min-severity=informational
+          --persona=pedantic
+          --format=sarif
+          .github > results.sarif
 
       - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@fca7ace96b7d713c7035871441bd52efbe39e27e # v3.28.19
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b # v3.29.2
         with:
           sarif_file: results.sarif
           category: zizmor

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import abc
 import contextlib
-import pathlib
 import typing as t
 import warnings
 from enum import Enum
@@ -20,8 +19,8 @@ from singer_sdk.exceptions import (
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
-from singer_sdk.helpers._state import write_stream_state
-from singer_sdk.helpers._util import dump_json, read_json_file
+from singer_sdk.helpers._state import StateWriter, write_stream_state
+from singer_sdk.helpers._util import dump_json, load_json, read_json_file
 from singer_sdk.helpers.capabilities import (
     BATCH_CONFIG,
     SQL_TAP_USE_SINGER_DECIMAL,
@@ -30,8 +29,8 @@ from singer_sdk.helpers.capabilities import (
     TapCapabilities,
 )
 from singer_sdk.io_base import SingerWriter
-from singer_sdk.plugin_base import BaseSingerWriter, PluginBase
-from singer_sdk.singerlib import Catalog, StateMessage
+from singer_sdk.plugin_base import BaseSingerWriter, PluginBase, _ConfigInput
+from singer_sdk.singerlib import Catalog
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -107,6 +106,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._input_catalog: Catalog | None = None
         self._state: types.TapState = {}
         self._catalog: Catalog | None = None  # Tap's working catalog
+        self._state_writer: StateWriter = StateWriter(self.message_writer)
 
         # Process input catalog
         if isinstance(catalog, Catalog):
@@ -185,6 +185,15 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             Catalog dictionary input, or None if not provided.
         """
         return self._input_catalog
+
+    @property
+    def state_writer(self) -> StateWriter:
+        """Get the centralized state writer for this tap.
+
+        Returns:
+            The StateWriter instance for coordinated state message writing.
+        """
+        return self._state_writer
 
     @property
     def catalog(self) -> Catalog:
@@ -473,7 +482,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
         if self.state:
-            self.write_message(StateMessage(value=self.state))
+            self._state_writer.write_state(self.state)
 
         stream: Stream
         for stream in self.streams.values():
@@ -515,7 +524,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         # Emit a final state message to ensure the state is written to the output
         # even if the process is terminated by a signal.
         try:
-            self.write_message(StateMessage(value=self.state))
+            self._state_writer.write_state(self.state)
         finally:
             super()._handle_termination(signum, frame)
 
@@ -525,9 +534,9 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         *,
         about: bool = False,
         about_format: str | None = None,
-        config: tuple[str, ...] = (),
-        state: pathlib.Path | None = None,
-        catalog: pathlib.Path | None = None,
+        config: _ConfigInput | None = None,
+        state: t.IO[str] | None = None,
+        catalog: t.IO[str] | None = None,
     ) -> None:
         """Invoke the tap's command line interface.
 
@@ -541,13 +550,13 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         super().invoke(about=about, about_format=about_format)
         cls.print_version(print_fn=cls.logger.info)
-        config_files, parse_env_config = cls.config_from_cli_args(*config)
+        config = config or _ConfigInput()
 
         tap = cls(
-            config=config_files,  # type: ignore[arg-type]
-            state=state,
-            catalog=catalog,
-            parse_env_config=parse_env_config,
+            config=config.config,
+            state=None if state is None else load_json(state.read()),
+            catalog=None if catalog is None else load_json(catalog.read()),
+            parse_env_config=config.parse_env,
             validate_config=True,
         )
         tap.sync_all()
@@ -569,12 +578,11 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         if not value:
             return
 
-        config_args = ctx.params.get("config", ())
-        config_files, parse_env_config = cls.config_from_cli_args(*config_args)
+        config: _ConfigInput = ctx.params.get("config", _ConfigInput())
         try:
             tap = cls(
-                config=config_files,  # type: ignore[arg-type]
-                parse_env_config=parse_env_config,
+                config=config.config,
+                parse_env_config=config.parse_env,
                 validate_config=cls.dynamic_catalog,
                 setup_mapper=False,
             )
@@ -602,11 +610,10 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         if value == CliTestOptionValue.Disabled.value:
             return
 
-        config_args = ctx.params.get("config", ())
-        config_files, parse_env_config = cls.config_from_cli_args(*config_args)
+        config: _ConfigInput = ctx.params.get("config", _ConfigInput())
         tap = cls(
-            config=config_files,  # type: ignore[arg-type]
-            parse_env_config=parse_env_config,
+            config=config.config,
+            parse_env_config=config.parse_env,
             validate_config=True,
         )
 
@@ -651,20 +658,12 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
                 click.Option(
                     ["--catalog"],
                     help="Use a Singer catalog file with the tap.",
-                    type=click.Path(
-                        path_type=pathlib.Path,
-                        exists=True,
-                        dir_okay=False,
-                    ),
+                    type=click.File(),
                 ),
                 click.Option(
                     ["--state"],
                     help="Use a bookmarks file for incremental replication.",
-                    type=click.Path(
-                        path_type=pathlib.Path,
-                        exists=True,
-                        dir_okay=False,
-                    ),
+                    type=click.File(),
                 ),
             ],
         )

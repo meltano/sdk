@@ -164,7 +164,6 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
         self._is_state_flushed: bool = True
-        self._last_emitted_state: types.TapState | None = None
         self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
         if schema:
@@ -863,13 +862,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def _write_state_message(self) -> None:
         """Write out a STATE message with the latest state."""
-        if (
-            (not self._is_state_flushed)
-            and self.tap_state
-            and (self.tap_state != self._last_emitted_state)
-        ):
-            self._tap.write_message(singer.StateMessage(value=self.tap_state))
-            self._last_emitted_state = copy.deepcopy(self.tap_state)
+        if not self._is_state_flushed and self.tap_state:
+            self._tap.state_writer.write_state(self.tap_state)
             self._is_state_flushed = True
 
     def _write_activate_version_message(self, full_table_version: int) -> None:
@@ -1110,14 +1104,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             state: State object to promote progress markers with.
         """
-        if not self.selected:
-            return
-
         if state is None or state == {}:
             for child_stream in self.child_streams or []:
-                child_stream.finalize_state_progress_markers()
+                if child_stream.selected:
+                    child_stream.finalize_state_progress_markers()
 
-            context: types.Context | None
+            if not self.selected:
+                return
+
             for context in self.partitions or [{}]:
                 state = self.get_context_state(context or None)
                 self._finalize_state(state)
@@ -1193,7 +1187,6 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 timer.context = context_element
 
                 current_context = context_element or None
-                state = self.get_context_state(current_context)
                 state_partition_context = self._get_state_partition_context(
                     current_context,
                 )
@@ -1258,6 +1251,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
                 if current_context == state_partition_context:
                     # Finalize per-partition state only if 1:1 with context
+                    state = self.get_context_state(current_context)
                     self._finalize_state(state)
 
         if not context:
@@ -1544,21 +1538,29 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         row: types.Record,
         context: types.Context | None = None,  # noqa: ARG002
     ) -> types.Record | None:
-        """As needed, append or transform raw data to match expected structure.
+        """Process individual records after extraction from the source.
 
-        Optional. This method gives developers an opportunity to "clean up" the results
-        prior to returning records to the downstream tap - for instance: cleaning,
-        renaming, or appending properties to the raw record result returned from the
-        API.
+        This method provides an opportunity to clean, transform, or validate records
+        before they are emitted. Common use cases include:
 
-        Developers may also return `None` from this method to filter out
-        invalid or not-applicable records from the stream.
+        - Cleaning or normalizing field values
+        - Renaming fields to match expected schema
+        - Adding computed or derived fields
+        - Filtering out invalid or unwanted records
+
+        Developers may return `None` from this method to exclude records from the
+        stream output.
+
+        .. versionchanged:: 0.47.0
+           This method is now automatically executed for all stream types during
+           record processing. You should not call this method directly in custom
+           `get_records` implementations.
 
         Args:
-            row: Individual record in the stream.
+            row: Individual record from the stream.
             context: Stream partition or context dictionary.
 
         Returns:
-            The resulting record dict, or `None` if the record should be excluded.
+            The processed record dict, or `None` to exclude the record.
         """
         return row

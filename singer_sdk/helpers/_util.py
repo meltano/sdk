@@ -62,7 +62,7 @@ def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
         for template in [f"{path}.template"]:
             if Path(template).exists():
                 msg += f"\nFor more info, please see the sample template at: {template}"
-        raise FileExistsError(msg)
+        raise FileNotFoundError(msg)
 
     return load_json(Path(path).read_text(encoding="utf-8"))
 

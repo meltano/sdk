@@ -7,7 +7,7 @@ from copy import deepcopy
 
 import pytest
 
-import singer_sdk._singerlib as singer
+import singer_sdk.singerlib as singer
 from singer_sdk.helpers._catalog import (
     deselect_all_streams,
     get_selected_schema,

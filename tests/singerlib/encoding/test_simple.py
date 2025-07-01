@@ -10,12 +10,12 @@ from textwrap import dedent
 
 import pytest
 
-from singer_sdk._singerlib import RecordMessage
-from singer_sdk._singerlib.exceptions import InvalidInputLine
+from singer_sdk.singerlib import RecordMessage
 from singer_sdk.singerlib.encoding.simple import (
     SimpleSingerReader,
     SimpleSingerWriter,
 )
+from singer_sdk.singerlib.exceptions import InvalidInputLine
 
 CALLBACKS = {
     "RECORD": lambda _: None,
