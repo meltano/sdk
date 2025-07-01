@@ -4,7 +4,12 @@ import typing as t
 
 import pytest
 
-from singer_sdk.plugin_base import SDK_PACKAGE_NAME, MapperNotInitialized, PluginBase
+from singer_sdk.plugin_base import (
+    SDK_PACKAGE_NAME,
+    MapperNotInitialized,
+    PluginBase,
+    _ConfigInput,
+)
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 
 if t.TYPE_CHECKING:
@@ -80,3 +85,27 @@ def test_mapper_not_initialized():
 def test_supported_python_versions():
     """Test that supported python versions are correctly parsed."""
     assert PluginBase._get_supported_python_versions(SDK_PACKAGE_NAME)
+
+
+def test_config_from_cli_args(tmp_path: Path):
+    """Test that input is converted to list of paths."""
+    config_path = tmp_path / "config.json"
+    config_path.write_text("{}")
+    config_input = _ConfigInput.from_cli_args(str(config_path))
+    assert config_input.files == [config_path]
+    assert not config_input.parse_env
+
+
+def test_config_from_cli_args_env(tmp_path: Path):
+    """Test that input is converted to list of paths and parse_env is true."""
+    config_path = tmp_path / "config.json"
+    config_path.write_text("{}")
+    config_input = _ConfigInput.from_cli_args(str(config_path), "ENV")
+    assert config_input.files == [config_path]
+    assert config_input.parse_env
+
+
+def test_config_from_cli_args_invalid_file(tmp_path: Path):
+    """Test that invalid file paths raise an error."""
+    with pytest.raises(FileNotFoundError, match="Could not locate config file at"):
+        _ConfigInput.from_cli_args(tmp_path / "config.json", "ENV")

@@ -29,7 +29,7 @@ from singer_sdk.helpers.capabilities import (
     TapCapabilities,
 )
 from singer_sdk.io_base import SingerWriter
-from singer_sdk.plugin_base import BaseSingerWriter, PluginBase
+from singer_sdk.plugin_base import BaseSingerWriter, PluginBase, _ConfigInput
 from singer_sdk.singerlib import Catalog
 
 if t.TYPE_CHECKING:
@@ -534,7 +534,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         *,
         about: bool = False,
         about_format: str | None = None,
-        config: tuple[str, ...] = (),
+        config: _ConfigInput,
         state: t.IO[str] | None = None,
         catalog: t.IO[str] | None = None,
     ) -> None:
@@ -550,13 +550,12 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         super().invoke(about=about, about_format=about_format)
         cls.print_version(print_fn=cls.logger.info)
-        config_files, parse_env_config = cls.config_from_cli_args(*config)
 
         tap = cls(
-            config=config_files,  # type: ignore[arg-type]
+            config=config.files,  # type: ignore[arg-type]
             state=None if state is None else load_json(state.read()),
             catalog=None if catalog is None else load_json(catalog.read()),
-            parse_env_config=parse_env_config,
+            parse_env_config=config.parse_env,
             validate_config=True,
         )
         tap.sync_all()
@@ -578,12 +577,11 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         if not value:
             return
 
-        config_args = ctx.params.get("config", ())
-        config_files, parse_env_config = cls.config_from_cli_args(*config_args)
+        config: _ConfigInput = ctx.params.get("config", _ConfigInput())
         try:
             tap = cls(
-                config=config_files,  # type: ignore[arg-type]
-                parse_env_config=parse_env_config,
+                config=config.files,  # type: ignore[arg-type]
+                parse_env_config=config.parse_env,
                 validate_config=cls.dynamic_catalog,
                 setup_mapper=False,
             )
@@ -611,11 +609,10 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         if value == CliTestOptionValue.Disabled.value:
             return
 
-        config_args = ctx.params.get("config", ())
-        config_files, parse_env_config = cls.config_from_cli_args(*config_args)
+        config: _ConfigInput = ctx.params.get("config", _ConfigInput())
         tap = cls(
-            config=config_files,  # type: ignore[arg-type]
-            parse_env_config=parse_env_config,
+            config=config.files,  # type: ignore[arg-type]
+            parse_env_config=config.parse_env,
             validate_config=True,
         )
 
