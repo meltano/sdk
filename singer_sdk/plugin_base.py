@@ -69,8 +69,8 @@ class MapperNotInitialized(Exception):
 class _ConfigInput:
     """Configuration input."""
 
-    files: list[Path] = dataclasses.field(default_factory=list)
-    """The files to read the config from."""
+    config: dict[str, t.Any] = dataclasses.field(default_factory=dict)
+    """The merged config dictionary from all files."""
 
     parse_env: bool = False
     """Whether to parse environment variables."""
@@ -85,11 +85,15 @@ class _ConfigInput:
         Returns:
             A _ConfigInput object.
         """
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=SingerSDKDeprecationWarning)
-            config_files, parse_env_config = PluginBase.config_from_cli_args(*args)
-
-        return _ConfigInput(files=config_files, parse_env=parse_env_config)
+        config: dict[str, t.Any] = {}
+        parse_env = False
+        for config_path in args:
+            if config_path == "ENV":
+                parse_env = True
+                continue
+            file_config = read_json_file(config_path)
+            config |= file_config
+        return _ConfigInput(config=config, parse_env=parse_env)
 
 
 class SingerCommand(click.Command):
@@ -213,7 +217,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
             )
-        elif isinstance(config, list):
+        elif isinstance(config, list):  # pragma: no cover
             config_dict = {}
             for config_path in config:
                 # Read each config file sequentially. Settings from files later in the
@@ -590,7 +594,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         category=SingerSDKDeprecationWarning,
         stacklevel=2,
     )
-    def config_from_cli_args(*args: str) -> tuple[list[Path], bool]:
+    def config_from_cli_args(*args: str) -> tuple[list[Path], bool]:  # pragma: no cover
         """Parse CLI arguments into a config dictionary.
 
         Args:

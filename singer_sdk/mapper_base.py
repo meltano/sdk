@@ -151,7 +151,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
         config = config or _ConfigInput()
 
         mapper = cls(
-            config=config.files,  # type: ignore[arg-type]
+            config=config.config,
             validate_config=True,
             parse_env_config=config.parse_env,
         )
