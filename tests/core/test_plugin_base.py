@@ -3,8 +3,14 @@ from __future__ import annotations
 import typing as t
 
 import pytest
+import simplejson
 
-from singer_sdk.plugin_base import SDK_PACKAGE_NAME, MapperNotInitialized, PluginBase
+from singer_sdk.plugin_base import (
+    SDK_PACKAGE_NAME,
+    MapperNotInitialized,
+    PluginBase,
+    _ConfigInput,
+)
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 
 if t.TYPE_CHECKING:
@@ -80,3 +86,53 @@ def test_mapper_not_initialized():
 def test_supported_python_versions():
     """Test that supported python versions are correctly parsed."""
     assert PluginBase._get_supported_python_versions(SDK_PACKAGE_NAME)
+
+
+def test_config_from_cli_args(tmp_path: Path):
+    """Test that input is converted to a merged config dict."""
+    config_paths = [
+        tmp_path / "config1.json",
+        tmp_path / "config2.json",
+    ]
+    config_paths[0].write_text('{"prop1": "hello", "prop2": 123}')
+    config_paths[1].write_text('{"prop2": 456, "prop3": "world"}')
+    config_input = _ConfigInput.from_cli_args(*config_paths)
+    assert config_input.config == {"prop1": "hello", "prop2": 456, "prop3": "world"}
+    assert not config_input.parse_env
+
+
+def test_config_from_cli_args_env(tmp_path: Path):
+    """Test that input is converted to a merged config dict and parse_env is true."""
+    config_path = tmp_path / "config.json"
+    config_path.write_text('{"prop1": "hello"}')
+    config_input = _ConfigInput.from_cli_args(str(config_path), "ENV")
+    assert config_input.config == {"prop1": "hello"}
+    assert config_input.parse_env
+
+
+def test_config_from_cli_args_invalid_file(tmp_path: Path):
+    """Test that invalid file paths raise an error."""
+    missing_path = tmp_path / "config.json"
+    with pytest.raises(
+        FileNotFoundError,
+        match=r"File at '.*' was not found",
+    ) as exc_info:
+        _ConfigInput.from_cli_args(str(missing_path), "ENV")
+    # Assert the error message includes the specific file path
+    assert str(missing_path) in str(exc_info.value)
+
+
+def test_config_from_cli_args_invalid_json(tmp_path):
+    """Test that invalid JSON raises a JSONDecodeError."""
+    config_path = tmp_path / "invalid.json"
+    config_path.write_text('{"prop1": "hello", "prop2": 123')  # missing closing }
+    with pytest.raises((simplejson.JSONDecodeError, ValueError)):
+        _ConfigInput.from_cli_args(config_path)
+
+
+def test_config_from_cli_args_non_dict_json(tmp_path):
+    """Test that non-dict JSON raises a TypeError."""
+    config_path = tmp_path / "not_a_dict.json"
+    config_path.write_text('["not", "a", "dict"]')
+    with pytest.raises(ValueError, match="dictionary update sequence"):
+        _ConfigInput.from_cli_args(config_path)

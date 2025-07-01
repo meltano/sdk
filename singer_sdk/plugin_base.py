@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import dataclasses
 import logging
 import os
 import signal
@@ -26,7 +27,7 @@ from singer_sdk.configuration._dict_config import (
 )
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -62,6 +63,37 @@ class MapperNotInitialized(Exception):
     def __init__(self) -> None:
         """Initialize the exception."""
         super().__init__("Mapper not initialized. Please call setup_mapper() first.")
+
+
+@dataclasses.dataclass
+class _ConfigInput:
+    """Configuration input."""
+
+    config: dict[str, t.Any] = dataclasses.field(default_factory=dict)
+    """The merged config dictionary from all files."""
+
+    parse_env: bool = False
+    """Whether to parse environment variables."""
+
+    @classmethod
+    def from_cli_args(cls, *args: str) -> _ConfigInput:
+        """Create a _ConfigInput from CLI arguments.
+
+        Args:
+            *args: CLI arguments.
+
+        Returns:
+            A _ConfigInput object.
+        """
+        config: dict[str, t.Any] = {}
+        parse_env = False
+        for config_path in args:
+            if config_path == "ENV":
+                parse_env = True
+                continue
+            file_config = read_json_file(config_path)
+            config |= file_config
+        return _ConfigInput(config=config, parse_env=parse_env)
 
 
 class SingerCommand(click.Command):
@@ -185,7 +217,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
             )
-        elif isinstance(config, list):
+        elif isinstance(config, list):  # pragma: no cover
             config_dict = {}
             for config_path in config:
                 # Read each config file sequentially. Settings from files later in the
@@ -557,7 +589,12 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         print(formatter.format_about(info))  # noqa: T201
 
     @staticmethod
-    def config_from_cli_args(*args: str) -> tuple[list[Path], bool]:
+    @deprecated(
+        "config_from_cli_args is deprecated and will be removed by 2026-01-01.",
+        category=SingerSDKDeprecationWarning,
+        stacklevel=2,
+    )
+    def config_from_cli_args(*args: str) -> tuple[list[Path], bool]:  # pragma: no cover
         """Parse CLI arguments into a config dictionary.
 
         Args:
@@ -582,7 +619,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             # Validate config file paths before adding to list
             if not Path(config_path).is_file():
                 msg = (
-                    f"Could not locate config file at '{config_path}'.Please check "
+                    f"Could not locate config file at '{config_path}'. Please check "
                     "that the file exists."
                 )
                 raise FileNotFoundError(msg)
@@ -630,6 +667,20 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         ctx.exit()
 
     @classmethod
+    def cb_config(
+        cls: type[PluginBase],
+        ctx: click.Context,  # noqa: ARG003
+        param: click.Option,  # noqa: ARG003
+        value: tuple[str, ...],
+    ) -> _ConfigInput:
+        """CLI callback to parse the config.
+
+        Returns:
+            A _ConfigInput object.
+        """
+        return _ConfigInput.from_cli_args(*value)
+
+    @classmethod
     def get_singer_command(cls: type[PluginBase]) -> click.Command:
         """Handle command line execution.
 
@@ -675,6 +726,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     type=click.STRING,
                     default=(),
                     is_eager=True,
+                    callback=cls.cb_config,
                 ),
             ],
             logger=cls.logger,
