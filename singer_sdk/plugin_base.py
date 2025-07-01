@@ -92,7 +92,7 @@ class _ConfigInput:
                 parse_env = True
                 continue
             file_config = read_json_file(config_path)
-            config.update(file_config)
+            config |= file_config
         return _ConfigInput(config=config, parse_env=parse_env)
 
 
