@@ -564,7 +564,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         *,
         about: bool = False,
         about_format: str | None = None,
-        config: _ConfigInput,
+        config: _ConfigInput | None = None,
         file_input: t.IO[str] | None = None,
     ) -> None:
         """Invoke the target.
@@ -578,6 +578,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         """
         super().invoke(about=about, about_format=about_format)
         cls.print_version(print_fn=cls.logger.info)
+        config = config or _ConfigInput()
 
         target = cls(
             config=config.files,  # type: ignore[arg-type]

@@ -534,7 +534,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         *,
         about: bool = False,
         about_format: str | None = None,
-        config: _ConfigInput,
+        config: _ConfigInput | None = None,
         state: t.IO[str] | None = None,
         catalog: t.IO[str] | None = None,
     ) -> None:
@@ -550,6 +550,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         super().invoke(about=about, about_format=about_format)
         cls.print_version(print_fn=cls.logger.info)
+        config = config or _ConfigInput()
 
         tap = cls(
             config=config.files,  # type: ignore[arg-type]
