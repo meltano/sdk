@@ -31,7 +31,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
         ObjectType(
             Property(
                 "__else__",
-                Constant("__NULL__"),
+                AnyOf(Constant("__NULL__"), NullType()),
                 nullable=True,
                 required=False,
                 title="Other streams",
