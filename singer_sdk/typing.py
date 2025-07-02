@@ -899,6 +899,51 @@ class ObjectType(JSONTypeHelper):
         return result
 
 
+class AnyOf(JSONTypeHelper):
+    """AnyOf type.
+
+    This type allows for a value to match at least one of a set of types.
+    In JSON Schema, 'anyOf' means the value is valid if it matches any (one or more) of
+    the given schemas. By contrast, 'oneOf' (see the OneOf class) requires the value to
+    match exactly one schema.
+
+    Examples:
+        >>> t = AnyOf(StringType, IntegerType)
+        >>> print(t.to_json(indent=2))
+        {
+            "anyOf": [
+                {
+                    "type": [
+                        "string"
+                    ]
+                },
+                {
+                    "type": [
+                        "integer"
+                    ]
+                }
+            ]
+        }
+    """
+
+    def __init__(self, *types: W | type[W]) -> None:
+        """Initialize AnyOf type.
+
+        Args:
+            types: Types to choose from.
+        """
+        self.wrapped = types
+
+    @property
+    def type_dict(self) -> dict:
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        return {"anyOf": [t.type_dict for t in self.wrapped]}
+
+
 class OneOf(JSONTypeHelper):
     """OneOf type.
 
@@ -1098,6 +1143,27 @@ class DiscriminatedUnion(OneOf):
                 for k, v in options.items()
             ),
         )
+
+
+class NullType(JSONTypeHelper[None]):
+    """A null type.
+
+    Examples:
+        >>> t = NullType()
+        >>> print(t.to_json(indent=2))
+        {
+            "type": "null"
+        }
+    """
+
+    @property
+    def type_dict(self) -> dict:
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        return {"type": "null"}
 
 
 class CustomType(JSONTypeHelper):

@@ -953,6 +953,18 @@ class MappedTap(Tap):
             "json_dumps.jsonl",
             id="json_dumps",
         ),
+        pytest.param(
+            {"mystream": {"__filter__": "bool(count < 20)"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "filter_records.jsonl",
+            id="filter_records",
+        ),
+        pytest.param(
+            {"mystream": "__NULL__"},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "remove_stream.jsonl",
+            id="remove_stream",
+        ),
     ],
 )
 def test_mapped_stream(
@@ -964,7 +976,7 @@ def test_mapped_stream(
 ):
     snapshot.snapshot_dir = snapshot_dir.joinpath("mapped_stream")
 
-    tap = MappedTap(config={"stream_maps": stream_maps, **config})
+    tap = MappedTap(config={"stream_maps": stream_maps, **config}, validate_config=True)
     buf = io.StringIO()
     with redirect_stdout(buf):
         tap.sync_all()

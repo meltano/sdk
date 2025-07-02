@@ -7,9 +7,12 @@ from enum import Enum, EnumMeta
 from warnings import warn
 
 from singer_sdk.typing import (
+    AnyOf,
     ArrayType,
     BooleanType,
+    Constant,
     IntegerType,
+    NullType,
     NumberType,
     ObjectType,
     OneOf,
@@ -25,7 +28,79 @@ _EnumMemberT = t.TypeVar("_EnumMemberT")
 STREAM_MAPS_CONFIG = PropertiesList(
     Property(
         "stream_maps",
-        ObjectType(),
+        ObjectType(
+            Property(
+                "__else__",
+                AnyOf(Constant("__NULL__"), NullType()),
+                nullable=True,
+                required=False,
+                title="Other streams",
+                description=(
+                    "Currently, only setting this to `__NULL__` is supported. "
+                    "This will remove all other streams."
+                ),
+            ),
+            # Stream names → Stream map config
+            additional_properties=AnyOf(
+                Constant("__NULL__"),  # Remove the stream.
+                NullType(),  # Remove the stream.
+                ObjectType(  # Map the stream using this configuration.
+                    Property(
+                        "__alias__",
+                        StringType,
+                        title="Stream Alias",
+                        description="Alias to use for the stream.",
+                        nullable=False,
+                        required=False,
+                    ),
+                    Property(
+                        "__else__",
+                        AnyOf(Constant("__NULL__"), NullType()),
+                        title="Other properties",
+                        description=(
+                            "Currently, only setting this to `__NULL__` is supported. "
+                            "This will remove all other properties from the stream."
+                        ),
+                        required=False,
+                        nullable=False,
+                    ),
+                    Property(
+                        "__filter__",
+                        StringType(pattern=r"^bool\((.*)\)$"),
+                        title="Filter",
+                        description=(
+                            "Filter out records from a stream. A string expression "
+                            "which must evaluate to `true` to include the record, or "
+                            "`false` to exclude it. Filter expressions should be "
+                            "wrapped in `bool()` to ensure proper type conversion."
+                        ),
+                        nullable=False,
+                        required=False,
+                    ),
+                    Property(
+                        "__key_properties__",
+                        ArrayType(StringType),
+                        title="Key Properties",
+                        description="Primary key properties for the stream.",
+                        nullable=False,
+                        required=False,
+                    ),
+                    Property(
+                        "__source__",
+                        StringType,
+                        description="Create a new stream from this source stream.",
+                        nullable=False,
+                        required=False,
+                    ),
+                    # Property names → Property map config
+                    additional_properties=AnyOf(
+                        Constant("__NULL__"),  # Remove the property from the stream.
+                        NullType(),  # Remove the property from the stream.
+                        StringType(),  # Compute the property using this expression.
+                    ),
+                ),
+            ),
+        ),
         title="Stream Maps",
         description=(
             "Config object for stream maps capability. "

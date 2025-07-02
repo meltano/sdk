@@ -174,7 +174,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     #: The package name of the plugin. e.g meltanolabs-tap-foo
     package_name: str | None = None
 
-    config_jsonschema: t.ClassVar[dict] = {}
+    config_jsonschema: t.ClassVar[dict] = {"properties": {}}
     # A JSON Schema object defining the config options that this tap will accept.
 
     _config: dict
@@ -479,9 +479,9 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         errors: list[str] = []
         config_jsonschema = self.config_jsonschema
+        self.append_builtin_config(config_jsonschema)
 
-        if config_jsonschema:
-            self.append_builtin_config(config_jsonschema)
+        if config_jsonschema:  # pragma: no branch
             self.logger.debug(
                 "Validating config using jsonschema: %s",
                 config_jsonschema,
