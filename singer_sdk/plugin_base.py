@@ -479,11 +479,9 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         errors: list[str] = []
         config_jsonschema = self.config_jsonschema
+        self.append_builtin_config(config_jsonschema)
 
-        if "properties" in config_jsonschema:
-            self.append_builtin_config(config_jsonschema)
-
-        if config_jsonschema:
+        if config_jsonschema:  # pragma: no branch
             self.logger.debug(
                 "Validating config using jsonschema: %s",
                 config_jsonschema,
