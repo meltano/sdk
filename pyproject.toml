@@ -142,6 +142,21 @@ benchmark = [
     "pytest-codspeed>=2.2.0",
 ]
 
+[tool.hatch.build.targets.sdist]
+include = [
+    "cookiecutter",
+    "docs",
+    "fixtures",
+    "samples",
+    "singer_sdk",
+    "tests",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "singer_sdk",
+]
+
 [tool.hatch.version]
 fallback-version = "0.0.0"
 source = "vcs"
