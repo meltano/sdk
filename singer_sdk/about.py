@@ -201,9 +201,9 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
         md_description = schema.get("description", "").replace("\n", "<BR/>")
         yield (
             f"| {setting_name} "
-            f"| {'True' if required else 'False':8} "
-            f"| {schema.get('default', 'None'):7} "
-            f"| {md_description:11} |"
+            f"| {'True' if required else 'False'} "
+            f"| {schema.get('default', 'None')} "
+            f"| {md_description} |"
         )
         if "properties" in schema:
             yield from self._generate_property_rows(schema, parent_name=setting_name)
@@ -250,14 +250,14 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
 
         # Process capabilities
         output += "## Capabilities\n\n"
-        output += "\n".join([f"* `{v}`" for v in about_info.capabilities])
+        output += "\n".join([f"- `{v}`" for v in about_info.capabilities])
         output += "\n\n"
 
         # Process Supported Python Versions
         if about_info.supported_python_versions:
             output += "## Supported Python Versions\n\n"
             output += "\n".join(
-                [f"* {v}" for v in about_info.supported_python_versions],
+                [f"- {v}" for v in about_info.supported_python_versions],
             )
             output += "\n\n"
 

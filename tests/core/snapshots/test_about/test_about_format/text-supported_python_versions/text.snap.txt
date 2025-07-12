@@ -3,9 +3,6 @@ Description: Example tap for Singer SDK
 Version: 0.1.1
 SDK Version: 1.0.0
 Supported Python Versions:
-  - 3.8
-  - 3.9
-  - 3.10
   - 3.11
   - 3.12
   - 3.13

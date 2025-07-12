@@ -37,7 +37,7 @@ repos:
         cookiecutter/.*|
         docs/.*|
         samples/.*\.json|
-        tests/snapshots/.*
+        tests/.*snapshots/.*
       )$
   - id: trailing-whitespace
 
