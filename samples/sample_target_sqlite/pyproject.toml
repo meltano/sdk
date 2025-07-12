@@ -17,6 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 license = "Apache-2.0"
+requires-python = ">=3.9"
 dependencies = [
     "singer-sdk~=0.47.4",
 ]
