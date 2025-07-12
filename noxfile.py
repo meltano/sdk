@@ -24,6 +24,7 @@ PYPROJECT = nox.project.load_toml()
 UV_SYNC_COMMAND = (
     "uv",
     "sync",
+    "--all-packages",
     "--locked",
     "--no-dev",
 )

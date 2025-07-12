@@ -398,7 +398,7 @@ unfixable = [
 # Disabled some checks in helper modules
 "singer_sdk/helpers/_*.py" = ["DOC"]
 # Disabled some checks in samples code
-"samples/*" = ["ANN", "D", "DOC"]
+"samples/*" = ["ANN", "DOC"]
 # Templates support a generic resource of type Any.
 "singer_sdk/testing/*.py" = ["S101"]
 "singer_sdk/testing/templates.py" = ["ANN401"]
@@ -420,7 +420,23 @@ fixture-parentheses = false
 parametrize-names-type = "csv"
 
 [tool.ruff.lint.isort]
-known-first-party = ["singer_sdk", "samples", "tests"]
+known-first-party = [
+    "singer_sdk",
+    "samples",
+    "mapper_custom",
+    "tap_bigquery",
+    "tap_countries",
+    "tap_csv",
+    "tap_dummyjson",
+    "tap_fake_people",
+    "tap_gitlab",
+    "tap_hostile",
+    "tap_sqlite",
+    "target_csv",
+    "target_parquet",
+    "target_sqlite",
+    "tests",
+]
 required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.pep8-naming]
@@ -436,6 +452,22 @@ max-args = 9
 
 [tool.uv]
 required-version = ">=0.5.19"
+
+[tool.uv.workspace]
+members = [
+    "samples/sample_mapper",
+    "samples/sample_tap_bigquery",
+    "samples/sample_tap_countries",
+    "samples/sample_tap_csv",
+    "samples/sample_tap_dummy_json",
+    "samples/sample_tap_fake_people",
+    "samples/sample_tap_gitlab",
+    "samples/sample_tap_hostile",
+    "samples/sample_tap_sqlite",
+    "samples/sample_target_csv",
+    "samples/sample_target_parquet",
+    "samples/sample_target_sqlite",
+]
 
 [tool.codespell]
 skip = "*.csv,samples/aapl/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"

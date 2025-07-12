@@ -1,9 +1,9 @@
 [project]
 name = "tap-dummyjson"
-version = "0.0.1"
-description = "Singer tap for DummyJSON, built with the Meltano Singer SDK."
+version = "0.1.0"
+description = "Singer tap for DummyJSON, built with the Meltano Singer SDK"
 readme = "README.md"
-authors = [{ name = "Edgar Ramírez-Mondragón", email = "edgar@arch.dev" }]
+authors = [{ name = "Meltano Team", email = "hello@meltano.com" }]
 keywords = [
     "ELT",
     "DummyJSON",
@@ -23,7 +23,7 @@ requires-python = ">=3.9"
 dependencies = [
     "requests~=2.32.3",
     "requests-cache~=1.2.1",
-    "singer-sdk",
+    "singer-sdk~=0.47.4",
 ]
 optional-dependencies.s3 = [
     "s3fs~=2025.5.0",
@@ -44,7 +44,7 @@ python_version = "3.12"
 warn_unused_configs = true
 
 [tool.uv.sources]
-singer-sdk = { path = "../../", editable = true }
+singer-sdk = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

@@ -5,14 +5,14 @@ import typing as t
 
 import pytest
 
-from samples.sample_tap_csv.sample_tap_csv import SampleTapCSV
 from singer_sdk.testing import SuiteConfig, TapTestRunner, get_tap_test_class
+from tap_csv.tap import TapCSV
 
 if t.TYPE_CHECKING:
-    from samples.sample_tap_csv.client import CSVStream
+    from tap_csv.client import CSVStream
 
 _TestCSVMerge = get_tap_test_class(
-    tap_class=SampleTapCSV,
+    tap_class=TapCSV,
     config={
         "path": "fixtures/csv",
         "read_mode": "merge",
@@ -27,7 +27,7 @@ class TestCSVMerge(_TestCSVMerge):
 
 
 _TestCSVOneStreamPerFile = get_tap_test_class(
-    tap_class=SampleTapCSV,
+    tap_class=TapCSV,
     config={
         "path": "fixtures/csv",
         "read_mode": "one_stream_per_file",
@@ -68,7 +68,7 @@ STATE = {
 
 
 _TestCSVOneStreamPerFileIncremental = get_tap_test_class(
-    tap_class=SampleTapCSV,
+    tap_class=TapCSV,
     config={
         "path": "fixtures/csv",
         "read_mode": "one_stream_per_file",
@@ -94,7 +94,7 @@ class TestCSVOneStreamPerFileIncremental(_TestCSVOneStreamPerFileIncremental):
 
 
 TestCSVOneStreamPerFileIncrementalIgnoreNoRecords = get_tap_test_class(
-    tap_class=SampleTapCSV,
+    tap_class=TapCSV,
     config={
         "path": "fixtures/csv",
         "read_mode": "one_stream_per_file",

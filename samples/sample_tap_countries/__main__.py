@@ -1,5 +1,7 @@
+"""Entry point for the tap."""
+
 from __future__ import annotations
 
-from samples.sample_tap_countries.countries_tap import SampleTapCountries
+from tap_countries.tap import TapCountries
 
-SampleTapCountries.cli()
+TapCountries.cli()

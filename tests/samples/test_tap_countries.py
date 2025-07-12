@@ -11,13 +11,13 @@ from contextlib import redirect_stdout
 import pytest
 from click.testing import CliRunner
 
-from samples.sample_tap_countries.countries_tap import SampleTapCountries
 from singer_sdk.helpers._catalog import (
     get_selected_schema,
     pop_deselected_record_properties,
 )
 from singer_sdk.testing import get_tap_test_class
 from singer_sdk.testing.config import SuiteConfig
+from tap_countries.tap import TapCountries
 
 if t.TYPE_CHECKING:
     from pathlib import Path
@@ -29,14 +29,14 @@ SAMPLE_CONFIG_BAD = {"not": "correct"}
 
 # standard tap tests
 TestSampleTapCountries = get_tap_test_class(
-    tap_class=SampleTapCountries,
+    tap_class=TapCountries,
     config=SAMPLE_CONFIG,
     suite_config=SuiteConfig(max_records_limit=5),
 )
 
 
 def test_countries_primary_key():
-    tap = SampleTapCountries(config=None)
+    tap = TapCountries(config=None)
     countries_entry = tap.streams["countries"]._singer_catalog_entry
     metadata_root = countries_entry.metadata.root
     key_props_1 = metadata_root.table_key_properties
@@ -54,7 +54,7 @@ def test_countries_primary_key():
 
 def test_with_catalog_mismatch():
     """Test catalog apply with no matching stream catalog entries."""
-    tap = SampleTapCountries(config=None, catalog={"streams": []})
+    tap = TapCountries(config=None, catalog={"streams": []})
     for stream in tap.streams.values():
         # All streams should be deselected:
         assert not stream.selected
@@ -62,7 +62,7 @@ def test_with_catalog_mismatch():
 
 def test_with_catalog_entry():
     """Test catalog apply with a matching stream catalog entry for one stream."""
-    tap = SampleTapCountries(
+    tap = TapCountries(
         config=None,
         catalog={
             "streams": [
@@ -101,7 +101,7 @@ def test_with_catalog_entry():
 
 def test_batch_mode(outdir: Path):
     """Test batch mode."""
-    tap = SampleTapCountries(
+    tap = TapCountries(
         config={
             "batch_config": {
                 "encoding": {
@@ -153,7 +153,7 @@ def test_write_schema(
     runner = CliRunner()
     # TODO: Remote this once support for Python 3.9 and thus Click<8.2 is dropped
     runner.mix_stderr = False
-    result = runner.invoke(SampleTapCountries.cli, ["--test", "schema"])
+    result = runner.invoke(TapCountries.cli, ["--test", "schema"])
 
     snapshot_name = "countries_write_schemas"
     snapshot.assert_match(result.stdout, snapshot_name)
