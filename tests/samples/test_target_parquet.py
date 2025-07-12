@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from samples.sample_target_parquet.parquet_target import SampleTargetParquet
 from singer_sdk.testing import get_target_test_class
+from target_parquet.target import TargetParquet
 
 SAMPLE_FILEPATH = Path(f".output/test_{uuid.uuid4()}/")
 SAMPLE_FILENAME = SAMPLE_FILEPATH / "testfile.parquet"
@@ -18,7 +18,7 @@ SAMPLE_CONFIG = {
 }
 
 StandardTests = get_target_test_class(
-    target_class=SampleTargetParquet,
+    target_class=TargetParquet,
     config=SAMPLE_CONFIG,
 )
 

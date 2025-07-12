@@ -10,7 +10,12 @@ from dataclasses import dataclass, fields
 from singer_sdk.singerlib.schema import Schema
 
 if t.TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    import sys
+
+    if sys.version_info < (3, 10):
+        from typing_extensions import TypeAlias
+    else:
+        from typing import TypeAlias  # noqa: ICN003
 
 
 Breadcrumb = tuple[str, ...]

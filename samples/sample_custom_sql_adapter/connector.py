@@ -1,3 +1,5 @@
+"""Custom SQL dialect."""
+
 from __future__ import annotations
 
 import typing as t
@@ -12,9 +14,6 @@ class CustomSQLDialect(DefaultDialect):
     """Custom SQLite dialect that supports JSON."""
 
     name = "myrdbms"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
     @classmethod
     def import_dbapi(cls):

@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+import sys
+
 import pytest
-from typing_extensions import override
 
 from singer_sdk.sinks.core import BaseJSONSchemaValidator, InvalidJSONSchema, Sink
 from singer_sdk.target_base import Target
+
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
 
 
 @pytest.fixture

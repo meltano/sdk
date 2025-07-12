@@ -1,13 +1,25 @@
+"""DuckDB connector."""
+
 from __future__ import annotations
+
+import sys
 
 import sqlalchemy as sa
 
 from singer_sdk.connectors import SQLConnector
 
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
+
 
 class DuckDBConnector(SQLConnector):
+    """DuckDB connector."""
+
     allow_column_alter = True
 
+    @override
     @staticmethod
     def get_column_alter_ddl(
         table_name: str,

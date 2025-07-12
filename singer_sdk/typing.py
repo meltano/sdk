@@ -71,10 +71,10 @@ if t.TYPE_CHECKING:
 
     from jsonschema.protocols import Validator
 
-    if sys.version_info >= (3, 10):
-        from typing import TypeAlias  # noqa: ICN003
-    else:
+    if sys.version_info < (3, 10):
         from typing_extensions import TypeAlias
+    else:
+        from typing import TypeAlias  # noqa: ICN003
 
 
 __all__ = [

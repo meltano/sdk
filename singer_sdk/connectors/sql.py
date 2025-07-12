@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import functools
 import logging
-import sys
 import typing as t
 import warnings
 from collections import UserString
@@ -22,14 +21,16 @@ from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
 from singer_sdk.singerlib import CatalogEntry, MetadataMapping, Schema
 
-if sys.version_info < (3, 10):
-    from typing_extensions import TypeAlias
-else:
-    from typing import TypeAlias  # noqa: ICN003
-
 if t.TYPE_CHECKING:
+    import sys
+
     from sqlalchemy.engine import Engine
     from sqlalchemy.engine.reflection import Inspector
+
+    if sys.version_info < (3, 10):
+        from typing_extensions import TypeAlias
+    else:
+        from typing import TypeAlias  # noqa: ICN003
 
 
 class FullyQualifiedName(UserString):

@@ -8,14 +8,14 @@ import pytest
 import time_machine
 from click.testing import CliRunner
 
-from samples.sample_tap_sqlite import SQLiteTap
-from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk.singerlib import MetadataMapping, StreamMetadata
 from singer_sdk.testing import (
     get_standard_tap_tests,
     tap_sync_test,
     tap_to_target_sync_test,
 )
+from tap_sqlite import SQLiteTap
+from target_csv.target import TargetCSV
 
 if t.TYPE_CHECKING:
     from pathlib import Path
@@ -127,7 +127,7 @@ def test_sync_sqlite_to_csv(sqlite_sample_tap: SQLTap, tmp_path: Path):
     _discover_and_select_all(sqlite_sample_tap)
     _, _, _, _ = tap_to_target_sync_test(
         sqlite_sample_tap,
-        SampleTargetCSV(config={"target_folder": f"{tmp_path}/"}),
+        TargetCSV(config={"target_folder": f"{tmp_path}/"}),
     )
 
 
