@@ -19,7 +19,7 @@ license = "Apache-2.0"
 requires-python = ">=3.9"
 dependencies = [
     "singer-sdk~=0.47.4",
-    "typing-extensions>=4.5.0",
+    "typing-extensions>=4.5.0; python_version < '3.12'",
 ]
 
 [project.scripts]

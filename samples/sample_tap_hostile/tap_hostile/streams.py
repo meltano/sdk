@@ -4,12 +4,16 @@ from __future__ import annotations
 
 import random
 import string
+import sys
 import typing as t
-
-from typing_extensions import override
 
 from singer_sdk import typing as th
 from singer_sdk.streams import Stream
+
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
 
 
 class HostilePropertyNamesStream(Stream):

@@ -2,14 +2,19 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 from faker import Faker
-from typing_extensions import override
 
 from singer_sdk import Stream, Tap
 from singer_sdk import typing as th
 from singer_sdk.singerlib import Message, SingerMessageType
+
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
 
 if t.TYPE_CHECKING:
     from collections.abc import Iterable, Sequence

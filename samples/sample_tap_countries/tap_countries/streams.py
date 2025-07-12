@@ -10,13 +10,19 @@ from __future__ import annotations
 
 import abc
 import importlib.resources
+import sys
 
 from requests_cache.session import CachedSession
-from typing_extensions import override
 
 from singer_sdk import typing as th
 from singer_sdk.streams.graphql import GraphQLStream
 from tap_countries import schemas
+
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
+
 
 SCHEMAS_DIR = importlib.resources.files(schemas)
 

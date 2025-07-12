@@ -2689,7 +2689,7 @@ dependencies = [
     { name = "simpleeval" },
     { name = "simplejson" },
     { name = "sqlalchemy" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
     { name = "universal-pathlib" },
 ]
 
@@ -2846,7 +2846,7 @@ requires-dist = [
     { name = "simpleeval", specifier = ">=0.9.13,!=1.0.1" },
     { name = "simplejson", specifier = ">=3.17.6" },
     { name = "sqlalchemy", specifier = ">=2" },
-    { name = "typing-extensions", specifier = ">=4.5.0" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'", specifier = ">=4.5.0" },
     { name = "universal-pathlib", specifier = ">=0.2.6" },
 ]
 provides-extras = ["faker", "jwt", "msgspec", "parquet", "s3", "ssh", "testing"]
@@ -3301,14 +3301,14 @@ source = { editable = "samples/sample_tap_countries" }
 dependencies = [
     { name = "requests-cache" },
     { name = "singer-sdk" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "requests-cache", specifier = "~=1.2.1" },
     { name = "singer-sdk", editable = "." },
-    { name = "typing-extensions", specifier = ">=4.5.0" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
 ]
 
 [[package]]
@@ -3365,14 +3365,14 @@ source = { editable = "samples/sample_tap_fake_people" }
 dependencies = [
     { name = "faker" },
     { name = "singer-sdk" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "faker" },
     { name = "singer-sdk", editable = "." },
-    { name = "typing-extensions", specifier = ">=4.5.0" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
 ]
 
 [[package]]
@@ -3381,13 +3381,13 @@ version = "0.1.0"
 source = { editable = "samples/sample_tap_gitlab" }
 dependencies = [
     { name = "singer-sdk" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "singer-sdk", editable = "." },
-    { name = "typing-extensions", specifier = ">=4.5.0" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
 ]
 
 [[package]]
@@ -3396,13 +3396,13 @@ version = "0.1.0"
 source = { editable = "samples/sample_tap_hostile" }
 dependencies = [
     { name = "singer-sdk" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "singer-sdk", editable = "." },
-    { name = "typing-extensions", specifier = ">=4.5.0" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
 ]
 
 [[package]]

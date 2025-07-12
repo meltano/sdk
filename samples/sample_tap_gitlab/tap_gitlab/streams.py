@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import importlib.resources
+import sys
 import typing as t
 
 from requests_cache import CachedSession
-from typing_extensions import override
 
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.pagination import SimpleHeaderPaginator
@@ -22,6 +22,12 @@ from singer_sdk.typing import (
     StringType,
 )
 from tap_gitlab import schemas
+
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
+
 
 SCHEMAS_DIR = importlib.resources.files(schemas)
 
