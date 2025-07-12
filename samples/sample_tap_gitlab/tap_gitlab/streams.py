@@ -45,7 +45,7 @@ class GitlabStream(RESTStream[str]):
             ".http_cache",
             backend="filesystem",
             serializer="json",
-            ignored_parameters=["Private-Token"],
+            ignored_parameters=["Private-Token", "User-Agent"],
             match_headers=True,
         )
 
