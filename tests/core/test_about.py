@@ -18,8 +18,6 @@ from singer_sdk.helpers.capabilities import TapCapabilities
 from singer_sdk.plugin_base import SDK_PACKAGE_NAME
 
 if t.TYPE_CHECKING:
-    from pathlib import Path
-
     from pytest_snapshot.plugin import Snapshot
 
 _format_to_extension = {
@@ -72,6 +70,17 @@ def about_info() -> AboutInfo:
 
 @pytest.mark.snapshot
 @pytest.mark.parametrize(
+    "supported_python_versions",
+    [
+        ["3.11", "3.12", "3.13"],
+        None,
+    ],
+    ids=[
+        "supported_python_versions",
+        "no_supported_python_versions",
+    ],
+)
+@pytest.mark.parametrize(
     "about_format",
     [
         "text",
@@ -81,12 +90,11 @@ def about_info() -> AboutInfo:
 )
 def test_about_format(
     snapshot: Snapshot,
-    snapshot_dir: Path,
+    supported_python_versions: list[str] | None,
     about_info: AboutInfo,
     about_format: str,
 ):
-    snapshot.snapshot_dir = snapshot_dir.joinpath("about_format")
-
+    about_info.supported_python_versions = supported_python_versions
     formatter = AboutFormatter.get_formatter(about_format)
     output = formatter.format_about(about_info)
     snapshot_name = f"{about_format}.snap.{_format_to_extension[about_format]}"
