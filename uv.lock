@@ -2547,7 +2547,7 @@ provides-extras = ["faker", "jwt", "msgspec", "parquet", "s3", "ssh", "testing"]
 
 [package.metadata.requires-dev]
 benchmark = [
-    { name = "coverage", extras = ["toml"], specifier = ">=7.4" },
+    { name = "coverage", extras = ["toml"], specifier = ">=7.9" },
     { name = "duckdb", specifier = ">=0.8.0" },
     { name = "duckdb-engine", specifier = ">=0.13" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
@@ -2566,7 +2566,7 @@ benchmark = [
     { name = "xdoctest", extras = ["colors"], specifier = ">=1.1.1" },
 ]
 dev = [
-    { name = "coverage", extras = ["toml"], specifier = ">=7.4" },
+    { name = "coverage", extras = ["toml"], specifier = ">=7.9" },
     { name = "deptry", specifier = ">=0.15.0" },
     { name = "duckdb", specifier = ">=0.8.0" },
     { name = "duckdb-engine", specifier = ">=0.13" },
@@ -2610,7 +2610,7 @@ docs = [
     { name = "sphinx-reredirects", specifier = ">=0.1.5" },
 ]
 testing = [
-    { name = "coverage", extras = ["toml"], specifier = ">=7.4" },
+    { name = "coverage", extras = ["toml"], specifier = ">=7.9" },
     { name = "duckdb", specifier = ">=0.8.0" },
     { name = "duckdb-engine", specifier = ">=0.13" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },

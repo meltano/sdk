@@ -102,8 +102,6 @@ def tests(session: nox.Session) -> None:
         env=_install_env(session),
     )
 
-    env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
-
     try:
         session.run(
             "coverage",
@@ -114,7 +112,6 @@ def tests(session: nox.Session) -> None:
             "--durations=10",
             "--benchmark-skip",
             *session.posargs,
-            env=env,
         )
     finally:
         if session.interactive:
