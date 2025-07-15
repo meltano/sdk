@@ -303,6 +303,165 @@ class TestConnectorSQL:  # noqa: PLR0904
                 (2, {"x": Decimal("2.0"), "y": [1, 2, 3]}),
             ]
 
+    def test_create_empty_table_primary_key_order(self, connector: SQLConnector):
+        """Test that primary key columns maintain their specified order."""
+        schema = {
+            "type": "object",
+            "properties": {
+                "col_a": {"type": "string"},
+                "col_b": {"type": "integer"},
+                "col_c": {"type": "string"},
+                "col_d": {"type": "integer"},
+            },
+        }
+
+        # Test different primary key orders
+        test_cases = [
+            ["col_b", "col_d", "col_a"],  # Mixed order
+            ["col_d", "col_c", "col_b", "col_a"],  # Reverse alphabetical
+            ["col_a", "col_b", "col_c", "col_d"],  # Alphabetical order
+        ]
+
+        for i, primary_keys in enumerate(test_cases):
+            table_name = f"test_pk_order_{i}"
+
+            # Create the table
+            connector.create_empty_table(
+                full_table_name=table_name,
+                schema=schema,
+                primary_keys=primary_keys,
+            )
+
+            # Inspect the created table to verify primary key order
+            inspector = sa.inspect(connector._engine)
+            pk_constraint = inspector.get_pk_constraint(table_name)
+
+            # Verify the primary key columns are in the exact order specified
+            assert pk_constraint["constrained_columns"] == primary_keys
+
+            # Clean up
+            with connector._engine.connect() as conn, conn.begin():
+                conn.execute(sa.text(f"DROP TABLE {table_name}"))
+
+    def test_create_empty_table_partial_primary_keys(self, connector: SQLConnector):
+        """Test that only existing columns are included in primary key constraint."""
+        schema = {
+            "type": "object",
+            "properties": {
+                "existing_col_1": {"type": "string"},
+                "existing_col_2": {"type": "integer"},
+                "existing_col_3": {"type": "string"},
+            },
+        }
+
+        # Primary keys include some columns not in the schema
+        primary_keys = [
+            "missing_col",
+            "existing_col_2",
+            "existing_col_1",
+            "another_missing",
+        ]
+        table_name = "test_partial_pk"
+
+        # Should not raise an error
+        connector.create_empty_table(
+            full_table_name=table_name,
+            schema=schema,
+            primary_keys=primary_keys,
+        )
+
+        # Inspect the created table
+        inspector = sa.inspect(connector._engine)
+        pk_constraint = inspector.get_pk_constraint(table_name)
+
+        # Should only include existing columns in the order they were specified
+        expected_pk_columns = ["existing_col_2", "existing_col_1"]
+        assert pk_constraint["constrained_columns"] == expected_pk_columns
+
+        # Clean up
+        with connector._engine.connect() as conn, conn.begin():
+            conn.execute(sa.text(f"DROP TABLE {table_name}"))
+
+    def test_create_empty_table_no_primary_keys_in_schema(
+        self,
+        connector: SQLConnector,
+    ):
+        """Test behavior when no primary key columns exist in schema."""
+        schema = {
+            "type": "object",
+            "properties": {
+                "col_a": {"type": "string"},
+                "col_b": {"type": "integer"},
+            },
+        }
+
+        # Primary keys reference columns not in schema
+        primary_keys = ["missing_col_1", "missing_col_2"]
+        table_name = "test_no_pk_in_schema"
+
+        # Should not raise an error
+        connector.create_empty_table(
+            full_table_name=table_name,
+            schema=schema,
+            primary_keys=primary_keys,
+        )
+
+        # Inspect the created table
+        inspector = sa.inspect(connector._engine)
+        pk_constraint = inspector.get_pk_constraint(table_name)
+
+        # Should have no primary key constraint
+        assert pk_constraint["constrained_columns"] == []
+
+        # Clean up
+        with connector._engine.connect() as conn, conn.begin():
+            conn.execute(sa.text(f"DROP TABLE {table_name}"))
+
+    def test_create_empty_table_schema_property_order_independence(
+        self,
+        connector: SQLConnector,
+    ):
+        """Test that primary key order is independent of schema property order."""
+        # Same properties in different orders
+        schema1 = {
+            "type": "object",
+            "properties": {
+                "col_a": {"type": "string"},
+                "col_b": {"type": "integer"},
+                "col_c": {"type": "string"},
+            },
+        }
+
+        schema2 = {
+            "type": "object",
+            "properties": {
+                "col_c": {"type": "string"},
+                "col_a": {"type": "string"},
+                "col_b": {"type": "integer"},
+            },
+        }
+
+        primary_keys = ["col_b", "col_c", "col_a"]
+
+        # Create tables with different schema property orders
+        table1 = "test_schema_order_1"
+        table2 = "test_schema_order_2"
+
+        connector.create_empty_table(table1, schema1, primary_keys)
+        connector.create_empty_table(table2, schema2, primary_keys)
+
+        # Both should have identical primary key order
+        inspector = sa.inspect(connector._engine)
+        pk1 = inspector.get_pk_constraint(table1)["constrained_columns"]
+        pk2 = inspector.get_pk_constraint(table2)["constrained_columns"]
+
+        assert pk1 == pk2 == primary_keys
+
+        # Clean up
+        with connector._engine.connect() as conn, conn.begin():
+            conn.execute(sa.text(f"DROP TABLE {table1}"))
+            conn.execute(sa.text(f"DROP TABLE {table2}"))
+
 
 class TestDuckDBConnector:
     @pytest.fixture
@@ -349,6 +508,7 @@ class TestDuckDBConnector:
         with engine.connect() as conn:
             result = conn.execute(sa.text("SELECT * FROM test_table"))
             assert result.keys() == ["id", "name"]
+            assert result.cursor is not None
             assert result.cursor.description[1][1] == "STRING"
 
     @pytest.mark.parametrize(
