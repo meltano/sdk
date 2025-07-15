@@ -303,7 +303,19 @@ class TestConnectorSQL:  # noqa: PLR0904
                 (2, {"x": Decimal("2.0"), "y": [1, 2, 3]}),
             ]
 
-    def test_create_empty_table_primary_key_order(self, connector: SQLConnector):
+    @pytest.mark.parametrize(
+        "primary_keys",
+        [
+            pytest.param(["col_b", "col_d", "col_a"], id="mixed-order"),
+            pytest.param(["col_d", "col_c", "col_b", "col_a"], id="reverse-order"),
+            pytest.param(["col_a", "col_b", "col_c", "col_d"], id="alphabetical-order"),
+        ],
+    )
+    def test_create_empty_table_primary_key_order(
+        self,
+        connector: SQLConnector,
+        primary_keys: list[str],
+    ):
         """Test that primary key columns maintain their specified order."""
         schema = {
             "type": "object",
@@ -315,33 +327,21 @@ class TestConnectorSQL:  # noqa: PLR0904
             },
         }
 
-        # Test different primary key orders
-        test_cases = [
-            ["col_b", "col_d", "col_a"],  # Mixed order
-            ["col_d", "col_c", "col_b", "col_a"],  # Reverse alphabetical
-            ["col_a", "col_b", "col_c", "col_d"],  # Alphabetical order
-        ]
+        table_name = "test_pk_order"
 
-        for i, primary_keys in enumerate(test_cases):
-            table_name = f"test_pk_order_{i}"
+        connector.create_empty_table(
+            full_table_name=table_name,
+            schema=schema,
+            primary_keys=primary_keys,
+        )
 
-            # Create the table
-            connector.create_empty_table(
-                full_table_name=table_name,
-                schema=schema,
-                primary_keys=primary_keys,
-            )
+        inspector = sa.inspect(connector._engine)
+        pk_constraint = inspector.get_pk_constraint(table_name)
 
-            # Inspect the created table to verify primary key order
-            inspector = sa.inspect(connector._engine)
-            pk_constraint = inspector.get_pk_constraint(table_name)
+        assert pk_constraint["constrained_columns"] == primary_keys
 
-            # Verify the primary key columns are in the exact order specified
-            assert pk_constraint["constrained_columns"] == primary_keys
-
-            # Clean up
-            with connector._engine.connect() as conn, conn.begin():
-                conn.execute(sa.text(f"DROP TABLE {table_name}"))
+        with connector._engine.connect() as conn, conn.begin():
+            conn.execute(sa.text(f"DROP TABLE {table_name}"))
 
     def test_create_empty_table_partial_primary_keys(self, connector: SQLConnector):
         """Test that only existing columns are included in primary key constraint."""
