@@ -13,10 +13,10 @@ import importlib.resources
 import sys
 
 from requests_cache.session import CachedSession
-from tap_countries import schemas
 
 from singer_sdk import typing as th
 from singer_sdk.streams.graphql import GraphQLStream
+from tap_countries import schemas
 
 if sys.version_info < (3, 12):
     from typing_extensions import override

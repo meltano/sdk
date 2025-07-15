@@ -472,17 +472,7 @@ target-sqlite = { workspace = true }
 
 [tool.uv.workspace]
 members = [
-    "packages/sample_mapper",
-    "packages/sample_tap_countries",
-    "packages/sample_tap_csv",
-    "packages/sample_tap_dummy_json",
-    "packages/sample_tap_fake_people",
-    "packages/sample_tap_gitlab",
-    "packages/sample_tap_hostile",
-    "packages/sample_tap_sqlite",
-    "packages/sample_target_csv",
-    "packages/sample_target_parquet",
-    "packages/sample_target_sqlite",
+    "packages/*",
 ]
 
 [tool.codespell]
