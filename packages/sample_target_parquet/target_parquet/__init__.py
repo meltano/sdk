@@ -1,4 +1,4 @@
-"""Module test for target-parquet functionality."""
+"""Main package module for target-parquet functionality."""
 
 from __future__ import annotations
 
