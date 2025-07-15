@@ -6,6 +6,7 @@ import abc
 import copy
 import datetime
 import importlib.util
+import sys
 import time
 import typing as t
 from functools import cached_property
@@ -15,7 +16,6 @@ from types import MappingProxyType
 
 import jsonschema
 import jsonschema.validators
-from typing_extensions import override
 
 from singer_sdk import metrics
 from singer_sdk.exceptions import (
@@ -41,6 +41,11 @@ from singer_sdk.helpers._typing import (
 )
 from singer_sdk.singerlib.json import deserialize_json
 from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
+
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
 
 if t.TYPE_CHECKING:
     from logging import Logger

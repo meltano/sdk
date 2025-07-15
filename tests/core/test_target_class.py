@@ -5,8 +5,8 @@ from contextlib import nullcontext
 
 import pytest
 from click.testing import CliRunner
+from target_sqlite import SQLiteTarget
 
-from samples.sample_target_sqlite import SQLiteTarget
 from singer_sdk.exceptions import ConfigValidationError
 
 

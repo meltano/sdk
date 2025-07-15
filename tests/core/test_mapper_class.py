@@ -5,8 +5,8 @@ from contextlib import nullcontext
 
 import pytest
 from click.testing import CliRunner
+from mapper_custom.mapper import StreamTransform
 
-from samples.sample_mapper.mapper import StreamTransform
 from singer_sdk.exceptions import ConfigValidationError
 
 

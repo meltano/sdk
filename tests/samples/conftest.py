@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 import sqlalchemy as sa
+from tap_sqlite import SQLiteConnector, SQLiteTap
 
-from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
 from singer_sdk.singerlib import Catalog
 from singer_sdk.testing import _get_tap_catalog
 

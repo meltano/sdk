@@ -49,7 +49,7 @@ dependencies = [
     "simpleeval>=0.9.13,!=1.0.1",
     "simplejson>=3.17.6",
     "sqlalchemy>=2",
-    "typing-extensions>=4.5.0",
+    "typing-extensions>=4.5.0; python_version < '3.13'",
     "universal-pathlib>=0.2.6",
 ]
 
@@ -127,6 +127,18 @@ testing = [
     "rfc3339-validator>=0.1.4",
     "time-machine>=2.10.0",
     "xdoctest[colors]>=1.1.1",
+    # Workspace packages needed for tests
+    "mapper-custom",
+    "tap-countries",
+    "tap-csv",
+    "tap-dummyjson",
+    "tap-fake-people",
+    "tap-gitlab",
+    "tap-hostile",
+    "tap-sqlite",
+    "target-csv",
+    "target-parquet",
+    "target-sqlite",
 ]
 typing = [
     "mypy>=1.16",
@@ -147,6 +159,7 @@ include = [
     "cookiecutter",
     "docs",
     "fixtures",
+    "packages",
     "samples",
     "singer_sdk",
     "tests",
@@ -206,6 +219,7 @@ version_files = [
     """cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml:^    "singer-sdk""",
     """cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:^    "singer-sdk""",
     """cookiecutter/mapper-template/{{cookiecutter.mapper_id}}/pyproject.toml:^    "singer-sdk""",
+    """packages/*/pyproject.toml:^    "singer-sdk""",
     ".github/ISSUE_TEMPLATE/bug.yml:^      placeholder:",
 ]
 
@@ -227,6 +241,7 @@ relative_files = true  # This allows coverage to be measured in Windows
 omit = [
     "tests/*",
     "samples/*",
+    "packages/*",
     "singer_sdk/helpers/_compat.py",
     "singer_sdk/helpers/types.py",
 ]
@@ -398,7 +413,8 @@ unfixable = [
 # Disabled some checks in helper modules
 "singer_sdk/helpers/_*.py" = ["DOC"]
 # Disabled some checks in samples code
-"samples/*" = ["ANN", "D", "DOC"]
+"samples/*" = ["ANN", "DOC"]
+"packages/*" = ["DOC"]
 # Templates support a generic resource of type Any.
 "singer_sdk/testing/*.py" = ["S101"]
 "singer_sdk/testing/templates.py" = ["ANN401"]
@@ -420,7 +436,11 @@ fixture-parentheses = false
 parametrize-names-type = "csv"
 
 [tool.ruff.lint.isort]
-known-first-party = ["singer_sdk", "samples", "tests"]
+known-first-party = [
+    "singer_sdk",
+    "samples",
+    "tests",
+]
 required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.pep8-naming]
@@ -437,6 +457,24 @@ max-args = 9
 [tool.uv]
 required-version = ">=0.5.19"
 
+[tool.uv.sources]
+mapper-custom = { workspace = true }
+tap-countries = { workspace = true }
+tap-csv = { workspace = true }
+tap-dummyjson = { workspace = true }
+tap-fake-people = { workspace = true }
+tap-gitlab = { workspace = true }
+tap-hostile = { workspace = true }
+tap-sqlite = { workspace = true }
+target-csv = { workspace = true }
+target-parquet = { workspace = true }
+target-sqlite = { workspace = true }
+
+[tool.uv.workspace]
+members = [
+    "packages/*",
+]
+
 [tool.codespell]
-skip = "*.csv,samples/aapl/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"
+skip = "*.csv,samples/aapl/*.json,packages/*/schemas/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"
 ignore-words-list = "fo,intoto"

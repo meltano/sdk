@@ -7,6 +7,22 @@ resolution-markers = [
     "python_full_version < '3.10'",
 ]
 
+[manifest]
+members = [
+    "mapper-custom",
+    "singer-sdk",
+    "tap-countries",
+    "tap-csv",
+    "tap-dummyjson",
+    "tap-fake-people",
+    "tap-gitlab",
+    "tap-hostile",
+    "tap-sqlite",
+    "target-csv",
+    "target-parquet",
+    "target-sqlite",
+]
+
 [[package]]
 name = "aiobotocore"
 version = "2.23.0"
@@ -1154,6 +1170,17 @@ sdist = { url = "https://files.pythonhosted.org/packages/bf/ce/46fbd9c8119cfc358
 wheels = [
     { url = "https://files.pythonhosted.org/packages/01/0e/b27cdbaccf30b890c40ed1da9fd4a3593a5cf94dae54fb34f8a4b74fcd3f/jsonschema_specifications-2025.4.1-py3-none-any.whl", hash = "sha256:4653bffbd6584f7de83a67e0d620ef16900b390ddc7939d56684d6c81e33f1af", size = 18437, upload-time = "2025-04-23T12:34:05.422Z" },
 ]
+
+[[package]]
+name = "mapper-custom"
+version = "0.1.0"
+source = { editable = "packages/mapper-custom" }
+dependencies = [
+    { name = "singer-sdk" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "singer-sdk", editable = "." }]
 
 [[package]]
 name = "markdown-it-py"
@@ -2383,7 +2410,7 @@ dependencies = [
     { name = "simpleeval" },
     { name = "simplejson" },
     { name = "sqlalchemy" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
     { name = "universal-pathlib" },
 ]
 
@@ -2417,6 +2444,7 @@ benchmark = [
     { name = "duckdb" },
     { name = "duckdb-engine" },
     { name = "fastjsonschema" },
+    { name = "mapper-custom" },
     { name = "moto" },
     { name = "pytest" },
     { name = "pytest-benchmark" },
@@ -2428,6 +2456,16 @@ benchmark = [
     { name = "requests-cache" },
     { name = "requests-mock" },
     { name = "rfc3339-validator" },
+    { name = "tap-countries" },
+    { name = "tap-csv" },
+    { name = "tap-dummyjson" },
+    { name = "tap-fake-people" },
+    { name = "tap-gitlab" },
+    { name = "tap-hostile" },
+    { name = "tap-sqlite" },
+    { name = "target-csv" },
+    { name = "target-parquet" },
+    { name = "target-sqlite" },
     { name = "time-machine" },
     { name = "xdoctest", extra = ["colors"] },
 ]
@@ -2438,6 +2476,7 @@ dev = [
     { name = "duckdb-engine" },
     { name = "fastjsonschema" },
     { name = "furo" },
+    { name = "mapper-custom" },
     { name = "moto" },
     { name = "mypy" },
     { name = "myst-parser", version = "3.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
@@ -2460,6 +2499,16 @@ dev = [
     { name = "sphinx-notfound-page" },
     { name = "sphinx-reredirects", version = "0.1.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "sphinx-reredirects", version = "1.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "tap-countries" },
+    { name = "tap-csv" },
+    { name = "tap-dummyjson" },
+    { name = "tap-fake-people" },
+    { name = "tap-gitlab" },
+    { name = "tap-hostile" },
+    { name = "tap-sqlite" },
+    { name = "target-csv" },
+    { name = "target-parquet" },
+    { name = "target-sqlite" },
     { name = "time-machine" },
     { name = "types-jsonschema" },
     { name = "types-pytz" },
@@ -2488,6 +2537,7 @@ testing = [
     { name = "duckdb" },
     { name = "duckdb-engine" },
     { name = "fastjsonschema" },
+    { name = "mapper-custom" },
     { name = "moto" },
     { name = "pytest" },
     { name = "pytest-benchmark" },
@@ -2498,6 +2548,16 @@ testing = [
     { name = "requests-cache" },
     { name = "requests-mock" },
     { name = "rfc3339-validator" },
+    { name = "tap-countries" },
+    { name = "tap-csv" },
+    { name = "tap-dummyjson" },
+    { name = "tap-fake-people" },
+    { name = "tap-gitlab" },
+    { name = "tap-hostile" },
+    { name = "tap-sqlite" },
+    { name = "target-csv" },
+    { name = "target-parquet" },
+    { name = "target-sqlite" },
     { name = "time-machine" },
     { name = "xdoctest", extra = ["colors"] },
 ]
@@ -2540,7 +2600,7 @@ requires-dist = [
     { name = "simpleeval", specifier = ">=0.9.13,!=1.0.1" },
     { name = "simplejson", specifier = ">=3.17.6" },
     { name = "sqlalchemy", specifier = ">=2" },
-    { name = "typing-extensions", specifier = ">=4.5.0" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'", specifier = ">=4.5.0" },
     { name = "universal-pathlib", specifier = ">=0.2.6" },
 ]
 provides-extras = ["faker", "jwt", "msgspec", "parquet", "s3", "ssh", "testing"]
@@ -2551,6 +2611,7 @@ benchmark = [
     { name = "duckdb", specifier = ">=0.8.0" },
     { name = "duckdb-engine", specifier = ">=0.13" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
+    { name = "mapper-custom", editable = "packages/mapper-custom" },
     { name = "moto", specifier = ">=5.0.14" },
     { name = "pytest", specifier = ">=7.2.1" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
@@ -2562,6 +2623,16 @@ benchmark = [
     { name = "requests-cache", specifier = ">=1.2.1" },
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "rfc3339-validator", specifier = ">=0.1.4" },
+    { name = "tap-countries", editable = "packages/tap-countries" },
+    { name = "tap-csv", editable = "packages/tap-csv" },
+    { name = "tap-dummyjson", editable = "packages/tap-dummyjson" },
+    { name = "tap-fake-people", editable = "packages/tap-fake-people" },
+    { name = "tap-gitlab", editable = "packages/tap-gitlab" },
+    { name = "tap-hostile", editable = "packages/tap-hostile" },
+    { name = "tap-sqlite", editable = "packages/tap-sqlite" },
+    { name = "target-csv", editable = "packages/target-csv" },
+    { name = "target-parquet", editable = "packages/target-parquet" },
+    { name = "target-sqlite", editable = "packages/target-sqlite" },
     { name = "time-machine", specifier = ">=2.10.0" },
     { name = "xdoctest", extras = ["colors"], specifier = ">=1.1.1" },
 ]
@@ -2572,6 +2643,7 @@ dev = [
     { name = "duckdb-engine", specifier = ">=0.13" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
     { name = "furo", specifier = ">=2024.5.6" },
+    { name = "mapper-custom", editable = "packages/mapper-custom" },
     { name = "moto", specifier = ">=5.0.14" },
     { name = "mypy", specifier = ">=1.16" },
     { name = "myst-parser", specifier = ">=3" },
@@ -2591,6 +2663,16 @@ dev = [
     { name = "sphinx-inline-tabs", specifier = ">=2023.4.21" },
     { name = "sphinx-notfound-page", specifier = ">=1.0.0" },
     { name = "sphinx-reredirects", specifier = ">=0.1.5" },
+    { name = "tap-countries", editable = "packages/tap-countries" },
+    { name = "tap-csv", editable = "packages/tap-csv" },
+    { name = "tap-dummyjson", editable = "packages/tap-dummyjson" },
+    { name = "tap-fake-people", editable = "packages/tap-fake-people" },
+    { name = "tap-gitlab", editable = "packages/tap-gitlab" },
+    { name = "tap-hostile", editable = "packages/tap-hostile" },
+    { name = "tap-sqlite", editable = "packages/tap-sqlite" },
+    { name = "target-csv", editable = "packages/target-csv" },
+    { name = "target-parquet", editable = "packages/target-parquet" },
+    { name = "target-sqlite", editable = "packages/target-sqlite" },
     { name = "time-machine", specifier = ">=2.10.0" },
     { name = "types-jsonschema", specifier = ">=4.17.0.6" },
     { name = "types-pytz", specifier = ">=2022.7.1.2" },
@@ -2614,6 +2696,7 @@ testing = [
     { name = "duckdb", specifier = ">=0.8.0" },
     { name = "duckdb-engine", specifier = ">=0.13" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
+    { name = "mapper-custom", editable = "packages/mapper-custom" },
     { name = "moto", specifier = ">=5.0.14" },
     { name = "pytest", specifier = ">=7.2.1" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
@@ -2624,6 +2707,16 @@ testing = [
     { name = "requests-cache", specifier = ">=1.2.1" },
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "rfc3339-validator", specifier = ">=0.1.4" },
+    { name = "tap-countries", editable = "packages/tap-countries" },
+    { name = "tap-csv", editable = "packages/tap-csv" },
+    { name = "tap-dummyjson", editable = "packages/tap-dummyjson" },
+    { name = "tap-fake-people", editable = "packages/tap-fake-people" },
+    { name = "tap-gitlab", editable = "packages/tap-gitlab" },
+    { name = "tap-hostile", editable = "packages/tap-hostile" },
+    { name = "tap-sqlite", editable = "packages/tap-sqlite" },
+    { name = "target-csv", editable = "packages/target-csv" },
+    { name = "target-parquet", editable = "packages/target-parquet" },
+    { name = "target-sqlite", editable = "packages/target-sqlite" },
     { name = "time-machine", specifier = ">=2.10.0" },
     { name = "xdoctest", extras = ["colors"], specifier = ">=1.1.1" },
 ]
@@ -2952,6 +3045,169 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/b0/1f/f68c58970d80ea5a1868ca5dc965d154a3b711f9ab06376ad9840d1475b8/sqlalchemy-2.0.41-cp39-cp39-win_amd64.whl", hash = "sha256:5e22575d169529ac3e0a120cf050ec9daa94b6a9597993d1702884f6954a7d71", size = 2113134, upload-time = "2025-05-14T18:01:42.801Z" },
     { url = "https://files.pythonhosted.org/packages/1c/fc/9ba22f01b5cdacc8f5ed0d22304718d2c758fce3fd49a5372b886a86f37c/sqlalchemy-2.0.41-py3-none-any.whl", hash = "sha256:57df5dc6fdb5ed1a88a1ed2195fd31927e705cad62dedd86b46972752a80f576", size = 1911224, upload-time = "2025-05-14T17:39:42.154Z" },
 ]
+
+[[package]]
+name = "tap-countries"
+version = "0.1.0"
+source = { editable = "packages/tap-countries" }
+dependencies = [
+    { name = "requests-cache" },
+    { name = "singer-sdk" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "requests-cache", specifier = "~=1.2.1" },
+    { name = "singer-sdk", editable = "." },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
+]
+
+[[package]]
+name = "tap-csv"
+version = "0.1.0"
+source = { editable = "packages/tap-csv" }
+dependencies = [
+    { name = "singer-sdk" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "singer-sdk", editable = "." }]
+
+[[package]]
+name = "tap-dummyjson"
+version = "0.1.0"
+source = { editable = "packages/tap-dummyjson" }
+dependencies = [
+    { name = "requests" },
+    { name = "requests-cache" },
+    { name = "singer-sdk" },
+]
+
+[package.optional-dependencies]
+s3 = [
+    { name = "s3fs" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "singer-sdk", extra = ["testing"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "requests", specifier = "~=2.32.3" },
+    { name = "requests-cache", specifier = "~=1.2.1" },
+    { name = "s3fs", marker = "extra == 's3'", specifier = "~=2025.5.0" },
+    { name = "singer-sdk", editable = "." },
+]
+provides-extras = ["s3"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=8" },
+    { name = "singer-sdk", extras = ["testing"], editable = "." },
+]
+
+[[package]]
+name = "tap-fake-people"
+version = "0.1.0"
+source = { editable = "packages/tap-fake-people" }
+dependencies = [
+    { name = "faker" },
+    { name = "singer-sdk" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "faker" },
+    { name = "singer-sdk", editable = "." },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
+]
+
+[[package]]
+name = "tap-gitlab"
+version = "0.1.0"
+source = { editable = "packages/tap-gitlab" }
+dependencies = [
+    { name = "singer-sdk" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "singer-sdk", editable = "." },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
+]
+
+[[package]]
+name = "tap-hostile"
+version = "0.1.0"
+source = { editable = "packages/tap-hostile" }
+dependencies = [
+    { name = "singer-sdk" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "singer-sdk", editable = "." },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
+]
+
+[[package]]
+name = "tap-sqlite"
+version = "0.1.0"
+source = { editable = "packages/tap-sqlite" }
+dependencies = [
+    { name = "singer-sdk" },
+    { name = "sqlalchemy" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "singer-sdk", editable = "." },
+    { name = "sqlalchemy" },
+]
+
+[[package]]
+name = "target-csv"
+version = "0.1.0"
+source = { editable = "packages/target-csv" }
+dependencies = [
+    { name = "singer-sdk" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "singer-sdk", editable = "." }]
+
+[[package]]
+name = "target-parquet"
+version = "0.1.0"
+source = { editable = "packages/target-parquet" }
+dependencies = [
+    { name = "pyarrow" },
+    { name = "singer-sdk" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pyarrow" },
+    { name = "singer-sdk", editable = "." },
+]
+
+[[package]]
+name = "target-sqlite"
+version = "0.1.0"
+source = { editable = "packages/target-sqlite" }
+dependencies = [
+    { name = "singer-sdk" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "singer-sdk", editable = "." }]
 
 [[package]]
 name = "time-machine"
