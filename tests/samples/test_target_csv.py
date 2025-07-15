@@ -15,17 +15,17 @@ from pathlib import Path
 import pytest
 import time_machine
 from click.testing import CliRunner
-
 from mapper_custom.mapper import StreamTransform
+from tap_countries.tap import TapCountries
+from tap_fake_people.tap import TapFakePeople
+from target_csv.target import TargetCSV
+
 from singer_sdk.testing import (
     get_target_test_class,
     tap_sync_test,
     tap_to_target_sync_test,
     target_sync_test,
 )
-from tap_countries.tap import TapCountries
-from tap_fake_people.tap import TapFakePeople
-from target_csv.target import TargetCSV
 from tests.conftest import TargetMock
 
 if t.TYPE_CHECKING:

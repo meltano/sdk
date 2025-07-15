@@ -10,6 +10,7 @@ from contextlib import redirect_stdout
 
 import pytest
 from click.testing import CliRunner
+from tap_countries.tap import TapCountries
 
 from singer_sdk.helpers._catalog import (
     get_selected_schema,
@@ -17,7 +18,6 @@ from singer_sdk.helpers._catalog import (
 )
 from singer_sdk.testing import get_tap_test_class
 from singer_sdk.testing.config import SuiteConfig
-from tap_countries.tap import TapCountries
 
 if t.TYPE_CHECKING:
     from pathlib import Path

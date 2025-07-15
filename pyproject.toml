@@ -127,6 +127,18 @@ testing = [
     "rfc3339-validator>=0.1.4",
     "time-machine>=2.10.0",
     "xdoctest[colors]>=1.1.1",
+    # Workspace packages needed for tests
+    "mapper-custom",
+    "tap-countries",
+    "tap-csv",
+    "tap-dummyjson",
+    "tap-fake-people",
+    "tap-gitlab",
+    "tap-hostile",
+    "tap-sqlite",
+    "target-csv",
+    "target-parquet",
+    "target-sqlite",
 ]
 typing = [
     "mypy>=1.16",
@@ -147,6 +159,7 @@ include = [
     "cookiecutter",
     "docs",
     "fixtures",
+    "packages",
     "samples",
     "singer_sdk",
     "tests",
@@ -206,7 +219,7 @@ version_files = [
     """cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml:^    "singer-sdk""",
     """cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:^    "singer-sdk""",
     """cookiecutter/mapper-template/{{cookiecutter.mapper_id}}/pyproject.toml:^    "singer-sdk""",
-    """samples/*/pyproject.toml:^    "singer-sdk""",
+    """packages/*/pyproject.toml:^    "singer-sdk""",
     ".github/ISSUE_TEMPLATE/bug.yml:^      placeholder:",
 ]
 
@@ -228,6 +241,7 @@ relative_files = true  # This allows coverage to be measured in Windows
 omit = [
     "tests/*",
     "samples/*",
+    "packages/*",
     "singer_sdk/helpers/_compat.py",
     "singer_sdk/helpers/types.py",
 ]
@@ -400,6 +414,7 @@ unfixable = [
 "singer_sdk/helpers/_*.py" = ["DOC"]
 # Disabled some checks in samples code
 "samples/*" = ["ANN", "DOC"]
+"packages/*" = ["DOC"]
 # Templates support a generic resource of type Any.
 "singer_sdk/testing/*.py" = ["S101"]
 "singer_sdk/testing/templates.py" = ["ANN401"]
@@ -424,18 +439,6 @@ parametrize-names-type = "csv"
 known-first-party = [
     "singer_sdk",
     "samples",
-    "mapper_custom",
-    "tap_bigquery",
-    "tap_countries",
-    "tap_csv",
-    "tap_dummyjson",
-    "tap_fake_people",
-    "tap_gitlab",
-    "tap_hostile",
-    "tap_sqlite",
-    "target_csv",
-    "target_parquet",
-    "target_sqlite",
     "tests",
 ]
 required-imports = ["from __future__ import annotations"]
@@ -454,22 +457,34 @@ max-args = 9
 [tool.uv]
 required-version = ">=0.5.19"
 
+[tool.uv.sources]
+mapper-custom = { workspace = true }
+tap-countries = { workspace = true }
+tap-csv = { workspace = true }
+tap-dummyjson = { workspace = true }
+tap-fake-people = { workspace = true }
+tap-gitlab = { workspace = true }
+tap-hostile = { workspace = true }
+tap-sqlite = { workspace = true }
+target-csv = { workspace = true }
+target-parquet = { workspace = true }
+target-sqlite = { workspace = true }
+
 [tool.uv.workspace]
 members = [
-    "samples/sample_mapper",
-    "samples/sample_tap_bigquery",
-    "samples/sample_tap_countries",
-    "samples/sample_tap_csv",
-    "samples/sample_tap_dummy_json",
-    "samples/sample_tap_fake_people",
-    "samples/sample_tap_gitlab",
-    "samples/sample_tap_hostile",
-    "samples/sample_tap_sqlite",
-    "samples/sample_target_csv",
-    "samples/sample_target_parquet",
-    "samples/sample_target_sqlite",
+    "packages/sample_mapper",
+    "packages/sample_tap_countries",
+    "packages/sample_tap_csv",
+    "packages/sample_tap_dummy_json",
+    "packages/sample_tap_fake_people",
+    "packages/sample_tap_gitlab",
+    "packages/sample_tap_hostile",
+    "packages/sample_tap_sqlite",
+    "packages/sample_target_csv",
+    "packages/sample_target_parquet",
+    "packages/sample_target_sqlite",
 ]
 
 [tool.codespell]
-skip = "*.csv,samples/aapl/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"
+skip = "*.csv,samples/aapl/*.json,packages/*/schemas/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"
 ignore-words-list = "fo,intoto"

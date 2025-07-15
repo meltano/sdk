@@ -4,9 +4,9 @@ import datetime
 import typing as t
 
 import pytest
+from tap_csv.tap import TapCSV
 
 from singer_sdk.testing import SuiteConfig, TapTestRunner, get_tap_test_class
-from tap_csv.tap import TapCSV
 
 if t.TYPE_CHECKING:
     from tap_csv.client import CSVStream

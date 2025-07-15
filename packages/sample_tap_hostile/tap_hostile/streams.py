@@ -36,7 +36,7 @@ class HostilePropertyNamesStream(Stream):
     ).to_dict()
 
     @staticmethod
-    def get_random_lowercase_string():
+    def get_random_lowercase_string() -> str:
         """Get a random lowercase string."""
         return "".join(random.choice(string.ascii_lowercase) for _ in range(10))  # noqa: S311
 

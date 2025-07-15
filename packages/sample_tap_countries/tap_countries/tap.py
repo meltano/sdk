@@ -8,9 +8,10 @@ See the online explorer and query builder here:
 
 from __future__ import annotations
 
+from tap_countries.streams import ContinentsStream, CountriesStream
+
 from singer_sdk import Stream, Tap
 from singer_sdk.contrib.msgspec import MsgSpecWriter
-from tap_countries.streams import ContinentsStream, CountriesStream
 
 
 class TapCountries(Tap):

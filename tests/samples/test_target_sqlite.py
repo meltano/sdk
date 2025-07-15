@@ -13,6 +13,9 @@ from uuid import uuid4
 
 import pytest
 import sqlalchemy as sa
+from tap_hostile import TapHostile
+from tap_sqlite import SQLiteTap
+from target_sqlite import SQLiteSink, SQLiteTarget
 
 from singer_sdk import typing as th
 from singer_sdk.testing import (
@@ -20,9 +23,6 @@ from singer_sdk.testing import (
     tap_to_target_sync_test,
     target_sync_test,
 )
-from tap_hostile import TapHostile
-from tap_sqlite import SQLiteTap
-from target_sqlite import SQLiteSink, SQLiteTarget
 
 if t.TYPE_CHECKING:
     from pytest_snapshot.plugin import Snapshot

@@ -7,9 +7,9 @@ import uuid
 from pathlib import Path
 
 import pytest
+from target_parquet.target import TargetParquet
 
 from singer_sdk.testing import get_target_test_class
-from target_parquet.target import TargetParquet
 
 SAMPLE_FILEPATH = Path(f".output/test_{uuid.uuid4()}/")
 SAMPLE_FILENAME = SAMPLE_FILEPATH / "testfile.parquet"

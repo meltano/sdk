@@ -7,6 +7,8 @@ import typing as t
 import pytest
 import time_machine
 from click.testing import CliRunner
+from tap_sqlite import SQLiteTap
+from target_csv.target import TargetCSV
 
 from singer_sdk.singerlib import MetadataMapping, StreamMetadata
 from singer_sdk.testing import (
@@ -14,8 +16,6 @@ from singer_sdk.testing import (
     tap_sync_test,
     tap_to_target_sync_test,
 )
-from tap_sqlite import SQLiteTap
-from target_csv.target import TargetCSV
 
 if t.TYPE_CHECKING:
     from pathlib import Path

@@ -13,17 +13,17 @@ from singer_sdk.contrib.msgspec import MsgSpecReader
 DB_PATH_CONFIG = "path_to_db"
 
 
-def adapt_date_iso(val):
+def adapt_date_iso(val: datetime.date) -> str:
     """Adapt datetime.date to ISO 8601 date."""
     return val.isoformat()
 
 
-def adapt_datetime_iso(val):
+def adapt_datetime_iso(val: datetime.datetime) -> str:
     """Adapt datetime.datetime to timezone-naive ISO 8601 date."""
     return val.isoformat()
 
 
-def adapt_datetime_epoch(val):
+def adapt_datetime_epoch(val: datetime.datetime) -> int:
     """Adapt datetime.datetime to Unix timestamp."""
     return int(val.timestamp())
 
@@ -33,17 +33,17 @@ sqlite3.register_adapter(datetime.datetime, adapt_datetime_iso)
 sqlite3.register_adapter(datetime.datetime, adapt_datetime_epoch)
 
 
-def convert_date(val):
+def convert_date(val: bytes) -> datetime.date:
     """Convert ISO 8601 date to datetime.date object."""
     return datetime.date.fromisoformat(val.decode())
 
 
-def convert_datetime(val):
+def convert_datetime(val: bytes) -> datetime.datetime:
     """Convert ISO 8601 datetime to datetime.datetime object."""
     return datetime.datetime.fromisoformat(val.decode())
 
 
-def convert_timestamp(val):
+def convert_timestamp(val: bytes) -> datetime.datetime:
     """Convert Unix epoch timestamp to datetime.datetime object."""
     return datetime.datetime.fromtimestamp(int(val), tz=datetime.timezone.utc)
 
@@ -90,7 +90,7 @@ class SQLiteTarget(SQLTarget):
 
     name = "target-sqlite"
     default_sink_class = SQLiteSink
-    max_parallelism = 1
+    max_parallelism: int = 1
 
     config_jsonschema = th.PropertiesList(
         th.Property(

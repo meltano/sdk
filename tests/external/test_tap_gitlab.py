@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import warnings
 
+from tap_gitlab.tap import TapGitlab
+
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers import _catalog
 from singer_sdk.singerlib import Catalog
 from singer_sdk.testing import get_tap_test_class
-from tap_gitlab.tap import TapGitlab
 
 from .conftest import gitlab_config
 

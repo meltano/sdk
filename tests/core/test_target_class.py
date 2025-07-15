@@ -5,9 +5,9 @@ from contextlib import nullcontext
 
 import pytest
 from click.testing import CliRunner
+from target_sqlite import SQLiteTarget
 
 from singer_sdk.exceptions import ConfigValidationError
-from target_sqlite import SQLiteTarget
 
 
 @pytest.mark.parametrize(
