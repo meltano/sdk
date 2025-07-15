@@ -1314,16 +1314,21 @@ class SQLConnector:  # noqa: PLR0904
             msg = f"Schema for '{full_table_name}' does not define properties: {schema}"
             raise RuntimeError(msg) from e
         for property_name, property_jsonschema in properties.items():
-            is_primary_key = property_name in primary_keys
             columns.append(
                 sa.Column(
                     property_name,
                     self.to_sql_type(property_jsonschema),
-                    primary_key=is_primary_key,
                 ),
             )
 
-        _ = sa.Table(table_name, meta, *columns)
+        table_args = []
+        if primary_keys:
+            # Only include primary keys that exist in the schema properties
+            existing_pk_columns = [col for col in primary_keys if col in properties]
+            if existing_pk_columns:
+                table_args.append(sa.PrimaryKeyConstraint(*existing_pk_columns))
+
+        _ = sa.Table(table_name, meta, *columns, *table_args)
         meta.create_all(self._engine)
 
     def _create_empty_column(
