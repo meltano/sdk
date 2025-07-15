@@ -9,7 +9,7 @@ import pytest
 from .config import SuiteConfig
 from .runners import TapTestRunner, TargetTestRunner
 from .suites import (
-    TestSuite,
+    SingerTestSuite,
     tap_stream_attribute_tests,
     tap_stream_tests,
     tap_tests,
@@ -154,7 +154,7 @@ class TapTestClassFactory:
     def _annotate_test_class(
         self,
         empty_test_class: type[BaseTestClass],
-        test_suites: list[TestSuite],
+        test_suites: list[SingerTestSuite],
         test_runner: TapTestRunner,
     ) -> type[BaseTestClass]:
         """Annotate test class with test methods.
@@ -185,7 +185,7 @@ class TapTestClassFactory:
     def _with_tap_tests(  # noqa: PLR6301
         self,
         empty_test_class: type[BaseTestClass],
-        suite: TestSuite[TapTestTemplate],
+        suite: SingerTestSuite[TapTestTemplate],
     ) -> None:
         for test_class in suite.tests:
             test = test_class()
@@ -195,7 +195,7 @@ class TapTestClassFactory:
     def _with_stream_tests(  # noqa: PLR6301
         self,
         empty_test_class: type[BaseTestClass],
-        suite: TestSuite[StreamTestTemplate],
+        suite: SingerTestSuite[StreamTestTemplate],
         streams: list[Stream],
     ) -> None:
         params = [
@@ -220,7 +220,7 @@ class TapTestClassFactory:
     def _with_stream_attribute_tests(  # noqa: PLR6301
         self,
         empty_test_class: type[BaseTestClass],
-        suite: TestSuite[AttributeTestTemplate],
+        suite: SingerTestSuite[AttributeTestTemplate],
         streams: list[Stream],
     ) -> None:
         for test_class in suite.tests:
