@@ -62,7 +62,7 @@ def _install_env(session: nox.Session) -> dict[str, str]:
     return env
 
 
-@nox.session()
+@nox.session(python=[python_versions[0], python_versions[-1]])
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
