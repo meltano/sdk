@@ -119,13 +119,13 @@ _JsonValue: TypeAlias = t.Union[
     None,
 ]
 
-DEFAULT_JSONSCHEMA_VALIDATOR: type[Validator] = validators.Draft202012Validator  # type: ignore[assignment]
+DEFAULT_JSONSCHEMA_VALIDATOR = validators.Draft202012Validator
 
 T = t.TypeVar("T", bound=_JsonValue)
 P = t.TypeVar("P")
 
 
-def extend_validator_with_defaults(validator_class: type[Validator]):  # noqa: ANN201
+def extend_validator_with_defaults(validator_class: type[DEFAULT_JSONSCHEMA_VALIDATOR]):  # noqa: ANN201
     """Fill in defaults, before validating with the provided JSON Schema Validator.
 
     See
