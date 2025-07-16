@@ -15,7 +15,6 @@ from gzip import open as gzip_open
 from types import MappingProxyType
 
 import jsonschema
-import jsonschema.validators
 
 from singer_sdk import metrics
 from singer_sdk.exceptions import (
@@ -96,27 +95,23 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
         Raises:
             InvalidJSONSchema: If the schema provided from tap or mapper is invalid.
         """
-        jsonschema_validator = jsonschema.validators.validator_for(
-            schema,
-            DEFAULT_JSONSCHEMA_VALIDATOR,
-        )
-
-        super().__init__(schema)
-        if validate_formats:
-            format_checker = format_checker or jsonschema_validator.FORMAT_CHECKER
-        else:
+        if not validate_formats:
             format_checker = jsonschema.FormatChecker(formats=())
+        elif format_checker is None:
+            format_checker = DEFAULT_JSONSCHEMA_VALIDATOR.FORMAT_CHECKER
 
-        try:
-            jsonschema_validator.check_schema(schema)
-        except jsonschema.SchemaError as e:
-            error_message = f"Schema Validation Error: {e}"
-            raise InvalidJSONSchema(error_message) from e
-
-        self.validator = jsonschema_validator(
+        self.validator = DEFAULT_JSONSCHEMA_VALIDATOR(
             schema=schema,
             format_checker=format_checker,
         )
+
+        super().__init__(schema)
+
+        try:
+            self.validator.check_schema(schema)
+        except jsonschema.SchemaError as e:
+            error_message = f"Schema Validation Error: {e}"
+            raise InvalidJSONSchema(error_message) from e
 
     @override
     def validate(self, record: dict):  # noqa: ANN201
