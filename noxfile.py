@@ -62,7 +62,7 @@ def _install_env(session: nox.Session) -> dict[str, str]:
     return env
 
 
-@nox.session()
+@nox.session(python=[python_versions[0], python_versions[-1]])
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
@@ -102,8 +102,6 @@ def tests(session: nox.Session) -> None:
         env=_install_env(session),
     )
 
-    env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
-
     try:
         session.run(
             "coverage",
@@ -114,7 +112,6 @@ def tests(session: nox.Session) -> None:
             "--durations=10",
             "--benchmark-skip",
             *session.posargs,
-            env=env,
         )
     finally:
         if session.interactive:

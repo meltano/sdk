@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import warnings
 
-from samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
+from tap_gitlab.tap import TapGitlab
+
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers import _catalog
 from singer_sdk.singerlib import Catalog
@@ -13,7 +14,7 @@ from .conftest import gitlab_config
 try:
     config = gitlab_config()
     TestSampleTapGitlab = get_tap_test_class(
-        tap_class=SampleTapGitlab,
+        tap_class=TapGitlab,
         config=config,
         parse_env_config=True,
     )
@@ -33,12 +34,16 @@ SAMPLE_CONFIG_BAD = {"not": "correct"}
 def test_gitlab_replication_keys(gitlab_config: dict | None):
     stream_name = "issues"
     expected_replication_key = "updated_at"
-    tap = SampleTapGitlab(config=gitlab_config, state=None, parse_env_config=True)
+    tap = TapGitlab(config=gitlab_config, state=None, parse_env_config=True)
 
     catalog = tap._singer_catalog
     catalog_entry = catalog.get_stream(stream_name)
-    metadata_root = catalog_entry.metadata.root
+    assert catalog_entry is not None
 
+    metadata_root = catalog_entry.metadata.root
+    assert metadata_root is not None
+
+    assert metadata_root.valid_replication_keys is not None
     key_props_1 = metadata_root.valid_replication_keys[0]
     key_props_2 = catalog_entry.replication_key
     assert key_props_1 == expected_replication_key, (
@@ -62,7 +67,7 @@ def test_gitlab_sync_epic_issues(gitlab_config: dict | None):
     """Test sync for just the 'epic_issues' child stream."""
     # Initialize with basic config
     stream_name = "epic_issues"
-    tap1 = SampleTapGitlab(config=gitlab_config, parse_env_config=True)
+    tap1 = TapGitlab(config=gitlab_config, parse_env_config=True)
     # Test discovery
     tap1.run_discovery()
     catalog1 = Catalog.from_dict(tap1.catalog_dict)
@@ -74,7 +79,7 @@ def test_gitlab_sync_epic_issues(gitlab_config: dict | None):
         selected=True,
     )
     tap1 = None
-    tap2 = SampleTapGitlab(
+    tap2 = TapGitlab(
         config=gitlab_config,
         parse_env_config=True,
         catalog=catalog1.to_dict(),

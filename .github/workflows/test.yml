@@ -63,6 +63,7 @@ jobs:
         include:
         - { session: doctest,     python-version: "3.13", os: "ubuntu-latest" }
         - { session: mypy,        python-version: "3.13", os: "ubuntu-latest" }
+        - { session: mypy,        python-version: "3.9",  os: "ubuntu-latest" }
         - { session: deps,        python-version: "3.13", os: "ubuntu-latest" }
         - { session: test-lowest, python-version: "3.9",  os: "ubuntu-latest" }
 
@@ -110,10 +111,10 @@ jobs:
     env:
       NOXPYTHON: "3.12"
       NOXSESSION: tests
-      SAMPLE_TAP_GITLAB_AUTH_TOKEN: ${{ secrets.SAMPLE_TAP_GITLAB_AUTH_TOKEN }}
-      SAMPLE_TAP_GITLAB_GROUP_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_GROUP_IDS }}
-      SAMPLE_TAP_GITLAB_PROJECT_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_PROJECT_IDS }}
-      SAMPLE_TAP_GITLAB_START_DATE: "2022-01-01T00:00:00Z"
+      TAP_GITLAB_AUTH_TOKEN: ${{ secrets.SAMPLE_TAP_GITLAB_AUTH_TOKEN }}
+      TAP_GITLAB_GROUP_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_GROUP_IDS }}
+      TAP_GITLAB_PROJECT_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_PROJECT_IDS }}
+      TAP_GITLAB_START_DATE: "2022-01-01T00:00:00Z"
 
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2

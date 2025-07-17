@@ -15,11 +15,11 @@ from pathlib import Path
 import pytest
 import time_machine
 from click.testing import CliRunner
+from mapper_custom.mapper import StreamTransform
+from tap_countries.tap import TapCountries
+from tap_fake_people.tap import TapFakePeople
+from target_csv.target import TargetCSV
 
-from samples.sample_mapper.mapper import StreamTransform
-from samples.sample_tap_countries.countries_tap import SampleTapCountries
-from samples.sample_tap_fake_people.tap import SampleTapFakePeople
-from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk.testing import (
     get_target_test_class,
     tap_sync_test,
@@ -37,7 +37,7 @@ DATETIME = datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc)
 
 
 StandardTests = get_target_test_class(
-    target_class=SampleTargetCSV,
+    target_class=TargetCSV,
     config=SAMPLE_CONFIG,
 )
 
@@ -69,8 +69,8 @@ def test_countries_to_csv(
     snapshot: Snapshot,
     caplog: pytest.LogCaptureFixture,
 ):
-    tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
-    target = SampleTargetCSV(config=csv_config)
+    tap = TapCountries(config=SAMPLE_TAP_CONFIG, state=None)
+    target = TargetCSV(config=csv_config)
     target.max_parallelism = 1
 
     caplog.set_level("ERROR", "singer_sdk.metrics")
@@ -96,14 +96,14 @@ def test_countries_to_csv_mapped(
     caplog: pytest.LogCaptureFixture,
     emit_activate_version_messages: bool,
 ):
-    tap = SampleTapCountries(
+    tap = TapCountries(
         config={
             **SAMPLE_TAP_CONFIG,
             "emit_activate_version_messages": emit_activate_version_messages,
         },
         state=None,
     )
-    target = SampleTargetCSV(config=csv_config)
+    target = TargetCSV(config=csv_config)
     target.max_parallelism = 1
     mapper = StreamTransform(config=COUNTRIES_STREAM_MAPS_CONFIG)
 
@@ -144,8 +144,8 @@ def test_fake_people_to_csv(
     snapshot: Snapshot,
     caplog: pytest.LogCaptureFixture,
 ):
-    tap = SampleTapFakePeople()
-    target = SampleTargetCSV(config=csv_config)
+    tap = TapFakePeople()
+    target = TargetCSV(config=csv_config)
     target.max_parallelism = 1
 
     caplog.set_level("ERROR", "singer_sdk.metrics")
@@ -165,7 +165,7 @@ def test_target_batching():
     of time elapsed. Currently this is set to 30 minutes, so we test after 31
     minutes elapsed between checkpoints.
     """
-    tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
+    tap = TapCountries(config=SAMPLE_TAP_CONFIG, state=None)
 
     buf, _ = tap_sync_test(tap)
 
@@ -248,7 +248,7 @@ EXPECTED_OUTPUT = """"id"	"name"
 
 @pytest.fixture
 def target(csv_config: dict):
-    return SampleTargetCSV(config=csv_config)
+    return TargetCSV(config=csv_config)
 
 
 @pytest.fixture

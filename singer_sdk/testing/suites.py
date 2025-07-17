@@ -49,8 +49,23 @@ from .templates import TestTemplate
 T = t.TypeVar("T", bound=TestTemplate)
 
 
+def __getattr__(name: str) -> t.Any:  # noqa: ANN401
+    """Provide backwards compatibility for TestSuite."""  # noqa: DOC201, DOC501
+    if name == "TestSuite":
+        import warnings  # noqa: PLC0415
+
+        warnings.warn(
+            "TestSuite is deprecated, use SingerTestSuite instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return SingerTestSuite
+    msg = f"module '{__name__}' has no attribute '{name}'"
+    raise AttributeError(msg)
+
+
 @dataclass
-class TestSuite(t.Generic[T]):
+class SingerTestSuite(t.Generic[T]):
     """Test Suite container class."""
 
     kind: str
@@ -58,7 +73,7 @@ class TestSuite(t.Generic[T]):
 
 
 # Tap Test Suites
-tap_tests = TestSuite(
+tap_tests = SingerTestSuite(
     kind="tap",
     tests=[
         TapCLIPrintsTest,
@@ -67,7 +82,7 @@ tap_tests = TestSuite(
         TapValidFinalStateTest,
     ],
 )
-tap_stream_tests = TestSuite(
+tap_stream_tests = SingerTestSuite(
     kind="tap_stream",
     tests=[
         StreamCatalogSchemaMatchesRecordTest,
@@ -78,7 +93,7 @@ tap_stream_tests = TestSuite(
         StreamPrimaryKeysTest,
     ],
 )
-tap_stream_attribute_tests = TestSuite(
+tap_stream_attribute_tests = SingerTestSuite(
     kind="tap_stream_attribute",
     tests=[
         AttributeIsBooleanTest,
@@ -92,7 +107,7 @@ tap_stream_attribute_tests = TestSuite(
 
 
 # Target Test Suites
-target_tests = TestSuite(
+target_tests = SingerTestSuite(
     kind="target",
     tests=[
         TargetArrayData,

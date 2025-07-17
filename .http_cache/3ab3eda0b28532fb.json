@@ -1,0 +1,56 @@
+{
+  "cookies": {
+    "_cfuvid": "Xr5Q0uPNDnHySlsIaJ9LJtoVq3uosVyQOQLEDHUs8.w-1752284730016-0.0.1.1-604800000"
+  },
+  "created_at": "2025-07-12T01:45:29.715472+00:00",
+  "elapsed": 0.233423,
+  "encoding": "utf-8",
+  "headers": {
+    "Accept-Ranges": "bytes",
+    "CF-Cache-Status": "MISS",
+    "CF-Ray": "95dcdc89995aeddf-QRO",
+    "Cache-Control": "max-age=0, private, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Length": "2",
+    "Content-Type": "application/json",
+    "Date": "Sat, 12 Jul 2025 01:45:30 GMT",
+    "ETag": "W/\"4f53cda18c2baa0c0354bb5f9a3ecbe5\"",
+    "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/83/issues?epic_iid=83&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/83/issues?epic_iid=83&id=2524164&page=1&per_page=20>; rel=\"last\"",
+    "Server": "cloudflare",
+    "Set-Cookie": "_cfuvid=Xr5Q0uPNDnHySlsIaJ9LJtoVq3uosVyQOQLEDHUs8.w-1752284730016-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Vary": "Origin, Accept-Encoding",
+    "content-security-policy": "default-src 'none'",
+    "gitlab-lb": "haproxy-main-20-lb-gprd",
+    "gitlab-sv": "gke-cny-api",
+    "nel": "{\"max_age\": 0}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "x-gitlab-meta": "{\"correlation_id\":\"cafe11012df6ee976f44df6dc95ed051\",\"version\":\"1\"}",
+    "x-next-page": "",
+    "x-page": "1",
+    "x-per-page": "20",
+    "x-prev-page": "",
+    "x-request-id": "cafe11012df6ee976f44df6dc95ed051",
+    "x-runtime": "0.088340",
+    "x-total": "0",
+    "x-total-pages": "1"
+  },
+  "reason": "OK",
+  "request": {
+    "body": "",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Private-Token": "REDACTED",
+      "User-Agent": "REDACTED"
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/groups/2524164/epics/83/issues"
+  },
+  "status_code": 200,
+  "url": "https://gitlab.com/api/v4/groups/2524164/epics/83/issues",
+  "_decoded_content": []
+}

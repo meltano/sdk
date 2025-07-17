@@ -6,6 +6,7 @@ import abc
 import copy
 import datetime
 import importlib.util
+import sys
 import time
 import typing as t
 from functools import cached_property
@@ -14,8 +15,6 @@ from gzip import open as gzip_open
 from types import MappingProxyType
 
 import jsonschema
-import jsonschema.validators
-from typing_extensions import override
 
 from singer_sdk import metrics
 from singer_sdk.exceptions import (
@@ -41,6 +40,11 @@ from singer_sdk.helpers._typing import (
 )
 from singer_sdk.singerlib.json import deserialize_json
 from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
+
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
 
 if t.TYPE_CHECKING:
     from logging import Logger
@@ -91,27 +95,23 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
         Raises:
             InvalidJSONSchema: If the schema provided from tap or mapper is invalid.
         """
-        jsonschema_validator = jsonschema.validators.validator_for(
-            schema,
-            DEFAULT_JSONSCHEMA_VALIDATOR,
-        )
-
-        super().__init__(schema)
-        if validate_formats:
-            format_checker = format_checker or jsonschema_validator.FORMAT_CHECKER
-        else:
+        if not validate_formats:
             format_checker = jsonschema.FormatChecker(formats=())
+        elif format_checker is None:
+            format_checker = DEFAULT_JSONSCHEMA_VALIDATOR.FORMAT_CHECKER
 
-        try:
-            jsonschema_validator.check_schema(schema)
-        except jsonschema.SchemaError as e:
-            error_message = f"Schema Validation Error: {e}"
-            raise InvalidJSONSchema(error_message) from e
-
-        self.validator = jsonschema_validator(
+        self.validator = DEFAULT_JSONSCHEMA_VALIDATOR(
             schema=schema,
             format_checker=format_checker,
         )
+
+        super().__init__(schema)
+
+        try:
+            self.validator.check_schema(schema)
+        except jsonschema.SchemaError as e:
+            error_message = f"Schema Validation Error: {e}"
+            raise InvalidJSONSchema(error_message) from e
 
     @override
     def validate(self, record: dict):  # noqa: ANN201
