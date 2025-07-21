@@ -11,23 +11,23 @@ repos:
   hooks:
   - id: check-json
     exclude: |
-        (?x)^(
-            .*/launch.json
-        )$
+      (?x)^(
+        .*/launch.json
+      )$
   - id: check-toml
   - id: check-yaml
   - id: end-of-file-fixer
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.33.1
+  rev: 0.33.2
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
   - id: check-meltano
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.12.1
+  rev: v0.12.4
   hooks:
   - id: ruff-check
     args: [--diff]
@@ -35,7 +35,7 @@ repos:
     args: [--diff]
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.7.17
+  rev: 0.8.0
   hooks:
   - id: uv-lock
   - id: uv-sync
