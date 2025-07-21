@@ -66,7 +66,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         return self._connector
 
     @property
-    def connection(self) -> sa.engine.Connection:
+    def connection(self) -> sa.Connection:
         """Get or set the SQLAlchemy connection for this sink.
 
         Returns:
@@ -403,7 +403,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
             self.connector.prepare_column(
                 self.full_table_name,
                 self.version_column_name,
-                sql_type=sa.types.Integer(),
+                sql_type=sa.Integer(),
             )
 
         if self.config.get("hard_delete", False):
@@ -421,7 +421,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
             self.connector.prepare_column(
                 self.full_table_name,
                 self.soft_delete_column_name,
-                sql_type=sa.types.DateTime(),
+                sql_type=sa.DateTime(),
             )
 
         query = sa.text(
@@ -431,8 +431,8 @@ class SQLSink(BatchSink, t.Generic[_C]):
             f"  AND {self.soft_delete_column_name} IS NULL\n",
         )
         query = query.bindparams(
-            bindparam("deletedate", value=deleted_at, type_=sa.types.DateTime),
-            bindparam("version", value=new_version, type_=sa.types.Integer),
+            bindparam("deletedate", value=deleted_at, type_=sa.DateTime),
+            bindparam("version", value=new_version, type_=sa.Integer),
         )
         with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
             conn.execute(query)

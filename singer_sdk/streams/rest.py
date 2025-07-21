@@ -14,6 +14,7 @@ from warnings import warn
 
 import backoff
 import requests
+import requests.exceptions
 
 from singer_sdk import metrics
 from singer_sdk.authenticators import SimpleAuthenticator
