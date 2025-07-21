@@ -80,7 +80,7 @@ jobs:
 
     - uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6.3.1
       with:
-        version: ">=0.6,<0.7"
+        version: ">=0.8,<0.9"
 
     - name: Install Nox
       run: |
@@ -109,7 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.head.repo.fork }}
     env:
-      NOXPYTHON: "3.12"
+      NOXPYTHON: "3.13"
       NOXSESSION: tests
       TAP_GITLAB_AUTH_TOKEN: ${{ secrets.SAMPLE_TAP_GITLAB_AUTH_TOKEN }}
       TAP_GITLAB_GROUP_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_GROUP_IDS }}
@@ -128,7 +128,7 @@ jobs:
 
     - uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6.3.1
       with:
-        version: ">=0.6,<0.7"
+        version: ">=0.8,<0.9"
 
     - name: Install Nox
       run: |
@@ -160,7 +160,7 @@ jobs:
 
     - uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6.3.1
       with:
-        version: ">=0.6,<0.7"
+        version: ">=0.8,<0.9"
 
     - name: Install Nox
       run: |

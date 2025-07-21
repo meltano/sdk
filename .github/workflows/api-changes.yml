@@ -39,7 +39,7 @@ jobs:
 
     - uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6.3.1
       with:
-        version: ">=0.6,<0.7"
+        version: ">=0.8,<0.9"
 
     - name: Install tools
       run: |
