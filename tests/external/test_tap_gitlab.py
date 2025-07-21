@@ -20,9 +20,6 @@ except ConfigValidationError as e:
         stacklevel=2,
     )
 
-COUNTER = 0
-SAMPLE_CONFIG_BAD = {"not": "correct"}
-
 
 def test_gitlab_replication_keys():
     stream_name = "issues"
