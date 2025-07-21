@@ -1,24 +1,12 @@
 from __future__ import annotations
 
-import warnings
-
 from tap_gitlab.tap import TapGitlab
 
-from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers import _catalog
 from singer_sdk.singerlib import Catalog
 from singer_sdk.testing import get_tap_test_class
 
-try:
-    TestSampleTapGitlab = get_tap_test_class(TapGitlab)
-except ConfigValidationError as e:
-    warnings.warn(
-        UserWarning(
-            "Could not configure external gitlab tests. "
-            f"Config in CI is expected via env vars.\n{e}",
-        ),
-        stacklevel=2,
-    )
+TestSampleTapGitlab = get_tap_test_class(TapGitlab, validate_config=False)
 
 
 def test_gitlab_replication_keys():
