@@ -870,8 +870,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """Write out an ACTIVATE_VERSION message."""
         singer.write_message(
             singer.ActivateVersionMessage(
-                self.name,
-                full_table_version,
+                stream=self.name,
+                version=full_table_version,
             )
         )
 

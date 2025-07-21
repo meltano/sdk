@@ -24,13 +24,9 @@ if t.TYPE_CHECKING:
 
     from pytest_snapshot.plugin import Snapshot
 
-SAMPLE_CONFIG = {}
-SAMPLE_CONFIG_BAD = {"not": "correct"}
-
 # standard tap tests
 TestSampleTapCountries = get_tap_test_class(
     tap_class=TapCountries,
-    config=SAMPLE_CONFIG,
     suite_config=SuiteConfig(max_records_limit=5),
 )
 

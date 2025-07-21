@@ -9,15 +9,8 @@ from singer_sdk.helpers import _catalog
 from singer_sdk.singerlib import Catalog
 from singer_sdk.testing import get_tap_test_class
 
-from .conftest import gitlab_config
-
 try:
-    config = gitlab_config()
-    TestSampleTapGitlab = get_tap_test_class(
-        tap_class=TapGitlab,
-        config=config,
-        parse_env_config=True,
-    )
+    TestSampleTapGitlab = get_tap_test_class(TapGitlab)
 except ConfigValidationError as e:
     warnings.warn(
         UserWarning(
@@ -27,14 +20,11 @@ except ConfigValidationError as e:
         stacklevel=2,
     )
 
-COUNTER = 0
-SAMPLE_CONFIG_BAD = {"not": "correct"}
 
-
-def test_gitlab_replication_keys(gitlab_config: dict | None):
+def test_gitlab_replication_keys():
     stream_name = "issues"
     expected_replication_key = "updated_at"
-    tap = TapGitlab(config=gitlab_config, state=None, parse_env_config=True)
+    tap = TapGitlab(state=None, parse_env_config=True)
 
     catalog = tap._singer_catalog
     catalog_entry = catalog.get_stream(stream_name)
@@ -63,11 +53,11 @@ def test_gitlab_replication_keys(gitlab_config: dict | None):
     )
 
 
-def test_gitlab_sync_epic_issues(gitlab_config: dict | None):
+def test_gitlab_sync_epic_issues():
     """Test sync for just the 'epic_issues' child stream."""
     # Initialize with basic config
     stream_name = "epic_issues"
-    tap1 = TapGitlab(config=gitlab_config, parse_env_config=True)
+    tap1 = TapGitlab(parse_env_config=True)
     # Test discovery
     tap1.run_discovery()
     catalog1 = Catalog.from_dict(tap1.catalog_dict)
@@ -79,9 +69,5 @@ def test_gitlab_sync_epic_issues(gitlab_config: dict | None):
         selected=True,
     )
     tap1 = None
-    tap2 = TapGitlab(
-        config=gitlab_config,
-        parse_env_config=True,
-        catalog=catalog1.to_dict(),
-    )
+    tap2 = TapGitlab(parse_env_config=True, catalog=catalog1.to_dict())
     tap2.sync_all()

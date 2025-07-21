@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import json.decoder
 import logging
 import sys
 import typing as t
