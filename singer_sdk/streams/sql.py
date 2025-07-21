@@ -14,6 +14,8 @@ from singer_sdk.singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.streams.core import REPLICATION_INCREMENTAL, Stream
 
 if t.TYPE_CHECKING:
+    from sqlalchemy.sql import selectable
+
     from singer_sdk.connectors.sql import FullyQualifiedName
     from singer_sdk.helpers.types import Context, Record
     from singer_sdk.tap_base import Tap
@@ -169,11 +171,11 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
     def apply_query_filters(
         self,
-        query: sa.sql.Select,
+        query: selectable.Select,
         table: sa.Table,
         *,
         context: Context | None = None,
-    ) -> sa.sql.Select:
+    ) -> selectable.Select:
         """Apply WHERE and ORDER BY clauses to the query.
 
         By default, this method applies a replication filter to the query
@@ -202,7 +204,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         return query
 
-    def apply_query_limit(self, query: sa.sql.Select) -> sa.sql.Select:
+    def apply_query_limit(self, query: selectable.Select) -> selectable.Select:
         """Apply LIMIT clause to the query.
 
         By default, this method applies a limit filter to the query
@@ -228,7 +230,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         return query
 
-    def build_query(self, *, context: Context | None = None) -> sa.sql.Select:
+    def build_query(self, *, context: Context | None = None) -> selectable.Select:
         """Build a SQLAlchemy Select object for the stream.
 
         - Apply WHERE and ORDER BY clauses to the query.
