@@ -31,8 +31,6 @@ else:
 
 SCHEMAS_DIR = importlib.resources.files(schemas)
 
-DEFAULT_URL_BASE = "https://gitlab.com/api/v4"
-
 
 class GitlabStream(RESTStream[str]):
     """Sample tap test for gitlab."""
@@ -42,7 +40,7 @@ class GitlabStream(RESTStream[str]):
     @property
     def url_base(self) -> str:
         """Return the base GitLab URL."""
-        return self.config.get("api_url", DEFAULT_URL_BASE)
+        return self.config["url_base"]
 
     @property
     @override
@@ -60,7 +58,7 @@ class GitlabStream(RESTStream[str]):
         """Return an authenticator for REST API requests."""
         return SimpleAuthenticator(
             stream=self,
-            auth_headers={"Private-Token": self.config.get("auth_token")},
+            auth_headers={"Private-Token": self.config["auth_token"]},
         )
 
     def get_url_params(
@@ -95,19 +93,18 @@ class ProjectBasedStream(GitlabStream):
         if "{project_id}" in self.path:
             return [
                 {"project_id": pid}
-                for pid in t.cast("list", self.config.get("project_ids"))
+                for pid in t.cast("list", self.config["project_ids"])
             ]
         if "{group_id}" in self.path:
-            if "group_ids" not in self.config:
-                msg = (
-                    "Missing `group_ids` setting which is required for the "
-                    f"'{self.name}' stream."
-                )
-                raise ValueError(msg)
-            return [
-                {"group_id": gid}
-                for gid in t.cast("list", self.config.get("group_ids"))
-            ]
+            if group_ids := self.config["group_ids"]:
+                return [{"group_id": gid} for gid in group_ids]
+
+            msg = (
+                "Missing `group_ids` setting which is required for the "
+                f"'{self.name}' stream."
+            )
+            raise ValueError(msg)
+
         msg = (
             f"Could not detect partition type for Gitlab stream '{self.name}' "
             f"({self.path}). Expected a URL path containing '{{project_id}}' or "

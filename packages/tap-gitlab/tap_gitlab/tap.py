@@ -19,6 +19,7 @@ from tap_gitlab.streams import (
     ReleasesStream,
 )
 
+DEFAULT_URL_BASE = "https://gitlab.com/api/v4"
 STREAM_TYPES = [
     ProjectsStream,
     ReleasesStream,
@@ -44,13 +45,15 @@ class TapGitlab(Tap):
         Property(
             "project_ids",
             ArrayType(StringType),
-            required=True,
+            nullable=False,
+            default=[],
             title="Project IDs",
         ),
         Property(
             "group_ids",
             ArrayType(StringType),
-            required=True,
+            nullable=False,
+            default=[],
             title="Group IDs",
         ),
         Property(
@@ -58,6 +61,13 @@ class TapGitlab(Tap):
             DateTimeType,
             required=True,
             title="Start Date",
+        ),
+        Property(
+            "url_base",
+            StringType,
+            required=False,
+            default=DEFAULT_URL_BASE,
+            title="GitLab API URL",
         ),
     ).to_dict()
 
