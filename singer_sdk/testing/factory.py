@@ -96,8 +96,7 @@ class TapTestClassFactory:
             suites.append(tap_stream_attribute_tests)
 
         # set default values
-        if "parse_env_config" not in kwargs:
-            kwargs["parse_env_config"] = True
+        kwargs.setdefault("parse_env_config", True)
 
         # create singleton test runner
         test_runner = TapTestRunner(

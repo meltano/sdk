@@ -185,12 +185,12 @@ addopts = [
 ]
 filterwarnings = [
     "error",
-    "ignore:Could not configure external gitlab tests:UserWarning",
+    "once:Could not configure external gitlab tests:UserWarning",
     "ignore:No records were available to test:UserWarning",
     # https://github.com/meltano/sdk/issues/1354
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
     # TODO: Address this SQLite warning in Python 3.13+
-    "ignore::ResourceWarning",
+    "default::ResourceWarning",
     # universal-pathlib
     "default:in a future version of UPath this will be set to None:PendingDeprecationWarning",
 ]

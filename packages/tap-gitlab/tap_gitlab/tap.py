@@ -35,13 +35,30 @@ class TapGitlab(Tap):
     name: str = "tap-gitlab"
     config_jsonschema = PropertiesList(
         Property(
-            "auth_token", StringType, required=True, secret=True, title="Auth Token"
+            "auth_token",
+            StringType,
+            required=True,
+            secret=True,
+            title="Auth Token",
         ),
         Property(
-            "project_ids", ArrayType(StringType), required=True, title="Project IDs"
+            "project_ids",
+            ArrayType(StringType),
+            required=True,
+            title="Project IDs",
         ),
-        Property("group_ids", ArrayType(StringType), required=True, title="Group IDs"),
-        Property("start_date", DateTimeType, required=True, title="Start Date"),
+        Property(
+            "group_ids",
+            ArrayType(StringType),
+            required=True,
+            title="Group IDs",
+        ),
+        Property(
+            "start_date",
+            DateTimeType,
+            required=True,
+            title="Start Date",
+        ),
     ).to_dict()
 
     def discover_streams(self) -> list[Stream]:
