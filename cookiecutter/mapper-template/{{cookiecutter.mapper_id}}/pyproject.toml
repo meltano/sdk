@@ -73,6 +73,10 @@ packages = [
 addopts = [
     "--durations=10",
 ]
+markers = [
+    "singer_stream: Tests that validate Singer stream-level functionality",
+    "singer_stream_attribute: Tests that validate individual Singer stream attributes/properties",
+]
 
 [tool.mypy]
 warn_unused_configs = true

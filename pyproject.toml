@@ -201,6 +201,8 @@ markers = [
     "linux: Tests that only run on Linux",
     "darwin: Tests that only run on Darwin",
     "snapshot: Tests that use pytest-snapshot",
+    "singer_stream: Tests that validate Singer stream-level functionality",
+    "singer_stream_attribute: Tests that validate individual Singer stream attributes/properties",
 ]
 minversion = "7"
 testpaths = ["tests"]

@@ -1,5 +1,6 @@
 paths:
   - samples
+  - packages
   - singer_sdk
   - tests
 paths-ignore:
