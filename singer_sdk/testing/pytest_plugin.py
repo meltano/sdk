@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+from singer_sdk.testing.factory import BaseTestClass
+
 
 def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     """Pytest Hook, responsible for parameterizing tests.
@@ -15,13 +17,9 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     Args:
         metafunc: Pytest MetaFunc instance, representing a test function or method.
     """
-    if metafunc.cls and hasattr(metafunc.cls, "params"):
+    if metafunc.cls is not None and issubclass(metafunc.cls, BaseTestClass):
         func_arg_list = metafunc.cls.params.get(metafunc.definition.name)
-        func_arg_ids = (
-            metafunc.cls.param_ids.get(metafunc.definition.name)
-            if hasattr(metafunc.cls, "param_ids")
-            else None
-        )
+        func_arg_ids = metafunc.cls.param_ids.get(metafunc.definition.name)
         if func_arg_list:
             arg_names = list(func_arg_list[0].keys())
             parameters = [
