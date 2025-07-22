@@ -468,7 +468,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
             # Use start_date if it is more recent than the replication_key state
             start_date_value: str | None = self.config.get("start_date")
-            if start_date_value:
+            if start_date_value and self.is_timestamp_replication_key:
                 if not value:
                     value = start_date_value
                 else:

@@ -98,7 +98,10 @@ def path_to_sample_data_db(tmp_path: Path) -> Path:
 @pytest.fixture
 def sqlite_sample_db_config(path_to_sample_data_db: Path) -> dict:
     """Get configuration dictionary for target-csv."""
-    return {"path_to_db": str(path_to_sample_data_db)}
+    return {
+        "path_to_db": str(path_to_sample_data_db),
+        "start_date": "2010-01-01T00:00:00Z",
+    }
 
 
 @pytest.fixture
