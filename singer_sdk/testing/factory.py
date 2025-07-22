@@ -365,7 +365,7 @@ class TargetTestClassFactory:
     def _annotate_test_class(  # noqa: PLR6301
         self,
         empty_test_class: type[BaseTestClass],
-        test_suites: list,
+        test_suites: list[SingerTestSuite],
     ) -> type[BaseTestClass]:
         """Annotate test class with test methods.
 
