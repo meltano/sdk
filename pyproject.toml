@@ -189,7 +189,7 @@ filterwarnings = [
     # https://github.com/meltano/sdk/issues/1354
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
     # TODO: Address this SQLite warning in Python 3.13+
-    "default::ResourceWarning",
+    "ignore::ResourceWarning",
     # universal-pathlib
     "default:in a future version of UPath this will be set to None:PendingDeprecationWarning",
 ]
