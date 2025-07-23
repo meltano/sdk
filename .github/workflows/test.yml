@@ -65,6 +65,7 @@ jobs:
         - "3.11"
         - "3.12"
         - "3.13"
+        - "3.14"
         include:
         - { session: doctest,       python-version: "3.13", os: "ubuntu-latest" }
         - { session: mypy,          python-version: "3.13", os: "ubuntu-latest" }
