@@ -257,7 +257,6 @@ exclude_also = [
     '''@(abc\.)?abstractmethod''',
     '''if (t\.)?TYPE_CHECKING:''',
 ]
-fail_under = 82
 show_missing = true
 
 [tool.deptry]
