@@ -266,24 +266,21 @@ def dependencies(session: nox.Session) -> None:
 @nox.session(name="snap")
 def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
-    args = session.posargs or ["-m", "snapshot"]
-
-    extras = [
-        "faker",
-        "jwt",
-        "msgspec",
-        "parquet",
-        "s3",
-    ]
-
     session.run_install(
         *UV_SYNC_COMMAND,
         "--group=testing",
-        *(f"--extra={extra}" for extra in extras),
+        "--group=packages",
+        "--all-extras",
         env=_install_env(session),
     )
-
-    session.run("pytest", "--snapshot-update", *args)
+    _run_pytest(
+        session,
+        "--snapshot-update",
+        "-m",
+        "snapshot",
+        *session.posargs,
+        coverage=False,
+    )
 
 
 @nox.session()
