@@ -135,18 +135,13 @@ def test_external(session: nox.Session) -> None:
     )
 
 
-@nox.session(name="test-modules", tags=["test"])
-def test_modules(session: nox.Session) -> None:
+@nox.session(name="test-contrib", tags=["test"])
+def test_contrib(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
     session.run_install(
         *UV_SYNC_COMMAND,
-        "--group=packages",
         "--group=testing",
-        "--extra=faker",
-        "--extra=jwt",
-        "--extra=s3",
-        "--extra=msgspec",  # more performant SerDe
-        "--extra=parquet",  # BATCH message support
+        "--all-extras",
         env=_install_env(session),
     )
 
@@ -154,9 +149,35 @@ def test_modules(session: nox.Session) -> None:
         session,
         "--durations=10",
         "--benchmark-skip",
+        "--ignore=tests/benchmarks",
+        "--ignore=tests/external",
+        "--ignore=tests/packages",
+        "-m",
+        "contrib",
+        *session.posargs,
+    )
+
+
+@nox.session(name="test-packages", tags=["test"])
+def test_packages(session: nox.Session) -> None:
+    """Execute pytest tests and compute coverage."""
+    session.run_install(
+        *UV_SYNC_COMMAND,
+        "--group=packages",
+        "--group=testing",
+        "--all-extras",
+        env=_install_env(session),
+    )
+
+    _run_pytest(
+        session,
+        "--durations=10",
+        "--benchmark-skip",
+        "--ignore=tests/benchmarks",
+        "--ignore=tests/contrib",
         "--ignore=tests/external",
         "-m",
-        "contrib or packages",
+        "packages",
         *session.posargs,
     )
 
