@@ -146,6 +146,7 @@ jobs:
     env:
       NOXSESSION: coverage
     strategy:
+      fail-fast: false
       matrix:
         flag:
         - "tests"
