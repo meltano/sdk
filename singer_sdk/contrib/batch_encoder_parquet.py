@@ -7,6 +7,9 @@ from uuid import uuid4
 
 from singer_sdk.batch import BaseBatcher, lazy_chunked_generator
 
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers.types import Record
+
 __all__ = ["ParquetBatcher"]
 
 
@@ -15,7 +18,7 @@ class ParquetBatcher(BaseBatcher):
 
     def get_batches(
         self,
-        records: t.Iterator[dict],
+        records: t.Iterable[Record],
     ) -> t.Iterator[list[str]]:
         """Yield manifest of batches.
 

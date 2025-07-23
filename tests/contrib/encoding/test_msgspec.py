@@ -9,12 +9,7 @@ from textwrap import dedent
 
 import pytest
 
-from singer_sdk.contrib.msgspec import (
-    MsgSpecReader,
-    MsgSpecWriter,
-    dec_hook,
-    enc_hook,
-)
+from singer_sdk.contrib.msgspec import MsgSpecReader, MsgSpecWriter, dec_hook, enc_hook
 from singer_sdk.singerlib import RecordMessage
 from singer_sdk.singerlib.exceptions import InvalidInputLine
 

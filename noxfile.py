@@ -66,18 +66,10 @@ def _install_env(session: nox.Session) -> dict[str, str]:
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
-    extras = [
-        "faker",
-        "jwt",
-        "msgspec",
-        "parquet",
-        "s3",
-        "testing",
-    ]
     session.run_install(
         *UV_SYNC_COMMAND,
         "--group=typing",
-        *(f"--extra={extra}" for extra in extras),
+        "--all-extras",
         env=_install_env(session),
     )
     session.run("mypy", *args)
@@ -85,56 +77,99 @@ def mypy(session: nox.Session) -> None:
         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
 
 
-@nox.session(python=python_versions)
-def tests(session: nox.Session) -> None:
-    """Execute pytest tests and compute coverage."""
-    extras = [
-        "faker",
-        "jwt",
-        "msgspec",
-        "parquet",
-        "s3",
-    ]
-    session.run_install(
-        *UV_SYNC_COMMAND,
-        "--group=testing",
-        *(f"--extra={extra}" for extra in extras),
-        env=_install_env(session),
-    )
+def _run_pytest(session: nox.Session, *pytest_args: str, coverage: bool = True) -> None:
+    """Run pytest with the given arguments."""
+    args = ["pytest", *pytest_args]
+
+    if coverage:
+        args = ["coverage", "run", "--parallel", "-m", *args]
 
     try:
-        session.run(
-            "coverage",
-            "run",
-            "--parallel",
-            "-m",
-            "pytest",
-            "--durations=10",
-            "--benchmark-skip",
-            *session.posargs,
-        )
+        session.run(*args)
     finally:
-        if session.interactive:
+        if coverage and session.interactive:
             session.notify("coverage", posargs=[])
 
 
-@nox.session(name="test-lowest", python=python_versions[0])
+@nox.session(python=python_versions, tags=["test"])
+def tests(session: nox.Session) -> None:
+    """Execute pytest tests and compute coverage."""
+    session.run_install(
+        *UV_SYNC_COMMAND,
+        "--group=testing",
+        "--extra=faker",
+        "--extra=jwt",
+        "--extra=s3",
+        env=_install_env(session),
+    )
+
+    _run_pytest(
+        session,
+        "--durations=10",
+        "--benchmark-skip",
+        "--ignore=tests/contrib",
+        "--ignore=tests/benchmarks",
+        "--ignore=tests/external",
+        "--ignore=tests/packages",
+        *session.posargs,
+    )
+
+
+@nox.session(name="test-external", tags=["test"])
+def test_external(session: nox.Session) -> None:
+    """Execute pytest tests and compute coverage."""
+    session.run_install(
+        *UV_SYNC_COMMAND,
+        "--group=packages",
+        "--group=testing",
+        "--all-extras",
+        env=_install_env(session),
+    )
+
+    _run_pytest(
+        session,
+        "--durations=10",
+        "-m",
+        "external",
+        *session.posargs,
+    )
+
+
+@nox.session(name="test-modules", tags=["test"])
+def test_modules(session: nox.Session) -> None:
+    """Execute pytest tests and compute coverage."""
+    session.run_install(
+        *UV_SYNC_COMMAND,
+        "--group=packages",
+        "--group=testing",
+        "--extra=faker",
+        "--extra=jwt",
+        "--extra=s3",
+        "--extra=msgspec",  # more performant SerDe
+        "--extra=parquet",  # BATCH message support
+        env=_install_env(session),
+    )
+
+    _run_pytest(
+        session,
+        "--durations=10",
+        "--benchmark-skip",
+        "--ignore=tests/external",
+        "-m",
+        "contrib or packages",
+        *session.posargs,
+    )
+
+
+@nox.session(name="test-lowest", python=python_versions[0], tags=["test"])
 def test_lowest_requirements(session: nox.Session) -> None:
     """Test the package with the lowest dependency versions."""
-    extras = [
-        "faker",
-        "jwt",
-        "msgspec",
-        "parquet",
-        "s3",
-    ]
-
     install_env = _install_env(session)
 
     session.run_install(
         *UV_SYNC_COMMAND,
         "--group=testing",
-        *(f"--extra={extra}" for extra in extras),
+        "--all-extras",
         env=install_env,
     )
     tmpdir = session.create_tmp()
@@ -154,7 +189,37 @@ def test_lowest_requirements(session: nox.Session) -> None:
     )
 
     session.install("-r", f"{tmpdir}/requirements.txt", env=install_env)
-    session.run("pytest", *session.posargs)
+    _run_pytest(
+        session,
+        "--benchmark-skip",
+        "--ignore=tests/contrib",
+        "--ignore=tests/benchmarks",
+        "--ignore=tests/external",
+        "--ignore=tests/packages",
+        *session.posargs,
+        coverage=False,
+    )
+
+
+@nox.session(tags=["test"])
+def benches(session: nox.Session) -> None:
+    """Run benchmarks."""
+    session.run_install(
+        *UV_SYNC_COMMAND,
+        "--group=testing",
+        "--all-extras",
+        env=_install_env(session),
+    )
+    _run_pytest(
+        session,
+        "--benchmark-only",
+        "--benchmark-json=output.json",
+        "--ignore=tests/contrib",
+        "--ignore=tests/external",
+        "--ignore=tests/packages",
+        *session.posargs,
+        coverage=False,
+    )
 
 
 @nox.session()
@@ -172,28 +237,6 @@ def coverage(session: nox.Session) -> None:
         session.run("coverage", "combine")
 
     session.run("coverage", *args)
-
-
-@nox.session()
-def benches(session: nox.Session) -> None:
-    """Run benchmarks."""
-    extras = [
-        "jwt",
-        "msgspec",
-        "s3",
-    ]
-    session.run_install(
-        *UV_SYNC_COMMAND,
-        "--group=testing",
-        *(f"--extra={extra}" for extra in extras),
-        env=_install_env(session),
-    )
-    session.run(
-        "pytest",
-        "--benchmark-only",
-        "--benchmark-json=output.json",
-        *session.posargs,
-    )
 
 
 @nox.session(name="deps")

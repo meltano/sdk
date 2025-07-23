@@ -5,9 +5,29 @@ from contextlib import nullcontext
 
 import pytest
 from click.testing import CliRunner
-from target_sqlite import SQLiteTarget
 
+from singer_sdk import SQLTarget
+from singer_sdk import typing as th
 from singer_sdk.exceptions import ConfigValidationError
+
+
+class DummyTarget(SQLTarget):
+    """A dummy target class."""
+
+    name = "target-dummy"
+
+    config_jsonschema = th.PropertiesList(
+        th.Property(
+            "required_property",
+            th.StringType,
+            required=True,
+        ),
+        th.Property(
+            "optional_property",
+            th.StringType,
+            required=False,
+        ),
+    ).to_dict()
 
 
 @pytest.mark.parametrize(
@@ -16,11 +36,11 @@ from singer_sdk.exceptions import ConfigValidationError
         pytest.param(
             {},
             pytest.raises(ConfigValidationError, match="Config validation failed"),
-            ["'path_to_db' is a required property"],
-            id="missing_path_to_db",
+            ["'required_property' is a required property"],
+            id="missing_required_property",
         ),
         pytest.param(
-            {"path_to_db": "sqlite://test.db"},
+            {"required_property": "test"},
             nullcontext(),
             [],
             id="valid_config",
@@ -29,7 +49,7 @@ from singer_sdk.exceptions import ConfigValidationError
 )
 def test_config_errors(config_dict: dict, expectation, errors: list[str]):
     with expectation as exc:
-        SQLiteTarget(config=config_dict, validate_config=True)
+        DummyTarget(config=config_dict, validate_config=True)
 
     if isinstance(exc, pytest.ExceptionInfo):
         assert exc.value.errors == errors
@@ -40,7 +60,7 @@ def test_cli():
     runner = CliRunner()
     # TODO: Remote this once support for Python 3.9 and thus Click<8.2 is dropped
     runner.mix_stderr = False
-    result = runner.invoke(SQLiteTarget.cli, ["--help"])
+    result = runner.invoke(DummyTarget.cli, ["--help"])
     assert result.exit_code == 0
     assert "Show this message and exit." in result.output
 
@@ -53,7 +73,7 @@ def test_cli_config_validation(tmp_path, caplog: pytest.LogCaptureFixture):
     config_path = tmp_path / "config.json"
     config_path.write_text(json.dumps({}))
     with caplog.at_level("ERROR"):
-        result = runner.invoke(SQLiteTarget.cli, ["--config", str(config_path)])
+        result = runner.invoke(DummyTarget.cli, ["--config", str(config_path)])
     assert result.exit_code == 1
     assert not result.stdout
-    assert "'path_to_db' is a required property" in caplog.text
+    assert "'required_property' is a required property" in caplog.text

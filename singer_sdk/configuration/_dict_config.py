@@ -5,13 +5,12 @@ from __future__ import annotations
 import logging
 import os
 import typing as t
-from pathlib import Path
 
 from dotenv import find_dotenv
 from dotenv.main import DotEnv
 
 from singer_sdk.helpers import _typing
-from singer_sdk.helpers._util import load_json, read_json_file
+from singer_sdk.helpers._util import load_json
 
 logger = logging.getLogger(__name__)
 
@@ -81,45 +80,6 @@ def parse_environment_config(
             else:
                 result[config_key] = env_var_value
     return result
-
-
-def merge_config_sources(
-    inputs: t.Iterable[str],
-    config_schema: dict[str, t.Any],
-    env_prefix: str,
-) -> dict[str, t.Any]:
-    """Merge configuration from multiple sources into a single dictionary.
-
-    Args:
-        inputs: A sequence of configuration sources (file paths or ENV).
-        config_schema: A JSON Schema dictionary for the configuration.
-        env_prefix: Prefix for environment variables.
-
-    Raises:
-        FileNotFoundError: If any of config files does not exist.
-
-    Returns:
-        A single configuration dictionary.
-    """
-    config: dict[str, t.Any] = {}
-    for config_input in inputs:
-        if config_input == "ENV":
-            env_config = parse_environment_config(config_schema, prefix=env_prefix)
-            config.update(env_config)
-            continue
-
-        config_path = Path(config_input)
-
-        if not config_path.is_file():
-            msg = (
-                f"Could not locate config file at '{config_path}'.Please check that "
-                "the file exists."
-            )
-            raise FileNotFoundError(msg)
-
-        config.update(read_json_file(config_path))
-
-    return config
 
 
 def merge_missing_config_jsonschema(

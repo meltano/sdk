@@ -238,7 +238,7 @@ def test_target_batching():
 
 
 SAMPLE_FILENAME = (
-    importlib.resources.files("tests.samples") / "resources/messages.jsonl"
+    importlib.resources.files("tests.packages") / "resources/messages.jsonl"
 )
 EXPECTED_OUTPUT = """"id"	"name"
 1	"Chris"

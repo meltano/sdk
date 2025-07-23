@@ -110,6 +110,20 @@ docs = [
     "sphinx-notfound-page>=1.0.0",
     "sphinx-reredirects>=0.1.5",
 ]
+# Workspace packages needed for end-to-end tests
+packages = [
+    "mapper-custom",
+    "tap-countries",
+    "tap-csv",
+    "tap-dummyjson",
+    "tap-fake-people",
+    "tap-gitlab",
+    "tap-hostile",
+    "tap-sqlite",
+    "target-csv",
+    "target-parquet",
+    "target-sqlite",
+]
 testing = [
     "coverage[toml]>=7.9",
     "duckdb>=0.8.0",
@@ -127,18 +141,6 @@ testing = [
     "rfc3339-validator>=0.1.4",
     "time-machine>=2.10.0",
     "xdoctest[colors]>=1.1.1",
-    # Workspace packages needed for tests
-    "mapper-custom",
-    "tap-countries",
-    "tap-csv",
-    "tap-dummyjson",
-    "tap-fake-people",
-    "tap-gitlab",
-    "tap-hostile",
-    "tap-sqlite",
-    "target-csv",
-    "target-parquet",
-    "target-sqlite",
 ]
 typing = [
     "mypy>=1.16",
@@ -178,7 +180,7 @@ source = "vcs"
 addopts = [
     "--durations=10",
     "-m",
-    "not external",
+    "not contrib and not external and not packages",
     "-ra",
     "--strict-config",
     "--strict-markers",
@@ -196,7 +198,9 @@ filterwarnings = [
 log_cli_level = "INFO"
 log_format = "%(levelname)s %(name)s %(message)s"
 markers = [
+    "contrib: Tests for contrib (experimental or optional) modules",
     "external: Tests relying on external resources",
+    "packages: Tests for sample taps and targets",
     "windows: Tests that only run on Windows",
     "linux: Tests that only run on Linux",
     "darwin: Tests that only run on Darwin",

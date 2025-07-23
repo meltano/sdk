@@ -7,7 +7,6 @@ import json
 
 import pytest
 
-from singer_sdk.contrib.msgspec import MsgSpecReader, MsgSpecWriter
 from singer_sdk.singerlib import RecordMessage
 
 # IO Benchmarks
@@ -43,6 +42,8 @@ def bench_encoded_record(bench_record):
 
 def test_bench_format_message(benchmark, bench_record_message: RecordMessage):
     """Run benchmark for Sink._validator method validate."""
+    from singer_sdk.contrib.msgspec import MsgSpecWriter  # noqa: PLC0415
+
     number_of_runs = 1000
 
     writer = MsgSpecWriter()
@@ -56,6 +57,8 @@ def test_bench_format_message(benchmark, bench_record_message: RecordMessage):
 
 def test_bench_deserialize_json(benchmark, bench_encoded_record: str):
     """Run benchmark for Sink._validator method validate."""
+    from singer_sdk.contrib.msgspec import MsgSpecReader  # noqa: PLC0415
+
     number_of_runs = 1000
     reader = MsgSpecReader()
 
