@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import typing as t
 from collections.abc import Mapping
 
@@ -24,6 +25,7 @@ __all__ = [
 Context: TypeAlias = Mapping[str, t.Any]
 Record: TypeAlias = dict[str, t.Any]
 Auth: TypeAlias = t.Callable[[requests.PreparedRequest], requests.PreparedRequest]
+StrPath: TypeAlias = t.Union[str, os.PathLike[str]]
 
 
 class TapState(t.TypedDict, total=False):

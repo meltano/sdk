@@ -119,7 +119,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def __init__(
         self,
         tap: Tap,
-        schema: str | PathLike | dict[str, t.Any] | singer.Schema | None = None,
+        schema: types.StrPath | dict[str, t.Any] | singer.Schema | None = None,
         name: str | None = None,
     ) -> None:
         """Init tap stream.
