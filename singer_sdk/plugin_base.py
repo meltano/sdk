@@ -28,7 +28,6 @@ from singer_sdk.configuration._dict_config import (
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
-from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
     FLATTENING_CONFIG,
@@ -239,9 +238,6 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             config_dict.update(self._env_var_config)
         else:
             self.logger.info("Skipping parse of env var settings...")
-        for k, v in config_dict.items():
-            if self._is_secret_config(k):
-                config_dict[k] = SecretString(v)
         self._config = config_dict
         self.metrics_logger = metrics.get_metrics_logger()
         if metrics_level := self.config.get(
@@ -450,20 +446,6 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             A frozen (read-only) config dictionary map.
         """
         return t.cast("dict", MappingProxyType(self._config))
-
-    @staticmethod
-    def _is_secret_config(config_key: str) -> bool:
-        """Check if config key is secret.
-
-        This prevents accidental printing to logs.
-
-        Args:
-            config_key: Configuration key name to match against common secret names.
-
-        Returns:
-            True if a config value should be treated as a secret.
-        """
-        return is_common_secret_key(config_key)
 
     def _validate_config(self, *, raise_errors: bool = True) -> list[str]:
         """Validate configuration input against the plugin configuration JSON schema.
