@@ -12,6 +12,9 @@ from dotenv.main import DotEnv
 from singer_sdk.helpers import _typing
 from singer_sdk.helpers._util import load_json
 
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers.types import StrPath
+
 logger = logging.getLogger(__name__)
 
 TRUTHY = ("true", "1", "yes", "on")
@@ -28,7 +31,7 @@ def _legacy_parse_array_of_strings(value: str) -> list[str]:
 def parse_environment_config(
     config_schema: dict[str, t.Any],
     prefix: str,
-    dotenv_path: str | None = None,
+    dotenv_path: StrPath | None = None,
 ) -> dict[str, t.Any]:
     """Parse configuration from environment variables.
 

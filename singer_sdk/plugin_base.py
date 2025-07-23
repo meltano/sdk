@@ -45,6 +45,7 @@ from singer_sdk.typing import (
 if t.TYPE_CHECKING:
     from jsonschema import ValidationError
 
+    from singer_sdk.helpers.types import StrPath
     from singer_sdk.singerlib.encoding.base import (
         GenericSingerReader,
         GenericSingerWriter,
@@ -75,7 +76,7 @@ class _ConfigInput:
     """Whether to parse environment variables."""
 
     @classmethod
-    def from_cli_args(cls, *args: str) -> _ConfigInput:
+    def from_cli_args(cls, *args: StrPath) -> _ConfigInput:
         """Create a _ConfigInput from CLI arguments.
 
         Args:
