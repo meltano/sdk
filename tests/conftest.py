@@ -26,14 +26,21 @@ SYSTEMS = {"linux", "darwin", "windows"}
 
 
 def pytest_collection_modifyitems(config: Config, items: list[pytest.Item]):
-    rootdir = pathlib.Path(config.rootdir)
-
     for item in items:
-        rel_path = pathlib.Path(item.fspath).relative_to(rootdir)
+        rel_path = pathlib.Path(item.fspath).relative_to(config.rootpath)
+        test_dir = rel_path.parts[1]
+
+        # Mark all tests under tests/contrib/* as 'contrib'
+        if test_dir.startswith("contrib"):
+            item.add_marker("contrib")
 
         # Mark all tests under tests/external*/ as 'external'
-        if rel_path.parts[1].startswith("external"):
+        if test_dir.startswith("external"):
             item.add_marker("external")
+
+        # Mark all tests under tests/packages/* as 'packages'
+        if test_dir.startswith("packages"):
+            item.add_marker("packages")
 
 
 def pytest_runtest_setup(item: pytest.Item):
