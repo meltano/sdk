@@ -12,6 +12,7 @@ from singer_sdk import Stream, Tap, Target
 from singer_sdk.testing.config import SuiteConfig
 from singer_sdk.testing.factory import (
     BaseTestClass,
+    StreamAttributeTestParams,
     TapTestClassFactory,
     TargetTestClassFactory,
     get_tap_test_class,
@@ -422,16 +423,13 @@ class TestTapTestClassFactory:
                 # Should have parameters for each property that passed evaluate
                 assert len(params) > 0
 
-                # Assert that each param's id matches the expected format and values contains correct stream and property
+                # Assert that each param's id matches the expected format and values
+                # contains correct stream and property
                 for param in params:
-                    # id should be in the format "stream.property"
-                    assert isinstance(param.id, str)
-                    assert "." in param.id
                     stream, prop = param.id.split(".", 1)
-                    # values should contain the correct stream and property name
-                    assert hasattr(param, "values")
-                    assert param.values.get("stream_name") == stream
-                    assert param.values.get("property_name") == prop
+                    assert isinstance(param.values, StreamAttributeTestParams)
+                    assert param.values.stream.name == stream
+                    assert param.values.attribute_name == prop
 
 
 class TestTargetTestClassFactory:
