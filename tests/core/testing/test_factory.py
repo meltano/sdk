@@ -12,6 +12,7 @@ from singer_sdk import Stream, Tap, Target
 from singer_sdk.testing.config import SuiteConfig
 from singer_sdk.testing.factory import (
     BaseTestClass,
+    StreamAttributeTestParams,
     TapTestClassFactory,
     TargetTestClassFactory,
     get_tap_test_class,
@@ -54,9 +55,7 @@ class TestBaseTestClass:
             pass
 
         assert hasattr(DirectSubclass, "params")
-        assert hasattr(DirectSubclass, "param_ids")
         assert DirectSubclass.params == {}
-        assert DirectSubclass.param_ids == {}
 
     def test_base_test_class_nested_subclass_no_params(self):
         """Test that subclasses of subclasses don't get params attributes."""
@@ -69,13 +68,10 @@ class TestBaseTestClass:
 
         # Direct subclass should have params
         assert hasattr(DirectSubclass, "params")
-        assert hasattr(DirectSubclass, "param_ids")
 
         # Nested subclass should not get new params (inherits from direct)
         assert hasattr(NestedSubclass, "params")
-        assert hasattr(NestedSubclass, "param_ids")
         assert NestedSubclass.params is DirectSubclass.params
-        assert NestedSubclass.param_ids is DirectSubclass.param_ids
 
 
 class TestTapTestClassFactory:
@@ -372,14 +368,11 @@ class TestTapTestClassFactory:
             expected_method_name = f"test_tap_stream_{test_template.name}"
             assert hasattr(test_class, expected_method_name)
             assert expected_method_name in test_class.params
-            assert expected_method_name in test_class.param_ids
 
             # Check parameters
             params = test_class.params[expected_method_name]
-            param_ids = test_class.param_ids[expected_method_name]
             assert len(params) == 2
-            assert len(param_ids) == 2
-            assert param_ids == ["stream1", "stream2"]
+            assert [param.id for param in params] == ["stream1", "stream2"]
 
     @patch("singer_sdk.testing.factory.TapTestRunner")
     def test_with_stream_attribute_tests(
@@ -426,11 +419,17 @@ class TestTapTestClassFactory:
             if expected_method_name in test_class.params:
                 assert hasattr(test_class, expected_method_name)
                 params = test_class.params[expected_method_name]
-                param_ids = test_class.param_ids[expected_method_name]
 
                 # Should have parameters for each property that passed evaluate
                 assert len(params) > 0
-                assert len(param_ids) > 0
+
+                # Assert that each param's id matches the expected format and values
+                # contains correct stream and property
+                for param in params:
+                    stream, prop = param.id.split(".", 1)
+                    assert isinstance(param.values, StreamAttributeTestParams)
+                    assert param.values.stream.name == stream
+                    assert param.values.attribute_name == prop
 
 
 class TestTargetTestClassFactory:
