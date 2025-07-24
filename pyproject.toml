@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
@@ -185,13 +186,14 @@ addopts = [
 ]
 filterwarnings = [
     "error",
-    "ignore:No records were available to test:UserWarning",
+    "once:'asyncio.iscoroutinefunction' is deprecated:DeprecationWarning",  # https://github.com/litl/backoff/pull/220
+    "once:No records were available to test:UserWarning",
     # https://github.com/meltano/sdk/issues/1354
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
     # TODO: Address this SQLite warning in Python 3.13+
     "ignore::ResourceWarning",
     # universal-pathlib
-    "default:in a future version of UPath this will be set to None:PendingDeprecationWarning",
+    "once:in a future version of UPath this will be set to None:PendingDeprecationWarning",
 ]
 log_cli_level = "INFO"
 log_format = "%(levelname)s %(name)s %(message)s"
