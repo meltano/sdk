@@ -103,6 +103,51 @@ TestTapStackExchange = get_tap_test_class(
 
 Check out [the reference](#reference) for more information on the available configuration options.
 
+## Pytest Markers
+
+The Singer SDK automatically adds pytest markers to auto-generated tests, allowing you to run specific subsets of tests using pytest's `-m` option. This is particularly useful for focusing on specific test categories during development or CI/CD workflows.
+
+### Available Markers
+
+- **`singer_stream`**: Tests that validate stream-level functionality (schema validation, record validation, etc.)
+- **`singer_stream_attribute`**: Tests that validate individual stream attributes/properties
+
+### Usage Examples
+
+#### Basic Usage
+
+```shell
+# Run all stream-level tests
+pytest -m "singer_stream"
+
+# Run all stream attribute tests
+pytest -m "singer_stream_attribute"
+```
+
+#### Practical Examples
+
+```shell
+# Focus on stream functionality during development
+pytest -m "singer_stream" tests/
+
+# Test only attribute validation
+pytest -m "singer_stream_attribute" tests/
+
+# CI pipeline: test stream functionality with fast failure
+pytest -m "singer_stream" --maxfail=1
+
+# Run both stream and attribute tests
+pytest -m "singer_stream or singer_stream_attribute" tests/
+```
+
+### Benefits
+
+- **Granular Control**: Run only the tests you need
+- **Faster Development**: Focus on specific test categories during development
+- **CI/CD Optimization**: Run different test subsets in parallel or on different stages
+- **Debugging**: Isolate issues by running specific test types
+- **Faster Test Execution**: Skip irrelevant test categories to reduce overall test runtime
+
 ## Writing New Tests
 
 Writing new tests is as easy as subclassing the appropriate class.

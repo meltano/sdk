@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import io
 import json
+import sys
 import typing as t
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
@@ -12,6 +13,12 @@ from contextlib import redirect_stderr, redirect_stdout
 from singer_sdk import Tap, Target
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.testing.config import SuiteConfig
+
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
+
 
 if t.TYPE_CHECKING:
     from pathlib import Path
@@ -150,7 +157,8 @@ class TapTestRunner(SingerTestRunner[Tap]):
             dry_run_record_limit=self.suite_config.max_records_limit,
         )
 
-    def sync_all(self, **kwargs: t.Any) -> None:  # noqa: ARG002
+    @override
+    def sync_all(self, **kwargs: t.Any) -> None:
         """Run a full tap sync, assigning output to the runner object.
 
         Args:
@@ -258,12 +266,8 @@ class TargetTestRunner(SingerTestRunner[Target]):
     def target_input(self, value: t.IO[str]) -> None:
         self._input = value
 
-    def sync_all(
-        self,
-        *,
-        finalize: bool = True,
-        **kwargs: t.Any,  # noqa: ARG002
-    ) -> None:
+    @override
+    def sync_all(self, *, finalize: bool = True, **kwargs: t.Any) -> None:
         """Run a full tap sync, assigning output to the runner object.
 
         Args:

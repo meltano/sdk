@@ -18,12 +18,23 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
         metafunc: Pytest MetaFunc instance, representing a test function or method.
     """
     if metafunc.cls is not None and issubclass(metafunc.cls, BaseTestClass):
-        func_arg_list = metafunc.cls.params.get(metafunc.definition.name)
-        func_arg_ids = metafunc.cls.param_ids.get(metafunc.definition.name)
+        name = metafunc.definition.name
+        func_arg_list = metafunc.cls.params.get(name)
+        func_arg_ids = metafunc.cls.param_ids.get(name)
+
         if func_arg_list:
+            markers = []
+            if "tap_stream_" in name and "attribute" not in name:
+                markers.append(pytest.mark.singer_stream)
+            elif "tap_stream_attribute_" in name:
+                markers.append(pytest.mark.singer_stream_attribute)
+
             arg_names = list(func_arg_list[0].keys())
             parameters = [
-                pytest.param(*tuple(func_args[name] for name in arg_names))
+                pytest.param(
+                    *tuple(func_args[name] for name in arg_names),
+                    marks=markers,
+                )
                 for func_args in func_arg_list
             ]
             metafunc.parametrize(
