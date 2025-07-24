@@ -28,7 +28,7 @@ if t.TYPE_CHECKING:
 class BaseTestClass:
     """Base test class."""
 
-    params: dict[str, t.Any]
+    params: dict[str, list[dict[str, t.Any]]]
     param_ids: dict[str, list[str]]
 
     def __init_subclass__(cls, **kwargs: t.Any) -> None:
