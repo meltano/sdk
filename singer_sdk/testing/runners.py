@@ -229,6 +229,8 @@ class TargetTestRunner(SingerTestRunner[Target]):
         self.input_filepath = input_filepath
         self.input_io = input_io
         self._input: t.IO[str] | None = None
+        self.stdout: str | None = None
+        self.stderr: str | None = None
 
     def new_target(self) -> Target:
         """Get new Target instance.
@@ -281,7 +283,7 @@ class TargetTestRunner(SingerTestRunner[Target]):
     def _execute_sync(  # noqa: PLR6301
         self,
         target: Target,
-        target_input: t.IO[str],
+        target_input: t.IO[str] | None,
         *,
         finalize: bool = True,
     ) -> tuple[io.TextIOWrapper[io.BytesIO], io.TextIOWrapper[io.BytesIO]]:
