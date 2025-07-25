@@ -27,7 +27,7 @@ repos:
   - id: check-meltano
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.12.4
+  rev: v0.12.5
   hooks:
   - id: ruff-check
     args: [--diff]
@@ -35,7 +35,7 @@ repos:
     args: [--diff]
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.8.0
+  rev: 0.8.3
   hooks:
   - id: uv-lock
   - id: uv-sync
