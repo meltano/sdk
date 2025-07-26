@@ -105,7 +105,7 @@ class StreamSchema:
         Returns:
             A JSON schema dictionary.
         """
-        return self.schema_source.get_schema(self.key or objtype.name)
+        return self.schema_source.get_schema(self.key or obj.name)
 
 
 class OpenAPISchema(SchemaSource):
