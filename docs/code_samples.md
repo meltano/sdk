@@ -26,6 +26,7 @@ These are code samples taken from other projects. Use these as a reference if yo
 - [Define a REST-based stream with a JSONPath expression](./code_samples.md#define-a-rest-based-stream-with-a-jsonpath-expression)
 - [Use a JSONPath expression to extract the next page URL from a HATEOAS response](./code_samples.md#use-a-jsonpath-expression-to-extract-the-next-page-url-from-a-hateoas-response)
 - [Dynamically discovering `schema` for a stream](./code_samples.md#dynamically-discovering-schema-for-a-stream)
+- [Using schema sources for flexible schema loading](./code_samples.md#using-schema-sources-for-flexible-schema-loading)
 - [Initialize a collection of tap streams with differing types](./code_samples.md#initialize-a-collection-of-tap-streams-with-differing-types)
 - [Run the standard built-in tap tests](./code_samples.md#run-the-standard-built-in-tap-tests)
 - [Make all streams reuse the same authenticator instance](./code_samples.md#make-all-streams-reuse-the-same-authenticator-instance)
@@ -159,12 +160,69 @@ class ParquetStream(Stream):
             name = parquet_schema.names[i]
             # Translate from the Parquet type to a JSON Schema type
             dtype = get_jsonschema_type(str(parquet_schema.types[i]))
-
-            # Add the new property to our list
+            # Add the property to the list
             properties.append(th.Property(name, dtype))
 
         # Return the list as a JSON Schema dictionary object
         return th.PropertiesList(*properties).to_dict()
+```
+
+### Using schema sources for flexible schema loading
+
+The Singer SDK provides an extensible API for loading schemas from various sources through the `SchemaSource` system. This allows you to load schemas from files, OpenAPI specifications, or implement custom schema sources.
+
+#### Loading schemas from a directory of JSON files
+
+```python
+import importlib.resources
+from singer_sdk import RESTStream, SchemaDirectory, StreamSchema
+from myproject import schemas  # Your schemas module/package
+
+# Create a schema source from a directory
+SCHEMAS_DIR = SchemaDirectory(importlib.resources.files(schemas))
+
+class ProjectsStream(RESTStream):
+    """Projects stream with schema loaded from files."""
+
+    name = "projects"
+    path = "/projects"
+
+    # Use the StreamSchema descriptor to load schema from the source
+    schema = StreamSchema(SCHEMAS_DIR)  # Loads from projects.json
+```
+
+#### Loading schemas from OpenAPI specifications
+
+```python
+from singer_sdk import RESTStream, OpenAPISchema, StreamSchema
+
+# Load from a remote OpenAPI spec
+openapi_source = OpenAPISchema("https://api.example.com/openapi.json")
+
+# Or load from a local file
+# openapi_source = OpenAPISchema("/path/to/openapi.json")
+
+class UsersStream(RESTStream):
+    """Users stream with schema from OpenAPI spec."""
+
+    name = "users"
+    path = "/users"
+
+    # Load the "User" component schema from the OpenAPI spec
+    schema = StreamSchema(openapi_source, key="User")
+```
+
+#### Using different schema keys
+
+```python
+class ProjectDetailsStream(RESTStream):
+    """Project details with custom schema key."""
+
+    name = "project_details"
+    path = "/projects/{project_id}"
+
+    # Load schema using a custom key instead of the stream name
+    schema = StreamSchema(SCHEMAS_DIR, key="ProjectDetail")
 ```
 
 ### Initialize a collection of tap streams with differing types
