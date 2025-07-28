@@ -338,6 +338,20 @@ class TestOpenAPISchema:
 class TestStreamSchemaDescriptor:
     """Test the StreamSchema descriptor."""
 
+    def test_stream_schema_descriptor_with_explicit_key(self, tmp_path: Path):
+        """Test StreamSchema descriptor with an explicit custom key."""
+        schema_source = SchemaDirectory(tmp_path)
+        schema_dict = {"type": "object", "properties": {"id": {"type": "string"}}}
+        schema_file = tmp_path / "foo.json"
+        schema_file.write_text(json.dumps(schema_dict))
+
+        class Dummy:
+            name = "dummy"
+            schema = StreamSchema(schema_source, key="foo")
+
+        inst = Dummy()
+        assert inst.schema == schema_dict
+
     def test_stream_schema_descriptor(self, tmp_path: Path):
         """Test the StreamSchema descriptor."""
         schema_source = SchemaDirectory(tmp_path)
