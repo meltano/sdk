@@ -177,8 +177,10 @@ class OpenAPISchema(SchemaSource):
             SchemaNotFoundError: If the schema component is not found.
         """
         spec = self.spec
-        schema = {"$ref": f"#/components/schemas/{key}"}
-        schema["components"] = spec.get("components", {})
+        schema = {
+            "$ref": f"#/components/schemas/{key}",
+            "components": spec.get("components", {}),
+        }
         try:
             resolved_schema = resolve_schema_references(schema)
             return resolved_schema.get("components", {}).get("schemas", {}).get(key, {})  # type: ignore[no-any-return]
