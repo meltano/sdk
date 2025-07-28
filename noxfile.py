@@ -29,18 +29,15 @@ UV_SYNC_COMMAND = (
 )
 
 package = "singer_sdk"
+main_python = "3.13"
 python_versions = nox.project.python_versions(PYPROJECT)
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = [
-    "mypy",
-    "tests",
-    "test-lowest",
-    "benches",
+    f"mypy-{main_python}",
+    f"tests-{main_python}",
     "doctest",
     "deps",
     "docs",
-    "api",
-    "templates",
 ]
 
 
@@ -62,7 +59,7 @@ def _install_env(session: nox.Session) -> dict[str, str]:
     return env
 
 
-@nox.session(python=[python_versions[0], python_versions[-1]])
+@nox.session(python=[python_versions[0], main_python])
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
