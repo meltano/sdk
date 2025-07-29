@@ -165,7 +165,6 @@ class OpenAPISchema(SchemaSource):
         Raises:
             DiscoveryError: If the specification cannot be loaded from a remote or local
                 source.
-            SchemaNotValidError: If the specification format is invalid.
         """
         try:
             if isinstance(self.source, str) and self.source.startswith(
@@ -179,10 +178,6 @@ class OpenAPISchema(SchemaSource):
         except Exception as e:
             msg = f"Failed to load OpenAPI specification from {self.source}"
             raise DiscoveryError(msg) from e
-
-        if not isinstance(spec, dict):
-            msg = "OpenAPI specification must be a JSON object"
-            raise SchemaNotValidError(msg)
 
         return spec
 

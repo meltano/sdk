@@ -235,22 +235,6 @@ class TestOpenAPISchema:
 
         assert isinstance(exc.value.__cause__, requests.RequestException)
 
-    @patch("requests.get")
-    def test_openapi_load_not_a_json_object(self, mock_get):
-        """Test error handling when loading from URL."""
-        mock_response = Mock()
-        mock_response.json.return_value = "not a json object"
-        mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
-
-        source = OpenAPISchema("https://api.example.com/openapi.json")
-
-        with pytest.raises(
-            SchemaNotValidError,
-            match="OpenAPI specification must be a JSON object",
-        ):
-            _ = source.spec
-
     def test_openapi_load_from_file(
         self,
         tmp_path: Path,
@@ -339,20 +323,6 @@ class TestOpenAPISchema:
         result = source.get_schema("User")
         assert result == resolved_user_schema
         mock_traversable.read_text.assert_called_once()
-
-    def test_openapi_schema_invalid_json(self, tmp_path: Path):
-        """Test OpenAPISchema with invalid JSON content."""
-        openapi_file = tmp_path / "invalid.json"
-        openapi_file.write_text(
-            '["this", "is", "not", "an", "object"]'
-        )  # JSON array, not object
-
-        source = OpenAPISchema(openapi_file)
-        with pytest.raises(
-            SchemaNotValidError,
-            match="OpenAPI specification must be a JSON object",
-        ):
-            _ = source.spec
 
 
 class TestStreamSchemaDescriptor:
