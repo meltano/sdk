@@ -187,7 +187,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 msg = f"Unexpected type {type(schema).__name__} for arg 'schema'."  # type: ignore[unreachable]
                 raise ValueError(msg)
 
-        if self.schema_filepath:
+        if self.schema_filepath:  # pragma: no cover
             warnings.warn(
                 "Passing a schema filepath is deprecated. Use the `StreamSchema` "
                 "descriptor with a `SchemaDirectory` source instead.",
