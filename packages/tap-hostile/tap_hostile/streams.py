@@ -10,6 +10,9 @@ import typing as t
 from singer_sdk import typing as th
 from singer_sdk.streams import Stream
 
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers.types import Context
+
 if sys.version_info < (3, 12):
     from typing_extensions import override
 else:
@@ -43,7 +46,7 @@ class HostilePropertyNamesStream(Stream):
     @override
     def get_records(
         self,
-        context: dict | None,
+        context: Context | None,
     ) -> t.Iterable[dict | tuple[dict, dict]]:
         return (
             {

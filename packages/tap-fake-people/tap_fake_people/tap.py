@@ -19,7 +19,7 @@ else:
 if t.TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
 
-    from singer_sdk.helpers.types import Record
+    from singer_sdk.helpers.types import Context, Record
 
 
 class FakePeopleStream(Stream):
@@ -36,7 +36,7 @@ class FakePeopleStream(Stream):
     ).to_dict()
 
     @override
-    def get_records(self, context: dict | None) -> Iterable[Record]:
+    def get_records(self, context: Context | None) -> Iterable[Record]:
         faker = Faker()
         faker.seed_instance(42)
         for i in range(100):
@@ -54,7 +54,7 @@ class TapFakePeople(Tap):
 
     name = "tap-fake-people"
 
-    @override
+    @override  # type: ignore[misc]
     def write_message(self, message: Message) -> None:
         if message.type == SingerMessageType.STATE:
             return
