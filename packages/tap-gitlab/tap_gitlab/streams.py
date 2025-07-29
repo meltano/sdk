@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import importlib.resources
 import sys
 import typing as t
 
@@ -29,7 +28,7 @@ else:
     from typing import override  # noqa: ICN003
 
 
-SCHEMAS_DIR = SchemaDirectory(importlib.resources.files(schemas))
+SCHEMAS_DIR = SchemaDirectory(schemas)
 
 
 class GitlabStream(RESTStream[str]):

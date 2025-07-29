@@ -5,16 +5,16 @@ from __future__ import annotations
 import importlib.resources
 import json
 
-from singer_sdk import Stream, Tap
+from singer_sdk import SchemaDirectory, Stream, StreamSchema, Tap
 
-PROJECT_DIR = importlib.resources.files("samples.aapl")
+PROJECT_DIR = SchemaDirectory(importlib.resources.files("samples.aapl"))
 
 
 class AAPL(Stream):
     """An AAPL stream."""
 
     name = "aapl"
-    schema_filepath = PROJECT_DIR / "fundamentals.json"
+    schema = StreamSchema(PROJECT_DIR, "fundamentals.json")
 
     def get_records(self, _):  # noqa: PLR6301
         """Generate a single record."""
