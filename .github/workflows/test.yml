@@ -72,7 +72,9 @@ jobs:
         - { session: mypy,          python-version: "3.9",  os: "ubuntu-latest" }
         - { session: deps,          python-version: "3.13", os: "ubuntu-latest" }
         - { session: test-lowest,   python-version: "3.9",  os: "ubuntu-latest" }
+        - { session: test-contrib,  python-version: "3.9",  os: "ubuntu-latest" }
         - { session: test-contrib,  python-version: "3.13", os: "ubuntu-latest" }
+        - { session: test-packages, python-version: "3.9",  os: "ubuntu-latest" }
         - { session: test-packages, python-version: "3.13", os: "ubuntu-latest" }
 
     steps:

@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from tap_bigquery.tap import TapBigQuery
+from . import TapBigQuery
 
 TapBigQuery.cli()

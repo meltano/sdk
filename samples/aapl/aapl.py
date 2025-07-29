@@ -14,7 +14,7 @@ class AAPL(Stream):
     """An AAPL stream."""
 
     name = "aapl"
-    schema = StreamSchema(PROJECT_DIR, "fundamentals.json")
+    schema = StreamSchema(PROJECT_DIR, key="fundamentals")
 
     def get_records(self, _):  # noqa: PLR6301
         """Generate a single record."""
