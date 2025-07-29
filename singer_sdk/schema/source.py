@@ -118,13 +118,21 @@ class OpenAPISchema(SchemaSource):
         stream_schema = openapi_schema("ProjectListItem")
     """
 
-    def __init__(self, source: str | Path | Traversable) -> None:
+    def __init__(
+        self,
+        source: str | Path | Traversable,
+        *args: t.Any,
+        **kwargs: t.Any,
+    ) -> None:
         """Initialize the OpenAPI schema source.
 
         Args:
             source: URL, file path, or Traversable object pointing to an OpenAPI spec.
+            *args: Additional arguments to pass to the superclass constructor.
+            **kwargs: Additional keyword arguments to pass to the superclass
+                constructor.
         """
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.source = source
 
     @cached_property
@@ -212,16 +220,20 @@ class SchemaDirectory(SchemaSource):
     def __init__(
         self,
         dir_path: str | Path | Traversable | ModuleType,
-        *,
+        *args: t.Any,
         extension: str = "json",
+        **kwargs: t.Any,
     ) -> None:
         """Initialize the file schema source.
 
         Args:
             dir_path: Path to a directory containing JSON schema files.
+            *args: Additional arguments to pass to the superclass constructor.
+            **kwargs: Additional keyword arguments to pass to the superclass
+                constructor.
             extension: The extension of the schema files.
         """
-        super().__init__()
+        super().__init__(*args, **kwargs)
         if isinstance(dir_path, ModuleType):
             self.dir_path = importlib.resources.files(dir_path)
         elif isinstance(dir_path, str):
