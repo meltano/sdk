@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import json.decoder
 import typing as t
 from pathlib import Path
 from types import ModuleType
@@ -11,6 +12,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
+from singer_sdk.exceptions import DiscoveryError
 from singer_sdk.helpers._compat import Traversable
 from singer_sdk.schema.source import (
     OpenAPISchema,
@@ -225,8 +227,13 @@ class TestOpenAPISchema:
 
         source = OpenAPISchema("https://api.example.com/openapi.json")
 
-        with pytest.raises(requests.RequestException):
+        with pytest.raises(
+            DiscoveryError,
+            match="Failed to load OpenAPI specification",
+        ) as exc:
             _ = source.spec
+
+        assert isinstance(exc.value.__cause__, requests.RequestException)
 
     @patch("requests.get")
     def test_openapi_load_not_a_json_object(self, mock_get):
@@ -256,6 +263,20 @@ class TestOpenAPISchema:
         source = OpenAPISchema(openapi_file)
         spec = source.spec
         assert spec == sample_openapi_spec
+
+    def test_openapi_load_from_file_error(self, tmp_path: Path):
+        """Test error handling when loading from file."""
+        openapi_file = tmp_path / "openapi.json"
+        openapi_file.write_text("this is not a valid json object")
+
+        source = OpenAPISchema(openapi_file)
+        with pytest.raises(
+            DiscoveryError,
+            match="Failed to load OpenAPI specification",
+        ) as exc:
+            _ = source.spec
+
+        assert isinstance(exc.value.__cause__, json.decoder.JSONDecodeError)
 
     def test_openapi_component(
         self,

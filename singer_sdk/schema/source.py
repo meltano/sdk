@@ -136,6 +136,26 @@ class OpenAPISchema(SchemaSource):
         """
         return self._load_spec()
 
+    def _load_remote_spec(self, url: str) -> dict[str, t.Any]:  # noqa: PLR6301
+        """Load the OpenAPI specification from a remote source.
+
+        Returns:
+            The OpenAPI specification as a dictionary.
+        """
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        return response.json()  # type: ignore[no-any-return]
+
+    def _load_local_spec(self, path: str | Path | Traversable) -> dict[str, t.Any]:
+        """Load the OpenAPI specification from a local source.
+
+        Returns:
+            The OpenAPI specification as a dictionary.
+        """
+        path = Path(self.source) if isinstance(self.source, str) else self.source
+        content = path.read_text(encoding="utf-8")
+        return json.loads(content)  # type: ignore[no-any-return]
+
     def _load_spec(self) -> dict[str, t.Any]:
         """Load the OpenAPI specification from the source.
 
@@ -143,19 +163,22 @@ class OpenAPISchema(SchemaSource):
             The OpenAPI specification as a dictionary.
 
         Raises:
+            DiscoveryError: If the specification cannot be loaded from a remote or local
+                source.
             SchemaNotValidError: If the specification format is invalid.
         """
-        if isinstance(self.source, str) and self.source.startswith(
-            ("http://", "https://")
-        ):
-            # Load from URL
-            response = requests.get(self.source, timeout=30)
-            response.raise_for_status()
-            spec = response.json()
-        else:
-            path = Path(self.source) if isinstance(self.source, str) else self.source
-            content = path.read_text(encoding="utf-8")
-            spec = json.loads(content)
+        try:
+            if isinstance(self.source, str) and self.source.startswith(
+                ("http://", "https://")
+            ):
+                # Load from URL
+                spec = self._load_remote_spec(self.source)
+            else:
+                # Load from local file
+                spec = self._load_local_spec(self.source)
+        except Exception as e:
+            msg = f"Failed to load OpenAPI specification from {self.source}"
+            raise DiscoveryError(msg) from e
 
         if not isinstance(spec, dict):
             msg = "OpenAPI specification must be a JSON object"
@@ -176,10 +199,9 @@ class OpenAPISchema(SchemaSource):
         Raises:
             SchemaNotFoundError: If the schema component is not found.
         """
-        spec = self.spec
         schema = {
             "$ref": f"#/components/schemas/{key}",
-            "components": spec.get("components", {}),
+            "components": self.spec.get("components", {}),
         }
         try:
             resolved_schema = resolve_schema_references(schema)
