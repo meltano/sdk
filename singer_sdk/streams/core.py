@@ -174,7 +174,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
                 self._schema_filepath = Path(schema)
                 warnings.warn(
-                    "Passing a schema filepath is deprecated. Please pass the schema "
+                    "Passing a schema filepath is deprecated. Please pass a schema "
                     "dictionary or a Singer Schema object instead.",
                     SingerSDKDeprecationWarning,
                     stacklevel=2,
@@ -187,7 +187,13 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 msg = f"Unexpected type {type(schema).__name__} for arg 'schema'."  # type: ignore[unreachable]
                 raise ValueError(msg)
 
-        if self.schema_filepath:
+        if self.schema_filepath:  # pragma: no cover
+            warnings.warn(
+                "Passing a schema filepath is deprecated. Use the `StreamSchema` "
+                "descriptor with a `SchemaDirectory` source instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
             self._schema = json.loads(self.schema_filepath.read_text())
 
         if not self.schema:

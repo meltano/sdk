@@ -9,11 +9,12 @@ See the online explorer and query builder here:
 from __future__ import annotations
 
 import abc
-import importlib.resources
 import sys
+import typing as t
 
 from requests_cache.session import CachedSession
 
+from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk import typing as th
 from singer_sdk.streams.graphql import GraphQLStream
 from tap_countries import schemas
@@ -24,7 +25,7 @@ else:
     from typing import override  # noqa: ICN003
 
 
-SCHEMAS_DIR = importlib.resources.files(schemas)
+SCHEMAS_DIR = SchemaDirectory(schemas)
 
 
 class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
@@ -102,7 +103,7 @@ class ContinentsStream(CountriesAPIStream):
 
     name = "continents"
     primary_keys = ("code",)
-    schema_filepath = SCHEMAS_DIR / "continents.json"
+    schema: t.ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
     query = """
         continents {
             code

@@ -159,8 +159,7 @@ class ParquetStream(Stream):
             name = parquet_schema.names[i]
             # Translate from the Parquet type to a JSON Schema type
             dtype = get_jsonschema_type(str(parquet_schema.types[i]))
-
-            # Add the new property to our list
+            # Add the property to the list
             properties.append(th.Property(name, dtype))
 
         # Return the list as a JSON Schema dictionary object
