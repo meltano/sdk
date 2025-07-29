@@ -21,7 +21,6 @@ from singer_sdk.schema.source import (
     StreamSchema,
 )
 from singer_sdk.streams.core import Stream
-from singer_sdk.tap_base import Tap
 
 if t.TYPE_CHECKING:
     from collections.abc import Mapping
@@ -338,42 +337,48 @@ class TestOpenAPISchema:
 class TestStreamSchemaDescriptor:
     """Test the StreamSchema descriptor."""
 
-    def test_stream_schema_descriptor_with_explicit_key(self, tmp_path: Path):
-        """Test StreamSchema descriptor with an explicit custom key."""
+    def test_stream_schema_descriptor(self, tmp_path: Path):
+        """Test the StreamSchema descriptor."""
         schema_source = SchemaDirectory(tmp_path)
         schema_dict = {"type": "object", "properties": {"id": {"type": "string"}}}
         schema_file = tmp_path / "foo.json"
         schema_file.write_text(json.dumps(schema_dict))
 
-        class Dummy:
-            name = "dummy"
-            schema = StreamSchema(schema_source, key="foo")
-
-        inst = Dummy()
-        assert inst.schema == schema_dict
-
-    def test_stream_schema_descriptor(self, tmp_path: Path):
-        """Test the StreamSchema descriptor."""
-        schema_source = SchemaDirectory(tmp_path)
-        schema_dict = {"type": "object", "properties": {"id": {"type": "string"}}}
-        schema_file = tmp_path / "dummy.json"
-        schema_file.write_text(json.dumps(schema_dict))
-
-        class DummyStream(Stream):
-            name = "dummy"
+        class FooStream:
+            name = "foo"
             schema = StreamSchema(schema_source)
 
-            def get_records(self, context: Mapping[str, t.Any] | None):  # noqa: ARG002
-                return []
-
-        tap = Mock(spec=Tap)
-        tap.metrics_logger = Mock()
-        tap.logger = Mock()
-        tap.logger.getChild.return_value = Mock()
-        tap.metrics_logger = Mock()
-        tap.config = {}
-        tap.state = {}
-        tap.name = "test_tap"
-        tap.initialized_at = 1234567890000
-        stream = DummyStream(tap)
+        stream = FooStream()
         assert stream.schema == schema_dict
+
+    def test_stream_schema_descriptor_with_explicit_key(self, tmp_path: Path):
+        """Test StreamSchema descriptor with an explicit custom key."""
+        schema_source = SchemaDirectory(tmp_path)
+        schema_dict = {"type": "object", "properties": {"id": {"type": "string"}}}
+        schema_file = tmp_path / "bar.json"
+        schema_file.write_text(json.dumps(schema_dict))
+
+        class FooStream:
+            name = "foo"
+            schema = StreamSchema(schema_source, key="bar")
+
+        stream = FooStream()
+        assert stream.schema == schema_dict
+
+    def test_stream_schema_descriptor_key_not_found(self, tmp_path: Path):
+        """Test StreamSchema descriptor with an explicit custom key."""
+        schema_source = SchemaDirectory(tmp_path)
+        schema_dict = {"type": "object", "properties": {"id": {"type": "string"}}}
+        schema_file = tmp_path / "bar.json"
+        schema_file.write_text(json.dumps(schema_dict))
+
+        class FooStream:
+            name = "foo"
+            schema = StreamSchema(schema_source)
+
+        stream = FooStream()
+        with pytest.raises(
+            SchemaNotFoundError,
+            match="Schema file not found for 'foo'",
+        ):
+            _ = stream.schema
