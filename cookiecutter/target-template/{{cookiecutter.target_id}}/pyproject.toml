@@ -65,6 +65,7 @@ test = [
 ]
 typing = [
     "mypy>=1.16.0",
+    "ty>=0.0.1-alpha.16",
     {%- if cookiecutter.serialization_method == "SQL" %}
     "sqlalchemy-stubs",
     {%- else %}
@@ -129,4 +130,7 @@ commands = [ [ "pytest", { replace = "posargs", default = [ "tests" ], extend = 
 
 [tool.tox.env.typing]
 dependency_groups = [ "test", "typing" ]
-commands = [ [ "mypy", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ] ]
+commands = [
+    [ "mypy", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ],
+    [ "ty", "check", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ],
+]
