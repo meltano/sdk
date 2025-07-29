@@ -42,6 +42,7 @@ class SchemaSource(ABC):
         """Initialize the schema source with caching."""
         self._schema_cache: dict[str | None, dict[str, t.Any]] = {}
 
+    @t.final
     def get_schema(self, key: str, /) -> dict[str, t.Any]:
         """Convenience method to get a schema component.
 
