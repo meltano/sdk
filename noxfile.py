@@ -62,9 +62,15 @@ def _install_env(session: nox.Session) -> dict[str, str]:
 @nox.session(python=[python_versions[0], main_python])
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
-    args = session.posargs or ["singer_sdk"]
+    default_locations = [
+        "packages",
+        "samples",
+        "singer_sdk",
+    ]
+    args = session.posargs or default_locations
     session.run_install(
         *UV_SYNC_COMMAND,
+        "--group=packages",
         "--group=typing",
         "--all-extras",
         env=_install_env(session),
@@ -112,7 +118,11 @@ def tests(session: nox.Session) -> None:
     )
 
 
-@nox.session(name="test-external", tags=["test"])
+@nox.session(
+    name="test-external",
+    python=[python_versions[0], main_python],
+    tags=["test"],
+)
 def test_external(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
     session.run_install(
@@ -132,7 +142,11 @@ def test_external(session: nox.Session) -> None:
     )
 
 
-@nox.session(name="test-contrib", tags=["test"])
+@nox.session(
+    name="test-contrib",
+    python=[python_versions[0], main_python],
+    tags=["test"],
+)
 def test_contrib(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
     session.run_install(
@@ -155,7 +169,11 @@ def test_contrib(session: nox.Session) -> None:
     )
 
 
-@nox.session(name="test-packages", tags=["test"])
+@nox.session(
+    name="test-packages",
+    python=[python_versions[0], main_python],
+    tags=["test"],
+)
 def test_packages(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
     session.run_install(
