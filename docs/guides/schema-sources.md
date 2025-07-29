@@ -9,6 +9,8 @@ The Singer SDK provides an extensible API for loading schemas from various sourc
 ## Basic Usage
 
 ```python
+from typing import ClassVar
+
 from singer_sdk import RESTStream, SchemaDirectory, StreamSchema
 
 from myproject import schemas
@@ -25,12 +27,14 @@ SCHEMAS_DIR = SchemaDirectory(schemas)
 
 class ProjectsStream(RESTStream):
     name = "projects"
-    schema = StreamSchema(SCHEMAS_DIR)  # Loads from projects.json
+    schema: ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)  # Loads from projects.json
 ```
 
 ## OpenAPI Integration
 
 ```python
+from typing import ClassVar
+
 from singer_sdk import OpenAPISchema, StreamSchema
 
 # Load from OpenAPI spec
@@ -38,5 +42,5 @@ openapi_source = OpenAPISchema("https://api.example.com/openapi.json")
 
 class UsersStream(RESTStream):
     name = "users"
-    schema = StreamSchema(openapi_source, key="User")  # Load "User" component
+    schema: ClassVar[StreamSchema] = StreamSchema(openapi_source, key="User")  # Load "User" component
 ```

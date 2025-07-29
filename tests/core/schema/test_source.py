@@ -337,7 +337,7 @@ class TestStreamSchemaDescriptor:
 
         class FooStream:
             name = "foo"
-            schema = StreamSchema(schema_source)
+            schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source)
 
         stream = FooStream()
         assert stream.schema == schema_dict
@@ -351,7 +351,7 @@ class TestStreamSchemaDescriptor:
 
         class FooStream:
             name = "foo"
-            schema = StreamSchema(schema_source, key="bar")
+            schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source, key="bar")
 
         stream = FooStream()
         assert stream.schema == schema_dict
@@ -365,7 +365,7 @@ class TestStreamSchemaDescriptor:
 
         class FooStream:
             name = "foo"
-            schema = StreamSchema(schema_source)
+            schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source)
 
         stream = FooStream()
         with pytest.raises(

@@ -38,7 +38,7 @@ class GitlabStream(RESTStream[str]):
     """Sample tap test for gitlab."""
 
     _LOG_REQUEST_METRIC_URLS = True
-    schema = StreamSchema(SCHEMAS_DIR)
+    schema: t.ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
 
     @property
     @override
