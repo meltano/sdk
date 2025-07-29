@@ -62,9 +62,14 @@ def _install_env(session: nox.Session) -> dict[str, str]:
 @nox.session(python=[python_versions[0], main_python])
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
-    args = session.posargs or ["singer_sdk"]
+    default_locations = [
+        "singer_sdk",
+        "packages",
+    ]
+    args = session.posargs or default_locations
     session.run_install(
         *UV_SYNC_COMMAND,
+        "--group=packages",
         "--group=typing",
         "--all-extras",
         env=_install_env(session),

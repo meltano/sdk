@@ -27,6 +27,9 @@ if sys.version_info < (3, 12):
 else:
     from typing import override  # noqa: ICN003
 
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers.types import Context
+
 
 SCHEMAS_DIR = SchemaDirectory(schemas)
 
@@ -38,9 +41,10 @@ class GitlabStream(RESTStream[str]):
     schema = StreamSchema(SCHEMAS_DIR)
 
     @property
+    @override
     def url_base(self) -> str:
         """Return the base GitLab URL."""
-        return self.config["url_base"]
+        return self.config["url_base"]  # type: ignore[no-any-return]
 
     @property
     @override
@@ -54,6 +58,7 @@ class GitlabStream(RESTStream[str]):
         )
 
     @property
+    @override
     def authenticator(self) -> SimpleAuthenticator:
         """Return an authenticator for REST API requests."""
         return SimpleAuthenticator(
@@ -61,9 +66,10 @@ class GitlabStream(RESTStream[str]):
             auth_headers={"Private-Token": self.config["auth_token"]},
         )
 
+    @override
     def get_url_params(
         self,
-        context: dict | None,  # noqa: ARG002
+        context: Context | None,
         next_page_token: str | None,
     ) -> dict[str, t.Any]:
         """Return a dictionary of values to be used in URL parameterization."""
@@ -75,7 +81,8 @@ class GitlabStream(RESTStream[str]):
             params["order_by"] = self.replication_key
         return params
 
-    def get_new_paginator(self) -> SimpleHeaderPaginator:  # noqa: PLR6301
+    @override
+    def get_new_paginator(self) -> SimpleHeaderPaginator:
         """Return a new paginator for GitLab API endpoints.
 
         Returns:
@@ -88,6 +95,7 @@ class ProjectBasedStream(GitlabStream):
     """Base class for streams that are keys based on project ID."""
 
     @property
+    @override
     def partitions(self) -> list[dict]:
         """Return a list of partition key dicts (if applicable), otherwise None."""
         if "{project_id}" in self.path:
@@ -195,10 +203,11 @@ class EpicsStream(ProjectBasedStream):
         ),
     ).to_dict()
 
-    def get_child_context(  # noqa: PLR6301
+    @override
+    def get_child_context(
         self,
         record: dict,
-        context: dict | None,  # noqa: ARG002
+        context: Context | None,
     ) -> dict:
         """Perform post processing, including queuing up any child stream types."""
         # Ensure child state record(s) are created
@@ -218,9 +227,10 @@ class EpicIssuesStream(GitlabStream):
     replication_key = None
     parent_stream_type = EpicsStream  # Stream should wait for parents to complete.
 
+    @override
     def get_url_params(
         self,
-        context: dict | None,
+        context: Context | None,
         next_page_token: str | None,
     ) -> dict[str, t.Any]:
         """Return a dictionary of values to be used in parameterization."""
