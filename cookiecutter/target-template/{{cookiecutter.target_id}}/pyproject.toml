@@ -35,7 +35,10 @@ dependencies = [
     {%- else %}
     "singer-sdk~=0.47.4",
     {%- endif %}
-    {%- if cookiecutter.serialization_method != "SQL" %}
+    {%- if cookiecutter.serialization_method == "SQL" %}
+    "sqlalchemy~=2.0",
+    "typing-extensions>=4.5.0; python_version < '3.13'",
+    {%- else %}
     "requests~=2.32.3",
     {%- endif %}
 ]
