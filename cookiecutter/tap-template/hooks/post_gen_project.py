@@ -15,6 +15,19 @@ if __name__ == "__main__":
     for client_py in PACKAGE_PATH.rglob("*-client.py"):
         client_py.unlink()
 
+    # Select appropriate tap.py based on stream type
+    tap_target = PACKAGE_PATH / "tap.py"
+    if "{{ cookiecutter.stream_type }}" == "SQL":
+        sql_tap_py = PACKAGE_PATH / "sql-tap.py"
+        sql_tap_py.rename(tap_target)
+    else:
+        non_sql_tap_py = PACKAGE_PATH / "non-sql-tap.py"
+        non_sql_tap_py.rename(tap_target)
+
+    # Clean up remaining tap template files
+    for tap_py in PACKAGE_PATH.rglob("*-tap.py"):
+        tap_py.unlink()
+
     if "{{ cookiecutter.stream_type }}" != "REST":
         shutil.rmtree(PACKAGE_PATH.joinpath("schemas"), ignore_errors=True)
 

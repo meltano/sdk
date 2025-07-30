@@ -2,27 +2,17 @@
 
 from __future__ import annotations
 
-from singer_sdk import {{ 'SQL' if cookiecutter.stream_type == 'SQL' else '' }}Tap
+from singer_sdk import Tap
 from singer_sdk import typing as th  # JSON schema typing helpers
-
-{%- if cookiecutter.stream_type == "SQL" %}
-
-from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }}Stream
-{%- else %}
 
 # TODO: Import your custom stream types here:
 from {{ cookiecutter.library_name }} import streams
-{%- endif %}
 
 
-class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 'SQL' else '' }}Tap):
+class Tap{{ cookiecutter.source_name }}(Tap):
     """{{ cookiecutter.source_name }} tap class."""
 
     name = "{{ cookiecutter.tap_id }}"
-
-    {%- if cookiecutter.stream_type == "SQL" %}
-    default_stream_class = {{ cookiecutter.source_name }}Stream
-    {%- endif %}
 
     # TODO: Update this section with the actual config values you expect:
     config_jsonschema = th.PropertiesList(
@@ -64,7 +54,6 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
         ),
         {%- endif %}
     ).to_dict()
-{%- if cookiecutter.stream_type in ("GraphQL", "REST", "Other") %}
 
     def discover_streams(self) -> list[streams.{{ cookiecutter.source_name }}Stream]:
         """Return a list of discovered streams.
@@ -76,7 +65,6 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
             streams.GroupsStream(self),
             streams.UsersStream(self),
         ]
-{%- endif %}
 
 
 if __name__ == "__main__":

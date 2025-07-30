@@ -128,9 +128,6 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
         Returns:
             List of schema names
         """
-        # Example: Filter schemas based on configuration
-        if "filter_schemas" in self.config and len(self.config["filter_schemas"]) != 0:
-            return self.config["filter_schemas"]
         return super().get_schema_names(engine, inspected)
 
     def to_jsonschema_type(
