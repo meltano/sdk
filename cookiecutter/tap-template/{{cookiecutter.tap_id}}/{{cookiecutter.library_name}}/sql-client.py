@@ -269,11 +269,8 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
         """
         query = super().apply_query_filters(query, table, context=context)
 
-        # Example: Add custom WHERE clauses from configuration
-        stream_options = self.config.get("stream_options", {}).get(self.name, {})
-        if clauses := stream_options.get("custom_where_clauses"):
-            for clause in clauses:
-                query = query.where(sqlalchemy.text(clause.strip()))
+        # Add custom WHERE clauses from configuration, etc.
+        # query = query.where(...)
 
         return query
 
@@ -315,7 +312,6 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
             query = query.limit(max_records)
 
         # 4. Execute query and yield records
-        # NOTE: Using private _connect() method. If connector API changes, this may break.
         with self.connector._connect() as connection:
             for record in connection.execute(query).mappings():
                 yield dict(record)
