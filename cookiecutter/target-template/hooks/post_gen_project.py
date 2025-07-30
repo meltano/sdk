@@ -26,7 +26,12 @@ if __name__ == "__main__":
     elif serialization_method == "SQL":
         source_file = BASE_PATH / "sinks_sql.py"
     else:
-        raise ValueError(f"Unknown serialization method: {serialization_method}")
+        valid_methods = ["Per record", "Per batch", "SQL"]
+        msg = (
+            f"Unknown serialization method: {serialization_method}. "
+            f"Valid methods are: {', '.join(valid_methods)}"
+        )
+        raise ValueError(msg)
 
     # Copy the appropriate sinks file to sinks.py
     target_file = BASE_PATH / "sinks.py"
