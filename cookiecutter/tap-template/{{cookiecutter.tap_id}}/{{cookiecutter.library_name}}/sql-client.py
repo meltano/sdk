@@ -234,18 +234,6 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
     # RECURSIVE: Recursively enforce types throughout nested structures
     TYPE_CONFORMANCE_LEVEL = TypeConformanceLevel.RECURSIVE
 
-    def max_record_count(self) -> int | None:
-        """Return the maximum number of records to fetch in a single query.
-
-        Developers may override this method to implement query-level pagination
-        or limit large result sets to prevent memory issues.
-
-        Returns:
-            Maximum number of records per query, or None for no limit.
-        """
-        # Example: Read from configuration
-        return self.config.get("max_record_count")
-
     def apply_query_filters(
         self,
         query: sqlalchemy.sql.Select,
@@ -306,12 +294,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
             if start_val:
                 query = query.where(replication_key_col >= start_val)
 
-        # 3. Apply record limit if configured
-        max_records = self.max_record_count()
-        if max_records:
-            query = query.limit(max_records)
-
-        # 4. Execute query and yield records
+        # 3. Execute query and yield records
         with self.connector._connect() as connection:
             for record in connection.execute(query).mappings():
                 yield dict(record)
