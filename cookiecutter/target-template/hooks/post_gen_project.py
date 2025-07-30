@@ -38,6 +38,5 @@ if __name__ == "__main__":
     shutil.copy2(source_file, target_file)
 
     # Clean up the unused sink files
-    (BASE_PATH / "sinks_record.py").unlink(missing_ok=True)
-    (BASE_PATH / "sinks_batch.py").unlink(missing_ok=True)
-    (BASE_PATH / "sinks_sql.py").unlink(missing_ok=True)
+    for template in ["sinks_record.py", "sinks_batch.py", "sinks_sql.py"]:
+        (BASE_PATH / template).unlink(missing_ok=True)
