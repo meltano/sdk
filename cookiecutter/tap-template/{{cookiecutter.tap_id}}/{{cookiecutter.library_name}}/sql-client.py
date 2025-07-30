@@ -318,8 +318,9 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
             query = query.limit(max_records)
 
         # 4. Execute query and yield records
-        for record in self.connector.execute(query).mappings():
-            yield dict(record)
+        with self.connector._connect() as connection:
+            for record in connection.execute(query).mappings():
+                yield dict(record)
 
         # Alternative: Use the default implementation
         # yield from super().get_records(partition)

@@ -4,28 +4,10 @@ from __future__ import annotations
 
 import typing as t
 
-{%- set
-    sinkclass_mapping = {
-        "Per batch": "BatchSink",
-        "Per record": "RecordSink",
-        "SQL": "SQLSink",
-    }
-%}
-
-{%- set sinkclass = sinkclass_mapping[cookiecutter.serialization_method] %}
-
-{%- if sinkclass == "SQLSink" %}
-
 import sqlalchemy
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.sinks import {{ sinkclass }}
-{%- else %}
-
-from singer_sdk.sinks import {{ sinkclass }}
-{%- endif %}
-
-
-{%- if sinkclass == "SQLSink" %}
+from singer_sdk.connectors.sql import FullyQualifiedName
+from singer_sdk.sinks import SQLSink
 
 
 class {{ cookiecutter.destination_name }}Connector(SQLConnector):
@@ -48,69 +30,10 @@ class {{ cookiecutter.destination_name }}Connector(SQLConnector):
             config: The configuration for the connector.
         """
         return super().get_sqlalchemy_url(config)
-{%- endif %}
 
 
-class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
+class {{ cookiecutter.destination_name }}Sink(SQLSink):
     """{{ cookiecutter.destination_name }} target sink class."""
-
-    {% if sinkclass == "RecordSink" -%}
-    def process_record(self, record: dict, context: dict) -> None:
-        """Process the record.
-
-        Args:
-            record: Individual record in the stream.
-            context: Stream partition or context dictionary.
-        """
-        # Sample:
-        # ------
-        # client.write(record)  # noqa: ERA001
-
-    {%- elif sinkclass == "BatchSink" -%}
-
-    max_size = 10000  # Max records to write in one batch
-
-    def start_batch(self, context: dict) -> None:
-        """Start a batch.
-
-        Developers may optionally add additional markers to the `context` dict,
-        which is unique to this batch.
-
-        Args:
-            context: Stream partition or context dictionary.
-        """
-        # Sample:
-        # ------
-        # batch_key = context["batch_id"]
-        # context["file_path"] = f"{batch_key}.csv"
-
-    def process_record(self, record: dict, context: dict) -> None:
-        """Process the record.
-
-        Developers may optionally read or write additional markers within the
-        passed `context` dict from the current batch.
-
-        Args:
-            record: Individual record in the stream.
-            context: Stream partition or context dictionary.
-        """
-        # Sample:
-        # ------
-        # with open(context["file_path"], "a") as csvfile:
-        #     csvfile.write(record)
-
-    def process_batch(self, context: dict) -> None:
-        """Write out any prepped records and return once fully written.
-
-        Args:
-            context: Stream partition or context dictionary.
-        """
-        # Sample:
-        # ------
-        # client.upload(context["file_path"])  # Upload file
-        # Path(context["file_path"]).unlink()  # Delete local copy
-
-    {%- elif sinkclass == "SQLSink" -%}
 
     connector_class = {{ cookiecutter.destination_name }}Connector
 
@@ -169,7 +92,7 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
 
             try:
                 # Insert records into temporary table
-                self.bulk_insert_records(
+                self.bulk_insert_records_to_table(
                     table=temp_table,
                     schema=self.schema,
                     primary_keys=self.key_properties,
@@ -203,6 +126,36 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
         return f"temp_{str(uuid.uuid4()).replace('-', '_')}"
 
     def bulk_insert_records(
+        self,
+        full_table_name: str | FullyQualifiedName,
+        schema: dict,
+        records: t.Iterable[dict[str, t.Any]],
+    ) -> int | None:
+        """Bulk insert records to an existing destination table.
+
+        This is the standard interface method that matches the parent class signature.
+        Developers should typically override bulk_insert_records_to_table instead
+        for more advanced use cases.
+
+        Args:
+            full_table_name: The target table name.
+            schema: The JSON schema for the new table.
+            records: The input records.
+
+        Returns:
+            Number of records inserted, or None if not detectable.
+        """
+        with self.connector._connect() as connection, connection.begin():
+            table = self.connector.get_table(full_table_name)
+            return self.bulk_insert_records_to_table(
+                table=table,
+                schema=schema,
+                primary_keys=self.key_properties,
+                records=records,
+                connection=connection,
+            )
+
+    def bulk_insert_records_to_table(
         self,
         table: sqlalchemy.Table,
         schema: dict,
@@ -379,4 +332,3 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
             return parts[-2]
 
         return None
-    {%- endif %}
