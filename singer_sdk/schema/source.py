@@ -127,7 +127,7 @@ class StreamSchema(t.Generic[_TKey]):
         return self.schema_source.get_schema(self.key or obj.name)  # type: ignore[arg-type]
 
 
-class OpenAPISchema(SchemaSource[str]):
+class OpenAPISchema(SchemaSource):
     """Schema source for OpenAPI specifications.
 
     Supports loading schemas from a local or remote OpenAPI 3.1 specification.
@@ -233,7 +233,7 @@ class OpenAPISchema(SchemaSource[str]):
             raise SchemaNotFoundError(msg) from e
 
 
-class SchemaDirectory(SchemaSource[str]):
+class SchemaDirectory(SchemaSource):
     """Schema source for local file-based schemas."""
 
     def __init__(
