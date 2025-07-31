@@ -253,7 +253,8 @@ The following variables are available in the context of a mapping expression:
 | `_` | Same as `record` but shorter to type. |
 | `self` | The existing property value if the property already exists. |
 | `fake` | A [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config` (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers) for available methods. |
-| `__stream_name__` | The name of the stream. Useful when [applying the same transformation to multiple streams](#applying-a-mapping-across-two-or-more-streams). |
+| `__stream_name__` | The name of the stream. Useful when [applying the same transformation to multiple streams](#applying-a-mapping-across-two-or-more-streams). If used outside of `__alias__`, this will reference the aliased stream name. |
+| `__original_stream_name__` | The original name of the stream. Useful when `__alias__` is specified but you want to reference the original (unaliased) stream name elsewhere (e.g. property mapping). If `__alias__` is not specified, this will reference the same value as `__stream_name__`. |
 
 ```{tip}
 To use the `fake` object, the `faker` library must be installed.
@@ -265,6 +266,10 @@ The `faker` object.
 
 :::{versionadded} 0.42.0
 The `__stream_name__` variable.
+:::
+
+:::{versionadded} 0.48.0
+The `__original_stream_name__` variable.
 :::
 
 #### Built-in Alias Variable Names
