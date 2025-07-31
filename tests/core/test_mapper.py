@@ -798,10 +798,28 @@ class MappedTap(Tap):
             id="builtin_variable_stream_name_alias",
         ),
         pytest.param(
+            {"mystream": {"__alias__": "'aliased_' + __original_stream_name__"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_original_stream_name_alias.jsonl",
+            id="builtin_variable_original_stream_name_alias",
+        ),
+        pytest.param(
             {"mystream": {"__alias__": "__stream_name__.upper()"}},
             {"flattening_enabled": False, "flattening_max_depth": 0},
             "builtin_variable_stream_name_alias_expr.jsonl",
             id="builtin_variable_stream_name_alias_expr",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "__alias__": "'aliased'",
+                    "stream_name": "__stream_name__",
+                    "original_stream_name": "__original_stream_name__",
+                }
+            },
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_stream_name_variables_with_alias.jsonl",
+            id="builtin_stream_name_variables_with_alias",
         ),
         pytest.param(
             {

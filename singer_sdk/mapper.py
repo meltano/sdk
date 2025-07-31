@@ -254,17 +254,19 @@ class CustomStreamMap(StreamMap):
         key_properties: t.Sequence[str] | None,
         map_transform: dict,
         flattening_options: FlatteningOptions | None,
+        stream_name: str | None = None,
     ) -> None:
         """Initialize mapper.
 
         Args:
-            stream_alias: Stream name.
+            stream_alias: Stream alias.
             map_config: Stream map configuration.
             faker_config: Faker configuration.
             raw_schema: Original stream's JSON schema.
             key_properties: Primary key of the source stream.
             map_transform: Dictionary of transformations to apply to the stream.
             flattening_options: Flattening options, or None to skip flattening.
+            stream_name: Stream name.
         """
         super().__init__(
             stream_alias=stream_alias,
@@ -275,6 +277,7 @@ class CustomStreamMap(StreamMap):
 
         self.map_config = map_config
         self.faker_config = faker_config
+        self.stream_name = stream_name
 
         self._transform_fn: t.Callable[[dict], dict | None]
         self._filter_fn: t.Callable[[dict], bool]
@@ -350,6 +353,9 @@ class CustomStreamMap(StreamMap):
         names["record"] = record  # ...and a longhand alias
         names["config"] = self.map_config  # Allow map config access within transform
         names["__stream_name__"] = self.stream_alias  # Access stream name in transform
+
+        # Stream name (prior to aliasing, if applicable)
+        names["__original_stream_name__"] = self.stream_name
 
         if self.fake:
             names["fake"] = self.fake
@@ -812,6 +818,7 @@ class PluginMapper:
                     raw_schema=schema,
                     key_properties=key_properties,
                     flattening_options=self.flattening_options,
+                    stream_name=stream_name,
                 )
             elif stream_def is None or (stream_def == NULL_STRING):
                 mapper = RemoveRecordTransform(
@@ -858,6 +865,7 @@ class PluginMapper:
         """
         # Allow stream name access within alias transform
         names = {"__stream_name__": stream_name}
+        names["__original_stream_name__"] = names["__stream_name__"]
 
         result: str
 
