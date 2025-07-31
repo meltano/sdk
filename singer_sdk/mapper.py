@@ -865,7 +865,6 @@ class PluginMapper:
         """
         # Allow stream name access within alias transform
         names = {"__stream_name__": stream_name}
-        names["__original_stream_name__"] = names["__stream_name__"]
 
         result: str
 
