@@ -229,7 +229,7 @@ class OpenAPISchema(SchemaSource):
             resolved_schema = resolve_schema_references(schema)
             return resolved_schema.get("components", {}).get("schemas", {}).get(key, {})  # type: ignore[no-any-return]
         except PointerToNowhere as e:
-            msg = f"Schema component '{key}' not found"
+            msg = f"Failed to resolve schema references for '{key}'"
             raise SchemaNotFoundError(msg) from e
 
 

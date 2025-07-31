@@ -288,7 +288,7 @@ class TestOpenAPISchema:
         source = OpenAPISchema(openapi_file)
         with pytest.raises(
             SchemaNotFoundError,
-            match="Schema component 'InvalidComponent' not found",
+            match="Failed to resolve schema references for 'InvalidComponent'",
         ):
             source.get_schema("InvalidComponent")
 
