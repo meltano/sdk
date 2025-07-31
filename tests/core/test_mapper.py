@@ -812,8 +812,19 @@ class MappedTap(Tap):
                 }
             },
             {"flattening_enabled": False, "flattening_max_depth": 0},
-            "builtin_stream_name_variables_with_alias.jsonl",
-            id="builtin_stream_name_variables_with_alias",
+            "builtin_variable_original_stream_name_alias.jsonl",
+            id="builtin_variable_original_stream_name_alias",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "stream_name": "__stream_name__",
+                    "original_stream_name": "__original_stream_name__",
+                }
+            },
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_original_stream_name_no_alias.jsonl",
+            id="builtin_variable_original_stream_name_no_alias",
         ),
         pytest.param(
             {
