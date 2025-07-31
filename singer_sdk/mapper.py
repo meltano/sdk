@@ -254,6 +254,7 @@ class CustomStreamMap(StreamMap):
         key_properties: t.Sequence[str] | None,
         map_transform: dict,
         flattening_options: FlatteningOptions | None,
+        *,
         stream_name: str | None = None,
     ) -> None:
         """Initialize mapper.
