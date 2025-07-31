@@ -356,6 +356,13 @@ class TestStreamSchemaDescriptor:
         stream_schema = StreamSchema(schema_source)
         assert stream_schema.get_stream_schema(stream, type(stream)) == foo_schema
 
+        stream_schema = StreamSchema(schema_source, key="bar")
+        with pytest.raises(
+            SchemaNotFoundError,
+            match="Schema file not found for 'bar'",
+        ):
+            stream_schema.get_stream_schema(stream, type(stream))
+
     def test_stream_schema_descriptor(
         self,
         foo_schema: dict[str, t.Any],
