@@ -14,7 +14,6 @@ from joblib import Parallel, delayed, parallel_config
 
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
-from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import (
     ACTIVATE_VERSION_CONFIG,
     ADD_RECORD_METADATA_CONFIG,
@@ -63,6 +62,14 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
     message_reader_class: type[GenericSingerReader] = SingerReader
     """The message reader class to use for reading messages."""
 
+    #: A list of plugin capabilities supported by this target.
+    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+        PluginCapabilities.ABOUT,
+        PluginCapabilities.STREAM_MAPS,
+        PluginCapabilities.FLATTENING,
+        TargetCapabilities.VALIDATE_RECORDS,
+    ]
+
     def __init__(
         self,
         *,
@@ -104,20 +111,6 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
 
         if setup_mapper:
             self.setup_mapper()
-
-    @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
-        """Get target capabilities.
-
-        Returns:
-            A list of capabilities supported by this target.
-        """
-        return [
-            PluginCapabilities.ABOUT,
-            PluginCapabilities.STREAM_MAPS,
-            PluginCapabilities.FLATTENING,
-            TargetCapabilities.VALIDATE_RECORDS,
-        ]
 
     @property
     def max_parallelism(self) -> int:
@@ -656,6 +649,14 @@ class SQLTarget(Target):
 
     default_sink_class: type[SQLSink]
 
+    #: A list of capabilities supported by this target.
+    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+        *Target.capabilities,
+        PluginCapabilities.ACTIVATE_VERSION,
+        TargetCapabilities.TARGET_SCHEMA,
+        TargetCapabilities.HARD_DELETE,
+    ]
+
     @property
     def target_connector(self) -> SQLConnector:
         """The connector object.
@@ -668,24 +669,6 @@ class SQLTarget(Target):
                 dict(self.config),
             )
         return self._target_connector
-
-    @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:
-        """Get target capabilities.
-
-        Returns:
-            A list of capabilities supported by this target.
-        """
-        sql_target_capabilities: list[CapabilitiesEnum] = super().capabilities
-        sql_target_capabilities.extend(
-            [
-                PluginCapabilities.ACTIVATE_VERSION,
-                TargetCapabilities.TARGET_SCHEMA,
-                TargetCapabilities.HARD_DELETE,
-            ]
-        )
-
-        return sql_target_capabilities
 
     @classmethod
     def append_builtin_config(cls: type[SQLTarget], config_jsonschema: dict) -> None:

@@ -17,7 +17,6 @@ from singer_sdk.exceptions import (
     ConfigValidationError,
 )
 from singer_sdk.helpers import _state
-from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._state import StateWriter, write_stream_state
 from singer_sdk.helpers._util import dump_json, load_json, read_json_file
@@ -66,6 +65,18 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     message_writer_class: type[GenericSingerWriter] = SingerWriter
     """The message writer class to use for writing messages."""
+
+    #: A list of capabilities supported by this tap.
+    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+        TapCapabilities.CATALOG,
+        TapCapabilities.STATE,
+        TapCapabilities.DISCOVER,
+        TapCapabilities.ACTIVATE_VERSION,
+        PluginCapabilities.ABOUT,
+        PluginCapabilities.STREAM_MAPS,
+        PluginCapabilities.FLATTENING,
+        PluginCapabilities.BATCH,
+    ]
 
     # Constructor
 
@@ -211,24 +222,6 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """Initialize the plugin mapper for this tap."""
         super().setup_mapper()
         self.mapper.register_raw_streams_from_catalog(self.catalog)
-
-    @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
-        """Get tap capabilities.
-
-        Returns:
-            A list of capabilities supported by this tap.
-        """
-        return [
-            TapCapabilities.CATALOG,
-            TapCapabilities.STATE,
-            TapCapabilities.DISCOVER,
-            TapCapabilities.ACTIVATE_VERSION,
-            PluginCapabilities.ABOUT,
-            PluginCapabilities.STREAM_MAPS,
-            PluginCapabilities.FLATTENING,
-            PluginCapabilities.BATCH,
-        ]
 
     @classmethod
     def append_builtin_config(cls: type[PluginBase], config_jsonschema: dict) -> None:
