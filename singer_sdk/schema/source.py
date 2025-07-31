@@ -17,10 +17,15 @@ from referencing.exceptions import PointerToNowhere
 from singer_sdk.exceptions import DiscoveryError
 from singer_sdk.singerlib.schema import resolve_schema_references
 
-if sys.version_info < (3, 12):
-    from typing_extensions import override
-else:
+if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
+if sys.version_info >= (3, 13):
+    from typing import TypeVar  # noqa: ICN003
+else:
+    from typing_extensions import TypeVar
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
@@ -35,15 +40,18 @@ class SchemaNotValidError(DiscoveryError):
     """Raised when a schema is not valid."""
 
 
-class SchemaSource(ABC):
+_TKey = TypeVar("_TKey", bound=t.Hashable, default=str)
+
+
+class SchemaSource(ABC, t.Generic[_TKey]):
     """Abstract base class for schema sources."""
 
     def __init__(self) -> None:
         """Initialize the schema source with caching."""
-        self._schema_cache: dict[str | None, dict[str, t.Any]] = {}
+        self._schema_cache: dict[_TKey, dict[str, t.Any]] = {}
 
     @t.final
-    def get_schema(self, key: str, /) -> dict[str, t.Any]:
+    def get_schema(self, key: _TKey, /) -> dict[str, t.Any]:
         """Convenience method to get a schema component.
 
         Args:
@@ -64,7 +72,7 @@ class SchemaSource(ABC):
         return self._schema_cache[key]
 
     @abstractmethod
-    def fetch_schema(self, key: str) -> dict[str, t.Any]:
+    def fetch_schema(self, key: _TKey) -> dict[str, t.Any]:
         """Retrieve a JSON schema from this source.
 
         Args:
@@ -79,13 +87,23 @@ class SchemaSource(ABC):
         """
 
 
-class StreamSchema:
-    """Stream schema.
+class StreamSchema(t.Generic[_TKey]):
+    """Stream schema descriptor.
 
-    A stream schema is a schema that is used to validate the records of a stream.
+    Assign a `StreamSchema` descriptor to a stream class to dynamically load the schema
+    from a schema source.
+
+    Example:
+        class MyStream(Stream):
+            schema = StreamSchema(SchemaDirectory("schemas"))
     """
 
-    def __init__(self, schema_source: SchemaSource, *, key: str | None = None) -> None:
+    def __init__(
+        self,
+        schema_source: SchemaSource[_TKey],
+        *,
+        key: _TKey | None = None,
+    ) -> None:
         """Initialize the stream schema.
 
         Args:
@@ -106,10 +124,10 @@ class StreamSchema:
         Returns:
             A JSON schema dictionary.
         """
-        return self.schema_source.get_schema(self.key or obj.name)
+        return self.schema_source.get_schema(self.key or obj.name)  # type: ignore[arg-type]
 
 
-class OpenAPISchema(SchemaSource):
+class OpenAPISchema(SchemaSource[str]):
     """Schema source for OpenAPI specifications.
 
     Supports loading schemas from a local or remote OpenAPI 3.1 specification.
@@ -215,7 +233,7 @@ class OpenAPISchema(SchemaSource):
             raise SchemaNotFoundError(msg) from e
 
 
-class SchemaDirectory(SchemaSource):
+class SchemaDirectory(SchemaSource[str]):
     """Schema source for local file-based schemas."""
 
     def __init__(
