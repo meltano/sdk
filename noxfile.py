@@ -29,7 +29,7 @@ UV_SYNC_COMMAND = (
 )
 
 package = "singer_sdk"
-main_python = "3.13"
+main_python = Path(".python-version").read_text(encoding="utf-8").rstrip()
 python_versions = nox.project.python_versions(PYPROJECT)
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = [
