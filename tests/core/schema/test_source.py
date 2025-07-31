@@ -328,48 +328,75 @@ class TestOpenAPISchema:
 class TestStreamSchemaDescriptor:
     """Test the StreamSchema descriptor."""
 
-    def test_stream_schema_descriptor(self, tmp_path: Path):
-        """Test the StreamSchema descriptor."""
-        schema_source = SchemaDirectory(tmp_path)
-        schema_dict = {"type": "object", "properties": {"id": {"type": "string"}}}
+    @pytest.fixture
+    def foo_schema(self) -> dict[str, t.Any]:
+        """Schema dictionary."""
+        return {"type": "object", "properties": {"id": {"type": "string"}}}
+
+    @pytest.fixture
+    def schema_source(
+        self,
+        foo_schema: dict[str, t.Any],
+        tmp_path: Path,
+    ) -> SchemaDirectory:
+        """Schema source."""
         schema_file = tmp_path / "foo.json"
-        schema_file.write_text(json.dumps(schema_dict))
+        schema_file.write_text(json.dumps(foo_schema))
+        return SchemaDirectory(tmp_path)
+
+    def test_get_stream_schema(
+        self,
+        foo_schema: dict[str, t.Any],
+        schema_source: SchemaDirectory,
+    ):
+        """Test the StreamSchema descriptor."""
+        stream = Mock(spec=Stream)
+        stream.name = "foo"
+
+        stream_schema = StreamSchema(schema_source)
+        assert stream_schema.get_stream_schema(stream, type(stream)) == foo_schema
+
+    def test_stream_schema_descriptor(
+        self,
+        foo_schema: dict[str, t.Any],
+        schema_source: SchemaDirectory,
+    ):
+        """Test the StreamSchema descriptor."""
 
         class FooStream:
             name = "foo"
             schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source)
 
         stream = FooStream()
-        assert stream.schema == schema_dict
+        assert stream.schema == foo_schema
 
-    def test_stream_schema_descriptor_with_explicit_key(self, tmp_path: Path):
+    def test_stream_schema_descriptor_with_explicit_key(
+        self,
+        foo_schema: dict[str, t.Any],
+        schema_source: SchemaDirectory,
+    ):
         """Test StreamSchema descriptor with an explicit custom key."""
-        schema_source = SchemaDirectory(tmp_path)
-        schema_dict = {"type": "object", "properties": {"id": {"type": "string"}}}
-        schema_file = tmp_path / "bar.json"
-        schema_file.write_text(json.dumps(schema_dict))
 
-        class FooStream:
-            name = "foo"
-            schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source, key="bar")
+        class BarStream:
+            name = "bar"
+            schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source, key="foo")
 
-        stream = FooStream()
-        assert stream.schema == schema_dict
+        stream = BarStream()
+        assert stream.schema == foo_schema
 
-    def test_stream_schema_descriptor_key_not_found(self, tmp_path: Path):
+    def test_stream_schema_descriptor_key_not_found(
+        self,
+        schema_source: SchemaDirectory,
+    ):
         """Test StreamSchema descriptor with an explicit custom key."""
-        schema_source = SchemaDirectory(tmp_path)
-        schema_dict = {"type": "object", "properties": {"id": {"type": "string"}}}
-        schema_file = tmp_path / "bar.json"
-        schema_file.write_text(json.dumps(schema_dict))
 
-        class FooStream:
-            name = "foo"
+        class BarStream:
+            name = "bar"
             schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source)
 
-        stream = FooStream()
+        stream = BarStream()
         with pytest.raises(
             SchemaNotFoundError,
-            match="Schema file not found for 'foo'",
+            match="Schema file not found for 'bar'",
         ):
             _ = stream.schema

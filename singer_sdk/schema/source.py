@@ -114,6 +114,7 @@ class StreamSchema(t.Generic[_TKey]):
         self.schema_source = schema_source
         self.key = key
 
+    @t.final
     def __get__(self, obj: Stream, objtype: type[Stream]) -> dict[str, t.Any]:
         """Get the schema from the schema source.
 
@@ -124,7 +125,23 @@ class StreamSchema(t.Generic[_TKey]):
         Returns:
             A JSON schema dictionary.
         """
-        return self.schema_source.get_schema(self.key or obj.name)  # type: ignore[arg-type]
+        return self.get_stream_schema(obj, objtype)
+
+    def get_stream_schema(
+        self,
+        stream: Stream,
+        stream_class: type[Stream],  # noqa: ARG002
+    ) -> dict[str, t.Any]:
+        """Get the schema from the stream instance or class.
+
+        Args:
+            stream: The stream instance to get the schema from.
+            stream_class: The stream class to get the schema from.
+
+        Returns:
+            A JSON schema dictionary.
+        """
+        return self.schema_source.get_schema(self.key or stream.name)  # type: ignore[arg-type]
 
 
 class OpenAPISchema(SchemaSource):
