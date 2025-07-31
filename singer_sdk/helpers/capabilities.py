@@ -327,7 +327,7 @@ class DeprecatedEnum(Enum):
 
     deprecation: str | None
 
-    def __new__(
+    def __new__(  # noqa: PYI034
         cls,
         value: _EnumMemberT,
         deprecation: str | None = None,

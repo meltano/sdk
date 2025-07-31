@@ -9,10 +9,10 @@ import typing as t
 from singer_sdk.contrib.filesystem import FileStream
 from singer_sdk.contrib.filesystem.stream import SDC_META_FILEPATH
 
-if sys.version_info < (3, 12):
-    from typing_extensions import override
-else:
+if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Record

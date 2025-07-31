@@ -33,10 +33,10 @@ if t.TYPE_CHECKING:
         ReflectedPrimaryKeyConstraint,
     )
 
-    if sys.version_info < (3, 10):
-        from typing_extensions import TypeAlias
-    else:
+    if sys.version_info >= (3, 10):
         from typing import TypeAlias  # noqa: ICN003
+    else:
+        from typing_extensions import TypeAlias
 
 
 class FullyQualifiedName(UserString):

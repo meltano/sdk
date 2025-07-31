@@ -20,10 +20,10 @@ from singer_sdk.connectors.sql import (
 )
 from singer_sdk.exceptions import ConfigValidationError
 
-if sys.version_info < (3, 12):
-    from typing_extensions import override
-else:
+if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 if t.TYPE_CHECKING:

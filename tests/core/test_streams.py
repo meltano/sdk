@@ -84,7 +84,7 @@ def stream(tap):
 @pytest.mark.parametrize("no_replication_key", [None, "", False])
 def test_stream_apply_catalog(
     stream: Stream,
-    no_replication_key: t.Literal[None, "", False],
+    no_replication_key: t.Literal["", False] | None,
 ):
     """Applying a catalog to a stream should overwrite fields."""
     assert stream.primary_keys == []

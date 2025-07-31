@@ -11,10 +11,10 @@ from singer_sdk.connectors import SQLConnector
 from singer_sdk.sinks.sql import SQLSink
 from singer_sdk.target_base import SQLTarget
 
-if sys.version_info < (3, 12):
-    from typing_extensions import override
-else:
+if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 class DummySQLConnector(SQLConnector):

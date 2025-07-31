@@ -6,20 +6,20 @@ import datetime
 import sys
 from importlib import resources as importlib_resources
 
-if sys.version_info < (3, 13):
-    from typing_extensions import deprecated
-else:
+if sys.version_info >= (3, 13):
     from warnings import deprecated
-
-if sys.version_info < (3, 12):
-    from importlib.abc import Traversable
 else:
+    from typing_extensions import deprecated
+
+if sys.version_info >= (3, 12):
     from importlib.resources.abc import Traversable
-
-if sys.version_info < (3, 12):
-    from importlib_metadata import entry_points
 else:
+    from importlib.abc import Traversable
+
+if sys.version_info >= (3, 12):
     from importlib.metadata import entry_points
+else:
+    from importlib_metadata import entry_points
 
 if sys.version_info < (3, 11):
     from backports.datetime_fromisoformat import MonkeyPatch

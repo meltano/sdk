@@ -41,10 +41,10 @@ from singer_sdk.helpers._typing import (
 from singer_sdk.singerlib.json import deserialize_json
 from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
-if sys.version_info < (3, 12):
-    from typing_extensions import override
-else:
+if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from logging import Logger

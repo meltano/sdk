@@ -402,7 +402,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def _write_replication_key_signpost(
         self,
         context: types.Context | None,
-        value: datetime.datetime | str | int | float,
+        value: datetime.datetime | str | float,
     ) -> None:
         """Write the signpost value, if available.
 

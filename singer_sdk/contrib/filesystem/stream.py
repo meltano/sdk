@@ -12,10 +12,10 @@ from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.streams.core import REPLICATION_INCREMENTAL
 
-if sys.version_info < (3, 12):
-    from typing_extensions import override
-else:
+if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 if t.TYPE_CHECKING:

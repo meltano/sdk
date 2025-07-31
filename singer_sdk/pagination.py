@@ -9,10 +9,10 @@ from urllib.parse import ParseResult, urlparse
 
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 
-if sys.version_info < (3, 12):
-    from typing_extensions import override
-else:
+if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     import requests

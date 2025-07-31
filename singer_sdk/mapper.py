@@ -34,10 +34,10 @@ if t.TYPE_CHECKING:
 
     from faker import Faker
 
-    if sys.version_info < (3, 10):
-        from typing_extensions import TypeAlias
-    else:
+    if sys.version_info >= (3, 10):
         from typing import TypeAlias  # noqa: ICN003
+    else:
+        from typing_extensions import TypeAlias
 
     from singer_sdk.singerlib.catalog import Catalog
 

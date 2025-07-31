@@ -19,10 +19,10 @@ from singer_sdk import typing as th
 from singer_sdk.streams.graphql import GraphQLStream
 from tap_countries import schemas
 
-if sys.version_info < (3, 12):
-    from typing_extensions import override
-else:
+if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 SCHEMAS_DIR = SchemaDirectory(schemas)

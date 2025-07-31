@@ -6,7 +6,6 @@ import abc
 import enum
 import json
 import logging
-import logging.config
 import os
 import typing as t
 import warnings
@@ -16,10 +15,15 @@ from time import time
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 
 if t.TYPE_CHECKING:
+    import sys
     from types import TracebackType
 
     from singer_sdk.helpers import types
 
+    if sys.version_info >= (3, 11):
+        from typing import Self  # noqa: ICN003
+    else:
+        from typing_extensions import Self
 
 DEFAULT_LOG_INTERVAL = 60.0
 METRICS_LOGGER_NAME = __name__
@@ -217,7 +221,7 @@ class Counter(Meter):
         """Exit the counter context."""
         self._pop()
 
-    def __enter__(self) -> Counter:
+    def __enter__(self) -> Self:
         """Enter the counter context.
 
         Returns:
@@ -279,7 +283,7 @@ class Timer(Meter):
         super().__init__(metric, tags)
         self.start_time = time()
 
-    def __enter__(self) -> Timer:
+    def __enter__(self) -> Self:
         """Enter the timer context.
 
         Returns:

@@ -13,10 +13,10 @@ from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.streams import GraphQLStream
 from tap_gitlab import schemas
 
-if sys.version_info < (3, 12):
-    from typing_extensions import override
-else:
+if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 SITE_URL = "https://gitlab.com/graphql"
 
