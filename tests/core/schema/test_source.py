@@ -7,7 +7,7 @@ import json.decoder
 import typing as t
 from pathlib import Path
 from types import ModuleType
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 import requests
@@ -201,7 +201,7 @@ class TestOpenAPISchema:
         source = OpenAPISchema("/path/to/openapi.json")
         assert source.source == "/path/to/openapi.json"
 
-    @patch("requests.get")
+    @patch("requests.Session.get")
     def test_openapi_load_from_url(
         self,
         mock_get,
@@ -223,7 +223,7 @@ class TestOpenAPISchema:
         )
         mock_response.raise_for_status.assert_called_once()
 
-    @patch("requests.get")
+    @patch("requests.Session.get")
     def test_openapi_load_from_url_error(self, mock_get):
         """Test error handling when loading from URL."""
         mock_get.side_effect = requests.RequestException("Network error")
@@ -390,6 +390,55 @@ class TestStreamSchemaDescriptor:
 
         stream = BarStream()
         assert stream.schema == foo_schema
+
+    @patch("requests.Session.send")
+    def test_stream_schema_descriptor_with_stream_requests_session(
+        self,
+        mock_send: MagicMock,
+    ) -> None:
+        """Test StreamSchema descriptor with a stream requests session."""
+        schema_source = OpenAPISchema("https://api.example.com/openapi.json")
+        mock_send.return_value.json.return_value = {
+            "openapi": "3.0.0",
+            "info": {"title": "Test API", "version": "1.0.0"},
+            "components": {
+                "schemas": {
+                    "Foo": {
+                        "type": "object",
+                        "properties": {"id": {"type": "string"}},
+                    }
+                }
+            },
+        }
+
+        class FooBaseStream:
+            @property
+            def requests_session(self) -> requests.Session:
+                session = requests.Session()
+                session.headers["Authorization"] = "Bearer 1234567890"
+                return session
+
+        # class FooSchema(StreamSchema[OpenAPISchema, FooBaseStream]):
+        class FooSchema(StreamSchema):
+            def get_stream_schema(
+                self,
+                stream: FooBaseStream,
+                stream_class: type[FooBaseStream],
+            ) -> dict[str, t.Any]:
+                self.schema_source.requests_session = stream.requests_session
+                return super().get_stream_schema(stream, stream_class)
+
+        class FooStream(FooBaseStream):
+            name = "foo"
+            schema: t.ClassVar[FooSchema] = FooSchema(schema_source, key="Foo")
+
+        stream = FooStream()
+        assert stream.schema == {
+            "type": "object",
+            "properties": {"id": {"type": "string"}},
+        }
+        request = mock_send.call_args.args[0]
+        assert request.headers["Authorization"] == "Bearer 1234567890"
 
     def test_stream_schema_descriptor_key_not_found(
         self,

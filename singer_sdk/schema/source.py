@@ -162,18 +162,31 @@ class OpenAPISchema(SchemaSource):
         self,
         source: str | Path | Traversable,
         *args: t.Any,
+        requests_session: requests.Session | None = None,
         **kwargs: t.Any,
     ) -> None:
         """Initialize the OpenAPI schema source.
 
         Args:
             source: URL, file path, or Traversable object pointing to an OpenAPI spec.
+            requests_session: A requests session to use for fetching the OpenAPI spec.
             *args: Additional arguments to pass to the superclass constructor.
             **kwargs: Additional keyword arguments to pass to the superclass
                 constructor.
         """
         super().__init__(*args, **kwargs)
         self.source = source
+        self._requests_session = requests_session or requests.Session()
+
+    @property
+    def requests_session(self) -> requests.Session:
+        """The requests session to use for fetching the OpenAPI spec."""
+        return self._requests_session
+
+    @requests_session.setter
+    def requests_session(self, value: requests.Session) -> None:
+        """Set the requests session to use for fetching the OpenAPI spec."""
+        self._requests_session = value
 
     @cached_property
     def spec(self) -> dict[str, t.Any]:
@@ -184,13 +197,13 @@ class OpenAPISchema(SchemaSource):
         """
         return self._load_spec()
 
-    def _load_remote_spec(self, url: str) -> dict[str, t.Any]:  # noqa: PLR6301
+    def _load_remote_spec(self, url: str) -> dict[str, t.Any]:
         """Load the OpenAPI specification from a remote source.
 
         Returns:
             The OpenAPI specification as a dictionary.
         """
-        response = requests.get(url, timeout=30)
+        response = self.requests_session.get(url, timeout=30)
         response.raise_for_status()
         return response.json()  # type: ignore[no-any-return]
 
