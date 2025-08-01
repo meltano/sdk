@@ -16,6 +16,12 @@ import requests
 from singer_sdk.exceptions import DiscoveryError
 from singer_sdk.singerlib.schema import resolve_schema_references
 
+if sys.version_info >= (3, 11):
+    from typing import assert_never  # noqa: ICN003
+else:
+    from typing_extensions import assert_never
+
+
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
 else:
@@ -152,7 +158,7 @@ class StreamSchema(t.Generic[_TKey]):
         return self.schema_source.get_schema(self.key or stream.name)  # type: ignore[arg-type]
 
 
-class OpenAPISchema(SchemaSource):
+class OpenAPISchema(SchemaSource[_TKey]):
     """Schema source for OpenAPI specifications.
 
     Supports loading schemas from a local or remote OpenAPI 2.0 or 3.x specification.
@@ -188,6 +194,24 @@ class OpenAPISchema(SchemaSource):
         """
         return self._load_spec()
 
+    @property
+    def spec_version(self) -> t.Literal["v2", "v3"]:
+        """Get the OpenAPI specification version.
+
+        Returns:
+            The OpenAPI specification version.
+
+        Raises:
+            UnsupportedOpenAPISpec: If the OpenAPI specification format is unknown.
+        """
+        if "swagger" in self.spec:
+            return "v2"
+        if "openapi" in self.spec:
+            return "v3"
+
+        msg = "Unknown OpenAPI specification format"
+        raise UnsupportedOpenAPISpec(msg)
+
     def _load_remote_spec(self, url: str) -> dict[str, t.Any]:  # noqa: PLR6301
         """Load the OpenAPI specification from a remote source.
 
@@ -220,7 +244,7 @@ class OpenAPISchema(SchemaSource):
             return self._load_remote_spec(self.source)
         return self._load_local_spec(self.source)
 
-    def build_base_schema(self, key: str) -> tuple[dict[str, t.Any], str]:
+    def get_unresolved_schema(self, key: _TKey) -> dict[str, t.Any]:
         """Build the base schema for the given key.
 
         By default, this method treats the key as a component name and builds a
@@ -231,31 +255,44 @@ class OpenAPISchema(SchemaSource):
             key: The key to build the schema for.
 
         Returns:
-            A tuple containing the base schema and the components key.
-
-        Raises:
-            UnsupportedOpenAPISpec: If the OpenAPI specification format is unknown.
+            A JSON schema dictionary.
         """
-        if "swagger" in self.spec:  # OpenAPI 2.0
-            ref_path = f"#/definitions/{key}"
+        if self.spec_version == "v2":
+            return {"$ref": f"#/definitions/{key}"}
+
+        if self.spec_version == "v3":
+            return {"$ref": f"#/components/schemas/{key}"}
+
+        assert_never(self.spec_version)
+
+    def resolve_schema(self, key: _TKey) -> dict[str, t.Any]:
+        """Resolve the schema references.
+
+        Args:
+            key: The schema component name to resolve.
+
+        Returns:
+            A JSON schema dictionary.
+        """
+        if self.spec_version == "v2":
             components_key = "definitions"
             components = self.spec.get(components_key, {})
-        elif "openapi" in self.spec:  # OpenAPI 3.0
-            ref_path = f"#/components/schemas/{key}"
+        elif self.spec_version == "v3":
             components_key = "components"
             components = self.spec.get(components_key, {})
         else:
-            msg = "Unknown OpenAPI specification format"
-            raise UnsupportedOpenAPISpec(msg)
+            assert_never(self.spec_version)
 
         schema = {
-            "$ref": ref_path,
+            **self.get_unresolved_schema(key),
             components_key: components,
         }
-        return schema, components_key
+        resolved_schema = resolve_schema_references(schema)
+        resolved_schema.pop(components_key)
+        return resolved_schema
 
     @override
-    def fetch_schema(self, key: str) -> dict[str, t.Any]:
+    def fetch_schema(self, key: _TKey) -> dict[str, t.Any]:
         """Retrieve a schema from the OpenAPI specification.
 
         Args:
@@ -265,10 +302,7 @@ class OpenAPISchema(SchemaSource):
         Returns:
             A JSON schema dictionary.
         """
-        schema, components_key = self.build_base_schema(key)
-        resolved_schema = resolve_schema_references(schema)
-        resolved_schema.pop(components_key)
-        return resolved_schema
+        return self.resolve_schema(key)
 
 
 class SchemaDirectory(SchemaSource):

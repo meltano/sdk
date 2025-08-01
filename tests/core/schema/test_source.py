@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import json.decoder
+import sys
 import typing as t
 from pathlib import Path
 from types import ModuleType
@@ -12,6 +13,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 from referencing.exceptions import PointerToNowhere
+from toolz.dicttoolz import get_in
 
 from singer_sdk.helpers._compat import Traversable
 from singer_sdk.schema.source import (
@@ -24,6 +26,11 @@ from singer_sdk.schema.source import (
     UnsupportedOpenAPISpec,
 )
 from singer_sdk.streams.core import Stream
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from collections.abc import Mapping
@@ -43,25 +50,28 @@ def resolved_user_schema() -> dict[str, t.Any]:
     }
 
 
-@pytest.fixture(scope="session")
-def openapi3_spec() -> dict[str, t.Any]:
-    """Sample OpenAPI spec for testing."""
-    return {
-        "openapi": "3.0.0",
-        "info": {"title": "Test API", "version": "1.0.0"},
-        "paths": {
-            "/users": {
-                "get": {
-                    "summary": "Get a list of users",
-                    "responses": {
-                        "200": {
-                            "description": "A list of users",
-                            "content": {
-                                "application/json": {
-                                    "schema": {
-                                        "type": "array",
-                                        "items": {
-                                            "$ref": "#/components/schemas/User",
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(
+            {
+                "openapi": "3.0.0",
+                "info": {"title": "Test API", "version": "1.0.0"},
+                "paths": {
+                    "/users": {
+                        "get": {
+                            "summary": "Get a list of users",
+                            "responses": {
+                                "200": {
+                                    "description": "A list of users",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "array",
+                                                "items": {
+                                                    "$ref": "#/components/schemas/User",
+                                                },
+                                            },
                                         },
                                     },
                                 },
@@ -69,60 +79,63 @@ def openapi3_spec() -> dict[str, t.Any]:
                         },
                     },
                 },
-            },
-        },
-        "components": {
-            "schemas": {
-                "Email": {
-                    "type": "string",
-                    "format": "email",
+                "components": {
+                    "schemas": {
+                        "Email": {
+                            "type": "string",
+                            "format": "email",
+                        },
+                        "User": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "string"},
+                                "name": {"type": "string"},
+                                "email": {"$ref": "#/components/schemas/Email"},
+                            },
+                            "required": ["id", "name"],
+                        },
+                        "Project": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "string"},
+                                "title": {"type": "string"},
+                                "description": {"type": "string"},
+                                "owner": {"$ref": "#/components/schemas/User"},
+                            },
+                            "required": ["id", "title"],
+                        },
+                    }
                 },
-                "User": {
-                    "type": "object",
-                    "properties": {
-                        "id": {"type": "string"},
-                        "name": {"type": "string"},
-                        "email": {"$ref": "#/components/schemas/Email"},
+            },
+            id="openapi-3.0",
+        ),
+        pytest.param(
+            {
+                "swagger": "2.0",
+                "info": {"title": "Test API", "version": "1.0.0"},
+                "definitions": {
+                    "Email": {
+                        "type": "string",
+                        "format": "email",
                     },
-                    "required": ["id", "name"],
-                },
-                "Project": {
-                    "type": "object",
-                    "properties": {
-                        "id": {"type": "string"},
-                        "title": {"type": "string"},
-                        "description": {"type": "string"},
-                        "owner": {"$ref": "#/components/schemas/User"},
+                    "User": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "string"},
+                            "name": {"type": "string"},
+                            "email": {"$ref": "#/definitions/Email"},
+                        },
+                        "required": ["id", "name"],
                     },
-                    "required": ["id", "title"],
                 },
-            }
-        },
-    }
-
-
-@pytest.fixture(scope="session")
-def openapi2_spec() -> dict[str, t.Any]:
-    """Sample OpenAPI 2.0 spec for testing."""
-    return {
-        "swagger": "2.0",
-        "info": {"title": "Test API", "version": "1.0.0"},
-        "definitions": {
-            "Email": {
-                "type": "string",
-                "format": "email",
             },
-            "User": {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "string"},
-                    "name": {"type": "string"},
-                    "email": {"$ref": "#/definitions/Email"},
-                },
-                "required": ["id", "name"],
-            },
-        },
-    }
+            id="openapi-2.0",
+        ),
+    ],
+)
+def openapi_spec(request: pytest.FixtureRequest) -> dict[str, t.Any]:
+    """Parameterized OpenAPI spec fixture for testing both 2.0 and 3.0 versions."""
+    return request.param  # type: ignore[no-any-return]
 
 
 class MockStream(Stream):
@@ -254,18 +267,18 @@ class TestOpenAPISchema:
     def test_openapi_load_from_url(
         self,
         mock_get,
-        openapi3_spec: dict[str, t.Any],
+        openapi_spec: dict[str, t.Any],
     ):
         """Test loading OpenAPI spec from URL."""
         mock_response = Mock()
-        mock_response.json.return_value = openapi3_spec
+        mock_response.json.return_value = openapi_spec
         mock_response.raise_for_status.return_value = None
         mock_get.return_value = mock_response
 
         source = OpenAPISchema("https://api.example.com/openapi.json")
         spec = source.spec
 
-        assert spec == openapi3_spec
+        assert spec == openapi_spec
         mock_get.assert_called_once_with(
             "https://api.example.com/openapi.json",
             timeout=30,
@@ -288,15 +301,15 @@ class TestOpenAPISchema:
     def test_openapi_load_from_file(
         self,
         tmp_path: Path,
-        openapi3_spec: dict[str, t.Any],
+        openapi_spec: dict[str, t.Any],
     ):
         """Test loading OpenAPI spec from file."""
         openapi_file = tmp_path / "openapi.json"
-        openapi_file.write_text(json.dumps(openapi3_spec))
+        openapi_file.write_text(json.dumps(openapi_spec))
 
         source = OpenAPISchema(openapi_file)
         spec = source.spec
-        assert spec == openapi3_spec
+        assert spec == openapi_spec
 
     def test_openapi_load_from_file_error(self, tmp_path: Path):
         """Test error handling when loading from file."""
@@ -309,29 +322,15 @@ class TestOpenAPISchema:
 
         assert isinstance(exc.value.__cause__, json.decoder.JSONDecodeError)
 
-    def test_openapi3_component(
+    def test_openapi_component(
         self,
         tmp_path: Path,
         resolved_user_schema: dict[str, t.Any],
-        openapi3_spec: dict[str, t.Any],
+        openapi_spec: dict[str, t.Any],
     ):
-        """Test getting full spec when no component specified."""
+        """Test getting a component from OpenAPI spec (both 2.0 and 3.0)."""
         openapi_file = tmp_path / "openapi.json"
-        openapi_file.write_text(json.dumps(openapi3_spec))
-
-        source = OpenAPISchema(openapi_file)
-        result = source.get_schema("User")
-        assert result == resolved_user_schema
-
-    def test_openapi2_component(
-        self,
-        tmp_path: Path,
-        resolved_user_schema: dict[str, t.Any],
-        openapi2_spec: dict[str, t.Any],
-    ):
-        """Test getting a component from an OpenAPI 2.0 spec."""
-        openapi_file = tmp_path / "openapi.json"
-        openapi_file.write_text(json.dumps(openapi2_spec))
+        openapi_file.write_text(json.dumps(openapi_spec))
 
         source = OpenAPISchema(openapi_file)
         result = source.get_schema("User")
@@ -357,11 +356,11 @@ class TestOpenAPISchema:
     def test_openapi_invalid_component(
         self,
         tmp_path: Path,
-        openapi3_spec: dict[str, t.Any],
+        openapi_spec: dict[str, t.Any],
     ):
         """Test error when requesting invalid component."""
         openapi_file = tmp_path / "openapi.json"
-        openapi_file.write_text(json.dumps(openapi3_spec))
+        openapi_file.write_text(json.dumps(openapi_spec))
 
         source = OpenAPISchema(openapi_file)
         with pytest.raises(
@@ -374,11 +373,11 @@ class TestOpenAPISchema:
     def test_openapi_schema_spec_caching(
         self,
         tmp_path: Path,
-        openapi3_spec: dict[str, t.Any],
+        openapi_spec: dict[str, t.Any],
     ):
         """Test that spec property caches the loaded specification."""
         openapi_file = tmp_path / "openapi.json"
-        openapi_file.write_text(json.dumps(openapi3_spec))
+        openapi_file.write_text(json.dumps(openapi_spec))
 
         source = OpenAPISchema(openapi_file)
         # First access should load and cache
@@ -386,17 +385,17 @@ class TestOpenAPISchema:
         # Second access should return cached version
         spec2 = source.spec
         assert spec1 is spec2  # Same object reference
-        assert spec1 == openapi3_spec
+        assert spec1 == openapi_spec
 
     def test_openapi_schema_with_traversable(
         self,
-        openapi3_spec: dict[str, t.Any],
         resolved_user_schema: dict[str, t.Any],
+        openapi_spec: dict[str, t.Any],
     ):
         """Test OpenAPISchema with a Traversable object."""
         # Create a mock Traversable object
         mock_traversable = Mock(spec=Traversable)
-        mock_traversable.read_text.return_value = json.dumps(openapi3_spec)
+        mock_traversable.read_text.return_value = json.dumps(openapi_spec)
 
         source = OpenAPISchema(mock_traversable)
         result = source.get_schema("User")
@@ -407,19 +406,70 @@ class TestOpenAPISchema:
 class TestCustomOpenAPISchema:
     """Test a custom OpenAPISchema implementation."""
 
-    def test_openapi_schema_from_path(self, openapi3_spec: dict[str, t.Any]):
+    def test_openapi_schema_from_path(self) -> None:
         """Test getting schema from an endpoint path."""
+        # Use OpenAPI 3.0 spec for this specific test
+        openapi3_spec = {
+            "openapi": "3.0.0",
+            "info": {"title": "Test API", "version": "1.0.0"},
+            "paths": {
+                "/users": {
+                    "get": {
+                        "summary": "Get a list of users",
+                        "responses": {
+                            "200": {
+                                "description": "A list of users",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/User",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            "components": {
+                "schemas": {
+                    "Email": {"type": "string", "format": "email"},
+                    "User": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "string"},
+                            "name": {"type": "string"},
+                            "email": {"$ref": "#/components/schemas/Email"},
+                        },
+                        "required": ["id", "name"],
+                    },
+                }
+            },
+        }
 
-        class OpenAPISchemaFromPath(OpenAPISchema):
-            def build_base_schema(self, key: str) -> tuple[dict[str, t.Any], str]:
-                path_item = self.spec["paths"][key]
-                schema = path_item["get"]["responses"]["200"]["content"][
-                    "application/json"
-                ]["schema"]
-                return {
-                    **schema,
-                    "components": self.spec.get("components", {}),
-                }, "components"
+        class PathAndMethodKey(t.NamedTuple):
+            path: str
+            http_method: str
+
+        class OpenAPISchemaFromPath(OpenAPISchema[PathAndMethodKey]):
+            @override
+            def get_unresolved_schema(self, key: PathAndMethodKey) -> dict[str, t.Any]:
+                return get_in(  # type: ignore[no-any-return]
+                    [
+                        "paths",
+                        key.path,
+                        key.http_method.lower(),
+                        "responses",
+                        "200",
+                        "content",
+                        "application/json",
+                        "schema",
+                    ],
+                    self.spec,
+                )
 
         source = OpenAPISchemaFromPath("dummy_path")
         source.spec = openapi3_spec  # type: ignore[assignment]
@@ -437,7 +487,7 @@ class TestCustomOpenAPISchema:
             },
         }
 
-        assert source.get_schema("/users") == expected_schema
+        assert source.get_schema(PathAndMethodKey("/users", "GET")) == expected_schema
 
 
 class TestStreamSchemaDescriptor:
