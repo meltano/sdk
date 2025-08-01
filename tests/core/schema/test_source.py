@@ -201,7 +201,7 @@ class TestOpenAPISchema:
         source = OpenAPISchema("/path/to/openapi.json")
         assert source.source == "/path/to/openapi.json"
 
-    @patch("requests.get")
+    @patch("requests.Session.get")
     def test_openapi_load_from_url(
         self,
         mock_get,
@@ -223,7 +223,7 @@ class TestOpenAPISchema:
         )
         mock_response.raise_for_status.assert_called_once()
 
-    @patch("requests.get")
+    @patch("requests.Session.get")
     def test_openapi_load_from_url_error(self, mock_get):
         """Test error handling when loading from URL."""
         mock_get.side_effect = requests.RequestException("Network error")
