@@ -39,6 +39,10 @@ class SchemaNotValidError(DiscoveryError):
     """Raised when a schema is not valid."""
 
 
+class UnsupportedOpenAPISpec(Exception):
+    """Raised when the OpenAPI specification is not supported."""
+
+
 _TKey = TypeVar("_TKey", bound=t.Hashable, default=str)
 
 
@@ -151,7 +155,7 @@ class StreamSchema(t.Generic[_TKey]):
 class OpenAPISchema(SchemaSource):
     """Schema source for OpenAPI specifications.
 
-    Supports loading schemas from a local or remote OpenAPI 3.1 specification.
+    Supports loading schemas from a local or remote OpenAPI 2.0 or 3.x specification.
 
     Example:
         openapi_schema = OpenAPISchema("https://api.example.com/openapi.json")
@@ -216,22 +220,54 @@ class OpenAPISchema(SchemaSource):
             return self._load_remote_spec(self.source)
         return self._load_local_spec(self.source)
 
+    def build_base_schema(self, key: str) -> tuple[dict[str, t.Any], str]:
+        """Build the base schema for the given key.
+
+        By default, this method treats the key as a component name and builds a
+        reference to it. It can be overridden to support other key types, such as
+        endpoint paths.
+
+        Args:
+            key: The key to build the schema for.
+
+        Returns:
+            A tuple containing the base schema and the components key.
+
+        Raises:
+            UnsupportedOpenAPISpec: If the OpenAPI specification format is unknown.
+        """
+        if "swagger" in self.spec:  # OpenAPI 2.0
+            ref_path = f"#/definitions/{key}"
+            components_key = "definitions"
+            components = self.spec.get(components_key, {})
+        elif "openapi" in self.spec:  # OpenAPI 3.0
+            ref_path = f"#/components/schemas/{key}"
+            components_key = "components"
+            components = self.spec.get(components_key, {})
+        else:
+            msg = "Unknown OpenAPI specification format"
+            raise UnsupportedOpenAPISpec(msg)
+
+        schema = {
+            "$ref": ref_path,
+            components_key: components,
+        }
+        return schema, components_key
+
     @override
     def fetch_schema(self, key: str) -> dict[str, t.Any]:
         """Retrieve a schema from the OpenAPI specification.
 
         Args:
-            key: The schema component name to retrieve from #/components/schemas/.
+            key: The schema component name to retrieve. The format of the key
+                depends on the implementation of `build_base_schema`.
 
         Returns:
             A JSON schema dictionary.
         """
-        schema = {
-            "$ref": f"#/components/schemas/{key}",
-            "components": self.spec.get("components", {}),
-        }
+        schema, components_key = self.build_base_schema(key)
         resolved_schema = resolve_schema_references(schema)
-        resolved_schema.pop("components")
+        resolved_schema.pop(components_key)
         return resolved_schema
 
 
