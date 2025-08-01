@@ -12,7 +12,6 @@ from pathlib import Path
 from types import ModuleType
 
 import requests
-from referencing.exceptions import PointerToNowhere
 
 from singer_sdk.exceptions import DiscoveryError
 from singer_sdk.singerlib.schema import resolve_schema_references
@@ -61,10 +60,15 @@ class SchemaSource(ABC, t.Generic[_TKey]):
             A JSON schema dictionary.
 
         Raises:
+            SchemaNotFoundError: If the schema is not found or cannot be fetched.
             SchemaNotValidError: If the schema is not a JSON object.
         """
         if key not in self._schema_cache:
-            schema = self.fetch_schema(key)
+            try:
+                schema = self.fetch_schema(key)
+            except Exception as e:
+                msg = f"Schema not found for '{key}'"
+                raise SchemaNotFoundError(msg) from e
             if not isinstance(schema, dict):
                 msg = "Schema must be a JSON object"  # type: ignore[unreachable]
                 raise SchemaNotValidError(msg)
@@ -205,25 +209,12 @@ class OpenAPISchema(SchemaSource):
 
         Returns:
             The OpenAPI specification as a dictionary.
-
-        Raises:
-            DiscoveryError: If the specification cannot be loaded from a remote or local
-                source.
         """
-        try:
-            if isinstance(self.source, str) and self.source.startswith(
-                ("http://", "https://")
-            ):
-                # Load from URL
-                spec = self._load_remote_spec(self.source)
-            else:
-                # Load from local file
-                spec = self._load_local_spec(self.source)
-        except Exception as e:
-            msg = f"Failed to load OpenAPI specification from {self.source}"
-            raise DiscoveryError(msg) from e
-
-        return spec
+        if isinstance(self.source, str) and self.source.startswith(
+            ("http://", "https://")
+        ):
+            return self._load_remote_spec(self.source)
+        return self._load_local_spec(self.source)
 
     @override
     def fetch_schema(self, key: str) -> dict[str, t.Any]:
@@ -234,20 +225,14 @@ class OpenAPISchema(SchemaSource):
 
         Returns:
             A JSON schema dictionary.
-
-        Raises:
-            SchemaNotFoundError: If the schema component is not found.
         """
         schema = {
             "$ref": f"#/components/schemas/{key}",
             "components": self.spec.get("components", {}),
         }
-        try:
-            resolved_schema = resolve_schema_references(schema)
-            return resolved_schema.get("components", {}).get("schemas", {}).get(key, {})  # type: ignore[no-any-return]
-        except PointerToNowhere as e:
-            msg = f"Failed to resolve schema references for '{key}'"
-            raise SchemaNotFoundError(msg) from e
+        resolved_schema = resolve_schema_references(schema)
+        resolved_schema.pop("components")
+        return resolved_schema
 
 
 class SchemaDirectory(SchemaSource):
@@ -288,17 +273,6 @@ class SchemaDirectory(SchemaSource):
 
         Returns:
             A JSON schema dictionary.
-
-        Raises:
-            SchemaNotFoundError: If the schema file is not found.
-            SchemaNotValidError: If the schema file is invalid.
         """
         file_path = self.dir_path.joinpath(f"{key}.{self.extension}")
-        try:
-            return json.loads(file_path.read_text(encoding="utf-8"))  # type: ignore[no-any-return]
-        except FileNotFoundError as e:
-            msg = f"Schema file not found for '{key}'"
-            raise SchemaNotFoundError(msg) from e
-        except json.JSONDecodeError as e:
-            msg = f"Invalid JSON for '{key}' schema"
-            raise SchemaNotValidError(msg) from e
+        return json.loads(file_path.read_text(encoding="utf-8"))  # type: ignore[no-any-return]
