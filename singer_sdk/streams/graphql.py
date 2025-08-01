@@ -5,7 +5,6 @@ from __future__ import annotations
 import abc
 import typing as t
 
-from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.streams.rest import RESTStream
 
 if t.TYPE_CHECKING:
@@ -26,14 +25,14 @@ class GraphQLStream(RESTStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     path = ""
     http_method = "POST"
 
-    @classproperty
-    def records_jsonpath(cls) -> str:  # noqa: N805
+    @property
+    def records_jsonpath(self) -> str:
         """Get the JSONPath expression to extract records from an API response.
 
         Returns:
-            JSONPath expression string
+            JSONPath expression string.
         """
-        return f"$.data.{cls.name}[*]"
+        return f"$.data.{self.name}[*]"
 
     @property
     def query(self) -> str:
