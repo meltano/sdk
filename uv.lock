@@ -2452,6 +2452,7 @@ benchmark = [
     { name = "requests-mock" },
     { name = "rfc3339-validator" },
     { name = "time-machine" },
+    { name = "toolz" },
     { name = "xdoctest", extra = ["colors"] },
 ]
 dev = [
@@ -2482,6 +2483,7 @@ dev = [
     { name = "sphinx-reredirects", version = "0.1.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "sphinx-reredirects", version = "1.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "time-machine" },
+    { name = "toolz" },
     { name = "types-jsonschema" },
     { name = "types-pytz" },
     { name = "types-pyyaml" },
@@ -2531,6 +2533,7 @@ testing = [
     { name = "requests-mock" },
     { name = "rfc3339-validator" },
     { name = "time-machine" },
+    { name = "toolz" },
     { name = "xdoctest", extra = ["colors"] },
 ]
 typing = [
@@ -2593,6 +2596,7 @@ benchmark = [
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "rfc3339-validator", specifier = ">=0.1.4" },
     { name = "time-machine", specifier = ">=2.10.0" },
+    { name = "toolz", specifier = ">=1.0.0" },
     { name = "xdoctest", extras = ["colors"], specifier = ">=1.1.1" },
 ]
 dev = [
@@ -2620,6 +2624,7 @@ dev = [
     { name = "sphinx-notfound-page", specifier = ">=1.0.0" },
     { name = "sphinx-reredirects", specifier = ">=0.1.5" },
     { name = "time-machine", specifier = ">=2.10.0" },
+    { name = "toolz", specifier = ">=1.0.0" },
     { name = "types-jsonschema", specifier = ">=4.17.0.6" },
     { name = "types-pytz", specifier = ">=2022.7.1.2" },
     { name = "types-pyyaml", specifier = ">=6.0.12" },
@@ -2664,6 +2669,7 @@ testing = [
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "rfc3339-validator", specifier = ">=0.1.4" },
     { name = "time-machine", specifier = ">=2.10.0" },
+    { name = "toolz", specifier = ">=1.0.0" },
     { name = "xdoctest", extras = ["colors"], specifier = ">=1.1.1" },
 ]
 typing = [
@@ -3260,6 +3266,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/5b/b9/1ed31d167be802da0fc95020d04cd27b7d7065cc6fbefdd2f9186f60d7bd/tomli-2.2.1-cp313-cp313-win32.whl", hash = "sha256:d3f5614314d758649ab2ab3a62d4f2004c825922f9e370b29416484086b264ec", size = 98724, upload-time = "2024-11-27T22:38:32.837Z" },
     { url = "https://files.pythonhosted.org/packages/c7/32/b0963458706accd9afcfeb867c0f9175a741bf7b19cd424230714d722198/tomli-2.2.1-cp313-cp313-win_amd64.whl", hash = "sha256:a38aa0308e754b0e3c67e344754dff64999ff9b513e691d0e786265c93583c69", size = 109383, upload-time = "2024-11-27T22:38:34.455Z" },
     { url = "https://files.pythonhosted.org/packages/6e/c2/61d3e0f47e2b74ef40a68b9e6ad5984f6241a942f7cd3bbfbdbd03861ea9/tomli-2.2.1-py3-none-any.whl", hash = "sha256:cb55c73c5f4408779d0cf3eef9f762b9c9f147a77de7b258bef0a5628adc85cc", size = 14257, upload-time = "2024-11-27T22:38:35.385Z" },
+]
+
+[[package]]
+name = "toolz"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/0b/d80dfa675bf592f636d1ea0b835eab4ec8df6e9415d8cfd766df54456123/toolz-1.0.0.tar.gz", hash = "sha256:2c86e3d9a04798ac556793bced838816296a2f085017664e4995cb40a1047a02", size = 66790, upload-time = "2024-10-04T16:17:04.001Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/03/98/eb27cc78ad3af8e302c9d8ff4977f5026676e130d28dd7578132a457170c/toolz-1.0.0-py3-none-any.whl", hash = "sha256:292c8f1c4e7516bf9086f8850935c799a874039c8bcf959d47b600e4c44a6236", size = 56383, upload-time = "2024-10-04T16:17:01.533Z" },
 ]
 
 [[package]]

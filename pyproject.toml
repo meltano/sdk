@@ -139,6 +139,7 @@ testing = [
     "requests-mock>=1.10.0",
     "rfc3339-validator>=0.1.4",
     "time-machine>=2.10.0",
+    "toolz>=1.0.0",
     "xdoctest[colors]>=1.1.1",
 ]
 typing = [
@@ -258,6 +259,7 @@ exclude_also = [
     '''class .*\bProtocol\):''',
     '''@(abc\.)?abstractmethod''',
     '''if (t\.)?TYPE_CHECKING:''',
+    "assert_never",
 ]
 show_missing = true
 
