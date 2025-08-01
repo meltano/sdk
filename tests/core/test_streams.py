@@ -17,7 +17,6 @@ from singer_sdk.exceptions import (
     FatalAPIError,
     InvalidReplicationKeyException,
 )
-from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._compat import datetime_fromisoformat as parse
 from singer_sdk.helpers.jsonpath import _compile_jsonpath
@@ -394,7 +393,7 @@ def test_jsonpath_graphql_stream_default(tap: Tap):
     assert list(records) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
 
 
-def test_jsonpath_graphql_stream_override(tap: Tap):
+def test_jsonpath_graphql_stream_override(tap: Tap) -> None:
     """Validate graphql jsonpath can be updated."""
     content = """[
                         {"id": 1, "value": "abc"},
@@ -406,9 +405,7 @@ def test_jsonpath_graphql_stream_override(tap: Tap):
     fake_response._content = str.encode(content)
 
     class GraphQLJSONPathOverride(GraphqlTestStream):
-        @classproperty
-        def records_jsonpath(cls):  # noqa: N805
-            return "$[*]"
+        records_jsonpath = "$[*]"
 
     stream = GraphQLJSONPathOverride(tap)
 
