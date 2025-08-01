@@ -11,8 +11,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 import requests
+from referencing.exceptions import PointerToNowhere
 
-from singer_sdk.exceptions import DiscoveryError
 from singer_sdk.helpers._compat import Traversable
 from singer_sdk.schema.source import (
     OpenAPISchema,
@@ -118,9 +118,11 @@ class TestSchemaDirectory:
         source = SchemaDirectory(tmp_path)
         with pytest.raises(
             SchemaNotFoundError,
-            match="Schema file not found for 'users'",
-        ):
+            match="Schema not found for 'users'",
+        ) as exc:
             source.get_schema("users")
+
+        assert isinstance(exc.value.__cause__, FileNotFoundError)
 
     def test_dir_source_invalid_json_file(self, tmp_path: Path):
         """Test FileSchema with invalid JSON content."""
@@ -131,10 +133,11 @@ class TestSchemaDirectory:
 
         source = SchemaDirectory(tmp_path)
         with pytest.raises(
-            SchemaNotValidError,
-            match="Invalid JSON for 'invalid' schema",
-        ):
+            SchemaNotFoundError,
+            match="Schema not found for 'invalid'",
+        ) as exc:
             source.get_schema("invalid")
+        assert isinstance(exc.value.__cause__, json.decoder.JSONDecodeError)
 
 
 class TestOpenAPISchema:
@@ -227,13 +230,11 @@ class TestOpenAPISchema:
 
         source = OpenAPISchema("https://api.example.com/openapi.json")
 
-        with pytest.raises(
-            DiscoveryError,
-            match="Failed to load OpenAPI specification",
-        ) as exc:
-            _ = source.spec
+        with pytest.raises(SchemaNotFoundError) as exc:
+            _ = source.get_schema("User")
 
         assert isinstance(exc.value.__cause__, requests.RequestException)
+        assert exc.value.__cause__.args == ("Network error",)
 
     def test_openapi_load_from_file(
         self,
@@ -254,11 +255,8 @@ class TestOpenAPISchema:
         openapi_file.write_text("this is not a valid json object")
 
         source = OpenAPISchema(openapi_file)
-        with pytest.raises(
-            DiscoveryError,
-            match="Failed to load OpenAPI specification",
-        ) as exc:
-            _ = source.spec
+        with pytest.raises(SchemaNotFoundError) as exc:
+            _ = source.get_schema("User")
 
         assert isinstance(exc.value.__cause__, json.decoder.JSONDecodeError)
 
@@ -288,9 +286,10 @@ class TestOpenAPISchema:
         source = OpenAPISchema(openapi_file)
         with pytest.raises(
             SchemaNotFoundError,
-            match="Failed to resolve schema references for 'InvalidComponent'",
-        ):
+            match="Schema not found for 'InvalidComponent'",
+        ) as exc:
             source.get_schema("InvalidComponent")
+        assert isinstance(exc.value.__cause__, PointerToNowhere)
 
     def test_openapi_schema_spec_caching(
         self,
@@ -328,48 +327,84 @@ class TestOpenAPISchema:
 class TestStreamSchemaDescriptor:
     """Test the StreamSchema descriptor."""
 
-    def test_stream_schema_descriptor(self, tmp_path: Path):
-        """Test the StreamSchema descriptor."""
-        schema_source = SchemaDirectory(tmp_path)
-        schema_dict = {"type": "object", "properties": {"id": {"type": "string"}}}
+    @pytest.fixture
+    def foo_schema(self) -> dict[str, t.Any]:
+        """Schema dictionary."""
+        return {"type": "object", "properties": {"id": {"type": "string"}}}
+
+    @pytest.fixture
+    def schema_source(
+        self,
+        foo_schema: dict[str, t.Any],
+        tmp_path: Path,
+    ) -> SchemaDirectory:
+        """Schema source."""
         schema_file = tmp_path / "foo.json"
-        schema_file.write_text(json.dumps(schema_dict))
+        schema_file.write_text(json.dumps(foo_schema))
+        return SchemaDirectory(tmp_path)
 
-        class FooStream:
-            name = "foo"
-            schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source)
+    def test_get_stream_schema(
+        self,
+        foo_schema: dict[str, t.Any],
+        schema_source: SchemaDirectory,
+    ):
+        """Test the StreamSchema descriptor."""
+        stream = Mock(spec=Stream)
+        stream.name = "foo"
 
-        stream = FooStream()
-        assert stream.schema == schema_dict
+        stream_schema = StreamSchema(schema_source)
+        assert stream_schema.get_stream_schema(stream, type(stream)) == foo_schema
 
-    def test_stream_schema_descriptor_with_explicit_key(self, tmp_path: Path):
-        """Test StreamSchema descriptor with an explicit custom key."""
-        schema_source = SchemaDirectory(tmp_path)
-        schema_dict = {"type": "object", "properties": {"id": {"type": "string"}}}
-        schema_file = tmp_path / "bar.json"
-        schema_file.write_text(json.dumps(schema_dict))
-
-        class FooStream:
-            name = "foo"
-            schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source, key="bar")
-
-        stream = FooStream()
-        assert stream.schema == schema_dict
-
-    def test_stream_schema_descriptor_key_not_found(self, tmp_path: Path):
-        """Test StreamSchema descriptor with an explicit custom key."""
-        schema_source = SchemaDirectory(tmp_path)
-        schema_dict = {"type": "object", "properties": {"id": {"type": "string"}}}
-        schema_file = tmp_path / "bar.json"
-        schema_file.write_text(json.dumps(schema_dict))
-
-        class FooStream:
-            name = "foo"
-            schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source)
-
-        stream = FooStream()
+        stream_schema = StreamSchema(schema_source, key="bar")
         with pytest.raises(
             SchemaNotFoundError,
-            match="Schema file not found for 'foo'",
-        ):
+            match="Schema not found for 'bar'",
+        ) as exc:
+            stream_schema.get_stream_schema(stream, type(stream))
+        assert isinstance(exc.value.__cause__, FileNotFoundError)
+
+    def test_stream_schema_descriptor(
+        self,
+        foo_schema: dict[str, t.Any],
+        schema_source: SchemaDirectory,
+    ):
+        """Test the StreamSchema descriptor."""
+
+        class FooStream:
+            name = "foo"
+            schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source)
+
+        stream = FooStream()
+        assert stream.schema == foo_schema
+
+    def test_stream_schema_descriptor_with_explicit_key(
+        self,
+        foo_schema: dict[str, t.Any],
+        schema_source: SchemaDirectory,
+    ):
+        """Test StreamSchema descriptor with an explicit custom key."""
+
+        class BarStream:
+            name = "bar"
+            schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source, key="foo")
+
+        stream = BarStream()
+        assert stream.schema == foo_schema
+
+    def test_stream_schema_descriptor_key_not_found(
+        self,
+        schema_source: SchemaDirectory,
+    ):
+        """Test StreamSchema descriptor with an explicit custom key."""
+
+        class BarStream:
+            name = "bar"
+            schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source)
+
+        stream = BarStream()
+        with pytest.raises(
+            SchemaNotFoundError,
+            match="Schema not found for 'bar'",
+        ) as exc:
             _ = stream.schema
+        assert isinstance(exc.value.__cause__, FileNotFoundError)
