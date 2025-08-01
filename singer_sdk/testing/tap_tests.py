@@ -6,7 +6,6 @@ import typing as t
 import warnings
 
 import pytest
-from jsonschema import validators
 from jsonschema.exceptions import SchemaError
 
 import singer_sdk.helpers._typing as th
@@ -86,8 +85,7 @@ class StreamSchemaIsValidTest(StreamTestTemplate):
             AssertionError: if schema is not valid.
         """
         schema = self.stream.schema
-        default = DEFAULT_JSONSCHEMA_VALIDATOR
-        validator = validators.validator_for(schema, default=default)
+        validator = DEFAULT_JSONSCHEMA_VALIDATOR(schema)
 
         try:
             validator.check_schema(schema)
@@ -162,9 +160,10 @@ class StreamRecordMatchesStreamSchema(StreamTestTemplate):
     def test(self) -> None:
         """Run test."""
         schema = self.stream.schema
-        default = DEFAULT_JSONSCHEMA_VALIDATOR
-        validator = validators.validator_for(schema, default=default)(schema)
-        validator.format_checker = default.FORMAT_CHECKER
+        validator = DEFAULT_JSONSCHEMA_VALIDATOR(
+            schema,
+            format_checker=DEFAULT_JSONSCHEMA_VALIDATOR.FORMAT_CHECKER,
+        )
 
         for record in self.stream_records:
             errors = list(validator.iter_errors(record))

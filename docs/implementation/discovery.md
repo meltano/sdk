@@ -8,8 +8,9 @@ The catalog generated is automatically populated by a small number of developer 
 importantly:
 
 - `Tap.discover_streams()` - Should return a list of available "discovered" streams.
-- `Stream.schema` or `Stream.schema_filepath` - The JSON Schema definition of each stream,
-  provided either directly as a Python `dict` or indirectly as a `.json` filepath.
+- `Stream.schema` - The JSON Schema definition of each stream,
+  provided either directly as a Python `dict`, or through a
+  [`StreamSchema`](/guides/schema-sources.md) descriptor with a schema source.
 - `Stream.primary_keys` - a list of strings indicating the primary key(s) of the stream.
 - `Stream.replication_key` - a single string indicating the name of the stream's replication
   key (if applicable).

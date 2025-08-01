@@ -24,6 +24,7 @@ dependencies = [
     "requests~=2.32.3",
     "requests-cache~=1.2.1",
     "singer-sdk~=0.47.4",
+    "typing-extensions>=4.5.0; python_version < '3.12'",
 ]
 optional-dependencies.s3 = [
     "s3fs~=2025.5.0",

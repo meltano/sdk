@@ -177,6 +177,14 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     config_jsonschema: t.ClassVar[dict] = {"properties": {}}
     # A JSON Schema object defining the config options that this tap will accept.
 
+    #: Developers may override this property in order to add or remove
+    #: advertised capabilities for this plugin.
+    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+        PluginCapabilities.STREAM_MAPS,
+        PluginCapabilities.FLATTENING,
+        PluginCapabilities.BATCH,
+    ]
+
     _config: dict
 
     @classproperty
@@ -310,22 +318,6 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             The start time of the plugin.
         """
         return self.__initialized_at
-
-    @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
-        """Get capabilities.
-
-        Developers may override this property in order to add or remove
-        advertised capabilities for this plugin.
-
-        Returns:
-            A list of plugin capabilities.
-        """
-        return [
-            PluginCapabilities.STREAM_MAPS,
-            PluginCapabilities.FLATTENING,
-            PluginCapabilities.BATCH,
-        ]
 
     @classproperty
     def _env_var_prefix(cls) -> str:  # noqa: N805

@@ -286,7 +286,6 @@ DEP004 = [
 
 [tool.mypy]
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
-exclude = "tests"
 files = "singer_sdk"
 local_partial_types = true
 strict = false
@@ -366,6 +365,7 @@ select = [
     "INP",  # flake8-no-pep420
     "PIE",  # flake8-pie
     "T20",  # flake8-print
+    "PYI",  # flake8-pyi
     "PT",   # flake8-pytest-style
     "Q",    # flake8-quotes
     "RSE",  # flake8-raise

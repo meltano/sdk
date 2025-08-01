@@ -30,6 +30,10 @@ class ConfigValidationError(Exception):
         self.errors = errors or []
 
 
+class DiscoveryError(Exception):
+    """Raised when a schema discovery error occurs."""
+
+
 class FatalAPIError(Exception):
     """Exception raised when a failed request should not be considered retriable."""
 

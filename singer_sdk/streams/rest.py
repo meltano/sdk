@@ -753,9 +753,6 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
 class RESTStream(_HTTPStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     """Abstract base class for REST API streams."""
 
-    #: JSONPath expression to extract records from the API response.
-    records_jsonpath: str = "$[*]"
-
     #: Optional JSONPath expression to extract a pagination token from the API response.
     #: Example: `"$.next_page"`
     next_page_token_jsonpath: str | None = None
@@ -788,6 +785,11 @@ class RESTStream(_HTTPStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         super().__init__(tap, name, schema, path, http_method=http_method)
         self._compiled_jsonpath = None
         self._next_page_token_compiled_jsonpath = None
+
+    @property
+    def records_jsonpath(self) -> str:
+        """JSONPath expression to extract records from the API response."""
+        return "$[*]"
 
     def parse_response(self, response: requests.Response) -> t.Iterable[dict]:
         """Parse the response and return an iterator of result records.
