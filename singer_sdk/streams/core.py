@@ -7,6 +7,7 @@ import copy
 import datetime
 import json
 import typing as t
+import uuid
 import warnings
 from os import PathLike
 from pathlib import Path
@@ -116,7 +117,10 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     selected_by_default: bool = True
     """Whether this stream is selected by default in the catalog."""
 
-    def __init__(
+    __abstract__: bool = False
+    """Flag to indicate this stream is abstract and will not generate a catalog entry."""  # noqa: E501
+
+    def __init__(  # noqa: C901
         self,
         tap: Tap,
         schema: types.StrPath | dict[str, t.Any] | singer.Schema | None = None,
@@ -135,6 +139,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         if name:
             self.name: str = name
+        if self.__abstract__:
+            self.name = f"abstract_{uuid.uuid4().hex[:8]}"
         if not self.name:
             msg = "Missing argument or class variable 'name'."
             raise ValueError(msg)
@@ -196,7 +202,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             )
             self._schema = json.loads(self.schema_filepath.read_text())
 
-        if not self.schema:
+        if not self.__abstract__ and not self.schema:
             msg = (
                 f"Could not initialize schema for stream '{self.name}'. A valid schema "
                 "object or filepath was not provided."
@@ -215,7 +221,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if self._stream_maps:
             return self._stream_maps
 
-        if self._tap.mapper is not None:
+        if not self.__abstract__ and self._tap.mapper is not None:
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
             self.logger.debug(
                 "Tap has custom mapper. Using %d provided map(s).",
@@ -346,6 +352,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             True if the stream is selected.
         """
+        if self.__abstract__:
+            return self.has_selected_descendents
+
         return self.mask.get((), True)
 
     @selected.setter
@@ -1240,7 +1249,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                         )
                         raise
 
-                    if selected:
+                    if not self.__abstract__ and selected:
                         if write_messages:
                             self._write_record_message(record)
 
@@ -1309,7 +1318,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             self._write_replication_key_signpost(context, signpost)
 
         # Send a SCHEMA message to the downstream target:
-        if self.selected:
+        if not self.__abstract__ and self.selected:
             self._write_schema_message()
 
         if (
