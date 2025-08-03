@@ -2,11 +2,11 @@
 
 ## Introduction
 
-SDK-based taps, targets, and mappers automatically support the custom inline mappings feature. Stream mappings can be applied to solve the following real-world applications:
+SDK-based taps, targets, and mappers automatically support the custom inline mappings feature. Stream mappings can be applied to solve the following real-world applications.
 
-### Note on `null` values
-
+:::{tip}
 In all examples below where `null` is used as a value, the special string `"__NULL__"` can be used instead.
+:::
 
 ### Stream-Level Mapping Applications
 
