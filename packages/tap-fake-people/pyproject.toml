@@ -21,7 +21,7 @@ license = "Apache-2.0"
 requires-python = ">=3.9"
 dependencies = [
     "faker",
-    "singer-sdk~=0.47.4",
+    "singer-sdk~=0.48.0",
     "typing-extensions>=4.5.0; python_version < '3.12'",
 ]
 
