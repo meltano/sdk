@@ -20,7 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
-- Do not upload wheel to github release in templates
 - [#3165](https://github.com/meltano/sdk/issues/3165) Honor order of primary key columns when creating an empty table
 - [#3160](https://github.com/meltano/sdk/issues/3160) Make output of `--about --format=markdown` compliant with CommonMark
 - [#3147](https://github.com/meltano/sdk/issues/3147) Run mypy in templates inside of a virtualenv including the package
