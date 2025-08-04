@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.48.0 (2025-08-04)
+
+### ✨ New
+
+- [#3207](https://github.com/meltano/sdk/issues/3207) Automatically handle OpenAPI 2.0 and 3.0 specs
+- [#3200](https://github.com/meltano/sdk/issues/3200) Expose new variable `__original_stream_name__` in stream maps -- _**Thanks @ReubenFrankel!**_
+- [#3198](https://github.com/meltano/sdk/issues/3198) Update SQL tap and target templates with latest APIs
+- [#3190](https://github.com/meltano/sdk/issues/3190) Added an extensible API for stream schema sources
+- [#3189](https://github.com/meltano/sdk/issues/3189) Added `.env.example` files to tap, target and mapper templates
+- [#3188](https://github.com/meltano/sdk/issues/3188) Update tap, target and mapper dependencies in templates
+- [#3151](https://github.com/meltano/sdk/issues/3151) Define internal schema for `stream_maps`
+- [#3141](https://github.com/meltano/sdk/issues/3141) Support disabling stream pagination logic -- _**Thanks @ReubenFrankel!**_
+
+### 🐛 Fixes
+
+- [#3165](https://github.com/meltano/sdk/issues/3165) Honor order of primary key columns when creating an empty table
+- [#3160](https://github.com/meltano/sdk/issues/3160) Make output of `--about --format=markdown` compliant with CommonMark
+- [#3147](https://github.com/meltano/sdk/issues/3147) Run mypy in templates inside of a virtualenv including the package
+- [#3148](https://github.com/meltano/sdk/issues/3148) Fixed the return type of `RESTStream.get_new_paginator` to indicate returning `None` is supported to indicate no pagination
+- [#3145](https://github.com/meltano/sdk/issues/3145) Handle logging configuration not found gracefully
+- [#3065](https://github.com/meltano/sdk/issues/3065) Revert table name splitting by `-` in SQL targets when `default_target_schema` is set, introduced in #3020
+- [#3127](https://github.com/meltano/sdk/issues/3127) Ensure Singer SDK warnings are logged
+- [#3127](https://github.com/meltano/sdk/issues/3127) Ensure Singer SDK warnings are logged
+- [#3127](https://github.com/meltano/sdk/issues/3127) Ensure Singer SDK warnings are logged
+- [#3114](https://github.com/meltano/sdk/issues/3114) Centralize state writing to avoid emitting duplicate STATE messages
+
+### ⚙️ Under the Hood
+
+- [#3206](https://github.com/meltano/sdk/issues/3206) Make `RESTStream.records_jsonpath` read-only by default
+- [#3204](https://github.com/meltano/sdk/issues/3204) Make `get_stream_schema` the public API of the `StreamSchema` descriptor
+- [#3203](https://github.com/meltano/sdk/issues/3203) Make `SchemaSource` generic on any hashable key type
+- [#3201](https://github.com/meltano/sdk/issues/3201) Make `capabilities` a proper class attribute for tap, target and mapper classes
+- [#3187](https://github.com/meltano/sdk/issues/3187) Consolidate test parameters in built-in tests
+- [#3181](https://github.com/meltano/sdk/issues/3181) Update type annotations of some functions to indicate they accept string path or a path-like object
+- [#3180](https://github.com/meltano/sdk/issues/3180) Remove no-op deadcode for handling secret values
+- [#3178](https://github.com/meltano/sdk/issues/3178) Check explicitly for a `BaseTestClass` subclass when generating built-in tests
+- [#3175](https://github.com/meltano/sdk/issues/3175) Add type parameters to generic `SingerTestRunner` class
+- [#3172](https://github.com/meltano/sdk/issues/3172) Use explicit submodule imports
+- [#3166](https://github.com/meltano/sdk/issues/3166) Use the `jsonschema` validator instance directly instead of routing through `jsonschema.validators.validator_for`
+- [#3164](https://github.com/meltano/sdk/issues/3164) Rename `TestSuite` → `SingerTestSuite` to prevent a pytest test collection warning
+- [#3153](https://github.com/meltano/sdk/issues/3153) Read config files early
+- [#3152](https://github.com/meltano/sdk/issues/3152) Use a `click` callback to parse config input arguments and deprecate `PluginBase.config_from_cli_args`
+- [#3144](https://github.com/meltano/sdk/issues/3144) Pass catalog and state files early and pass the corresponding dictionaries to the tap class
+- [#3123](https://github.com/meltano/sdk/issues/3123) Remove `Faker` class from stream maps
+- [#3121](https://github.com/meltano/sdk/issues/3121) Remove `singer_sdk._singerlib`
+
+### 📚 Documentation Improvements
+
+- [#3208](https://github.com/meltano/sdk/issues/3208) Convert `__NULL__` comment to admonition
+- [#3122](https://github.com/meltano/sdk/issues/3122) Remove `Faker` class from stream maps docs
+
+### 📦 Packaging changes
+
+- [#3185](https://github.com/meltano/sdk/issues/3185) Declare support for Python 3.14
+- [#3126](https://github.com/meltano/sdk/issues/3126) Require SQLAlchemy >= 2.0
+- [#3099](https://github.com/meltano/sdk/issues/3099) Remove some unused Python version markers
+
 ## v0.47.4 (2025-06-25)
 
 ### 🐛 Fixes

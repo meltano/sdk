@@ -23,7 +23,7 @@ requires-python = ">=3.9"
 dependencies = [
     "requests~=2.32.3",
     "requests-cache~=1.2.1",
-    "singer-sdk~=0.47.4",
+    "singer-sdk~=0.48.0",
     "typing-extensions>=4.5.0; python_version < '3.12'",
 ]
 optional-dependencies.s3 = [
