@@ -44,6 +44,7 @@ DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = t.TypeVar("_TToken")
+_TNum = t.TypeVar("_TNum", int, float)
 
 
 class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PLR0904
@@ -727,8 +728,8 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
     def backoff_runtime(  # noqa: PLR6301
         self,
         *,
-        value: t.Callable[[t.Any], int],
-    ) -> t.Generator[int, None, None]:
+        value: t.Callable[[t.Any], _TNum],
+    ) -> t.Generator[_TNum, None, None]:
         """Optional backoff wait generator that can replace the default `backoff.expo`.
 
         It is based on parsing the thrown exception of the decorated method, making it
