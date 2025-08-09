@@ -13,13 +13,13 @@ Developer TODO: Update the below as needed to correctly describe the install pro
 Install from PyPI:
 
 ```bash
-pipx install {{ cookiecutter.target_id }}
+uv tool install {{ cookiecutter.target_id }}
 ```
 
 Install from GitHub:
 
 ```bash
-pipx install git+https://github.com/ORG_NAME/{{ cookiecutter.target_id }}.git@main
+uv tool install git+https://github.com/ORG_NAME/{{ cookiecutter.target_id }}.git@main
 ```
 
 -->
@@ -115,7 +115,7 @@ Next, install Meltano (if you haven't already) and any needed plugins:
 
 ```bash
 # Install meltano
-pipx install meltano
+uv tool install meltano
 # Initialize meltano within this directory
 cd {{ cookiecutter.target_id }}
 meltano install
