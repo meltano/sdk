@@ -93,7 +93,12 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
         """
         return str(self)
 
-    def continue_if_empty(self, response: requests.Response) -> bool:  # noqa: ARG002, PLR6301
+    def continue_if_empty(  # noqa: PLR6301
+        self,
+        response: requests.Response,  # noqa: ARG002
+        *,
+        page_data: t.Any | None = None,  # noqa: ANN401, ARG002
+    ) -> bool:
         """Check if pagination should continue even if the response is empty.
 
         Override this method to keep the pagination going even if the page retrieved
@@ -101,17 +106,24 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
 
         Args:
             response: API response object.
+            page_data: Page data.
 
         Returns:
             Boolean flag used to indicate if the endpoint has more pages.
         """
         return False
 
-    def advance(self, response: requests.Response) -> None:
+    def advance(
+        self,
+        response: requests.Response,
+        *,
+        page_data: t.Any | None = None,  # noqa: ANN401, ARG002
+    ) -> None:
         """Get a new page value and advance the current one.
 
         Args:
             response: API response object.
+            page_data: Page data.
 
         Raises:
             RuntimeError: If a loop in pagination is detected. That is, when two
@@ -138,11 +150,17 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
         else:
             self._value = new_value
 
-    def has_more(self, response: requests.Response) -> bool:  # noqa: ARG002, PLR6301
+    def has_more(  # noqa: PLR6301
+        self,
+        response: requests.Response,  # noqa: ARG002
+        *,
+        page_data: t.Any | None = None,  # noqa: ANN401, ARG002
+    ) -> bool:
         """Override this method to check if the endpoint has any pages left.
 
         Args:
             response: API response object.
+            page_data: Page data.
 
         Returns:
             Boolean flag used to indicate if the endpoint has more pages.
@@ -150,11 +168,17 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
         return True
 
     @abstractmethod
-    def get_next(self, response: requests.Response) -> TPageToken | None:
+    def get_next(
+        self,
+        response: requests.Response,
+        *,
+        page_data: t.Any | None = None,  # noqa: ANN401
+    ) -> TPageToken | None:
         """Get the next pagination token or index from the API response.
 
         Args:
             response: API response object.
+            page_data: Page data.
 
         Returns:
             The next page token or index. Return `None` from this method to indicate
@@ -176,11 +200,17 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
         super().__init__(None, *args, **kwargs)
 
     @override
-    def has_more(self, response: requests.Response) -> bool:
+    def has_more(
+        self,
+        response: requests.Response,
+        *,
+        page_data: t.Any | None = None,
+    ) -> bool:
         """A single page should not have any more pages.
 
         Args:
             response: API response object.
+            page_data: Page data.
 
         Returns:
             `False` to indicate pagination is complete after the first page.
@@ -188,11 +218,17 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
         return False
 
     @override
-    def get_next(self, response: requests.Response) -> None:
+    def get_next(
+        self,
+        response: requests.Response,
+        *,
+        page_data: t.Any | None = None,
+    ) -> None:
         """Always return None to indicate pagination is complete after the first page.
 
         Args:
             response: API response object.
+            page_data: Page data.
         """
         return
 
@@ -249,20 +285,32 @@ class BaseHATEOASPaginator(
         super().__init__(None, *args, **kwargs)
 
     @abstractmethod
-    def get_next_url(self, response: requests.Response) -> str | None:
+    def get_next_url(
+        self,
+        response: requests.Response,
+        *,
+        page_data: t.Any | None = None,  # noqa: ANN401
+    ) -> str | None:
         """Override this method to extract a HATEOAS link from the response.
 
         Args:
             response: API response object.
+            page_data: Page data.
         """
         ...
 
     @override
-    def get_next(self, response: requests.Response) -> ParseResult | None:
+    def get_next(
+        self,
+        response: requests.Response,
+        *,
+        page_data: t.Any | None = None,
+    ) -> ParseResult | None:
         """Get the next pagination token or index from the API response.
 
         Args:
             response: API response object.
+            page_data: Page data.
 
         Returns:
             A parsed HATEOAS link if the response has one, otherwise `None`.
@@ -280,11 +328,17 @@ class HeaderLinkPaginator(BaseHATEOASPaginator):
     """
 
     @override
-    def get_next_url(self, response: requests.Response) -> str | None:
+    def get_next_url(
+        self,
+        response: requests.Response,
+        *,
+        page_data: t.Any | None = None,
+    ) -> str | None:
         """Override this method to extract a HATEOAS link from the response.
 
         Args:
             response: API response object.
+            page_data: Page data.
 
         Returns:
             A HATEOAS link parsed from the response headers.
@@ -313,11 +367,17 @@ class JSONPathPaginator(BaseAPIPaginator[t.Optional[str]]):
         self._jsonpath = jsonpath
 
     @override
-    def get_next(self, response: requests.Response) -> str | None:
+    def get_next(
+        self,
+        response: requests.Response,
+        *,
+        page_data: t.Any | None = None,
+    ) -> str | None:
         """Get the next page token.
 
         Args:
             response: API response object.
+            page_data: Page data.
 
         Returns:
             The next page token.
@@ -346,11 +406,17 @@ class SimpleHeaderPaginator(BaseAPIPaginator[t.Optional[str]]):
         self._key = key
 
     @override
-    def get_next(self, response: requests.Response) -> str | None:
+    def get_next(
+        self,
+        response: requests.Response,
+        *,
+        page_data: t.Any | None = None,
+    ) -> str | None:
         """Get the next page token.
 
         Args:
             response: API response object.
+            page_data: Page data.
 
         Returns:
             The next page token.
@@ -362,11 +428,17 @@ class BasePageNumberPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
     """Paginator class for APIs that use page number."""
 
     @override
-    def get_next(self, response: requests.Response) -> int | None:
+    def get_next(
+        self,
+        response: requests.Response,
+        *,
+        page_data: t.Any | None = None,
+    ) -> int | None:
         """Get the next page number.
 
         Args:
             response: API response object.
+            page_data: Page data.
 
         Returns:
             The next page number.
@@ -396,11 +468,17 @@ class BaseOffsetPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         self._page_size = page_size
 
     @override
-    def get_next(self, response: requests.Response) -> int | None:
+    def get_next(
+        self,
+        response: requests.Response,
+        *,
+        page_data: t.Any | None = None,
+    ) -> int | None:
         """Get the next page offset.
 
         Args:
             response: API response object.
+            page_data: Page data.
 
         Returns:
             The next page offset.
@@ -447,11 +525,17 @@ class LegacyStreamPaginator(
         self.stream = stream
 
     @override
-    def get_next(self, response: requests.Response) -> TPageToken | None:
+    def get_next(
+        self,
+        response: requests.Response,
+        *,
+        page_data: t.Any | None = None,
+    ) -> TPageToken | None:
         """Get next page value by calling the stream method.
 
         Args:
             response: API response object.
+            page_data: Page data.
 
         Returns:
             The next page token or index. Return `None` from this method to indicate
