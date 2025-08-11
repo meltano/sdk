@@ -22,7 +22,6 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
 {%- endif %}
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -32,7 +31,7 @@ classifiers = [
 license = "{{cookiecutter.license}}"
 {%- endif %}
 license-files = [ "LICENSE" ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     {%- if extras %}
     "singer-sdk[{{ extras|join(',') }}]~=0.48.0",
@@ -127,7 +126,6 @@ env_list = [
     "py312",
     "py311",
     "py310",
-    "py39",
 ]
 
 [tool.tox.env_run_base]
