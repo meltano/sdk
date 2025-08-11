@@ -27,8 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#3145](https://github.com/meltano/sdk/issues/3145) Handle logging configuration not found gracefully
 - [#3065](https://github.com/meltano/sdk/issues/3065) Revert table name splitting by `-` in SQL targets when `default_target_schema` is set, introduced in #3020
 - [#3127](https://github.com/meltano/sdk/issues/3127) Ensure Singer SDK warnings are logged
-- [#3127](https://github.com/meltano/sdk/issues/3127) Ensure Singer SDK warnings are logged
-- [#3127](https://github.com/meltano/sdk/issues/3127) Ensure Singer SDK warnings are logged
 - [#3114](https://github.com/meltano/sdk/issues/3114) Centralize state writing to avoid emitting duplicate STATE messages
 
 ### ⚙️ Under the Hood
