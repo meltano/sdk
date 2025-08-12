@@ -65,7 +65,6 @@ class MapperNotInitialized(Exception):
         super().__init__("Mapper not initialized. Please call setup_mapper() first.")
 
 
-# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclasses.dataclass
 class _ConfigInput:
     """Configuration input."""

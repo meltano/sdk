@@ -103,7 +103,6 @@ def python_versions(package_metadata: PackageMetadata) -> list[str]:
     )
 
 
-# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclasses.dataclass
 class AboutInfo:
     """About information for a plugin."""

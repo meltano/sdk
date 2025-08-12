@@ -29,7 +29,6 @@ class BatchFileFormat(str, enum.Enum):
     """Parquet format."""
 
 
-# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclass
 class BaseBatchFileEncoding:
     """Base class for batch file encodings."""
@@ -66,7 +65,6 @@ class BaseBatchFileEncoding:
         return encoding_cls(**data)
 
 
-# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclass
 class JSONLinesEncoding(BaseBatchFileEncoding):
     """JSON Lines encoding for batch files."""
@@ -74,7 +72,6 @@ class JSONLinesEncoding(BaseBatchFileEncoding):
     __encoding_format__ = "jsonl"
 
 
-# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclass
 class ParquetEncoding(BaseBatchFileEncoding):
     """Parquet encoding for batch files."""
@@ -82,7 +79,6 @@ class ParquetEncoding(BaseBatchFileEncoding):
     __encoding_format__ = "parquet"
 
 
-# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclass
 class SDKBatchMessage(Message):
     """Singer batch message in the Meltano Singer SDK flavor."""
@@ -106,7 +102,6 @@ class SDKBatchMessage(Message):
         self.type = SingerMessageType.BATCH
 
 
-# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclass
 class StorageTarget:
     """Storage target for batch files."""
@@ -216,7 +211,6 @@ class StorageTarget:
             yield f
 
 
-# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclass
 class BatchConfig:
     """Batch configuration."""

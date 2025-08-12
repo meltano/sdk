@@ -64,7 +64,6 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
     raise AttributeError(msg)
 
 
-# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclass
 class SingerTestSuite(t.Generic[T]):
     """Test Suite container class."""

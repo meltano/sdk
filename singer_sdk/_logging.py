@@ -40,7 +40,6 @@ def _setup_console_logging(*, log_level: str | int | None = None) -> None:
     root_formatter = logging.Formatter(
         "{asctime:23s} | {levelname:8s} | {name:20s} | {message}",
         style="{",
-        # TODO: Use `defaults={"point": None}` when Python 3.10+ is the minimum version
     )
     handler = logging.StreamHandler(sys.stderr)
     handler.setFormatter(root_formatter)

@@ -39,7 +39,6 @@ class StreamAttributeTestParams(t.NamedTuple):
     attribute_name: str
 
 
-# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclass
 class TestParam:
     """Test parameters."""

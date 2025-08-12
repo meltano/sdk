@@ -64,7 +64,6 @@ class Metric(str, enum.Enum):
     BATCH_PROCESSING_TIME = "batch_processing_time"
 
 
-# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclass
 class Point(t.Generic[_TVal]):
     """An individual metric measurement."""
