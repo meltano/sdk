@@ -56,6 +56,7 @@ def _get_max_version(specifiers: SpecifierSet) -> int:
 
 def get_supported_pythons(
     requires_python: str,
+    *,
     classifiers: list[str] | None = None,
 ) -> t.Generator[str, None, None]:
     """Get the supported Python versions from a requires_python string and classifiers.
@@ -87,10 +88,10 @@ def python_versions(package_metadata: PackageMetadata) -> list[str]:
     Returns:
         A list of supported Python versions.
     """
-    requires_python = package_metadata["Requires-Python"]
+    requires_python = package_metadata.get("Requires-Python", f">={_PY_MIN_VERSION}")
     classifiers = [
         classifier.split("::")[-1].strip()
-        for classifier in package_metadata.get_all("Classifier") or []
+        for classifier in package_metadata.get_all("Classifier", [])
         if classifier.startswith("Programming Language :: Python ::")
     ]
 
