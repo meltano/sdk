@@ -12,7 +12,8 @@ from textwrap import dedent
 from uuid import uuid4
 
 import pytest
-import sqlalchemy as sa
+import sqlalchemy
+import sqlalchemy.exc
 from tap_hostile import TapHostile
 from tap_sqlite import SQLiteTap
 from target_sqlite import SQLiteSink, SQLiteTarget
@@ -25,13 +26,15 @@ from singer_sdk.testing import (
 )
 
 if t.TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from pytest_snapshot.plugin import Snapshot
 
     from singer_sdk.tap_base import SQLTap
     from singer_sdk.target_base import SQLTarget
 
 
-def get_table(config: dict, table_name: str) -> sa.Table:
+def get_table(config: Mapping, table_name: str) -> sqlalchemy.Table:
     """Get SQLAlchemy metadata and table for inspection.
 
     Args:
@@ -42,8 +45,8 @@ def get_table(config: dict, table_name: str) -> sa.Table:
         Tuple of (metadata, table)
     """
     db_path = config["path_to_db"]
-    engine = sa.create_engine(f"sqlite:///{db_path}")
-    meta = sa.MetaData()
+    engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
+    meta = sqlalchemy.MetaData()
     meta.reflect(bind=engine)
     return meta.tables[table_name]
 
@@ -205,13 +208,14 @@ def test_sqlite_schema_addition(sqlite_sample_target: SQLTarget):
         ]
     )
     # sqlite doesn't support schema creation
-    with pytest.raises(sa.exc.OperationalError) as excinfo:
+    with pytest.raises(sqlalchemy.exc.OperationalError) as excinfo:
         target_sync_test(
             sqlite_sample_target,
             input=StringIO(tap_output),
             finalize=True,
         )
     # check the target at least tried to create the schema
+    assert isinstance(excinfo.value, sqlalchemy.exc.OperationalError)
     assert excinfo.value.statement == f"CREATE SCHEMA {schema_name}"
 
 
@@ -332,10 +336,10 @@ def test_sqlite_activate_version(
     table = get_table(sqlite_sample_target_hard_delete.config, test_tbl)
 
     assert "_sdc_table_version" in table.columns
-    assert type(table.columns["_sdc_table_version"].type) is sa.INTEGER
+    assert type(table.columns["_sdc_table_version"].type) is sqlalchemy.INTEGER
 
     assert "_sdc_deleted_at" in table.columns
-    assert type(table.columns["_sdc_deleted_at"].type) is sa.DATETIME
+    assert type(table.columns["_sdc_deleted_at"].type) is sqlalchemy.DATETIME
 
 
 @pytest.mark.snapshot
@@ -444,13 +448,13 @@ def test_sqlite_add_record_metadata(
     table = get_table(sqlite_target_add_record_metadata.config, test_tbl)
 
     assert "_sdc_received_at" in table.columns
-    assert type(table.columns["_sdc_received_at"].type) is sa.DATETIME
+    assert type(table.columns["_sdc_received_at"].type) is sqlalchemy.DATETIME
 
     assert "_sdc_sync_started_at" in table.columns
-    assert type(table.columns["_sdc_sync_started_at"].type) is sa.INTEGER
+    assert type(table.columns["_sdc_sync_started_at"].type) is sqlalchemy.INTEGER
 
     assert "_sdc_table_version" in table.columns
-    assert type(table.columns["_sdc_table_version"].type) is sa.INTEGER
+    assert type(table.columns["_sdc_table_version"].type) is sqlalchemy.INTEGER
 
 
 def test_sqlite_column_morph(sqlite_sample_target: SQLTarget):
