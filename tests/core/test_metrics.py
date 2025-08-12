@@ -48,7 +48,14 @@ def metric_log_records() -> list[logging.LogRecord]:
         metric_type="counter",
         metric=metrics.Metric.RECORD_COUNT,
         value=1,
-        tags={"test_tag": "test_value", "stream": "users"},
+        tags={
+            metrics.Tag.STREAM: "users",
+            metrics.Tag.CONTEXT: {
+                "account_id": 1,
+                "parent_id": 1,
+            },
+            "test_tag": "test_value",
+        },
     ).to_dict()
 
     timer = logging.LogRecord(
@@ -64,7 +71,13 @@ def metric_log_records() -> list[logging.LogRecord]:
         metric_type="timer",
         metric=metrics.Metric.SYNC_DURATION,
         value=0.314,
-        tags={"test_tag": "test_value", "stream": "teams"},
+        tags={
+            metrics.Tag.STREAM: "teams",
+            metrics.Tag.CONTEXT: {
+                "account_id": 2,
+            },
+            "test_tag": "test_value",
+        },
     ).to_dict()
 
     return [normal_log, counter, timer]
@@ -249,6 +262,13 @@ def test_metric_filter_exclude_tags(
     assert filtered[1].__dict__["point"]["tags"]["stream"] == "teams"
 
     metric_filter = metrics.MetricExclusionFilter(tags={"test_tag": "test_value"})
+    filtered = _filter(metric_log_records, metric_filter.filter)
+    assert len(filtered) == 1
+    assert filtered[0].msg == "Hey there"
+
+    metric_filter = metrics.MetricExclusionFilter(
+        tags={"stream": "users", "test_tag": "test_value"},
+    )
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 1
     assert filtered[0].msg == "Hey there"
