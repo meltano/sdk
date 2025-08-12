@@ -155,10 +155,10 @@ class MetricExclusionFilter(logging.Filter):
         Args:
             **kwargs: The point dictionary.
 
-        A metric record is excluded if all of the following are true:
-        - The metric is in the metrics list or the metrics list is empty.
-        - The metric type is in the types list or the types list is empty.
-        - Any of the tags match the tags dictionary or the tags dictionary is empty.
+        A metric record is excluded if any of the following are true:
+        - The metric name matches one in the metrics list
+        - The metric type matches one in the types list
+        - Any of the point's tags match the corresponding values in the tags dictionary
 
         Returns:
             True if the point should be excluded.
