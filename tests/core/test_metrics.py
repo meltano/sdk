@@ -230,6 +230,22 @@ def test_metric_filter_no_exclusions(
     assert len(filtered) == 3
 
 
+def test_metric_filter_malformed_point() -> None:
+    metric_filter = metrics.MetricExclusionFilter()
+    record = logging.LogRecord(
+        name="test",
+        level=logging.INFO,
+        pathname="test.py",
+        lineno=1,
+        msg="METRIC",
+        args=(),
+        exc_info=None,
+    )
+    record.__dict__["point"] = "Not a dict"
+
+    assert metric_filter.filter(record)
+
+
 def test_metric_filter_exclude_metrics(
     metric_log_records: list[logging.LogRecord],
 ) -> None:
