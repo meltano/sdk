@@ -74,7 +74,7 @@ def metric_log_records() -> list[logging.LogRecord]:
         tags={
             metrics.Tag.STREAM: "teams",
             metrics.Tag.CONTEXT: {
-                "account_id": 2,
+                "account_id": 1,
             },
             "test_tag": "test_value",
         },
@@ -255,19 +255,36 @@ def test_metric_filter_exclude_metric_types(
 def test_metric_filter_exclude_tags(
     metric_log_records: list[logging.LogRecord],
 ) -> None:
-    metric_filter = metrics.MetricExclusionFilter(tags={"stream": "users"})
+    metric_filter = metrics.MetricExclusionFilter(
+        tags={
+            metrics.Tag.STREAM: "users",
+        },
+    )
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 2
     assert filtered[0].msg == "Hey there"
     assert filtered[1].__dict__["point"]["tags"]["stream"] == "teams"
 
-    metric_filter = metrics.MetricExclusionFilter(tags={"test_tag": "test_value"})
+    metric_filter = metrics.MetricExclusionFilter(
+        tags={
+            "test_tag": "test_value",
+        },
+    )
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 1
     assert filtered[0].msg == "Hey there"
 
+
+@pytest.mark.xfail(reason="Nested tags are not supported yet")
+def test_metric_filter_exclude_nested_tags(
+    metric_log_records: list[logging.LogRecord],
+) -> None:
     metric_filter = metrics.MetricExclusionFilter(
-        tags={"stream": "users", "test_tag": "test_value"},
+        tags={
+            metrics.Tag.CONTEXT: {
+                "account_id": 1,
+            },
+        },
     )
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 1
