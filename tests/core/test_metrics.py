@@ -212,7 +212,7 @@ def _filter(
 def test_metric_filter_no_exclusions(
     metric_log_records: list[logging.LogRecord],
 ) -> None:
-    metric_filter = metrics.SingerMetricsExclusionFilter()
+    metric_filter = metrics.MetricExclusionFilter()
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 3
 
@@ -220,7 +220,7 @@ def test_metric_filter_no_exclusions(
 def test_metric_filter_exclude_metrics(
     metric_log_records: list[logging.LogRecord],
 ) -> None:
-    metric_filter = metrics.SingerMetricsExclusionFilter(metrics=["record_count"])
+    metric_filter = metrics.MetricExclusionFilter(metrics=["record_count"])
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 2
     assert filtered[0].msg == "Hey there"
@@ -231,7 +231,7 @@ def test_metric_filter_exclude_metrics(
 def test_metric_filter_exclude_metric_types(
     metric_log_records: list[logging.LogRecord],
 ) -> None:
-    metric_filter = metrics.SingerMetricsExclusionFilter(metrics=["sync_duration"])
+    metric_filter = metrics.MetricExclusionFilter(metrics=["sync_duration"])
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 2
     assert filtered[0].msg == "Hey there"
@@ -242,15 +242,13 @@ def test_metric_filter_exclude_metric_types(
 def test_metric_filter_exclude_tags(
     metric_log_records: list[logging.LogRecord],
 ) -> None:
-    metric_filter = metrics.SingerMetricsExclusionFilter(tags={"stream": "users"})
+    metric_filter = metrics.MetricExclusionFilter(tags={"stream": "users"})
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 2
     assert filtered[0].msg == "Hey there"
     assert filtered[1].__dict__["point"]["tags"]["stream"] == "teams"
 
-    metric_filter = metrics.SingerMetricsExclusionFilter(
-        tags={"test_tag": "test_value"}
-    )
+    metric_filter = metrics.MetricExclusionFilter(tags={"test_tag": "test_value"})
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 1
     assert filtered[0].msg == "Hey there"
@@ -259,7 +257,7 @@ def test_metric_filter_exclude_tags(
 def test_metric_filter_exclude_name_and_type(
     metric_log_records: list[logging.LogRecord],
 ) -> None:
-    metric_filter = metrics.SingerMetricsExclusionFilter(
+    metric_filter = metrics.MetricExclusionFilter(
         metrics=["record_count"],
         types=["counter"],
     )
@@ -273,7 +271,7 @@ def test_metric_filter_exclude_name_and_type(
 def test_metric_filter_exclude_name_and_tag(
     metric_log_records: list[logging.LogRecord],
 ) -> None:
-    metric_filter = metrics.SingerMetricsExclusionFilter(
+    metric_filter = metrics.MetricExclusionFilter(
         metrics=["record_count"],
         tags={"stream": "users"},
     )

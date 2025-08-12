@@ -66,7 +66,7 @@ handlers:
 # Optionally, you can exclude metrics
 filters:
   remove_events_stream_metrics:
-    (): singer_sdk.metrics.SingerMetricsExclusionFilter
+    (): singer_sdk.metrics.MetricExclusionFilter
     tags:
       stream: events
 loggers:

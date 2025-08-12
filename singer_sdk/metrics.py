@@ -128,7 +128,7 @@ class SingerMetricsFormatter(logging.Formatter):
         return super().format(record)
 
 
-class SingerMetricsExclusionFilter(logging.Filter):
+class MetricExclusionFilter(logging.Filter):
     """A filter for excluding metrics from logging."""
 
     def __init__(
