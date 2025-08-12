@@ -231,7 +231,7 @@ def test_metric_filter_exclude_metrics(
 def test_metric_filter_exclude_metric_types(
     metric_log_records: list[logging.LogRecord],
 ) -> None:
-    metric_filter = metrics.MetricExclusionFilter(metrics=["sync_duration"])
+    metric_filter = metrics.MetricExclusionFilter(types=["timer"])
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 2
     assert filtered[0].msg == "Hey there"
