@@ -12,7 +12,15 @@ from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
 if t.TYPE_CHECKING:
+    import sys
+
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
+
+    if sys.version_info >= (3, 10):
+        from importlib.metadata import PackageMetadata
+    else:
+        from email.message import Message as PackageMetadata
+
 
 __all__ = [
     "AboutFormatter",
@@ -23,7 +31,7 @@ __all__ = [
 
 # Keep these in sync with the supported Python versions in pyproject.toml
 _PY_MIN_VERSION = 9
-_PY_MAX_VERSION = 13
+_PY_MAX_VERSION = 14
 
 
 def _get_min_version(specifiers: SpecifierSet) -> int:
@@ -46,7 +54,23 @@ def _get_max_version(specifiers: SpecifierSet) -> int:
     return max(max_version, default=_PY_MAX_VERSION)
 
 
-def get_supported_pythons(requires_python: str) -> t.Generator[str, None, None]:
+def get_supported_pythons(
+    requires_python: str,
+    classifiers: list[str] | None = None,
+) -> t.Generator[str, None, None]:
+    """Get the supported Python versions from a requires_python string and classifiers.
+
+    Args:
+        requires_python: The requires_python string from the package metadata.
+        classifiers: The classifiers from the package metadata.
+
+    Yields:
+        A generator of supported Python versions.
+    """
+    if classifiers:
+        yield from classifiers
+        return
+
     specifiers = SpecifierSet(requires_python)
     min_version = _get_min_version(specifiers)
     max_version = _get_max_version(specifiers)
@@ -54,6 +78,31 @@ def get_supported_pythons(requires_python: str) -> t.Generator[str, None, None]:
     yield from specifiers.filter(f"3.{v}" for v in range(min_version, max_version + 1))
 
 
+def python_versions(package_metadata: PackageMetadata) -> list[str]:
+    """Get the supported Python versions from a package metadata dictionary.
+
+    Args:
+        package_metadata: The package metadata dictionary.
+
+    Returns:
+        A list of supported Python versions.
+    """
+    requires_python = package_metadata["Requires-Python"]
+    classifiers = [
+        classifier.split("::")[-1].strip()
+        for classifier in package_metadata.get_all("Classifier") or []
+        if classifier.startswith("Programming Language :: Python ::")
+    ]
+
+    return list(
+        get_supported_pythons(
+            requires_python,
+            classifiers=classifiers,
+        )
+    )
+
+
+# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclasses.dataclass
 class AboutInfo:
     """About information for a plugin."""

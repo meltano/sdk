@@ -111,14 +111,35 @@ def test_get_supported_pythons_sdk():
 
 
 @pytest.mark.parametrize(
-    "specifiers,expected",
+    "specifiers,classifiers,expected",
     [
-        (">=3.7,<3.12", ["3.7", "3.8", "3.9", "3.10", "3.11"]),
-        (">=3.7", ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]),
-        (">3.7", ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]),
-        (">3.7,<=3.11", ["3.8", "3.9", "3.10", "3.11"]),
+        (">=3.9,<3.12", None, ["3.9", "3.10", "3.11"]),
+        (">=3.9", None, ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]),
+        (">3.9", None, ["3.10", "3.11", "3.12", "3.13", "3.14"]),
+        (">3.9,<=3.11", None, ["3.10", "3.11"]),
+        (">=3.9,<3.12", ["3.9", "3.10", "3.11"], ["3.9", "3.10", "3.11"]),
+        (
+            ">=3.9",
+            ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"],
+            ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"],
+        ),
+        (
+            ">3.9",
+            ["3.10", "3.11", "3.12", "3.13", "3.14"],
+            ["3.10", "3.11", "3.12", "3.13", "3.14"],
+        ),
+        (">3.9,<=3.11", ["3.10", "3.11"], ["3.10", "3.11"]),
     ],
 )
-def test_get_supported_pythons(specifiers: str, expected: list[str]):
-    supported_pythons = list(get_supported_pythons(specifiers))
+def test_get_supported_pythons(
+    specifiers: str,
+    classifiers: list[str] | None,
+    expected: list[str],
+):
+    supported_pythons = list(
+        get_supported_pythons(
+            specifiers,
+            classifiers=classifiers,
+        )
+    )
     assert supported_pythons == expected

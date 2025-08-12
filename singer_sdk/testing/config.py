@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 
+# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclass
 class SuiteConfig:
     """Test Suite Config, passed to each test.

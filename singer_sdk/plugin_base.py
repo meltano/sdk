@@ -65,6 +65,7 @@ class MapperNotInitialized(Exception):
         super().__init__("Mapper not initialized. Please call setup_mapper() first.")
 
 
+# TODO: Use `slots=True` when Python 3.10+ is the minimum version
 @dataclasses.dataclass
 class _ConfigInput:
     """Configuration input."""
@@ -367,11 +368,9 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             A list of supported Python versions.
         """
         try:
-            package_metadata = metadata.metadata(package)
+            return about.python_versions(metadata.metadata(package))
         except metadata.PackageNotFoundError:
             return None
-
-        return list(about.get_supported_pythons(package_metadata["Requires-Python"]))
 
     @classmethod
     def get_plugin_version(cls) -> str:
