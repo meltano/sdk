@@ -63,10 +63,17 @@ handlers:
     class: logging.FileHandler
     formatter: metrics
     filename: metrics.jsonl
+# Optionally, you can exclude metrics
+filters:
+  remove_events_stream_metrics:
+    (): singer_sdk.metrics.MetricExclusionFilter
+    tags:
+      stream: events
 loggers:
   singer_sdk.metrics:
     level: INFO
     handlers: [ metrics ]
+    filters: [ remove_events_stream_metrics ]
     propagate: no
 ```
 

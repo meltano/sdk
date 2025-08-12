@@ -16,6 +16,7 @@ from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 
 if t.TYPE_CHECKING:
     import sys
+    from collections.abc import Sequence
     from types import TracebackType
 
     from singer_sdk.helpers import types
@@ -125,6 +126,66 @@ class SingerMetricsFormatter(logging.Formatter):
         point = record.__dict__.get("point")
         record.__dict__["metric_json"] = _to_json(point) if point else ""
         return super().format(record)
+
+
+class MetricExclusionFilter(logging.Filter):
+    """A filter for excluding metrics from logging."""
+
+    def __init__(
+        self,
+        *,
+        metrics: Sequence[str | Metric] | None = None,
+        types: Sequence[str] | None = None,
+        tags: dict[str, t.Any] | None = None,
+    ):
+        """Initialize a metric filter.
+
+        Args:
+            metrics: A set of metrics to exclude.
+            types: A set of metric types to exclude.
+            tags: A dictionary of tags to exclude.
+        """
+        self.metrics = metrics or []
+        self.types = types or []
+        self.tags = tags or {}
+
+    def _exclude_point(self, **kwargs: t.Any) -> bool:
+        """Filter a point.
+
+        Args:
+            **kwargs: The point dictionary.
+
+        A metric record is excluded if any of the following are true:
+        - The metric name matches one in the metrics list
+        - The metric type matches one in the types list
+        - Any of the point's tags match the corresponding values in the tags dictionary
+
+        Returns:
+            True if the point should be excluded.
+        """
+        return (
+            (kwargs.get("metric") in self.metrics)
+            or (kwargs.get("type") in self.types)
+            or any(
+                kwargs.get("tags", {}).get(tag) == value
+                for tag, value in self.tags.items()
+            )
+        )
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        """Filter a log record.
+
+        Args:
+            record: A log record.
+
+        Returns:
+            True if the record should be logged.
+        """
+        return not (
+            (point := record.__dict__.get("point"))
+            and isinstance(point, dict)
+            and self._exclude_point(**point)
+        )
 
 
 def log(logger: logging.Logger, point: Point) -> None:
