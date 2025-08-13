@@ -25,6 +25,10 @@ __all__ = [
 Context: TypeAlias = Mapping[str, t.Any]
 Record: TypeAlias = dict[str, t.Any]
 Auth: TypeAlias = t.Callable[[requests.PreparedRequest], requests.PreparedRequest]
+RequestFunc: TypeAlias = t.Callable[
+    [requests.PreparedRequest, t.Union[Context, None]],
+    requests.Response,
+]
 StrPath: TypeAlias = t.Union[str, os.PathLike[str]]
 
 
