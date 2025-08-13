@@ -36,7 +36,7 @@ if t.TYPE_CHECKING:
 
     from backoff.types import Details
 
-    from singer_sdk.helpers.types import Auth, Context
+    from singer_sdk.helpers.types import Auth, Context, RequestFunc
     from singer_sdk.singerlib import Schema
     from singer_sdk.tap_base import Tap
 
@@ -279,7 +279,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
 
         return msg
 
-    def request_decorator(self, func: t.Callable) -> t.Callable:
+    def request_decorator(self, func: RequestFunc) -> RequestFunc:
         """Instantiate a decorator for handling request failures.
 
         Uses a wait generator defined in `backoff_wait_generator` to
