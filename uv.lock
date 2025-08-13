@@ -3024,6 +3024,7 @@ name = "tap-countries"
 version = "0.1.0"
 source = { editable = "packages/tap-countries" }
 dependencies = [
+    { name = "msgspec" },
     { name = "requests-cache" },
     { name = "singer-sdk" },
     { name = "typing-extensions", marker = "python_full_version < '3.12'" },
@@ -3031,6 +3032,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "msgspec", specifier = ">=0.19.0" },
     { name = "requests-cache", specifier = "~=1.2.1" },
     { name = "singer-sdk", editable = "." },
     { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
@@ -3137,12 +3139,14 @@ name = "tap-sqlite"
 version = "0.1.0"
 source = { editable = "packages/tap-sqlite" }
 dependencies = [
+    { name = "msgspec" },
     { name = "singer-sdk" },
     { name = "sqlalchemy" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "msgspec", specifier = ">=0.19.0" },
     { name = "singer-sdk", editable = "." },
     { name = "sqlalchemy" },
 ]
@@ -3178,11 +3182,15 @@ name = "target-sqlite"
 version = "0.1.0"
 source = { editable = "packages/target-sqlite" }
 dependencies = [
+    { name = "msgspec" },
     { name = "singer-sdk" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "singer-sdk", editable = "." }]
+requires-dist = [
+    { name = "msgspec", specifier = ">=0.19.0" },
+    { name = "singer-sdk", editable = "." },
+]
 
 [[package]]
 name = "time-machine"
