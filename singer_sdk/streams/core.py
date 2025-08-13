@@ -130,8 +130,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             name: Name of this stream.
 
         Raises:
-            ValueError: TODO
-            FileNotFoundError: TODO
+            ValueError: If the stream name is not provided.
+            ValueError: If an unsupported schema type is provided.
+            FileNotFoundError: If the schema does not exist at the provided filepath.
         """
         if name:
             self.name: str = name
@@ -162,7 +163,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._schema_filepath: Path | Traversable | None = None
         self._metadata: singer.MetadataMapping | None = None
         self._mask: singer.SelectionMask | None = None
-        self._schema: dict
+        self._schema: dict | None = None
         self._is_state_flushed: bool = True
         self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
@@ -195,13 +196,6 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 stacklevel=2,
             )
             self._schema = json.loads(self.schema_filepath.read_text())
-
-        if not self.schema:
-            msg = (
-                f"Could not initialize schema for stream '{self.name}'. A valid schema "
-                "object or filepath was not provided."
-            )
-            raise ValueError(msg)
 
     @property
     def stream_maps(self) -> list[StreamMap]:
@@ -529,7 +523,13 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         Returns:
             JSON Schema dictionary for this stream.
+
+        Raises:
+            ValueError: If the schema was not provided.
         """
+        if self._schema is None:
+            msg = "The schema for this stream was not provided"
+            raise ValueError(msg)
         return self._schema
 
     @property
