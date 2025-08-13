@@ -18,6 +18,7 @@ from singer_sdk.batch import Batcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
+    DiscoveryError,
     InvalidReplicationKeyException,
     InvalidStreamSortException,
     MaxRecordsLimitException,
@@ -525,11 +526,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             JSON Schema dictionary for this stream.
 
         Raises:
-            ValueError: If the schema was not provided.
+            DiscoveryError: If the schema was not provided.
         """
         if self._schema is None:
-            msg = "The schema for this stream was not provided"
-            raise ValueError(msg)
+            msg = f"The schema for stream '{self.name}' was not provided"
+            raise DiscoveryError(msg)
         return self._schema
 
     @property
