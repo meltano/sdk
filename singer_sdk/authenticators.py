@@ -41,7 +41,7 @@ def _add_parameters(initial_url: str, extra_parameters: dict) -> str:
 
     new_query_string = urlencode(query_params, doseq=True)
 
-    return urlunsplit((scheme, netloc, path, new_query_string, fragment))
+    return str(urlunsplit((scheme, netloc, path, new_query_string, fragment)))
 
 
 class SingletonMeta(type):
