@@ -193,6 +193,9 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             "batch_size_rows",
         )
 
+        # Track fields we've already warned about missing from schema
+        self._warned_missing_fields: set[str] = set()
+
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
         self._record_counter: metrics.Counter = metrics.record_counter(self.stream_name)
         self._batch_timer = metrics.Timer(
@@ -585,8 +588,13 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         for key, value in record.items():
             additional_properties = schema.get("additionalProperties", False)
             if key not in schema["properties"]:
-                if value is not None and not additional_properties:
+                if (
+                    value is not None
+                    and not additional_properties
+                    and key not in self._warned_missing_fields
+                ):
                     self.logger.warning("No schema for record field '%s'", key)
+                    self._warned_missing_fields.add(key)
                 continue
 
             if datelike_type := get_datelike_property_type(schema["properties"][key]):
