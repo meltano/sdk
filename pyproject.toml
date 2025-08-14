@@ -32,7 +32,7 @@ license-files = ["LICENSE"]
 requires-python = ">=3.9"
 
 dependencies = [
-    "backoff>=2.0.0",
+    "backoff>=2.0.0,<4",
     'backports-datetime-fromisoformat>=2.0.1; python_version<"3.11"',
     "click>=8.0,<9",
     "fsspec>=2024.9.0",
