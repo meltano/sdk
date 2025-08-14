@@ -287,7 +287,12 @@ DEP004 = [
 ]
 
 [tool.mypy]
-enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+enable_error_code = [
+    "exhaustive-match",
+    "ignore-without-code",
+    "redundant-expr",
+    "truthy-bool",
+]
 files = "singer_sdk"
 local_partial_types = true
 strict = false
