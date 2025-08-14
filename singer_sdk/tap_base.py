@@ -523,7 +523,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     @classmethod
     def invoke(  # type: ignore[override]
-        cls: type[Tap],
+        cls,
         *,
         about: bool = False,
         about_format: str | None = None,
@@ -618,7 +618,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         ctx.exit()
 
     @classmethod
-    def get_singer_command(cls: type[Tap]) -> click.Command:
+    def get_singer_command(cls) -> click.Command:
         """Execute standard CLI handler for taps.
 
         Returns:
@@ -698,7 +698,7 @@ class SQLTap(Tap):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def append_builtin_config(cls: type[SQLTap], config_jsonschema: dict) -> None:
+    def append_builtin_config(cls, config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         Args:

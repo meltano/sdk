@@ -125,7 +125,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
 
     @classmethod
     def invoke(  # type: ignore[override]
-        cls: type[InlineMapper],
+        cls,
         *,
         about: bool = False,
         about_format: str | None = None,
@@ -153,7 +153,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
         mapper.listen(file_input)
 
     @classmethod
-    def get_singer_command(cls: type[InlineMapper]) -> click.Command:
+    def get_singer_command(cls) -> click.Command:
         """Execute standard CLI handler for inline mappers.
 
         Returns:
