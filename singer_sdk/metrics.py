@@ -137,7 +137,7 @@ class MetricExclusionFilter(logging.Filter):
         metrics: Sequence[str | Metric] | None = None,
         types: Sequence[str] | None = None,
         tags: dict[str, t.Any] | None = None,
-    ):
+    ) -> None:
         """Initialize a metric filter.
 
         Args:
