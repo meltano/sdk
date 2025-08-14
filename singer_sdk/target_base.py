@@ -553,7 +553,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
 
     @classmethod
     def invoke(  # type: ignore[override]
-        cls: type[Target],
+        cls,
         *,
         about: bool = False,
         about_format: str | None = None,
@@ -581,7 +581,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         target.listen(file_input)
 
     @classmethod
-    def get_singer_command(cls: type[Target]) -> click.Command:
+    def get_singer_command(cls) -> click.Command:
         """Execute standard CLI handler for taps.
 
         Returns:
@@ -602,7 +602,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         return command
 
     @classmethod
-    def append_builtin_config(cls: type[Target], config_jsonschema: dict) -> None:
+    def append_builtin_config(cls, config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         To customize or disable this behavior, developers may either override this class
@@ -671,7 +671,7 @@ class SQLTarget(Target):
         return self._target_connector
 
     @classmethod
-    def append_builtin_config(cls: type[SQLTarget], config_jsonschema: dict) -> None:
+    def append_builtin_config(cls, config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         To customize or disable this behavior, developers may either override this class

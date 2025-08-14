@@ -525,7 +525,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         )
 
     @classmethod
-    def append_builtin_config(cls: type[PluginBase], config_jsonschema: dict) -> None:
+    def append_builtin_config(cls, config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         To customize or disable this behavior, developers may either override this class
@@ -654,7 +654,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return _ConfigInput.from_cli_args(*value)
 
     @classmethod
-    def get_singer_command(cls: type[PluginBase]) -> click.Command:
+    def get_singer_command(cls) -> click.Command:
         """Handle command line execution.
 
         Returns:
