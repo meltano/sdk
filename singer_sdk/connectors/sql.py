@@ -1561,7 +1561,7 @@ class SQLConnector:  # noqa: PLR0904
         raise ValueError(msg)
 
     @staticmethod
-    def _sort_types(  # noqa: PLR6301
+    def _sort_types(
         sql_types: t.Iterable[sqlalchemy.types.TypeEngine],
     ) -> t.Sequence[sqlalchemy.types.TypeEngine]:
         """Return the input types sorted from most to least compatible.
