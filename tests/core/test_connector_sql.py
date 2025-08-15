@@ -491,6 +491,36 @@ class TestConnectorSQL:  # noqa: PLR0904
             conn.execute(sqlalchemy.text(f"DROP TABLE {table1}"))
             conn.execute(sqlalchemy.text(f"DROP TABLE {table2}"))
 
+    def test_sort_types(self, connector: SQLConnector):
+        """Test that sort_types returns the correct order of SQL types."""
+        types = [
+            sqlalchemy.Integer,
+            sqlalchemy.String,
+            sqlalchemy.String(length=255),
+            sqlalchemy.Boolean,
+            sqlalchemy.DateTime,
+            sqlalchemy.Float,
+        ]
+        sorted_types = connector._sort_types(types)
+
+        # Check that types are sorted by their type precedence
+        expected_order = [
+            sqlalchemy.String(length=255),
+            sqlalchemy.String,
+            sqlalchemy.DateTime,
+            sqlalchemy.Float,
+            sqlalchemy.Integer,
+            sqlalchemy.Boolean,
+        ]
+
+        # Zip the sorted types with the expected order and compare
+        zipped_types = zip(sorted_types, expected_order)
+        for sorted_type, expected in zipped_types:
+            assert isinstance(sorted_type, expected.__class__)
+            sorted_len = int(getattr(sorted_type, "length", 0) or 0)
+            expected_len = int(getattr(expected, "length", 0) or 0)
+            assert sorted_len == expected_len
+
 
 class TestDummySQLConnector:
     @pytest.fixture

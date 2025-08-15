@@ -1560,8 +1560,8 @@ class SQLConnector:  # noqa: PLR0904
         msg = f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}"
         raise ValueError(msg)
 
+    @staticmethod
     def _sort_types(  # noqa: PLR6301
-        self,
         sql_types: t.Iterable[sqlalchemy.types.TypeEngine],
     ) -> t.Sequence[sqlalchemy.types.TypeEngine]:
         """Return the input types sorted from most to least compatible.
