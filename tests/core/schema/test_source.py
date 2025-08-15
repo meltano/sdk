@@ -12,6 +12,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 import requests
+import yaml
 from referencing.exceptions import PointerToNowhere
 from toolz.dicttoolz import get_in
 
@@ -263,26 +264,38 @@ class TestOpenAPISchema:
         source = OpenAPISchema("/path/to/openapi.json")
         assert source.source == "/path/to/openapi.json"
 
+    @pytest.mark.parametrize(
+        "url,content_type",
+        [
+            ("https://api.example.com/openapi.json", "application/json"),
+            ("https://api.example.com/openapi.yaml", "application/x-yaml"),
+            ("https://api.example.com/openapi.yml", "text/plain"),
+        ],
+    )
     @patch("requests.get")
     def test_openapi_load_from_url(
         self,
         mock_get,
         openapi_spec: dict[str, t.Any],
+        url: str,
+        content_type: str,
     ):
         """Test loading OpenAPI spec from URL."""
         mock_response = Mock()
-        mock_response.json.return_value = openapi_spec
+        mock_response.content = (
+            json.dumps(openapi_spec).encode("utf-8")
+            if content_type == "application/json"
+            else yaml.dump(openapi_spec).encode("utf-8")
+        )
+        mock_response.headers = {"content-type": content_type}
         mock_response.raise_for_status.return_value = None
         mock_get.return_value = mock_response
 
-        source = OpenAPISchema("https://api.example.com/openapi.json")
+        source = OpenAPISchema(url)
         spec = source.spec
 
         assert spec == openapi_spec
-        mock_get.assert_called_once_with(
-            "https://api.example.com/openapi.json",
-            timeout=30,
-        )
+        mock_get.assert_called_once_with(url, timeout=30)
         mock_response.raise_for_status.assert_called_once()
 
     @patch("requests.get")
@@ -298,14 +311,27 @@ class TestOpenAPISchema:
         assert isinstance(exc.value.__cause__, requests.RequestException)
         assert exc.value.__cause__.args == ("Network error",)
 
+    @pytest.mark.parametrize(
+        "file_extension",
+        [
+            ".json",
+            ".yaml",
+            ".yml",
+        ],
+    )
     def test_openapi_load_from_file(
         self,
         tmp_path: Path,
         openapi_spec: dict[str, t.Any],
+        file_extension: str,
     ):
         """Test loading OpenAPI spec from file."""
-        openapi_file = tmp_path / "openapi.json"
-        openapi_file.write_text(json.dumps(openapi_spec))
+        openapi_file = tmp_path / f"openapi{file_extension}"
+        openapi_file.write_text(
+            json.dumps(openapi_spec)
+            if file_extension == ".json"
+            else yaml.dump(openapi_spec)
+        )
 
         source = OpenAPISchema(openapi_file)
         spec = source.spec
@@ -322,15 +348,22 @@ class TestOpenAPISchema:
 
         assert isinstance(exc.value.__cause__, json.decoder.JSONDecodeError)
 
+    @pytest.mark.parametrize("file_format", ["json", "yaml"])
     def test_openapi_component(
         self,
         tmp_path: Path,
         resolved_user_schema: dict[str, t.Any],
         openapi_spec: dict[str, t.Any],
+        file_format: str,
     ):
         """Test getting a component from OpenAPI spec (both 2.0 and 3.0)."""
-        openapi_file = tmp_path / "openapi.json"
-        openapi_file.write_text(json.dumps(openapi_spec))
+        file_extension = ".json" if file_format == "json" else ".yaml"
+        openapi_file = tmp_path / f"openapi{file_extension}"
+
+        if file_format == "json":
+            openapi_file.write_text(json.dumps(openapi_spec))
+        else:  # yaml
+            openapi_file.write_text(yaml.dump(openapi_spec))
 
         source = OpenAPISchema(openapi_file)
         result = source.get_schema("User")
@@ -391,16 +424,30 @@ class TestOpenAPISchema:
         self,
         resolved_user_schema: dict[str, t.Any],
         openapi_spec: dict[str, t.Any],
+        tmp_path: Path,
     ):
         """Test OpenAPISchema with a Traversable object."""
-        # Create a mock Traversable object
-        mock_traversable = Mock(spec=Traversable)
-        mock_traversable.read_text.return_value = json.dumps(openapi_spec)
+        path = tmp_path / "openapi.json"
+        path.write_text(json.dumps(openapi_spec))
 
-        source = OpenAPISchema(mock_traversable)
+        source = OpenAPISchema(path)
         result = source.get_schema("User")
         assert result == resolved_user_schema
-        mock_traversable.read_text.assert_called_once()
+
+    def test_openapi_schema_with_unknown_file_type(
+        self,
+        tmp_path: Path,
+    ):
+        """Test OpenAPISchema with an unknown file type."""
+        path = tmp_path / "openapi.toml"
+        path.write_text('openapi = "3.0.0"\n')
+
+        source = OpenAPISchema(path)
+        with pytest.raises(
+            UnsupportedOpenAPISpec,
+            match=r"Unsupported OpenAPI file type: \.toml",
+        ):
+            _ = source.spec
 
 
 class TestCustomOpenAPISchema:
