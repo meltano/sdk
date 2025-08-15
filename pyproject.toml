@@ -306,10 +306,11 @@ warn_unused_ignores = true
 ignore_missing_imports = true
 module = [
     "backports.datetime_fromisoformat.*",
-    "fsspec.*",       # TODO: Remove when https://github.com/fsspec/filesystem_spec/issues/625 is addressed
-    "joblib.*",       # TODO: Remove when https://github.com/joblib/joblib/issues/1516 is shipped
-    "jsonpath_ng.*",  # TODO: Remove when https://github.com/h2non/jsonpath-ng/issues/152 is implemented and released
-    "pyarrow.*",      # TODO: Remove when https://github.com/apache/arrow/issues/32609 if implemented and released
+    "joblib.*",       # https://github.com/joblib/joblib/issues/1516
+    "fsspec.*",       # https://github.com/fsspec/filesystem_spec/issues/625
+    "jsonpath_ng.*",  # https://github.com/h2non/jsonpath-ng/issues/152
+    "pyarrow.*",      # https://github.com/apache/arrow/issues/32609
+    "toolz.*",        # https://github.com/pytoolz/toolz/issues/496
 ]
 
 [build-system]
