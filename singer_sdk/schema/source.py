@@ -10,6 +10,7 @@ from abc import ABC, abstractmethod
 from functools import cached_property
 from pathlib import Path
 from types import ModuleType
+from urllib.parse import urlparse
 
 import requests
 
@@ -33,6 +34,8 @@ else:
     from typing_extensions import TypeVar
 
 if t.TYPE_CHECKING:
+    from collections.abc import Callable
+
     from singer_sdk.helpers._compat import Traversable
     from singer_sdk.streams.core import Stream
 
@@ -158,10 +161,17 @@ class StreamSchema(t.Generic[_TKey]):
         return self.schema_source.get_schema(self.key or stream.name)  # type: ignore[arg-type]
 
 
+def _load_yaml(content: bytes) -> dict[str, t.Any]:
+    import yaml  # noqa: PLC0415
+
+    return yaml.safe_load(content)  # type: ignore[no-any-return]
+
+
 class OpenAPISchema(SchemaSource[_TKey]):
     """Schema source for OpenAPI specifications.
 
-    Supports loading schemas from a local or remote OpenAPI 2.0 or 3.x specification.
+    Supports loading schemas from a local or remote OpenAPI 2.0 or 3.x specification
+    in JSON or YAML format.
 
     Example:
         openapi_schema = OpenAPISchema("https://api.example.com/openapi.json")
@@ -177,13 +187,19 @@ class OpenAPISchema(SchemaSource[_TKey]):
         """Initialize the OpenAPI schema source.
 
         Args:
-            source: URL, file path, or Traversable object pointing to an OpenAPI spec.
+            source: URL, file path, or Traversable object pointing to an OpenAPI spec
+                in JSON or YAML format.
             *args: Additional arguments to pass to the superclass constructor.
             **kwargs: Additional keyword arguments to pass to the superclass
                 constructor.
         """
         super().__init__(*args, **kwargs)
         self.source = source
+        self._content_loaders: dict[str, Callable[[bytes], dict[str, t.Any]]] = {
+            ".json": json.loads,
+            ".yaml": _load_yaml,
+            ".yml": _load_yaml,
+        }
 
     @cached_property
     def spec(self) -> dict[str, t.Any]:
@@ -212,37 +228,42 @@ class OpenAPISchema(SchemaSource[_TKey]):
         msg = "Unknown OpenAPI specification format"
         raise UnsupportedOpenAPISpec(msg)
 
-    def _load_remote_spec(self, url: str) -> dict[str, t.Any]:  # noqa: PLR6301
-        """Load the OpenAPI specification from a remote source.
-
-        Returns:
-            The OpenAPI specification as a dictionary.
-        """
-        response = requests.get(url, timeout=30)
-        response.raise_for_status()
-        return response.json()  # type: ignore[no-any-return]
-
-    def _load_local_spec(self, path: str | Path | Traversable) -> dict[str, t.Any]:
-        """Load the OpenAPI specification from a local source.
-
-        Returns:
-            The OpenAPI specification as a dictionary.
-        """
-        path = Path(self.source) if isinstance(self.source, str) else self.source
-        content = path.read_text(encoding="utf-8")
-        return json.loads(content)  # type: ignore[no-any-return]
-
     def _load_spec(self) -> dict[str, t.Any]:
         """Load the OpenAPI specification from the source.
 
         Returns:
             The OpenAPI specification as a dictionary.
+
+        Raises:
+            UnsupportedOpenAPISpec: If the OpenAPI specification file type is not
+                supported.
         """
         if isinstance(self.source, str) and self.source.startswith(
             ("http://", "https://")
         ):
-            return self._load_remote_spec(self.source)
-        return self._load_local_spec(self.source)
+            response = requests.get(self.source, timeout=30)
+            response.raise_for_status()
+            content = response.content
+
+            ext: str | None = None
+            if content_type := response.headers.get("Content-Type"):
+                if content_type == "application/yaml":
+                    ext = ".yaml"
+                elif content_type == "application/json":
+                    ext = ".json"
+
+            ext = ext or f".{urlparse(self.source).path.split('.').pop()}"
+        else:
+            path = Path(self.source) if isinstance(self.source, str) else self.source
+            with importlib.resources.as_file(path) as tmp_path:
+                content = tmp_path.read_bytes()
+                ext = tmp_path.suffix
+
+        if loader := self._content_loaders.get(ext.lower()):
+            return loader(content)
+
+        msg = f"Unsupported OpenAPI file type: {ext}"
+        raise UnsupportedOpenAPISpec(msg)
 
     def get_unresolved_schema(self, key: _TKey) -> dict[str, t.Any]:
         """Build the base schema for the given key.
