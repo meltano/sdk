@@ -359,6 +359,15 @@ class TestOpenAPISchema:
 
         assert isinstance(exc.value.__cause__, yaml.YAMLError)
 
+    def test_openapi_load_not_a_file_error(self, tmp_path: Path):
+        """Test error handling when loading from file."""
+        openapi_dir = tmp_path / "openapi"
+        openapi_dir.mkdir()
+
+        source = OpenAPISchema(openapi_dir)
+        with pytest.raises(IsADirectoryError):
+            _ = source.spec
+
     @pytest.mark.parametrize("file_format", ["json", "yaml"])
     def test_openapi_component(
         self,
