@@ -1,4 +1,4 @@
-griffe~=1.11
+griffe~=1.12
 nox==2025.5.1
 pre-commit==4.3.0
 twine==6.1.0
