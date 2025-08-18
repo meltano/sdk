@@ -10,6 +10,7 @@ from abc import ABC, abstractmethod
 from functools import cached_property
 from pathlib import Path
 from types import ModuleType
+from urllib.parse import urlparse
 
 import requests
 
@@ -243,14 +244,22 @@ class OpenAPISchema(SchemaSource[_TKey]):
             response = requests.get(self.source, timeout=30)
             response.raise_for_status()
             content = response.content
-            ext = f".{self.source.split('.').pop()}"
+
+            ext: str | None = None
+            if content_type := response.headers.get("Content-Type"):
+                if content_type == "application/yaml":
+                    ext = ".yaml"
+                elif content_type == "application/json":
+                    ext = ".json"
+
+            ext = ext or f".{urlparse(self.source).path.split('.').pop()}"
         else:
             path = Path(self.source) if isinstance(self.source, str) else self.source
             with importlib.resources.as_file(path) as tmp_path:
                 content = tmp_path.read_bytes()
                 ext = tmp_path.suffix
 
-        if loader := self._content_loaders.get(ext):
+        if loader := self._content_loaders.get(ext.lower()):
             return loader(content)
 
         msg = f"Unsupported OpenAPI file type: {ext}"

@@ -265,11 +265,12 @@ class TestOpenAPISchema:
         assert source.source == "/path/to/openapi.json"
 
     @pytest.mark.parametrize(
-        "url,content_type",
+        "url,headers",
         [
-            ("https://api.example.com/openapi.json", "application/json"),
-            ("https://api.example.com/openapi.yaml", "application/x-yaml"),
-            ("https://api.example.com/openapi.yml", "text/plain"),
+            ("https://api.example.com/openapi", {"content-type": "application/json"}),
+            ("https://api.example.com/openapi", {"content-type": "application/yaml"}),
+            ("https://api.example.com/openapi.yaml", {}),
+            ("https://api.example.com/openapi.yml", {"content-type": "text/plain"}),
         ],
     )
     @patch("requests.get")
@@ -278,25 +279,24 @@ class TestOpenAPISchema:
         mock_get,
         openapi_spec: dict[str, t.Any],
         url: str,
-        content_type: str,
+        headers: dict[str, str],
     ):
         """Test loading OpenAPI spec from URL."""
-        mock_response = Mock()
-        mock_response.content = (
+        response = requests.Response()
+        response._content = (
             json.dumps(openapi_spec).encode("utf-8")
-            if content_type == "application/json"
+            if headers.get("content-type") == "application/json"
             else yaml.dump(openapi_spec).encode("utf-8")
         )
-        mock_response.headers = {"content-type": content_type}
-        mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
+        response.status_code = 200
+        response.headers.update(headers)
+        mock_get.return_value = response
 
         source = OpenAPISchema(url)
         spec = source.spec
 
         assert spec == openapi_spec
         mock_get.assert_called_once_with(url, timeout=30)
-        mock_response.raise_for_status.assert_called_once()
 
     @patch("requests.get")
     def test_openapi_load_from_url_error(self, mock_get):
@@ -337,7 +337,7 @@ class TestOpenAPISchema:
         spec = source.spec
         assert spec == openapi_spec
 
-    def test_openapi_load_from_file_error(self, tmp_path: Path):
+    def test_openapi_load_json_from_file_error(self, tmp_path: Path):
         """Test error handling when loading from file."""
         openapi_file = tmp_path / "openapi.json"
         openapi_file.write_text("this is not a valid json object")
@@ -347,6 +347,17 @@ class TestOpenAPISchema:
             _ = source.get_schema("User")
 
         assert isinstance(exc.value.__cause__, json.decoder.JSONDecodeError)
+
+    def test_openapi_load_yaml_from_file_error(self, tmp_path: Path):
+        """Test error handling when loading from file."""
+        openapi_file = tmp_path / "openapi.yaml"
+        openapi_file.write_text("{ NOT VALID YAML")
+
+        source = OpenAPISchema(openapi_file)
+        with pytest.raises(SchemaNotFoundError) as exc:
+            _ = source.get_schema("User")
+
+        assert isinstance(exc.value.__cause__, yaml.YAMLError)
 
     @pytest.mark.parametrize("file_format", ["json", "yaml"])
     def test_openapi_component(
