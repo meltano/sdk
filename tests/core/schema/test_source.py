@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import json.decoder
+import platform
 import sys
 import typing as t
 from pathlib import Path
@@ -365,7 +366,8 @@ class TestOpenAPISchema:
         openapi_dir.mkdir()
 
         source = OpenAPISchema(openapi_dir)
-        with pytest.raises(IsADirectoryError):
+        err = IsADirectoryError if platform.system() != "Windows" else PermissionError
+        with pytest.raises(err):
             _ = source.spec
 
     @pytest.mark.parametrize("file_format", ["json", "yaml"])
@@ -379,11 +381,12 @@ class TestOpenAPISchema:
         """Test getting a component from OpenAPI spec (both 2.0 and 3.0)."""
         file_extension = ".json" if file_format == "json" else ".yaml"
         openapi_file = tmp_path / f"openapi{file_extension}"
-
-        if file_format == "json":
-            openapi_file.write_text(json.dumps(openapi_spec))
-        else:  # yaml
-            openapi_file.write_text(yaml.dump(openapi_spec))
+        content = (
+            json.dumps(openapi_spec)
+            if file_format == "json"
+            else yaml.dump(openapi_spec)
+        )
+        openapi_file.write_text(content)
 
         source = OpenAPISchema(openapi_file)
         result = source.get_schema("User")
