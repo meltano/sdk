@@ -617,7 +617,7 @@ def test_paginator_access_from_methods(tap: Tap):
     )
 
     # Verify no error calls
-    assert not any("ERROR" in call for call in stream.paginator_access_calls)
+    assert all("ERROR" not in call for call in stream.paginator_access_calls)
 
     # Test that paginator is NOT accessible after request_records completes
     with pytest.raises(
