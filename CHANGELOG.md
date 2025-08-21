@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.48.1 (2025-08-21)
+
+### ✨ New
+
+- [#3238](https://github.com/meltano/sdk/issues/3238) Auto-detect and load YAML-formatted OpenAPI specs
+- [#3227](https://github.com/meltano/sdk/issues/3227) Get the supported Python versions in `--about` output from PyPI classifiers if they are available
+- [#3226](https://github.com/meltano/sdk/issues/3226) Declare Python 3.14 support in templates
+- [#3223](https://github.com/meltano/sdk/issues/3223) Add a metrics exclusion filter
+- [#3222](https://github.com/meltano/sdk/issues/3222) Dropped support for Python 3.9 in tap, target and mapper templates
+
+### 🐛 Fixes
+
+- [#3236](https://github.com/meltano/sdk/issues/3236) Restore `<4` Python version constraint for `backoff` dependency
+- [#3234](https://github.com/meltano/sdk/issues/3234) Avoid spamming warnings when record field is not found in schema
+- [#3216](https://github.com/meltano/sdk/issues/3216) Use `uv` in templates README
+- [#3215](https://github.com/meltano/sdk/issues/3215) Set the dependabot ecosystem to `uv` in templates
+- [#3214](https://github.com/meltano/sdk/issues/3214) Remove duplicate prefix from generated `.env` in templates
+- [#3212](https://github.com/meltano/sdk/issues/3212) Update the type annotation of `RESTStream.backoff_runtime` to support any number type
+
+### ⚙️ Under the Hood
+
+- [#3233](https://github.com/meltano/sdk/issues/3233) Raise a `DiscoveryError` when schema for stream is not provided
+- [#3231](https://github.com/meltano/sdk/issues/3231) Add type parameters to decorated request function
+- [#3228](https://github.com/meltano/sdk/issues/3228) Move exception when schema is not provided to the stream outside of the constructor
+
+### 📦 Packaging changes
+
+- [#3224](https://github.com/meltano/sdk/issues/3224) Bump hatch-vcs to 0.5.0
+
 ## v0.48.0 (2025-08-04)
 
 ### ✨ New
