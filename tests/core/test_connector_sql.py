@@ -493,33 +493,29 @@ class TestConnectorSQL:  # noqa: PLR0904
 
     def test_sort_types(self, connector: SQLConnector):
         """Test that sort_types returns the correct order of SQL types."""
-        types = [
-            sqlalchemy.Integer,
-            sqlalchemy.String,
-            sqlalchemy.String(length=255),
-            sqlalchemy.Boolean,
-            sqlalchemy.DateTime,
-            sqlalchemy.Float,
-        ]
-        sorted_types = connector._sort_types(types)
+        integer_type = sqlalchemy.Integer()
+        string_type = sqlalchemy.String()
+        string_255_type = sqlalchemy.String(length=255)
+        boolean_type = sqlalchemy.Boolean()
+        datetime_type = sqlalchemy.DateTime()
+        float_type = sqlalchemy.Float()
 
-        # Check that types are sorted by their type precedence
-        expected_order = [
-            sqlalchemy.String(length=255),
-            sqlalchemy.String,
-            sqlalchemy.DateTime,
-            sqlalchemy.Float,
-            sqlalchemy.Integer,
-            sqlalchemy.Boolean,
+        types: list[sqlalchemy.types.TypeEngine] = [
+            integer_type,
+            string_type,
+            string_255_type,
+            boolean_type,
+            datetime_type,
+            float_type,
         ]
-
-        # Zip the sorted types with the expected order and compare
-        zipped_types = zip(sorted_types, expected_order)
-        for sorted_type, expected in zipped_types:
-            assert isinstance(sorted_type, expected.__class__)
-            sorted_len = int(getattr(sorted_type, "length", 0) or 0)
-            expected_len = int(getattr(expected, "length", 0) or 0)
-            assert sorted_len == expected_len
+        assert connector._sort_types(types) == [
+            string_255_type,
+            string_type,
+            datetime_type,
+            float_type,
+            integer_type,
+            boolean_type,
+        ]
 
 
 class TestDummySQLConnector:
