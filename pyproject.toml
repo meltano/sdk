@@ -32,7 +32,7 @@ license-files = ["LICENSE"]
 requires-python = ">=3.9"
 
 dependencies = [
-    "backoff>=2.0.0,<4",
+    "backoff>=2.0.0",
     'backports-datetime-fromisoformat>=2.0.1; python_version<"3.11"',
     "click>=8.0,<9",
     "fsspec>=2024.9.0",
@@ -187,7 +187,6 @@ addopts = [
 ]
 filterwarnings = [
     "error",
-    "once:'asyncio.iscoroutinefunction' is deprecated:DeprecationWarning",  # https://github.com/litl/backoff/pull/220
     "once:No records were available to test:UserWarning",
     # https://github.com/meltano/sdk/issues/1354
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
@@ -467,6 +466,7 @@ max-args = 9
 required-version = ">=0.5.19"
 
 [tool.uv.sources]
+backoff = { git = "https://github.com/python-backoff/backoff.git" }
 mapper-custom = { workspace = true }
 tap-countries = { workspace = true }
 tap-csv = { workspace = true }
