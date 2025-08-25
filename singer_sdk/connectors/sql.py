@@ -1587,7 +1587,7 @@ class SQLConnector:  # noqa: PLR0904
 
             len_ = int(getattr(sql_type, "length", 0) or 0)
 
-            pytype = t.cast("type", sql_type.python_type)
+            pytype = sql_type.python_type
             if issubclass(pytype, (str, bytes)):
                 return 900, len_
             if issubclass(pytype, datetime):
