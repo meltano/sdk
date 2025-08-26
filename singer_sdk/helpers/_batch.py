@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 
 from upath import UPath
 
+from singer_sdk.helpers._compat import deprecated
 from singer_sdk.singerlib.messages import Message, SingerMessageType
 
 if t.TYPE_CHECKING:
@@ -29,57 +30,40 @@ class BatchFileFormat(str, enum.Enum):
     """Parquet format."""
 
 
-@dataclass
+@dataclass(slots=True)
 class BaseBatchFileEncoding:
     """Base class for batch file encodings."""
 
-    registered_encodings: t.ClassVar[dict[str, type[BaseBatchFileEncoding]]] = {}
-    __encoding_format__: t.ClassVar[str] = "OVERRIDE_ME"
-
     # Base encoding fields
-    format: str = field(init=False)
+    format: str
     """The format of the batch file."""
 
     compression: str | None = None
     """The compression of the batch file."""
 
-    def __init_subclass__(cls, **kwargs: t.Any) -> None:
-        """Register subclasses.
-
-        Args:
-            **kwargs: Keyword arguments.
-        """
-        super().__init_subclass__(**kwargs)
-        cls.registered_encodings[cls.__encoding_format__] = cls
-
-    def __post_init__(self) -> None:
-        """Post-init hook."""
-        self.format = self.__encoding_format__
-
     @classmethod
     def from_dict(cls, data: dict[str, t.Any]) -> BaseBatchFileEncoding:
         """Create an encoding from a dictionary."""
-        data = data.copy()
-        encoding_format = data.pop("format")
-        encoding_cls = cls.registered_encodings[encoding_format]
-        return encoding_cls(**data)
+        return cls(**data)
 
 
-@dataclass
+@deprecated("Use BaseBatchFileEncoding with format='jsonl' instead")
+@dataclass(slots=True)
 class JSONLinesEncoding(BaseBatchFileEncoding):
     """JSON Lines encoding for batch files."""
 
-    __encoding_format__ = "jsonl"
+    format: t.Literal["jsonl"] = "jsonl"
 
 
-@dataclass
+@deprecated("Use BaseBatchFileEncoding with format='parquet' instead")
+@dataclass(slots=True)
 class ParquetEncoding(BaseBatchFileEncoding):
     """Parquet encoding for batch files."""
 
-    __encoding_format__ = "parquet"
+    format: t.Literal["parquet"] = "parquet"
 
 
-@dataclass
+@dataclass(slots=True)
 class SDKBatchMessage(Message):
     """Singer batch message in the Meltano Singer SDK flavor."""
 
@@ -211,7 +195,7 @@ class StorageTarget:
             yield f
 
 
-@dataclass
+@dataclass(slots=True)
 class BatchConfig:
     """Batch configuration."""
 

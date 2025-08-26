@@ -39,7 +39,7 @@ class StreamAttributeTestParams(t.NamedTuple):
     attribute_name: str
 
 
-@dataclass
+@dataclass(slots=True)
 class TestParam:
     """Test parameters."""
 

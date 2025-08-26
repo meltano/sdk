@@ -99,7 +99,7 @@ def python_versions(package_metadata: PackageMetadata) -> list[str]:
     )
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(slots=True)
 class AboutInfo:
     """About information for a plugin."""
 

@@ -3,8 +3,7 @@ from __future__ import annotations
 import pytest
 
 from singer_sdk.helpers._batch import (
-    JSONLinesEncoding,
-    ParquetEncoding,
+    BaseBatchFileEncoding,
     SDKBatchMessage,
 )
 from singer_sdk.singerlib import SingerMessageType
@@ -16,7 +15,7 @@ from singer_sdk.singerlib import SingerMessageType
         (
             SDKBatchMessage(
                 stream="test_stream",
-                encoding=JSONLinesEncoding("gzip"),
+                encoding=BaseBatchFileEncoding(format="jsonl", compression="gzip"),
                 manifest=[
                     "path/to/file1.jsonl.gz",
                     "path/to/file2.jsonl.gz",
@@ -35,7 +34,7 @@ from singer_sdk.singerlib import SingerMessageType
         (
             SDKBatchMessage(
                 stream="test_stream",
-                encoding=ParquetEncoding("gzip"),
+                encoding=BaseBatchFileEncoding(format="parquet", compression="gzip"),
                 manifest=[
                     "path/to/file1.parquet.gz",
                     "path/to/file2.parquet.gz",

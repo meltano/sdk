@@ -64,7 +64,7 @@ class Metric(str, enum.Enum):
     BATCH_PROCESSING_TIME = "batch_processing_time"
 
 
-@dataclass
+@dataclass(slots=True)
 class Point(t.Generic[_TVal]):
     """An individual metric measurement."""
 
