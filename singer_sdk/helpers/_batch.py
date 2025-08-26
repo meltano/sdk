@@ -86,7 +86,7 @@ class SDKBatchMessage(Message):
         self.type = SingerMessageType.BATCH
 
 
-@dataclass(slots=True)
+@dataclass
 class StorageTarget:
     """Storage target for batch files."""
 
