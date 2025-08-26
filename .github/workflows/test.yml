@@ -60,21 +60,20 @@ jobs:
         session: [tests]
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
         python-version:
-        - "3.9"
         - "3.10"
         - "3.11"
         - "3.12"
         - "3.13"
         - "3.14"
         include:
-        - { session: doctest,       python-version: "3.13", os: "ubuntu-latest" }
+        - { session: doctest,       python-version: "3.14", os: "ubuntu-latest" }
         - { session: mypy,          python-version: "3.13", os: "ubuntu-latest" }
-        - { session: mypy,          python-version: "3.9",  os: "ubuntu-latest" }
+        - { session: mypy,          python-version: "3.10",  os: "ubuntu-latest" }
         - { session: deps,          python-version: "3.13", os: "ubuntu-latest" }
-        - { session: test-lowest,   python-version: "3.9",  os: "ubuntu-latest" }
-        - { session: test-contrib,  python-version: "3.9",  os: "ubuntu-latest" }
+        - { session: test-lowest,   python-version: "3.10",  os: "ubuntu-latest" }
+        - { session: test-contrib,  python-version: "3.10",  os: "ubuntu-latest" }
         - { session: test-contrib,  python-version: "3.13", os: "ubuntu-latest" }
-        - { session: test-packages, python-version: "3.9",  os: "ubuntu-latest" }
+        - { session: test-packages, python-version: "3.10",  os: "ubuntu-latest" }
         - { session: test-packages, python-version: "3.13", os: "ubuntu-latest" }
 
     steps:

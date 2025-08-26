@@ -14,7 +14,6 @@ import hashlib
 import importlib.util
 import json
 import logging
-import sys
 import typing as t
 
 import simpleeval  # type: ignore[import-untyped]
@@ -30,14 +29,7 @@ from singer_sdk.helpers._flattening import (
 )
 
 if t.TYPE_CHECKING:
-    import sys
-
     from faker import Faker
-
-    if sys.version_info >= (3, 10):
-        from typing import TypeAlias  # noqa: ICN003
-    else:
-        from typing_extensions import TypeAlias
 
     from singer_sdk.singerlib.catalog import Catalog
 
@@ -74,7 +66,7 @@ def sha256(string: str) -> str:
     return hashlib.sha256(string.encode("utf-8")).hexdigest()
 
 
-StreamMapsDict: TypeAlias = dict[str, t.Union[str, dict, None]]
+StreamMapsDict: t.TypeAlias = dict[str, str | dict | None]
 
 
 class StreamMap(metaclass=abc.ABCMeta):

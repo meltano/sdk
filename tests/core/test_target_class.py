@@ -58,8 +58,6 @@ def test_config_errors(config_dict: dict, expectation, errors: list[str]):
 def test_cli():
     """Test the CLI."""
     runner = CliRunner()
-    # TODO: Remote this once support for Python 3.9 and thus Click<8.2 is dropped
-    runner.mix_stderr = False
     result = runner.invoke(DummyTarget.cli, ["--help"])
     assert result.exit_code == 0
     assert "Show this message and exit." in result.output
@@ -68,8 +66,6 @@ def test_cli():
 def test_cli_config_validation(tmp_path, caplog: pytest.LogCaptureFixture):
     """Test the CLI config validation."""
     runner = CliRunner()
-    # TODO: Remote this once support for Python 3.9 and thus Click<8.2 is dropped
-    runner.mix_stderr = False
     config_path = tmp_path / "config.json"
     config_path.write_text(json.dumps({}))
     with caplog.at_level("ERROR"):

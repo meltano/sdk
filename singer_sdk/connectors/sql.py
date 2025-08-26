@@ -24,19 +24,12 @@ from singer_sdk.helpers.capabilities import TargetLoadMethods
 from singer_sdk.singerlib import CatalogEntry, MetadataMapping, Schema
 
 if t.TYPE_CHECKING:
-    import sys
-
     from sqlalchemy.engine.interfaces import (
         Dialect,
         ReflectedColumn,
         ReflectedIndex,
         ReflectedPrimaryKeyConstraint,
     )
-
-    if sys.version_info >= (3, 10):
-        from typing import TypeAlias  # noqa: ICN003
-    else:
-        from typing_extensions import TypeAlias
 
 
 class FullyQualifiedName(UserString):
@@ -245,10 +238,9 @@ class SQLToJSONSchema:
         return th.BooleanType.type_dict  # type: ignore[no-any-return]
 
 
-JSONtoSQLHandler: TypeAlias = t.Union[
-    type[sqlalchemy.types.TypeEngine],
-    t.Callable[[dict], sqlalchemy.types.TypeEngine],
-]
+JSONtoSQLHandler: t.TypeAlias = (
+    type[sqlalchemy.types.TypeEngine] | t.Callable[[dict], sqlalchemy.types.TypeEngine]
+)
 
 
 class JSONSchemaToSQL:

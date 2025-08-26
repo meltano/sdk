@@ -12,15 +12,9 @@ from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
 if t.TYPE_CHECKING:
-    import sys
+    from importlib.metadata import PackageMetadata
 
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
-
-    if sys.version_info >= (3, 10):
-        from importlib.metadata import PackageMetadata
-    else:
-        from email.message import Message as PackageMetadata
-
 
 __all__ = [
     "AboutFormatter",
@@ -30,7 +24,7 @@ __all__ = [
 ]
 
 # Keep these in sync with the supported Python versions in pyproject.toml
-_PY_MIN_VERSION = 9
+_PY_MIN_VERSION = 10
 _PY_MAX_VERSION = 14
 
 
@@ -88,7 +82,9 @@ def python_versions(package_metadata: PackageMetadata) -> list[str]:
     Returns:
         A list of supported Python versions.
     """
-    requires_python = package_metadata.get("Requires-Python", f">={_PY_MIN_VERSION}")
+    # TODO: Remove these ignores when we drop support for Python 3.12
+    # (This PackageMetadata protocol is a hot mess)
+    requires_python = package_metadata.get("Requires-Python", f">={_PY_MIN_VERSION}")  # type: ignore[attr-defined,unused-ignore]
     classifiers = [
         classifier.split("::")[-1].strip()
         for classifier in package_metadata.get_all("Classifier", [])

@@ -12,11 +12,6 @@ from singer_sdk.singerlib.schema import Schema
 if t.TYPE_CHECKING:
     import sys
 
-    if sys.version_info >= (3, 10):
-        from typing import TypeAlias  # noqa: ICN003
-    else:
-        from typing_extensions import TypeAlias
-
     if sys.version_info >= (3, 11):
         from typing import Self  # noqa: ICN003
     else:
@@ -104,7 +99,7 @@ class StreamMetadata(Metadata):
     schema_name: str | None = None
 
 
-AnyMetadata: TypeAlias = t.Union[Metadata, StreamMetadata]
+AnyMetadata: t.TypeAlias = Metadata | StreamMetadata
 
 
 class MetadataMapping(dict[Breadcrumb, AnyMetadata]):

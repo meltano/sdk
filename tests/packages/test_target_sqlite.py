@@ -151,6 +151,7 @@ def test_sync_sqlite_to_sqlite(
         range(len(orig_lines)),
         orig_lines,
         new_lines,
+        strict=False,
     ):
         try:
             orig_json = json.loads(orig_out)
