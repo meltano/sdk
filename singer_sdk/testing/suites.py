@@ -64,7 +64,7 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
     raise AttributeError(msg)
 
 
-@dataclass
+@dataclass(slots=True)
 class SingerTestSuite(t.Generic[T]):
     """Test Suite container class."""
 

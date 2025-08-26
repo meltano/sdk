@@ -94,7 +94,7 @@ Taps can optionally customize the batch file creation by implementing the [`get_
 class MyStream(Stream):
     def get_batches(self, records):
         return (
-            ParquetEncoding(compression="snappy"),
+            BaseBatchFileEncoding(format="parquet", compression="snappy"),
             [
                 "s3://my-bucket/my-batch-file-1.parquet",
                 "s3://my-bucket/my-batch-file-2.parquet",

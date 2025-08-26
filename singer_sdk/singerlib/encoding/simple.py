@@ -31,7 +31,7 @@ def exclude_null_dict(pairs: list[tuple[str, t.Any]]) -> dict[str, t.Any]:
     return {key: value for key, value in pairs if value is not None}
 
 
-@dataclass
+@dataclass(slots=True)
 class Message:
     """Singer base message."""
 
@@ -63,7 +63,7 @@ class Message:
         return cls(**data)
 
 
-@dataclass
+@dataclass(slots=True)
 class RecordMessage(Message):
     """Singer record message."""
 
@@ -140,7 +140,7 @@ class RecordMessage(Message):
             self.time_extracted = self.time_extracted.astimezone(timezone.utc)
 
 
-@dataclass
+@dataclass(slots=True)
 class SchemaMessage(Message):
     """Singer schema message."""
 
@@ -171,7 +171,7 @@ class SchemaMessage(Message):
             raise ValueError(msg)
 
 
-@dataclass
+@dataclass(slots=True)
 class StateMessage(Message):
     """Singer state message."""
 
@@ -183,7 +183,7 @@ class StateMessage(Message):
         self.type = SingerMessageType.STATE
 
 
-@dataclass
+@dataclass(slots=True)
 class ActivateVersionMessage(Message):
     """Singer activate version message."""
 

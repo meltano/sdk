@@ -11,8 +11,6 @@ from singer_sdk.contrib.batch_encoder_jsonl import JSONLinesBatcher
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
-    JSONLinesEncoding,
-    ParquetEncoding,
     StorageTarget,
 )
 
@@ -20,10 +18,22 @@ from singer_sdk.helpers._batch import (
 @pytest.mark.parametrize(
     "encoding,expected",
     [
-        (JSONLinesEncoding("gzip"), {"compression": "gzip", "format": "jsonl"}),
-        (JSONLinesEncoding(), {"compression": None, "format": "jsonl"}),
-        (ParquetEncoding("gzip"), {"compression": "gzip", "format": "parquet"}),
-        (ParquetEncoding(), {"compression": None, "format": "parquet"}),
+        (
+            BaseBatchFileEncoding(format="jsonl", compression="gzip"),
+            {"compression": "gzip", "format": "jsonl"},
+        ),
+        (
+            BaseBatchFileEncoding(format="jsonl"),
+            {"compression": None, "format": "jsonl"},
+        ),
+        (
+            BaseBatchFileEncoding(format="parquet", compression="gzip"),
+            {"compression": "gzip", "format": "parquet"},
+        ),
+        (
+            BaseBatchFileEncoding(format="parquet"),
+            {"compression": None, "format": "parquet"},
+        ),
     ],
     ids=[
         "jsonl-compression-gzip",
@@ -141,7 +151,7 @@ def test_json_lines_batcher():
         "tap-test",
         "stream-test",
         batch_config=BatchConfig(
-            encoding=JSONLinesEncoding("gzip"),
+            encoding=BaseBatchFileEncoding(format="jsonl", compression="gzip"),
             storage=StorageTarget("file:///tmp/sdk-batches"),
             batch_size=2,
         ),
@@ -167,7 +177,7 @@ def test_batcher_with_jsonl_encoding():
         "tap-test",
         "stream-test",
         batch_config=BatchConfig(
-            encoding=JSONLinesEncoding("gzip"),
+            encoding=BaseBatchFileEncoding(format="jsonl", compression="gzip"),
             storage=StorageTarget("file:///tmp/sdk-batches"),
             batch_size=2,
         ),

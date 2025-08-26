@@ -10,8 +10,8 @@ import pytest
 from singer_sdk.batch import Batcher
 from singer_sdk.contrib.batch_encoder_parquet import ParquetBatcher
 from singer_sdk.helpers._batch import (
+    BaseBatchFileEncoding,
     BatchConfig,
-    ParquetEncoding,
     StorageTarget,
 )
 
@@ -36,7 +36,7 @@ def test_batcher(tmp_path: Path) -> None:
     root = tmp_path.joinpath("batches")
     root.mkdir()
     config = BatchConfig(
-        encoding=ParquetEncoding(),
+        encoding=BaseBatchFileEncoding(format="parquet"),
         storage=StorageTarget(root=str(root)),
         batch_size=2,
     )
@@ -56,7 +56,7 @@ def test_batcher_gzip(tmp_path: Path) -> None:
     root = tmp_path.joinpath("batches")
     root.mkdir()
     config = BatchConfig(
-        encoding=ParquetEncoding(compression="gzip"),
+        encoding=BaseBatchFileEncoding(format="parquet", compression="gzip"),
         storage=StorageTarget(root=str(root)),
         batch_size=2,
     )
@@ -77,7 +77,7 @@ def test_parquet_batcher():
         "tap-test",
         "stream-test",
         batch_config=BatchConfig(
-            encoding=ParquetEncoding("gzip"),
+            encoding=BaseBatchFileEncoding(format="parquet", compression="gzip"),
             storage=StorageTarget("file:///tmp/sdk-batches"),
             batch_size=2,
         ),
@@ -104,7 +104,7 @@ def test_batcher_with_parquet_encoding():
         "tap-test",
         "stream-test",
         batch_config=BatchConfig(
-            encoding=ParquetEncoding("gzip"),
+            encoding=BaseBatchFileEncoding(format="parquet", compression="gzip"),
             storage=StorageTarget("file:///tmp/sdk-batches"),
             batch_size=2,
         ),
