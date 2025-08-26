@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 
-@dataclass
+@dataclass(slots=True)
 class SuiteConfig:
     """Test Suite Config, passed to each test.
 
