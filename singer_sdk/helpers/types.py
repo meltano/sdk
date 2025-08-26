@@ -8,28 +8,19 @@ from collections.abc import Mapping
 
 import requests
 
-if t.TYPE_CHECKING:
-    import sys
-
-    if sys.version_info >= (3, 10):
-        from typing import TypeAlias  # noqa: ICN003
-    else:
-        from typing_extensions import TypeAlias
-
-
 __all__ = [
     "Context",
     "Record",
 ]
 
-Context: TypeAlias = Mapping[str, t.Any]
-Record: TypeAlias = dict[str, t.Any]
-Auth: TypeAlias = t.Callable[[requests.PreparedRequest], requests.PreparedRequest]
-RequestFunc: TypeAlias = t.Callable[
-    [requests.PreparedRequest, t.Union[Context, None]],
+Context: t.TypeAlias = Mapping[str, t.Any]
+Record: t.TypeAlias = dict[str, t.Any]
+Auth: t.TypeAlias = t.Callable[[requests.PreparedRequest], requests.PreparedRequest]
+RequestFunc: t.TypeAlias = t.Callable[
+    [requests.PreparedRequest, Context | None],
     requests.Response,
 ]
-StrPath: TypeAlias = t.Union[str, os.PathLike[str]]
+StrPath: t.TypeAlias = str | os.PathLike[str]
 
 
 class TapState(t.TypedDict, total=False):

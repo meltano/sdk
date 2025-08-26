@@ -36,8 +36,7 @@ body:
         - "3.12"
         - "3.11"
         - "3.10"
-        - "3.9"
-        - "3.8 or earlier"
+        - "3.9 or earlier"
     validations:
       required: true
   - type: dropdown

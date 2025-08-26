@@ -921,7 +921,11 @@ def test_custom_type():
 )
 def test_type_check_variations(property_schemas, type_check_functions, results):
     for property_schema in property_schemas:
-        for type_check_function, result in zip(type_check_functions, results):
+        for type_check_function, result in zip(
+            type_check_functions,
+            results,
+            strict=False,
+        ):
             assert type_check_function(property_schema) == result
 
 

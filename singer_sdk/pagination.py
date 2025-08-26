@@ -197,10 +197,7 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
         return
 
 
-class BaseHATEOASPaginator(
-    BaseAPIPaginator[t.Optional[ParseResult]],
-    metaclass=ABCMeta,
-):
+class BaseHATEOASPaginator(BaseAPIPaginator[ParseResult | None], metaclass=ABCMeta):
     """Paginator class for APIs supporting HATEOAS links in their response bodies.
 
     HATEOAS stands for "Hypermedia as the Engine of Application State". See
@@ -293,7 +290,7 @@ class HeaderLinkPaginator(BaseHATEOASPaginator):
         return url
 
 
-class JSONPathPaginator(BaseAPIPaginator[t.Optional[str]]):
+class JSONPathPaginator(BaseAPIPaginator[str | None]):
     """Paginator class for APIs returning a pagination token in the response body."""
 
     def __init__(
@@ -326,7 +323,7 @@ class JSONPathPaginator(BaseAPIPaginator[t.Optional[str]]):
         return next(all_matches, None)
 
 
-class SimpleHeaderPaginator(BaseAPIPaginator[t.Optional[str]]):
+class SimpleHeaderPaginator(BaseAPIPaginator[str | None]):
     """Paginator class for APIs returning a pagination token in the response headers."""
 
     def __init__(
@@ -424,10 +421,7 @@ class LegacyPaginatedStreamProtocol(t.Protocol[TPageToken]):
         """
 
 
-class LegacyStreamPaginator(
-    BaseAPIPaginator[t.Optional[TPageToken]],
-    t.Generic[TPageToken],
-):
+class LegacyStreamPaginator(BaseAPIPaginator[TPageToken | None], t.Generic[TPageToken]):
     """Paginator that works with REST streams as they exist today."""
 
     def __init__(

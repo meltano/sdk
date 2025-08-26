@@ -147,8 +147,6 @@ def test_write_schema(
     snapshot.snapshot_dir = snapshot_dir.joinpath("countries_write_schemas")
 
     runner = CliRunner()
-    # TODO: Remote this once support for Python 3.9 and thus Click<8.2 is dropped
-    runner.mix_stderr = False
     result = runner.invoke(TapCountries.cli, ["--test", "schema"])
 
     snapshot_name = "countries_write_schemas"
