@@ -87,7 +87,7 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
 .. _Meltano EDK: https://edk.meltano.com
 .. _Meltano Hub: https://hub.meltano.com/utilities/
 .. _integrated with Meltano: https://docs.meltano.com/tutorials/custom-extractor#add-the-plugin-to-your-meltano-project
-.. _contribute back: https://github.com/meltano/sdk/issues?q=is%3Aopen+is%3Aissue+label%3A%22accepting+merge+requests%22
+.. _contribute back: https://github.com/meltano/sdk/contribute
 .. _source code: https://github.com/meltano/sdk
 .. _log an issue or feature request: https://github.com/meltano/sdk/-/issues
 .. _Apache 2.0: https://en.wikipedia.org/wiki/Apache_License
