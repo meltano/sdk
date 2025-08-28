@@ -491,6 +491,32 @@ class TestConnectorSQL:  # noqa: PLR0904
             conn.execute(sqlalchemy.text(f"DROP TABLE {table1}"))
             conn.execute(sqlalchemy.text(f"DROP TABLE {table2}"))
 
+    def test_sort_types(self, connector: SQLConnector):
+        """Test that sort_types returns the correct order of SQL types."""
+        integer_type = sqlalchemy.Integer()
+        string_type = sqlalchemy.String()
+        string_255_type = sqlalchemy.String(length=255)
+        boolean_type = sqlalchemy.Boolean()
+        datetime_type = sqlalchemy.DateTime()
+        float_type = sqlalchemy.Float()
+
+        types: list[sqlalchemy.types.TypeEngine] = [
+            integer_type,
+            string_type,
+            string_255_type,
+            boolean_type,
+            datetime_type,
+            float_type,
+        ]
+        assert connector._sort_types(types) == [
+            string_255_type,
+            string_type,
+            datetime_type,
+            float_type,
+            integer_type,
+            boolean_type,
+        ]
+
 
 class TestDummySQLConnector:
     @pytest.fixture

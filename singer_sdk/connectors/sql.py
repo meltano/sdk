@@ -741,7 +741,7 @@ class SQLConnector:  # noqa: PLR0904
             msg = "Could not find or create 'sqlalchemy_url' for connection."
             raise ConfigValidationError(msg)
 
-        return t.cast("str", config["sqlalchemy_url"])
+        return config["sqlalchemy_url"]  # type: ignore[no-any-return]
 
     def to_jsonschema_type(
         self,
@@ -1579,7 +1579,7 @@ class SQLConnector:  # noqa: PLR0904
 
             len_ = int(getattr(sql_type, "length", 0) or 0)
 
-            pytype = t.cast("type", sql_type.python_type)
+            pytype = sql_type.python_type
             if issubclass(pytype, (str, bytes)):
                 return 900, len_
             if issubclass(pytype, datetime):
