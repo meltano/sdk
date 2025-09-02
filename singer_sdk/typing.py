@@ -568,7 +568,6 @@ class DecimalType(_NumericType[float]):
     __type_name__ = "number"
 
 
-@deprecated("Use DecimalType instead.", category=SingerSDKDeprecationWarning)
 class NumberType(DecimalType):
     """Number type (deprecated)."""
 
