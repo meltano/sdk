@@ -78,11 +78,11 @@ Create a data loader to write records to any destination:
 Key Features
 -----------
 
-- ✅ **70% Less Code**: Focus on your business logic, not boilerplate
-- ✅ **Auto-Compliant**: Singer Spec compliance built-in
-- ✅ **Battle-Tested**: Powers millions of pipeline runs monthly
-- ✅ **Rich Ecosystem**: 300+ existing connectors on `Meltano Hub`_
-- ✅ **Advanced Features**: Authentication, pagination, incremental sync, batching, and more
+- **Less Code**: Focus on your business logic, not boilerplate
+- **Auto-Compliant**: Singer Spec compliance built-in
+- **Battle-Tested**: Powers millions of pipeline runs monthly
+- **Rich Ecosystem**: 600+ existing connectors on `Meltano Hub`_
+- **Advanced Features**: Authentication, pagination, incremental sync, batching, and more
 
 Core Classes
 -----------
