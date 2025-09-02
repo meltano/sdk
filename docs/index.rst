@@ -42,6 +42,10 @@ Create a data extractor in just a few lines of code:
    class MyTap(Tap):
        """My custom tap."""
        name = "tap-myapi"
+       config_jsonschema = th.PropertiesList(
+           th.Property("api_url", th.StringType, required=True),
+           th.Property("api_key", th.StringType, required=True, secret=True),
+       ).to_dict()
 
        def discover_streams(self):
            return [UsersStream(self)]
@@ -70,6 +74,13 @@ Create a data loader to write records to any destination:
    class MyTarget(Target):
        """My custom target."""
        name = "target-mydb"
+       config_jsonschema = th.PropertiesList(
+           th.Property("host", th.StringType, required=True),
+           th.Property("port", th.IntegerType, default=5432),
+           th.Property("database", th.StringType, required=True),
+           th.Property("username", th.StringType, required=True),
+           th.Property("password", th.StringType, required=True, secret=True),
+       ).to_dict()
        default_sink_class = MySink
 
    if __name__ == "__main__":
