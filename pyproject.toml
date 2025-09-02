@@ -193,6 +193,8 @@ filterwarnings = [
     "ignore::ResourceWarning",
     # universal-pathlib
     "once:in a future version of UPath this will be set to None:PendingDeprecationWarning",
+    # Our own warnings:
+    "ignore:Use DecimalType instead:DeprecationWarning",
 ]
 log_cli_level = "INFO"
 log_format = "%(levelname)s %(name)s %(message)s"

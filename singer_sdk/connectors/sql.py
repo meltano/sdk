@@ -211,7 +211,7 @@ class SQLToJSONSchema:
         """
         if self.use_singer_decimal:
             return th.SingerDecimalType.type_dict  # type: ignore[no-any-return]
-        return th.NumberType.type_dict  # type: ignore[no-any-return]
+        return th.DecimalType.type_dict  # type: ignore[no-any-return]
 
     @to_jsonschema.register
     def string_to_jsonschema(self, column_type: sqlalchemy.types.String) -> dict:  # noqa: PLR6301
