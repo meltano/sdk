@@ -6,12 +6,13 @@ Build powerful data extractors and loaders with minimal code. The Singer SDK is 
 Quick Start
 -----------
 
-Install the SDK and create your first tap:
+Create your first tap in seconds:
 
 .. code-block:: bash
 
-   pip install singer-sdk
    cookiecutter https://github.com/meltano/sdk --directory="cookiecutter/tap-template"
+   cd tap-myapi  # or whatever you named it
+   uv sync
 
 Build a Simple REST API Tap
 ---------------------------
