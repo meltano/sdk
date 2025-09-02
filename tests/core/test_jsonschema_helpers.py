@@ -33,6 +33,7 @@ from singer_sdk.typing import (
     CustomType,
     DateTimeType,
     DateType,
+    DecimalType,
     DiscriminatedUnion,
     DurationType,
     EmailType,
@@ -42,7 +43,6 @@ from singer_sdk.typing import (
     IPv6Type,
     JSONPointerType,
     JSONTypeHelper,
-    NumberType,
     ObjectType,
     PropertiesList,
     Property,
@@ -385,7 +385,7 @@ def test_property_title():
             },
         ),
         (
-            NumberType,
+            DecimalType,
             {
                 "type": ["number"],
             },

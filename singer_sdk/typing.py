@@ -18,7 +18,7 @@ Usage example:
                 ),
             ),
         ),
-        Property("ratio", NumberType, examples=[0.25, 0.75, 1.0]),
+        Property("ratio", DecimalType, examples=[0.25, 0.75, 1.0]),
         Property("days_active", IntegerType),
         Property("updated_on", DateTimeType),
         Property("is_deleted", BooleanType),
@@ -76,6 +76,7 @@ __all__ = [
     "CustomType",
     "DateTimeType",
     "DateType",
+    "DecimalType",
     "DurationType",
     "EmailType",
     "HostnameType",
@@ -84,7 +85,6 @@ __all__ = [
     "IntegerType",
     "JSONPointerType",
     "JSONTypeHelper",
-    "NumberType",
     "ObjectType",
     "PropertiesList",
     "Property",
@@ -547,25 +547,29 @@ class IntegerType(_NumericType[int]):
     __type_name__ = "integer"
 
 
-class NumberType(_NumericType[float]):
-    """Number type.
+class DecimalType(_NumericType[float]):
+    """Decimal type.
 
     Examples:
-        >>> NumberType.type_dict
+        >>> DecimalType.type_dict
         {'type': ['number']}
-        >>> NumberType().type_dict
+        >>> DecimalType().type_dict
         {'type': ['number']}
-        >>> NumberType(allowed_values=[1.0, 2.0]).type_dict
+        >>> DecimalType(allowed_values=[1.0, 2.0]).type_dict
         {'type': ['number'], 'enum': [1.0, 2.0]}
-        >>> NumberType(minimum=0, maximum=10).type_dict
+        >>> DecimalType(minimum=0, maximum=10).type_dict
         {'type': ['number'], 'minimum': 0, 'maximum': 10}
-        >>> NumberType(exclusive_minimum=0, exclusive_maximum=10).type_dict
+        >>> DecimalType(exclusive_minimum=0, exclusive_maximum=10).type_dict
         {'type': ['number'], 'exclusiveMinimum': 0, 'exclusiveMaximum': 10}
-        >>> NumberType(multiple_of=2).type_dict
+        >>> DecimalType(multiple_of=2).type_dict
         {'type': ['number'], 'multipleOf': 2}
     """
 
     __type_name__ = "number"
+
+
+class NumberType(DecimalType):
+    """Number type (deprecated)."""
 
 
 W = t.TypeVar("W", bound=JSONTypeHelper)
@@ -768,7 +772,7 @@ class ObjectType(JSONTypeHelper):
             >>> t = ObjectType(
             ...     Property("name", StringType, required=True),
             ...     Property("age", IntegerType),
-            ...     Property("height", NumberType),
+            ...     Property("height", DecimalType),
             ...     additional_properties=False,
             ... )
             >>> print(t.to_json(indent=2))
@@ -801,7 +805,7 @@ class ObjectType(JSONTypeHelper):
             >>> t = ObjectType(
             ...     Property("name", StringType, required=True),
             ...     Property("age", IntegerType),
-            ...     Property("height", NumberType),
+            ...     Property("height", DecimalType),
             ...     additional_properties=StringType,
             ... )
             >>> print(t.to_json(indent=2))

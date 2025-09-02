@@ -398,7 +398,7 @@ class CustomStreamMap(StreamMap):
             return th.CustomType(self.raw_schema)
 
         if expr.startswith("float("):
-            return th.NumberType()
+            return th.DecimalType()
 
         if expr.startswith("int("):
             return th.IntegerType()

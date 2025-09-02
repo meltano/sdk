@@ -11,9 +11,9 @@ from singer_sdk.typing import (
     ArrayType,
     BooleanType,
     Constant,
+    DecimalType,
     IntegerType,
     NullType,
-    NumberType,
     ObjectType,
     OneOf,
     PropertiesList,
@@ -119,7 +119,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
         ObjectType(
             Property(
                 "seed",
-                OneOf(NumberType, StringType, BooleanType),
+                OneOf(DecimalType, StringType, BooleanType),
                 title="Faker Seed",
                 description=(
                     "Value to seed the Faker generator for deterministic output: "
