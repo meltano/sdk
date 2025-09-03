@@ -110,7 +110,7 @@ class FolderTap(Tap, t.Generic[_T]):
     config_jsonschema: t.ClassVar[dict] = {"properties": {}}
 
     @classmethod
-    def append_builtin_config(cls: type[FolderTap], config_jsonschema: dict) -> None:
+    def append_builtin_config(cls, config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         To customize or disable this behavior, developers may either override this class
