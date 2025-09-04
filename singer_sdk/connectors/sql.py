@@ -1408,12 +1408,42 @@ class SQLConnector:  # noqa: PLR0904
             )
             return
 
+        self.prepare_table_columns(
+            full_table_name=full_table_name,
+            schema=schema,
+        )
+
+    def prepare_table_columns(
+        self,
+        full_table_name: str,
+        schema: dict,
+    ) -> None:
+        """Adapt target table columns to provided schema if possible.
+
+        The advantage of encapsulating this in a separate method is that we reduce
+        the number of calls to the database by calling get_table_columns() only once
+        per table.
+
+        Args:
+            full_table_name: the target table name.
+            schema: the JSON Schema for the table.
+        """
+        columns = self.get_table_columns(
+            full_table_name=full_table_name,
+        )
         for property_name, property_def in schema["properties"].items():
-            self.prepare_column(
-                full_table_name,
-                property_name,
-                self.to_sql_type(property_def),
-            )
+            if property_name not in columns:
+                self._create_empty_column(
+                    full_table_name=full_table_name,
+                    column_name=property_name,
+                    sql_type=self.to_sql_type(property_def),
+                )
+            else:
+                self._adapt_column_type(
+                    full_table_name,
+                    column_name=property_name,
+                    sql_type=self.to_sql_type(property_def),
+                )
 
         self.prepare_primary_key(
             full_table_name=full_table_name,
