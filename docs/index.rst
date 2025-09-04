@@ -54,7 +54,7 @@ Create a data extractor in just a few lines of code:
        MyTap.cli()
 
 Build a Simple Target
---------------------
+---------------------
 
 Create a data loader to write records to any destination:
 
@@ -87,7 +87,7 @@ Create a data loader to write records to any destination:
        MyTarget.cli()
 
 Key Features
------------
+------------
 
 - **Less Code**: Focus on your business logic, not boilerplate
 - **Auto-Compliant**: Singer Spec compliance built-in
@@ -96,7 +96,7 @@ Key Features
 - **Advanced Features**: Authentication, pagination, incremental sync, batching, and more
 
 Core Classes
------------
+------------
 
 The SDK provides these main building blocks:
 
@@ -120,7 +120,7 @@ The SDK provides these main building blocks:
    - Incremental replication support
 
 What's a Tap vs Target?
----------------------
+-----------------------
 
 - **Tap**: Extracts data *from* a source (API, database, file)
 - **Target**: Loads data *to* a destination (database, warehouse, file)
