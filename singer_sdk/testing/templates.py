@@ -39,7 +39,6 @@ class TestTemplate(t.Generic[_T]):
     """
 
     name: str | None = None
-    plugin_type: str | None = None
 
     @property
     def id(self) -> str:
@@ -107,8 +106,8 @@ class TestTemplate(t.Generic[_T]):
         Raises:
             ValueError: if Test instance does not have `name` and `type` properties.
         """
-        if not self.name or not self.plugin_type:  # pragma: no cover
-            msg = "Test must have 'name' and 'plugin_type' properties."
+        if not self.name:  # pragma: no cover
+            msg = "Test must have 'name' property."
             raise ValueError(msg)
 
         self.config = config
@@ -130,8 +129,6 @@ class TestTemplate(t.Generic[_T]):
 
 class TapTestTemplate(TestTemplate):
     """Base Tap test template."""
-
-    plugin_type = "tap"
 
     @property
     def id(self) -> str:
@@ -162,7 +159,6 @@ class TapTestTemplate(TestTemplate):
 class StreamTestTemplate(TestTemplate):
     """Base Tap Stream test template."""
 
-    plugin_type = "stream"
     required_kwargs: t.ClassVar[list[str]] = ["stream"]
 
     @property
@@ -204,8 +200,6 @@ class StreamTestTemplate(TestTemplate):
 
 class AttributeTestTemplate(StreamTestTemplate):
     """Base Tap Stream Attribute template."""
-
-    plugin_type = "attribute"
 
     @property
     def id(self) -> str:
@@ -283,8 +277,6 @@ class AttributeTestTemplate(StreamTestTemplate):
 
 class TargetTestTemplate(TestTemplate[TargetTestRunner]):
     """Base Target test template."""
-
-    plugin_type = "target"
 
     def run(
         self,
