@@ -996,7 +996,8 @@ class AllOf(JSONTypeHelper):
                     "null"
                   ]
                 }
-              }
+              },
+              "additionalProperties": true
             },
             {
               "type": "object",
@@ -1007,7 +1008,8 @@ class AllOf(JSONTypeHelper):
                     "null"
                   ]
                 }
-              }
+              },
+              "additionalProperties": true
             }
           ]
         }
@@ -1095,19 +1097,21 @@ class DiscriminatedUnion(OneOf):
                   },
                   "required": [
                     "species"
-                  ]
+                  ],
+                  "additionalProperties": true
                 },
                 {
                   "type": "object",
                   "properties": {
                     "species": {
-                        "const": "dog",
-                        "description": "Discriminator for object of type 'dog'."
+                      "const": "dog",
+                      "description": "Discriminator for object of type 'dog'."
                     }
                   },
                   "required": [
                     "species"
-                  ]
+                  ],
+                  "additionalProperties": true
                 }
               ]
             }
