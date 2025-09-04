@@ -754,7 +754,7 @@ class ObjectType(JSONTypeHelper):
     def __init__(
         self,
         *properties: Property,
-        additional_properties: W | type[W] | bool | None = None,
+        additional_properties: W | type[W] | bool | None = True,
         pattern_properties: t.Mapping[str, W | type[W]] | None = None,
         **kwargs: t.Any,
     ) -> None:
@@ -1245,6 +1245,21 @@ class PropertiesList(ObjectType):
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
     """
+
+    def __init__(
+        self,
+        *args: t.Any,
+        additional_properties: W | type[W] | bool | None = None,
+        **kwargs: t.Any,
+    ) -> None:
+        """Initialize PropertiesList.
+
+        Args:
+            *args: Arguments to pass to the parent class.
+            additional_properties: Additional properties to allow.
+            **kwargs: Keyword arguments to pass to the parent class.
+        """
+        super().__init__(*args, additional_properties=additional_properties, **kwargs)
 
     def items(self) -> t.ItemsView[str, Property]:
         """Get wrapped properties.
