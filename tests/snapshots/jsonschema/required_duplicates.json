@@ -27,5 +27,6 @@
   "required": [
     "email",
     "username"
-  ]
+  ],
+  "additionalProperties": true
 }

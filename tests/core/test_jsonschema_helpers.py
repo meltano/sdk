@@ -141,7 +141,8 @@ def test_to_json():
                                         "null"
                                     ]
                                 }
-                            }
+                            },
+                            "additionalProperties": true
                         },
                         {
                             "type": "object",
@@ -152,7 +153,8 @@ def test_to_json():
                                         "null"
                                     ]
                                 }
-                            }
+                            },
+                            "additionalProperties": true
                         }
                     ]
                 }
@@ -469,6 +471,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                             "writeOnly": True,
                         },
                     },
+                    "additionalProperties": True,
                 },
             },
             {is_object_type, is_secret_type},
