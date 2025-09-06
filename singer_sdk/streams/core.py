@@ -59,6 +59,7 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.helpers import types
     from singer_sdk.helpers._compat import Traversable
+    from singer_sdk.helpers.stream_dag import StreamDAG
     from singer_sdk.singerlib.catalog import StreamMetadata
     from singer_sdk.tap_base import Tap
 
@@ -168,6 +169,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._is_state_flushed: bool = True
         self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
+
+        # DAG support
+        self._dag: StreamDAG | None = None
         if schema:
             if isinstance(schema, (PathLike, str)):
                 if not Path(schema).is_file():
@@ -1246,6 +1250,10 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                             self._write_record_message(record)
 
                         self._increment_stream_state(record, context=current_context)
+
+                        # Notify DAG of processed record
+                        self._process_record_with_dag(record, current_context)
+
                         if (
                             record_index + 1
                         ) % self.STATE_MSG_FREQUENCY == 0 and write_messages:
@@ -1269,6 +1277,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if write_messages:
             # Write final state message if we haven't already
             self._write_state_message()
+
+        # Notify DAG that stream processing is complete
+        self._finalize_with_dag()
 
     def _sync_batches(
         self,
@@ -1571,3 +1582,37 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             The processed record dict, or `None` to exclude the record.
         """
         return row
+
+    # DAG-related methods
+
+    def set_dag(self, dag: StreamDAG) -> None:
+        """Set the DAG instance for this stream.
+
+        Args:
+            dag: The StreamDAG instance managing relationships.
+        """
+        self._dag = dag
+
+    def _process_record_with_dag(
+        self, record: types.Record, context: types.Context | None = None
+    ) -> None:
+        """Process a record and notify the DAG.
+
+        This is called after processing each record in the stream to trigger
+        any dependent streams according to the DAG configuration.
+
+        Args:
+            record: The processed record.
+            context: Stream context.
+        """
+        if self._dag:
+            self._dag.process_record(self.name, record, context)
+
+    def _finalize_with_dag(self) -> None:
+        """Notify the DAG that this stream has finished processing.
+
+        This triggers any batch or aggregated sync operations that were
+        waiting for this stream to complete.
+        """
+        if self._dag:
+            self._dag.finalize_stream(self.name)
