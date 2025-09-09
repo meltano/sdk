@@ -27,6 +27,7 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
     TapCapabilities,
 )
+from singer_sdk.helpers.stream_dag import StreamDAG
 from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import BaseSingerWriter, PluginBase, _ConfigInput
 from singer_sdk.singerlib import Catalog
@@ -118,6 +119,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._state: types.TapState = {}
         self._catalog: Catalog | None = None  # Tap's working catalog
         self._state_writer: StateWriter = StateWriter(self.message_writer)
+        self._dag: StreamDAG | None = None
 
         # Process input catalog
         if isinstance(catalog, Catalog):
@@ -217,6 +219,36 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             self._catalog = self.input_catalog or self._singer_catalog
 
         return self._catalog
+
+    # DAG support methods
+
+    def setup_dag(self) -> StreamDAG:
+        """Initialize and configure the Stream DAG.
+
+        This method should be overridden by taps that want to use DAG functionality
+        to define custom stream relationships beyond simple parent-child patterns.
+
+        Returns:
+            The configured StreamDAG instance.
+        """
+        if self._dag is None:
+            self._dag = StreamDAG()
+
+            # Register all streams with the DAG
+            for stream in self.streams.values():
+                self._dag.add_stream(stream)
+                stream.set_dag(self._dag)
+
+        return self._dag
+
+    @property
+    def dag(self) -> StreamDAG | None:
+        """Get the current DAG instance.
+
+        Returns:
+            The StreamDAG instance if configured, otherwise None.
+        """
+        return self._dag
 
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
