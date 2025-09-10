@@ -8,7 +8,14 @@ from __future__ import annotations
 
 {%- elif cookiecutter.auth_method == "OAuth2" %}
 
+import sys
+
 from singer_sdk.authenticators import OAuthAuthenticator, SingletonMeta
+
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 
 
 # The SingletonMeta metaclass makes your streams reuse the same authenticator instance.
@@ -16,6 +23,7 @@ from singer_sdk.authenticators import OAuthAuthenticator, SingletonMeta
 class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator, metaclass=SingletonMeta):
     """Authenticator class for {{ cookiecutter.source_name }}."""
 
+    @override
     @property
     def oauth_request_body(self) -> dict:
         """Define the OAuth request body for the AutomaticTestTap API.

@@ -6,12 +6,18 @@ This includes {{ cookiecutter.source_name }}Stream and {{ cookiecutter.source_na
 from __future__ import annotations
 
 import functools
+import sys
 import typing as t
 
 import sqlalchemy
 from singer_sdk import SQLConnector, SQLStream
 from singer_sdk.connectors.sql import SQLToJSONSchema
 from singer_sdk.helpers._typing import TypeConformanceLevel
+
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Context
@@ -37,6 +43,7 @@ class {{ cookiecutter.source_name }}SQLToJSONSchema(SQLToJSONSchema):
         super().__init__(**kwargs)
         self.custom_config_option = custom_config_option
 
+    @override
     @classmethod
     def from_config(cls, config: dict) -> {{ cookiecutter.source_name }}SQLToJSONSchema:
         """Instantiate the SQL to JSON Schema converter from a config dictionary.
@@ -54,6 +61,7 @@ class {{ cookiecutter.source_name }}SQLToJSONSchema(SQLToJSONSchema):
             custom_config_option=config.get("custom_config_option", False),
         )
 
+    @override
     @functools.singledispatchmethod
     def to_jsonschema(self, column_type: t.Any) -> dict:
         """Customize the JSON Schema for {{ cookiecutter.source_name }} types.
@@ -94,6 +102,7 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
     # Custom SQL to JSON Schema converter
     sql_to_jsonschema_converter = {{ cookiecutter.source_name }}SQLToJSONSchema
 
+    @override
     def get_sqlalchemy_url(self, config: dict) -> str:
         """Concatenate a SQLAlchemy URL for use in connecting to the source.
 
@@ -115,6 +124,7 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
             f"s3_staging_dir={config['s3_staging_dir']}"
         )
 
+    @override
     def get_schema_names(self, engine: Engine, inspected: Inspector) -> list[str]:
         """Return a list of schema names in DB, or overrides with user-provided values.
 
@@ -130,9 +140,10 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
         """
         return super().get_schema_names(engine, inspected)
 
+    @override
     def to_jsonschema_type(
         self,
-        from_type: str | sqlalchemy.types.TypeEngine | type[sqlalchemy.types.TypeEngine],
+        sql_type: str | sqlalchemy.types.TypeEngine | type[sqlalchemy.types.TypeEngine],
     ) -> dict:
         """Returns a JSON Schema equivalent for the given SQL type.
 
@@ -149,8 +160,9 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
         """
         # Optionally, add custom logic before calling the parent SQLConnector method.
         # You may delete this method if overrides are not needed.
-        return super().to_jsonschema_type(from_type)
+        return super().to_jsonschema_type(sql_type)
 
+    @override
     def to_sql_type(self, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
         """Returns a JSON Schema equivalent for the given SQL type.
 
@@ -169,6 +181,7 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
 
     # Uncomment and customize these methods as needed for your specific database:
 
+    # @override
     # def get_object_names(
     #     self, engine: Engine, inspected: Inspector, schema_name: str
     # ) -> list[tuple[str, bool]]:
@@ -187,6 +200,7 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
     #     """
     #     return super().get_object_names(engine, inspected, schema_name)
 
+    # @override
     # def prepare_column(
     #     self, full_table_name: str, column_name: str, sql_type: sqlalchemy.types.TypeEngine
     # ) -> sqlalchemy.Column:
@@ -197,6 +211,7 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
     #     """
     #     return super().prepare_column(full_table_name, column_name, sql_type)
 
+    # @override
     # def create_engine(self) -> sqlalchemy.engine.Engine:
     #     """Create a SQLAlchemy engine for database connections.
     #
@@ -205,6 +220,7 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
     #     """
     #     return super().create_engine()
 
+    # @override
     # def open_connection(self) -> sqlalchemy.engine.Connection:
     #     """Open a new database connection.
     #
@@ -232,6 +248,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
     # RECURSIVE: Recursively enforce types throughout nested structures
     TYPE_CONFORMANCE_LEVEL = TypeConformanceLevel.RECURSIVE
 
+    @override
     def apply_query_filters(
         self,
         query: sqlalchemy.sql.Select,
@@ -260,6 +277,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
 
         return query
 
+    @override
     def get_records(self, partition: Context | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
 
@@ -302,6 +320,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
 
     # Uncomment and customize these methods as needed for your specific database:
 
+    # @override
     # def get_starting_replication_key_value(
     #     self, context: Context | None
     # ) -> t.Any | None:
@@ -313,6 +332,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
     #     """
     #     return super().get_starting_replication_key_value(context)
 
+    # @override
     # def post_process(self, row: dict, context: Context | None = None) -> dict | None:
     #     """Process a single record after it's been retrieved from the database.
     #
@@ -329,6 +349,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
     #     """
     #     return row
 
+    # @override
     # def validate_config(self) -> None:
     #     """Validate tap configuration.
     #
@@ -341,6 +362,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
     #     # if not self.config.get("custom_required_field"):
     #     #     raise ValueError("custom_required_field is required")
 
+    # @override
     # @property
     # def is_sorted(self) -> bool:
     #     """Indicate whether the stream is sorted by replication key.

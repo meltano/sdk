@@ -36,6 +36,7 @@ dependencies = [
     {%- else %}
     "singer-sdk~=0.48.1",
     {%- endif %}
+    "typing-extensions>=4.5.0; python_version < '3.13'",
 ]
 
 [project.optional-dependencies]
