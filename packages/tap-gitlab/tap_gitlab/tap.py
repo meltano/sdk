@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from singer_sdk import Stream, Tap
+import typing as t
+
+from singer_sdk import Tap
 from singer_sdk.typing import (
     ArrayType,
     DateTimeType,
@@ -18,6 +20,9 @@ from tap_gitlab.streams import (
     ProjectsStream,
     ReleasesStream,
 )
+
+if t.TYPE_CHECKING:
+    from singer_sdk import Stream
 
 DEFAULT_URL_BASE = "https://gitlab.com/api/v4"
 STREAM_TYPES = [

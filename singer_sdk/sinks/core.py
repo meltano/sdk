@@ -10,7 +10,6 @@ import sys
 import time
 import typing as t
 from functools import cached_property
-from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
 
@@ -22,12 +21,7 @@ from singer_sdk.exceptions import (
     InvalidRecord,
     MissingKeyPropertiesError,
 )
-from singer_sdk.helpers._batch import (
-    BaseBatchFileEncoding,
-    BatchConfig,
-    BatchFileFormat,
-    StorageTarget,
-)
+from singer_sdk.helpers._batch import BatchConfig, BatchFileFormat, StorageTarget
 from singer_sdk.helpers._compat import (
     date_fromisoformat,
     datetime_fromisoformat,
@@ -47,8 +41,10 @@ else:
     from typing_extensions import override
 
 if t.TYPE_CHECKING:
+    from gzip import GzipFile
     from logging import Logger
 
+    from singer_sdk.helpers._batch import BaseBatchFileEncoding
     from singer_sdk.target_base import Target
 
 

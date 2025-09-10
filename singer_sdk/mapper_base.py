@@ -7,13 +7,14 @@ import typing as t
 
 import click
 
-from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
+from singer_sdk.helpers.capabilities import PluginCapabilities
 from singer_sdk.plugin_base import BaseSingerReader, BaseSingerWriter, _ConfigInput
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
     import singer_sdk.singerlib as singer
+    from singer_sdk.helpers.capabilities import CapabilitiesEnum
     from singer_sdk.singerlib.encoding.base import (
         GenericSingerReader,
         GenericSingerWriter,

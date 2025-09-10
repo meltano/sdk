@@ -42,7 +42,6 @@ from singer_sdk.typing import (
     IPv4Type,
     IPv6Type,
     JSONPointerType,
-    JSONTypeHelper,
     ObjectType,
     PropertiesList,
     Property,
@@ -62,6 +61,7 @@ if t.TYPE_CHECKING:
     from pytest_snapshot.plugin import Snapshot
 
     from singer_sdk.streams.core import Stream
+    from singer_sdk.typing import JSONTypeHelper
 
 TYPE_FN_CHECKS: set[t.Callable] = {
     is_array_type,

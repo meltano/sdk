@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.singerlib import CatalogEntry, MetadataMapping
+from singer_sdk.singerlib import CatalogEntry
 from singer_sdk.streams.core import REPLICATION_INCREMENTAL, Stream
 
 if t.TYPE_CHECKING:
@@ -18,6 +18,7 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.connectors.sql import FullyQualifiedName
     from singer_sdk.helpers.types import Context, Record
+    from singer_sdk.singerlib import MetadataMapping
     from singer_sdk.tap_base import Tap
 
 

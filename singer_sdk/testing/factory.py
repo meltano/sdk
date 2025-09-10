@@ -10,7 +10,6 @@ import pytest
 from .config import SuiteConfig
 from .runners import TapTestRunner, TargetTestRunner
 from .suites import (
-    SingerTestSuite,
     tap_stream_attribute_tests,
     tap_stream_tests,
     tap_tests,
@@ -24,6 +23,8 @@ if t.TYPE_CHECKING:
         StreamTestTemplate,
         TapTestTemplate,
     )
+
+    from .suites import SingerTestSuite
 
 
 class StreamTestParams(t.NamedTuple):

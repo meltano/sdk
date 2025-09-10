@@ -9,11 +9,12 @@ import warnings
 from functools import cached_property
 
 from singer_sdk.testing import target_test_streams
-from singer_sdk.testing.runners import SingerTestRunner, TapTestRunner, TargetTestRunner
+from singer_sdk.testing.runners import SingerTestRunner, TargetTestRunner
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
     from singer_sdk.streams import Stream
+    from singer_sdk.testing.runners import TapTestRunner
 
     from .config import SuiteConfig
 

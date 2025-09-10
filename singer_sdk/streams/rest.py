@@ -22,7 +22,6 @@ from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
-    BaseAPIPaginator,
     JSONPathPaginator,
     LegacyStreamPaginator,
     SimpleHeaderPaginator,
@@ -37,6 +36,7 @@ if t.TYPE_CHECKING:
     from backoff.types import Details
 
     from singer_sdk.helpers.types import Auth, Context, RequestFunc
+    from singer_sdk.pagination import BaseAPIPaginator
     from singer_sdk.singerlib import Schema
     from singer_sdk.tap_base import Tap
 

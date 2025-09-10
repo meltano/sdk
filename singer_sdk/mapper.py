@@ -22,7 +22,6 @@ import singer_sdk.typing as th
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.helpers._flattening import (
-    FlatteningOptions,
     flatten_record,
     flatten_schema,
     get_flattening_options,
@@ -31,6 +30,7 @@ from singer_sdk.helpers._flattening import (
 if t.TYPE_CHECKING:
     from faker import Faker
 
+    from singer_sdk.helpers._flattening import FlatteningOptions
     from singer_sdk.singerlib.catalog import Catalog
 
 

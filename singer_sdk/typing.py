@@ -56,7 +56,7 @@ import json
 import typing as t
 
 import sqlalchemy.types
-from jsonschema import ValidationError, validators
+from jsonschema import validators
 
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.helpers._typing import (
@@ -67,6 +67,7 @@ from singer_sdk.helpers._typing import (
 )
 
 if t.TYPE_CHECKING:
+    from jsonschema import ValidationError
     from jsonschema.protocols import Validator
 
 __all__ = [

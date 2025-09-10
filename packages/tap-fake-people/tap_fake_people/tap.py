@@ -9,7 +9,7 @@ from faker import Faker
 
 from singer_sdk import Stream, Tap
 from singer_sdk import typing as th
-from singer_sdk.singerlib import Message, SingerMessageType
+from singer_sdk.singerlib import SingerMessageType
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
@@ -20,6 +20,7 @@ if t.TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
 
     from singer_sdk.helpers.types import Context, Record
+    from singer_sdk.singerlib import Message
 
 
 class FakePeopleStream(Stream):

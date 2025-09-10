@@ -8,9 +8,14 @@ See the online explorer and query builder here:
 
 from __future__ import annotations
 
-from singer_sdk import Stream, Tap
+import typing as t
+
+from singer_sdk import Tap
 from singer_sdk.contrib.msgspec import MsgSpecWriter
 from tap_countries.streams import ContinentsStream, CountriesStream
+
+if t.TYPE_CHECKING:
+    from singer_sdk import Stream
 
 
 class TapCountries(Tap):

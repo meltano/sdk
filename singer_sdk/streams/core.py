@@ -23,11 +23,7 @@ from singer_sdk.exceptions import (
     InvalidStreamSortException,
     MaxRecordsLimitException,
 )
-from singer_sdk.helpers._batch import (
-    BaseBatchFileEncoding,
-    BatchConfig,
-    SDKBatchMessage,
-)
+from singer_sdk.helpers._batch import BatchConfig, SDKBatchMessage
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import (
     SingerSDKDeprecationWarning,
@@ -52,13 +48,15 @@ from singer_sdk.helpers._typing import (
     is_datetime_type,
 )
 from singer_sdk.helpers._util import utc_now
-from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
+from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform
 
 if t.TYPE_CHECKING:
     import logging
 
     from singer_sdk.helpers import types
+    from singer_sdk.helpers._batch import BaseBatchFileEncoding
     from singer_sdk.helpers._compat import Traversable
+    from singer_sdk.mapper import StreamMap
     from singer_sdk.singerlib.catalog import StreamMetadata
     from singer_sdk.tap_base import Tap
 

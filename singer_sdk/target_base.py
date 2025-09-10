@@ -23,7 +23,6 @@ from singer_sdk.helpers.capabilities import (
     TARGET_LOAD_METHOD_CONFIG,
     TARGET_SCHEMA_CONFIG,
     TARGET_VALIDATE_RECORDS_CONFIG,
-    CapabilitiesEnum,
     PluginCapabilities,
     TargetCapabilities,
 )
@@ -36,6 +35,7 @@ if t.TYPE_CHECKING:
     from types import FrameType
 
     from singer_sdk.connectors import SQLConnector
+    from singer_sdk.helpers.capabilities import CapabilitiesEnum
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.singerlib.encoding.base import GenericSingerReader
     from singer_sdk.sinks import Sink, SQLSink

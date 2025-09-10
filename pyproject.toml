@@ -331,13 +331,14 @@ extend-exclude = [
     "cookiecutter/*",
 ]
 line-length = 88
-required-version = ">=0.9"
+required-version = ">=0.13"
 
 [tool.ruff.format]
 docstring-code-format = true
 
 [tool.ruff.lint]
 explicit-preview-rules = false
+future-annotations = true
 ignore = [
     "N818",    # Exception name should be named with an Error suffix
     "COM812",  # missing-trailing-comma

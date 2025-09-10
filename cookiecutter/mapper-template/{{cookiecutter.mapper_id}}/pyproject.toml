@@ -78,7 +78,12 @@ addopts = [
 [tool.mypy]
 warn_unused_configs = true
 
+[tool.ruff]
+line-length = 100
+required-version = ">=0.13"
+
 [tool.ruff.lint]
+future-annotations = true
 ignore = [
     "COM812",  # missing-trailing-comma
 ]
