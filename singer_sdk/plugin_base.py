@@ -14,7 +14,7 @@ import typing as t
 import warnings
 from importlib import metadata
 from pathlib import Path, PurePath
-from types import FrameType, MappingProxyType
+from types import MappingProxyType
 
 import click
 
@@ -32,7 +32,6 @@ from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
     FLATTENING_CONFIG,
     STREAM_MAPS_CONFIG,
-    CapabilitiesEnum,
     PluginCapabilities,
 )
 from singer_sdk.io_base import SingerMessageType, SingerReader, SingerWriter
@@ -43,8 +42,11 @@ from singer_sdk.typing import (
 )
 
 if t.TYPE_CHECKING:
+    from types import FrameType
+
     from jsonschema import ValidationError
 
+    from singer_sdk.helpers.capabilities import CapabilitiesEnum
     from singer_sdk.helpers.types import StrPath
     from singer_sdk.singerlib.encoding.base import (
         GenericSingerReader,

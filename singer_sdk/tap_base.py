@@ -23,7 +23,6 @@ from singer_sdk.helpers._util import dump_json, load_json, read_json_file
 from singer_sdk.helpers.capabilities import (
     BATCH_CONFIG,
     SQL_TAP_USE_SINGER_DECIMAL,
-    CapabilitiesEnum,
     PluginCapabilities,
     TapCapabilities,
 )
@@ -37,6 +36,7 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.connectors import SQLConnector
     from singer_sdk.helpers import types
+    from singer_sdk.helpers.capabilities import CapabilitiesEnum
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.singerlib.encoding.base import GenericSingerWriter
     from singer_sdk.streams import SQLStream, Stream

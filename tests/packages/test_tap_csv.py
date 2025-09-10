@@ -6,10 +6,12 @@ import typing as t
 import pytest
 from tap_csv.tap import TapCSV
 
-from singer_sdk.testing import SuiteConfig, TapTestRunner, get_tap_test_class
+from singer_sdk.testing import SuiteConfig, get_tap_test_class
 
 if t.TYPE_CHECKING:
     from tap_csv.client import CSVStream
+
+    from singer_sdk.testing import TapTestRunner
 
 _TestCSVMerge = get_tap_test_class(
     tap_class=TapCSV,

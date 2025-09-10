@@ -8,11 +8,7 @@ import typing as t
 import jwt
 import pytest
 import time_machine
-from cryptography.hazmat.primitives.asymmetric.rsa import (
-    RSAPrivateKey,
-    RSAPublicKey,
-    generate_private_key,
-)
+from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.serialization import (
     Encoding,
     NoEncryption,
@@ -29,6 +25,10 @@ from singer_sdk.authenticators import (
 
 if t.TYPE_CHECKING:
     import requests_mock
+    from cryptography.hazmat.primitives.asymmetric.rsa import (
+        RSAPrivateKey,
+        RSAPublicKey,
+    )
 
     from singer_sdk.streams import RESTStream
     from singer_sdk.tap_base import Tap

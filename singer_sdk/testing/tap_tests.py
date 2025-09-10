@@ -9,13 +9,13 @@ import pytest
 from jsonschema.exceptions import SchemaError
 
 import singer_sdk.helpers._typing as th
-from singer_sdk import Tap
 from singer_sdk.helpers._compat import datetime_fromisoformat
 from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
 
 if t.TYPE_CHECKING:
+    from singer_sdk import Tap
     from singer_sdk.streams.core import Stream
 
 

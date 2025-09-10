@@ -461,6 +461,7 @@ def test_schema_from_dict_simple():
     schema_plus = Schema.from_dict(simple_schema)
     assert schema_plus.to_dict() == simple_schema
     assert schema_plus.required == ["latitude", "longitude"]
+    assert schema_plus.properties is not None
     assert isinstance(schema_plus.properties["latitude"], Schema)
     latitude = schema_plus.properties["latitude"]
     assert latitude.type == "number"
@@ -474,6 +475,7 @@ def test_schema_from_dict_with_items():
     }
     schema_plus = Schema.from_dict(schema)
     assert schema_plus.to_dict() == schema
+    assert schema_plus.properties is not None
     assert isinstance(schema_plus.properties["fruits"], Schema)
     fruits = schema_plus.properties["fruits"]
     assert isinstance(fruits.items, Schema)

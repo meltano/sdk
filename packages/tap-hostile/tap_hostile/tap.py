@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
-from singer_sdk import Stream, Tap
+import typing as t
+
+from singer_sdk import Tap
 from singer_sdk.typing import PropertiesList
 from tap_hostile.streams import HostilePropertyNamesStream
+
+if t.TYPE_CHECKING:
+    from singer_sdk import Stream
 
 
 class TapHostile(Tap):

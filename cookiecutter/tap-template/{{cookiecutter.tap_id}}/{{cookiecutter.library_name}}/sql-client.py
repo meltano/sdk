@@ -132,9 +132,7 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
 
     def to_jsonschema_type(
         self,
-        from_type: str
-        | sqlalchemy.types.TypeEngine
-        | type[sqlalchemy.types.TypeEngine],
+        from_type: str | sqlalchemy.types.TypeEngine | type[sqlalchemy.types.TypeEngine],
     ) -> dict:
         """Returns a JSON Schema equivalent for the given SQL type.
 
