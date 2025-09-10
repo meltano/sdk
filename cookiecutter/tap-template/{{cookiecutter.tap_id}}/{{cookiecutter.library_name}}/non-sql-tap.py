@@ -2,11 +2,18 @@
 
 from __future__ import annotations
 
+import sys
+
 from singer_sdk import Tap
 from singer_sdk import typing as th  # JSON schema typing helpers
 
 # TODO: Import your custom stream types here:
 from {{ cookiecutter.library_name }} import streams
+
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 
 
 class Tap{{ cookiecutter.source_name }}(Tap):
@@ -55,6 +62,7 @@ class Tap{{ cookiecutter.source_name }}(Tap):
         {%- endif %}
     ).to_dict()
 
+    @override
     def discover_streams(self) -> list[streams.{{ cookiecutter.source_name }}Stream]:
         """Return a list of discovered streams.
 
