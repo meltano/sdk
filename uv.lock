@@ -16,6 +16,7 @@ members = [
     "tap-csv",
     "tap-dummyjson",
     "tap-fake-people",
+    "tap-fundamentals",
     "tap-gitlab",
     "tap-hostile",
     "tap-sqlite",
@@ -706,7 +707,7 @@ name = "exceptiongroup"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0b/9f/a65090624ecf468cdca03533906e7c69ed7588582240cfe7cc9e770b50eb/exceptiongroup-1.3.0.tar.gz", hash = "sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88", size = 29749, upload-time = "2025-05-10T17:42:51.123Z" }
 wheels = [
@@ -928,7 +929,7 @@ name = "importlib-metadata"
 version = "8.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "zipp" },
+    { name = "zipp", marker = "python_full_version < '3.14' or platform_python_implementation == 'PyPy'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/76/66/650a33bd90f786193e4de4b3ad86ea60b53c89b669a5c7be931fac31cdb0/importlib_metadata-8.7.0.tar.gz", hash = "sha256:d13b81ad223b890aa16c5471f2ac3056cf76c5f10f82d6f9292f0b415f389000", size = 56641, upload-time = "2025-04-27T15:29:01.736Z" }
 wheels = [
@@ -2228,6 +2229,7 @@ packages = [
     { name = "tap-csv" },
     { name = "tap-dummyjson" },
     { name = "tap-fake-people" },
+    { name = "tap-fundamentals" },
     { name = "tap-gitlab" },
     { name = "tap-hostile" },
     { name = "tap-sqlite" },
@@ -2360,6 +2362,7 @@ packages = [
     { name = "tap-csv", editable = "packages/tap-csv" },
     { name = "tap-dummyjson", editable = "packages/tap-dummyjson" },
     { name = "tap-fake-people", editable = "packages/tap-fake-people" },
+    { name = "tap-fundamentals", editable = "packages/tap-fundamentals" },
     { name = "tap-gitlab", editable = "packages/tap-gitlab" },
     { name = "tap-hostile", editable = "packages/tap-hostile" },
     { name = "tap-sqlite", editable = "packages/tap-sqlite" },
@@ -2748,6 +2751,21 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "faker" },
+    { name = "singer-sdk", editable = "." },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
+]
+
+[[package]]
+name = "tap-fundamentals"
+version = "0.1.0"
+source = { editable = "packages/tap-fundamentals" }
+dependencies = [
+    { name = "singer-sdk" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+]
+
+[package.metadata]
+requires-dist = [
     { name = "singer-sdk", editable = "." },
     { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
 ]

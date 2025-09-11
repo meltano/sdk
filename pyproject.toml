@@ -120,6 +120,7 @@ packages = [
     "tap-csv",
     "tap-dummyjson",
     "tap-fake-people",
+    "tap-fundamentals",
     "tap-gitlab",
     "tap-hostile",
     "tap-sqlite",
@@ -476,6 +477,7 @@ tap-countries = { workspace = true }
 tap-csv = { workspace = true }
 tap-dummyjson = { workspace = true }
 tap-fake-people = { workspace = true }
+tap-fundamentals = { workspace = true }
 tap-gitlab = { workspace = true }
 tap-hostile = { workspace = true }
 tap-sqlite = { workspace = true }
