@@ -21,7 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#3269](https://github.com/meltano/sdk/issues/3269) Move all SQLAlchemy-related classes to `singer_sdk.sql`, deprecate old locations and add a `sql` dependency extra
 - [#3268](https://github.com/meltano/sdk/issues/3268) Deprecate the `stream` attribute in authenticator constructors and also deprecate the `create_for_stream` method
 - [#3267](https://github.com/meltano/sdk/issues/3267) Use `typing.override` in mapper and tap templates
-- Use `typing.override` in templates
 - [#3177](https://github.com/meltano/sdk/issues/3177) Remove unused `plugin_type` attribute from test template classes
 - [#3253](https://github.com/meltano/sdk/issues/3253) Use slotted dataclasses
 
