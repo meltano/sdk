@@ -93,10 +93,7 @@ def _get_stream_param(*args: t.Any, **kwargs: t.Any) -> _HTTPStream | None:
     if len(args) == 1 and isinstance(args[0], _HTTPStream):
         return args[0]
 
-    if stream := kwargs.get("stream"):
-        return stream  # type: ignore[no-any-return]
-
-    return None
+    return stream if (stream := kwargs.get("stream")) else None
 
 
 class APIAuthenticatorBase:
