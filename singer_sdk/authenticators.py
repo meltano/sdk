@@ -256,7 +256,7 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
         *args: t.Any,
         key: str,
         value: str,
-        location: str = "header",
+        location: t.Literal["header", "params"] = "header",
         **kwargs: t.Any,
     ) -> None:
         """Create a new authenticator.
@@ -311,7 +311,7 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
         stream: _HTTPStream,
         key: str,
         value: str,
-        location: str,
+        location: t.Literal["header", "params"],
     ) -> APIKeyAuthenticator:
         """Create an Authenticator object specific to the Stream class.
 
