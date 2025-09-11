@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import os
 import typing as t
 
 import jwt
@@ -246,7 +247,7 @@ def assert_basic_auth_deprecation_warning(
     message = warning.message.args[0]
     assert isinstance(message, str)
     assert message.startswith("BasicAuthenticator is deprecated")
-    assert warning.filename.endswith(f"/{location}")
+    assert warning.filename.endswith(f"{os.path.sep}{location}")
 
 
 def assert_stream_param_deprecation_warning(warning: warnings.WarningMessage):
@@ -254,7 +255,7 @@ def assert_stream_param_deprecation_warning(warning: warnings.WarningMessage):
     message = warning.message.args[0]
     assert isinstance(message, str)
     assert message.startswith("The `stream` parameter is deprecated")
-    assert warning.filename.endswith("/authenticators.py")
+    assert warning.filename.endswith(f"{os.path.sep}authenticators.py")
 
 
 def assert_create_for_stream_deprecation_warning(warning: warnings.WarningMessage):
@@ -262,7 +263,7 @@ def assert_create_for_stream_deprecation_warning(warning: warnings.WarningMessag
     message = warning.message.args[0]
     assert isinstance(message, str)
     assert message.startswith("The `create_for_stream` method is deprecated")
-    assert warning.filename.endswith("/test_authenticators.py")
+    assert warning.filename.endswith(f"{os.path.sep}test_authenticators.py")
 
 
 def assert_config_property_deprecation_warning(warning: warnings.WarningMessage):
@@ -270,7 +271,7 @@ def assert_config_property_deprecation_warning(warning: warnings.WarningMessage)
     message = warning.message.args[0]
     assert isinstance(message, str)
     assert message.startswith("The `config` property is deprecated")
-    assert warning.filename.endswith("/authenticators.py")
+    assert warning.filename.endswith(f"{os.path.sep}authenticators.py")
 
 
 @pytest.mark.parametrize("stream_param", ["positional", "keyword"])
