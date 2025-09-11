@@ -662,7 +662,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             Authenticator instance that will be used to authenticate all outgoing
             requests.
         """
-        return SimpleAuthenticator(stream=self)
+        return SimpleAuthenticator()
 
     def backoff_wait_generator(self) -> t.Generator[float, None, None]:  # noqa: PLR6301
         """The wait generator used by the backoff decorator on request failure.

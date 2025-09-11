@@ -92,7 +92,6 @@ class LOTRCharactersStream(RESTStream):
     @property
     def authenticator(self):
         return SimpleAuthenticator(
-            stream=self,
             auth_headers={
                 "Authorization": f"Bearer {self.config.get('api_key')}",
             },
@@ -234,7 +233,7 @@ class SingletonAuthStream(RESTStream):
     @property
     def authenticator(self) -> SingletonAuthenticator:
         """Stream authenticator."""
-        return SingletonAuthenticator(stream=self)
+        return SingletonAuthenticator()
 ```
 
 ### Make a stream reuse the same authenticator instance for all requests
@@ -251,7 +250,7 @@ class CachedAuthStream(RESTStream):
     @cached_property
     def authenticator(self) -> APIAuthenticatorBase:
         """Stream authenticator."""
-        return APIAuthenticatorBase(stream=self)
+        return APIAuthenticatorBase()
 ```
 
 ### Use one of `requests`'s built-in authenticators

@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import base64
 import datetime
+import logging
 import math
 import typing as t
+import warnings
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
@@ -15,8 +17,6 @@ from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.helpers._util import utc_now
 
 if t.TYPE_CHECKING:
-    import logging
-
     from singer_sdk.streams.rest import _HTTPStream
 
 
@@ -78,6 +78,27 @@ class SingletonMeta(type):
         return single_obj
 
 
+def _get_stream_param(*args: t.Any, **kwargs: t.Any) -> _HTTPStream | None:
+    """Get the stream parameter from the arguments or keyword arguments.
+
+    Args:
+        args: Positional arguments.
+        kwargs: Keyword arguments.
+
+    Returns:
+        The stream parameter value if it is found, otherwise None.
+    """
+    from singer_sdk.streams.rest import _HTTPStream  # noqa: PLC0415
+
+    if len(args) == 1 and isinstance(args[0], _HTTPStream):
+        return args[0]
+
+    if stream := kwargs.get("stream"):
+        return stream  # type: ignore[no-any-return]
+
+    return None
+
+
 class APIAuthenticatorBase:
     """Base class for offloading API auth.
 
@@ -86,19 +107,59 @@ class APIAuthenticatorBase:
         auth_params: URL query parameters for authentication.
     """
 
-    def __init__(self, stream: _HTTPStream) -> None:
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Init authenticator.
 
         Args:
-            stream: A stream for a RESTful endpoint.
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
         """
-        self.tap_name: str = stream.tap_name
-        self._config: dict[str, t.Any] = dict(stream.config)
+        self._tap_name: str
+        self._config: dict[str, t.Any]
+
+        if stream := _get_stream_param(*args, **kwargs):
+            warnings.warn(
+                (
+                    "The `stream` parameter is deprecated and will be removed in a "
+                    "future version"
+                ),
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
+            self._tap_name = stream.tap_name
+            self._config = dict(stream.config)
+        else:
+            self._tap_name = "tap"
+            self._config = {}
+
         self.auth_headers: dict[str, t.Any] = {}
         self.auth_params: dict[str, t.Any] = {}
-        self.logger: logging.Logger = stream.logger
+        self.logger: logging.Logger = logging.getLogger(__name__)
 
     @property
+    @deprecated(
+        (
+            "This `tap_name` property is deprecated and will be removed in a "
+            "future version"
+        ),
+        category=SingerSDKDeprecationWarning,
+    )
+    def tap_name(self) -> str:
+        """Get tap name.
+
+        Returns:
+            The tap name.
+        """
+        return self._tap_name
+
+    @property
+    @deprecated(
+        (
+            "This `config` property is deprecated and will be removed in a "
+            "future version"
+        ),
+        category=SingerSDKDeprecationWarning,
+    )
     def config(self) -> t.Mapping[str, t.Any]:
         """Get stream or tap config.
 
@@ -151,8 +212,9 @@ class SimpleAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: _HTTPStream,
+        *args: t.Any,
         auth_headers: dict | None = None,
+        **kwargs: t.Any,
     ) -> None:
         """Create a new authenticator.
 
@@ -160,10 +222,15 @@ class SimpleAuthenticator(APIAuthenticatorBase):
         the stream.
 
         Args:
-            stream: The stream instance to use with this authenticator.
+            *args: Positional arguments.
             auth_headers: Authentication headers.
+            **kwargs: Keyword arguments.
         """
-        super().__init__(stream=stream)
+        if stream := _get_stream_param(*args, **kwargs):
+            super().__init__(stream=stream)
+        else:
+            super().__init__(*args, **kwargs)
+
         if self.auth_headers is None:
             self.auth_headers = {}  # type: ignore[unreachable]
         if auth_headers:
@@ -181,23 +248,29 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: _HTTPStream,
+        *args: t.Any,
         key: str,
         value: str,
         location: str = "header",
+        **kwargs: t.Any,
     ) -> None:
         """Create a new authenticator.
 
         Args:
-            stream: The stream instance to use with this authenticator.
+            *args: Positional arguments.
             key: API key parameter name.
             value: API key value.
             location: Where the API key is to be added. Either 'header' or 'params'.
+            **kwargs: Keyword arguments.
 
         Raises:
             ValueError: If the location value is not 'header' or 'params'.
         """
-        super().__init__(stream=stream)
+        if stream := _get_stream_param(*args, **kwargs):
+            super().__init__(stream=stream)
+        else:
+            super().__init__(*args, **kwargs)
+
         auth_credentials = {key: value}
 
         if location not in {"header", "params"}:
@@ -214,6 +287,13 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
             self.auth_params.update(auth_credentials)
 
     @classmethod
+    @deprecated(
+        (
+            "This `create_for_stream` method is deprecated and will be removed in a "
+            "future version"
+        ),
+        category=SingerSDKDeprecationWarning,
+    )
     def create_for_stream(
         cls: type[APIKeyAuthenticator],
         stream: _HTTPStream,
@@ -244,14 +324,19 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
     'Bearer '. The token will be merged with HTTP headers on the stream.
     """
 
-    def __init__(self, stream: _HTTPStream, token: str) -> None:
+    def __init__(self, *args: t.Any, token: str, **kwargs: t.Any) -> None:
         """Create a new authenticator.
 
         Args:
-            stream: The stream instance to use with this authenticator.
+            *args: Positional arguments.
             token: Authentication token.
+            **kwargs: Keyword arguments.
         """
-        super().__init__(stream=stream)
+        if stream := _get_stream_param(*args, **kwargs):
+            super().__init__(stream=stream)
+        else:
+            super().__init__(*args, **kwargs)
+
         auth_credentials = {"Authorization": f"Bearer {token}"}
 
         if self.auth_headers is None:
@@ -259,6 +344,13 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
         self.auth_headers.update(auth_credentials)
 
     @classmethod
+    @deprecated(
+        (
+            "This `create_for_stream` method is deprecated and will be removed in a "
+            "future version"
+        ),
+        category=SingerSDKDeprecationWarning,
+    )
     def create_for_stream(
         cls: type[BearerTokenAuthenticator],
         stream: _HTTPStream,
@@ -295,18 +387,23 @@ class BasicAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: _HTTPStream,
+        *args: t.Any,
         username: str,
         password: str,
+        **kwargs: t.Any,
     ) -> None:
         """Create a new authenticator.
 
         Args:
-            stream: The stream instance to use with this authenticator.
+            *args: Positional arguments.
             username: API username.
             password: API password.
+            **kwargs: Keyword arguments.
         """
-        super().__init__(stream=stream)
+        if stream := _get_stream_param(*args, **kwargs):
+            super().__init__(stream=stream)
+        else:
+            super().__init__(*args, **kwargs)
 
         credentials = f"{username}:{password}".encode()
         auth_token = base64.b64encode(credentials).decode("ascii")
@@ -317,6 +414,13 @@ class BasicAuthenticator(APIAuthenticatorBase):
         self.auth_headers.update(auth_credentials)
 
     @classmethod
+    @deprecated(
+        (
+            "This `create_for_stream` method is deprecated and will be removed in a "
+            "future version"
+        ),
+        category=SingerSDKDeprecationWarning,
+    )
     def create_for_stream(
         cls: type[BasicAuthenticator],
         stream: _HTTPStream,
@@ -342,22 +446,37 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: _HTTPStream,
+        *args: t.Any,
         auth_endpoint: str | None = None,
         oauth_scopes: str | None = None,
         default_expiration: int | None = None,
         oauth_headers: dict | None = None,
+        client_id: str | None = None,
+        client_secret: str | None = None,
+        **kwargs: t.Any,
     ) -> None:
         """Create a new authenticator.
 
         Args:
+            *args: Positional arguments.
             stream: The stream instance to use with this authenticator.
             auth_endpoint: The OAuth 2.0 authorization endpoint.
             oauth_scopes: A comma-separated list of OAuth scopes.
             default_expiration: Default token expiry in seconds.
             oauth_headers: An optional dict of headers required to get a token.
+            client_id: The client ID to use in authentication.
+            client_secret: The client secret to use in authentication.
+            **kwargs: Keyword arguments.
         """
-        super().__init__(stream=stream)
+        if stream := _get_stream_param(*args, **kwargs):
+            super().__init__(stream=stream)
+            self._client_id = self.config.get("client_id")
+            self._client_secret = self.config.get("client_secret")
+        else:
+            super().__init__(*args, **kwargs)
+            self._client_id = client_id
+            self._client_secret = client_secret
+
         self._auth_endpoint = auth_endpoint
         self._default_expiration = default_expiration
         self._oauth_scopes = oauth_scopes
@@ -435,9 +554,9 @@ class OAuthAuthenticator(APIAuthenticatorBase):
                     "grant_type": "password",
                     "scope": "https://api.powerbi.com",
                     "resource": "https://analysis.windows.net/powerbi/api",
-                    "client_id": self.config["client_id"],
-                    "username": self.config.get("username", self.config["client_id"]),
-                    "password": self.config["password"],
+                    "client_id": self.client_id,
+                    "username": self.username,
+                    "password": self.password,
                 }
 
         Raises:
@@ -453,7 +572,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         Returns:
             Optional client secret from stream config if it has been set.
         """
-        return self.config.get("client_id") if self.config else None
+        return self._client_id
 
     @property
     def client_secret(self) -> str | None:
@@ -462,7 +581,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         Returns:
             Optional client secret from stream config if it has been set.
         """
-        return self.config.get("client_secret") if self.config else None
+        return self._client_secret
 
     def is_token_valid(self) -> bool:
         """Check if token is valid.
@@ -515,6 +634,23 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 class OAuthJWTAuthenticator(OAuthAuthenticator):
     """API Authenticator for OAuth 2.0 flows which utilize a JWT refresh token."""
 
+    def __init__(
+        self,
+        *args: t.Any,
+        private_key: str | None = None,
+        private_key_passphrase: str | None = None,
+        **kwargs: t.Any,
+    ) -> None:
+        """Create a new JWT authenticator."""
+        if stream := _get_stream_param(*args, **kwargs):
+            super().__init__(stream=stream)
+            self._private_key = self.config.get("private_key")
+            self._private_key_passphrase = self.config.get("private_key_passphrase")
+        else:
+            super().__init__(*args, **kwargs)
+            self._private_key = private_key
+            self._private_key_passphrase = private_key_passphrase
+
     @property
     def private_key(self) -> str | None:
         """Return the private key to use in encryption.
@@ -522,7 +658,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         Returns:
             Private key from stream config.
         """
-        return self.config.get("private_key", None)
+        return self._private_key
 
     @property
     def private_key_passphrase(self) -> str | None:
@@ -531,7 +667,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         Returns:
             Passphrase for private key from stream config.
         """
-        return self.config.get("private_key_passphrase", None)
+        return self._private_key_passphrase
 
     @property
     def oauth_request_body(self) -> dict:

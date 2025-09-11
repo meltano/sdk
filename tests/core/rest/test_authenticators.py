@@ -230,5 +230,6 @@ def test_basic_auth_deprecation_warning(rest_tap: Tap):
     with pytest.deprecated_call(match="BasicAuthenticator is deprecated") as recorder:
         BasicAuthenticator(stream=stream, username="username", password="password")  # noqa: S106
 
-    assert len(recorder.list) == 1
+    assert len(recorder.list) == 2
     assert recorder.list[0].filename.endswith("test_authenticators.py")
+    assert recorder.list[1].filename.endswith("authenticators.py")
