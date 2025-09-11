@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import os
 import typing as t
+import warnings
 
 import jwt
 import pytest
@@ -29,8 +30,6 @@ from singer_sdk.authenticators import (
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 
 if t.TYPE_CHECKING:
-    import warnings
-
     import requests_mock
     from cryptography.hazmat.primitives.asymmetric.rsa import (
         RSAPrivateKey,
@@ -298,6 +297,10 @@ def test_api_key_authenticator_stream_param_deprecation_warning(
     stream_param: t.Literal["positional", "keyword"],
 ):
     """Validate that a warning is emitted when using stream parameter."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        APIKeyAuthenticator(key="api-key", value="secret")
+
     stream: RESTStream = rest_tap.streams["some_stream"]
     args, kwargs = _get_args_kwargs(stream_param, stream)
     with pytest.deprecated_call() as recorder:
@@ -313,6 +316,10 @@ def test_bearer_token_authenticator_stream_param_deprecation_warning(
     stream_param: t.Literal["positional", "keyword"],
 ):
     """Validate that a warning is emitted when using stream parameter."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        BearerTokenAuthenticator(token="bearer-token")  # noqa: S106
+
     stream: RESTStream = rest_tap.streams["some_stream"]
     args, kwargs = _get_args_kwargs(stream_param, stream)
     with pytest.deprecated_call() as recorder:
@@ -328,6 +335,10 @@ def test_simple_authenticator_stream_param_deprecation_warning(
     stream_param: t.Literal["positional", "keyword"],
 ):
     """Validate that a warning is emitted when using stream parameter."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        SimpleAuthenticator(auth_endpoint="https://example.com/oauth")
+
     stream: RESTStream = rest_tap.streams["some_stream"]
     args, kwargs = _get_args_kwargs(stream_param, stream)
     with pytest.deprecated_call() as recorder:
@@ -343,6 +354,10 @@ def test_oauth_authenticator_stream_param_deprecation_warning(
     stream_param: t.Literal["positional", "keyword"],
 ):
     """Validate that a warning is emitted when using stream parameter."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        _FakeOAuthAuthenticator(auth_endpoint="https://example.com/oauth")
+
     stream: RESTStream = rest_tap.streams["some_stream"]
     args, kwargs = _get_args_kwargs(stream_param, stream)
     with pytest.deprecated_call() as recorder:
@@ -366,6 +381,10 @@ def test_oauth_jwt_authenticator_stream_param_deprecation_warning(
     stream_param: t.Literal["positional", "keyword"],
 ):
     """Validate that a warning is emitted when using stream parameter."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        OAuthJWTAuthenticator(auth_endpoint="https://example.com/oauth")
+
     stream: RESTStream = rest_tap.streams["some_stream"]
     args, kwargs = _get_args_kwargs(stream_param, stream)
     with pytest.deprecated_call() as recorder:
