@@ -123,6 +123,21 @@ def test_basic_authenticator():
     assert auth.auth_params == {}
 
 
+def test_oauth_authenticator():
+    auth = OAuthAuthenticator(client_id="client-id", client_secret="client-secret")  # noqa: S106
+    assert auth.client_id == "client-id"
+    assert auth.client_secret == "client-secret"  # noqa: S105
+
+
+def test_oauth_jwt_authenticator():
+    auth = OAuthJWTAuthenticator(
+        private_key="private-key",
+        private_key_passphrase="private-key-passphrase",  # noqa: S106
+    )
+    assert auth.private_key == "private-key"
+    assert auth.private_key_passphrase == "private-key-passphrase"  # noqa: S105
+
+
 class _FakeOAuthAuthenticator(OAuthAuthenticator):
     def oauth_request_body(self) -> dict:
         return {}
