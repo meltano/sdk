@@ -96,6 +96,17 @@ def _get_stream_param(*args: t.Any, **kwargs: t.Any) -> _HTTPStream | None:
     return kwargs.get("stream")
 
 
+def _warn_stream_param_deprecation() -> None:
+    warnings.warn(
+        (
+            "The `stream` parameter is deprecated and will be removed in a "
+            "future version"
+        ),
+        SingerSDKDeprecationWarning,
+        stacklevel=2,
+    )
+
+
 class APIAuthenticatorBase:
     """Base class for offloading API auth.
 
@@ -115,14 +126,7 @@ class APIAuthenticatorBase:
         self._config: dict[str, t.Any]
 
         if stream := _get_stream_param(*args, **kwargs):
-            warnings.warn(
-                (
-                    "The `stream` parameter is deprecated and will be removed in a "
-                    "future version"
-                ),
-                SingerSDKDeprecationWarning,
-                stacklevel=2,
-            )
+            _warn_stream_param_deprecation()
             self._tap_name = stream.tap_name
             self._config = dict(stream.config)
         else:
@@ -221,7 +225,14 @@ class SimpleAuthenticator(APIAuthenticatorBase):
             **kwargs: Keyword arguments.
         """
         if stream := _get_stream_param(*args, **kwargs):
-            super().__init__(stream=stream)
+            _warn_stream_param_deprecation()
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message=r"The `stream` parameter is deprecated.*",
+                    category=SingerSDKDeprecationWarning,
+                )
+                super().__init__(stream=stream)
         else:
             super().__init__(*args, **kwargs)
 
@@ -261,7 +272,14 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
             ValueError: If the location value is not 'header' or 'params'.
         """
         if stream := _get_stream_param(*args, **kwargs):
-            super().__init__(stream=stream)
+            _warn_stream_param_deprecation()
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message=r"The `stream` parameter is deprecated.*",
+                    category=SingerSDKDeprecationWarning,
+                )
+                super().__init__(stream=stream)
         else:
             super().__init__(*args, **kwargs)
 
@@ -327,7 +345,14 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
             **kwargs: Keyword arguments.
         """
         if stream := _get_stream_param(*args, **kwargs):
-            super().__init__(stream=stream)
+            _warn_stream_param_deprecation()
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message=r"The `stream` parameter is deprecated.*",
+                    category=SingerSDKDeprecationWarning,
+                )
+                super().__init__(stream=stream)
         else:
             super().__init__(*args, **kwargs)
 
@@ -395,7 +420,14 @@ class BasicAuthenticator(APIAuthenticatorBase):
             **kwargs: Keyword arguments.
         """
         if stream := _get_stream_param(*args, **kwargs):
-            super().__init__(stream=stream)
+            _warn_stream_param_deprecation()
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message=r"The `stream` parameter is deprecated.*",
+                    category=SingerSDKDeprecationWarning,
+                )
+                super().__init__(stream=stream)
         else:
             super().__init__(*args, **kwargs)
 
@@ -463,7 +495,14 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             **kwargs: Keyword arguments.
         """
         if stream := _get_stream_param(*args, **kwargs):
-            super().__init__(stream=stream)
+            _warn_stream_param_deprecation()
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message=r"The `stream` parameter is deprecated.*",
+                    category=SingerSDKDeprecationWarning,
+                )
+                super().__init__(stream=stream)
             self._client_id = self.config.get("client_id")
             self._client_secret = self.config.get("client_secret")
         else:
@@ -637,7 +676,14 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
     ) -> None:
         """Create a new JWT authenticator."""
         if stream := _get_stream_param(*args, **kwargs):
-            super().__init__(stream=stream)
+            _warn_stream_param_deprecation()
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message=r"The `stream` parameter is deprecated.*",
+                    category=SingerSDKDeprecationWarning,
+                )
+                super().__init__(stream=stream)
             self._private_key = self.config.get("private_key")
             self._private_key_passphrase = self.config.get("private_key_passphrase")
         else:
