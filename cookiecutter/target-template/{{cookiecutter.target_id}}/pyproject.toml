@@ -31,9 +31,9 @@ license-files = [ "LICENSE" ]
 requires-python = ">=3.10"
 dependencies = [
     {%- if cookiecutter.faker_extra %}
-    "singer-sdk[faker]~=0.48.1",
+    "singer-sdk[faker]~=0.49.0",
     {%- else %}
-    "singer-sdk~=0.48.1",
+    "singer-sdk~=0.49.0",
     {%- endif %}
     {%- if cookiecutter.serialization_method == "SQL" %}
     "sqlalchemy~=2.0",

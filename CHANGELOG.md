@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.49.0 (2025-09-11)
+
+### ✨ New
+
+- [#3262](https://github.com/meltano/sdk/issues/3262) By default `ObjectType` fields now use `additionalProperties: true`
+- [#3196](https://github.com/meltano/sdk/issues/3196) Use `ty` to check types in tap, target and mapper templates
+
+### 🐛 Fixes
+
+- [#3257](https://github.com/meltano/sdk/issues/3257) Add `DecimalType` alias for `NumberType`
+
+### ⚙️ Under the Hood
+
+- [#3269](https://github.com/meltano/sdk/issues/3269) Move all SQLAlchemy-related classes to `singer_sdk.sql`, deprecate old locations and add a `sql` dependency extra
+- [#3268](https://github.com/meltano/sdk/issues/3268) Deprecate the `stream` attribute in authenticator constructors and also deprecate the `create_for_stream` method
+- [#3267](https://github.com/meltano/sdk/issues/3267) Use `typing.override` in mapper and tap templates
+- Use `typing.override` in templates
+- [#3177](https://github.com/meltano/sdk/issues/3177) Remove unused `plugin_type` attribute from test template classes
+- [#3253](https://github.com/meltano/sdk/issues/3253) Use slotted dataclasses
+
+### 📚 Documentation Improvements
+
+- [#3258](https://github.com/meltano/sdk/issues/3258) Update docs landing page
+- [#3254](https://github.com/meltano/sdk/issues/3254) Link to https://github.com/meltano/sdk/contribute
+
+### 📦 Packaging changes
+
+- [#3252](https://github.com/meltano/sdk/issues/3252) Dropped support for Python 3.9
+
 ## v0.48.1 (2025-08-21)
 
 ### ✨ New
