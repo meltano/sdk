@@ -236,7 +236,7 @@ class SimpleAuthenticator(APIAuthenticatorBase):
         else:
             super().__init__(*args, **kwargs)
 
-        if self.auth_headers is None:
+        if self.auth_headers is None:  # pragma: no cover
             self.auth_headers = {}  # type: ignore[unreachable]
         if auth_headers:
             self.auth_headers.update(auth_headers)
@@ -290,11 +290,11 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
             raise ValueError(msg)
 
         if location == "header":
-            if self.auth_headers is None:
+            if self.auth_headers is None:  # pragma: no cover
                 self.auth_headers = {}  # type: ignore[unreachable]
             self.auth_headers.update(auth_credentials)
         elif location == "params":
-            if self.auth_params is None:
+            if self.auth_params is None:  # pragma: no cover
                 self.auth_params = {}  # type: ignore[unreachable]
             self.auth_params.update(auth_credentials)
 
@@ -358,7 +358,7 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
 
         auth_credentials = {"Authorization": f"Bearer {token}"}
 
-        if self.auth_headers is None:
+        if self.auth_headers is None:  # pragma: no cover
             self.auth_headers = {}  # type: ignore[unreachable]
         self.auth_headers.update(auth_credentials)
 
@@ -435,7 +435,7 @@ class BasicAuthenticator(APIAuthenticatorBase):
         auth_token = base64.b64encode(credentials).decode("ascii")
         auth_credentials = {"Authorization": f"Basic {auth_token}"}
 
-        if self.auth_headers is None:
+        if self.auth_headers is None:  # pragma: no cover
             self.auth_headers = {}  # type: ignore[unreachable]
         self.auth_headers.update(auth_credentials)
 
