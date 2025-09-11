@@ -235,7 +235,7 @@ def _get_args_kwargs(
     stream_param: t.Literal["positional", "keyword"],
     stream: RESTStream,
 ) -> tuple[tuple[t.Any, ...], dict[str, t.Any]]:
-    return ((stream,), {}) if stream_param == "positional" else (), {"stream": stream}
+    return ((stream,), {}) if stream_param == "positional" else ((), {"stream": stream})
 
 
 def assert_basic_auth_deprecation_warning(
