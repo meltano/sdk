@@ -136,7 +136,7 @@ class APIAuthenticatorBase:
     @property
     @deprecated(
         (
-            "This `tap_name` property is deprecated and will be removed in a "
+            "The `tap_name` property is deprecated and will be removed in a "
             "future version"
         ),
         category=SingerSDKDeprecationWarning,
@@ -151,10 +151,7 @@ class APIAuthenticatorBase:
 
     @property
     @deprecated(
-        (
-            "This `config` property is deprecated and will be removed in a "
-            "future version"
-        ),
+        "The `config` property is deprecated and will be removed in a future version",
         category=SingerSDKDeprecationWarning,
     )
     def config(self) -> t.Mapping[str, t.Any]:
@@ -286,7 +283,7 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
     @classmethod
     @deprecated(
         (
-            "This `create_for_stream` method is deprecated and will be removed in a "
+            "The `create_for_stream` method is deprecated and will be removed in a "
             "future version"
         ),
         category=SingerSDKDeprecationWarning,
@@ -343,7 +340,7 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
     @classmethod
     @deprecated(
         (
-            "This `create_for_stream` method is deprecated and will be removed in a "
+            "The `create_for_stream` method is deprecated and will be removed in a "
             "future version"
         ),
         category=SingerSDKDeprecationWarning,
@@ -413,7 +410,7 @@ class BasicAuthenticator(APIAuthenticatorBase):
     @classmethod
     @deprecated(
         (
-            "This `create_for_stream` method is deprecated and will be removed in a "
+            "The `create_for_stream` method is deprecated and will be removed in a "
             "future version"
         ),
         category=SingerSDKDeprecationWarning,
