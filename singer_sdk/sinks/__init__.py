@@ -10,6 +10,9 @@ from singer_sdk.sinks.batch import BatchSink
 from singer_sdk.sinks.core import Sink
 from singer_sdk.sinks.record import RecordSink
 
+if t.TYPE_CHECKING:
+    from singer_sdk.sql import SQLSink  # noqa: F401
+
 __all__ = ["BatchSink", "RecordSink", "Sink"]
 
 
