@@ -36,7 +36,6 @@ repos:
       (?x)^(
         cookiecutter/.*|
         docs/.*|
-        samples/.*\.json|
         tests/.*snapshots/.*
       )$
   - id: trailing-whitespace
@@ -73,6 +72,10 @@ repos:
   rev: v2.4.1
   hooks:
   - id: codespell
+    exclude: |
+      (?x)^(
+        packages/.*\.json|
+      )$
 
 - repo: https://github.com/executablebooks/mdformat
   rev: 0.7.22

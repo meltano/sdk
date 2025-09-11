@@ -4,23 +4,36 @@ from __future__ import annotations
 
 import importlib.resources
 import json
+import sys
 import typing as t
 
 from singer_sdk import SchemaDirectory, Stream, StreamSchema, Tap
 
-PROJECT_DIR = importlib.resources.files("samples.aapl")
+from . import data
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers.types import Context
+
+PROJECT_DIR = importlib.resources.files(data)
+SCHEMA_DIR = SchemaDirectory(PROJECT_DIR)
 
 
 class AAPL(Stream):
     """An AAPL stream."""
 
     name = "aapl"
-    schema: t.ClassVar[StreamSchema] = StreamSchema(
-        SchemaDirectory(PROJECT_DIR),
-        key="fundamentals",
-    )
+    schema: t.ClassVar[StreamSchema] = StreamSchema(SCHEMA_DIR, key="fundamentals")
 
-    def get_records(self, _):  # noqa: PLR6301
+    @override
+    def get_records(
+        self,
+        context: Context | None = None,
+    ) -> t.Iterator[dict[str, t.Any]]:
         """Generate a single record."""
         with PROJECT_DIR.joinpath("AAPL.json").open() as f:
             record = json.load(f)
@@ -33,6 +46,7 @@ class Fundamentals(Tap):
 
     name = "fundamentals"
 
-    def discover_streams(self):
+    @override
+    def discover_streams(self) -> list[AAPL]:
         """Get financial streams."""
         return [AAPL(self)]
