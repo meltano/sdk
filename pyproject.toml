@@ -82,6 +82,10 @@ msgspec = [
     "msgspec>=0.19.0",
 ]
 
+sql = [
+    "sqlalchemy>=2",
+]
+
 [project.urls]
 Homepage = "https://sdk.meltano.com/en/latest/"
 Repository = "https://github.com/meltano/sdk"
@@ -192,8 +196,8 @@ filterwarnings = [
     "ignore::ResourceWarning",
     # universal-pathlib
     "once:in a future version of UPath this will be set to None:PendingDeprecationWarning",
-    # Our own warnings:
-    "ignore:Use DecimalType instead:DeprecationWarning",
+    # Our own warnings
+    "once::singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
 ]
 log_cli_level = "INFO"
 log_format = "%(levelname)s %(name)s %(message)s"
