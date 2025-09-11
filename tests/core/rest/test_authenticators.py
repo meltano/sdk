@@ -104,6 +104,16 @@ def test_simple_authenticator():
     assert auth.auth_headers == {"Authorization": "Bearer token"}
 
 
+def test_api_key_authenticator():
+    auth = APIKeyAuthenticator(key="api-key", value="secret")
+    assert auth.auth_headers == {"api-key": "secret"}
+    assert auth.auth_params == {}
+
+    auth = APIKeyAuthenticator(key="api-key", value="secret", location="params")
+    assert auth.auth_headers == {}
+    assert auth.auth_params == {"api-key": "secret"}
+
+
 class _FakeOAuthAuthenticator(OAuthAuthenticator):
     def oauth_request_body(self) -> dict:
         return {}
