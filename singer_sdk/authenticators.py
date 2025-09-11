@@ -90,10 +90,10 @@ def _get_stream_param(*args: t.Any, **kwargs: t.Any) -> _HTTPStream | None:
     """
     from singer_sdk.streams.rest import _HTTPStream  # noqa: PLC0415
 
-    if len(args) == 1 and isinstance(args[0], _HTTPStream):
+    if len(args) >= 1 and isinstance(args[0], _HTTPStream):
         return args[0]
 
-    return stream if (stream := kwargs.get("stream")) else None
+    return kwargs.get("stream")
 
 
 class APIAuthenticatorBase:
