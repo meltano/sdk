@@ -20,6 +20,15 @@ from singer_sdk.streams import GraphQLStream, RESTStream, Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
 
+if t.TYPE_CHECKING:
+    from singer_sdk.sql import (  # noqa: F401
+        SQLConnector,
+        SQLSink,
+        SQLStream,
+        SQLTap,
+        SQLTarget,
+    )
+
 __all__ = [
     "BatchSink",
     "GraphQLStream",
