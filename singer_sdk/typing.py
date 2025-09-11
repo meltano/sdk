@@ -55,7 +55,6 @@ from __future__ import annotations
 import json
 import typing as t
 
-import sqlalchemy.types
 from jsonschema import validators
 
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
@@ -67,6 +66,7 @@ from singer_sdk.helpers._typing import (
 )
 
 if t.TYPE_CHECKING:
+    import sqlalchemy.types
     from jsonschema import ValidationError
     from jsonschema.protocols import Validator
 
@@ -1321,6 +1321,8 @@ def to_jsonschema_type(
     Returns:
         A compatible JSON Schema type definition.
     """
+    import sqlalchemy.types  # noqa: PLC0415
+
     sqltype_lookup: dict[str, dict] = {
         # NOTE: This is an ordered mapping, with earlier mappings taking precedence.
         #       If the SQL-provided type contains the type name on the left, the mapping
@@ -1398,6 +1400,8 @@ def to_sql_type(  # noqa: PLR0911, C901
     Returns:
         The SQL type.
     """
+    import sqlalchemy.types  # noqa: PLC0415
+
     if _jsonschema_type_check(jsonschema_type, ("object",)):
         return sqlalchemy.types.VARCHAR()
 
