@@ -114,6 +114,15 @@ def test_api_key_authenticator():
     assert auth.auth_params == {"api-key": "secret"}
 
 
+def test_basic_authenticator():
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        auth = BasicAuthenticator(username="username", password="password")  # noqa: S106
+
+    assert auth.auth_headers == {"Authorization": "Basic dXNlcm5hbWU6cGFzc3dvcmQ="}
+    assert auth.auth_params == {}
+
+
 class _FakeOAuthAuthenticator(OAuthAuthenticator):
     def oauth_request_body(self) -> dict:
         return {}
