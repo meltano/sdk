@@ -96,6 +96,14 @@ def test_authenticator_is_reused(
     assert (stream.authenticator is other_stream.authenticator) is auth_reused
 
 
+def test_simple_authenticator():
+    auth = SimpleAuthenticator()
+    assert auth.auth_headers == {}
+
+    auth = SimpleAuthenticator(auth_headers={"Authorization": "Bearer token"})
+    assert auth.auth_headers == {"Authorization": "Bearer token"}
+
+
 class _FakeOAuthAuthenticator(OAuthAuthenticator):
     def oauth_request_body(self) -> dict:
         return {}

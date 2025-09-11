@@ -151,7 +151,7 @@ class APIAuthenticatorBase:
         Returns:
             The tap name.
         """
-        return self._tap_name
+        return self._tap_name  # pragma: no cover
 
     @property
     @deprecated(
