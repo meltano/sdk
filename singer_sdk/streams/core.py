@@ -721,7 +721,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     @property
     def emit_activate_version_messages(self) -> bool:
         """Get whether to emit `ACTIVATE_VERSION` messages."""
-        return self.config.get("emit_activate_version_messages", False)
+        return self.config.get("emit_activate_version_messages", False)  # type: ignore[no-any-return]
 
     # State properties:
 

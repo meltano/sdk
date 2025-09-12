@@ -80,8 +80,8 @@ class SDKBatchMessage(Message):
     """If syncing in FULL_TABLE mode, the start time as an epoch timestamp int."""
 
     def __post_init__(self) -> None:
-        if isinstance(self.encoding, dict):
-            self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
+        if isinstance(self.encoding, dict):  # type: ignore[unreachable]
+            self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)  # type: ignore[unreachable]
 
         self.type = SingerMessageType.BATCH
 
@@ -209,8 +209,8 @@ class BatchConfig:
     """The max number of records in a batch."""
 
     def __post_init__(self) -> None:
-        if isinstance(self.encoding, dict):
-            self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
+        if isinstance(self.encoding, dict):  # type: ignore[unreachable]
+            self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)  # type: ignore[unreachable]
 
         if isinstance(self.storage, dict):
             self.storage = StorageTarget.from_dict(self.storage)

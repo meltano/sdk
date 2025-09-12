@@ -226,7 +226,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             True if JSON schema validation is enabled.
         """
-        return self.config.get("validate_records", True)
+        return self.config.get("validate_records", True)  # type: ignore[no-any-return]
 
     def get_validator(self) -> BaseJSONSchemaValidator | None:
         """Get a record validator for this sink.
@@ -396,7 +396,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             True if metadata columns should be added.
         """
-        return self.config.get("add_record_metadata", False)
+        return self.config.get("add_record_metadata", False)  # type: ignore[no-any-return]
 
     @property
     def process_activate_version_messages(self) -> bool:
@@ -405,7 +405,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             True if activate version messages should be processed.
         """
-        return self.config.get("process_activate_version_messages", True)
+        return self.config.get("process_activate_version_messages", True)  # type: ignore[no-any-return]
 
     @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:

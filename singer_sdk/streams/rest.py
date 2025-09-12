@@ -201,7 +201,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
 
         .. versionadded:: 0.40.0
         """
-        return self.config.get(
+        return self.config.get(  # type: ignore[no-any-return]
             "user_agent",
             f"{self.tap_name}/{self._tap.plugin_version}",
         )
