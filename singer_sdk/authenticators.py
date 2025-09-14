@@ -146,12 +146,13 @@ class APIAuthenticatorBase:
         category=SingerSDKDeprecationWarning,
     )
     def tap_name(self) -> str:
-        """Get tap name.
-
-        Returns:
-            The tap name.
-        """
+        """The tap name."""
         return self._tap_name  # pragma: no cover
+
+    @tap_name.setter
+    def tap_name(self, name: str) -> None:
+        """Set the tap name."""
+        self._tap_name = name
 
     @property
     @deprecated(
