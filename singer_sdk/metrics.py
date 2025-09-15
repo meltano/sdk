@@ -86,6 +86,15 @@ class Point(t.Generic[_TVal]):
             "tags": self.tags,
         }
 
+    def to_json(self) -> str:
+        """Convert this measure to a JSON string.
+
+        Returns:
+            A JSON string.
+        """
+        return json.dumps(self.to_dict(), default=str, separators=(",", ":"))
+
+
 
 def _to_json(point: dict) -> str:
     """Convert this measure to a JSON string.
@@ -196,7 +205,7 @@ def log(logger: logging.Logger, point: Point) -> None:
         point: A measurement.
     """
     point_dict = point.to_dict()
-    logger.info("METRIC: %s", _to_json(point_dict), extra={"point": point_dict})
+    logger.info("METRIC", extra={"point": point_dict})
 
 
 class Meter(metaclass=abc.ABCMeta):

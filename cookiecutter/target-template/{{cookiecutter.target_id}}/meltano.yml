@@ -24,6 +24,8 @@ plugins:
     - about
     - stream-maps
     - schema-flattening
+    - structured-logging
+    log_parser: singer-sdk
 
     # TODO: Declare settings and their types here:
     settings:
