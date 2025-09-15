@@ -95,7 +95,6 @@ class Point(t.Generic[_TVal]):
         return json.dumps(self.to_dict(), default=str, separators=(",", ":"))
 
 
-
 def _to_json(point: dict) -> str:
     """Convert this measure to a JSON string.
 
