@@ -136,6 +136,7 @@ class TestTapTestClassFactory:
             tap_class=factory.tap_class,
             config=factory.config,
             suite_config=None,
+            streams=None,
             parse_env_config=True,
         )
 
@@ -176,6 +177,7 @@ class TestTapTestClassFactory:
             tap_class=factory.tap_class,
             config=factory.config,
             suite_config=suite_config,
+            streams=None,
             parse_env_config=False,
             custom_kwarg=custom_kwarg,
         )
@@ -636,6 +638,7 @@ class TestConvenienceFunctions:
             include_tap_tests=True,
             include_stream_tests=False,
             include_stream_attribute_tests=True,
+            streams=None,
             custom_kwarg="value",
         )
 
