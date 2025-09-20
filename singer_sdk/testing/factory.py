@@ -17,6 +17,8 @@ from .suites import (
 )
 
 if t.TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from singer_sdk import Stream, Tap, Target
     from singer_sdk.testing.templates import (
         AttributeTestTemplate,
@@ -91,6 +93,7 @@ class TapTestClassFactory:
         include_stream_attribute_tests: bool = True,
         custom_suites: list | None = None,
         suite_config: SuiteConfig | None = None,
+        streams: Sequence[str] | None = None,
         **kwargs: t.Any,
     ) -> type[BaseTestClass]:
         """Get a new test class.
@@ -102,6 +105,7 @@ class TapTestClassFactory:
                 Include stream attribute tests in the test class.
             custom_suites: List of custom test suites to include in the test class.
             suite_config: SuiteConfig instance to be used when instantiating tests.
+            streams: Streams to test.
             kwargs: Default arguments to be passed to tap on create.
 
         Returns:
@@ -124,6 +128,7 @@ class TapTestClassFactory:
             tap_class=self.tap_class,
             config=self.config,
             suite_config=suite_config,
+            streams=streams,
             **kwargs,
         )
 
@@ -396,6 +401,7 @@ def get_tap_test_class(
     include_stream_attribute_tests: bool = True,
     custom_suites: list | None = None,
     suite_config: SuiteConfig | None = None,
+    streams: Sequence[str] | None = None,
     **kwargs: t.Any,
 ) -> type[BaseTestClass]:
     """Get Tap Test Class.
@@ -408,6 +414,7 @@ def get_tap_test_class(
         include_stream_attribute_tests: Include Tap stream attribute tests.
         custom_suites: Custom test suites to add to standard tests.
         suite_config: SuiteConfig instance to pass to tests.
+        streams: Streams to test.
         kwargs: Keyword arguments to pass to the TapRunner.
 
     Returns:
@@ -423,6 +430,7 @@ def get_tap_test_class(
         include_tap_tests=include_tap_tests,
         include_stream_tests=include_stream_tests,
         include_stream_attribute_tests=include_stream_attribute_tests,
+        streams=streams,
         **kwargs,
     )
 

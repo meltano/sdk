@@ -14,6 +14,7 @@ from singer_sdk.plugin_base import PluginBase
 from singer_sdk.testing.config import SuiteConfig
 
 if t.TYPE_CHECKING:
+    from collections.abc import Sequence
     from pathlib import Path
 
     from singer_sdk.helpers._compat import Traversable
@@ -96,6 +97,8 @@ class TapTestRunner(SingerTestRunner[Tap]):
         tap_class: type[Tap],
         config: dict | None = None,
         suite_config: SuiteConfig | None = None,
+        *,
+        streams: Sequence[str] | None = None,
         **kwargs: t.Any,
     ) -> None:
         """Initialize Tap instance.
@@ -105,6 +108,7 @@ class TapTestRunner(SingerTestRunner[Tap]):
             config: Config dict to pass to Tap class.
             suite_config (SuiteConfig): SuiteConfig instance to be used when
                 instantiating tests.
+            streams: Streams to test.
             kwargs: Default arguments to be passed to tap on create.
         """
         super().__init__(
@@ -113,6 +117,7 @@ class TapTestRunner(SingerTestRunner[Tap]):
             suite_config=suite_config,
             **kwargs,
         )
+        self.streams = streams
 
     def new_tap(self) -> Tap:
         """Get new Tap instance.
@@ -148,6 +153,7 @@ class TapTestRunner(SingerTestRunner[Tap]):
         new_tap = self.new_tap()
         return new_tap.run_sync_dry_run(
             dry_run_record_limit=self.suite_config.max_records_limit,
+            streams=self.streams,
         )
 
     def sync_all(self, **kwargs: t.Any) -> None:  # noqa: ARG002
