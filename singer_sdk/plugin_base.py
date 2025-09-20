@@ -185,6 +185,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         PluginCapabilities.STREAM_MAPS,
         PluginCapabilities.FLATTENING,
         PluginCapabilities.BATCH,
+        PluginCapabilities.STRUCTURED_LOGGING,
     ]
 
     _config: dict

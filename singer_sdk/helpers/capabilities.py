@@ -453,6 +453,9 @@ class PluginCapabilities(CapabilitiesEnum):
     #: A.K.A ``FAST_SYNC``.
     BATCH = "batch"
 
+    #: Support structured logging with contextual information.
+    STRUCTURED_LOGGING = "structured-logging"
+
 
 class TapCapabilities(CapabilitiesEnum):
     """Tap-specific capabilities."""

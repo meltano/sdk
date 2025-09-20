@@ -17,6 +17,8 @@ plugins:
     - discover
     - about
     - stream-maps
+    - structured-logging
+    log_parser: singer-sdk
 
     # TODO: Declare settings and their types here:
     settings:
