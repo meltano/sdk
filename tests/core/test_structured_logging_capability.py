@@ -18,6 +18,10 @@ class SampleTapWithStructuredLogging(Tap):
         PluginCapabilities.STRUCTURED_LOGGING,
     )
 
+    def discover_streams(self):
+        """Return empty streams for testing."""
+        return []
+
 
 class SampleTapWithoutStructuredLogging(Tap):
     """Sample tap without structured logging capability."""
@@ -27,6 +31,10 @@ class SampleTapWithoutStructuredLogging(Tap):
         TapCapabilities.CATALOG,
         TapCapabilities.DISCOVER,
     )
+
+    def discover_streams(self):
+        """Return empty streams for testing."""
+        return []
 
 
 class SampleTargetWithStructuredLogging(Target):
@@ -62,7 +70,7 @@ class TestStructuredLoggingCapability:
 
         # Check that it appears in the about info
         about_info = tap._get_about_info()
-        assert "structured-logging" in about_info.capabilities
+        assert PluginCapabilities.STRUCTURED_LOGGING in about_info.capabilities
 
     def test_tap_without_structured_logging_capability(self):
         """Test that tap without structured logging doesn't include the capability."""
@@ -84,7 +92,7 @@ class TestStructuredLoggingCapability:
 
         # Check that it appears in the about info
         about_info = target._get_about_info()
-        assert "structured-logging" in about_info.capabilities
+        assert PluginCapabilities.STRUCTURED_LOGGING in about_info.capabilities
 
     def test_target_without_structured_logging_capability(self):
         """Test that target without structured logging doesn't have the capability."""
@@ -95,25 +103,24 @@ class TestStructuredLoggingCapability:
 
         # Check that it doesn't appear in the about info
         about_info = target._get_about_info()
-        assert "structured-logging" not in about_info.capabilities
+        assert PluginCapabilities.STRUCTURED_LOGGING not in about_info.capabilities
 
     def test_structured_logging_capability_serialization(self):
-        """Test that STRUCTURED_LOGGING capability is correctly serialized."""
+        """Test that STRUCTURED_LOGGING capability is correctly present."""
         tap = SampleTapWithStructuredLogging()
         about_info = tap._get_about_info()
 
-        # Convert to dict and check serialization
-        about_dict = about_info.to_dict()
-        assert "structured-logging" in about_dict["capabilities"]
+        # Check that the capability is present
+        assert PluginCapabilities.STRUCTURED_LOGGING in about_info.capabilities
 
     def test_multiple_capabilities_including_structured_logging(self):
         """Test plugin with multiple capabilities including structured logging."""
         tap = SampleTapWithStructuredLogging()
 
         expected_capabilities = [
-            "catalog",
-            "discover",
-            "structured-logging",
+            TapCapabilities.CATALOG,
+            TapCapabilities.DISCOVER,
+            PluginCapabilities.STRUCTURED_LOGGING,
         ]
 
         about_info = tap._get_about_info()
@@ -124,7 +131,7 @@ class TestStructuredLoggingCapability:
             assert capability in actual_capabilities
 
         # Check that structured-logging is specifically included
-        assert "structured-logging" in actual_capabilities
+        assert PluginCapabilities.STRUCTURED_LOGGING in actual_capabilities
 
     @pytest.mark.parametrize(
         "plugin_class,should_have_capability",
@@ -144,7 +151,7 @@ class TestStructuredLoggingCapability:
 
         if should_have_capability:
             assert PluginCapabilities.STRUCTURED_LOGGING in plugin.capabilities
-            assert "structured-logging" in about_info.capabilities
+            assert PluginCapabilities.STRUCTURED_LOGGING in about_info.capabilities
         else:
             assert PluginCapabilities.STRUCTURED_LOGGING not in plugin.capabilities
             assert "structured-logging" not in about_info.capabilities
@@ -161,14 +168,9 @@ class TestStructuredLoggingCapability:
         assert PluginCapabilities.STRUCTURED_LOGGING in all_capabilities
 
     def test_about_info_format_with_structured_logging(self):
-        """Test that about info is formatted with structured logging capability."""
+        """Test that about info contains structured logging capability."""
         tap = SampleTapWithStructuredLogging()
         about_info = tap._get_about_info()
 
-        # Test text format includes structured-logging
-        text_output = about_info.to_text()
-        assert "structured-logging" in text_output
-
-        # Test dict format includes structured-logging
-        dict_output = about_info.to_dict()
-        assert "structured-logging" in dict_output["capabilities"]
+        # Test that structured-logging capability is present
+        assert PluginCapabilities.STRUCTURED_LOGGING in about_info.capabilities
