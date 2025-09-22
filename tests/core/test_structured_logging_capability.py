@@ -5,49 +5,49 @@ from __future__ import annotations
 import pytest
 
 from singer_sdk import Tap, Target
-from singer_sdk.helpers.capabilities import PluginCapabilities
+from singer_sdk.helpers.capabilities import PluginCapabilities, TapCapabilities
 
 
 class SampleTapWithStructuredLogging(Tap):
     """Sample tap with structured logging capability."""
 
     name = "tap-sample-structured"
-    capabilities = [
-        PluginCapabilities.CATALOG,
-        PluginCapabilities.DISCOVER,
+    capabilities = (
+        TapCapabilities.CATALOG,
+        TapCapabilities.DISCOVER,
         PluginCapabilities.STRUCTURED_LOGGING,
-    ]
+    )
 
 
 class SampleTapWithoutStructuredLogging(Tap):
     """Sample tap without structured logging capability."""
 
     name = "tap-sample-no-structured"
-    capabilities = [
-        PluginCapabilities.CATALOG,
-        PluginCapabilities.DISCOVER,
-    ]
+    capabilities = (
+        TapCapabilities.CATALOG,
+        TapCapabilities.DISCOVER,
+    )
 
 
 class SampleTargetWithStructuredLogging(Target):
     """Sample target with structured logging capability."""
 
     name = "target-sample-structured"
-    capabilities = [
+    capabilities = (
         PluginCapabilities.ABOUT,
         PluginCapabilities.STREAM_MAPS,
         PluginCapabilities.STRUCTURED_LOGGING,
-    ]
+    )
 
 
 class SampleTargetWithoutStructuredLogging(Target):
     """Sample target without structured logging capability."""
 
     name = "target-sample-no-structured"
-    capabilities = [
+    capabilities = (
         PluginCapabilities.ABOUT,
         PluginCapabilities.STREAM_MAPS,
-    ]
+    )
 
 
 class TestStructuredLoggingCapability:
@@ -87,7 +87,7 @@ class TestStructuredLoggingCapability:
         assert "structured-logging" in about_info.capabilities
 
     def test_target_without_structured_logging_capability(self):
-        """Test that target without structured logging doesn't include the capability."""
+        """Test that target without structured logging doesn't have the capability."""
         target = SampleTargetWithoutStructuredLogging()
 
         # Check that the capability is NOT in the capabilities list
@@ -138,7 +138,7 @@ class TestStructuredLoggingCapability:
     def test_structured_logging_capability_parametrized(
         self, plugin_class, should_have_capability
     ):
-        """Test structured logging capability detection across different plugin types."""
+        """Test structured logging capability detection for different plugin types."""
         plugin = plugin_class()
         about_info = plugin._get_about_info()
 
@@ -157,11 +157,11 @@ class TestStructuredLoggingCapability:
 
     def test_capability_enum_includes_structured_logging(self):
         """Test that PluginCapabilities enum includes STRUCTURED_LOGGING."""
-        all_capabilities = [capability for capability in PluginCapabilities]
+        all_capabilities = list(PluginCapabilities)
         assert PluginCapabilities.STRUCTURED_LOGGING in all_capabilities
 
     def test_about_info_format_with_structured_logging(self):
-        """Test that about info is properly formatted with structured logging capability."""
+        """Test that about info is formatted with structured logging capability."""
         tap = SampleTapWithStructuredLogging()
         about_info = tap._get_about_info()
 
