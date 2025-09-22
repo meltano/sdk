@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import enum
-import logging
 import sys
 import typing as t
 from dataclasses import dataclass
+
+if t.TYPE_CHECKING:
+    import logging
 
 
 class ErrorCode(str, enum.Enum):
@@ -60,12 +62,12 @@ class StructuredError:
         Returns:
             Dictionary representation suitable for logging.
         """
-        log_data = {
+        log_data: dict[str, t.Any] = {
             "error_code": self.code.value,
             "error_message": self.message,
         }
 
-        if self.details:
+        if self.details is not None:
             log_data["error_details"] = self.details
 
         if self.exception:
@@ -151,19 +153,20 @@ def _infer_error_code_from_exception(exc: Exception) -> ErrorCode:
     Returns:
         Inferred error code.
     """
-    exc_name = exc.__class__.__name__
+    exc_name = exc.__class__.__name__.lower()
 
-    # Map common exception types to error codes
-    if "config" in exc_name.lower() or "validation" in exc_name.lower():
-        return ErrorCode.CONFIG_VALIDATION_FAILED
-    if "connection" in exc_name.lower():
-        return ErrorCode.CONNECTION_FAILED
-    if "auth" in exc_name.lower():
-        return ErrorCode.AUTHENTICATION_FAILED
-    if "discovery" in exc_name.lower():
-        return ErrorCode.SCHEMA_DISCOVERY_FAILED
-    if "replication" in exc_name.lower():
-        return ErrorCode.INVALID_REPLICATION_KEY
-    if "api" in exc_name.lower() or "request" in exc_name.lower():
-        return ErrorCode.API_REQUEST_FAILED
+    # Map common exception name patterns to error codes
+    error_mappings = [
+        (["config", "validation"], ErrorCode.CONFIG_VALIDATION_FAILED),
+        (["connection"], ErrorCode.CONNECTION_FAILED),
+        (["auth"], ErrorCode.AUTHENTICATION_FAILED),
+        (["discovery"], ErrorCode.SCHEMA_DISCOVERY_FAILED),
+        (["replication"], ErrorCode.INVALID_REPLICATION_KEY),
+        (["api", "request"], ErrorCode.API_REQUEST_FAILED),
+    ]
+
+    for keywords, error_code in error_mappings:
+        if any(keyword in exc_name for keyword in keywords):
+            return error_code
+
     return ErrorCode.UNKNOWN_ERROR

@@ -6,12 +6,15 @@ import json
 import logging
 import typing as t
 
+if t.TYPE_CHECKING:
+    from collections.abc import MutableMapping
+
 
 class StructuredFormatter(logging.Formatter):
     """Custom formatter for structured logging with contextual information."""
 
     def __init__(
-        self, *args, defaults: dict[str, t.Any] | None = None, **kwargs
+        self, *args: t.Any, defaults: dict[str, t.Any] | None = None, **kwargs: t.Any
     ) -> None:
         """Initialize the structured formatter.
 
@@ -83,8 +86,10 @@ class ContextualLoggerAdapter(logging.LoggerAdapter):
         super().__init__(logger, extra or {})
 
     def process(
-        self, msg: t.Any, kwargs: dict[str, t.Any]
-    ) -> tuple[t.Any, dict[str, t.Any]]:
+        self,
+        msg: t.Any,  # noqa: ANN401
+        kwargs: MutableMapping[str, t.Any],
+    ) -> tuple[t.Any, MutableMapping[str, t.Any]]:
         """Process the logging call.
 
         Args:
@@ -105,8 +110,12 @@ class ContextualLoggerAdapter(logging.LoggerAdapter):
         Args:
             **context: Context fields to set.
         """
-        self.extra.update(context)
+        # mypy: extra is guaranteed to be a MutableMapping here
+        extra_dict = t.cast("MutableMapping[str, t.Any]", self.extra)
+        extra_dict.update(context)
 
     def clear_context(self) -> None:
         """Clear all context from this logger adapter."""
-        self.extra.clear()
+        # mypy: extra is guaranteed to be a MutableMapping here
+        extra_dict = t.cast("MutableMapping[str, t.Any]", self.extra)
+        extra_dict.clear()

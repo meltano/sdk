@@ -181,7 +181,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     #: Developers may override this property in order to add or remove
     #: advertised capabilities for this plugin.
-    capabilities: t.Sequence[CapabilitiesEnum] = [
+    capabilities: t.ClassVar[t.Sequence[CapabilitiesEnum]] = [
         PluginCapabilities.STREAM_MAPS,
         PluginCapabilities.FLATTENING,
         PluginCapabilities.BATCH,
@@ -522,7 +522,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             version=cls.get_plugin_version(),
             sdk_version=cls.get_sdk_version(),
             supported_python_versions=cls.get_supported_python_versions(),
-            capabilities=cls.capabilities,
+            capabilities=list(cls.capabilities),
             settings=config_jsonschema,
             env_var_prefix=cls._env_var_prefix,
         )
