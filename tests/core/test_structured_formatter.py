@@ -249,3 +249,45 @@ class TestStructuredFormatter:
         # Clean up
         structured_logger.removeHandler(structured_handler)
         console_logger.removeHandler(console_handler)
+
+    def test_structured_formatter_format_method_with_metric_record(self):
+        """Test StructuredFormatter.format() method directly with METRIC LogRecord."""
+        formatter = StructuredFormatter()
+
+        # Create a LogRecord that simulates what would be created for a METRIC log
+        record = logging.LogRecord(
+            name="tap_postgres",
+            level=logging.INFO,
+            pathname="/path/to/tap.py",
+            lineno=42,
+            msg="METRIC",
+            args=(),
+            exc_info=None,
+        )
+
+        # Add extra fields that would be included in a METRIC log
+        record.point = {
+            "metric_name": "records_processed",
+            "value": 150,
+            "tags": {"stream": "users", "tap": "tap-postgres"},
+        }
+        record.plugin_name = "tap-postgres"
+        record.stream_name = "users"
+
+        # Format the record directly
+        formatted_output = formatter.format(record)
+
+        # Parse and verify the JSON output
+        log_data = json.loads(formatted_output)
+
+        # Verify key fields are present and correct
+        assert log_data["message"] == "METRIC"
+        assert "point" in log_data
+        assert isinstance(log_data["point"], dict)
+        assert log_data["point"]["metric_name"] == "records_processed"
+        assert log_data["point"]["value"] == 150
+        assert log_data["point"]["tags"]["stream"] == "users"
+        assert log_data["plugin_name"] == "tap-postgres"
+        assert log_data["stream_name"] == "users"
+        assert log_data["name"] == "tap_postgres"
+        assert log_data["levelname"] == "INFO"

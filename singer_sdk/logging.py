@@ -61,10 +61,11 @@ class StructuredFormatter(logging.Formatter):
             Formatted log message as JSON string.
         """
         # Add default fields
-        if defaults := self._defaults:
-            log_data = defaults | record.__dict__
-        else:
-            log_data = record.__dict__.copy()
+        log_data = (
+            self._defaults | record.__dict__
+            if self._defaults is not None
+            else record.__dict__.copy()
+        )
 
         # Handle exception information
         if record.exc_info:
