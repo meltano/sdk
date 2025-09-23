@@ -12,6 +12,7 @@ from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
 if t.TYPE_CHECKING:
+    from collections.abc import Sequence
     from importlib.metadata import PackageMetadata
 
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
@@ -107,9 +108,9 @@ class AboutInfo:
     description: str | None
     version: str
     sdk_version: str
-    supported_python_versions: list[str] | None
+    supported_python_versions: Sequence[str] | None
 
-    capabilities: list[CapabilitiesEnum]
+    capabilities: Sequence[CapabilitiesEnum]
     settings: dict
     env_var_prefix: str
 
