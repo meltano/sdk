@@ -315,3 +315,54 @@ class TestStructuredFormatter:
         assert log_data["stream_name"] == "users"
         assert log_data["name"] == "tap_postgres"
         assert log_data["levelname"] == "INFO"
+
+    def test_structured_formatter_getmessage_exception_fallback(self):
+        """Test that StructuredFormatter handles getMessage() exceptions properly."""
+        formatter = StructuredFormatter()
+
+        # Create a LogRecord with args that will cause getMessage() to fail
+        record = logging.LogRecord(
+            name="test_logger",
+            level=logging.INFO,
+            pathname="/path/to/test.py",
+            lineno=123,
+            msg="Test message with %s and %d args",
+            args=(
+                "string_arg",
+                "invalid_int_arg",  # This will cause TypeError in getMessage()
+            ),
+            exc_info=None,
+        )
+
+        # Format the record - this should trigger the getMessage() exception handling
+        formatted_output = formatter.format(record)
+        log_data = json.loads(formatted_output)
+
+        # Verify that we get the original msg when getMessage() fails
+        assert log_data["message"] == "Test message with %s and %d args"
+        assert log_data["name"] == "test_logger"
+        assert log_data["levelname"] == "INFO"
+
+    def test_structured_formatter_getmessage_value_error_fallback(self):
+        """Test that StructuredFormatter handles getMessage() ValueError properly."""
+        formatter = StructuredFormatter()
+
+        # Create a LogRecord with args that will cause getMessage() to raise ValueError
+        record = logging.LogRecord(
+            name="test_logger",
+            level=logging.INFO,
+            pathname="/path/to/test.py",
+            lineno=456,
+            msg="Test message with {invalid_format",  # Invalid format string
+            args=("arg1",),
+            exc_info=None,
+        )
+
+        # Format the record - this should trigger the getMessage() exception handling
+        formatted_output = formatter.format(record)
+        log_data = json.loads(formatted_output)
+
+        # Verify that we get the original msg when getMessage() fails
+        assert log_data["message"] == "Test message with {invalid_format"
+        assert log_data["name"] == "test_logger"
+        assert log_data["levelname"] == "INFO"
