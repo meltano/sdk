@@ -6,9 +6,6 @@ import json
 import logging
 import typing as t
 
-if t.TYPE_CHECKING:
-    from collections.abc import MutableMapping
-
 DEFAULT_FORMAT = "{asctime:23s} | {levelname:8s} | {name:30s} | {message}"
 
 
@@ -93,55 +90,3 @@ class StructuredFormatter(logging.Formatter):
         except (TypeError, ValueError):
             # Fallback to basic formatting if JSON serialization fails
             return super().format(record)
-
-
-class ContextualLoggerAdapter(logging.LoggerAdapter):
-    """Logger adapter that adds contextual information to log records."""
-
-    def __init__(
-        self,
-        logger: logging.Logger,
-        extra: dict[str, t.Any] | None = None,
-    ) -> None:
-        """Initialize the contextual logger adapter.
-
-        Args:
-            logger: The logger instance to wrap.
-            extra: Additional context to include in log records.
-        """
-        super().__init__(logger, extra or {})
-
-    def process(
-        self,
-        msg: t.Any,  # noqa: ANN401
-        kwargs: MutableMapping[str, t.Any],
-    ) -> tuple[t.Any, MutableMapping[str, t.Any]]:
-        """Process the logging call.
-
-        Args:
-            msg: The log message.
-            kwargs: Keyword arguments for the log call.
-
-        Returns:
-            Tuple of processed message and kwargs.
-        """
-        # Merge extra fields into the log record
-        extra = kwargs.setdefault("extra", {})
-        extra.update(self.extra)
-        return msg, kwargs
-
-    def set_context(self, **context: t.Any) -> None:
-        """Update the context for this logger adapter.
-
-        Args:
-            **context: Context fields to set.
-        """
-        # mypy: extra is guaranteed to be a MutableMapping here
-        extra_dict = t.cast("MutableMapping[str, t.Any]", self.extra)
-        extra_dict.update(context)
-
-    def clear_context(self) -> None:
-        """Clear all context from this logger adapter."""
-        # mypy: extra is guaranteed to be a MutableMapping here
-        extra_dict = t.cast("MutableMapping[str, t.Any]", self.extra)
-        extra_dict.clear()
