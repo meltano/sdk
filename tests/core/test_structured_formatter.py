@@ -152,18 +152,22 @@ class TestStructuredFormatter:
             def __init__(self):
                 self.data = "test"
 
+            def __str__(self):
+                return self.data
+
         non_serializable = NonSerializable()
 
         # Log with a non-serializable extra field
         logger.info("Test message", extra={"object": non_serializable})
 
         # Get the logged output
-        log_output = log_stream.getvalue().strip()
+        log_output = json.loads(log_stream.getvalue().strip())
 
         # Should still produce valid output
         # (either JSON with str conversion or fallback)
-        assert log_output
-        assert "Test message" in log_output
+        assert isinstance(log_output, dict)
+        assert log_output["message"] == "Test message"
+        assert log_output["object"] == "test"
 
         # Clean up
         logger.removeHandler(handler)
