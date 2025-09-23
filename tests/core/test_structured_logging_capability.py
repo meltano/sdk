@@ -117,7 +117,7 @@ class TestStructuredLoggingCapability:
         """Test plugin with multiple capabilities including structured logging."""
         tap = SampleTapWithStructuredLogging()
 
-        expected_capabilities = [
+        expected = [
             TapCapabilities.CATALOG,
             TapCapabilities.DISCOVER,
             PluginCapabilities.STRUCTURED_LOGGING,
@@ -127,8 +127,7 @@ class TestStructuredLoggingCapability:
         actual_capabilities = about_info.capabilities
 
         # Check that all expected capabilities are present
-        for capability in expected_capabilities:
-            assert capability in actual_capabilities
+        assert all(capability in actual_capabilities for capability in expected)
 
         # Check that structured-logging is specifically included
         assert PluginCapabilities.STRUCTURED_LOGGING in actual_capabilities
@@ -148,13 +147,10 @@ class TestStructuredLoggingCapability:
         """Test structured logging capability detection for different plugin types."""
         plugin = plugin_class()
         about_info = plugin._get_about_info()
+        capability = PluginCapabilities.STRUCTURED_LOGGING
 
-        if should_have_capability:
-            assert PluginCapabilities.STRUCTURED_LOGGING in plugin.capabilities
-            assert PluginCapabilities.STRUCTURED_LOGGING in about_info.capabilities
-        else:
-            assert PluginCapabilities.STRUCTURED_LOGGING not in plugin.capabilities
-            assert "structured-logging" not in about_info.capabilities
+        assert (capability in plugin.capabilities) is should_have_capability
+        assert (capability in about_info.capabilities) is should_have_capability
 
     def test_structured_logging_capability_constant_value(self):
         """Test that STRUCTURED_LOGGING capability has the expected constant value."""
