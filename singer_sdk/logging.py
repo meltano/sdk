@@ -26,7 +26,22 @@ class ConsoleFormatter(logging.Formatter):
             A formatted log message.
         """
         if record.msg == "METRIC" and (point := record.__dict__.get("point")):
-            record.msg = f"{record.msg} {json.dumps(point, default=str)}"
+            formatted_msg = f"{record.msg} {json.dumps(point, default=str)}"
+            # Create a shallow copy of the record to avoid mutating the original
+            record_copy = logging.LogRecord(
+                name=record.name,
+                level=record.levelno,
+                pathname=record.pathname,
+                lineno=record.lineno,
+                msg=formatted_msg,
+                args=record.args,
+                exc_info=record.exc_info,
+                func=record.funcName,
+                sinfo=record.stack_info,
+            )
+            # Copy extra attributes
+            record_copy.__dict__.update(record.__dict__)
+            return super().format(record_copy)
         return super().format(record)
 
 
