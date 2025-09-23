@@ -168,6 +168,30 @@ class TestStructuredFormatter:
         # Clean up
         logger.removeHandler(handler)
 
+    def test_structured_formatter_with_args(self):
+        """Test that StructuredFormatter handles args properly."""
+        logger = logging.getLogger("test_logger_args")
+        logger.setLevel(logging.INFO)
+
+        log_stream = StringIO()
+        handler = logging.StreamHandler(log_stream)
+        formatter = StructuredFormatter()
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
+        # Log a message with args
+        logger.info("Test message with %s and %s", "arg1", "arg2")
+
+        # Get the logged output
+        log_output = log_stream.getvalue().strip()
+        log_data = json.loads(log_output)
+
+        # Verify that the args are included
+        assert log_data["message"] == "Test message with arg1 and arg2"
+
+        # Clean up
+        logger.removeHandler(handler)
+
     def test_structured_formatter_with_metric_logs(self):
         """Test that StructuredFormatter handles METRIC logs correctly."""
         logger = logging.getLogger("test_logger_metrics")
