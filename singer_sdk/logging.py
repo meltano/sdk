@@ -85,8 +85,4 @@ class StructuredFormatter(logging.Formatter):
         # Remove the original msg field to avoid duplication
         log_data.pop("msg", None)
 
-        try:
-            return json.dumps(log_data, default=str, separators=(",", ":"))
-        except (TypeError, ValueError):
-            # Fallback to basic formatting if JSON serialization fails
-            return super().format(record)
+        return json.dumps(log_data, default=str, separators=(",", ":"))
