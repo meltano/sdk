@@ -6,11 +6,23 @@ import json
 import logging
 from io import StringIO
 
+import pytest
+
+from singer_sdk import metrics
 from singer_sdk.logging import ConsoleFormatter, StructuredFormatter
 
 
 class TestStructuredFormatter:
     """Test the StructuredFormatter class."""
+
+    @pytest.fixture
+    def point(self) -> metrics.Point:
+        return metrics.Point(
+            metric_type="counter",
+            metric=metrics.Metric.RECORD_COUNT,
+            value=150,
+            tags={"stream": "users", "tap": "tap-postgres"},
+        )
 
     def test_structured_formatter_includes_extra_fields(self):
         """Test that StructuredFormatter includes extra fields in output."""
@@ -302,7 +314,7 @@ class TestStructuredFormatter:
         # Clean up
         logger.removeHandler(handler)
 
-    def test_structured_formatter_with_metric_logs(self):
+    def test_structured_formatter_with_metric_logs(self, point: metrics.Point):
         """Test that StructuredFormatter handles METRIC logs correctly."""
         logger = logging.getLogger("test_logger_metrics")
         logger.setLevel(logging.INFO)
@@ -314,12 +326,7 @@ class TestStructuredFormatter:
         logger.addHandler(handler)
 
         # Log a METRIC message with point data (like ConsoleFormatter test)
-        metric_point = {
-            "metric_name": "records_processed",
-            "value": 150,
-            "tags": {"stream": "users", "tap": "tap-postgres"},
-        }
-        logger.info("METRIC", extra={"point": metric_point})
+        metrics.log(logger, point)
 
         # Get the logged output
         log_output = log_stream.getvalue().strip()
@@ -329,7 +336,8 @@ class TestStructuredFormatter:
         assert log_data["message"] == "METRIC"
         assert "metric_info" in log_data
         assert log_data["metric_info"] == {
-            "metric_name": "records_processed",
+            "type": "counter",
+            "metric": "record_count",
             "value": 150,
             "tags": {"stream": "users", "tap": "tap-postgres"},
         }
@@ -337,7 +345,10 @@ class TestStructuredFormatter:
         # Clean up
         logger.removeHandler(handler)
 
-    def test_structured_formatter_vs_console_formatter_metric_handling(self):
+    def test_structured_formatter_vs_console_formatter_metric_handling(
+        self,
+        point: metrics.Point,
+    ):
         """Compare how StructuredFormatter and ConsoleFormatter handle METRIC logs."""
         # Test StructuredFormatter
         structured_logger = logging.getLogger("test_structured_metrics")
@@ -357,12 +368,9 @@ class TestStructuredFormatter:
         console_handler.setFormatter(console_formatter)
         console_logger.addHandler(console_handler)
 
-        # Same metric data
-        metric_point = {"metric_name": "records_processed", "value": 150}
-
         # Log with both formatters
-        structured_logger.info("METRIC", extra={"point": metric_point})
-        console_logger.info("METRIC", extra={"point": metric_point})
+        metrics.log(structured_logger, point)
+        metrics.log(console_logger, point)
 
         # Get outputs
         structured_output = structured_stream.getvalue().strip()
@@ -375,20 +383,25 @@ class TestStructuredFormatter:
         assert structured_data["message"] == "METRIC"
         assert "metric_info" in structured_data
         assert structured_data["metric_info"] == {
-            "metric_name": "records_processed",
+            "type": "counter",
+            "metric": "record_count",
             "value": 150,
+            "tags": {"stream": "users", "tap": "tap-postgres"},
         }
 
         # Verify console output embeds point data in message
         assert "METRIC" in console_output
-        assert "records_processed" in console_output
+        assert "record_count" in console_output
         assert "150" in console_output
 
         # Clean up
         structured_logger.removeHandler(structured_handler)
         console_logger.removeHandler(console_handler)
 
-    def test_structured_formatter_format_method_with_metric_record(self):
+    def test_structured_formatter_format_method_with_metric_record(
+        self,
+        point: metrics.Point,
+    ):
         """Test StructuredFormatter.format() method directly with METRIC LogRecord."""
         formatter = StructuredFormatter()
 
@@ -398,17 +411,12 @@ class TestStructuredFormatter:
             level=logging.INFO,
             pathname="/path/to/tap.py",
             lineno=42,
-            msg="METRIC",
-            args=(),
+            msg="METRIC: %s",
+            args=(point,),
             exc_info=None,
         )
 
         # Add extra fields that would be included in a METRIC log
-        record.point = {
-            "metric_name": "records_processed",
-            "value": 150,
-            "tags": {"stream": "users", "tap": "tap-postgres"},
-        }
         record.app_name = "tap-postgres"
         record.stream_name = "users"
 
@@ -426,9 +434,13 @@ class TestStructuredFormatter:
         assert log_data["logger_name"] == "tap_postgres"
         assert log_data["level"] == "info"
         assert log_data["metric_info"] == {
-            "metric_name": "records_processed",
+            "type": "counter",
+            "metric": "record_count",
             "value": 150,
-            "tags": {"stream": "users", "tap": "tap-postgres"},
+            "tags": {
+                "stream": "users",
+                "tap": "tap-postgres",
+            },
         }
 
     def test_structured_formatter_getmessage_exception_fallback(self):

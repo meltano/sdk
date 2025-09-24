@@ -42,7 +42,7 @@ from singer_sdk.typing import (
 )
 
 if t.TYPE_CHECKING:
-    from types import FrameType
+    from types import FrameType, TracebackType
 
     from jsonschema import ValidationError
 
@@ -117,6 +117,19 @@ class SingerCommand(click.Command):
         super().__init__(*args, **kwargs)
         self.logger = logger
 
+    def excepthook(
+        self,
+        exc_type: type,
+        exc_value: Exception,
+        exc_traceback: TracebackType | None,
+    ) -> None:
+        """Custom excepthook function."""
+        self.logger.error(
+            "%s",
+            exc_value.args[0],
+            exc_info=(exc_type, exc_value, exc_traceback),
+        )
+
     def invoke(self, ctx: click.Context) -> t.Any:  # noqa: ANN401
         """Invoke the command, capturing warnings and logging them.
 
@@ -128,6 +141,7 @@ class SingerCommand(click.Command):
         """
         logging.captureWarnings(capture=True)
         warnings.filterwarnings("once", category=DeprecationWarning)
+        sys.excepthook = self.excepthook
         try:
             return super().invoke(ctx)
         except ConfigValidationError as exc:

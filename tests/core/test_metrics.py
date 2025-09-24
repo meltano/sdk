@@ -39,45 +39,47 @@ def metric_log_records() -> list[logging.LogRecord]:
         level=logging.INFO,
         pathname="test.py",
         lineno=1,
-        msg="METRIC",
-        args=(),
+        msg="METRIC: %s",
+        args=(
+            metrics.Point(
+                metric_type="counter",
+                metric=metrics.Metric.RECORD_COUNT,
+                value=1,
+                tags={
+                    metrics.Tag.STREAM: "users",
+                    metrics.Tag.CONTEXT: {
+                        "account_id": 1,
+                        "parent_id": 1,
+                    },
+                    "test_tag": "test_value",
+                },
+            ),
+        ),
         exc_info=None,
     )
-    counter.__dict__["point"] = metrics.Point(
-        metric_type="counter",
-        metric=metrics.Metric.RECORD_COUNT,
-        value=1,
-        tags={
-            metrics.Tag.STREAM: "users",
-            metrics.Tag.CONTEXT: {
-                "account_id": 1,
-                "parent_id": 1,
-            },
-            "test_tag": "test_value",
-        },
-    ).to_dict()
 
     timer = logging.LogRecord(
         name="test",
         level=logging.INFO,
         pathname="test.py",
         lineno=1,
-        msg="METRIC",
-        args=(),
+        msg="METRIC: %s",
+        args=(
+            metrics.Point(
+                metric_type="timer",
+                metric=metrics.Metric.SYNC_DURATION,
+                value=0.314,
+                tags={
+                    metrics.Tag.STREAM: "teams",
+                    metrics.Tag.CONTEXT: {
+                        "account_id": 1,
+                    },
+                    "test_tag": "test_value",
+                },
+            ),
+        ),
         exc_info=None,
     )
-    timer.__dict__["point"] = metrics.Point(
-        metric_type="timer",
-        metric=metrics.Metric.SYNC_DURATION,
-        value=0.314,
-        tags={
-            metrics.Tag.STREAM: "teams",
-            metrics.Tag.CONTEXT: {
-                "account_id": 1,
-            },
-            "test_tag": "test_value",
-        },
-    ).to_dict()
 
     return [normal_log, counter, timer]
 
@@ -163,7 +165,10 @@ def test_record_counter(caplog: pytest.LogCaptureFixture):
         assert record.levelname == "INFO"
         assert record.msg.startswith("METRIC")
 
-        point = record.__dict__["point"]
+        assert record.args
+        assert isinstance(record.args[0], metrics.Point)
+
+        point = record.args[0].to_dict()
         assert point["type"] == "counter"
         assert point["metric"] == "record_count"
         assert point["tags"] == {
@@ -201,7 +206,10 @@ def test_sync_timer(caplog: pytest.LogCaptureFixture):
     assert record.levelname == "INFO"
     assert record.msg.startswith("METRIC")
 
-    point = record.__dict__["point"]
+    assert record.args
+    assert isinstance(record.args[0], metrics.Point)
+
+    point = record.args[0].to_dict()
     assert point["type"] == "timer"
     assert point["metric"] == "sync_duration"
     assert point["tags"] == {
@@ -252,8 +260,10 @@ def test_metric_filter_exclude_metrics(
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 2
     assert filtered[0].msg == "Hey there"
-    assert filtered[1].msg == "METRIC"
-    assert filtered[1].__dict__["point"]["metric"] == "sync_duration"
+    assert filtered[1].msg == "METRIC: %s"
+    assert filtered[1].args
+    assert isinstance(filtered[1].args[0], metrics.Point)
+    assert filtered[1].args[0].metric.value == "sync_duration"
 
 
 def test_metric_filter_exclude_metric_types(
@@ -263,8 +273,10 @@ def test_metric_filter_exclude_metric_types(
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 2
     assert filtered[0].msg == "Hey there"
-    assert filtered[1].msg == "METRIC"
-    assert filtered[1].__dict__["point"]["metric"] == "record_count"
+    assert filtered[1].msg == "METRIC: %s"
+    assert filtered[1].args
+    assert isinstance(filtered[1].args[0], metrics.Point)
+    assert filtered[1].args[0].metric.value == "record_count"
 
 
 def test_metric_filter_exclude_tags(
@@ -278,7 +290,9 @@ def test_metric_filter_exclude_tags(
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 2
     assert filtered[0].msg == "Hey there"
-    assert filtered[1].__dict__["point"]["tags"]["stream"] == "teams"
+    assert filtered[1].args
+    assert isinstance(filtered[1].args[0], metrics.Point)
+    assert filtered[1].args[0].tags[metrics.Tag.STREAM] == "teams"
 
     metric_filter = metrics.MetricExclusionFilter(
         tags={
@@ -316,8 +330,10 @@ def test_metric_filter_exclude_name_and_type(
     filtered = _filter(metric_log_records, metric_filter.filter)
     assert len(filtered) == 2
     assert filtered[0].msg == "Hey there"
-    assert filtered[1].msg == "METRIC"
-    assert filtered[1].__dict__["point"]["metric"] == "sync_duration"
+    assert filtered[1].msg == "METRIC: %s"
+    assert filtered[1].args
+    assert isinstance(filtered[1].args[0], metrics.Point)
+    assert filtered[1].args[0].metric.value == "sync_duration"
 
 
 def test_metric_filter_exclude_name_and_tag(

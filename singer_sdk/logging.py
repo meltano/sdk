@@ -8,6 +8,8 @@ import sys
 import typing as t
 from types import TracebackType
 
+from singer_sdk import metrics
+
 if sys.version_info >= (3, 11):
     from typing import Required  # noqa: ICN003
 else:
@@ -44,22 +46,11 @@ _SysExcInfoType: t.TypeAlias = (
 class ConsoleFormatter(logging.Formatter):
     """Custom formatter for console logging."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs: t.Any) -> None:
         """Initialize the console formatter."""
-        super().__init__(DEFAULT_FORMAT, style="{", defaults={"point": {}})
-
-    def format(self, record: logging.LogRecord) -> str:
-        """Format the log record as a console log message.
-
-        Args:
-            record: The log record to format.
-
-        Returns:
-            A formatted log message.
-        """
-        if record.msg == "METRIC" and (point := record.__dict__.get("point")):
-            record.msg = f"{record.msg} {json.dumps(point, default=str)}"
-        return super().format(record)
+        kwargs.setdefault("fmt", DEFAULT_FORMAT)
+        kwargs.setdefault("style", "{")
+        super().__init__(**kwargs)
 
 
 class StructuredFormatter(logging.Formatter):
@@ -193,16 +184,20 @@ class StructuredFormatter(logging.Formatter):
             "stream_name": data.pop("stream_name", None),
         }
 
-        # Handle metric information
-        if point := data.pop("point", None):
-            log_data["metric_info"] = point
-
         # Handle exception information
         if record.exc_info and (exc_info := self._format_exception(record.exc_info)):
             log_data["exception"] = exc_info
 
+        # Handle metric information
+        if record.msg == "METRIC: %s":
+            log_data["message"] = "METRIC"
+            if record.args and isinstance(  # pragma: no branch
+                record.args[0],
+                metrics.Point,
+            ):
+                log_data["metric_info"] = record.args[0].to_dict()
         # Format the main message
-        if record.args:
+        elif record.args:
             try:
                 log_data["message"] = record.getMessage()
             except (TypeError, ValueError):

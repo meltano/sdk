@@ -86,6 +86,14 @@ class Point(t.Generic[_TVal]):
             "tags": self.tags,
         }
 
+    def __str__(self) -> str:
+        """Convert this measure to a string.
+
+        Returns:
+            A string.
+        """
+        return json.dumps(self.to_dict(), default=str, separators=(",", ":"))
+
 
 def _to_json(point: dict) -> str:
     """Convert this measure to a JSON string.
@@ -149,11 +157,11 @@ class MetricExclusionFilter(logging.Filter):
         self.types = types or []
         self.tags = tags or {}
 
-    def _exclude_point(self, **kwargs: t.Any) -> bool:
+    def _exclude_point(self, point: Point) -> bool:
         """Filter a point.
 
         Args:
-            **kwargs: The point dictionary.
+            point: The point.
 
         A metric record is excluded if any of the following are true:
         - The metric name matches one in the metrics list
@@ -164,12 +172,9 @@ class MetricExclusionFilter(logging.Filter):
             True if the point should be excluded.
         """
         return (
-            (kwargs.get("metric") in self.metrics)
-            or (kwargs.get("type") in self.types)
-            or any(
-                kwargs.get("tags", {}).get(tag) == value
-                for tag, value in self.tags.items()
-            )
+            (point.metric.value in self.metrics)
+            or (point.metric_type in self.types)
+            or any(point.tags.get(tag) == value for tag, value in self.tags.items())
         )
 
     def filter(self, record: logging.LogRecord) -> bool:
@@ -182,9 +187,10 @@ class MetricExclusionFilter(logging.Filter):
             True if the record should be logged.
         """
         return not (
-            (point := record.__dict__.get("point"))
-            and isinstance(point, dict)
-            and self._exclude_point(**point)
+            record.args
+            and (point := record.args[0])
+            and isinstance(point, Point)
+            and self._exclude_point(point)
         )
 
 
@@ -195,8 +201,7 @@ def log(logger: logging.Logger, point: Point) -> None:
         logger: An logger instance.
         point: A measurement.
     """
-    point_dict = point.to_dict()
-    logger.info("METRIC", extra={"point": point_dict})
+    logger.info("METRIC: %s", point)
 
 
 class Meter(metaclass=abc.ABCMeta):
