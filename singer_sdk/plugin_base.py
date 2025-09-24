@@ -117,13 +117,17 @@ class SingerCommand(click.Command):
         super().__init__(*args, **kwargs)
         self.logger = logger
 
-    def excepthook(
+    def excepthook(  # pragma: no cover
         self,
         exc_type: type[BaseException],
         exc_value: BaseException,
         exc_traceback: TracebackType | None,
     ) -> None:
         """Custom excepthook function."""
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+
         self.logger.error(
             "%s",
             exc_value.args[0],
