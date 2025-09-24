@@ -1346,7 +1346,6 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 "An unhandled error occurred while syncing '%s'",
                 self.name,
                 level=logging.ERROR,
-                exc_info=True,
             )
             raise
 
