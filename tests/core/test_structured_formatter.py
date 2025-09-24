@@ -318,11 +318,6 @@ class TestStructuredFormatter:
         )
 
         # Add extra fields that would be included in a METRIC log
-        record.point = {
-            "metric_name": "records_processed",
-            "value": 150,
-            "tags": {"stream": "users", "tap": "tap-postgres"},
-        }
         record.app_name = "tap-postgres"
         record.stream_name = "users"
 
@@ -343,7 +338,10 @@ class TestStructuredFormatter:
             "type": "counter",
             "metric": "record_count",
             "value": 150,
-            "tags": {"stream": "users", "tap": "tap-postgres"},
+            "tags": {
+                "stream": "users",
+                "tap": "tap-postgres",
+            },
         }
 
     def test_structured_formatter_getmessage_exception_fallback(self):
