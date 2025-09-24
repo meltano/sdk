@@ -191,9 +191,13 @@ class StructuredFormatter(logging.Formatter):
         # Handle metric information
         if record.msg == "METRIC: %s":
             log_data["message"] = "METRIC"
-            if record.args and isinstance(  # pragma: no branch
-                record.args[0],
-                metrics.Point,
+            if (  # pragma: no branch
+                record.args
+                and isinstance(record.args, tuple)
+                and isinstance(
+                    record.args[0],
+                    metrics.Point,
+                )
             ):
                 log_data["metric_info"] = record.args[0].to_dict()
         # Format the main message

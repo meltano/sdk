@@ -188,6 +188,7 @@ class MetricExclusionFilter(logging.Filter):
         """
         return not (
             record.args
+            and isinstance(record.args, tuple)
             and (point := record.args[0])
             and isinstance(point, Point)
             and self._exclude_point(point)

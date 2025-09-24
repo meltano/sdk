@@ -119,8 +119,8 @@ class SingerCommand(click.Command):
 
     def excepthook(
         self,
-        exc_type: type,
-        exc_value: Exception,
+        exc_type: type[BaseException],
+        exc_value: BaseException,
         exc_traceback: TracebackType | None,
     ) -> None:
         """Custom excepthook function."""
