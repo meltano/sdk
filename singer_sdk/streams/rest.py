@@ -722,7 +722,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             details.get("target"),
             details.get("args"),
             details.get("kwargs"),
-            level=logging.WARNING,
+            level=logging.ERROR,
         )
 
     def backoff_runtime(  # noqa: PLR6301
