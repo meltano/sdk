@@ -117,7 +117,7 @@ class SingerCommand(click.Command):
         super().__init__(*args, **kwargs)
         self.logger = logger
 
-    def excepthook(  # pragma: no cover
+    def excepthook(
         self,
         exc_type: type[BaseException],
         exc_value: BaseException,
@@ -130,7 +130,7 @@ class SingerCommand(click.Command):
 
         self.logger.error(
             "%s",
-            exc_value.args[0],
+            exc_value.args[0] if exc_value.args else exc_type.__name__,
             exc_info=(exc_type, exc_value, exc_traceback),
         )
 
