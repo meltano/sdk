@@ -93,7 +93,7 @@ def _to_json(point: dict) -> str:
     Returns:
         A JSON string.
     """
-    return json.dumps(point, default=str)
+    return json.dumps(point, default=str, separators=(",", ":"))
 
 
 class SingerMetricsFormatter(logging.Formatter):
@@ -196,7 +196,7 @@ def log(logger: logging.Logger, point: Point) -> None:
         point: A measurement.
     """
     point_dict = point.to_dict()
-    logger.info("METRIC: %s", _to_json(point_dict), extra={"point": point_dict})
+    logger.info("METRIC", extra={"point": point_dict})
 
 
 class Meter(metaclass=abc.ABCMeta):

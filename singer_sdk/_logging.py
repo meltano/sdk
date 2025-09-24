@@ -7,6 +7,8 @@ import sys
 import typing as t
 from pathlib import Path
 
+import singer_sdk.logging
+
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
 
@@ -37,10 +39,7 @@ def _setup_console_logging(*, log_level: str | int | None = None) -> None:
     level = log_level or logging.INFO
     root = logging.getLogger()
     root.setLevel(level)
-    root_formatter = logging.Formatter(
-        "{asctime:23s} | {levelname:8s} | {name:20s} | {message}",
-        style="{",
-    )
+    root_formatter = singer_sdk.logging.ConsoleFormatter()
     handler = logging.StreamHandler(sys.stderr)
     handler.setFormatter(root_formatter)
     root.addHandler(handler)

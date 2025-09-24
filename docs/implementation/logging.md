@@ -44,6 +44,28 @@ Users of a tap can configure the SDK logging by setting the `SINGER_SDK_LOG_CONF
 environment variable. The value of this variable should be a path to a YAML file in the
 [Python logging dict format](https://docs.python.org/3/library/logging.config.html#dictionary-schema-details).
 
+### Structured logging
+
+The Singer SDK supports structured JSON logging through the `StructuredFormatter`. This formatter emits logs as structured JSON objects.
+
+#### Schema overview
+
+The structured logging schema defines the following fields:
+
+| Field | Type | Required | Description |
+| ------------- | -------------- | -------- | --------------------------------------------------------------- |
+| `level` | string | Yes | Log level (debug, info, warning, error, critical) |
+| `pid` | integer | Yes | Process ID |
+| `logger_name` | string | Yes | Name of the logger that emitted the log |
+| `ts` | number | Yes | Timestamp of the log (Unix timestamp) |
+| `thread_name` | string or null | Yes | Name of the thread that produced the log |
+| `app_name` | string | Yes | Name of the application (e.g., "tap-github", "target-postgres") |
+| `stream_name` | string or null | Yes | Name of the stream that produced the log |
+| `message` | string | Yes | The log message |
+| `extra` | object | Yes | Additional fields from the log record |
+| `metric_info` | object | No | Metric information for METRIC logs |
+| `exception` | string | No | Exception information for ERROR logs |
+
 ### Metrics logging
 
 The Singer SDK provides a logger named `singer_sdk.metrics` for logging [Singer metrics](./metrics.md). Metric log records contain an extra field `point` which is a dictionary containing the metric data. The `point` field is formatted as JSON by default.

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import logging
 import os
 import typing as t
@@ -107,7 +106,7 @@ def test_singer_metrics_formatter():
     ).to_dict()
     record.__dict__["point"] = metric_dict
 
-    assert formatter.format(record) == json.dumps(metric_dict)
+    assert formatter.format(record) == metrics._to_json(metric_dict)
 
 
 def test_meter():

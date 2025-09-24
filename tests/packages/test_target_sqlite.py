@@ -20,6 +20,7 @@ from target_sqlite import SQLiteSink, SQLiteTarget
 
 from singer_sdk import typing as th
 from singer_sdk.testing import (
+    get_target_test_class,
     tap_sync_test,
     tap_to_target_sync_test,
     target_sync_test,
@@ -32,6 +33,31 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.tap_base import SQLTap
     from singer_sdk.target_base import SQLTarget
+    from singer_sdk.testing.config import SuiteConfig
+    from singer_sdk.testing.runners import TargetTestRunner
+
+
+_TestTargetSQLite = get_target_test_class(
+    target_class=SQLiteTarget,
+    config={"path_to_db": ":memory:"},
+)
+
+
+class TestTargetSQLite(_TestTargetSQLite):
+    """Test Target SQLite."""
+
+    @pytest.mark.xfail(
+        reason="Our sample target SQLite does not support duplicate records.",
+        strict=True,
+    )
+    def test_target_duplicate_records(
+        self,
+        config: SuiteConfig,
+        resource: t.Any,
+        runner: TargetTestRunner,
+    ) -> None:
+        """Test target handles duplicate records."""
+        super().test_target_duplicate_records(config, resource, runner)
 
 
 def get_table(config: Mapping, table_name: str) -> sqlalchemy.Table:
