@@ -27,7 +27,7 @@ class TestStructuredFormatter:
 
         # Log a message with extra fields
         extra_fields = {
-            "plugin_name": "tap-test",
+            "app_name": "tap-test",
             "stream_name": "users",
             "record_count": 42,
             "custom_field": "test_value",
@@ -39,11 +39,13 @@ class TestStructuredFormatter:
         log_data = json.loads(log_output)
 
         # Verify that the extra fields are included
-        assert log_data["plugin_name"] == "tap-test"
+        assert log_data["app_name"] == "tap-test"
         assert log_data["stream_name"] == "users"
-        assert log_data["record_count"] == 42
-        assert log_data["custom_field"] == "test_value"
         assert log_data["message"] == "Test message with extras"
+        assert log_data["extra"] == {
+            "record_count": 42,
+            "custom_field": "test_value",
+        }
 
         # Clean up
         logger.removeHandler(handler)
@@ -51,7 +53,7 @@ class TestStructuredFormatter:
     def test_structured_formatter_with_defaults(self):
         """Test that StructuredFormatter includes default fields."""
         # Create formatter with defaults
-        defaults = {"app_name": "singer-sdk", "version": "1.0.0"}
+        defaults = {"version": "1.0.0"}
         formatter = StructuredFormatter(defaults=defaults)
 
         # Create a logger
@@ -64,7 +66,7 @@ class TestStructuredFormatter:
         logger.addHandler(handler)
 
         # Log a message with extra fields
-        extra_fields = {"plugin_name": "tap-test", "stream_name": "users"}
+        extra_fields = {"stream_name": "users"}
         logger.info("Test message", extra=extra_fields)
 
         # Get the logged output
@@ -73,10 +75,11 @@ class TestStructuredFormatter:
 
         # Verify that both defaults and extra fields are included
         assert log_data["app_name"] == "singer-sdk"
-        assert log_data["version"] == "1.0.0"
-        assert log_data["plugin_name"] == "tap-test"
         assert log_data["stream_name"] == "users"
         assert log_data["message"] == "Test message"
+        assert log_data["extra"] == {
+            "version": "1.0.0",
+        }
 
         # Clean up
         logger.removeHandler(handler)
@@ -101,9 +104,9 @@ class TestStructuredFormatter:
 
         # Verify basic structure
         assert log_data["message"] == "Simple test message"
-        assert log_data["levelname"] == "INFO"
-        assert "name" in log_data
-        assert "created" in log_data
+        assert log_data["level"] == "info"
+        assert "logger_name" in log_data
+        assert "ts" in log_data
 
         # Clean up
         logger.removeHandler(handler)
@@ -129,7 +132,9 @@ class TestStructuredFormatter:
 
         # Verify exception info and extra fields
         assert log_data["message"] == "Error occurred"
-        assert log_data["error_code"] == 500
+        assert log_data["extra"] == {
+            "error_code": 500,
+        }
         assert "exception" in log_data
         assert "ValueError" in log_data["exception"]
 
@@ -167,7 +172,9 @@ class TestStructuredFormatter:
         # (either JSON with str conversion or fallback)
         assert isinstance(log_output, dict)
         assert log_output["message"] == "Test message"
-        assert log_output["object"] == "test"
+        assert log_output["extra"] == {
+            "object": "test",
+        }
 
         # Clean up
         logger.removeHandler(handler)
@@ -221,11 +228,12 @@ class TestStructuredFormatter:
 
         # Verify that the METRIC log is handled correctly
         assert log_data["message"] == "METRIC"
-        assert "point" in log_data
-        assert log_data["point"]["metric_name"] == "records_processed"
-        assert log_data["point"]["value"] == 150
-        assert log_data["point"]["tags"]["stream"] == "users"
-        assert log_data["point"]["tags"]["tap"] == "tap-postgres"
+        assert "metric_info" in log_data
+        assert log_data["metric_info"] == {
+            "metric_name": "records_processed",
+            "value": 150,
+            "tags": {"stream": "users", "tap": "tap-postgres"},
+        }
 
         # Clean up
         logger.removeHandler(handler)
@@ -266,8 +274,11 @@ class TestStructuredFormatter:
 
         # Verify structured output includes point as separate field
         assert structured_data["message"] == "METRIC"
-        assert "point" in structured_data
-        assert structured_data["point"]["metric_name"] == "records_processed"
+        assert "metric_info" in structured_data
+        assert structured_data["metric_info"] == {
+            "metric_name": "records_processed",
+            "value": 150,
+        }
 
         # Verify console output embeds point data in message
         assert "METRIC" in console_output
@@ -299,7 +310,7 @@ class TestStructuredFormatter:
             "value": 150,
             "tags": {"stream": "users", "tap": "tap-postgres"},
         }
-        record.plugin_name = "tap-postgres"
+        record.app_name = "tap-postgres"
         record.stream_name = "users"
 
         # Format the record directly
@@ -310,15 +321,16 @@ class TestStructuredFormatter:
 
         # Verify key fields are present and correct
         assert log_data["message"] == "METRIC"
-        assert "point" in log_data
-        assert isinstance(log_data["point"], dict)
-        assert log_data["point"]["metric_name"] == "records_processed"
-        assert log_data["point"]["value"] == 150
-        assert log_data["point"]["tags"]["stream"] == "users"
-        assert log_data["plugin_name"] == "tap-postgres"
+        assert "metric_info" in log_data
+        assert log_data["app_name"] == "tap-postgres"
         assert log_data["stream_name"] == "users"
-        assert log_data["name"] == "tap_postgres"
-        assert log_data["levelname"] == "INFO"
+        assert log_data["logger_name"] == "tap_postgres"
+        assert log_data["level"] == "info"
+        assert log_data["metric_info"] == {
+            "metric_name": "records_processed",
+            "value": 150,
+            "tags": {"stream": "users", "tap": "tap-postgres"},
+        }
 
     def test_structured_formatter_getmessage_exception_fallback(self):
         """Test that StructuredFormatter handles getMessage() exceptions properly."""
@@ -344,8 +356,8 @@ class TestStructuredFormatter:
 
         # Verify that we get the original msg when getMessage() fails
         assert log_data["message"] == "Test message with %s and %d args"
-        assert log_data["name"] == "test_logger"
-        assert log_data["levelname"] == "INFO"
+        assert log_data["logger_name"] == "test_logger"
+        assert log_data["level"] == "info"
 
     def test_structured_formatter_getmessage_value_error_fallback(self):
         """Test that StructuredFormatter handles getMessage() ValueError properly."""
@@ -368,5 +380,5 @@ class TestStructuredFormatter:
 
         # Verify that we get the original msg when getMessage() fails
         assert log_data["message"] == "Test message with {invalid_format"
-        assert log_data["name"] == "test_logger"
-        assert log_data["levelname"] == "INFO"
+        assert log_data["logger_name"] == "test_logger"
+        assert log_data["level"] == "info"

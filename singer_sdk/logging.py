@@ -58,20 +58,57 @@ class StructuredFormatter(logging.Formatter):
             Formatted log message as JSON string.
         """
         # Add default fields
-        log_data = (
+        data = (
             self._defaults | record.__dict__
             if self._defaults is not None
             else record.__dict__.copy()
         )
 
+        # Clean up fields that aren't JSON serializable or are redundant
+        fields_to_remove = [
+            "args",
+            "asctime",
+            "created",
+            "exc_info",
+            "exc_text",
+            "filename",
+            "funcName",
+            "levelname",
+            "levelno",
+            "lineno",
+            "module",
+            "msecs",
+            "msg",  # Remove the original msg field to avoid duplication
+            "name",
+            "pathname",
+            "process",
+            "processName",
+            "relativeCreated",
+            "stack_info",
+            "thread",
+            "threadName",
+            "taskName",
+        ]
+        for field in fields_to_remove:
+            data.pop(field, None)
+
+        log_data = {
+            "level": record.levelname.lower(),
+            "pid": record.process,
+            "logger_name": record.name,
+            "ts": record.created,
+            "thread_name": record.threadName,
+            "app_name": data.pop("app_name", "singer-sdk"),
+            "stream_name": data.pop("stream_name", None),
+        }
+
+        # Handle metric information
+        if point := data.pop("point", None):
+            log_data["metric_info"] = point
+
         # Handle exception information
         if record.exc_info:
             log_data["exception"] = self.formatException(record.exc_info)
-
-        # Clean up fields that aren't JSON serializable or are redundant
-        fields_to_remove = ["exc_info", "exc_text", "stack_info", "args"]
-        for field in fields_to_remove:
-            log_data.pop(field, None)
 
         # Format the main message
         if record.args:
@@ -82,7 +119,6 @@ class StructuredFormatter(logging.Formatter):
         else:
             log_data["message"] = record.msg
 
-        # Remove the original msg field to avoid duplication
-        log_data.pop("msg", None)
+        log_data["extra"] = data
 
         return json.dumps(log_data, default=str, separators=(",", ":"))

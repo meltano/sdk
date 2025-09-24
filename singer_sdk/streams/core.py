@@ -6,6 +6,7 @@ import abc
 import copy
 import datetime
 import json
+import logging
 import typing as t
 import warnings
 from os import PathLike
@@ -51,8 +52,6 @@ from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform
 
 if t.TYPE_CHECKING:
-    import logging
-
     from singer_sdk.helpers import types
     from singer_sdk.helpers._batch import BaseBatchFileEncoding
     from singer_sdk.helpers._compat import Traversable
@@ -139,7 +138,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             msg = "Missing argument or class variable 'name'."
             raise ValueError(msg)
 
-        self.logger: logging.Logger = tap.logger.getChild(self.name)
+        self._logger: logging.Logger = tap.logger.getChild(self.name)
         self.metrics_logger = tap.metrics_logger
         self.tap_name: str = tap.name
         self.context: types.Context | None = None
@@ -197,6 +196,21 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             self._schema = json.loads(self.schema_filepath.read_text())
 
     @property
+    def logger(self) -> logging.Logger:
+        """Get stream logger."""
+        return self._logger
+
+    def log(
+        self,
+        message: str,
+        *args: t.Any,
+        level: int = logging.INFO,
+        **kwargs: t.Any,
+    ) -> None:
+        """Log a message."""
+        self._logger.log(level, message, *args, **kwargs)
+
+    @property
     def stream_maps(self) -> list[StreamMap]:
         """Get stream transformation maps.
 
@@ -210,16 +224,17 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         if self._tap.mapper is not None:
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
-            self.logger.debug(
+            self.log(
                 "Tap has custom mapper. Using %d provided map(s).",
                 len(self.stream_maps),
+                level=logging.DEBUG,
             )
 
         # TODO: A tap mapper is always registered so this code is unreachable.
         # Consider removing it.
         # https://github.com/meltano/sdk/blob/c6672eb70002c7430f5db30fba05bb21cf9f0c11/singer_sdk/mapper.py#L768-L778
         else:  # pragma: no cover
-            self.logger.info(  # type: ignore[unreachable]
+            self.log(  # type: ignore[unreachable]
                 "No custom mapper provided for '%s'. Using SameRecordTransform.",
                 self.name,
             )
@@ -473,7 +488,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 else:
                     value = self.compare_start_date(value, start_date_value)
 
-            self.logger.info("Starting incremental sync with bookmark value: %s", value)
+            self.log("Starting incremental sync with bookmark value: %s", value)
 
         write_starting_replication_value(state, value)
 
@@ -1015,8 +1030,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         the stream.
         """
         if len(self._sync_costs) > 0:
-            msg = f"Total Sync costs for stream {self.name}: {self._sync_costs}"
-            self.logger.info(msg)
+            self.log(f"Total Sync costs for stream {self.name}: {self._sync_costs}")
 
     def _check_max_record_limit(self, current_record_index: int) -> None:
         """Raise an exception if dry run record limit exceeded.
@@ -1299,7 +1313,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
             msg += f" with context: {context}"
-        self.logger.info(msg)
+        self.log(msg)
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
@@ -1328,18 +1342,21 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 for _ in self._sync_records(context=context):
                     pass
         except Exception:
-            self.logger.exception(
+            self.log(
                 "An unhandled error occurred while syncing '%s'",
                 self.name,
+                level=logging.ERROR,
+                exc_info=True,
             )
             raise
 
     def _sync_children(self, child_context: types.Context | None) -> None:
         if child_context is None:
-            self.logger.warning(
+            self.log(
                 "Context for child streams of '%s' is null, "
                 "skipping sync of any child streams",
                 self.name,
+                level=logging.WARNING,
             )
             return
 
