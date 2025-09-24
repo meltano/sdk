@@ -64,7 +64,51 @@ The structured logging schema defines the following fields:
 | `message` | string | Yes | The log message |
 | `extra` | object | Yes | Additional fields from the log record |
 | `metric_info` | object | No | Metric information for METRIC logs |
-| `exception` | string | No | Exception information for ERROR logs |
+| `exception` | object | No | Exception information for ERROR logs |
+
+#### Exception structure
+
+When an exception occurs, the `exception` field contains a structured representation of the exception with the following properties:
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `type` | string | The exception class name (e.g., "ValueError", "RuntimeError") |
+| `module` | string | The module containing the exception class (e.g., "builtins") |
+| `message` | string | The exception message |
+| `traceback` | array | Array of traceback frames, each containing `filename`, `function`, and `lineno` |
+| `cause` | object | The exception that caused this exception (when using `raise ... from ...`) |
+| `context` | object | The exception context (when an exception occurs during exception handling) |
+
+Example structured exception output:
+
+```json
+{
+  "level": "error",
+  "message": "Database operation failed",
+  "exception": {
+    "type": "DatabaseError",
+    "module": "psycopg2.errors",
+    "message": "connection to server was lost",
+    "traceback": [
+      {
+        "filename": "/app/database.py",
+        "function": "execute_query",
+        "lineno": 42
+      },
+      {
+        "filename": "/app/main.py",
+        "function": "process_records",
+        "lineno": 156
+      }
+    ],
+    "cause": {
+      "type": "ConnectionError",
+      "module": "psycopg2.errors",
+      "message": "server closed the connection unexpectedly"
+    }
+  }
+}
+```
 
 ### Metrics logging
 

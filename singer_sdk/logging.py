@@ -4,9 +4,41 @@ from __future__ import annotations
 
 import json
 import logging
+import sys
 import typing as t
+from types import TracebackType
+
+if sys.version_info >= (3, 11):
+    from typing import Required  # noqa: ICN003
+else:
+    from typing_extensions import Required
+
+
+class _FrameData(t.TypedDict):
+    """Frame data."""
+
+    filename: str
+    function: str
+    lineno: int
+
+
+class _ExceptionData(t.TypedDict, total=False):
+    """Exception data."""
+
+    type: Required[str]
+    module: Required[str]
+    message: Required[str]
+    traceback: list[_FrameData]
+    cause: _ExceptionData | None
+    context: _ExceptionData | None
+
 
 DEFAULT_FORMAT = "{asctime:23s} | {levelname:8s} | {name:30s} | {message}"
+
+_SysExcInfoType: t.TypeAlias = (
+    tuple[type[BaseException], BaseException, TracebackType | None]
+    | tuple[None, None, None]
+)
 
 
 class ConsoleFormatter(logging.Formatter):
@@ -47,6 +79,65 @@ class StructuredFormatter(logging.Formatter):
         """
         super().__init__(**kwargs)
         self._defaults = defaults
+
+    def _format_exception(
+        self,
+        exc_info: _SysExcInfoType,
+    ) -> _ExceptionData | None:
+        """Format exception information as a structured object.
+
+        Args:
+            exc_info: Exception info tuple from sys.exc_info().
+
+        Returns:
+            Structured exception data as a dictionary.
+        """
+        if exc_info[0] is None:
+            return None
+
+        exc_type, exc_value, exc_traceback = exc_info
+
+        # Extract basic exception info
+        exception_data: _ExceptionData = {
+            "type": exc_type.__name__,
+            "module": exc_type.__module__,
+            "message": str(exc_value),
+        }
+
+        # Add traceback frames
+        tb: TracebackType | None
+        if exc_traceback:
+            frames: list[_FrameData] = []
+            tb = exc_traceback
+            while tb is not None:
+                frame_info: _FrameData = {
+                    "filename": tb.tb_frame.f_code.co_filename,
+                    "function": tb.tb_frame.f_code.co_name,
+                    "lineno": tb.tb_lineno,
+                }
+                frames.append(frame_info)
+                tb = tb.tb_next
+            exception_data["traceback"] = frames
+
+        # Handle exception chaining (__cause__ and __context__)
+        if hasattr(exc_value, "__cause__") and exc_value.__cause__:
+            exception_data["cause"] = self._format_exception(
+                (
+                    type(exc_value.__cause__),
+                    exc_value.__cause__,
+                    exc_value.__cause__.__traceback__,
+                )
+            )
+        elif hasattr(exc_value, "__context__") and exc_value.__context__:
+            exception_data["context"] = self._format_exception(
+                (
+                    type(exc_value.__context__),
+                    exc_value.__context__,
+                    exc_value.__context__.__traceback__,
+                )
+            )
+
+        return exception_data
 
     def format(self, record: logging.LogRecord) -> str:
         """Format the log record as structured JSON.
@@ -107,8 +198,8 @@ class StructuredFormatter(logging.Formatter):
             log_data["metric_info"] = point
 
         # Handle exception information
-        if record.exc_info:
-            log_data["exception"] = self.formatException(record.exc_info)
+        if record.exc_info and (exc_info := self._format_exception(record.exc_info)):
+            log_data["exception"] = exc_info
 
         # Format the main message
         if record.args:
