@@ -92,7 +92,7 @@ class StructuredFormatter(logging.Formatter):
         Returns:
             Structured exception data as a dictionary.
         """
-        if exc_info[0] is None:
+        if exc_info[0] is None:  # pragma: no cover
             return None
 
         exc_type, exc_value, exc_traceback = exc_info
@@ -106,7 +106,7 @@ class StructuredFormatter(logging.Formatter):
 
         # Add traceback frames
         tb: TracebackType | None
-        if exc_traceback:
+        if exc_traceback:  # pragma: no branch
             frames: list[_FrameData] = []
             tb = exc_traceback
             while tb is not None:
