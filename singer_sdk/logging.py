@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import linecache
 import logging
 import sys
 import typing as t
@@ -22,6 +23,7 @@ class _FrameData(t.TypedDict):
     filename: str
     function: str
     lineno: int
+    line: str
 
 
 class _ExceptionData(t.TypedDict, total=False):
@@ -105,6 +107,10 @@ class StructuredFormatter(logging.Formatter):
                     "filename": tb.tb_frame.f_code.co_filename,
                     "function": tb.tb_frame.f_code.co_name,
                     "lineno": tb.tb_lineno,
+                    "line": linecache.getline(
+                        tb.tb_frame.f_code.co_filename,
+                        tb.tb_lineno,
+                    ),
                 }
                 frames.append(frame_info)
                 tb = tb.tb_next

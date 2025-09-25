@@ -163,6 +163,7 @@ class TestStructuredFormatter:
         assert "filename" in frame
         assert "function" in frame
         assert "lineno" in frame
+        assert "raise ValueError(msg)" in frame["line"]
 
         # Clean up
         logger.removeHandler(handler)

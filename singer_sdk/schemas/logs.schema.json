@@ -96,9 +96,13 @@
               "lineno": {
                 "type": "integer",
                 "description": "The line number where the frame occurred"
+              },
+              "line": {
+                "type": "string",
+                "description": "The line of code"
               }
             },
-            "required": ["filename", "function", "lineno"]
+            "required": ["filename", "function", "lineno", "line"]
           }
         },
         "cause": {
