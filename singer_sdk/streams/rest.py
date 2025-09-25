@@ -338,7 +338,6 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             else None,
         )
         self.validate_response(response)
-        logging.debug("Response received successfully.")
         return response
 
     def get_url_params(  # noqa: PLR6301
@@ -470,7 +469,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
                         paginator.advance(resp)
                         continue
 
-                    self.logger.info(
+                    self.log(
                         "Pagination stopped after %d pages because no records were "
                         "found in the last response",
                         pages,
@@ -704,7 +703,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         """
         return backoff.random_jitter(value)
 
-    def backoff_handler(self, details: Details) -> None:  # noqa: PLR6301
+    def backoff_handler(self, details: Details) -> None:
         """Adds additional behaviour prior to retry.
 
         By default will log out backoff details, developers can override
@@ -714,7 +713,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             details: backoff invocation details
                 https://github.com/litl/backoff#event-handlers
         """
-        logging.error(
+        self.log(
             "Backing off %0.2f seconds after %d tries "
             "calling function %s with args %s and kwargs "
             "%s",
@@ -723,6 +722,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             details.get("target"),
             details.get("args"),
             details.get("kwargs"),
+            level=logging.ERROR,
         )
 
     def backoff_runtime(  # noqa: PLR6301
