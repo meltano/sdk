@@ -64,8 +64,57 @@
       "additionalProperties": true
     },
     "exception": {
-      "type": "string",
-      "description": "The exception information, only present for ERROR logs"
+      "type": "object",
+      "description": "The exception information, only present for ERROR logs",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The exception class name"
+        },
+        "module": {
+          "type": "string",
+          "description": "The module containing the exception class"
+        },
+        "message": {
+          "type": "string",
+          "description": "The exception message"
+        },
+        "traceback": {
+          "type": "array",
+          "description": "The traceback frames",
+          "items": {
+            "type": "object",
+            "properties": {
+              "filename": {
+                "type": "string",
+                "description": "The filename where the frame occurred"
+              },
+              "function": {
+                "type": "string",
+                "description": "The function name where the frame occurred"
+              },
+              "lineno": {
+                "type": "integer",
+                "description": "The line number where the frame occurred"
+              },
+              "line": {
+                "type": "string",
+                "description": "The line of code"
+              }
+            },
+            "required": ["filename", "function", "lineno", "line"]
+          }
+        },
+        "cause": {
+          "$ref": "#/properties/exception",
+          "description": "The exception that caused this exception (__cause__)"
+        },
+        "context": {
+          "$ref": "#/properties/exception",
+          "description": "The exception context (__context__)"
+        }
+      },
+      "required": ["type", "module", "message"]
     },
     "message": {
       "type": "string",

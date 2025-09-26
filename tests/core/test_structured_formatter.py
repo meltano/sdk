@@ -134,9 +134,12 @@ class TestStructuredFormatter:
         handler.setFormatter(formatter)
         logger.addHandler(handler)
 
-        # Create an exception
-        exc = ValueError("Test exception")
-        logger.error("Error occurred", extra={"error_code": 500}, exc_info=exc)
+        # Create an exception with proper exc_info
+        try:
+            msg = "Test exception"
+            raise ValueError(msg)  # noqa: TRY301
+        except ValueError:
+            logger.exception("Error occurred", extra={"error_code": 500})
 
         # Get the logged output
         log_output = log_stream.getvalue().strip()
@@ -148,10 +151,107 @@ class TestStructuredFormatter:
             "error_code": 500,
         }
         assert "exception" in log_data
-        assert "ValueError" in log_data["exception"]
+        assert isinstance(log_data["exception"], dict)
+        assert log_data["exception"]["type"] == "ValueError"
+        assert log_data["exception"]["module"] == "builtins"
+        assert log_data["exception"]["message"] == "Test exception"
+        assert "traceback" in log_data["exception"]
+        assert isinstance(log_data["exception"]["traceback"], list)
+        assert len(log_data["exception"]["traceback"]) > 0
+        # Verify traceback frame structure
+        frame = log_data["exception"]["traceback"][0]
+        assert "filename" in frame
+        assert "function" in frame
+        assert "lineno" in frame
+        assert "raise ValueError(msg)" in frame["line"]
 
         # Clean up
         logger.removeHandler(handler)
+
+    def test_structured_formatter_with_chained_exception(self):
+        """Test that StructuredFormatter handles exception chaining properly."""
+        logger = logging.getLogger("test_logger_chained_exception")
+        logger.setLevel(logging.ERROR)
+
+        log_stream = StringIO()
+        handler = logging.StreamHandler(log_stream)
+        formatter = StructuredFormatter()
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
+        # Create a chained exception
+        try:
+            try:
+                msg = "Original error"
+                raise ValueError(msg)  # noqa: TRY301
+            except ValueError as e:
+                msg = "Chained error"
+                raise RuntimeError(msg) from e
+        except RuntimeError:
+            logger.exception("Chained error occurred")
+
+        # Get the logged output
+        log_output = log_stream.getvalue().strip()
+        log_data = json.loads(log_output)
+
+        # Verify main exception
+        assert log_data["message"] == "Chained error occurred"
+        assert "exception" in log_data
+        assert isinstance(log_data["exception"], dict)
+        assert log_data["exception"]["type"] == "RuntimeError"
+        assert log_data["exception"]["module"] == "builtins"
+        assert log_data["exception"]["message"] == "Chained error"
+
+        # Verify chained exception (cause)
+        assert "cause" in log_data["exception"]
+        assert isinstance(log_data["exception"]["cause"], dict)
+        assert log_data["exception"]["cause"]["type"] == "ValueError"
+        assert log_data["exception"]["cause"]["module"] == "builtins"
+        assert log_data["exception"]["cause"]["message"] == "Original error"
+
+        # Clean up
+        logger.removeHandler(handler)
+
+    def test_structured_formatter_with_context_exception(self):
+        """Test that StructuredFormatter handles context exception properly."""
+        logger = logging.getLogger("test_logger_context_exception")
+        logger.setLevel(logging.ERROR)
+
+        log_stream = StringIO()
+        handler = logging.StreamHandler(log_stream)
+        formatter = StructuredFormatter()
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
+        # Create a context exception
+        try:
+            try:
+                msg = "Original error"
+                raise ValueError(msg)  # noqa: TRY301
+            except ValueError:
+                msg = "Context error"
+                raise RuntimeError(msg) from None
+        except RuntimeError:
+            logger.exception("Context error occurred")
+
+        # Get the logged output
+        log_output = log_stream.getvalue().strip()
+        log_data = json.loads(log_output)
+
+        # Verify main exception
+        assert log_data["message"] == "Context error occurred"
+        assert "exception" in log_data
+        assert isinstance(log_data["exception"], dict)
+        assert log_data["exception"]["type"] == "RuntimeError"
+        assert log_data["exception"]["module"] == "builtins"
+        assert log_data["exception"]["message"] == "Context error"
+
+        # Verify context exception
+        assert "context" in log_data["exception"]
+        assert isinstance(log_data["exception"]["context"], dict)
+        assert log_data["exception"]["context"]["type"] == "ValueError"
+        assert log_data["exception"]["context"]["module"] == "builtins"
+        assert log_data["exception"]["context"]["message"] == "Original error"
 
     def test_structured_formatter_json_serialization_fallback(self):
         """Test that StructuredFormatter handles non-serializable objects."""
