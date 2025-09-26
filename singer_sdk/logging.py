@@ -103,8 +103,6 @@ class StructuredFormatter(logging.Formatter):
             frames: list[_FrameData] = []
             tb = exc_traceback
             while tb is not None:
-                # first_lineno = tb.tb_frame.f_lineno
-                # lines = linecache.getlines(tb.tb_frame.f_code.co_filename)
                 frame_info: _FrameData = {
                     "filename": tb.tb_frame.f_code.co_filename,
                     "function": tb.tb_frame.f_code.co_name,
