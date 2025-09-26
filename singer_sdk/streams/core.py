@@ -470,6 +470,16 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             context: Stream partition or context dictionary.
         """
+        if self.replication_method != REPLICATION_INCREMENTAL:
+            self.log(
+                (
+                    "Stream is not configured for incremental replication. Not "
+                    "writing starting replication value."
+                ),
+                level=logging.DEBUG,
+            )
+            return
+
         value = None
         state = self.get_context_state(context)
 
@@ -1210,6 +1220,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     current_context,
                 )
                 self._write_starting_replication_value(current_context)
+
                 child_context: types.Context | None = (
                     None if current_context is None else copy.copy(current_context)
                 )
