@@ -247,9 +247,9 @@ class OpenAPISchema(SchemaSource[_TKey]):
 
             ext: str | None = None
             if content_type := response.headers.get("Content-Type"):
-                if content_type == "application/yaml":
+                if "application/yaml" in content_type:
                     ext = ".yaml"
-                elif content_type == "application/json":
+                elif "application/json" in content_type:
                     ext = ".json"
 
             ext = ext or f".{urlparse(self.source).path.split('.').pop()}"

@@ -268,10 +268,31 @@ class TestOpenAPISchema:
     @pytest.mark.parametrize(
         "url,headers",
         [
-            ("https://api.example.com/openapi", {"content-type": "application/json"}),
-            ("https://api.example.com/openapi", {"content-type": "application/yaml"}),
-            ("https://api.example.com/openapi.yaml", {}),
-            ("https://api.example.com/openapi.yml", {"content-type": "text/plain"}),
+            pytest.param(
+                "https://api.example.com/openapi",
+                {"content-type": "application/json"},
+                id="application/json",
+            ),
+            pytest.param(
+                "https://api.example.com/openapi",
+                {"content-type": "application/json; charset=utf-8"},
+                id="application/json; charset=utf-8",
+            ),
+            pytest.param(
+                "https://api.example.com/openapi",
+                {"content-type": "application/yaml"},
+                id="application/yaml",
+            ),
+            pytest.param(
+                "https://api.example.com/openapi.yaml",
+                {},
+                id="no content-type",
+            ),
+            pytest.param(
+                "https://api.example.com/openapi.yml",
+                {"content-type": "text/plain"},
+                id="text/plain",
+            ),
         ],
     )
     @patch("requests.get")
@@ -286,7 +307,7 @@ class TestOpenAPISchema:
         response = requests.Response()
         response._content = (
             json.dumps(openapi_spec).encode("utf-8")
-            if headers.get("content-type") == "application/json"
+            if "application/json" in headers.get("content-type", "")
             else yaml.dump(openapi_spec).encode("utf-8")
         )
         response.status_code = 200
