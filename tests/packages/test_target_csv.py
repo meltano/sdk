@@ -6,6 +6,7 @@ import datetime
 import importlib.resources
 import io
 import json
+import logging
 import shutil
 import typing as t
 import uuid
@@ -73,9 +74,9 @@ def test_countries_to_csv(
     target = TargetCSV(config=csv_config)
     target.max_parallelism = 1
 
-    caplog.set_level("ERROR", "singer_sdk.metrics")
+    caplog.set_level(logging.ERROR, "singer_sdk.metrics")
 
-    with caplog.at_level("INFO"):
+    with caplog.at_level(logging.INFO):
         tap_stdout, _, target_stdout, _ = tap_to_target_sync_test(tap, target)
 
     snapshot.assert_match(tap_stdout.read(), "tap.jsonl")
@@ -107,10 +108,10 @@ def test_countries_to_csv_mapped(
     target.max_parallelism = 1
     mapper = StreamTransform(config=COUNTRIES_STREAM_MAPS_CONFIG)
 
-    caplog.set_level("ERROR", "singer_sdk.metrics")
+    caplog.set_level(logging.ERROR, "singer_sdk.metrics")
 
     tap_io = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
-    with redirect_stdout(tap_io), caplog.at_level("INFO"):
+    with redirect_stdout(tap_io), caplog.at_level(logging.INFO):
         tap.sync_all()
 
     tap_io.seek(0)
@@ -119,7 +120,7 @@ def test_countries_to_csv_mapped(
 
     tap_io.seek(0)
     mapper_io = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
-    with redirect_stdout(mapper_io), caplog.at_level("INFO"):
+    with redirect_stdout(mapper_io), caplog.at_level(logging.INFO):
         mapper.listen(tap_io)
 
     mapper_io.seek(0)
@@ -128,7 +129,7 @@ def test_countries_to_csv_mapped(
 
     mapper_io.seek(0)
     target_io = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
-    with redirect_stdout(target_io), caplog.at_level("INFO"):
+    with redirect_stdout(target_io), caplog.at_level(logging.INFO):
         target.listen(mapper_io)
 
     target_io.seek(0)
@@ -148,9 +149,9 @@ def test_fake_people_to_csv(
     target = TargetCSV(config=csv_config)
     target.max_parallelism = 1
 
-    caplog.set_level("ERROR", "singer_sdk.metrics")
+    caplog.set_level(logging.ERROR, "singer_sdk.metrics")
 
-    with caplog.at_level("INFO"):
+    with caplog.at_level(logging.INFO):
         tap_stdout, _, target_stdout, _ = tap_to_target_sync_test(tap, target)
 
     snapshot.assert_match(tap_stdout.read(), "tap.jsonl")

@@ -237,6 +237,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             self.log(  # type: ignore[unreachable]
                 "No custom mapper provided for '%s'. Using SameRecordTransform.",
                 self.name,
+                level=logging.DEBUG,
             )
             self._stream_maps = [
                 SameRecordTransform(
