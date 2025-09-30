@@ -650,7 +650,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             msg = f"Failed OAuth login, response was '{token_response.json()}'. {ex}"
             raise RuntimeError(msg) from ex
 
-        self.logger.info("OAuth authorization attempt was successful.")
+        self.logger.debug("OAuth authorization attempt was successful")
 
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
