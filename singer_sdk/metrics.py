@@ -28,7 +28,6 @@ if t.TYPE_CHECKING:
 
 DEFAULT_LOG_INTERVAL = 60.0
 METRICS_LOGGER_NAME = __name__
-METRICS_LOG_LEVEL_SETTING = "metrics_log_level"
 
 _TVal = t.TypeVar("_TVal")
 

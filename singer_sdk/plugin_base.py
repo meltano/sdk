@@ -270,20 +270,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             self.logger.info("Skipping parse of env var settings...")
         self._config = config_dict
         self.metrics_logger = metrics.get_metrics_logger()
-        if metrics_level := self.config.get(
-            metrics.METRICS_LOG_LEVEL_SETTING,
-        ):  # pragma: no cover
-            self.metrics_logger.setLevel(metrics_level.upper())
-            warnings.warn(
-                f"Using {metrics.METRICS_LOG_LEVEL_SETTING} to set metrics log level "
-                "is deprecated and will be removed by September 2025. "
-                "Please use the logging level environment variables "
-                "or a custom logging configuration file.",
-                SingerSDKDeprecationWarning,
-                stacklevel=2,
-            )
-        else:
-            self.metrics_logger.setLevel(_plugin_log_level(plugin_name=self.name))
+        self.metrics_logger.setLevel(_plugin_log_level(plugin_name=self.name))
 
         self._validate_config(raise_errors=validate_config)
         self._mapper: PluginMapper | None = None
