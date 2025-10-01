@@ -28,9 +28,7 @@ jobs:
     name: Analyze
     runs-on: ubuntu-latest
     permissions:
-      actions: read
-      contents: read
-      security-events: write
+      security-events: write # create security reports for the repo
 
     strategy:
       fail-fast: false
