@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.50.0 (2025-10-01)
+
+### ✨ New
+
+- [#3279](https://github.com/meltano/sdk/issues/3279) Emit structured logs and document this new capability for downstream consumers
+
+### 🐛 Fixes
+
+- [#3287](https://github.com/meltano/sdk/issues/3287) Handle presence of `charset` in `Content-Type` header when retrieving schema from OpenAPI spec
+- [#3286](https://github.com/meltano/sdk/issues/3286) Only write starting replication value for incremental streams -- _**Thanks @ReubenFrankel!**_
+
+### ⚙️ Under the Hood
+
+- [#3292](https://github.com/meltano/sdk/issues/3292) Remove deprecated `SingerMetricsFormatter`
+- [#3291](https://github.com/meltano/sdk/issues/3291) Remove unsupported `common_options` module
+- [#3290](https://github.com/meltano/sdk/issues/3290) Remove `metrics_log_level` setting in favor of application log level
+- [#3289](https://github.com/meltano/sdk/issues/3289) Move some noisy logs to the DEBUG level
+- [#3281](https://github.com/meltano/sdk/issues/3281) Emit structured exception information
+- [#3285](https://github.com/meltano/sdk/issues/3285) Use the stream logger to log events in HTTP streams
+- [#3283](https://github.com/meltano/sdk/issues/3283) Pass around raw `Point` instance for metrics
+- [#3282](https://github.com/meltano/sdk/issues/3282) Avoid printing raw tracebacks to keep stderr clean
+
 ## v0.49.1 (2025-09-14)
 
 ### 🐛 Fixes
