@@ -8,7 +8,6 @@ import pytest
 import time_machine
 
 from singer_sdk import metrics
-from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 
 if t.TYPE_CHECKING:
     from collections.abc import Callable, Iterable
@@ -82,33 +81,6 @@ def metric_log_records() -> list[logging.LogRecord]:
     )
 
     return [normal_log, counter, timer]
-
-
-def test_singer_metrics_formatter():
-    with pytest.warns(SingerSDKDeprecationWarning):
-        formatter = metrics.SingerMetricsFormatter(fmt="{metric_json}", style="{")
-
-    record = logging.LogRecord(
-        name="test",
-        level=logging.INFO,
-        pathname="test.py",
-        lineno=1,
-        msg="METRIC",
-        args=(),
-        exc_info=None,
-    )
-
-    assert not formatter.format(record)
-
-    metric_dict = metrics.Point(
-        metric_type="counter",
-        metric=metrics.Metric.RECORD_COUNT,
-        value=1,
-        tags={"test_tag": "test_value"},
-    ).to_dict()
-    record.__dict__["point"] = metric_dict
-
-    assert formatter.format(record) == metrics._to_json(metric_dict)
 
 
 def test_meter():

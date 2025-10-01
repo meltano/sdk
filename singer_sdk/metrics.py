@@ -8,11 +8,8 @@ import json
 import logging
 import os
 import typing as t
-import warnings
 from dataclasses import dataclass, field
 from time import time
-
-from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 
 if t.TYPE_CHECKING:
     import sys
@@ -101,38 +98,6 @@ def _to_json(point: dict) -> str:
         A JSON string.
     """
     return json.dumps(point, default=str, separators=(",", ":"))
-
-
-class SingerMetricsFormatter(logging.Formatter):
-    """Logging formatter that adds a ``metric_json`` field to the log record."""
-
-    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
-        """Initialize a formatter.
-
-        Args:
-            *args: Positional arguments.
-            **kwargs: Keyword arguments.
-        """
-        warnings.warn(
-            "SingerMetricsFormatter is deprecated and will be removed by September "
-            "2025. Use a different formatter.",
-            SingerSDKDeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)
-
-    def format(self, record: logging.LogRecord) -> str:
-        """Format a log record.
-
-        Args:
-            record: A log record.
-
-        Returns:
-            A formatted log record.
-        """
-        point = record.__dict__.get("point")
-        record.__dict__["metric_json"] = _to_json(point) if point else ""
-        return super().format(record)
 
 
 class MetricExclusionFilter(logging.Filter):
