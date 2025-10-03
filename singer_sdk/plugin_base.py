@@ -200,6 +200,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     #: Developers may override this property in order to add or remove
     #: advertised capabilities for this plugin.
     capabilities: t.ClassVar[t.Sequence[CapabilitiesEnum]] = [
+        PluginCapabilities.ABOUT,
         PluginCapabilities.STREAM_MAPS,
         PluginCapabilities.FLATTENING,
         PluginCapabilities.BATCH,

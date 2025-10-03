@@ -29,6 +29,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
         PluginCapabilities.ABOUT,
         PluginCapabilities.STREAM_MAPS,
         PluginCapabilities.FLATTENING,
+        PluginCapabilities.STRUCTURED_LOGGING,
     ]
 
     def __init__(
