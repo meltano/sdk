@@ -67,6 +67,7 @@ def test_target_about_info():
         PluginCapabilities.ABOUT,
         PluginCapabilities.STREAM_MAPS,
         PluginCapabilities.FLATTENING,
+        PluginCapabilities.STRUCTURED_LOGGING,
         TargetCapabilities.VALIDATE_RECORDS,
         PluginCapabilities.BATCH,
     ]

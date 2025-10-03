@@ -74,6 +74,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         PluginCapabilities.STREAM_MAPS,
         PluginCapabilities.FLATTENING,
         PluginCapabilities.BATCH,
+        PluginCapabilities.STRUCTURED_LOGGING,
     ]
 
     # Constructor

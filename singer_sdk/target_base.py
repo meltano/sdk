@@ -66,6 +66,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         PluginCapabilities.ABOUT,
         PluginCapabilities.STREAM_MAPS,
         PluginCapabilities.FLATTENING,
+        PluginCapabilities.STRUCTURED_LOGGING,
         TargetCapabilities.VALIDATE_RECORDS,
     ]
 
