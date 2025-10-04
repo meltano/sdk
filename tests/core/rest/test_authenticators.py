@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import datetime
+import os
 import typing as t
+import warnings
 
 import jwt
 import pytest
 import time_machine
-from cryptography.hazmat.primitives.asymmetric.rsa import (
-    RSAPrivateKey,
-    RSAPublicKey,
-    generate_private_key,
-)
+from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.serialization import (
     Encoding,
     NoEncryption,
@@ -22,13 +20,21 @@ from cryptography.hazmat.primitives.serialization import (
 from requests.auth import HTTPProxyAuth, _basic_auth_str
 
 from singer_sdk.authenticators import (
+    APIKeyAuthenticator,
     BasicAuthenticator,
+    BearerTokenAuthenticator,
     OAuthAuthenticator,
     OAuthJWTAuthenticator,
+    SimpleAuthenticator,
 )
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 
 if t.TYPE_CHECKING:
     import requests_mock
+    from cryptography.hazmat.primitives.asymmetric.rsa import (
+        RSAPrivateKey,
+        RSAPublicKey,
+    )
 
     from singer_sdk.streams import RESTStream
     from singer_sdk.tap_base import Tap
@@ -88,6 +94,48 @@ def test_authenticator_is_reused(
     other_stream: RESTStream = rest_tap.streams[other_stream_name]
 
     assert (stream.authenticator is other_stream.authenticator) is auth_reused
+
+
+def test_simple_authenticator():
+    auth = SimpleAuthenticator()
+    assert auth.auth_headers == {}
+
+    auth = SimpleAuthenticator(auth_headers={"Authorization": "Bearer token"})
+    assert auth.auth_headers == {"Authorization": "Bearer token"}
+
+
+def test_api_key_authenticator():
+    auth = APIKeyAuthenticator(key="api-key", value="secret")
+    assert auth.auth_headers == {"api-key": "secret"}
+    assert auth.auth_params == {}
+
+    auth = APIKeyAuthenticator(key="api-key", value="secret", location="params")
+    assert auth.auth_headers == {}
+    assert auth.auth_params == {"api-key": "secret"}
+
+
+def test_basic_authenticator():
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        auth = BasicAuthenticator(username="username", password="password")  # noqa: S106
+
+    assert auth.auth_headers == {"Authorization": "Basic dXNlcm5hbWU6cGFzc3dvcmQ="}
+    assert auth.auth_params == {}
+
+
+def test_oauth_authenticator():
+    auth = OAuthAuthenticator(client_id="client-id", client_secret="client-secret")  # noqa: S106
+    assert auth.client_id == "client-id"
+    assert auth.client_secret == "client-secret"  # noqa: S105
+
+
+def test_oauth_jwt_authenticator():
+    auth = OAuthJWTAuthenticator(
+        private_key="private-key",
+        private_key_passphrase="private-key-passphrase",  # noqa: S106
+    )
+    assert auth.private_key == "private-key"
+    assert auth.private_key_passphrase == "private-key-passphrase"  # noqa: S105
 
 
 class _FakeOAuthAuthenticator(OAuthAuthenticator):
@@ -224,11 +272,221 @@ def test_requests_library_auth(rest_tap: Tap):
     assert r.headers["Proxy-Authorization"] == _basic_auth_str("username", "password")
 
 
-def test_basic_auth_deprecation_warning(rest_tap: Tap):
+def _get_args_kwargs(
+    stream_param: t.Literal["positional", "keyword"],
+    stream: RESTStream,
+) -> tuple[tuple[t.Any, ...], dict[str, t.Any]]:
+    return ((stream,), {}) if stream_param == "positional" else ((), {"stream": stream})
+
+
+def assert_basic_auth_deprecation_warning(
+    warning: warnings.WarningMessage,
+    *,
+    location: str = "authenticators.py",
+):
+    assert isinstance(warning.message, SingerSDKDeprecationWarning)
+    message = warning.message.args[0]
+    assert isinstance(message, str)
+    assert message.startswith("BasicAuthenticator is deprecated")
+    assert warning.filename.endswith(f"{os.path.sep}{location}")
+
+
+def assert_stream_param_deprecation_warning(warning: warnings.WarningMessage):
+    assert isinstance(warning.message, SingerSDKDeprecationWarning)
+    message = warning.message.args[0]
+    assert isinstance(message, str)
+    assert message.startswith("The `stream` parameter is deprecated")
+    assert warning.filename.endswith(f"{os.path.sep}authenticators.py")
+
+
+def assert_create_for_stream_deprecation_warning(warning: warnings.WarningMessage):
+    assert isinstance(warning.message, SingerSDKDeprecationWarning)
+    message = warning.message.args[0]
+    assert isinstance(message, str)
+    assert message.startswith("The `create_for_stream` method is deprecated")
+    assert warning.filename.endswith(f"{os.path.sep}test_authenticators.py")
+
+
+def assert_config_property_deprecation_warning(warning: warnings.WarningMessage):
+    assert isinstance(warning.message, SingerSDKDeprecationWarning)
+    message = warning.message.args[0]
+    assert isinstance(message, str)
+    assert message.startswith("The `config` property is deprecated")
+    assert warning.filename.endswith(f"{os.path.sep}authenticators.py")
+
+
+@pytest.mark.parametrize("stream_param", ["positional", "keyword"])
+def test_basic_auth_deprecation_warning(
+    rest_tap: Tap, stream_param: t.Literal["positional", "keyword"]
+):
     """Validate that a warning is emitted when using BasicAuthenticator."""
     stream: RESTStream = rest_tap.streams["some_stream"]
-    with pytest.deprecated_call(match="BasicAuthenticator is deprecated") as recorder:
-        BasicAuthenticator(stream=stream, username="username", password="password")  # noqa: S106
+    args, kwargs = _get_args_kwargs(stream_param, stream)
+    with pytest.deprecated_call() as recorder:
+        BasicAuthenticator(*args, username="username", password="password", **kwargs)  # noqa: S106
+
+    assert len(recorder.list) == 2
+    assert_basic_auth_deprecation_warning(
+        recorder.list[0],
+        location="test_authenticators.py",
+    )
+    assert_stream_param_deprecation_warning(recorder.list[1])
+
+
+@pytest.mark.parametrize("stream_param", ["positional", "keyword"])
+def test_api_key_authenticator_stream_param_deprecation_warning(
+    rest_tap: Tap,
+    stream_param: t.Literal["positional", "keyword"],
+):
+    """Validate that a warning is emitted when using stream parameter."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        APIKeyAuthenticator(key="api-key", value="secret")
+
+    stream: RESTStream = rest_tap.streams["some_stream"]
+    args, kwargs = _get_args_kwargs(stream_param, stream)
+    with pytest.deprecated_call() as recorder:
+        APIKeyAuthenticator(*args, key="api-key", value="secret", **kwargs)
 
     assert len(recorder.list) == 1
-    assert recorder.list[0].filename.endswith("test_authenticators.py")
+    assert_stream_param_deprecation_warning(recorder.list[0])
+
+
+@pytest.mark.parametrize("stream_param", ["positional", "keyword"])
+def test_bearer_token_authenticator_stream_param_deprecation_warning(
+    rest_tap: Tap,
+    stream_param: t.Literal["positional", "keyword"],
+):
+    """Validate that a warning is emitted when using stream parameter."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        BearerTokenAuthenticator(token="bearer-token")  # noqa: S106
+
+    stream: RESTStream = rest_tap.streams["some_stream"]
+    args, kwargs = _get_args_kwargs(stream_param, stream)
+    with pytest.deprecated_call() as recorder:
+        BearerTokenAuthenticator(*args, token="bearer-token", **kwargs)  # noqa: S106
+
+    assert len(recorder.list) == 1
+    assert_stream_param_deprecation_warning(recorder.list[0])
+
+
+@pytest.mark.parametrize("stream_param", ["positional", "keyword"])
+def test_simple_authenticator_stream_param_deprecation_warning(
+    rest_tap: Tap,
+    stream_param: t.Literal["positional", "keyword"],
+):
+    """Validate that a warning is emitted when using stream parameter."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        SimpleAuthenticator(auth_endpoint="https://example.com/oauth")
+
+    stream: RESTStream = rest_tap.streams["some_stream"]
+    args, kwargs = _get_args_kwargs(stream_param, stream)
+    with pytest.deprecated_call() as recorder:
+        SimpleAuthenticator(*args, **kwargs)
+
+    assert len(recorder.list) == 1
+    assert_stream_param_deprecation_warning(recorder.list[0])
+
+
+@pytest.mark.parametrize("stream_param", ["positional", "keyword"])
+def test_oauth_authenticator_stream_param_deprecation_warning(
+    rest_tap: Tap,
+    stream_param: t.Literal["positional", "keyword"],
+):
+    """Validate that a warning is emitted when using stream parameter."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        _FakeOAuthAuthenticator(auth_endpoint="https://example.com/oauth")
+
+    stream: RESTStream = rest_tap.streams["some_stream"]
+    args, kwargs = _get_args_kwargs(stream_param, stream)
+    with pytest.deprecated_call() as recorder:
+        _FakeOAuthAuthenticator(
+            *args,
+            auth_endpoint="https://example.com/oauth",
+            **kwargs,
+        )
+
+    # Expects 3 warnings: stream param, config property
+    # (2x for client_id and client_secret)
+    assert len(recorder.list) == 3
+    assert_stream_param_deprecation_warning(recorder.list[0])
+    assert_config_property_deprecation_warning(recorder.list[1])
+    assert_config_property_deprecation_warning(recorder.list[2])
+
+
+@pytest.mark.parametrize("stream_param", ["positional", "keyword"])
+def test_oauth_jwt_authenticator_stream_param_deprecation_warning(
+    rest_tap: Tap,
+    stream_param: t.Literal["positional", "keyword"],
+):
+    """Validate that a warning is emitted when using stream parameter."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        OAuthJWTAuthenticator(auth_endpoint="https://example.com/oauth")
+
+    stream: RESTStream = rest_tap.streams["some_stream"]
+    args, kwargs = _get_args_kwargs(stream_param, stream)
+    with pytest.deprecated_call() as recorder:
+        OAuthJWTAuthenticator(
+            *args,
+            auth_endpoint="https://example.com/oauth",
+            **kwargs,
+        )
+
+    # Expects 5 warnings: stream param, config property
+    # (4x for client_id, client_secret, private_key, private_key_passphrase)
+    assert len(recorder.list) == 5
+    assert_stream_param_deprecation_warning(recorder.list[0])
+    assert_config_property_deprecation_warning(recorder.list[1])
+    assert_config_property_deprecation_warning(recorder.list[2])
+    assert_config_property_deprecation_warning(recorder.list[3])
+    assert_config_property_deprecation_warning(recorder.list[4])
+
+
+def test_api_key_authenticator_create_for_stream_deprecation_warning(rest_tap: Tap):
+    """Validate that a warning is emitted when using create_for_stream."""
+    stream: RESTStream = rest_tap.streams["some_stream"]
+    with pytest.deprecated_call() as recorder:
+        APIKeyAuthenticator.create_for_stream(
+            stream,
+            key="api-key",
+            value="secret",
+            location="header",
+        )
+
+    assert len(recorder.list) == 2  # Both create_for_stream and stream param warnings
+    assert_create_for_stream_deprecation_warning(recorder.list[0])
+    assert_stream_param_deprecation_warning(recorder.list[1])
+
+
+def test_bearer_token_authenticator_create_for_stream_deprecation_warning(
+    rest_tap: Tap,
+):
+    """Validate that a warning is emitted when using create_for_stream."""
+    stream: RESTStream = rest_tap.streams["some_stream"]
+    with pytest.deprecated_call() as recorder:
+        BearerTokenAuthenticator.create_for_stream(stream, token="bearer-token")  # noqa: S106
+
+    assert len(recorder.list) == 2  # Both create_for_stream and stream param warnings
+    assert_create_for_stream_deprecation_warning(recorder.list[0])
+    assert_stream_param_deprecation_warning(recorder.list[1])
+
+
+def test_basic_authenticator_create_for_stream_deprecation_warning(rest_tap: Tap):
+    """Validate that a warning is emitted when using create_for_stream."""
+    stream: RESTStream = rest_tap.streams["some_stream"]
+    with pytest.deprecated_call() as recorder:
+        BasicAuthenticator.create_for_stream(
+            stream,
+            username="username",
+            password="password",  # noqa: S106
+        )
+
+    # create_for_stream, BasicAuthenticator, and stream param warnings
+    assert len(recorder.list) == 3
+    assert_create_for_stream_deprecation_warning(recorder.list[0])
+    assert_basic_auth_deprecation_warning(recorder.list[1])
+    assert_stream_param_deprecation_warning(recorder.list[2])

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import typing as t
 
 import pytest
@@ -9,6 +10,7 @@ from singer_sdk.plugin_base import (
     SDK_PACKAGE_NAME,
     MapperNotInitialized,
     PluginBase,
+    SingerCommand,
     _ConfigInput,
 )
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
@@ -105,7 +107,7 @@ def test_config_from_cli_args_env(tmp_path: Path):
     """Test that input is converted to a merged config dict and parse_env is true."""
     config_path = tmp_path / "config.json"
     config_path.write_text('{"prop1": "hello"}')
-    config_input = _ConfigInput.from_cli_args(str(config_path), "ENV")
+    config_input = _ConfigInput.from_cli_args(config_path, "ENV")
     assert config_input.config == {"prop1": "hello"}
     assert config_input.parse_env
 
@@ -117,7 +119,7 @@ def test_config_from_cli_args_invalid_file(tmp_path: Path):
         FileNotFoundError,
         match=r"File at '.*' was not found",
     ) as exc_info:
-        _ConfigInput.from_cli_args(str(missing_path), "ENV")
+        _ConfigInput.from_cli_args(missing_path, "ENV")
     # Assert the error message includes the specific file path
     assert str(missing_path) in str(exc_info.value)
 
@@ -136,3 +138,39 @@ def test_config_from_cli_args_non_dict_json(tmp_path):
     config_path.write_text('["not", "a", "dict"]')
     with pytest.raises(ValueError, match="dictionary update sequence"):
         _ConfigInput.from_cli_args(config_path)
+
+
+def test_singer_command_excepthook(
+    caplog: pytest.LogCaptureFixture,
+    capsys: pytest.CaptureFixture,
+):
+    """Test that the excepthook is correctly set."""
+    logger = logging.getLogger("test_logger")
+    command = SingerCommand(name="test", logger=logger)
+
+    exc_info = (Exception, Exception("test"), None)
+    with caplog.at_level(logging.ERROR):
+        command.excepthook(*exc_info)
+
+    assert len(caplog.messages) == 1
+    assert caplog.messages[0] == "test"
+    assert "test" not in capsys.readouterr().err
+
+    caplog.clear()
+
+    exc_info = (RuntimeError, RuntimeError(), None)
+    with caplog.at_level(logging.ERROR):
+        command.excepthook(*exc_info)
+
+    assert len(caplog.messages) == 1
+    assert caplog.messages[0] == "RuntimeError"
+    assert "RuntimeError" not in capsys.readouterr().err
+
+    caplog.clear()
+
+    exc_info = (KeyboardInterrupt, KeyboardInterrupt(), None)
+    with caplog.at_level(logging.ERROR):
+        command.excepthook(*exc_info)
+
+    assert not caplog.messages
+    assert "KeyboardInterrupt" in capsys.readouterr().err

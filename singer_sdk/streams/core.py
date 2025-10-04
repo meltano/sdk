@@ -6,6 +6,7 @@ import abc
 import copy
 import datetime
 import json
+import logging
 import typing as t
 import warnings
 from os import PathLike
@@ -18,15 +19,12 @@ from singer_sdk.batch import Batcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
+    DiscoveryError,
     InvalidReplicationKeyException,
     InvalidStreamSortException,
     MaxRecordsLimitException,
 )
-from singer_sdk.helpers._batch import (
-    BaseBatchFileEncoding,
-    BatchConfig,
-    SDKBatchMessage,
-)
+from singer_sdk.helpers._batch import BatchConfig, SDKBatchMessage
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import (
     SingerSDKDeprecationWarning,
@@ -51,13 +49,13 @@ from singer_sdk.helpers._typing import (
     is_datetime_type,
 )
 from singer_sdk.helpers._util import utc_now
-from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
+from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform
 
 if t.TYPE_CHECKING:
-    import logging
-
     from singer_sdk.helpers import types
+    from singer_sdk.helpers._batch import BaseBatchFileEncoding
     from singer_sdk.helpers._compat import Traversable
+    from singer_sdk.mapper import StreamMap
     from singer_sdk.singerlib.catalog import StreamMetadata
     from singer_sdk.tap_base import Tap
 
@@ -122,7 +120,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def __init__(
         self,
         tap: Tap,
-        schema: str | PathLike | dict[str, t.Any] | singer.Schema | None = None,
+        schema: types.StrPath | dict[str, t.Any] | singer.Schema | None = None,
         name: str | None = None,
     ) -> None:
         """Init tap stream.
@@ -133,8 +131,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             name: Name of this stream.
 
         Raises:
-            ValueError: TODO
-            FileNotFoundError: TODO
+            ValueError: If the stream name is not provided.
+            ValueError: If an unsupported schema type is provided.
+            FileNotFoundError: If the schema does not exist at the provided filepath.
         """
         if name:
             self.name: str = name
@@ -142,7 +141,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             msg = "Missing argument or class variable 'name'."
             raise ValueError(msg)
 
-        self.logger: logging.Logger = tap.logger.getChild(self.name)
+        self._logger: logging.Logger = tap.logger.getChild(self.name)
         self.metrics_logger = tap.metrics_logger
         self.tap_name: str = tap.name
         self.context: types.Context | None = None
@@ -165,7 +164,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._schema_filepath: Path | Traversable | None = None
         self._metadata: singer.MetadataMapping | None = None
         self._mask: singer.SelectionMask | None = None
-        self._schema: dict
+        self._schema: dict | None = None
         self._is_state_flushed: bool = True
         self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
@@ -184,7 +183,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
                 self._schema_filepath = Path(schema)
                 warnings.warn(
-                    "Passing a schema filepath is deprecated. Please pass the schema "
+                    "Passing a schema filepath is deprecated. Please pass a schema "
                     "dictionary or a Singer Schema object instead.",
                     SingerSDKDeprecationWarning,
                     stacklevel=2,
@@ -197,15 +196,29 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 msg = f"Unexpected type {type(schema).__name__} for arg 'schema'."  # type: ignore[unreachable]
                 raise ValueError(msg)
 
-        if self.schema_filepath:
+        if self.schema_filepath:  # pragma: no cover
+            warnings.warn(
+                "Passing a schema filepath is deprecated. Use the `StreamSchema` "
+                "descriptor with a `SchemaDirectory` source instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
             self._schema = json.loads(self.schema_filepath.read_text())
 
-        if not self.schema:
-            msg = (
-                f"Could not initialize schema for stream '{self.name}'. A valid schema "
-                "object or filepath was not provided."
-            )
-            raise ValueError(msg)
+    @property
+    def logger(self) -> logging.Logger:
+        """Get stream logger."""
+        return self._logger
+
+    def log(
+        self,
+        message: str,
+        *args: t.Any,
+        level: int = logging.INFO,
+        **kwargs: t.Any,
+    ) -> None:
+        """Log a message."""
+        self._logger.log(level, message, *args, **kwargs)
 
     @property
     def stream_maps(self) -> list[StreamMap]:
@@ -221,18 +234,20 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         if self._tap.mapper is not None:
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
-            self.logger.debug(
+            self.log(
                 "Tap has custom mapper. Using %d provided map(s).",
                 len(self.stream_maps),
+                level=logging.DEBUG,
             )
 
         # TODO: A tap mapper is always registered so this code is unreachable.
         # Consider removing it.
         # https://github.com/meltano/sdk/blob/c6672eb70002c7430f5db30fba05bb21cf9f0c11/singer_sdk/mapper.py#L768-L778
         else:  # pragma: no cover
-            self.logger.info(  # type: ignore[unreachable]
+            self.log(  # type: ignore[unreachable]
                 "No custom mapper provided for '%s'. Using SameRecordTransform.",
                 self.name,
+                level=logging.DEBUG,
             )
             self._stream_maps = [
                 SameRecordTransform(
@@ -406,7 +421,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def _write_replication_key_signpost(
         self,
         context: types.Context | None,
-        value: datetime.datetime | str | int | float,
+        value: datetime.datetime | str | float,
     ) -> None:
         """Write the signpost value, if available.
 
@@ -466,6 +481,16 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             context: Stream partition or context dictionary.
         """
+        if self.replication_method != REPLICATION_INCREMENTAL:
+            self.log(
+                (
+                    "Stream is not configured for incremental replication. Not "
+                    "writing starting replication value."
+                ),
+                level=logging.DEBUG,
+            )
+            return
+
         value = None
         state = self.get_context_state(context)
 
@@ -484,7 +509,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 else:
                     value = self.compare_start_date(value, start_date_value)
 
-            self.logger.info("Starting incremental sync with bookmark value: %s", value)
+            self.log("Starting incremental sync with bookmark value: %s", value)
 
         write_starting_replication_value(state, value)
 
@@ -533,7 +558,13 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         Returns:
             JSON Schema dictionary for this stream.
+
+        Raises:
+            DiscoveryError: If the schema was not provided.
         """
+        if self._schema is None:
+            msg = f"The schema for stream '{self.name}' was not provided"
+            raise DiscoveryError(msg)
         return self._schema
 
     @property
@@ -726,7 +757,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     @property
     def emit_activate_version_messages(self) -> bool:
         """Get whether to emit `ACTIVATE_VERSION` messages."""
-        return self.config.get("emit_activate_version_messages", False)
+        return self.config.get("emit_activate_version_messages", False)  # type: ignore[no-any-return]
 
     # State properties:
 
@@ -880,8 +911,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """Write out an ACTIVATE_VERSION message."""
         singer.write_message(
             singer.ActivateVersionMessage(
-                self.name,
-                full_table_version,
+                stream=self.name,
+                version=full_table_version,
             )
         )
 
@@ -1020,8 +1051,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         the stream.
         """
         if len(self._sync_costs) > 0:
-            msg = f"Total Sync costs for stream {self.name}: {self._sync_costs}"
-            self.logger.info(msg)
+            self.log(f"Total Sync costs for stream {self.name}: {self._sync_costs}")
 
     def _check_max_record_limit(self, current_record_index: int) -> None:
         """Raise an exception if dry run record limit exceeded.
@@ -1201,6 +1231,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     current_context,
                 )
                 self._write_starting_replication_value(current_context)
+
                 child_context: types.Context | None = (
                     None if current_context is None else copy.copy(current_context)
                 )
@@ -1306,7 +1337,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
             msg += f" with context: {context}"
-        self.logger.info(msg)
+        self.log(msg)
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
@@ -1335,18 +1366,20 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 for _ in self._sync_records(context=context):
                     pass
         except Exception:
-            self.logger.exception(
+            self.log(
                 "An unhandled error occurred while syncing '%s'",
                 self.name,
+                level=logging.ERROR,
             )
             raise
 
     def _sync_children(self, child_context: types.Context | None) -> None:
         if child_context is None:
-            self.logger.warning(
+            self.log(
                 "Context for child streams of '%s' is null, "
                 "skipping sync of any child streams",
                 self.name,
+                level=logging.WARNING,
             )
             return
 

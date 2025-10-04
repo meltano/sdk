@@ -10,7 +10,6 @@ import sys
 import time
 import typing as t
 from functools import cached_property
-from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
 
@@ -22,12 +21,7 @@ from singer_sdk.exceptions import (
     InvalidRecord,
     MissingKeyPropertiesError,
 )
-from singer_sdk.helpers._batch import (
-    BaseBatchFileEncoding,
-    BatchConfig,
-    BatchFileFormat,
-    StorageTarget,
-)
+from singer_sdk.helpers._batch import BatchConfig, BatchFileFormat, StorageTarget
 from singer_sdk.helpers._compat import (
     date_fromisoformat,
     datetime_fromisoformat,
@@ -41,14 +35,16 @@ from singer_sdk.helpers._typing import (
 from singer_sdk.singerlib.json import deserialize_json
 from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
-if sys.version_info < (3, 12):
-    from typing_extensions import override
-else:
+if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
+    from gzip import GzipFile
     from logging import Logger
 
+    from singer_sdk.helpers._batch import BaseBatchFileEncoding
     from singer_sdk.target_base import Target
 
 
@@ -193,6 +189,9 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             "batch_size_rows",
         )
 
+        # Track fields we've already warned about missing from schema
+        self._warned_missing_fields: set[str] = set()
+
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
         self._record_counter: metrics.Counter = metrics.record_counter(self.stream_name)
         self._batch_timer = metrics.Timer(
@@ -227,7 +226,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             True if JSON schema validation is enabled.
         """
-        return self.config.get("validate_records", True)
+        return self.config.get("validate_records", True)  # type: ignore[no-any-return]
 
     def get_validator(self) -> BaseJSONSchemaValidator | None:
         """Get a record validator for this sink.
@@ -397,7 +396,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             True if metadata columns should be added.
         """
-        return self.config.get("add_record_metadata", False)
+        return self.config.get("add_record_metadata", False)  # type: ignore[no-any-return]
 
     @property
     def process_activate_version_messages(self) -> bool:
@@ -406,7 +405,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             True if activate version messages should be processed.
         """
-        return self.config.get("process_activate_version_messages", True)
+        return self.config.get("process_activate_version_messages", True)  # type: ignore[no-any-return]
 
     @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
@@ -585,8 +584,13 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         for key, value in record.items():
             additional_properties = schema.get("additionalProperties", False)
             if key not in schema["properties"]:
-                if value is not None and not additional_properties:
+                if (
+                    value is not None
+                    and not additional_properties
+                    and key not in self._warned_missing_fields
+                ):
                     self.logger.warning("No schema for record field '%s'", key)
+                    self._warned_missing_fields.add(key)
                 continue
 
             if datelike_type := get_datelike_property_type(schema["properties"][key]):

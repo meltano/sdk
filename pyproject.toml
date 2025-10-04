@@ -3,7 +3,7 @@ name = "singer-sdk"
 dynamic = [
     "version",
 ]
-description = "A framework for building Singer taps"
+description = "A framework for building Singer taps and targets"
 authors = [{ name = "Meltano Team and Contributors", email = "hello@meltano.com" }]
 maintainers = [{ name = "Meltano Team and Contributors", email = "hello@meltano.com" }]
 keywords = [
@@ -16,11 +16,11 @@ keywords = [
 classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
@@ -28,15 +28,14 @@ classifiers = [
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 dependencies = [
-    "backoff>=2.0.0",
+    "backoff>=2.0.0,<4",
     'backports-datetime-fromisoformat>=2.0.1; python_version<"3.11"',
-    "click>=8.0,<9",
+    "click>=8.2,<9",
     "fsspec>=2024.9.0",
-    'importlib-metadata>=5.0; python_version<"3.12"',
-    'importlib-resources>=5.12.0,!=6.2.0,!=6.3.0,!=6.3.1; python_version<"3.10"',
+    'importlib-metadata>=6.5; python_version<"3.12"',
     "inflection>=0.5.1",
     "joblib>=1.3.0",
     "jsonpath-ng>=1.5.3",
@@ -83,6 +82,10 @@ msgspec = [
     "msgspec>=0.19.0",
 ]
 
+sql = [
+    "sqlalchemy>=2",
+]
+
 [project.urls]
 Homepage = "https://sdk.meltano.com/en/latest/"
 Repository = "https://github.com/meltano/sdk"
@@ -110,12 +113,24 @@ docs = [
     "sphinx-notfound-page>=1.0.0",
     "sphinx-reredirects>=0.1.5",
 ]
+# Workspace packages needed for end-to-end tests
+packages = [
+    "mapper-custom",
+    "tap-countries",
+    "tap-csv",
+    "tap-dummyjson",
+    "tap-fake-people",
+    "tap-fundamentals",
+    "tap-gitlab",
+    "tap-hostile",
+    "tap-sqlite",
+    "target-csv",
+    "target-parquet",
+    "target-sqlite",
+]
 testing = [
     "coverage[toml]>=7.9",
-    "duckdb>=0.8.0",
-    "duckdb-engine>=0.13",
     "fastjsonschema>=2.19.1",
-    "moto>=5.0.14",
     "pytest>=7.2.1",
     "pytest-benchmark>=4.0.0",
     "pytest-github-actions-annotate-failures>=0.3.0",
@@ -126,22 +141,11 @@ testing = [
     "requests-mock>=1.10.0",
     "rfc3339-validator>=0.1.4",
     "time-machine>=2.10.0",
+    "toolz>=1.0.0",
     "xdoctest[colors]>=1.1.1",
-    # Workspace packages needed for tests
-    "mapper-custom",
-    "tap-countries",
-    "tap-csv",
-    "tap-dummyjson",
-    "tap-fake-people",
-    "tap-gitlab",
-    "tap-hostile",
-    "tap-sqlite",
-    "target-csv",
-    "target-parquet",
-    "target-sqlite",
 ]
 typing = [
-    "mypy>=1.16",
+    "mypy>=1.17",
     "pyarrow-stubs>=19.1",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
@@ -178,26 +182,30 @@ source = "vcs"
 addopts = [
     "--durations=10",
     "-m",
-    "not external",
+    "not contrib and not external and not packages",
     "-ra",
     "--strict-config",
     "--strict-markers",
 ]
 filterwarnings = [
     "error",
-    "ignore:Could not configure external gitlab tests:UserWarning",
-    "ignore:No records were available to test:UserWarning",
+    "once:'asyncio.iscoroutinefunction' is deprecated:DeprecationWarning",  # https://github.com/litl/backoff/pull/220
+    "once:No records were available to test:UserWarning",
     # https://github.com/meltano/sdk/issues/1354
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
     # TODO: Address this SQLite warning in Python 3.13+
     "ignore::ResourceWarning",
     # universal-pathlib
-    "default:in a future version of UPath this will be set to None:PendingDeprecationWarning",
+    "once:in a future version of UPath this will be set to None:PendingDeprecationWarning",
+    # Our own warnings
+    "once::singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
 ]
 log_cli_level = "INFO"
 log_format = "%(levelname)s %(name)s %(message)s"
 markers = [
+    "contrib: Tests for contrib (experimental or optional) modules",
     "external: Tests relying on external resources",
+    "packages: Tests for sample taps and targets",
     "windows: Tests that only run on Windows",
     "linux: Tests that only run on Linux",
     "darwin: Tests that only run on Darwin",
@@ -210,7 +218,7 @@ xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.47.4"
+version = "0.50.1"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -219,7 +227,6 @@ version_files = [
     """cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml:^    "singer-sdk""",
     """cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:^    "singer-sdk""",
     """cookiecutter/mapper-template/{{cookiecutter.mapper_id}}/pyproject.toml:^    "singer-sdk""",
-    """packages/*/pyproject.toml:^    "singer-sdk""",
     ".github/ISSUE_TEMPLATE/bug.yml:^      placeholder:",
 ]
 
@@ -255,8 +262,8 @@ exclude_also = [
     '''class .*\bProtocol\):''',
     '''@(abc\.)?abstractmethod''',
     '''if (t\.)?TYPE_CHECKING:''',
+    "assert_never",
 ]
-fail_under = 82
 show_missing = true
 
 [tool.deptry]
@@ -283,8 +290,12 @@ DEP004 = [
 ]
 
 [tool.mypy]
-enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
-exclude = "tests"
+enable_error_code = [
+    "exhaustive-match",
+    "ignore-without-code",
+    "redundant-expr",
+    "truthy-bool",
+]
 files = "singer_sdk"
 local_partial_types = true
 strict = false
@@ -298,16 +309,17 @@ warn_unused_ignores = true
 ignore_missing_imports = true
 module = [
     "backports.datetime_fromisoformat.*",
-    "fsspec.*",       # TODO: Remove when https://github.com/fsspec/filesystem_spec/issues/625 is addressed
-    "joblib.*",       # TODO: Remove when https://github.com/joblib/joblib/issues/1516 is shipped
-    "jsonpath_ng.*",  # TODO: Remove when https://github.com/h2non/jsonpath-ng/issues/152 is implemented and released
-    "pyarrow.*",      # TODO: Remove when https://github.com/apache/arrow/issues/32609 if implemented and released
+    "joblib.*",       # https://github.com/joblib/joblib/issues/1516
+    "fsspec.*",       # https://github.com/fsspec/filesystem_spec/issues/625
+    "jsonpath_ng.*",  # https://github.com/h2non/jsonpath-ng/issues/152
+    "pyarrow.*",      # https://github.com/apache/arrow/issues/32609
+    "toolz.*",        # https://github.com/pytoolz/toolz/issues/496
 ]
 
 [build-system]
 requires = [
     "hatchling==1.27",
-    "hatch-vcs==0.4",
+    "hatch-vcs==0.5",
 ]
 build-backend = "hatchling.build"
 
@@ -323,13 +335,14 @@ extend-exclude = [
     "cookiecutter/*",
 ]
 line-length = 88
-required-version = ">=0.9"
+required-version = ">=0.13"
 
 [tool.ruff.format]
 docstring-code-format = true
 
 [tool.ruff.lint]
 explicit-preview-rules = false
+future-annotations = true
 ignore = [
     "N818",    # Exception name should be named with an Error suffix
     "COM812",  # missing-trailing-comma
@@ -364,6 +377,7 @@ select = [
     "INP",  # flake8-no-pep420
     "PIE",  # flake8-pie
     "T20",  # flake8-print
+    "PYI",  # flake8-pyi
     "PT",   # flake8-pytest-style
     "Q",    # flake8-quotes
     "RSE",  # flake8-raise
@@ -425,10 +439,9 @@ mypy-init-return = true
 suppress-dummy-args = true
 
 [tool.ruff.lint.flake8-import-conventions]
-banned-from = ["sqlalchemy", "typing"]
+banned-from = ["typing"]
 
 [tool.ruff.lint.flake8-import-conventions.extend-aliases]
-sqlalchemy = "sa"
 typing = "t"
 
 [tool.ruff.lint.flake8-pytest-style]
@@ -463,6 +476,7 @@ tap-countries = { workspace = true }
 tap-csv = { workspace = true }
 tap-dummyjson = { workspace = true }
 tap-fake-people = { workspace = true }
+tap-fundamentals = { workspace = true }
 tap-gitlab = { workspace = true }
 tap-hostile = { workspace = true }
 tap-sqlite = { workspace = true }

@@ -92,7 +92,6 @@ class LOTRCharactersStream(RESTStream):
     @property
     def authenticator(self):
         return SimpleAuthenticator(
-            stream=self,
             auth_headers={
                 "Authorization": f"Bearer {self.config.get('api_key')}",
             },
@@ -159,8 +158,7 @@ class ParquetStream(Stream):
             name = parquet_schema.names[i]
             # Translate from the Parquet type to a JSON Schema type
             dtype = get_jsonschema_type(str(parquet_schema.types[i]))
-
-            # Add the new property to our list
+            # Add the property to the list
             properties.append(th.Property(name, dtype))
 
         # Return the list as a JSON Schema dictionary object
@@ -235,7 +233,7 @@ class SingletonAuthStream(RESTStream):
     @property
     def authenticator(self) -> SingletonAuthenticator:
         """Stream authenticator."""
-        return SingletonAuthenticator(stream=self)
+        return SingletonAuthenticator()
 ```
 
 ### Make a stream reuse the same authenticator instance for all requests
@@ -252,7 +250,7 @@ class CachedAuthStream(RESTStream):
     @cached_property
     def authenticator(self) -> APIAuthenticatorBase:
         """Stream authenticator."""
-        return APIAuthenticatorBase(stream=self)
+        return APIAuthenticatorBase()
 ```
 
 ### Use one of `requests`'s built-in authenticators

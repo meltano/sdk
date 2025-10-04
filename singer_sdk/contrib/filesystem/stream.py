@@ -4,12 +4,19 @@ from __future__ import annotations
 
 import abc
 import functools
+import sys
 import typing as t
 
 from singer_sdk import Stream
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.streams.core import REPLICATION_INCREMENTAL
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 
 if t.TYPE_CHECKING:
     import datetime
@@ -31,6 +38,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
         SDC_META_MODIFIED_AT: {"type": ["string", "null"], "format": "date-time"},
     }
 
+    @override
     def __init__(
         self,
         tap: Tap,
@@ -66,6 +74,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
         self._partitions = [{SDC_META_FILEPATH: path} for path in self._filepaths]
 
     @property
+    @override
     def partitions(self) -> list[dict[str, t.Any]]:
         """Return the list of partitions for this stream."""
         return self._partitions
@@ -85,10 +94,12 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
         return schema
 
     @functools.cached_property
+    @override
     def schema(self) -> dict[str, t.Any]:
         """Return the schema for the stream."""
         return self._get_full_schema()
 
+    @override
     def get_records(
         self,
         context: Context | None,
@@ -113,7 +124,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
 
         mtime: datetime.datetime | None
         try:
-            mtime: datetime.datetime = self.filesystem.modified(path)  # type: ignore[no-redef]
+            mtime = self.filesystem.modified(path)
         except NotImplementedError:  # pragma: no cover
             self.logger.warning("Filesystem does not support modified time")
             mtime = None

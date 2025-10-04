@@ -96,6 +96,7 @@ JSON Schema builder classes
     typing.CustomType
     typing.DateTimeType
     typing.DateType
+    typing.DecimalType
     typing.DiscriminatedUnion
     typing.DurationType
     typing.EmailType
@@ -104,7 +105,6 @@ JSON Schema builder classes
     typing.IPv4Type
     typing.IPv6Type
     typing.JSONPointerType
-    typing.NumberType
     typing.ObjectType
     typing.OneOf
     typing.Property

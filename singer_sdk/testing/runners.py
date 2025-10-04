@@ -9,22 +9,26 @@ import typing as t
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
 
+from singer_sdk import Tap, Target
+from singer_sdk.plugin_base import PluginBase
 from singer_sdk.testing.config import SuiteConfig
 
 if t.TYPE_CHECKING:
     from pathlib import Path
 
-    from singer_sdk import Tap, Target
     from singer_sdk.helpers._compat import Traversable
     from singer_sdk.helpers.types import Record
 
 
-class SingerTestRunner(metaclass=abc.ABCMeta):
+T = t.TypeVar("T", bound=PluginBase)
+
+
+class SingerTestRunner(t.Generic[T], metaclass=abc.ABCMeta):
     """Base Singer Test Runner."""
 
     def __init__(
         self,
-        singer_class: type[Tap] | type[Target],
+        singer_class: type[T],
         config: dict | None = None,
         suite_config: SuiteConfig | None = None,
         **kwargs: t.Any,
@@ -38,7 +42,7 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
                 instantiating tests.
             kwargs (dict): Default arguments to be passed to tap/target on create.
         """
-        self.singer_class = singer_class
+        self.singer_class: type[T] = singer_class
         self.config = config or {}
         self.default_kwargs = kwargs
         self.suite_config = suite_config or SuiteConfig()
@@ -62,7 +66,7 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
         lines = raw_records.strip().split("\n")
         return [json.loads(ii) for ii in lines if ii]
 
-    def create(self, kwargs: dict | None = None) -> Tap | Target:
+    def create(self, kwargs: dict | None = None) -> T:
         """Create a new tap/target from the runner defaults.
 
         Args:
@@ -84,7 +88,7 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
         """
 
 
-class TapTestRunner(SingerTestRunner):
+class TapTestRunner(SingerTestRunner[Tap]):
     """Utility class to simplify tap testing."""
 
     def __init__(
@@ -116,7 +120,7 @@ class TapTestRunner(SingerTestRunner):
         Returns:
             A configured Tap instance.
         """
-        return t.cast("Tap", self.create())
+        return self.create()
 
     def run_discovery(self) -> str:
         """Run tap discovery.
@@ -192,7 +196,7 @@ class TapTestRunner(SingerTestRunner):
         return stdout_buf.read(), stderr_buf.read()
 
 
-class TargetTestRunner(SingerTestRunner):
+class TargetTestRunner(SingerTestRunner[Target]):
     """Utility class to simplify target testing."""
 
     def __init__(
@@ -225,6 +229,8 @@ class TargetTestRunner(SingerTestRunner):
         self.input_filepath = input_filepath
         self.input_io = input_io
         self._input: t.IO[str] | None = None
+        self.stdout: str | None = None
+        self.stderr: str | None = None
 
     def new_target(self) -> Target:
         """Get new Target instance.
@@ -232,7 +238,7 @@ class TargetTestRunner(SingerTestRunner):
         Returns:
             A configured Target instance.
         """
-        return t.cast("Target", self.create())
+        return self.create()
 
     @property
     def target_input(self) -> t.IO[str]:
@@ -277,7 +283,7 @@ class TargetTestRunner(SingerTestRunner):
     def _execute_sync(  # noqa: PLR6301
         self,
         target: Target,
-        target_input: t.IO[str],
+        target_input: t.IO[str] | None,
         *,
         finalize: bool = True,
     ) -> tuple[io.TextIOWrapper[io.BytesIO], io.TextIOWrapper[io.BytesIO]]:

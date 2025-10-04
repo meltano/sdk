@@ -11,9 +11,9 @@ from singer_sdk.typing import (
     ArrayType,
     BooleanType,
     Constant,
+    DecimalType,
     IntegerType,
     NullType,
-    NumberType,
     ObjectType,
     OneOf,
     PropertiesList,
@@ -119,7 +119,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
         ObjectType(
             Property(
                 "seed",
-                OneOf(NumberType, StringType, BooleanType),
+                OneOf(DecimalType, StringType, BooleanType),
                 title="Faker Seed",
                 description=(
                     "Value to seed the Faker generator for deterministic output: "
@@ -327,7 +327,7 @@ class DeprecatedEnum(Enum):
 
     deprecation: str | None
 
-    def __new__(
+    def __new__(  # noqa: PYI034
         cls,
         value: _EnumMemberT,
         deprecation: str | None = None,
@@ -452,6 +452,9 @@ class PluginCapabilities(CapabilitiesEnum):
     #: `batched files <https://hub.meltano.com/singer/docs#batch>`_.
     #: A.K.A ``FAST_SYNC``.
     BATCH = "batch"
+
+    #: Support structured logging with contextual information.
+    STRUCTURED_LOGGING = "structured-logging"
 
 
 class TapCapabilities(CapabilitiesEnum):

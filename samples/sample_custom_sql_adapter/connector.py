@@ -28,4 +28,4 @@ class CustomSQLDialect(DefaultDialect):
 
         NOTE: This is a legacy method that will stop being used by SQLAlchemy at some point.
         """  # noqa: E501
-        return cls.import_dbapi()
+        return cls.import_dbapi()  # type: ignore[no-any-return]

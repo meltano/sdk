@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import typing as t
+from dataclasses import dataclass
 
 import pytest
 
 from .config import SuiteConfig
 from .runners import TapTestRunner, TargetTestRunner
 from .suites import (
-    SingerTestSuite,
     tap_stream_attribute_tests,
     tap_stream_tests,
     tap_tests,
@@ -24,12 +24,34 @@ if t.TYPE_CHECKING:
         TapTestTemplate,
     )
 
+    from .suites import SingerTestSuite
+
+
+class StreamTestParams(t.NamedTuple):
+    """Stream test parameters."""
+
+    stream: Stream
+
+
+class StreamAttributeTestParams(t.NamedTuple):
+    """Stream attribute test parameters."""
+
+    stream: Stream
+    attribute_name: str
+
+
+@dataclass(slots=True)
+class TestParam:
+    """Test parameters."""
+
+    id: str
+    values: t.NamedTuple
+
 
 class BaseTestClass:
     """Base test class."""
 
-    params: dict[str, t.Any]
-    param_ids: dict[str, list[str]]
+    params: dict[str, list[TestParam]]
 
     def __init_subclass__(cls, **kwargs: t.Any) -> None:
         """Initialize a subclass.
@@ -37,11 +59,10 @@ class BaseTestClass:
         Args:
             **kwargs: Keyword arguments.
         """
-        # Add empty params and param_ids attributes to a direct subclass but not to
-        # subclasses of subclasses
+        # Add empty params attribute to a direct subclass but not to subclasses of
+        # subclasses
         if cls.__base__ == BaseTestClass:
             cls.params = {}
-            cls.param_ids = {}
 
 
 class TapTestClassFactory:
@@ -96,8 +117,7 @@ class TapTestClassFactory:
             suites.append(tap_stream_attribute_tests)
 
         # set default values
-        if "parse_env_config" not in kwargs:
-            kwargs["parse_env_config"] = True
+        kwargs.setdefault("parse_env_config", True)
 
         # create singleton test runner
         test_runner = TapTestRunner(
@@ -199,12 +219,9 @@ class TapTestClassFactory:
         streams: list[Stream],
     ) -> None:
         params = [
-            {
-                "stream": stream,
-            }
+            TestParam(id=stream.name, values=StreamTestParams(stream=stream))
             for stream in streams
         ]
-        param_ids = [stream.name for stream in streams]
 
         for test_class in suite.tests:
             test = test_class()
@@ -215,7 +232,6 @@ class TapTestClassFactory:
                 test.run,
             )
             empty_test_class.params[test_name] = params
-            empty_test_class.param_ids[test_name] = param_ids
 
     def _with_stream_attribute_tests(  # noqa: PLR6301
         self,
@@ -227,33 +243,21 @@ class TapTestClassFactory:
             test = test_class()
             test_name = f"test_{suite.kind}_{test.name}"
             test_params = []
-            test_ids: list[str] = []
             for stream in streams:
                 final_schema = stream.stream_maps[-1].transformed_schema["properties"]
                 test_params.extend(
                     [
-                        {
-                            "stream": stream,
-                            "attribute_name": prop_name,
-                        }
+                        TestParam(
+                            id=f"{stream.name}.{prop_name}",
+                            values=StreamAttributeTestParams(stream, prop_name),
+                        )
                         for prop_name, prop_schema in final_schema.items()
                         if test_class.evaluate(
                             stream=stream,
                             property_name=prop_name,
                             property_schema=prop_schema,
                         )
-                    ],
-                )
-                test_ids.extend(
-                    [
-                        f"{stream.name}.{prop_name}"
-                        for prop_name, prop_schema in final_schema.items()
-                        if test_class.evaluate(
-                            stream=stream,
-                            property_name=prop_name,
-                            property_schema=prop_schema,
-                        )
-                    ],
+                    ]
                 )
 
             if test_params:
@@ -263,7 +267,6 @@ class TapTestClassFactory:
                     test.run,
                 )
                 empty_test_class.params[test_name] = test_params
-                empty_test_class.param_ids[test_name] = test_ids
 
 
 class TargetTestClassFactory:
@@ -363,7 +366,7 @@ class TargetTestClassFactory:
     def _annotate_test_class(  # noqa: PLR6301
         self,
         empty_test_class: type[BaseTestClass],
-        test_suites: list,
+        test_suites: list[SingerTestSuite],
     ) -> type[BaseTestClass]:
         """Annotate test class with test methods.
 

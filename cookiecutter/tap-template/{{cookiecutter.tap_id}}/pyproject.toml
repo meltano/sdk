@@ -22,22 +22,22 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
 {%- endif %}
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 {%- if cookiecutter.license != "None" %}
 license = "{{cookiecutter.license}}"
 {%- endif %}
 license-files = [ "LICENSE" ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     {%- if extras %}
-    "singer-sdk[{{ extras|join(',') }}]~=0.47.4",
+    "singer-sdk[{{ extras|join(',') }}]~=0.50.1",
     {%- else %}
-    "singer-sdk~=0.47.4",
+    "singer-sdk~=0.50.1",
     {%- endif %}
     {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
     "requests~=2.32.3",
@@ -45,11 +45,12 @@ dependencies = [
     {%- if cookiecutter.stream_type == "SQL" %}
     "sqlalchemy~=2.0.36",
     {%- endif %}
+    "typing-extensions>=4.5.0; python_version < '3.13'",
 ]
 
 [project.optional-dependencies]
 s3 = [
-    "s3fs~=2025.5.0",
+    "s3fs~=2025.7.0",
 ]
 
 [project.scripts]
@@ -69,6 +70,7 @@ test = [
 ]
 typing = [
     "mypy>=1.16.0",
+    "ty>=0.0.1-alpha.16",
     {%- if cookiecutter.stream_type == "SQL" %}
     "sqlalchemy-stubs",
     {%- else %}
@@ -96,7 +98,12 @@ warn_unused_configs = true
 plugins = "sqlmypy"
 {%- endif %}
 
+[tool.ruff]
+line-length = 100
+required-version = ">=0.13"
+
 [tool.ruff.lint]
+future-annotations = true
 ignore = [
     "COM812",  # missing-trailing-comma
 ]
@@ -123,11 +130,11 @@ requires = [
 ]
 env_list = [
     "typing",
+    "py314",
     "py313",
     "py312",
     "py311",
     "py310",
-    "py39",
 ]
 
 [tool.tox.env_run_base]
@@ -143,4 +150,7 @@ commands = [ [ "pytest", { replace = "posargs", default = [ "tests" ], extend = 
 
 [tool.tox.env.typing]
 dependency_groups = [ "test", "typing" ]
-commands = [ [ "mypy", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ] ]
+commands = [
+    [ "mypy", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ],
+    [ "ty", "check", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ],
+]

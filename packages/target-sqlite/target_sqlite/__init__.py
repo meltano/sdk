@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import datetime
+import decimal
+import json
 import sqlite3
 import typing as t
 
@@ -28,9 +30,27 @@ def adapt_datetime_epoch(val: datetime.datetime) -> int:
     return int(val.timestamp())
 
 
+def adapt_decimal(val: decimal.Decimal) -> str:
+    """Adapt decimal.Decimal to string."""
+    return str(val)
+
+
+def adapt_list(val: list) -> str:
+    """Adapt list to string."""
+    return json.dumps(val, default=str)
+
+
+def adapt_dict(val: dict) -> str:
+    """Adapt dict to string."""
+    return json.dumps(val, default=str)
+
+
 sqlite3.register_adapter(datetime.date, adapt_date_iso)
 sqlite3.register_adapter(datetime.datetime, adapt_datetime_iso)
 sqlite3.register_adapter(datetime.datetime, adapt_datetime_epoch)
+sqlite3.register_adapter(decimal.Decimal, adapt_decimal)
+sqlite3.register_adapter(list, adapt_list)
+sqlite3.register_adapter(dict, adapt_dict)
 
 
 def convert_date(val: bytes) -> datetime.date:

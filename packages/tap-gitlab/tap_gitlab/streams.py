@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-import importlib.resources
 import sys
 import typing as t
 
 from requests_cache import CachedSession
 
+from singer_sdk import RESTStream, SchemaDirectory, StreamSchema
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.pagination import SimpleHeaderPaginator
-from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import (
     ArrayType,
     DateTimeType,
@@ -23,26 +22,29 @@ from singer_sdk.typing import (
 )
 from tap_gitlab import schemas
 
-if sys.version_info < (3, 12):
-    from typing_extensions import override
-else:
+if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers.types import Context
 
 
-SCHEMAS_DIR = importlib.resources.files(schemas)
-
-DEFAULT_URL_BASE = "https://gitlab.com/api/v4"
+SCHEMAS_DIR = SchemaDirectory(schemas)
 
 
 class GitlabStream(RESTStream[str]):
     """Sample tap test for gitlab."""
 
     _LOG_REQUEST_METRIC_URLS = True
+    schema: t.ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
 
     @property
+    @override
     def url_base(self) -> str:
         """Return the base GitLab URL."""
-        return self.config.get("api_url", DEFAULT_URL_BASE)
+        return self.config["url_base"]  # type: ignore[no-any-return]
 
     @property
     @override
@@ -56,16 +58,18 @@ class GitlabStream(RESTStream[str]):
         )
 
     @property
+    @override
     def authenticator(self) -> SimpleAuthenticator:
         """Return an authenticator for REST API requests."""
         return SimpleAuthenticator(
             stream=self,
-            auth_headers={"Private-Token": self.config.get("auth_token")},
+            auth_headers={"Private-Token": self.config["auth_token"]},
         )
 
+    @override
     def get_url_params(
         self,
-        context: dict | None,  # noqa: ARG002
+        context: Context | None,
         next_page_token: str | None,
     ) -> dict[str, t.Any]:
         """Return a dictionary of values to be used in URL parameterization."""
@@ -77,7 +81,8 @@ class GitlabStream(RESTStream[str]):
             params["order_by"] = self.replication_key
         return params
 
-    def get_new_paginator(self) -> SimpleHeaderPaginator:  # noqa: PLR6301
+    @override
+    def get_new_paginator(self) -> SimpleHeaderPaginator:
         """Return a new paginator for GitLab API endpoints.
 
         Returns:
@@ -90,24 +95,24 @@ class ProjectBasedStream(GitlabStream):
     """Base class for streams that are keys based on project ID."""
 
     @property
+    @override
     def partitions(self) -> list[dict]:
         """Return a list of partition key dicts (if applicable), otherwise None."""
         if "{project_id}" in self.path:
             return [
                 {"project_id": pid}
-                for pid in t.cast("list", self.config.get("project_ids"))
+                for pid in t.cast("list", self.config["project_ids"])
             ]
         if "{group_id}" in self.path:
-            if "group_ids" not in self.config:
-                msg = (
-                    "Missing `group_ids` setting which is required for the "
-                    f"'{self.name}' stream."
-                )
-                raise ValueError(msg)
-            return [
-                {"group_id": gid}
-                for gid in t.cast("list", self.config.get("group_ids"))
-            ]
+            if group_ids := self.config["group_ids"]:
+                return [{"group_id": gid} for gid in group_ids]
+
+            msg = (
+                "Missing `group_ids` setting which is required for the "
+                f"'{self.name}' stream."
+            )
+            raise ValueError(msg)
+
         msg = (
             f"Could not detect partition type for Gitlab stream '{self.name}' "
             f"({self.path}). Expected a URL path containing '{{project_id}}' or "
@@ -124,7 +129,6 @@ class ProjectsStream(ProjectBasedStream):
     primary_keys = ("id",)
     replication_key = "last_activity_at"
     is_sorted = True
-    schema_filepath = SCHEMAS_DIR / "projects.json"
 
 
 class ReleasesStream(ProjectBasedStream):
@@ -134,7 +138,6 @@ class ReleasesStream(ProjectBasedStream):
     path = "/projects/{project_id}/releases"
     primary_keys = ("project_id", "tag_name")
     replication_key = None
-    schema_filepath = SCHEMAS_DIR / "releases.json"
 
 
 class IssuesStream(ProjectBasedStream):
@@ -145,7 +148,6 @@ class IssuesStream(ProjectBasedStream):
     primary_keys = ("id",)
     replication_key = "updated_at"
     is_sorted = False
-    schema_filepath = SCHEMAS_DIR / "issues.json"
 
 
 class CommitsStream(ProjectBasedStream):
@@ -158,7 +160,6 @@ class CommitsStream(ProjectBasedStream):
     primary_keys = ("id",)
     replication_key = "created_at"
     is_sorted = False
-    schema_filepath = SCHEMAS_DIR / "commits.json"
 
 
 class EpicsStream(ProjectBasedStream):
@@ -202,10 +203,11 @@ class EpicsStream(ProjectBasedStream):
         ),
     ).to_dict()
 
-    def get_child_context(  # noqa: PLR6301
+    @override
+    def get_child_context(
         self,
         record: dict,
-        context: dict | None,  # noqa: ARG002
+        context: Context | None,
     ) -> dict:
         """Perform post processing, including queuing up any child stream types."""
         # Ensure child state record(s) are created
@@ -223,12 +225,12 @@ class EpicIssuesStream(GitlabStream):
     path = "/groups/{group_id}/epics/{epic_iid}/issues"
     primary_keys = ("id",)
     replication_key = None
-    schema_filepath = SCHEMAS_DIR / "epic_issues.json"
     parent_stream_type = EpicsStream  # Stream should wait for parents to complete.
 
+    @override
     def get_url_params(
         self,
-        context: dict | None,
+        context: Context | None,
         next_page_token: str | None,
     ) -> dict[str, t.Any]:
         """Return a dictionary of values to be used in parameterization."""

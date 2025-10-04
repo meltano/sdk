@@ -23,8 +23,8 @@ from singer_sdk.typing import (
     ArrayType,
     BooleanType,
     DateTimeType,
+    DecimalType,
     IntegerType,
-    NumberType,
     ObjectType,
     OneOf,
     PropertiesList,
@@ -623,7 +623,7 @@ class MappedStream(Stream):
                         Property("custom_obj", StringType),
                     ),
                 ),
-                Property("some_numbers", ArrayType(NumberType())),
+                Property("some_numbers", ArrayType(DecimalType())),
             ),
         ),
         Property("joined_at", DateTimeType),
@@ -802,6 +802,29 @@ class MappedTap(Tap):
             {"flattening_enabled": False, "flattening_max_depth": 0},
             "builtin_variable_stream_name_alias_expr.jsonl",
             id="builtin_variable_stream_name_alias_expr",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "__alias__": "'aliased'",
+                    "stream_name": "__stream_name__",
+                    "original_stream_name": "__original_stream_name__",
+                }
+            },
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_original_stream_name_alias.jsonl",
+            id="builtin_variable_original_stream_name_alias",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "stream_name": "__stream_name__",
+                    "original_stream_name": "__original_stream_name__",
+                }
+            },
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_original_stream_name_no_alias.jsonl",
+            id="builtin_variable_original_stream_name_no_alias",
         ),
         pytest.param(
             {

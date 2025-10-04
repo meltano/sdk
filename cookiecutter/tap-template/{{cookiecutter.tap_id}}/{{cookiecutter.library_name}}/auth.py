@@ -8,7 +8,14 @@ from __future__ import annotations
 
 {%- elif cookiecutter.auth_method == "OAuth2" %}
 
+import sys
+
 from singer_sdk.authenticators import OAuthAuthenticator, SingletonMeta
+
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 
 
 # The SingletonMeta metaclass makes your streams reuse the same authenticator instance.
@@ -16,38 +23,22 @@ from singer_sdk.authenticators import OAuthAuthenticator, SingletonMeta
 class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator, metaclass=SingletonMeta):
     """Authenticator class for {{ cookiecutter.source_name }}."""
 
+    @override
     @property
     def oauth_request_body(self) -> dict:
-        """Define the OAuth request body for the AutomaticTestTap API.
+        """Define the OAuth request body for the {{ cookiecutter.source_name }} API.
 
         Returns:
             A dict with the request body
         """
         # TODO: Define the request body needed for the API.
         return {
-            "resource": "https://analysis.windows.net/powerbi/api",
+            "resource": "https://example.com",
             "scope": self.oauth_scopes,
-            "client_id": self.config["client_id"],
-            "username": self.config["username"],
-            "password": self.config["password"],
-            "grant_type": "password",
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "grant_type": "client_credentials",
         }
-
-    @classmethod
-    def create_for_stream(cls, stream) -> {{ cookiecutter.source_name }}Authenticator:  # noqa: ANN001
-        """Instantiate an authenticator for a specific Singer stream.
-
-        Args:
-            stream: The Singer stream instance.
-
-        Returns:
-            A new authenticator.
-        """
-        return cls(
-            stream=stream,
-            auth_endpoint="TODO: OAuth Endpoint URL",
-            oauth_scopes="TODO: OAuth Scopes",
-        )
 {%- elif cookiecutter.auth_method == "JWT" %}
 
 from singer_sdk.authenticators import OAuthJWTAuthenticator
@@ -55,23 +46,4 @@ from singer_sdk.authenticators import OAuthJWTAuthenticator
 
 class {{ cookiecutter.source_name }}Authenticator(OAuthJWTAuthenticator):
     """Authenticator class for {{ cookiecutter.source_name }}."""
-
-    @classmethod
-    def create_for_stream(
-        cls,
-        stream,  # noqa: ANN001
-    ) -> {{ cookiecutter.source_name }}Authenticator:
-        """Instantiate an authenticator for a specific Singer stream.
-
-        Args:
-            stream: The Singer stream instance.
-
-        Returns:
-            A new authenticator.
-        """
-        return cls(
-            stream=stream,
-            auth_endpoint="TODO: OAuth Endpoint URL",
-            oauth_scopes="TODO: OAuth Scopes",
-        )
 {%- endif %}

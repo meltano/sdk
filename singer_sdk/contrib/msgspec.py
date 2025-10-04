@@ -9,6 +9,7 @@ import sys
 import typing as t
 
 import msgspec
+import msgspec.json
 
 from singer_sdk.singerlib.encoding.base import GenericSingerReader, GenericSingerWriter
 from singer_sdk.singerlib.encoding.simple import Message

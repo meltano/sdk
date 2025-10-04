@@ -82,7 +82,7 @@ To run tests:
 nox -rs tests
 
 # Run all tests (external creds required):
-nox -rs tests -- -m "external"
+nox -rs test-external
 ```
 
 To view the code coverage report in HTML format:

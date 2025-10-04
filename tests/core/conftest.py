@@ -20,10 +20,10 @@ from singer_sdk.typing import (
     StringType,
 )
 
-if sys.version_info < (3, 12):
-    from typing_extensions import override
-else:
+if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 class SimpleTestStream(Stream):

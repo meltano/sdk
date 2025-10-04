@@ -64,11 +64,16 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
     raise AttributeError(msg)
 
 
-@dataclass
+@dataclass(slots=True)
 class SingerTestSuite(t.Generic[T]):
     """Test Suite container class."""
 
-    kind: str
+    kind: t.Literal[
+        "tap",
+        "tap_stream",
+        "tap_stream_attribute",
+        "target",
+    ]
     tests: list[type[T]]
 
 

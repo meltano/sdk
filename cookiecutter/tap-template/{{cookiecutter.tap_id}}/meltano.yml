@@ -17,6 +17,7 @@ plugins:
     - discover
     - about
     - stream-maps
+    - structured-logging
 
     # TODO: Declare settings and their types here:
     settings:

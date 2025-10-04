@@ -5,9 +5,12 @@ from __future__ import annotations
 import datetime
 import decimal
 import typing as t
-from pathlib import Path, PurePath
+from pathlib import Path
 
 import simplejson
+
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers.types import StrPath
 
 
 def dump_json(obj: t.Any, **kwargs: t.Any) -> str:  # noqa: ANN401
@@ -51,7 +54,7 @@ def load_json(json_str: str, **kwargs: t.Any) -> dict:
     )
 
 
-def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
+def read_json_file(path: StrPath) -> dict[str, t.Any]:
     """Read json file, throwing an error if missing."""
     if not path:
         msg = "Could not open file. Filepath not provided."

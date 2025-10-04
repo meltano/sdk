@@ -19,28 +19,29 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
 {%- endif %}
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 {%- if cookiecutter.license != "None" %}
 license = "{{cookiecutter.license}}"
 {%- endif %}
 license-files = [ "LICENSE" ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     {%- if cookiecutter.faker_extra %}
-    "singer-sdk[faker]~=0.47.4",
+    "singer-sdk[faker]~=0.50.1",
     {%- else %}
-    "singer-sdk~=0.47.4",
+    "singer-sdk~=0.50.1",
     {%- endif %}
+    "typing-extensions>=4.5.0; python_version < '3.13'",
 ]
 
 [project.optional-dependencies]
 s3 = [
-    "s3fs~=2025.5.0",
+    "s3fs~=2025.7.0",
 ]
 
 [project.scripts]
@@ -60,6 +61,7 @@ test = [
 ]
 typing = [
     "mypy>=1.16.0",
+    "ty>=0.0.1-alpha.16",
 ]
 
 {%- if cookiecutter.variant != "None (Skip)" %}
@@ -77,7 +79,12 @@ addopts = [
 [tool.mypy]
 warn_unused_configs = true
 
+[tool.ruff]
+line-length = 100
+required-version = ">=0.13"
+
 [tool.ruff.lint]
+future-annotations = true
 ignore = [
     "COM812",  # missing-trailing-comma
 ]
@@ -104,11 +111,11 @@ requires = [
 ]
 env_list = [
     "typing",
+    "py314",
     "py313",
     "py312",
     "py311",
     "py310",
-    "py39",
 ]
 
 [tool.tox.env_run_base]
@@ -124,4 +131,7 @@ commands = [ [ "pytest", { replace = "posargs", default = [ "tests" ], extend = 
 
 [tool.tox.env.typing]
 dependency_groups = [ "test", "typing" ]
-commands = [ [ "mypy", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ] ]
+commands = [
+    [ "mypy", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ],
+    [ "ty", "check", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ],
+]

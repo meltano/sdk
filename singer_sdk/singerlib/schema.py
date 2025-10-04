@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import typing as t
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 
 from referencing import Registry
 from referencing.jsonschema import DRAFT202012
@@ -49,7 +49,7 @@ STANDARD_KEYS = [
 ]
 
 
-@dataclass
+@dataclass(slots=True)
 class Schema:
     """Object model for JSON Schema.
 
@@ -93,8 +93,7 @@ class Schema:
     deprecated: bool | None = None
     oneOf: t.Any | None = None  # noqa: N815
 
-    # TODO: Use dataclass.KW_ONLY when Python 3.9 support is dropped
-    # _: KW_ONLY  # noqa: ERA001
+    _: KW_ONLY
 
     def to_dict(self) -> dict[str, t.Any]:
         """Return the raw JSON Schema as a (possibly nested) dict.
@@ -112,12 +111,12 @@ class Schema:
 
         for key in STANDARD_KEYS:
             attr = key.replace("-", "_")
-            if (val := self.__dict__.get(attr)) is not None:
+            if (val := getattr(self, attr, None)) is not None:
                 result[key] = val
 
         for key in META_KEYS:
             attr = key.replace("-", "_")
-            if (val := self.__dict__.get(attr)) is not None:
+            if (val := getattr(self, attr, None)) is not None:
                 result[f"${key}"] = val
 
         return result

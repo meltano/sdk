@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from singer_sdk import Stream, Tap
+import typing as t
+
+from singer_sdk import Tap
 from singer_sdk.typing import (
     ArrayType,
     DateTimeType,
@@ -19,6 +21,10 @@ from tap_gitlab.streams import (
     ReleasesStream,
 )
 
+if t.TYPE_CHECKING:
+    from singer_sdk import Stream
+
+DEFAULT_URL_BASE = "https://gitlab.com/api/v4"
 STREAM_TYPES = [
     ProjectsStream,
     ReleasesStream,
@@ -35,13 +41,39 @@ class TapGitlab(Tap):
     name: str = "tap-gitlab"
     config_jsonschema = PropertiesList(
         Property(
-            "auth_token", StringType, required=True, secret=True, title="Auth Token"
+            "auth_token",
+            StringType,
+            required=True,
+            secret=True,
+            title="Auth Token",
         ),
         Property(
-            "project_ids", ArrayType(StringType), required=True, title="Project IDs"
+            "project_ids",
+            ArrayType(StringType),
+            nullable=False,
+            default=[],
+            title="Project IDs",
         ),
-        Property("group_ids", ArrayType(StringType), required=True, title="Group IDs"),
-        Property("start_date", DateTimeType, required=True, title="Start Date"),
+        Property(
+            "group_ids",
+            ArrayType(StringType),
+            nullable=False,
+            default=[],
+            title="Group IDs",
+        ),
+        Property(
+            "start_date",
+            DateTimeType,
+            required=True,
+            title="Start Date",
+        ),
+        Property(
+            "url_base",
+            StringType,
+            required=False,
+            default=DEFAULT_URL_BASE,
+            title="GitLab API URL",
+        ),
     ).to_dict()
 
     def discover_streams(self) -> list[Stream]:

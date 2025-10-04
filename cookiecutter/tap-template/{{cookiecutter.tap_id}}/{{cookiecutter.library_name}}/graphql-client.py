@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import decimal
+import sys
 import typing as t
 
 import requests  # noqa: TC002
@@ -13,6 +14,11 @@ from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
 {%- endif %}
 
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
+
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Context
 
@@ -20,6 +26,7 @@ if t.TYPE_CHECKING:
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
+    @override
     @property
     def url_base(self) -> str:
         """Return the API URL root, configurable via tap settings."""
@@ -28,6 +35,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
 
+    @override
     @property
     def authenticator(self) -> {{ cookiecutter.source_name }}Authenticator:
         """Return a new authenticator object.
@@ -35,10 +43,11 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         Returns:
             An authenticator instance.
         """
-        return {{ cookiecutter.source_name }}Authenticator.create_for_stream(self)
+        return {{ cookiecutter.source_name }}Authenticator()
 
 {%- endif %}
 
+    @override
     @property
     def http_headers(self) -> dict:
         """Return the http headers needed.
@@ -52,6 +61,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 {%- endif %}
         return {}
 
+    @override
     def parse_response(self, response: requests.Response) -> t.Iterable[dict]:
         """Parse the response and return an iterator of result records.
 
@@ -65,10 +75,11 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         resp_json = response.json(parse_float=decimal.Decimal)
         yield from resp_json.get("<TODO>")
 
+    @override
     def post_process(
         self,
         row: dict,
-        context: Context | None = None,  # noqa: ARG002
+        context: Context | None = None,
     ) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
 

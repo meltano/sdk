@@ -36,6 +36,8 @@ plugins:
 
     config:
       start_date: '2024-01-01T00:00:00Z'
+      username: emilys
+      password: emilyspass
 
   loaders:
   - name: target-jsonl

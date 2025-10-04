@@ -6,21 +6,31 @@
 
 from __future__ import annotations
 
-import importlib.resources
+import sys
+import typing as t
 
+from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.streams import GraphQLStream
 from tap_gitlab import schemas
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 SITE_URL = "https://gitlab.com/graphql"
 
-SCHEMAS_DIR = importlib.resources.files(schemas)
+SCHEMAS_DIR = SchemaDirectory(schemas)
 
 
 class GitlabGraphQLStream(GraphQLStream):
     """Sample tap test for gitlab."""
 
     url_base = SITE_URL
+    schema: t.ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
 
+    @property
+    @override
     def http_headers(self) -> dict:
         """Return headers dict to be used for HTTP requests.
 
@@ -36,7 +46,6 @@ class GraphQLCurrentUserStream(GitlabGraphQLStream):
     name = "currentuser"
     primary_keys = ("id",)
     replication_key = None
-    schema_filepath = SCHEMAS_DIR / "currentuser.json"
     query = """
         currentUser {
             name
@@ -50,9 +59,9 @@ class GraphQLProjectsStream(GitlabGraphQLStream):
     name = "projects"
     primary_keys = ("id",)
     replication_key = None
-    schema_filepath = SCHEMAS_DIR / "projects-graphql.json"
 
     @property
+    @override
     def query(self) -> str:
         """Return dynamic GraphQL query."""
         return f"project(fullPath: {self.config['project_id']} {{ name }}"
