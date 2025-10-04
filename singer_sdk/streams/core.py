@@ -1401,7 +1401,16 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         for context in self._child_context_queue:
             for child_stream in self.child_streams:
                 if child_stream.selected or child_stream.has_selected_descendents:
-                    child_stream.sync(context=context)
+                    try:
+                        child_stream.sync(context=context)
+                    except Exception as exc:
+                        self.logger.error(
+                            "Error syncing child stream '%s' with context '%s': %s",
+                            getattr(child_stream, "name", repr(child_stream)),
+                            context,
+                            exc,
+                            exc_info=True,
+                        )
 
         self._child_context_queue = []
 
