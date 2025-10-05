@@ -491,11 +491,14 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         """TODO.
 
         Args:
-            endpoint: TODO
-            response: TODO
+            endpoint: The endpoint of the request.
+            response: The response object.
             context: Stream partition or context dictionary.
-            extra_tags: TODO
+            extra_tags: A dictionary of extra tags to add to the metric.
         """
+        if not self._LOG_REQUEST_METRICS:
+            return
+
         extra_tags = extra_tags or {}
         if context:
             extra_tags[metrics.Tag.CONTEXT] = context
