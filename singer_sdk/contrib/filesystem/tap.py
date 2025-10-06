@@ -9,7 +9,6 @@ import typing as t
 from pathlib import Path
 
 import fsspec
-import fsspec.implementations
 import fsspec.implementations.dirfs
 
 import singer_sdk.typing as th
