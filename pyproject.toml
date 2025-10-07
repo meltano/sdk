@@ -155,7 +155,7 @@ typing = [
 ]
 benchmark = [
     {"include-group" = "testing"},
-    "pytest-codspeed>=2.2.0",
+    "pytest-codspeed>=2.2.0,!=4.1.0",
 ]
 
 [tool.hatch.build.targets.sdist]
@@ -195,8 +195,6 @@ filterwarnings = [
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
     # TODO: Address this SQLite warning in Python 3.13+
     "ignore::ResourceWarning",
-    # universal-pathlib
-    "once:in a future version of UPath this will be set to None:PendingDeprecationWarning",
     # Our own warnings
     "once::singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
 ]
