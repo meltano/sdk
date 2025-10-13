@@ -469,6 +469,7 @@ max-args = 9
 required-version = ">=0.5.19"
 
 [tool.uv.sources]
+pyarrow = { index = "scientific-python-nightly-wheels" }
 mapper-custom = { workspace = true }
 tap-countries = { workspace = true }
 tap-csv = { workspace = true }
@@ -486,6 +487,11 @@ target-sqlite = { workspace = true }
 members = [
     "packages/*",
 ]
+
+[[tool.uv.index]]
+name = "scientific-python-nightly-wheels"
+url = "https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"
+explicit = true
 
 [tool.codespell]
 skip = "*.csv,samples/aapl/*.json,packages/*/schemas/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"
