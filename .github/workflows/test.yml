@@ -4,6 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
+      - "packages/**"
       - "samples/**"
       - "singer_sdk/**"
       - "tests/**"
@@ -17,6 +18,7 @@ on:
       - main
       - v*
     paths:
+      - "packages/**"
       - "samples/**"
       - "singer_sdk/**"
       - "tests/**"
