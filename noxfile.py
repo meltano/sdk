@@ -118,11 +118,7 @@ def tests(session: nox.Session) -> None:
     )
 
 
-@nox.session(
-    name="test-external",
-    python=[python_versions[0], main_python],
-    tags=["test"],
-)
+@nox.session(name="test-external", python=main_python, tags=["test"])
 def test_external(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
     session.run_install(
