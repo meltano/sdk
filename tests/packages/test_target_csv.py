@@ -34,7 +34,7 @@ if t.TYPE_CHECKING:
 
 TEST_OUTPUT_DIR = Path(f".output/test_{uuid.uuid4()}/")
 SAMPLE_CONFIG = {"target_folder": f"{TEST_OUTPUT_DIR}/"}
-DATETIME = datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc)
+DATETIME = datetime.datetime(2025, 6, 1, tzinfo=datetime.timezone.utc)
 
 
 StandardTests = get_target_test_class(

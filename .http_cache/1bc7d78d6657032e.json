@@ -1,6 +1,6 @@
 {
-  "created_at": "2025-05-22T17:35:47.820406+00:00",
-  "elapsed": 0.358153,
+  "created_at": "2025-10-14T18:32:57.231715+00:00",
+  "elapsed": 0.261514,
   "encoding": "utf-8",
   "headers": {
     "Connection": "keep-alive",
@@ -12,34 +12,33 @@
     "access-control-allow-origin": "*",
     "access-control-expose-headers": "*",
     "access-control-max-age": "600",
-    "age": "203846",
+    "age": "1019",
     "alt-svc": "h3=\":443\"; ma=86400",
     "cache-control": "public, s-maxage=2628000, stale-while-revalidate=2628000",
     "content-encoding": "gzip",
     "content-type": "application/json; charset=utf-8",
-    "date": "Tue, 20 May 2025 08:58:23 GMT",
+    "date": "Tue, 14 Oct 2025 18:15:59 GMT",
     "gcdn-cache": "HIT",
-    "server-timing": "cfL4;desc=\"?proto=TCP&rtt=2548&min_rtt=2464&rtt_var=984&sent=5&recv=6&lost=0&retrans=0&sent_bytes=2861&recv_bytes=1564&delivery_rate=1641233&cwnd=252&unsent_bytes=0&cid=7de4230e4efae718&ts=110&x=0\"",
-    "stellate-rate-limit-budget-remaining": "49",
+    "stellate-rate-limit-budget-remaining": "47",
     "stellate-rate-limit-budget-required": "6",
     "stellate-rate-limit-decision": "pass",
-    "stellate-rate-limit-rules": "\"IP limit\";type=\"RequestCount\";budget=50;limited=?0;remaining=49;refill=60",
-    "vary": "Accept-Encoding",
+    "stellate-rate-limit-rules": "\"IP limit\";type=\"RequestCount\";budget=50;limited=?0;remaining=47;refill=46",
+    "vary": "accept-encoding",
     "x-cache": "HIT",
-    "x-cache-hits": "454",
+    "x-cache-hits": "3",
     "x-powered-by": "Stellate",
-    "x-served-by": "cache-dfw-ktki8620054-DFW"
+    "x-served-by": "cache-dfw-ktki8620086-DFW"
   },
   "reason": "",
   "request": {
     "body": "dm?dlWpa5UIv^r(b!BpSAbTKVZ*FvHZe?zCb0B*lV{c?-AZ}r8WgvYZeIhI%B6eYNX<=e)Wpg4rAbWj%",
     "headers": {
       "Accept": "*/*",
-      "Accept-Encoding": "gzip, deflate",
+      "Accept-Encoding": "gzip, deflate, zstd",
       "Connection": "keep-alive",
       "Content-Length": "64",
       "Content-Type": "application/json",
-      "User-Agent": "sample-tap-countries/[could not be detected]"
+      "User-Agent": "tap-countries/0.1.0"
     },
     "method": "POST",
     "url": "https://countries.trevorblades.com/"
