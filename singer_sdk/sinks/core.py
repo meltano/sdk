@@ -193,13 +193,8 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._warned_missing_fields: set[str] = set()
 
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
-        self._record_counter: metrics.Counter = metrics.record_counter(self.stream_name)
-        self._batch_timer = metrics.Timer(
-            metrics.Metric.BATCH_PROCESSING_TIME,
-            tags={
-                metrics.Tag.STREAM: self.stream_name,
-            },
-        )
+        self._record_counter: metrics.Counter = self.get_sink_record_counter()
+        self._batch_timer = self.get_batch_processing_timer()
 
     @property
     def record_counter_metric(self) -> metrics.Counter:
@@ -218,6 +213,37 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             The Meter instance for the batch processing timer.
         """
         return self._batch_timer
+
+    def get_sink_record_counter(self) -> metrics.Counter:
+        """Get a counter for counting records processed by this sink.
+
+        This method can be overridden to customize the record counter, for example
+        to add custom tags or modify the logging behavior.
+
+        Returns:
+            A counter for counting records.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.record_counter(self.stream_name)
+
+    def get_batch_processing_timer(self) -> metrics.Timer:
+        """Get a timer for measuring batch processing time.
+
+        This method can be overridden to customize the batch processing timer,
+        for example to add custom tags or modify the logging behavior.
+
+        Returns:
+            A timer for measuring batch processing time.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.Timer(
+            metrics.Metric.BATCH_PROCESSING_TIME,
+            tags={
+                metrics.Tag.STREAM: self.stream_name,
+            },
+        )
 
     @cached_property
     def validate_schema(self) -> bool:

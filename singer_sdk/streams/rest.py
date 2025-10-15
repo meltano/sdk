@@ -435,6 +435,16 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
 
         return self.build_prepared_request(**prepare_kwargs)
 
+    def get_http_request_counter(self) -> metrics.Counter:
+        """Get the HTTP request counter for the stream.
+
+        Returns:
+            The HTTP request counter for the stream.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.http_request_counter(self.name, endpoint=self.path)
+
     def request_records(self, context: Context | None) -> t.Iterable[dict]:
         """Request records from REST endpoint(s), returning response records.
 
@@ -450,8 +460,8 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         decorated_request = self.request_decorator(self._request)
         pages = 0
 
-        with metrics.http_request_counter(self.name, self.path) as request_counter:
-            request_counter.context = context
+        with self.get_http_request_counter() as request_counter:
+            request_counter.with_context(context)
 
             while not paginator.finished:
                 prepared_request = self.prepare_request(

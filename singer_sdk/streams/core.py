@@ -1043,6 +1043,58 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if len(self._sync_costs) > 0:
             self.log(f"Total Sync costs for stream {self.name}: {self._sync_costs}")
 
+    def get_record_counter(
+        self,
+        *,
+        endpoint: str | None = None,
+        log_interval: float = metrics.DEFAULT_LOG_INTERVAL,
+    ) -> metrics.Counter:
+        """Get a counter for counting records retrieved from the source.
+
+        This method can be overridden to customize the record counter, for example
+        to add custom tags or modify the logging behavior.
+
+        Args:
+            endpoint: The endpoint name to include in metrics.
+            log_interval: The interval at which to log the count.
+
+        Returns:
+            A counter for counting records.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.record_counter(
+            self.name,
+            endpoint=endpoint,
+            log_interval=log_interval,
+        )
+
+    def get_batch_counter(self) -> metrics.Counter:
+        """Get a counter for counting batches sent to the target.
+
+        This method can be overridden to customize the batch counter, for example
+        to add custom tags or modify the logging behavior.
+
+        Returns:
+            A counter for counting batches.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.batch_counter(self.name)
+
+    def get_sync_timer(self) -> metrics.Timer:
+        """Get a timer for timing the sync of this stream.
+
+        This method can be overridden to customize the sync timer, for example
+        to add custom tags or modify the logging behavior.
+
+        Returns:
+            A timer for timing the sync of this stream.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.sync_timer(self.name)
+
     def _check_max_record_limit(self, current_record_index: int) -> None:
         """Raise an exception if dry run record limit exceeded.
 
@@ -1204,8 +1256,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         context_list: list[types.Context] | list[dict] | None
 
         # Initialize metrics
-        record_counter = metrics.record_counter(self.name)
-        timer = metrics.sync_timer(self.name)
+        record_counter = self.get_record_counter()
+        timer = self.get_sync_timer()
 
         record_index = 0
         context_list = [context] if context is not None else self.partitions
@@ -1213,8 +1265,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         with record_counter, timer:
             for context_element in context_list or [{}]:
-                record_counter.context = context_element
-                timer.context = context_element
+                record_counter.with_context(context_element)
+                timer.with_context(context_element)
 
                 current_context = context_element or None
                 state_partition_context = self._get_state_partition_context(
@@ -1305,7 +1357,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             batch_config: The batch configuration.
             context: Stream partition or context dictionary.
         """
-        with metrics.batch_counter(self.name, context=context) as counter:
+        with self.get_batch_counter() as counter:
             for encoding, manifest in self.get_batches(batch_config, context):
                 counter.increment()
                 self._write_batch_message(encoding=encoding, manifest=manifest)
