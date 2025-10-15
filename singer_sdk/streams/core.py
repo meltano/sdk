@@ -1322,10 +1322,12 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             context: Stream partition or context dictionary.
         """
-        msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
-        if context:
-            msg += f" with context: {context}"
-        self.log(msg)
+        self.log(
+            "Beginning %s sync of '%s'",
+            self.replication_method.lower(),
+            self.name,
+            extra={"context": context},
+        )
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
