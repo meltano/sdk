@@ -1,0 +1,5 @@
+INFO tap-preprocess Skipping parse of env var settings...
+INFO tap-preprocess Added 'child_preprocessed' as child stream to 'parent_large'
+INFO tap-preprocess.parent_large Beginning sync of 'parent_large' in full_table mode
+INFO tap-preprocess.child_preprocessed Beginning sync of 'child_preprocessed' in full_table mode with context: {'parent_id': 1, 'parent_name': 'Parent A'}
+INFO tap-preprocess.child_preprocessed Beginning sync of 'child_preprocessed' in full_table mode with context: {'parent_id': 2, 'parent_name': 'Parent B'}

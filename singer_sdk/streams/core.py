@@ -68,7 +68,9 @@ REPLICATION_LOG_BASED = "LOG_BASED"
 class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for tap streams.
 
-    :ivar context: Stream partition or context dictionary.
+    :ivar context: Stream partition or context dictionary. This is a read-only
+        (frozen) dictionary. To modify the context before it is used, override
+        the :meth:`~singer_sdk.Stream.preprocess_context` method.
 
     .. versionadded:: 0.39.0
        The ``context`` attribute.
@@ -1374,10 +1376,17 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             context: Stream partition or context dictionary.
         """
-        msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
+        # Preprocess context before it's frozen
+        context = self.preprocess_context(context) if context else None
+
+        log_msg = "Beginning sync of '%s' in %s mode"
+        log_args: list[t.Any] = [self.name, self.replication_method.lower()]
         if context:
-            msg += f" with context: {context}"
-        self.log(msg)
+            log_msg += " with context: %s"
+            log_args.append(context)
+
+        self.log(log_msg, *log_args)
+
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
@@ -1617,6 +1626,40 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         records = self._sync_records(context, write_messages=False)
         for manifest in batcher.get_batches(records=records):
             yield batch_config.encoding, manifest
+
+    def preprocess_context(  # noqa: PLR6301
+        self,
+        context: types.Context,
+    ) -> types.Context:
+        """Preprocess the context dictionary before it is used during sync operations.
+
+        This method provides an opportunity to clean, transform, or reduce the context
+        dictionary before it is frozen and used throughout the stream's sync lifecycle.
+        Common use cases include:
+
+        - Removing large data payloads from parent streams that are not needed
+        - Extracting only the necessary keys from parent context
+        - Transforming context values to a more convenient format
+        - Validating or sanitizing context values
+
+        This is the **only** appropriate place to modify the context dictionary. Once
+        this method returns, the context will be frozen (immutable) for the remainder
+        of the sync operation.
+
+        .. important::
+           The context object must not contain sensitive information such as API keys
+           or secrets, as it is sent to the target, stored in the state file, and
+           logged to the console.
+
+        Args:
+            context: Stream partition or context dictionary from the parent stream.
+
+        Returns:
+            The preprocessed context dictionary.
+
+        .. versionadded:: 0.52.0
+        """
+        return context
 
     def post_process(  # noqa: PLR6301
         self,
