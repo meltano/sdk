@@ -150,8 +150,12 @@ class SingerCommand(click.Command):
             return super().invoke(ctx)
         except ConfigValidationError as exc:
             for error in exc.errors:
-                self.logger.error("Config validation error: %s", error)  # noqa: TRY400
-            sys.exit(1)
+                self.logger.error(error)  # noqa: TRY400
+            self.logger.error(  # noqa: TRY400
+                "Config validation failed",
+                extra={"schema": exc.schema},
+            )
+            ctx.exit(1)
 
 
 def _format_validation_error(error: ValidationError) -> str:
@@ -474,12 +478,13 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             ]
 
         if errors:
-            summary = (
-                f"Config validation failed: {'; '.join(errors)}\n"
-                f"JSONSchema was: {config_jsonschema}"
-            )
+            summary = "Config validation failed"
             if raise_errors:
-                raise ConfigValidationError(summary, errors=errors)
+                raise ConfigValidationError(
+                    summary,
+                    errors=errors,
+                    schema=config_jsonschema,
+                )
 
             self.logger.warning(summary)
 
