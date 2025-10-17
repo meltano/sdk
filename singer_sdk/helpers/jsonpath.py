@@ -33,7 +33,7 @@ def extract_jsonpath(
     match: jsonpath_ng.DatumInContext
     matches = compiled_jsonpath.find(input)
 
-    logger.info("JSONPath %s match count: %d", expression, len(matches))
+    logger.debug("JSONPath %s match count: %d", expression, len(matches))
 
     for match in matches:
         yield match.value

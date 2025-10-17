@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from singer_sdk._singerlib import Schema, resolve_schema_references
+from singer_sdk.singerlib import Schema, resolve_schema_references
 
 STRING_SCHEMA = Schema(type="string", maxLength=32, default="")
 STRING_DICT = {"type": "string", "maxLength": 32, "default": ""}
@@ -415,8 +415,68 @@ def test_schema_from_dict(pydict, expected):
             },
             id="resolve_schema_references_with_circular_references",
         ),
+        pytest.param(
+            {
+                "type": "object",
+                "properties": {
+                    "min_compute_units": {"$ref": "components#/schemas/ComputeUnit"},
+                    "max_compute_units": {"$ref": "components#/schemas/ComputeUnit"},
+                },
+            },
+            {
+                "components": {
+                    "schemas": {
+                        "ComputeUnit": {"type": "number"},
+                    },
+                },
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "min_compute_units": {"type": "number"},
+                    "max_compute_units": {"type": "number"},
+                },
+            },
+            id="resolve_schema_multiple_properties_with_same_reference",
+        ),
     ],
 )
 def test_resolve_schema_references(schema, refs, expected):
     """Test resolving schema references."""
     assert resolve_schema_references(schema, refs) == expected
+
+
+def test_schema_from_dict_simple():
+    simple_schema = {
+        "title": "Longitude and Latitude Values",
+        "description": "A geographical coordinate.",
+        "required": ["latitude", "longitude"],
+        "type": "object",
+        "properties": {
+            "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+            "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+        },
+    }
+
+    schema_plus = Schema.from_dict(simple_schema)
+    assert schema_plus.to_dict() == simple_schema
+    assert schema_plus.required == ["latitude", "longitude"]
+    assert schema_plus.properties is not None
+    assert isinstance(schema_plus.properties["latitude"], Schema)
+    latitude = schema_plus.properties["latitude"]
+    assert latitude.type == "number"
+
+
+def test_schema_from_dict_with_items():
+    schema = {
+        "description": "A representation of a person, company, organization, or place",
+        "type": "object",
+        "properties": {"fruits": {"type": "array", "items": {"type": "string"}}},
+    }
+    schema_plus = Schema.from_dict(schema)
+    assert schema_plus.to_dict() == schema
+    assert schema_plus.properties is not None
+    assert isinstance(schema_plus.properties["fruits"], Schema)
+    fruits = schema_plus.properties["fruits"]
+    assert isinstance(fruits.items, Schema)
+    assert fruits.items.type == "string"

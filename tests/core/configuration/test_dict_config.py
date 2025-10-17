@@ -8,10 +8,7 @@ from pathlib import Path
 import pytest
 
 import singer_sdk.typing as th
-from singer_sdk.configuration._dict_config import (
-    merge_config_sources,
-    parse_environment_config,
-)
+from singer_sdk.configuration._dict_config import parse_environment_config
 
 if t.TYPE_CHECKING:
     from pytest_subtests import SubTests
@@ -133,33 +130,3 @@ def test_get_dotenv_config(tmp_path: Path):
     )
     assert dotenv_config
     assert dotenv_config["prop1"] == "hello"
-
-
-def test_merge_config_sources(
-    config_file1,
-    config_file2,
-    monkeypatch: pytest.MonkeyPatch,
-):
-    """Test merging multiple configuration sources."""
-    with monkeypatch.context() as m:
-        m.setenv("PLUGIN_TEST_PROP1", "from-env")
-        m.setenv("PLUGIN_TEST_PROP999", "not-a-tap-setting")
-        config = merge_config_sources(
-            [config_file1, config_file2, "ENV"],
-            CONFIG_JSONSCHEMA,
-            "PLUGIN_TEST_",
-        )
-        assert config["prop1"] == "from-env"
-        assert config["prop2"] == "from-file-1"
-        assert config["prop3"] == ["from-file-2"]
-        assert "prop4" not in config
-
-
-def test_merge_config_sources_missing_file():
-    """Test merging multiple configuration sources when a file is not found."""
-    with pytest.raises(FileNotFoundError):
-        merge_config_sources(
-            ["missing.json"],
-            CONFIG_JSONSCHEMA,
-            "PLUGIN_TEST_",
-        )

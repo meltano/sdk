@@ -24,6 +24,7 @@ plugins:
     - about
     - stream-maps
     - schema-flattening
+    - structured-logging
 
     # TODO: Declare settings and their types here:
     settings:

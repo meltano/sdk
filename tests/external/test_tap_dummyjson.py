@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from samples.sample_tap_dummy_json.tap_dummyjson.tap import TapDummyJSON
+from tap_dummyjson.tap import TapDummyJSON
+
 from singer_sdk.testing import SuiteConfig, get_tap_test_class
 
 CONFIG = {

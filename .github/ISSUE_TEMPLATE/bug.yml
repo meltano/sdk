@@ -15,7 +15,7 @@ body:
     attributes:
       label: Singer SDK Version
       description: Version of the library you are using
-      placeholder: "0.45.11"
+      placeholder: "0.51.0"
     validations:
       required: true
   - type: checkboxes
@@ -32,12 +32,12 @@ body:
       description: Version of Python you are using
       options:
         - "NA"
+        - "3.14"
         - "3.13"
         - "3.12"
         - "3.11"
         - "3.10"
-        - "3.9"
-        - "3.8 or earlier"
+        - "3.9 or earlier"
     validations:
       required: true
   - type: dropdown

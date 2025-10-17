@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 from singer_sdk.streams import Stream
+
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Context
@@ -13,6 +19,7 @@ if t.TYPE_CHECKING:
 class {{ cookiecutter.source_name }}Stream(Stream):
     """Stream class for {{ cookiecutter.source_name }} streams."""
 
+    @override
     def get_records(
         self,
         context: Context | None,

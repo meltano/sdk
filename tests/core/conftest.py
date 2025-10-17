@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 from contextlib import contextmanager
 
 import pytest
-from typing_extensions import override
 
 from singer_sdk import Stream, Tap
 from singer_sdk.helpers._compat import datetime_fromisoformat
@@ -19,6 +19,11 @@ from singer_sdk.typing import (
     Property,
     StringType,
 )
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 class SimpleTestStream(Stream):
@@ -42,9 +47,9 @@ class SimpleTestStream(Stream):
         context: dict | None,
     ) -> t.Iterable[dict[str, t.Any]]:
         """Generate records."""
-        yield {"id": 1, "value": "Egypt"}
-        yield {"id": 2, "value": "Germany"}
-        yield {"id": 3, "value": "India"}
+        yield {"id": 1, "value": "Egypt", "updatedAt": "2021-01-01T00:00:00Z"}
+        yield {"id": 2, "value": "Germany", "updatedAt": "2021-01-01T00:00:01Z"}
+        yield {"id": 3, "value": "India", "updatedAt": "2021-01-01T00:00:02Z"}
 
     @contextmanager
     def with_replication_method(self, method: str | None) -> t.Iterator[None]:

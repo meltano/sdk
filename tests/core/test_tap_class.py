@@ -81,27 +81,32 @@ def test_config_errors(
 
 def test_cli(tap_class: type[Tap]):
     """Test the CLI."""
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     result = runner.invoke(tap_class.cli, ["--help"])
     assert result.exit_code == 0
     assert "Show this message and exit." in result.output
 
 
-def test_cli_config_validation(tap_class: type[Tap], tmp_path):
+def test_cli_config_validation(
+    tap_class: type[Tap],
+    tmp_path,
+    caplog: pytest.LogCaptureFixture,
+):
     """Test the CLI config validation."""
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     config_path = tmp_path / "config.json"
     config_path.write_text(json.dumps({}))
-    result = runner.invoke(tap_class.cli, ["--config", str(config_path)])
+    with caplog.at_level("ERROR"):
+        result = runner.invoke(tap_class.cli, ["--config", str(config_path)])
     assert result.exit_code == 1
     assert not result.stdout
-    assert "'username' is a required property" in result.stderr
-    assert "'password' is a required property" in result.stderr
+    assert "'username' is a required property" in caplog.text
+    assert "'password' is a required property" in caplog.text
 
 
 def test_cli_discover(tap_class: type[Tap], tmp_path):
     """Test the CLI discover command."""
-    runner = CliRunner(mix_stderr=False)
+    runner = CliRunner()
     config_path = tmp_path / "config.json"
     config_path.write_text(json.dumps({}))
     result = runner.invoke(

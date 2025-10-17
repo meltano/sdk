@@ -6,24 +6,25 @@ import abc
 import enum
 import json
 import logging
-import logging.config
 import os
-import sys
 import typing as t
 from dataclasses import dataclass, field
-from pathlib import Path
 from time import time
 
 if t.TYPE_CHECKING:
+    import sys
+    from collections.abc import Sequence
     from types import TracebackType
 
     from singer_sdk.helpers import types
-    from singer_sdk.helpers._compat import Traversable
 
+    if sys.version_info >= (3, 11):
+        from typing import Self  # noqa: ICN003
+    else:
+        from typing_extensions import Self
 
 DEFAULT_LOG_INTERVAL = 60.0
 METRICS_LOGGER_NAME = __name__
-METRICS_LOG_LEVEL_SETTING = "metrics_log_level"
 
 _TVal = t.TypeVar("_TVal")
 
@@ -59,7 +60,7 @@ class Metric(str, enum.Enum):
     BATCH_PROCESSING_TIME = "batch_processing_time"
 
 
-@dataclass
+@dataclass(slots=True)
 class Point(t.Generic[_TVal]):
     """An individual metric measurement."""
 
@@ -81,22 +82,81 @@ class Point(t.Generic[_TVal]):
             "tags": self.tags,
         }
 
+    def __str__(self) -> str:
+        """Convert this measure to a string.
 
-class SingerMetricsFormatter(logging.Formatter):
-    """Logging formatter that adds a ``metric_json`` field to the log record."""
+        Returns:
+            A string.
+        """
+        return json.dumps(self.to_dict(), default=str, separators=(",", ":"))
 
-    def format(self, record: logging.LogRecord) -> str:
-        """Format a log record.
+
+def _to_json(point: dict) -> str:
+    """Convert this measure to a JSON string.
+
+    Returns:
+        A JSON string.
+    """
+    return json.dumps(point, default=str, separators=(",", ":"))
+
+
+class MetricExclusionFilter(logging.Filter):
+    """A filter for excluding metrics from logging."""
+
+    def __init__(
+        self,
+        *,
+        metrics: Sequence[str | Metric] | None = None,
+        types: Sequence[str] | None = None,
+        tags: dict[str, t.Any] | None = None,
+    ) -> None:
+        """Initialize a metric filter.
+
+        Args:
+            metrics: A set of metrics to exclude.
+            types: A set of metric types to exclude.
+            tags: A dictionary of tags to exclude.
+        """
+        self.metrics = metrics or []
+        self.types = types or []
+        self.tags = tags or {}
+
+    def _exclude_point(self, point: Point) -> bool:
+        """Filter a point.
+
+        Args:
+            point: The point.
+
+        A metric record is excluded if any of the following are true:
+        - The metric name matches one in the metrics list
+        - The metric type matches one in the types list
+        - Any of the point's tags match the corresponding values in the tags dictionary
+
+        Returns:
+            True if the point should be excluded.
+        """
+        return (
+            (point.metric.value in self.metrics)
+            or (point.metric_type in self.types)
+            or any(point.tags.get(tag) == value for tag, value in self.tags.items())
+        )
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        """Filter a log record.
 
         Args:
             record: A log record.
 
         Returns:
-            A formatted log record.
+            True if the record should be logged.
         """
-        point = record.__dict__.get("point")
-        record.__dict__["metric_json"] = json.dumps(point, default=str) if point else ""
-        return super().format(record)
+        return not (
+            record.args
+            and isinstance(record.args, tuple)
+            and (point := record.args[0])
+            and isinstance(point, Point)
+            and self._exclude_point(point)
+        )
 
 
 def log(logger: logging.Logger, point: Point) -> None:
@@ -106,7 +166,7 @@ def log(logger: logging.Logger, point: Point) -> None:
         logger: An logger instance.
         point: A measurement.
     """
-    logger.info("METRIC", extra={"point": point.to_dict()})
+    logger.info("METRIC: %s", point)
 
 
 class Meter(metaclass=abc.ABCMeta):
@@ -135,6 +195,14 @@ class Meter(metaclass=abc.ABCMeta):
 
     @context.setter
     def context(self, value: types.Context | None) -> None:
+        """Set the context for this meter.
+
+        Args:
+            value: A context dictionary.
+        """
+        self.with_context(value)
+
+    def with_context(self, value: types.Context | None) -> None:
         """Set the context for this meter.
 
         Args:
@@ -192,7 +260,7 @@ class Counter(Meter):
         """Exit the counter context."""
         self._pop()
 
-    def __enter__(self) -> Counter:
+    def __enter__(self) -> Self:
         """Enter the counter context.
 
         Returns:
@@ -254,7 +322,7 @@ class Timer(Meter):
         super().__init__(metric, tags)
         self.start_time = time()
 
-    def __enter__(self) -> Timer:
+    def __enter__(self) -> Self:
         """Enter the timer context.
 
         Returns:
@@ -389,75 +457,3 @@ def sync_timer(stream: str, **tags: t.Any) -> Timer:
     """
     tags[Tag.STREAM] = stream
     return Timer(Metric.SYNC_DURATION, tags)
-
-
-def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN401 # pragma: no cover
-    """Load the logging config from the YAML file.
-
-    Args:
-        path: A path to the YAML file.
-
-    Returns:
-        The logging config.
-    """
-    import yaml  # noqa: PLC0415
-
-    with path.open() as f:
-        return yaml.safe_load(f)
-
-
-def _setup_logging(config: t.Mapping[str, t.Any]) -> None:
-    """Setup logging.
-
-    Args:
-        package: The package name to get the logging configuration for.
-        config: A plugin configuration dictionary.
-    """
-    logging.config.dictConfig(
-        {
-            "version": 1,
-            "disable_existing_loggers": False,
-            "formatters": {
-                "console": {
-                    "format": "{asctime:23s} | {levelname:8s} | {name:20s} | {message}",
-                    "style": "{",
-                },
-                "metrics": {
-                    "()": SingerMetricsFormatter,
-                    "format": "{asctime:23s} | {levelname:8s} | {name:20s} | {message}: {metric_json}",  # noqa: E501
-                    "style": "{",
-                },
-            },
-            "handlers": {
-                "default": {
-                    "()": logging.StreamHandler,
-                    "formatter": "console",
-                    "stream": sys.stderr,
-                },
-                "metrics": {
-                    "()": logging.StreamHandler,
-                    "formatter": "metrics",
-                    "stream": sys.stderr,
-                },
-            },
-            "root": {
-                "level": logging.INFO,
-                "handlers": ["default"],
-            },
-            "loggers": {
-                "singer_sdk.metrics": {
-                    "level": logging.INFO,
-                    "handlers": ["metrics"],
-                    "propagate": False,
-                },
-            },
-        },
-    )
-
-    config = config or {}
-    metrics_log_level = config.get(METRICS_LOG_LEVEL_SETTING, "INFO").upper()
-    logging.getLogger(METRICS_LOGGER_NAME).setLevel(metrics_log_level)
-
-    if "SINGER_SDK_LOG_CONFIG" in os.environ:
-        log_config_path = Path(os.environ["SINGER_SDK_LOG_CONFIG"])
-        logging.config.dictConfig(_load_yaml_logging_config(log_config_path))

@@ -13,15 +13,14 @@ import pytest
 import requests
 import requests_mock.adapter as requests_mock_adapter
 
-from singer_sdk._singerlib import Catalog, MetadataMapping
 from singer_sdk.exceptions import (
     FatalAPIError,
     InvalidReplicationKeyException,
 )
-from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._compat import datetime_fromisoformat as parse
 from singer_sdk.helpers.jsonpath import _compile_jsonpath
+from singer_sdk.singerlib import Catalog, MetadataMapping
 from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
@@ -32,6 +31,7 @@ if t.TYPE_CHECKING:
     import requests_mock
 
     from singer_sdk import Stream, Tap
+    from singer_sdk.helpers.types import Context, Record
     from tests.core.conftest import SimpleTestTap
 
 CONFIG_START_DATE = "2021-01-01"
@@ -80,7 +80,11 @@ def stream(tap):
     return tap.load_streams()[0]
 
 
-def test_stream_apply_catalog(stream: Stream):
+@pytest.mark.parametrize("no_replication_key", [None, "", False])
+def test_stream_apply_catalog(
+    stream: Stream,
+    no_replication_key: t.Literal["", False] | None,
+):
     """Applying a catalog to a stream should overwrite fields."""
     assert stream.primary_keys == []
     assert stream.replication_key == "updatedAt"
@@ -98,7 +102,7 @@ def test_stream_apply_catalog(stream: Stream):
                         "stream": stream.name,
                         "schema": stream.schema,
                         "replication_method": REPLICATION_FULL_TABLE,
-                        "replication_key": None,
+                        "replication_key": no_replication_key,
                     },
                 ],
             },
@@ -389,7 +393,7 @@ def test_jsonpath_graphql_stream_default(tap: Tap):
     assert list(records) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
 
 
-def test_jsonpath_graphql_stream_override(tap: Tap):
+def test_jsonpath_graphql_stream_override(tap: Tap) -> None:
     """Validate graphql jsonpath can be updated."""
     content = """[
                         {"id": 1, "value": "abc"},
@@ -401,9 +405,7 @@ def test_jsonpath_graphql_stream_override(tap: Tap):
     fake_response._content = str.encode(content)
 
     class GraphQLJSONPathOverride(GraphqlTestStream):
-        @classproperty
-        def records_jsonpath(cls):  # noqa: N805
-            return "$[*]"
+        records_jsonpath = "$[*]"
 
     stream = GraphQLJSONPathOverride(tap)
 
@@ -737,3 +739,40 @@ def test_stream_class_selection(tap_class, input_catalog, selection):
     assert all(
         tap.streams[stream].selected is selection[stream] for stream in selection
     )
+
+
+def test_post_process_drops_record(tap: Tap):
+    """Test post-processing is applied to records."""
+
+    class DropsRecord(SimpleTestStream):
+        def post_process(
+            self,
+            record: Record,
+            context: Context | None,  # noqa: ARG002
+        ) -> Record | None:
+            # Drop even IDs
+            return None if record["id"] % 2 == 0 else record
+
+    stream = DropsRecord(tap)
+    records = list(stream._sync_records(None, write_messages=False))
+    assert records == [
+        {"id": 1, "value": "Egypt", "updatedAt": "2021-01-01T00:00:00Z"},
+        {"id": 3, "value": "India", "updatedAt": "2021-01-01T00:00:02Z"},
+    ]
+
+
+def test_post_process_transforms_record(tap: Tap):
+    """Test post-processing is applied to records."""
+
+    class TransformsRecord(SimpleTestStream):
+        def post_process(
+            self,
+            record: Record,
+            context: Context | None,  # noqa: ARG002
+        ) -> Record | None:
+            record["extra"] = "transformed"
+            return record
+
+    stream = TransformsRecord(tap)
+    records = stream._sync_records(None, write_messages=False)
+    assert all(record["extra"] == "transformed" for record in records)

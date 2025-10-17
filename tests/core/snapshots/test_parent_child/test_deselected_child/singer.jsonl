@@ -1,0 +1,5 @@
+{"type":"SCHEMA","stream":"parent","schema":{"properties":{"id":{"type":"integer"}},"type":"object"},"key_properties":[]}
+{"type":"RECORD","stream":"parent","record":{"id":1},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"parent","record":{"id":2},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"parent","record":{"id":3},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"parent":{}}}}

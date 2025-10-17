@@ -92,7 +92,6 @@ class LOTRCharactersStream(RESTStream):
     @property
     def authenticator(self):
         return SimpleAuthenticator(
-            stream=self,
             auth_headers={
                 "Authorization": f"Bearer {self.config.get('api_key')}",
             },
@@ -159,8 +158,7 @@ class ParquetStream(Stream):
             name = parquet_schema.names[i]
             # Translate from the Parquet type to a JSON Schema type
             dtype = get_jsonschema_type(str(parquet_schema.types[i]))
-
-            # Add the new property to our list
+            # Add the property to the list
             properties.append(th.Property(name, dtype))
 
         # Return the list as a JSON Schema dictionary object
@@ -235,7 +233,7 @@ class SingletonAuthStream(RESTStream):
     @property
     def authenticator(self) -> SingletonAuthenticator:
         """Stream authenticator."""
-        return SingletonAuthenticator(stream=self)
+        return SingletonAuthenticator()
 ```
 
 ### Make a stream reuse the same authenticator instance for all requests
@@ -252,7 +250,7 @@ class CachedAuthStream(RESTStream):
     @cached_property
     def authenticator(self) -> APIAuthenticatorBase:
         """Stream authenticator."""
-        return APIAuthenticatorBase(stream=self)
+        return APIAuthenticatorBase()
 ```
 
 ### Use one of `requests`'s built-in authenticators
@@ -325,6 +323,7 @@ class CustomResponseValidationStream(RESTStream):
 ```
 
 ### Custom Backoff
+
 Custom backoff and retry behaviour can be added by overriding the methods:
 
 - [`backoff_wait_generator`](singer_sdk.RESTStream.backoff_wait_generator)
@@ -333,6 +332,7 @@ Custom backoff and retry behaviour can be added by overriding the methods:
 - [`backoff_jitter`](singer_sdk.RESTStream.backoff_jitter)
 
 For example, to use a constant retry:
+
 ```
 def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:
     return backoff.constant(interval=10)
@@ -342,7 +342,7 @@ To utilise a response header as a wait value you can use [`backoff_runtime`](sin
 
 **Note**: By default jitter makes this function wait a bit longer than the value provided.
 To disable jitter override [`backoff_jitter`](singer_sdk.RESTStream.backoff_jitter).
-In sdk versions <=0.21.0 the default jitter function will make the function below not work as you would expect without disabling jitter,
+In sdk versions \<=0.21.0 the default jitter function will make the function below not work as you would expect without disabling jitter,
 ([here](https://github.com/meltano/sdk/issues/1477) for more information) to disable jitter override the `request_decorator` and pass `jitter=None` to the `backoff.on_exception` function.
 
 ```

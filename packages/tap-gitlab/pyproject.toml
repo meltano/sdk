@@ -1,0 +1,37 @@
+[project]
+name = "tap-gitlab"
+version = "0.1.0"
+description = "Singer tap for GitLab, built with the Meltano Singer SDK"
+authors = [{ name = "Meltano Team", email = "hello@meltano.com" }]
+keywords = [
+    "ELT",
+    "GitLab",
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+license = "Apache-2.0"
+requires-python = ">=3.10"
+dependencies = [
+    "singer-sdk",
+    "typing-extensions>=4.5.0; python_version < '3.12'",
+]
+
+[project.scripts]
+tap-gitlab = 'tap_gitlab.tap:TapGitlab.cli'
+
+[tool.mypy]
+warn_unused_configs = true
+
+[tool.uv.sources]
+singer-sdk = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

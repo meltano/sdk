@@ -69,7 +69,7 @@ class TestTargetExample(StandardTargetTests):
         such output folders, tables, buckets etc. for use during testing.
 
         Example usage can be found in the SDK samples test suite:
-        https://github.com/meltano/sdk/tree/main/tests/samples
+        https://github.com/meltano/sdk/tree/main/tests/packages
         """
         yield "resource"
 ```

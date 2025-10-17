@@ -1,0 +1,7 @@
+{
+    "type": "object",
+    "properties": {
+        "code": { "type": ["string", "null"] },
+        "name": { "type": ["string", "null"] }
+    }
+}

@@ -13,7 +13,7 @@ build:
       - uv sync --frozen --no-dev --group docs
     build:
       html:
-        - uv run sphinx-build -T -b html docs $READTHEDOCS_OUTPUT/html
+        - uv run --no-sync sphinx-build -T -b html docs $READTHEDOCS_OUTPUT/html
 
 sphinx:
   builder: html

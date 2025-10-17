@@ -4,7 +4,7 @@ import typing as t
 
 import pytest
 
-from singer_sdk._singerlib import (
+from singer_sdk.singerlib import (
     Catalog,
     CatalogEntry,
     Metadata,
@@ -181,7 +181,10 @@ def test_catalog_parsing():
     assert catalog.streams[0].database == "app_db"
     assert catalog.streams[0].row_count == 10000
     assert catalog.streams[0].stream_alias == "test_alias"
-    assert catalog.get_stream("test").tap_stream_id == "test"
+
+    test_stream = catalog.get_stream("test")
+    assert test_stream is not None
+    assert test_stream.tap_stream_id == "test"
     assert catalog["test"].metadata.to_list() == catalog_dict["streams"][0]["metadata"]
     assert catalog["test"].tap_stream_id == catalog_dict["streams"][0]["tap_stream_id"]
     assert catalog["test"].schema.to_dict() == {"type": "object"}

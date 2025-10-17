@@ -6,16 +6,14 @@ import abc
 import copy
 import datetime
 import importlib.util
+import sys
 import time
 import typing as t
 from functools import cached_property
-from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
 
 import jsonschema
-import jsonschema.validators
-from typing_extensions import override
 
 from singer_sdk import metrics
 from singer_sdk.exceptions import (
@@ -23,12 +21,7 @@ from singer_sdk.exceptions import (
     InvalidRecord,
     MissingKeyPropertiesError,
 )
-from singer_sdk.helpers._batch import (
-    BaseBatchFileEncoding,
-    BatchConfig,
-    BatchFileFormat,
-    StorageTarget,
-)
+from singer_sdk.helpers._batch import BatchConfig, BatchFileFormat, StorageTarget
 from singer_sdk.helpers._compat import (
     date_fromisoformat,
     datetime_fromisoformat,
@@ -42,9 +35,16 @@ from singer_sdk.helpers._typing import (
 from singer_sdk.singerlib.json import deserialize_json
 from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 if t.TYPE_CHECKING:
+    from gzip import GzipFile
     from logging import Logger
 
+    from singer_sdk.helpers._batch import BaseBatchFileEncoding
     from singer_sdk.target_base import Target
 
 
@@ -91,27 +91,23 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
         Raises:
             InvalidJSONSchema: If the schema provided from tap or mapper is invalid.
         """
-        jsonschema_validator = jsonschema.validators.validator_for(
-            schema,
-            DEFAULT_JSONSCHEMA_VALIDATOR,
-        )
-
-        super().__init__(schema)
-        if validate_formats:
-            format_checker = format_checker or jsonschema_validator.FORMAT_CHECKER
-        else:
+        if not validate_formats:
             format_checker = jsonschema.FormatChecker(formats=())
+        elif format_checker is None:
+            format_checker = DEFAULT_JSONSCHEMA_VALIDATOR.FORMAT_CHECKER
 
-        try:
-            jsonschema_validator.check_schema(schema)
-        except jsonschema.SchemaError as e:
-            error_message = f"Schema Validation Error: {e}"
-            raise InvalidJSONSchema(error_message) from e
-
-        self.validator = jsonschema_validator(
+        self.validator = DEFAULT_JSONSCHEMA_VALIDATOR(
             schema=schema,
             format_checker=format_checker,
         )
+
+        super().__init__(schema)
+
+        try:
+            self.validator.check_schema(schema)
+        except jsonschema.SchemaError as e:
+            error_message = f"Schema Validation Error: {e}"
+            raise InvalidJSONSchema(error_message) from e
 
     @override
     def validate(self, record: dict):  # noqa: ANN201
@@ -164,7 +160,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._config = dict(target.config)
         self._pending_batch: dict | None = None
         self.stream_name = stream_name
-        self.logger.info(
+        self.logger.debug(
             "Initializing target sink for stream '%s'...",
             stream_name,
         )
@@ -193,14 +189,12 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             "batch_size_rows",
         )
 
+        # Track fields we've already warned about missing from schema
+        self._warned_missing_fields: set[str] = set()
+
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
-        self._record_counter: metrics.Counter = metrics.record_counter(self.stream_name)
-        self._batch_timer = metrics.Timer(
-            metrics.Metric.BATCH_PROCESSING_TIME,
-            tags={
-                metrics.Tag.STREAM: self.stream_name,
-            },
-        )
+        self._record_counter: metrics.Counter = self.get_sink_record_counter()
+        self._batch_timer = self.get_batch_processing_timer()
 
     @property
     def record_counter_metric(self) -> metrics.Counter:
@@ -220,6 +214,37 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         return self._batch_timer
 
+    def get_sink_record_counter(self) -> metrics.Counter:
+        """Get a counter for counting records processed by this sink.
+
+        This method can be overridden to customize the record counter, for example
+        to add custom tags or modify the logging behavior.
+
+        Returns:
+            A counter for counting records.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.record_counter(self.stream_name)
+
+    def get_batch_processing_timer(self) -> metrics.Timer:
+        """Get a timer for measuring batch processing time.
+
+        This method can be overridden to customize the batch processing timer,
+        for example to add custom tags or modify the logging behavior.
+
+        Returns:
+            A timer for measuring batch processing time.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.Timer(
+            metrics.Metric.BATCH_PROCESSING_TIME,
+            tags={
+                metrics.Tag.STREAM: self.stream_name,
+            },
+        )
+
     @cached_property
     def validate_schema(self) -> bool:
         """Enable JSON schema record validation.
@@ -227,7 +252,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             True if JSON schema validation is enabled.
         """
-        return self.config.get("validate_records", True)
+        return self.config.get("validate_records", True)  # type: ignore[no-any-return]
 
     def get_validator(self) -> BaseJSONSchemaValidator | None:
         """Get a record validator for this sink.
@@ -397,7 +422,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             True if metadata columns should be added.
         """
-        return self.config.get("add_record_metadata", False)
+        return self.config.get("add_record_metadata", False)  # type: ignore[no-any-return]
 
     @property
     def process_activate_version_messages(self) -> bool:
@@ -406,7 +431,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             True if activate version messages should be processed.
         """
-        return self.config.get("process_activate_version_messages", True)
+        return self.config.get("process_activate_version_messages", True)  # type: ignore[no-any-return]
 
     @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
@@ -583,12 +608,18 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             treatment: TODO
         """
         for key, value in record.items():
+            additional_properties = schema.get("additionalProperties", False)
             if key not in schema["properties"]:
-                if value is not None:
+                if (
+                    value is not None
+                    and not additional_properties
+                    and key not in self._warned_missing_fields
+                ):
                     self.logger.warning("No schema for record field '%s'", key)
+                    self._warned_missing_fields.add(key)
                 continue
-            datelike_type = get_datelike_property_type(schema["properties"][key])
-            if datelike_type:
+
+            if datelike_type := get_datelike_property_type(schema["properties"][key]):
                 date_val = value
                 try:
                     if value is not None:
@@ -710,7 +741,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Setup is executed once per Sink instance, after instantiation. If a Schema
         change is detected, a new Sink is instantiated and this method is called again.
         """
-        self.logger.info("Setting up %s", self.stream_name)
+        self.logger.debug("Setting up %s", self.stream_name)
 
     def clean_up(self) -> None:
         """Perform any clean up actions required at end of a stream.
@@ -719,7 +750,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         that may be in use from other instances of the same sink. Stream name alone
         should not be relied on, it's recommended to use a uuid as well.
         """
-        self.logger.info("Cleaning up %s", self.stream_name)
+        self.logger.debug("Cleaning up %s", self.stream_name)
         self.record_counter_metric.exit()
 
     def process_batch_files(
@@ -737,21 +768,14 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             NotImplementedError: If the batch file encoding is not supported.
         """
         file: GzipFile | t.IO
-        storage: StorageTarget | None = None
+        storage = self.batch_config.storage if self.batch_config else None
 
         for path in files:
             head, tail = StorageTarget.split_url(path)
-
-            if self.batch_config:
-                storage = self.batch_config.storage
-            else:
-                storage = StorageTarget.from_url(head)
+            file_storage = storage or StorageTarget.from_url(head)
 
             if encoding.format == BatchFileFormat.JSONL:
-                with (
-                    storage.fs(create=False) as batch_fs,
-                    batch_fs.open(tail, mode="rb") as file,
-                ):
+                with file_storage.open(tail, mode="rb") as file:
                     if encoding.compression == "gzip":
                         with gzip_open(file) as context_file:
                             context = {
@@ -769,10 +793,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             ):
                 import pyarrow.parquet as pq  # noqa: PLC0415
 
-                with (
-                    storage.fs(create=False) as batch_fs,
-                    batch_fs.open(tail, mode="rb") as file,
-                ):
+                with file_storage.open(tail, mode="rb") as file:
                     table = pq.read_table(file)
                     context = {"records": table.to_pylist()}
                     self.record_counter_metric.increment(len(context["records"]))

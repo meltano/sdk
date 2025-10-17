@@ -5,10 +5,15 @@ import itertools
 import typing as t
 
 import fastjsonschema
+import jsonschema
 import pytest
 
 from singer_sdk.exceptions import InvalidRecord
-from singer_sdk.sinks.core import BaseJSONSchemaValidator, InvalidJSONSchema
+from singer_sdk.sinks.core import (
+    BaseJSONSchemaValidator,
+    InvalidJSONSchema,
+    JSONSchemaValidator,
+)
 from tests.conftest import BatchSinkMock, TargetMock
 
 
@@ -32,6 +37,51 @@ class FastJSONSchemaValidator(BaseJSONSchemaValidator):
 class FastJSONSchemaSink(BatchSinkMock):
     def get_validator(self) -> BaseJSONSchemaValidator | None:
         return FastJSONSchemaValidator(self.schema)
+
+
+def test_jsonschema_validator():
+    schema = {
+        "type": "object",
+        "properties": {
+            "id": {"type": "integer"},
+            "created_at": {"type": "string", "format": "date-time"},
+        },
+    }
+    # No format checking
+    validator = JSONSchemaValidator(schema=schema, validate_formats=False)
+    validator.validate({"id": 1, "created_at": "2021-01-01T00:00:00+00:00"})
+    validator.validate({"id": 1, "created_at": "not-a-date"})
+
+    # With format checking
+    validator = JSONSchemaValidator(schema=schema, validate_formats=True)
+    validator.validate({"id": 1, "created_at": "2021-01-01T00:00:00+00:00"})
+    with pytest.raises(InvalidRecord, match="'not-a-date' is not a 'date-time'"):
+        validator.validate({"id": 1, "created_at": "not-a-date"})
+
+    with pytest.raises(InvalidRecord, match="'2021-01-01' is not a 'date-time'"):
+        validator.validate({"id": 1, "created_at": "2021-01-01"})
+
+    # With format checking and custom format checker
+    format_checker = jsonschema.FormatChecker(formats=["date-time"])
+
+    @format_checker.checks("date-time")
+    def _is_date_time(value: object) -> bool:
+        try:
+            datetime.datetime.fromisoformat(value)
+        except (TypeError, ValueError):
+            return False
+
+        return True
+
+    validator = JSONSchemaValidator(
+        schema=schema,
+        validate_formats=True,
+        format_checker=format_checker,
+    )
+    validator.validate({"id": 1, "created_at": "2021-01-01T00:00:00+00:00"})
+    validator.validate({"id": 1, "created_at": "2021-01-01"})
+    with pytest.raises(InvalidRecord, match="'not-a-date' is not a 'date-time'"):
+        validator.validate({"id": 1, "created_at": "not-a-date"})
 
 
 def test_validate_record():
@@ -194,7 +244,7 @@ def test_validate_record_jsonschema_format_checking_enabled_stop_on_error(
 
 
 def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
-    capsys: pytest.CaptureFixture,
+    caplog: pytest.LogCaptureFixture,
     default_draft_sink_continue,
 ):
     sink: BatchSinkMock = default_draft_sink_continue
@@ -205,11 +255,12 @@ def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
         "created_at_date": "2021-01-01",
         "created_at_time": "00:01:00+00:00",
         "missing_datetime": "2021-01-01T00:00:00+00:00",
+        "missing_null": None,
         "invalid_datetime": "not a datetime",
     }
 
-    updated_record = sink._validate_and_parse(record)
-    captured = capsys.readouterr()
+    with caplog.at_level("WARNING"):
+        updated_record = sink._validate_and_parse(record)
 
     assert updated_record["created_at"] == datetime.datetime(
         2021,
@@ -230,8 +281,10 @@ def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
         tzinfo=datetime.timezone.utc,
     )
     assert updated_record["missing_datetime"] == "2021-01-01T00:00:00+00:00"
+    assert updated_record["missing_null"] is None
     assert updated_record["invalid_datetime"] == "9999-12-31 23:59:59.999999"
-    assert "Record Message Validation Error" in captured.err
+    assert "Record Message Validation Error" in caplog.text
+    assert "No schema for record field 'missing_datetime'" in caplog.text
 
 
 @pytest.fixture

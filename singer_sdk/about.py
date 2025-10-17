@@ -12,6 +12,9 @@ from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
 if t.TYPE_CHECKING:
+    from collections.abc import Sequence
+    from importlib.metadata import PackageMetadata
+
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
 
 __all__ = [
@@ -22,8 +25,8 @@ __all__ = [
 ]
 
 # Keep these in sync with the supported Python versions in pyproject.toml
-_PY_MIN_VERSION = 9
-_PY_MAX_VERSION = 13
+_PY_MIN_VERSION = 10
+_PY_MAX_VERSION = 14
 
 
 def _get_min_version(specifiers: SpecifierSet) -> int:
@@ -46,7 +49,24 @@ def _get_max_version(specifiers: SpecifierSet) -> int:
     return max(max_version, default=_PY_MAX_VERSION)
 
 
-def get_supported_pythons(requires_python: str) -> t.Generator[str, None, None]:
+def get_supported_pythons(
+    requires_python: str,
+    *,
+    classifiers: list[str] | None = None,
+) -> t.Generator[str, None, None]:
+    """Get the supported Python versions from a requires_python string and classifiers.
+
+    Args:
+        requires_python: The requires_python string from the package metadata.
+        classifiers: The classifiers from the package metadata.
+
+    Yields:
+        A generator of supported Python versions.
+    """
+    if classifiers:
+        yield from classifiers
+        return
+
     specifiers = SpecifierSet(requires_python)
     min_version = _get_min_version(specifiers)
     max_version = _get_max_version(specifiers)
@@ -54,7 +74,33 @@ def get_supported_pythons(requires_python: str) -> t.Generator[str, None, None]:
     yield from specifiers.filter(f"3.{v}" for v in range(min_version, max_version + 1))
 
 
-@dataclasses.dataclass
+def python_versions(package_metadata: PackageMetadata) -> list[str]:
+    """Get the supported Python versions from a package metadata dictionary.
+
+    Args:
+        package_metadata: The package metadata dictionary.
+
+    Returns:
+        A list of supported Python versions.
+    """
+    # TODO: Remove these ignores when we drop support for Python 3.12
+    # (This PackageMetadata protocol is a hot mess)
+    requires_python = package_metadata.get("Requires-Python", f">={_PY_MIN_VERSION}")  # type: ignore[attr-defined,unused-ignore]
+    classifiers = [
+        classifier.split("::")[-1].strip()
+        for classifier in package_metadata.get_all("Classifier", [])
+        if classifier.startswith("Programming Language :: Python ::")
+    ]
+
+    return list(
+        get_supported_pythons(
+            requires_python,
+            classifiers=classifiers,
+        )
+    )
+
+
+@dataclasses.dataclass(slots=True)
 class AboutInfo:
     """About information for a plugin."""
 
@@ -62,9 +108,9 @@ class AboutInfo:
     description: str | None
     version: str
     sdk_version: str
-    supported_python_versions: list[str] | None
+    supported_python_versions: Sequence[str] | None
 
-    capabilities: list[CapabilitiesEnum]
+    capabilities: Sequence[CapabilitiesEnum]
     settings: dict
     env_var_prefix: str
 
@@ -201,9 +247,9 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
         md_description = schema.get("description", "").replace("\n", "<BR/>")
         yield (
             f"| {setting_name} "
-            f"| {'True' if required else 'False':8} "
-            f"| {schema.get('default', 'None'):7} "
-            f"| {md_description:11} |"
+            f"| {'True' if required else 'False'} "
+            f"| {schema.get('default', 'None')} "
+            f"| {md_description} |"
         )
         if "properties" in schema:
             yield from self._generate_property_rows(schema, parent_name=setting_name)
@@ -250,14 +296,14 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
 
         # Process capabilities
         output += "## Capabilities\n\n"
-        output += "\n".join([f"* `{v}`" for v in about_info.capabilities])
+        output += "\n".join([f"- `{v}`" for v in about_info.capabilities])
         output += "\n\n"
 
         # Process Supported Python Versions
         if about_info.supported_python_versions:
             output += "## Supported Python Versions\n\n"
             output += "\n".join(
-                [f"* {v}" for v in about_info.supported_python_versions],
+                [f"- {v}" for v in about_info.supported_python_versions],
             )
             output += "\n\n"
 

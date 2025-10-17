@@ -9,7 +9,6 @@ import typing as t
 from pathlib import Path
 
 import fsspec
-import fsspec.implementations
 import fsspec.implementations.dirfs
 
 import singer_sdk.typing as th
@@ -110,7 +109,7 @@ class FolderTap(Tap, t.Generic[_T]):
     config_jsonschema: t.ClassVar[dict] = {"properties": {}}
 
     @classmethod
-    def append_builtin_config(cls: type[FolderTap], config_jsonschema: dict) -> None:
+    def append_builtin_config(cls, config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         To customize or disable this behavior, developers may either override this class
@@ -165,7 +164,7 @@ class FolderTap(Tap, t.Generic[_T]):
                 msg,
                 errors=[f"Missing configuration for filesystem {protocol}"],
             )
-        logger.info("Instantiating filesystem interface: '%s'", protocol)
+        logger.debug("Instantiating filesystem interface: '%s'", protocol)
 
         return fsspec.implementations.dirfs.DirFileSystem(
             path=self.path,

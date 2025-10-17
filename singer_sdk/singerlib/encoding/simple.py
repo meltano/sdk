@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import json
+import json.decoder
 import logging
 import sys
 import typing as t
+from collections.abc import Mapping  # noqa: TC003
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
@@ -29,7 +30,7 @@ def exclude_null_dict(pairs: list[tuple[str, t.Any]]) -> dict[str, t.Any]:
     return {key: value for key, value in pairs if value is not None}
 
 
-@dataclass
+@dataclass(slots=True)
 class Message:
     """Singer base message."""
 
@@ -61,7 +62,7 @@ class Message:
         return cls(**data)
 
 
-@dataclass
+@dataclass(slots=True)
 class RecordMessage(Message):
     """Singer record message."""
 
@@ -138,7 +139,7 @@ class RecordMessage(Message):
             self.time_extracted = self.time_extracted.astimezone(timezone.utc)
 
 
-@dataclass
+@dataclass(slots=True)
 class SchemaMessage(Message):
     """Singer schema message."""
 
@@ -169,11 +170,11 @@ class SchemaMessage(Message):
             raise ValueError(msg)
 
 
-@dataclass
+@dataclass(slots=True)
 class StateMessage(Message):
     """Singer state message."""
 
-    value: dict[str, t.Any]
+    value: Mapping[str, t.Any]
     """The state value."""
 
     def __post_init__(self) -> None:
@@ -181,7 +182,7 @@ class StateMessage(Message):
         self.type = SingerMessageType.STATE
 
 
-@dataclass
+@dataclass(slots=True)
 class ActivateVersionMessage(Message):
     """Singer activate version message."""
 

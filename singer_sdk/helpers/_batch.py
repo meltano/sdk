@@ -3,18 +3,19 @@
 from __future__ import annotations
 
 import enum
-import platform
 import typing as t
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
-from urllib.parse import ParseResult, urlencode, urlparse
+from functools import cached_property
+from urllib.parse import urlparse
 
-import fs
+from upath import UPath
 
+from singer_sdk.helpers._compat import deprecated
 from singer_sdk.singerlib.messages import Message, SingerMessageType
 
 if t.TYPE_CHECKING:
-    from fs.base import FS
+    from fsspec import AbstractFileSystem
 
 DEFAULT_BATCH_SIZE = 10000
 
@@ -29,57 +30,40 @@ class BatchFileFormat(str, enum.Enum):
     """Parquet format."""
 
 
-@dataclass
+@dataclass(slots=True)
 class BaseBatchFileEncoding:
     """Base class for batch file encodings."""
 
-    registered_encodings: t.ClassVar[dict[str, type[BaseBatchFileEncoding]]] = {}
-    __encoding_format__: t.ClassVar[str] = "OVERRIDE_ME"
-
     # Base encoding fields
-    format: str = field(init=False)
+    format: str
     """The format of the batch file."""
 
     compression: str | None = None
     """The compression of the batch file."""
 
-    def __init_subclass__(cls, **kwargs: t.Any) -> None:
-        """Register subclasses.
-
-        Args:
-            **kwargs: Keyword arguments.
-        """
-        super().__init_subclass__(**kwargs)
-        cls.registered_encodings[cls.__encoding_format__] = cls
-
-    def __post_init__(self) -> None:
-        """Post-init hook."""
-        self.format = self.__encoding_format__
-
     @classmethod
     def from_dict(cls, data: dict[str, t.Any]) -> BaseBatchFileEncoding:
         """Create an encoding from a dictionary."""
-        data = data.copy()
-        encoding_format = data.pop("format")
-        encoding_cls = cls.registered_encodings[encoding_format]
-        return encoding_cls(**data)
+        return cls(**data)
 
 
-@dataclass
+@deprecated("Use BaseBatchFileEncoding with format='jsonl' instead")
+@dataclass(slots=True)
 class JSONLinesEncoding(BaseBatchFileEncoding):
     """JSON Lines encoding for batch files."""
 
-    __encoding_format__ = "jsonl"
+    format: t.Literal["jsonl"] = "jsonl"
 
 
-@dataclass
+@deprecated("Use BaseBatchFileEncoding with format='parquet' instead")
+@dataclass(slots=True)
 class ParquetEncoding(BaseBatchFileEncoding):
     """Parquet encoding for batch files."""
 
-    __encoding_format__ = "parquet"
+    format: t.Literal["parquet"] = "parquet"
 
 
-@dataclass
+@dataclass(slots=True)
 class SDKBatchMessage(Message):
     """Singer batch message in the Meltano Singer SDK flavor."""
 
@@ -92,16 +76,19 @@ class SDKBatchMessage(Message):
     manifest: list[str] = field(default_factory=list)
     """The manifest of files in the batch."""
 
+    version: int | None = None
+    """If syncing in FULL_TABLE mode, the start time as an epoch timestamp int."""
+
     def __post_init__(self) -> None:
-        if isinstance(self.encoding, dict):
-            self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
+        if isinstance(self.encoding, dict):  # type: ignore[unreachable]
+            self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)  # type: ignore[unreachable]
 
         self.type = SingerMessageType.BATCH
 
 
 @dataclass
 class StorageTarget:
-    """Storage target."""
+    """Storage target for batch files."""
 
     root: str
     """"The root directory of the storage target."""
@@ -109,7 +96,7 @@ class StorageTarget:
     prefix: str | None = None
     """"The file prefix."""
 
-    params: dict = field(default_factory=dict)
+    params: dict[str, t.Any] = field(default_factory=dict)
     """"The storage parameters."""
 
     def asdict(self) -> dict[str, t.Any]:
@@ -132,6 +119,12 @@ class StorageTarget:
         """
         return cls(**data)
 
+    @cached_property
+    def _root_path(self) -> UPath:
+        """The root path of the storage target."""
+        # https://github.com/fsspec/universal_pathlib/issues/435
+        return UPath(self.root, **self.params).resolve()  # type: ignore[no-any-return]
+
     @staticmethod
     def split_url(url: str) -> tuple[str, str]:
         """Split a URL into a head and tail pair.
@@ -142,13 +135,9 @@ class StorageTarget:
         Returns:
             A tuple of the head and tail parts of the URL.
         """
-        if platform.system() == "Windows" and "\\" in url:
-            # Original code from pyFileSystem split
-            # Augmented slightly to properly handle Windows paths
-            split = url.rsplit("\\", 1)
-            return (split[0] or "\\", split[1])
-
-        return fs.path.split(url)
+        url_path = UPath(url)
+        head, tail = url_path.parts[:-1], url_path.parts[-1]
+        return url_path.with_segments(*head).as_uri(), tail
 
     @classmethod
     def from_url(cls, url: str) -> StorageTarget:
@@ -164,28 +153,29 @@ class StorageTarget:
         new_url = parsed_url._replace(query="")
         return cls(root=new_url.geturl())
 
-    @property
-    def fs_url(self) -> ParseResult:
-        """Get the storage target URL.
+    def get_url(self, filename: str) -> str:
+        """Get the filename URL for the storage target.
+
+        Args:
+            filename: The filename to get the URL for.
 
         Returns:
             The storage target URL.
         """
-        return urlparse(self.root)._replace(query=urlencode(self.params))
+        return self._root_path.joinpath(filename).as_uri()
 
     @contextmanager
-    def fs(self, **kwargs: t.Any) -> t.Generator[FS, None, None]:
-        """Get a filesystem object for the storage target.
-
-        Args:
-            kwargs: Additional arguments to pass ``f`.open_fs``.
+    def _fs(self) -> t.Generator[AbstractFileSystem, None, None]:
+        """Get filesystem.
 
         Returns:
             The filesystem object.
         """
-        filesystem = fs.open_fs(self.fs_url.geturl(), **kwargs)
-        yield filesystem
-        filesystem.close()
+        fs = self._root_path.fs
+        fs.start_transaction()
+        self._root_path.mkdir(parents=True, exist_ok=True)
+        yield fs
+        fs.end_transaction()
 
     @contextmanager
     def open(
@@ -202,16 +192,11 @@ class StorageTarget:
         Returns:
             The opened file.
         """
-        filesystem = fs.open_fs(self.root, writeable=True, create=True)
-        fo = filesystem.open(filename, mode=mode)
-        try:
-            yield fo
-        finally:
-            fo.close()
-            filesystem.close()
+        with self._fs() as fs, fs.open(self._root_path / filename, mode) as f:
+            yield f
 
 
-@dataclass
+@dataclass(slots=True)
 class BatchConfig:
     """Batch configuration."""
 
@@ -225,8 +210,8 @@ class BatchConfig:
     """The max number of records in a batch."""
 
     def __post_init__(self) -> None:
-        if isinstance(self.encoding, dict):
-            self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
+        if isinstance(self.encoding, dict):  # type: ignore[unreachable]
+            self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)  # type: ignore[unreachable]
 
         if isinstance(self.storage, dict):
             self.storage = StorageTarget.from_dict(self.storage)

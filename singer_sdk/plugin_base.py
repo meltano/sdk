@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import abc
+import dataclasses
 import logging
 import os
+import signal
 import sys
+import threading
 import time
 import typing as t
 import warnings
@@ -16,6 +19,7 @@ from types import MappingProxyType
 import click
 
 from singer_sdk import about, metrics
+from singer_sdk._logging import _setup_console_logging
 from singer_sdk.cli import plugin_cli
 from singer_sdk.configuration._dict_config import (
     merge_missing_config_jsonschema,
@@ -23,13 +27,11 @@ from singer_sdk.configuration._dict_config import (
 )
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
-from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
     FLATTENING_CONFIG,
     STREAM_MAPS_CONFIG,
-    CapabilitiesEnum,
     PluginCapabilities,
 )
 from singer_sdk.io_base import SingerMessageType, SingerReader, SingerWriter
@@ -39,20 +41,20 @@ from singer_sdk.typing import (
     extend_validator_with_defaults,
 )
 
-if sys.version_info >= (3, 11):
-    _LOG_LEVELS_MAPPING = logging.getLevelNamesMapping()
-else:
-    _LOG_LEVELS_MAPPING = logging._nameToLevel  # noqa: SLF001
-
 if t.TYPE_CHECKING:
+    from types import FrameType, TracebackType
+
     from jsonschema import ValidationError
 
+    from singer_sdk.helpers.capabilities import CapabilitiesEnum
+    from singer_sdk.helpers.types import StrPath
     from singer_sdk.singerlib.encoding.base import (
         GenericSingerReader,
         GenericSingerWriter,
     )
 
 SDK_PACKAGE_NAME = "singer_sdk"
+DEFAULT_LOG_LEVEL = "INFO"
 
 JSONSchemaValidator = extend_validator_with_defaults(DEFAULT_JSONSCHEMA_VALIDATOR)
 
@@ -63,6 +65,37 @@ class MapperNotInitialized(Exception):
     def __init__(self) -> None:
         """Initialize the exception."""
         super().__init__("Mapper not initialized. Please call setup_mapper() first.")
+
+
+@dataclasses.dataclass
+class _ConfigInput:
+    """Configuration input."""
+
+    config: dict[str, t.Any] = dataclasses.field(default_factory=dict)
+    """The merged config dictionary from all files."""
+
+    parse_env: bool = False
+    """Whether to parse environment variables."""
+
+    @classmethod
+    def from_cli_args(cls, *args: StrPath) -> _ConfigInput:
+        """Create a _ConfigInput from CLI arguments.
+
+        Args:
+            *args: CLI arguments.
+
+        Returns:
+            A _ConfigInput object.
+        """
+        config: dict[str, t.Any] = {}
+        parse_env = False
+        for config_path in args:
+            if config_path == "ENV":
+                parse_env = True
+                continue
+            file_config = read_json_file(config_path)
+            config |= file_config
+        return _ConfigInput(config=config, parse_env=parse_env)
 
 
 class SingerCommand(click.Command):
@@ -84,6 +117,23 @@ class SingerCommand(click.Command):
         super().__init__(*args, **kwargs)
         self.logger = logger
 
+    def excepthook(
+        self,
+        exc_type: type[BaseException],
+        exc_value: BaseException,
+        exc_traceback: TracebackType | None,
+    ) -> None:
+        """Custom excepthook function."""
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+
+        self.logger.error(
+            "%s",
+            exc_value.args[0] if exc_value.args else exc_type.__name__,
+            exc_info=(exc_type, exc_value, exc_traceback),
+        )
+
     def invoke(self, ctx: click.Context) -> t.Any:  # noqa: ANN401
         """Invoke the command, capturing warnings and logging them.
 
@@ -94,6 +144,8 @@ class SingerCommand(click.Command):
             The result of the command invocation.
         """
         logging.captureWarnings(capture=True)
+        warnings.filterwarnings("once", category=DeprecationWarning)
+        sys.excepthook = self.excepthook
         try:
             return super().invoke(ctx)
         except ConfigValidationError as exc:
@@ -119,6 +171,20 @@ def _format_validation_error(error: ValidationError) -> str:
     return result
 
 
+def _plugin_log_level(*, plugin_name: str) -> str:
+    """Get the log level for a plugin.
+
+    Args:
+        plugin_name: The name of the plugin.
+
+    Returns:
+        The log level.
+    """
+    prefix = f"{plugin_name.upper().replace('-', '_')}_"
+    level = os.environ.get(f"{prefix}LOGLEVEL") or os.environ.get("LOGLEVEL")
+    return level.upper() if level is not None else DEFAULT_LOG_LEVEL
+
+
 class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for taps."""
 
@@ -128,8 +194,18 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     #: The package name of the plugin. e.g meltanolabs-tap-foo
     package_name: str | None = None
 
-    config_jsonschema: t.ClassVar[dict] = {}
+    config_jsonschema: t.ClassVar[dict] = {"properties": {}}
     # A JSON Schema object defining the config options that this tap will accept.
+
+    #: Developers may override this property in order to add or remove
+    #: advertised capabilities for this plugin.
+    capabilities: t.ClassVar[t.Sequence[CapabilitiesEnum]] = [
+        PluginCapabilities.ABOUT,
+        PluginCapabilities.STREAM_MAPS,
+        PluginCapabilities.FLATTENING,
+        PluginCapabilities.BATCH,
+        PluginCapabilities.STRUCTURED_LOGGING,
+    ]
 
     _config: dict
 
@@ -140,18 +216,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             Plugin logger.
         """
-        # Get the level from <PLUGIN_NAME>_LOGLEVEL or LOGLEVEL environment variables
-        plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
-        log_level = os.environ.get(f"{plugin_env_prefix}LOGLEVEL") or os.environ.get(
-            "LOGLEVEL",
-        )
-
-        logger = logging.getLogger(cls.name)
-
-        if log_level is not None and log_level.upper() in _LOG_LEVELS_MAPPING:
-            logger.setLevel(log_level.upper())
-
-        return logger
+        return logging.getLogger(cls.name)
 
     # Constructor
 
@@ -182,7 +247,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
             )
-        elif isinstance(config, list):
+        elif isinstance(config, list):  # pragma: no cover
             config_dict = {}
             for config_path in config:
                 # Read each config file sequentially. Settings from files later in the
@@ -204,18 +269,25 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             config_dict.update(self._env_var_config)
         else:
             self.logger.info("Skipping parse of env var settings...")
-        for k, v in config_dict.items():
-            if self._is_secret_config(k):
-                config_dict[k] = SecretString(v)
         self._config = config_dict
-        metrics._setup_logging(self.config)  # noqa: SLF001
         self.metrics_logger = metrics.get_metrics_logger()
+        self.metrics_logger.setLevel(_plugin_log_level(plugin_name=self.name))
 
         self._validate_config(raise_errors=validate_config)
         self._mapper: PluginMapper | None = None
 
         # Initialization timestamp
         self.__initialized_at = int(time.time() * 1000)
+
+        # Signal handling
+        self._setup_signal_handlers()
+
+    def _setup_signal_handlers(self) -> None:  # pragma: no cover
+        if threading.current_thread() == threading.main_thread():
+            if hasattr(signal, "SIGINT"):
+                signal.signal(signal.SIGINT, self._handle_termination)
+            if hasattr(signal, "SIGTERM"):
+                signal.signal(signal.SIGTERM, self._handle_termination)
 
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
@@ -255,22 +327,6 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             The start time of the plugin.
         """
         return self.__initialized_at
-
-    @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
-        """Get capabilities.
-
-        Developers may override this property in order to add or remove
-        advertised capabilities for this plugin.
-
-        Returns:
-            A list of plugin capabilities.
-        """
-        return [
-            PluginCapabilities.STREAM_MAPS,
-            PluginCapabilities.FLATTENING,
-            PluginCapabilities.BATCH,
-        ]
 
     @classproperty
     def _env_var_prefix(cls) -> str:  # noqa: N805
@@ -320,11 +376,9 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             A list of supported Python versions.
         """
         try:
-            package_metadata = metadata.metadata(package)
+            return about.python_versions(metadata.metadata(package))
         except metadata.PackageNotFoundError:
             return None
-
-        return list(about.get_supported_pythons(package_metadata["Requires-Python"]))
 
     @classmethod
     def get_plugin_version(cls) -> str:
@@ -374,7 +428,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     # Abstract methods:
 
     @property
-    def state(self) -> dict:
+    def state(self) -> t.Mapping[str, t.Any]:
         """Get state.
 
         Raises:
@@ -393,20 +447,6 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         return t.cast("dict", MappingProxyType(self._config))
 
-    @staticmethod
-    def _is_secret_config(config_key: str) -> bool:
-        """Check if config key is secret.
-
-        This prevents accidental printing to logs.
-
-        Args:
-            config_key: Configuration key name to match against common secret names.
-
-        Returns:
-            True if a config value should be treated as a secret.
-        """
-        return is_common_secret_key(config_key)
-
     def _validate_config(self, *, raise_errors: bool = True) -> list[str]:
         """Validate configuration input against the plugin configuration JSON schema.
 
@@ -421,9 +461,9 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         errors: list[str] = []
         config_jsonschema = self.config_jsonschema
+        self.append_builtin_config(config_jsonschema)
 
-        if config_jsonschema:
-            self.append_builtin_config(config_jsonschema)
+        if config_jsonschema:  # pragma: no branch
             self.logger.debug(
                 "Validating config using jsonschema: %s",
                 config_jsonschema,
@@ -444,6 +484,20 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             self.logger.warning(summary)
 
         return errors
+
+    def _handle_termination(  # pragma: no cover
+        self,
+        signum: int,  # noqa: ARG002
+        frame: FrameType | None,  # noqa: ARG002
+    ) -> None:
+        """Handle termination signal.
+
+        Args:
+            signum: Signal number.
+            frame: Frame.
+        """
+        self.logger.info("Gracefully shutting down...")
+        sys.exit(0)
 
     @classmethod
     def print_version(
@@ -480,7 +534,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         )
 
     @classmethod
-    def append_builtin_config(cls: type[PluginBase], config_jsonschema: dict) -> None:
+    def append_builtin_config(cls, config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         To customize or disable this behavior, developers may either override this class
@@ -517,7 +571,12 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         print(formatter.format_about(info))  # noqa: T201
 
     @staticmethod
-    def config_from_cli_args(*args: str) -> tuple[list[Path], bool]:
+    @deprecated(
+        "config_from_cli_args is deprecated and will be removed by 2026-01-01.",
+        category=SingerSDKDeprecationWarning,
+        stacklevel=2,
+    )
+    def config_from_cli_args(*args: str) -> tuple[list[Path], bool]:  # pragma: no cover
         """Parse CLI arguments into a config dictionary.
 
         Args:
@@ -542,7 +601,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             # Validate config file paths before adding to list
             if not Path(config_path).is_file():
                 msg = (
-                    f"Could not locate config file at '{config_path}'.Please check "
+                    f"Could not locate config file at '{config_path}'. Please check "
                     "that the file exists."
                 )
                 raise FileNotFoundError(msg)
@@ -590,7 +649,21 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         ctx.exit()
 
     @classmethod
-    def get_singer_command(cls: type[PluginBase]) -> click.Command:
+    def cb_config(
+        cls: type[PluginBase],
+        ctx: click.Context,  # noqa: ARG003
+        param: click.Option,  # noqa: ARG003
+        value: tuple[str, ...],
+    ) -> _ConfigInput:
+        """CLI callback to parse the config.
+
+        Returns:
+            A _ConfigInput object.
+        """
+        return _ConfigInput.from_cli_args(*value)
+
+    @classmethod
+    def get_singer_command(cls) -> click.Command:
         """Handle command line execution.
 
         Returns:
@@ -635,6 +708,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     type=click.STRING,
                     default=(),
                     is_eager=True,
+                    callback=cls.cb_config,
                 ),
             ],
             logger=cls.logger,
@@ -647,6 +721,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             A callable CLI object.
         """
+        _setup_console_logging(log_level=_plugin_log_level(plugin_name=cls.name))
         return cls.get_singer_command()
 
 
@@ -735,14 +810,15 @@ class BaseSingerReader(BaseSingerIO, metaclass=abc.ABCMeta):
         line_count = sum(counter.values())
 
         self.logger.info(
-            "Target '%s' completed reading %d lines of input "
-            "(%d schemas, %d records, %d batch manifests, %d state messages).",
+            "Reader '%s' completed processing %d lines of input "
+            "(%d schemas, %d records, %d batch manifests, %d state messages, %d activate version messages).",  # noqa: E501
             self.name,
             line_count,
             counter[SingerMessageType.SCHEMA],
             counter[SingerMessageType.RECORD],
             counter[SingerMessageType.BATCH],
             counter[SingerMessageType.STATE],
+            counter[SingerMessageType.ACTIVATE_VERSION],
         )
         self.process_endofpipe()
 

@@ -7,10 +7,13 @@ from enum import Enum, EnumMeta
 from warnings import warn
 
 from singer_sdk.typing import (
+    AnyOf,
     ArrayType,
     BooleanType,
+    Constant,
+    DecimalType,
     IntegerType,
-    NumberType,
+    NullType,
     ObjectType,
     OneOf,
     PropertiesList,
@@ -25,7 +28,79 @@ _EnumMemberT = t.TypeVar("_EnumMemberT")
 STREAM_MAPS_CONFIG = PropertiesList(
     Property(
         "stream_maps",
-        ObjectType(),
+        ObjectType(
+            Property(
+                "__else__",
+                AnyOf(Constant("__NULL__"), NullType()),
+                nullable=True,
+                required=False,
+                title="Other streams",
+                description=(
+                    "Currently, only setting this to `__NULL__` is supported. "
+                    "This will remove all other streams."
+                ),
+            ),
+            # Stream names → Stream map config
+            additional_properties=AnyOf(
+                Constant("__NULL__"),  # Remove the stream.
+                NullType(),  # Remove the stream.
+                ObjectType(  # Map the stream using this configuration.
+                    Property(
+                        "__alias__",
+                        StringType,
+                        title="Stream Alias",
+                        description="Alias to use for the stream.",
+                        nullable=False,
+                        required=False,
+                    ),
+                    Property(
+                        "__else__",
+                        AnyOf(Constant("__NULL__"), NullType()),
+                        title="Other properties",
+                        description=(
+                            "Currently, only setting this to `__NULL__` is supported. "
+                            "This will remove all other properties from the stream."
+                        ),
+                        required=False,
+                        nullable=False,
+                    ),
+                    Property(
+                        "__filter__",
+                        StringType(pattern=r"^bool\((.*)\)$"),
+                        title="Filter",
+                        description=(
+                            "Filter out records from a stream. A string expression "
+                            "which must evaluate to `true` to include the record, or "
+                            "`false` to exclude it. Filter expressions should be "
+                            "wrapped in `bool()` to ensure proper type conversion."
+                        ),
+                        nullable=False,
+                        required=False,
+                    ),
+                    Property(
+                        "__key_properties__",
+                        ArrayType(StringType),
+                        title="Key Properties",
+                        description="Primary key properties for the stream.",
+                        nullable=False,
+                        required=False,
+                    ),
+                    Property(
+                        "__source__",
+                        StringType,
+                        description="Create a new stream from this source stream.",
+                        nullable=False,
+                        required=False,
+                    ),
+                    # Property names → Property map config
+                    additional_properties=AnyOf(
+                        Constant("__NULL__"),  # Remove the property from the stream.
+                        NullType(),  # Remove the property from the stream.
+                        StringType(),  # Compute the property using this expression.
+                    ),
+                ),
+            ),
+        ),
         title="Stream Maps",
         description=(
             "Config object for stream maps capability. "
@@ -44,7 +119,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
         ObjectType(
             Property(
                 "seed",
-                OneOf(NumberType, StringType, BooleanType),
+                OneOf(DecimalType, StringType, BooleanType),
                 title="Faker Seed",
                 description=(
                     "Value to seed the Faker generator for deterministic output: "
@@ -156,6 +231,18 @@ TARGET_SCHEMA_CONFIG = PropertiesList(
         description="The default target database schema name to use for all streams.",
     ),
 ).to_dict()
+EMIT_ACTIVATE_VERSION_CONFIG = PropertiesList(
+    Property(
+        "emit_activate_version_messages",
+        BooleanType,
+        default=False,
+        title="Emit `ACTIVATE_VERSION` messages",
+        description=(
+            "Whether to emit `ACTIVATE_VERSION` messages. If set to `True`, "
+            "the tap will emit `ACTIVATE_VERSION` messages for each stream."
+        ),
+    ),
+).to_dict()
 ACTIVATE_VERSION_CONFIG = PropertiesList(
     Property(
         "process_activate_version_messages",
@@ -238,7 +325,9 @@ TARGET_LOAD_METHOD_CONFIG = PropertiesList(
 class DeprecatedEnum(Enum):
     """Base class for capabilities enumeration."""
 
-    def __new__(
+    deprecation: str | None
+
+    def __new__(  # noqa: PYI034
         cls,
         value: _EnumMemberT,
         deprecation: str | None = None,
@@ -264,7 +353,6 @@ class DeprecatedEnum(Enum):
         Returns:
             Deprecation message.
         """
-        self.deprecation: str | None
         return self.deprecation
 
     def emit_warning(self) -> None:
@@ -365,6 +453,9 @@ class PluginCapabilities(CapabilitiesEnum):
     #: A.K.A ``FAST_SYNC``.
     BATCH = "batch"
 
+    #: Support structured logging with contextual information.
+    STRUCTURED_LOGGING = "structured-logging"
+
 
 class TapCapabilities(CapabilitiesEnum):
     """Tap-specific capabilities."""
@@ -387,6 +478,9 @@ class TapCapabilities(CapabilitiesEnum):
 
     #: Deprecated. Please use :attr:`~TapCapabilities.CATALOG` instead.
     PROPERTIES = "properties", "Please use CATALOG instead."
+
+    #: Support for ``ACTIVATE_VERSION`` messages.
+    ACTIVATE_VERSION = "activate-version"
 
 
 class TargetCapabilities(CapabilitiesEnum):

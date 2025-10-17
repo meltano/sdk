@@ -10,7 +10,7 @@ default_language_version:
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
+  rev: v6.0.0
   hooks:
   - id: check-json
     exclude: |
@@ -36,22 +36,24 @@ repos:
       (?x)^(
         cookiecutter/.*|
         docs/.*|
-        samples/.*\.json|
-        tests/snapshots/.*
+        tests/.*snapshots/.*
       )$
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.33.0
+  rev: 0.34.1
   hooks:
+  - id: check-codecov
   - id: check-dependabot
+  - id: check-github-issue-config
+  - id: check-github-issue-forms
   - id: check-github-workflows
   - id: check-readthedocs
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.11.8
+  rev: v0.14.1
   hooks:
-  - id: ruff
+  - id: ruff-check
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]
     exclude: |
       (?x)^(
@@ -64,7 +66,7 @@ repos:
       )$
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.7.2
+  rev: 0.9.3
   hooks:
   - id: uv-lock
   - id: uv-sync
@@ -73,3 +75,16 @@ repos:
   rev: v2.4.1
   hooks:
   - id: codespell
+    exclude: |
+      (?x)^(
+        packages/.*\.json|
+      )$
+
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.22
+  hooks:
+  - id: mdformat
+    exclude: tests/snapshots/about_format/markdown\.snap\.md
+    args: [--extensions, frontmatter]
+    additional_dependencies:
+    - mdformat-frontmatter

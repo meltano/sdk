@@ -22,22 +22,22 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
 {%- endif %}
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 {%- if cookiecutter.license != "None" %}
 license = "{{cookiecutter.license}}"
 {%- endif %}
 license-files = [ "LICENSE" ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     {%- if extras %}
-    "singer-sdk[{{ extras|join(',') }}]~=0.45.11",
+    "singer-sdk[{{ extras|join(',') }}]~=0.51.0",
     {%- else %}
-    "singer-sdk~=0.45.11",
+    "singer-sdk~=0.51.0",
     {%- endif %}
     {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
     "requests~=2.32.3",
@@ -45,11 +45,12 @@ dependencies = [
     {%- if cookiecutter.stream_type == "SQL" %}
     "sqlalchemy~=2.0.36",
     {%- endif %}
+    "typing-extensions>=4.5.0; python_version < '3.13'",
 ]
 
 [project.optional-dependencies]
 s3 = [
-    "fs-s3fs~=1.1.1",
+    "s3fs~=2025.9.0",
 ]
 
 [project.scripts]
@@ -66,6 +67,15 @@ test = [
     "pytest-github-actions-annotate-failures>=0.3",
     {%- endif %}
     "singer-sdk[testing]",
+]
+typing = [
+    "mypy>=1.16.0",
+    "ty>=0.0.1-alpha.16",
+    {%- if cookiecutter.stream_type == "SQL" %}
+    "sqlalchemy-stubs",
+    {%- else %}
+    "types-requests",
+    {%- endif %}
 ]
 
 {%- if cookiecutter.variant != "None (Skip)" %}
@@ -89,9 +99,11 @@ plugins = "sqlmypy"
 {%- endif %}
 
 [tool.ruff]
-target-version = "py39"
+line-length = 100
+required-version = ">=0.13"
 
 [tool.ruff.lint]
+future-annotations = true
 ignore = [
     "COM812",  # missing-trailing-comma
 ]
@@ -108,3 +120,37 @@ requires = [
     "hatchling>=1,<2",
 ]
 build-backend = "hatchling.build"
+
+# This configuration can be used to customize tox tests as well as other test frameworks like flake8 and mypy
+[tool.tox]
+min_version = "4.22"
+requires = [
+    "tox>=4.22",
+    "tox-uv",
+]
+env_list = [
+    "typing",
+    "py314",
+    "py313",
+    "py312",
+    "py311",
+    "py310",
+]
+
+[tool.tox.env_run_base]
+runner = "uv-venv-lock-runner"
+pass_env = [
+    {%- if cookiecutter.include_ci_files == "GitHub" %}
+    "GITHUB_*",
+    {%- endif %}
+    "{{cookiecutter.tap_id.replace('-', '_').upper()}}_*",
+]
+dependency_groups = [ "test" ]
+commands = [ [ "pytest", { replace = "posargs", default = [ "tests" ], extend = true } ] ]
+
+[tool.tox.env.typing]
+dependency_groups = [ "test", "typing" ]
+commands = [
+    [ "mypy", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ],
+    [ "ty", "check", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ],
+]

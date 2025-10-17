@@ -13,13 +13,13 @@ Developer TODO: Update the below as needed to correctly describe the install pro
 Install from PyPI:
 
 ```bash
-pipx install {{ cookiecutter.tap_id }}
+uv tool install {{ cookiecutter.tap_id }}
 ```
 
 Install from GitHub:
 
 ```bash
-pipx install git+https://github.com/ORG_NAME/{{ cookiecutter.tap_id }}.git@main
+uv tool install git+https://github.com/ORG_NAME/{{ cookiecutter.tap_id }}.git@main
 ```
 
 -->
@@ -77,7 +77,7 @@ Follow these instructions to contribute to this project.
 
 Prerequisites:
 
-- Python 3.9+
+- Python 3.10+
 - [uv](https://docs.astral.sh/uv/)
 
 ```bash
@@ -87,7 +87,7 @@ uv sync
 ### Create and Run Tests
 
 Create tests within the `tests` subfolder and
-  then run:
+then run:
 
 ```bash
 uv run pytest
@@ -114,7 +114,7 @@ Next, install Meltano (if you haven't already) and any needed plugins:
 
 ```bash
 # Install meltano
-pipx install meltano
+uv tool install meltano
 # Initialize meltano within this directory
 cd {{ cookiecutter.tap_id }}
 meltano install

@@ -19,6 +19,7 @@ Currently only a local filesystem or AWS S3 are supported, but other filesystems
 ## The `BATCH` Message
 
 Local
+
 ```json
 {
   "type": "BATCH",
@@ -35,6 +36,7 @@ Local
 ```
 
 AWS S3
+
 ```json
 {
   "type": "BATCH",
@@ -64,7 +66,6 @@ When local storage is used, targets do no require special configuration to proce
 
 Taps may be configured to specify a root storage `root` directory, file path `prefix`, and `encoding` for batch files using a configuration like the below:
 
-
 In `config.json`:
 
 ```js
@@ -93,7 +94,7 @@ Taps can optionally customize the batch file creation by implementing the [`get_
 class MyStream(Stream):
     def get_batches(self, records):
         return (
-            ParquetEncoding(compression="snappy"),
+            BaseBatchFileEncoding(format="parquet", compression="snappy"),
             [
                 "s3://my-bucket/my-batch-file-1.parquet",
                 "s3://my-bucket/my-batch-file-2.parquet",
@@ -114,6 +115,6 @@ class MySink(Sink):
 ## Known Limitations of `BATCH`
 
 1. Currently the built-in `BATCH` implementation does not support incremental bookmarks or `STATE` tracking. This work is tracked in [Issue #976](https://github.com/meltano/sdk/issues/976).
-2. The `BATCH` implementation is not currently compatible with [Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html). This is certainly possible to implement in theory, but it would also introduce some performance penalties. This limitation is tracked in [Issue 1117#](https://github.com/meltano/sdk/issues/1117).
+1. The `BATCH` implementation is not currently compatible with [Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html). This is certainly possible to implement in theory, but it would also introduce some performance penalties. This limitation is tracked in [Issue 1117#](https://github.com/meltano/sdk/issues/1117).
 
 If you are interested in contributing to one or both of these features, please add a comment in the respective issue.

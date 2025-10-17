@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 import singer_sdk.typing as th
-from singer_sdk import _singerlib as singer
+from singer_sdk import singerlib as singer
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.mapper_base import InlineMapper
+
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -53,6 +59,7 @@ class {{ cookiecutter.name }}Mapper(InlineMapper):
 
         self.mapper = PluginMapper(plugin_config=dict(self.config), logger=self.logger)
 
+    @override
     def map_schema_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a schema message to zero or more new messages.
 
@@ -61,6 +68,7 @@ class {{ cookiecutter.name }}Mapper(InlineMapper):
         """
         yield singer.SchemaMessage.from_dict(message_dict)
 
+    @override
     def map_record_message(
         self,
         message_dict: dict,
@@ -72,6 +80,7 @@ class {{ cookiecutter.name }}Mapper(InlineMapper):
         """
         yield singer.RecordMessage.from_dict(message_dict)
 
+    @override
     def map_state_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a state message to zero or more new messages.
 
@@ -80,6 +89,7 @@ class {{ cookiecutter.name }}Mapper(InlineMapper):
         """
         yield singer.StateMessage.from_dict(message_dict)
 
+    @override
     def map_activate_version_message(
         self,
         message_dict: dict,

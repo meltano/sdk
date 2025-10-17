@@ -18,31 +18,34 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
 {%- endif %}
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 {%- if cookiecutter.license != "None" %}
 license = "{{cookiecutter.license}}"
 {%- endif %}
 license-files = [ "LICENSE" ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     {%- if cookiecutter.faker_extra %}
-    "singer-sdk[faker]~=0.45.11",
+    "singer-sdk[faker]~=0.51.0",
     {%- else %}
-    "singer-sdk~=0.45.11",
+    "singer-sdk~=0.51.0",
     {%- endif %}
-    {%- if cookiecutter.serialization_method != "SQL" %}
+    {%- if cookiecutter.serialization_method == "SQL" %}
+    "sqlalchemy~=2.0",
+    "typing-extensions>=4.5.0; python_version < '3.13'",
+    {%- else %}
     "requests~=2.32.3",
     {%- endif %}
 ]
 
 [project.optional-dependencies]
 s3 = [
-    "fs-s3fs~=1.1.1",
+    "s3fs~=2025.9.0",
 ]
 
 [project.scripts]
@@ -60,6 +63,15 @@ test = [
     {%- endif %}
     "singer-sdk[testing]",
 ]
+typing = [
+    "mypy>=1.16.0",
+    "ty>=0.0.1-alpha.16",
+    {%- if cookiecutter.serialization_method == "SQL" %}
+    "sqlalchemy-stubs",
+    {%- else %}
+    "types-requests",
+    {%- endif %}
+]
 
 {%- if cookiecutter.variant != "None (Skip)" %}
 [tool.hatch.build.targets.wheel]
@@ -71,7 +83,12 @@ packages = [
 [tool.mypy]
 warn_unused_configs = true
 
+[tool.ruff]
+line-length = 100
+required-version = ">=0.13"
+
 [tool.ruff.lint]
+future-annotations = true
 ignore = [
     "COM812",  # missing-trailing-comma
 ]
@@ -88,3 +105,37 @@ requires = [
     "hatchling>=1,<2",
 ]
 build-backend = "hatchling.build"
+
+# This configuration can be used to customize tox tests as well as other test frameworks like flake8 and mypy
+[tool.tox]
+min_version = "4.22"
+requires = [
+    "tox>=4.22",
+    "tox-uv",
+]
+env_list = [
+    "typing",
+    "py314",
+    "py313",
+    "py312",
+    "py311",
+    "py310",
+]
+
+[tool.tox.env_run_base]
+runner = "uv-venv-lock-runner"
+pass_env = [
+    {%- if cookiecutter.include_ci_files == "GitHub" %}
+    "GITHUB_*",
+    {%- endif %}
+    "{{cookiecutter.target_id.replace('-', '_').upper()}}_*",
+]
+dependency_groups = [ "test" ]
+commands = [ [ "pytest", { replace = "posargs", default = [ "tests" ], extend = true } ] ]
+
+[tool.tox.env.typing]
+dependency_groups = [ "test", "typing" ]
+commands = [
+    [ "mypy", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ],
+    [ "ty", "check", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ],
+]

@@ -7,7 +7,7 @@ import typing as t
 from urllib.parse import parse_qs, urlparse
 
 import pytest
-from requests import PreparedRequest, Response
+from requests import Response
 
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
@@ -24,6 +24,8 @@ from singer_sdk.pagination import (
 from singer_sdk.streams.rest import RESTStream
 
 if t.TYPE_CHECKING:
+    from requests import PreparedRequest
+
     from singer_sdk.tap_base import Tap
 
 
@@ -472,6 +474,50 @@ def test_continue_if_empty(tap: Tap):
     assert next(records_iter) == {"id": 2}
     assert next(records_iter) == {"id": 3}
     assert next(records_iter) == {"id": 4}
+
+    with pytest.raises(StopIteration):
+        next(records_iter)
+
+
+def test_no_paginator(tap: Tap):
+    class MyAPIStream(RESTStream):
+        """My API stream."""
+
+        name = "my-api-stream"
+        url_base = "https://my.api.test"
+        path = "/path/to/resource"
+        records_jsonpath = "$.data[*]"
+        schema = {"type": "object", "properties": {"id": {"type": "integer"}}}  # noqa: RUF012
+
+        def get_new_paginator(self) -> None:
+            return None
+
+        def get_url_params(
+            self,
+            context: dict | None,  # noqa: ARG002
+            next_page_token: None,
+        ) -> dict[str, t.Any] | str:
+            params = {}
+            if next_page_token:
+                params["page"] = next_page_token
+            return params
+
+        def _request(
+            self,
+            prepared_request: PreparedRequest,  # noqa: ARG002
+            context: dict | None,  # noqa: ARG002
+        ) -> Response:
+            r = Response()
+            r.status_code = 200
+            r._content = json.dumps({"data": [{"id": 1}, {"id": 2}]}).encode()
+
+            return r
+
+    stream = MyAPIStream(tap=tap)
+    records_iter = stream.request_records(context=None)
+
+    assert next(records_iter) == {"id": 1}
+    assert next(records_iter) == {"id": 2}
 
     with pytest.raises(StopIteration):
         next(records_iter)

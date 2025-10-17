@@ -26,17 +26,24 @@ SYSTEMS = {"linux", "darwin", "windows"}
 
 
 def pytest_collection_modifyitems(config: Config, items: list[pytest.Item]):
-    rootdir = pathlib.Path(config.rootdir)
-
     for item in items:
-        rel_path = pathlib.Path(item.fspath).relative_to(rootdir)
+        rel_path = pathlib.Path(item.fspath).relative_to(config.rootpath)
+        test_dir = rel_path.parts[1]
+
+        # Mark all tests under tests/contrib/* as 'contrib'
+        if test_dir.startswith("contrib"):
+            item.add_marker("contrib")
 
         # Mark all tests under tests/external*/ as 'external'
-        if rel_path.parts[1].startswith("external"):
+        if test_dir.startswith("external"):
             item.add_marker("external")
 
+        # Mark all tests under tests/packages/* as 'packages'
+        if test_dir.startswith("packages"):
+            item.add_marker("packages")
 
-def pytest_runtest_setup(item):
+
+def pytest_runtest_setup(item: pytest.Item):
     supported_systems = SYSTEMS.intersection(mark.name for mark in item.iter_markers())
     system = platform.system().lower()
     if supported_systems and system not in supported_systems:
@@ -51,18 +58,18 @@ def _reset_envvars(monkeypatch: pytest.MonkeyPatch):
 
 
 @pytest.fixture(scope="class")
-def outdir() -> t.Generator[str, None, None]:
+def outdir() -> t.Generator[pathlib.Path, None, None]:
     """Create a temporary directory for target output."""
-    name = ".output/"
+    path = pathlib.Path(".output/").resolve()
     try:
-        pathlib.Path(name).mkdir(parents=True)
+        path.mkdir(parents=True)
     except FileExistsError:
         # Directory already exists
-        shutil.rmtree(name)
-        pathlib.Path(name).mkdir(parents=True)
+        shutil.rmtree(path)
+        path.mkdir(parents=True)
 
-    yield name
-    shutil.rmtree(name)
+    yield path
+    shutil.rmtree(path)
 
 
 @pytest.fixture(scope="session")

@@ -6,6 +6,7 @@ import abc
 import copy
 import datetime
 import json
+import logging
 import typing as t
 import warnings
 from os import PathLike
@@ -18,15 +19,12 @@ from singer_sdk.batch import Batcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
+    DiscoveryError,
     InvalidReplicationKeyException,
     InvalidStreamSortException,
     MaxRecordsLimitException,
 )
-from singer_sdk.helpers._batch import (
-    BaseBatchFileEncoding,
-    BatchConfig,
-    SDKBatchMessage,
-)
+from singer_sdk.helpers._batch import BatchConfig, SDKBatchMessage
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import (
     SingerSDKDeprecationWarning,
@@ -51,13 +49,13 @@ from singer_sdk.helpers._typing import (
     is_datetime_type,
 )
 from singer_sdk.helpers._util import utc_now
-from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
+from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform
 
 if t.TYPE_CHECKING:
-    import logging
-
     from singer_sdk.helpers import types
+    from singer_sdk.helpers._batch import BaseBatchFileEncoding
     from singer_sdk.helpers._compat import Traversable
+    from singer_sdk.mapper import StreamMap
     from singer_sdk.singerlib.catalog import StreamMetadata
     from singer_sdk.tap_base import Tap
 
@@ -70,7 +68,9 @@ REPLICATION_LOG_BASED = "LOG_BASED"
 class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for tap streams.
 
-    :ivar context: Stream partition or context dictionary.
+    :ivar context: Stream partition or context dictionary. This is a read-only
+        (frozen) dictionary. To modify the context before it is used, override
+        the :meth:`~singer_sdk.Stream.preprocess_context` method.
 
     .. versionadded:: 0.39.0
        The ``context`` attribute.
@@ -119,7 +119,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def __init__(
         self,
         tap: Tap,
-        schema: str | PathLike | dict[str, t.Any] | singer.Schema | None = None,
+        schema: types.StrPath | dict[str, t.Any] | singer.Schema | None = None,
         name: str | None = None,
     ) -> None:
         """Init tap stream.
@@ -130,8 +130,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             name: Name of this stream.
 
         Raises:
-            ValueError: TODO
-            FileNotFoundError: TODO
+            ValueError: If the stream name is not provided.
+            ValueError: If an unsupported schema type is provided.
+            FileNotFoundError: If the schema does not exist at the provided filepath.
         """
         if name:
             self.name: str = name
@@ -139,7 +140,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             msg = "Missing argument or class variable 'name'."
             raise ValueError(msg)
 
-        self.logger: logging.Logger = tap.logger.getChild(self.name)
+        self._logger: logging.Logger = tap.logger.getChild(self.name)
         self.metrics_logger = tap.metrics_logger
         self.tap_name: str = tap.name
         self.context: types.Context | None = None
@@ -147,6 +148,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._config: dict = dict(tap.config)
         self._tap = tap
         self._tap_state = tap.state
+        self._stream_version: int | None = None
+
+        # Epoch timestamp in milliseconds
+        self._initialized_at: int = tap.initialized_at
+
         self._tap_input_catalog: singer.Catalog | None = None
         self._input_schema: dict | None = None
         self._stream_maps: list[StreamMap] | None = None
@@ -157,9 +163,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._schema_filepath: Path | Traversable | None = None
         self._metadata: singer.MetadataMapping | None = None
         self._mask: singer.SelectionMask | None = None
-        self._schema: dict
+        self._schema: dict | None = None
         self._is_state_flushed: bool = True
-        self._last_emitted_state: dict | None = None
         self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
         if schema:
@@ -170,7 +175,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
                 self._schema_filepath = Path(schema)
                 warnings.warn(
-                    "Passing a schema filepath is deprecated. Please pass the schema "
+                    "Passing a schema filepath is deprecated. Please pass a schema "
                     "dictionary or a Singer Schema object instead.",
                     SingerSDKDeprecationWarning,
                     stacklevel=2,
@@ -183,15 +188,29 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 msg = f"Unexpected type {type(schema).__name__} for arg 'schema'."  # type: ignore[unreachable]
                 raise ValueError(msg)
 
-        if self.schema_filepath:
+        if self.schema_filepath:  # pragma: no cover
+            warnings.warn(
+                "Passing a schema filepath is deprecated. Use the `StreamSchema` "
+                "descriptor with a `SchemaDirectory` source instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
             self._schema = json.loads(self.schema_filepath.read_text())
 
-        if not self.schema:
-            msg = (
-                f"Could not initialize schema for stream '{self.name}'. A valid schema "
-                "object or filepath was not provided."
-            )
-            raise ValueError(msg)
+    @property
+    def logger(self) -> logging.Logger:
+        """Get stream logger."""
+        return self._logger
+
+    def log(
+        self,
+        message: str,
+        *args: t.Any,
+        level: int = logging.INFO,
+        **kwargs: t.Any,
+    ) -> None:
+        """Log a message."""
+        self._logger.log(level, message, *args, **kwargs)
 
     @property
     def stream_maps(self) -> list[StreamMap]:
@@ -207,18 +226,20 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         if self._tap.mapper is not None:
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
-            self.logger.info(
+            self.log(
                 "Tap has custom mapper. Using %d provided map(s).",
                 len(self.stream_maps),
+                level=logging.DEBUG,
             )
 
         # TODO: A tap mapper is always registered so this code is unreachable.
         # Consider removing it.
         # https://github.com/meltano/sdk/blob/c6672eb70002c7430f5db30fba05bb21cf9f0c11/singer_sdk/mapper.py#L768-L778
         else:  # pragma: no cover
-            self.logger.info(  # type: ignore[unreachable]
+            self.log(  # type: ignore[unreachable]
                 "No custom mapper provided for '%s'. Using SameRecordTransform.",
                 self.name,
+                level=logging.DEBUG,
             )
             self._stream_maps = [
                 SameRecordTransform(
@@ -392,7 +413,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def _write_replication_key_signpost(
         self,
         context: types.Context | None,
-        value: datetime.datetime | str | int | float,
+        value: datetime.datetime | str | float,
     ) -> None:
         """Write the signpost value, if available.
 
@@ -452,6 +473,16 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             context: Stream partition or context dictionary.
         """
+        if self.replication_method != REPLICATION_INCREMENTAL:
+            self.log(
+                (
+                    "Stream is not configured for incremental replication. Not "
+                    "writing starting replication value."
+                ),
+                level=logging.DEBUG,
+            )
+            return
+
         value = None
         state = self.get_context_state(context)
 
@@ -470,7 +501,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 else:
                     value = self.compare_start_date(value, start_date_value)
 
-            self.logger.info("Starting incremental sync with bookmark value: %s", value)
+            self.log("Starting incremental sync with bookmark value: %s", value)
 
         write_starting_replication_value(state, value)
 
@@ -495,7 +526,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             Max allowable bookmark value for this stream's replication key.
         """
-        return utc_now() if self.is_timestamp_replication_key else None
+        return (
+            datetime.datetime.fromtimestamp(
+                self._initialized_at / 1000.0,
+                tz=datetime.timezone.utc,
+            )
+            if self.is_timestamp_replication_key
+            else None
+        )
 
     @property
     def schema_filepath(self) -> Path | Traversable | None:
@@ -512,11 +550,17 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         Returns:
             JSON Schema dictionary for this stream.
+
+        Raises:
+            DiscoveryError: If the schema was not provided.
         """
+        if self._schema is None:
+            msg = f"The schema for stream '{self.name}' was not provided"
+            raise DiscoveryError(msg)
         return self._schema
 
     @property
-    def primary_keys(self) -> t.Sequence[str] | None:
+    def primary_keys(self) -> t.Sequence[str]:
         """Get primary keys.
 
         Returns:
@@ -525,11 +569,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._primary_keys or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: t.Sequence[str] | None) -> None:
+    def primary_keys(self, new_value: t.Sequence[str]) -> None:
         """Set primary key(s) for the stream.
 
         Args:
-            new_value: TODO
+            new_value: A list or tuple of primary key(s) for the stream.
         """
         self._primary_keys = new_value
 
@@ -702,10 +746,15 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             return REPLICATION_INCREMENTAL
         return REPLICATION_FULL_TABLE
 
+    @property
+    def emit_activate_version_messages(self) -> bool:
+        """Get whether to emit `ACTIVATE_VERSION` messages."""
+        return self.config.get("emit_activate_version_messages", False)  # type: ignore[no-any-return]
+
     # State properties:
 
     @property
-    def tap_state(self) -> dict:
+    def tap_state(self) -> types.TapState:
         """Return a writeable state dict for the entire tap.
 
         Note: This dictionary is shared (and writable) across all streams.
@@ -846,14 +895,18 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def _write_state_message(self) -> None:
         """Write out a STATE message with the latest state."""
-        if (
-            (not self._is_state_flushed)
-            and self.tap_state
-            and (self.tap_state != self._last_emitted_state)
-        ):
-            self._tap.write_message(singer.StateMessage(value=self.tap_state))
-            self._last_emitted_state = copy.deepcopy(self.tap_state)
+        if not self._is_state_flushed and self.tap_state:
+            self._tap.state_writer.write_state(self.tap_state)
             self._is_state_flushed = True
+
+    def _write_activate_version_message(self, full_table_version: int) -> None:
+        """Write out an ACTIVATE_VERSION message."""
+        singer.write_message(
+            singer.ActivateVersionMessage(
+                stream=self.name,
+                version=full_table_version,
+            )
+        )
 
     def _generate_schema_messages(
         self,
@@ -921,7 +974,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 yield singer.RecordMessage(
                     stream=stream_map.stream_alias,
                     record=mapped_record,
-                    version=None,
+                    version=self._stream_version,
                     time_extracted=utc_now(),
                 )
 
@@ -990,8 +1043,59 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         the stream.
         """
         if len(self._sync_costs) > 0:
-            msg = f"Total Sync costs for stream {self.name}: {self._sync_costs}"
-            self.logger.info(msg)
+            self.log(f"Total Sync costs for stream {self.name}: {self._sync_costs}")
+
+    def get_record_counter(
+        self,
+        *,
+        endpoint: str | None = None,
+        log_interval: float = metrics.DEFAULT_LOG_INTERVAL,
+    ) -> metrics.Counter:
+        """Get a counter for counting records retrieved from the source.
+
+        This method can be overridden to customize the record counter, for example
+        to add custom tags or modify the logging behavior.
+
+        Args:
+            endpoint: The endpoint name to include in metrics.
+            log_interval: The interval at which to log the count.
+
+        Returns:
+            A counter for counting records.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.record_counter(
+            self.name,
+            endpoint=endpoint,
+            log_interval=log_interval,
+        )
+
+    def get_batch_counter(self) -> metrics.Counter:
+        """Get a counter for counting batches sent to the target.
+
+        This method can be overridden to customize the batch counter, for example
+        to add custom tags or modify the logging behavior.
+
+        Returns:
+            A counter for counting batches.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.batch_counter(self.name)
+
+    def get_sync_timer(self) -> metrics.Timer:
+        """Get a timer for timing the sync of this stream.
+
+        This method can be overridden to customize the sync timer, for example
+        to add custom tags or modify the logging behavior.
+
+        Returns:
+            A timer for timing the sync of this stream.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.sync_timer(self.name)
 
     def _check_max_record_limit(self, current_record_index: int) -> None:
         """Raise an exception if dry run record limit exceeded.
@@ -1086,9 +1190,12 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         if state is None or state == {}:
             for child_stream in self.child_streams or []:
-                child_stream.finalize_state_progress_markers()
+                if child_stream.selected:
+                    child_stream.finalize_state_progress_markers()
 
-            context: types.Context | None
+            if not self.selected:
+                return
+
             for context in self.partitions or [{}]:
                 state = self.get_context_state(context or None)
                 self._finalize_state(state)
@@ -1145,27 +1252,30 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Yields:
             Each record from the source.
         """
+        # Type definitions
+        context_element: types.Context | None
+        record: types.Record | None
+        context_list: list[types.Context] | list[dict] | None
+
         # Initialize metrics
-        record_counter = metrics.record_counter(self.name)
-        timer = metrics.sync_timer(self.name)
+        record_counter = self.get_record_counter()
+        timer = self.get_sync_timer()
 
         record_index = 0
-        context_element: types.Context | None
-        context_list: list[types.Context] | list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
         with record_counter, timer:
             for context_element in context_list or [{}]:
-                record_counter.context = context_element
-                timer.context = context_element
+                record_counter.with_context(context_element)
+                timer.with_context(context_element)
 
                 current_context = context_element or None
-                state = self.get_context_state(current_context)
                 state_partition_context = self._get_state_partition_context(
                     current_context,
                 )
                 self._write_starting_replication_value(current_context)
+
                 child_context: types.Context | None = (
                     None if current_context is None else copy.copy(current_context)
                 )
@@ -1173,11 +1283,24 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 for idx, record_result in enumerate(self.get_records(current_context)):
                     self._check_max_record_limit(current_record_index=record_index)
 
-                    if isinstance(record_result, tuple):
+                    if isinstance(record_result, tuple):  # pragma: no cover
                         # Tuple items should be the record and the child context
+                        warnings.warn(
+                            "Yielding a tuple of (record, child_context) is "
+                            "deprecated and will be removed in version 0.49 "
+                            "at the earliest. "
+                            "Please yield a single item instead.",
+                            SingerSDKDeprecationWarning,
+                            stacklevel=2,
+                        )
                         record, child_context = record_result
                     else:
                         record = record_result
+
+                    record = self.post_process(record, current_context)
+                    if record is None:
+                        continue
+
                     try:
                         self._process_record(
                             record,
@@ -1213,6 +1336,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
                 if current_context == state_partition_context:
                     # Finalize per-partition state only if 1:1 with context
+                    state = self.get_context_state(current_context)
                     self._finalize_state(state)
 
         if not context:
@@ -1235,7 +1359,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             batch_config: The batch configuration.
             context: Stream partition or context dictionary.
         """
-        with metrics.batch_counter(self.name, context=context) as counter:
+        with self.get_batch_counter() as counter:
             for encoding, manifest in self.get_batches(batch_config, context):
                 counter.increment()
                 self._write_batch_message(encoding=encoding, manifest=manifest)
@@ -1252,10 +1376,17 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             context: Stream partition or context dictionary.
         """
-        msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
+        # Preprocess context before it's frozen
+        context = self.preprocess_context(context) if context else None
+
+        log_msg = "Beginning sync of '%s' in %s mode"
+        log_args: list[t.Any] = [self.name, self.replication_method.lower()]
         if context:
-            msg += f" with context: {context}"
-        self.logger.info("%s...", msg)
+            log_msg += " with context: %s"
+            log_args.append(context)
+
+        self.log(log_msg, *log_args)
+
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
@@ -1267,6 +1398,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if self.selected:
             self._write_schema_message()
 
+        if (
+            self.selected
+            and self.replication_method == REPLICATION_FULL_TABLE
+            and self.emit_activate_version_messages
+        ):
+            self._stream_version = self._initialized_at // 1000
+            self._write_activate_version_message(self._stream_version)
+
         try:
             batch_config = self.get_batch_config(self.config)
             if batch_config:
@@ -1276,18 +1415,20 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 for _ in self._sync_records(context=context):
                     pass
         except Exception:
-            self.logger.exception(
+            self.log(
                 "An unhandled error occurred while syncing '%s'",
                 self.name,
+                level=logging.ERROR,
             )
             raise
 
     def _sync_children(self, child_context: types.Context | None) -> None:
         if child_context is None:
-            self.logger.warning(
+            self.log(
                 "Context for child streams of '%s' is null, "
                 "skipping sync of any child streams",
                 self.name,
+                level=logging.WARNING,
             )
             return
 
@@ -1310,9 +1451,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         self._tap_input_catalog = catalog
 
-        if catalog_entry := catalog.get_stream(self.name):
+        if entry := catalog.get_stream(self.name):
             stream_metadata: StreamMetadata | None
-            if stream_metadata := catalog_entry.metadata.get(()):  # type: ignore[assignment]
+            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment]
                 table_key_properties = stream_metadata.table_key_properties
                 table_replication_key = stream_metadata.replication_key
                 table_replication_method = stream_metadata.forced_replication_method
@@ -1321,18 +1462,14 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 table_replication_key = None
                 table_replication_method = None
 
-            self.primary_keys = catalog_entry.key_properties or table_key_properties
-            self.replication_key = (
-                catalog_entry.replication_key or table_replication_key
-            )
+            self.primary_keys = entry.key_properties or table_key_properties or ()
+            self.replication_key = entry.replication_key or table_replication_key
 
-            replication_method = (
-                catalog_entry.replication_method or table_replication_method
-            )
+            replication_method = entry.replication_method or table_replication_method
             if replication_method:
                 self.forced_replication_method = replication_method
 
-            self._input_schema = catalog_entry.schema.to_dict()
+            self._input_schema = entry.schema.to_dict()
 
     def _get_state_partition_context(
         self,
@@ -1419,7 +1556,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def get_records(
         self,
         context: types.Context | None,
-    ) -> t.Iterable[dict | tuple[dict, dict | None]]:
+    ) -> t.Iterable[types.Record | tuple[dict, dict | None]]:
         """Abstract record generator function. Must be overridden by the child class.
 
         Each record emitted should be a dictionary of property names to their values.
@@ -1444,6 +1581,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         the child records can no longer be synced.
 
         More info: :doc:`/parent_streams`
+
+        .. versionchanged:: 0.47.0
+           Deprecated support for returning a tuple of (record, child_context).
 
         Args:
             context: Stream partition or context dictionary.
@@ -1487,26 +1627,68 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         for manifest in batcher.get_batches(records=records):
             yield batch_config.encoding, manifest
 
+    def preprocess_context(  # noqa: PLR6301
+        self,
+        context: types.Context,
+    ) -> types.Context:
+        """Preprocess the context dictionary before it is used during sync operations.
+
+        This method provides an opportunity to clean, transform, or reduce the context
+        dictionary before it is frozen and used throughout the stream's sync lifecycle.
+        Common use cases include:
+
+        - Removing large data payloads from parent streams that are not needed
+        - Extracting only the necessary keys from parent context
+        - Transforming context values to a more convenient format
+        - Validating or sanitizing context values
+
+        This is the **only** appropriate place to modify the context dictionary. Once
+        this method returns, the context will be frozen (immutable) for the remainder
+        of the sync operation.
+
+        .. important::
+           The context object must not contain sensitive information such as API keys
+           or secrets, as it is sent to the target, stored in the state file, and
+           logged to the console.
+
+        Args:
+            context: Stream partition or context dictionary from the parent stream.
+
+        Returns:
+            The preprocessed context dictionary.
+
+        .. versionadded:: 0.52.0
+        """
+        return context
+
     def post_process(  # noqa: PLR6301
         self,
         row: types.Record,
         context: types.Context | None = None,  # noqa: ARG002
-    ) -> dict | None:
-        """As needed, append or transform raw data to match expected structure.
+    ) -> types.Record | None:
+        """Process individual records after extraction from the source.
 
-        Optional. This method gives developers an opportunity to "clean up" the results
-        prior to returning records to the downstream tap - for instance: cleaning,
-        renaming, or appending properties to the raw record result returned from the
-        API.
+        This method provides an opportunity to clean, transform, or validate records
+        before they are emitted. Common use cases include:
 
-        Developers may also return `None` from this method to filter out
-        invalid or not-applicable records from the stream.
+        - Cleaning or normalizing field values
+        - Renaming fields to match expected schema
+        - Adding computed or derived fields
+        - Filtering out invalid or unwanted records
+
+        Developers may return `None` from this method to exclude records from the
+        stream output.
+
+        .. versionchanged:: 0.47.0
+           This method is now automatically executed for all stream types during
+           record processing. You should not call this method directly in custom
+           `get_records` implementations.
 
         Args:
-            row: Individual record in the stream.
+            row: Individual record from the stream.
             context: Stream partition or context dictionary.
 
         Returns:
-            The resulting record dict, or `None` if the record should be excluded.
+            The processed record dict, or `None` to exclude the record.
         """
         return row

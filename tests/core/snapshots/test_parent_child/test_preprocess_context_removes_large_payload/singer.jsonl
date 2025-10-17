@@ -1,0 +1,9 @@
+{"type":"SCHEMA","stream":"parent_large","schema":{"properties":{"id":{"type":"integer"},"name":{"type":"string"}},"type":"object"},"key_properties":[]}
+{"type":"SCHEMA","stream":"child_preprocessed","schema":{"properties":{"id":{"type":"integer"},"parent_id":{"type":"integer"},"parent_name":{"type":"string"},"sum":{"type":"integer"}},"type":"object"},"key_properties":[]}
+{"type":"RECORD","stream":"child_preprocessed","record":{"id":1,"parent_id":1,"parent_name":"Parent A","sum":500500},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"child_preprocessed":{"partitions":[{"context":{"parent_id":1,"parent_name":"Parent A"}}]}}}}
+{"type":"RECORD","stream":"parent_large","record":{"id":1,"name":"Parent A"},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"SCHEMA","stream":"child_preprocessed","schema":{"properties":{"id":{"type":"integer"},"parent_id":{"type":"integer"},"parent_name":{"type":"string"},"sum":{"type":"integer"}},"type":"object"},"key_properties":[]}
+{"type":"RECORD","stream":"child_preprocessed","record":{"id":1,"parent_id":2,"parent_name":"Parent B","sum":500500},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"child_preprocessed":{"partitions":[{"context":{"parent_id":1,"parent_name":"Parent A"}},{"context":{"parent_id":2,"parent_name":"Parent B"}}]},"parent_large":{}}}}
+{"type":"RECORD","stream":"parent_large","record":{"id":2,"name":"Parent B"},"time_extracted":"2022-01-01T00:00:00+00:00"}

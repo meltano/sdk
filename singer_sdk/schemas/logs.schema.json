@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Singer SDK Structured Logs",
+  "description": "The event schema for the Singer SDK structured logs",
+  "type": "object",
+  "properties": {
+    "level": {
+      "type": "string",
+      "description": "A string representing the log level",
+      "examples": ["debug", "info", "warning", "error", "critical"]
+    },
+    "pid": {
+      "type": "integer",
+      "description": "The process ID"
+    },
+    "logger_name": {
+      "type": "string",
+      "description": "The name of the logger that emitted the log",
+      "examples": ["my_tap", "singer_sdk.metrics"]
+    },
+    "ts": {
+      "type": "number",
+      "description": "The timestamp of the log"
+    },
+    "thread_name": {
+      "type": ["string", "null"],
+      "description": "The name of the thread that produced the log"
+    },
+    "app_name": {
+      "type": "string",
+      "description": "The name of the application that produced the log",
+      "examples": ["singer-sdk", "tap-github", "target-postgres"]
+    },
+    "stream_name": {
+      "type": ["string", "null"],
+      "description": "The name of the stream that produced the log",
+      "examples": ["users", "events", "products"]
+    },
+    "metric_info": {
+      "type": "object",
+      "description": "The metric information, only present for METRIC logs",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The type of the metric",
+          "examples": ["timer", "counter"]
+        },
+        "metric": {
+          "type": "string",
+          "description": "The name of the metric",
+          "examples": ["http_request_duration", "record_count"]
+        },
+        "value": {
+          "type": "number",
+          "description": "The value of the metric"
+        },
+        "tags": {
+          "type": "object",
+          "description": "The tags of the metric",
+          "additionalProperties": true
+        }
+      },
+      "required": ["type", "metric", "value"],
+      "additionalProperties": true
+    },
+    "exception": {
+      "type": "object",
+      "description": "The exception information, only present for ERROR logs",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The exception class name"
+        },
+        "module": {
+          "type": "string",
+          "description": "The module containing the exception class"
+        },
+        "message": {
+          "type": "string",
+          "description": "The exception message"
+        },
+        "traceback": {
+          "type": "array",
+          "description": "The traceback frames",
+          "items": {
+            "type": "object",
+            "properties": {
+              "filename": {
+                "type": "string",
+                "description": "The filename where the frame occurred"
+              },
+              "function": {
+                "type": "string",
+                "description": "The function name where the frame occurred"
+              },
+              "lineno": {
+                "type": "integer",
+                "description": "The line number where the frame occurred"
+              },
+              "line": {
+                "type": "string",
+                "description": "The line of code"
+              }
+            },
+            "required": ["filename", "function", "lineno", "line"]
+          }
+        },
+        "cause": {
+          "$ref": "#/properties/exception",
+          "description": "The exception that caused this exception (__cause__)"
+        },
+        "context": {
+          "$ref": "#/properties/exception",
+          "description": "The exception context (__context__)"
+        }
+      },
+      "required": ["type", "module", "message"]
+    },
+    "message": {
+      "type": "string",
+      "description": "The message of the log"
+    },
+    "extra": {
+      "type": "object",
+      "description": "The extra fields of the log",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "level",
+    "pid",
+    "logger_name",
+    "ts",
+    "thread_name",
+    "app_name",
+    "stream_name",
+    "message",
+    "extra"
+  ]
+}

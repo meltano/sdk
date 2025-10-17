@@ -18,8 +18,6 @@ from singer_sdk.helpers.capabilities import TapCapabilities
 from singer_sdk.plugin_base import SDK_PACKAGE_NAME
 
 if t.TYPE_CHECKING:
-    from pathlib import Path
-
     from pytest_snapshot.plugin import Snapshot
 
 _format_to_extension = {
@@ -72,6 +70,17 @@ def about_info() -> AboutInfo:
 
 @pytest.mark.snapshot
 @pytest.mark.parametrize(
+    "supported_python_versions",
+    [
+        ["3.11", "3.12", "3.13"],
+        None,
+    ],
+    ids=[
+        "supported_python_versions",
+        "no_supported_python_versions",
+    ],
+)
+@pytest.mark.parametrize(
     "about_format",
     [
         "text",
@@ -81,12 +90,11 @@ def about_info() -> AboutInfo:
 )
 def test_about_format(
     snapshot: Snapshot,
-    snapshot_dir: Path,
+    supported_python_versions: list[str] | None,
     about_info: AboutInfo,
     about_format: str,
 ):
-    snapshot.snapshot_dir = snapshot_dir.joinpath("about_format")
-
+    about_info.supported_python_versions = supported_python_versions
     formatter = AboutFormatter.get_formatter(about_format)
     output = formatter.format_about(about_info)
     snapshot_name = f"{about_format}.snap.{_format_to_extension[about_format]}"
@@ -103,14 +111,35 @@ def test_get_supported_pythons_sdk():
 
 
 @pytest.mark.parametrize(
-    "specifiers,expected",
+    "specifiers,classifiers,expected",
     [
-        (">=3.7,<3.12", ["3.7", "3.8", "3.9", "3.10", "3.11"]),
-        (">=3.7", ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]),
-        (">3.7", ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]),
-        (">3.7,<=3.11", ["3.8", "3.9", "3.10", "3.11"]),
+        (">=3.9,<3.12", None, ["3.9", "3.10", "3.11"]),
+        (">=3.9", None, ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]),
+        (">3.9", None, ["3.10", "3.11", "3.12", "3.13", "3.14"]),
+        (">3.9,<=3.11", None, ["3.10", "3.11"]),
+        (">=3.9,<3.12", ["3.9", "3.10", "3.11"], ["3.9", "3.10", "3.11"]),
+        (
+            ">=3.9",
+            ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"],
+            ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"],
+        ),
+        (
+            ">3.9",
+            ["3.10", "3.11", "3.12", "3.13", "3.14"],
+            ["3.10", "3.11", "3.12", "3.13", "3.14"],
+        ),
+        (">3.9,<=3.11", ["3.10", "3.11"], ["3.10", "3.11"]),
     ],
 )
-def test_get_supported_pythons(specifiers: str, expected: list[str]):
-    supported_pythons = list(get_supported_pythons(specifiers))
+def test_get_supported_pythons(
+    specifiers: str,
+    classifiers: list[str] | None,
+    expected: list[str],
+):
+    supported_pythons = list(
+        get_supported_pythons(
+            specifiers,
+            classifiers=classifiers,
+        )
+    )
     assert supported_pythons == expected

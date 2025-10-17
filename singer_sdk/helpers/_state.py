@@ -2,16 +2,19 @@
 
 from __future__ import annotations
 
+import copy
 import logging
 import typing as t
 
 from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.helpers._typing import to_json_compatible
+from singer_sdk.singerlib.encoding.simple import StateMessage
 
 if t.TYPE_CHECKING:
     import datetime
 
     from singer_sdk.helpers import types
+    from singer_sdk.singerlib.encoding.base import GenericSingerWriter
 
     _T = t.TypeVar("_T", datetime.datetime, str, int, float)
 
@@ -24,9 +27,9 @@ logger = logging.getLogger("singer_sdk")
 
 
 def get_state_if_exists(
-    tap_state: dict,
+    tap_state: types.TapState,
     tap_stream_id: str,
-    state_partition_context: dict | None = None,
+    state_partition_context: types.Context | None = None,
     key: str | None = None,
 ) -> t.Any | None:  # noqa: ANN401
     """Return the stream or partition state, creating a new one if it does not exist.
@@ -45,9 +48,7 @@ def get_state_if_exists(
     Raises:
         ValueError: Raised if state is invalid or cannot be parsed.
     """
-    if "bookmarks" not in tap_state:
-        return None
-    if tap_stream_id not in tap_state["bookmarks"]:
+    if "bookmarks" not in tap_state or tap_stream_id not in tap_state["bookmarks"]:
         return None
 
     stream_state = tap_state["bookmarks"][tap_stream_id]
@@ -65,9 +66,12 @@ def get_state_if_exists(
     return matched_partition.get(key, None) if key else matched_partition
 
 
-def get_state_partitions_list(tap_state: dict, tap_stream_id: str) -> list[dict] | None:
+def get_state_partitions_list(
+    tap_state: types.TapState,
+    tap_stream_id: str,
+) -> list[dict] | None:
     """Return a list of partitions defined in the state, or None if not defined."""
-    return (get_state_if_exists(tap_state, tap_stream_id) or {}).get("partitions", None)  # type: ignore[no-any-return]
+    return (get_state_if_exists(tap_state, tap_stream_id) or {}).get("partitions", None)
 
 
 def _find_in_partitions_list(
@@ -99,7 +103,7 @@ def _create_in_partitions_list(
 
 
 def get_writeable_state_dict(
-    tap_state: dict,
+    tap_state: types.TapState,
     tap_stream_id: str,
     state_partition_context: types.Context | None = None,
 ) -> dict:
@@ -121,16 +125,14 @@ def get_writeable_state_dict(
         msg = "Cannot write state to missing state dictionary."  # type: ignore[unreachable]
         raise ValueError(msg)
 
-    if "bookmarks" not in tap_state:
-        tap_state["bookmarks"] = {}
-    if tap_stream_id not in tap_state["bookmarks"]:
-        tap_state["bookmarks"][tap_stream_id] = {}
-    stream_state = t.cast("dict", tap_state["bookmarks"][tap_stream_id])
+    tap_state.setdefault("bookmarks", {})
+    tap_state["bookmarks"].setdefault(tap_stream_id, {})
+
+    stream_state = tap_state["bookmarks"][tap_stream_id]
     if not state_partition_context:
         return stream_state
 
-    if "partitions" not in stream_state:
-        stream_state["partitions"] = []
+    stream_state.setdefault("partitions", [])
     stream_state_partitions: list[dict] = stream_state["partitions"]
     if found := _find_in_partitions_list(
         stream_state_partitions,
@@ -142,12 +144,12 @@ def get_writeable_state_dict(
 
 
 def write_stream_state(
-    tap_state: dict,
+    tap_state: types.TapState,
     tap_stream_id: str,
     key: str,
     val: t.Any,  # noqa: ANN401
     *,
-    state_partition_context: dict | None = None,
+    state_partition_context: types.Context | None = None,
 ) -> None:
     """Write stream state."""
     state_dict = get_writeable_state_dict(
@@ -306,3 +308,37 @@ def log_sort_error(
         msg += f"Context was {current_context!s}. "
     msg += str(ex)
     log_fn(msg)
+
+
+class StateWriter:
+    """Centralized state message writer that prevents duplicate state emissions.
+
+    This class manages the writing of STATE messages to ensure that duplicate
+    state messages are not emitted across multiple streams or tap-level operations.
+    It tracks the last emitted state and only writes new messages when the state
+    has actually changed.
+    """
+
+    def __init__(self, message_writer: GenericSingerWriter) -> None:
+        """Initialize the StateWriter.
+
+        Args:
+            message_writer: The message writer instance (typically from tap)
+                           that has a write_message method.
+        """
+        self._message_writer = message_writer
+        self._last_emitted_state: types.TapState | None = None
+
+    def write_state(self, state: types.TapState) -> None:
+        """Write a state message if the state has changed.
+
+        This method checks if the provided state is different from the last
+        emitted state and only writes a STATE message if there are changes.
+
+        Args:
+            state: The current tap state to potentially emit.
+        """
+        # Check if state has changed since last emission
+        if self._last_emitted_state is None or state != self._last_emitted_state:
+            self._message_writer.write_message(StateMessage(value=state))
+            self._last_emitted_state = copy.deepcopy(state)

@@ -1,4 +1,4 @@
-"""JSON Lines Record Batcher."""
+"""JSON Lines batch encoder."""
 
 from __future__ import annotations
 
@@ -28,7 +28,8 @@ class JSONLinesBatcher(BaseBatcher):
             A list of file paths (called a manifest).
         """
         sync_id = f"{self.tap_name}--{self.stream_name}-{uuid4()}"
-        prefix = self.batch_config.storage.prefix or ""
+        storage = self.batch_config.storage
+        prefix = storage.prefix or ""
 
         for i, chunk in enumerate(
             lazy_chunked_generator(
@@ -38,14 +39,14 @@ class JSONLinesBatcher(BaseBatcher):
             start=1,
         ):
             filename = f"{prefix}{sync_id}-{i}.json.gz"
-            with self.batch_config.storage.fs(create=True) as fs:
-                # TODO: Determine compression from config.
-                with (
-                    fs.open(filename, "wb") as f,
-                    gzip.GzipFile(fileobj=f, mode="wb") as gz,
-                ):
-                    gz.writelines(
-                        (serialize_json(record) + "\n").encode() for record in chunk
-                    )
-                file_url = fs.geturl(filename)
+            # TODO: Determine compression from config.
+            with (
+                storage.open(filename, "wb") as f,
+                gzip.GzipFile(fileobj=f, mode="wb") as gz,
+            ):
+                gz.writelines(
+                    (serialize_json(record) + "\n").encode() for record in chunk
+                )
+
+            file_url = storage.get_url(filename)
             yield [file_url]
