@@ -14,6 +14,7 @@ from warnings import warn
 
 import backoff
 import requests
+import requests.exceptions
 
 from singer_sdk import metrics
 from singer_sdk.authenticators import SimpleAuthenticator
@@ -21,7 +22,6 @@ from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
-    BaseAPIPaginator,
     JSONPathPaginator,
     LegacyStreamPaginator,
     SimpleHeaderPaginator,
@@ -35,7 +35,8 @@ if t.TYPE_CHECKING:
 
     from backoff.types import Details
 
-    from singer_sdk.helpers.types import Auth, Context
+    from singer_sdk.helpers.types import Auth, Context, RequestFunc
+    from singer_sdk.pagination import BaseAPIPaginator
     from singer_sdk.singerlib import Schema
     from singer_sdk.tap_base import Tap
 
@@ -43,6 +44,7 @@ DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = t.TypeVar("_TToken")
+_TNum = t.TypeVar("_TNum", int, float)
 
 
 class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PLR0904
@@ -199,7 +201,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
 
         .. versionadded:: 0.40.0
         """
-        return self.config.get(
+        return self.config.get(  # type: ignore[no-any-return]
             "user_agent",
             f"{self.tap_name}/{self._tap.plugin_version}",
         )
@@ -277,7 +279,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
 
         return msg
 
-    def request_decorator(self, func: t.Callable) -> t.Callable:
+    def request_decorator(self, func: RequestFunc) -> RequestFunc:
         """Instantiate a decorator for handling request failures.
 
         Uses a wait generator defined in `backoff_wait_generator` to
@@ -336,7 +338,6 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             else None,
         )
         self.validate_response(response)
-        logging.debug("Response received successfully.")
         return response
 
     def get_url_params(  # noqa: PLR6301
@@ -434,6 +435,16 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
 
         return self.build_prepared_request(**prepare_kwargs)
 
+    def get_http_request_counter(self) -> metrics.Counter:
+        """Get the HTTP request counter for the stream.
+
+        Returns:
+            The HTTP request counter for the stream.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.http_request_counter(self.name, endpoint=self.path)
+
     def request_records(self, context: Context | None) -> t.Iterable[dict]:
         """Request records from REST endpoint(s), returning response records.
 
@@ -449,8 +460,8 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         decorated_request = self.request_decorator(self._request)
         pages = 0
 
-        with metrics.http_request_counter(self.name, self.path) as request_counter:
-            request_counter.context = context
+        with self.get_http_request_counter() as request_counter:
+            request_counter.with_context(context)
 
             while not paginator.finished:
                 prepared_request = self.prepare_request(
@@ -468,7 +479,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
                         paginator.advance(resp)
                         continue
 
-                    self.logger.info(
+                    self.log(
                         "Pagination stopped after %d pages because no records were "
                         "found in the last response",
                         pages,
@@ -490,11 +501,14 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         """TODO.
 
         Args:
-            endpoint: TODO
-            response: TODO
+            endpoint: The endpoint of the request.
+            response: The response object.
             context: Stream partition or context dictionary.
-            extra_tags: TODO
+            extra_tags: A dictionary of extra tags to add to the metric.
         """
+        if not self._LOG_REQUEST_METRICS:
+            return
+
         extra_tags = extra_tags or {}
         if context:
             extra_tags[metrics.Tag.CONTEXT] = context
@@ -660,7 +674,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             Authenticator instance that will be used to authenticate all outgoing
             requests.
         """
-        return SimpleAuthenticator(stream=self)
+        return SimpleAuthenticator()
 
     def backoff_wait_generator(self) -> t.Generator[float, None, None]:  # noqa: PLR6301
         """The wait generator used by the backoff decorator on request failure.
@@ -702,7 +716,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         """
         return backoff.random_jitter(value)
 
-    def backoff_handler(self, details: Details) -> None:  # noqa: PLR6301
+    def backoff_handler(self, details: Details) -> None:
         """Adds additional behaviour prior to retry.
 
         By default will log out backoff details, developers can override
@@ -712,7 +726,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             details: backoff invocation details
                 https://github.com/litl/backoff#event-handlers
         """
-        logging.error(
+        self.log(
             "Backing off %0.2f seconds after %d tries "
             "calling function %s with args %s and kwargs "
             "%s",
@@ -721,13 +735,14 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             details.get("target"),
             details.get("args"),
             details.get("kwargs"),
+            level=logging.ERROR,
         )
 
     def backoff_runtime(  # noqa: PLR6301
         self,
         *,
-        value: t.Callable[[t.Any], int],
-    ) -> t.Generator[int, None, None]:
+        value: t.Callable[[t.Any], _TNum],
+    ) -> t.Generator[_TNum, None, None]:
         """Optional backoff wait generator that can replace the default `backoff.expo`.
 
         It is based on parsing the thrown exception of the decorated method, making it
@@ -751,9 +766,6 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
 
 class RESTStream(_HTTPStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     """Abstract base class for REST API streams."""
-
-    #: JSONPath expression to extract records from the API response.
-    records_jsonpath: str = "$[*]"
 
     #: Optional JSONPath expression to extract a pagination token from the API response.
     #: Example: `"$.next_page"`
@@ -787,6 +799,11 @@ class RESTStream(_HTTPStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         super().__init__(tap, name, schema, path, http_method=http_method)
         self._compiled_jsonpath = None
         self._next_page_token_compiled_jsonpath = None
+
+    @property
+    def records_jsonpath(self) -> str:
+        """JSONPath expression to extract records from the API response."""
+        return "$[*]"
 
     def parse_response(self, response: requests.Response) -> t.Iterable[dict]:
         """Parse the response and return an iterator of result records.

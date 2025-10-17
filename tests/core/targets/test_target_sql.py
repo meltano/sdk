@@ -4,8 +4,11 @@ import typing as t
 
 import pytest
 
-from singer_sdk.helpers.capabilities import CapabilitiesEnum, TargetCapabilities
+from singer_sdk.helpers.capabilities import TargetCapabilities
 from singer_sdk.target_base import SQLTarget
+
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers.capabilities import CapabilitiesEnum
 
 
 class SQLTargetMock(SQLTarget):

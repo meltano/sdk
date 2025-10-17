@@ -23,8 +23,8 @@ from singer_sdk.typing import (
     ArrayType,
     BooleanType,
     DateTimeType,
+    DecimalType,
     IntegerType,
-    NumberType,
     ObjectType,
     OneOf,
     PropertiesList,
@@ -623,7 +623,7 @@ class MappedStream(Stream):
                         Property("custom_obj", StringType),
                     ),
                 ),
-                Property("some_numbers", ArrayType(NumberType())),
+                Property("some_numbers", ArrayType(DecimalType())),
             ),
         ),
         Property("joined_at", DateTimeType),
@@ -806,6 +806,29 @@ class MappedTap(Tap):
         pytest.param(
             {
                 "mystream": {
+                    "__alias__": "'aliased'",
+                    "stream_name": "__stream_name__",
+                    "original_stream_name": "__original_stream_name__",
+                }
+            },
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_original_stream_name_alias.jsonl",
+            id="builtin_variable_original_stream_name_alias",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "stream_name": "__stream_name__",
+                    "original_stream_name": "__original_stream_name__",
+                }
+            },
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_original_stream_name_no_alias.jsonl",
+            id="builtin_variable_original_stream_name_no_alias",
+        ),
+        pytest.param(
+            {
+                "mystream": {
                     "email": "self.upper()",
                     "__else__": None,
                 }
@@ -953,6 +976,18 @@ class MappedTap(Tap):
             "json_dumps.jsonl",
             id="json_dumps",
         ),
+        pytest.param(
+            {"mystream": {"__filter__": "bool(count < 20)"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "filter_records.jsonl",
+            id="filter_records",
+        ),
+        pytest.param(
+            {"mystream": "__NULL__"},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "remove_stream.jsonl",
+            id="remove_stream",
+        ),
     ],
 )
 def test_mapped_stream(
@@ -964,7 +999,7 @@ def test_mapped_stream(
 ):
     snapshot.snapshot_dir = snapshot_dir.joinpath("mapped_stream")
 
-    tap = MappedTap(config={"stream_maps": stream_maps, **config})
+    tap = MappedTap(config={"stream_maps": stream_maps, **config}, validate_config=True)
     buf = io.StringIO()
     with redirect_stdout(buf):
         tap.sync_all()

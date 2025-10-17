@@ -1,6 +1,6 @@
 # Contributing Guide
 
-_**Note:** The SDK currently works with Python versions 3.9 through 3.13.x._
+_**Note:** The SDK currently works with Python versions 3.10 through 3.14.x._
 
 Let's build together! Please see our [Contributor Guide](https://docs.meltano.com/contribute/)
 for more information on contributing to Meltano.
@@ -82,7 +82,7 @@ To run tests:
 nox -rs tests
 
 # Run all tests (external creds required):
-nox -rs tests -- -m "external"
+nox -rs test-external
 ```
 
 To view the code coverage report in HTML format:

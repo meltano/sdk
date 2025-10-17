@@ -1,0 +1,22 @@
+Name: tap-example
+Description: Example tap for Singer SDK
+Version: 0.1.1
+SDK Version: 1.0.0
+Supported Python Versions:
+  - 3.11
+  - 3.12
+  - 3.13
+Capabilities:
+  - catalog
+  - discover
+  - state
+Settings:
+  - Name: start_date
+    Type: string
+    Environment Variable: TAP_EXAMPLE_START_DATE
+  - Name: api_key
+    Type: string
+    Environment Variable: TAP_EXAMPLE_API_KEY
+  - Name: complex_setting
+    Type: object
+    Environment Variable: TAP_EXAMPLE_COMPLEX_SETTING

@@ -3,10 +3,10 @@
 To use this cookie cutter template:
 
 ```bash
-pip3 install pipx
-pipx ensurepath
+# Install uv (see https://docs.astral.sh/uv/getting-started/installation/ for more options)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 # You may need to reopen your shell at this point
-pipx install cookiecutter
+uv tool install cookiecutter
 ```
 
 Initialize Cookiecutter template directly from Git:

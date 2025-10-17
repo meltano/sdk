@@ -1,0 +1,42 @@
+{
+  "name": "tap-example",
+  "description": "Example tap for Singer SDK",
+  "version": "0.1.1",
+  "sdk_version": "1.0.0",
+  "supported_python_versions": [
+    "3.11",
+    "3.12",
+    "3.13"
+  ],
+  "capabilities": [
+    "catalog",
+    "discover",
+    "state"
+  ],
+  "settings": {
+    "properties": {
+      "start_date": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Start date for the tap to extract data from."
+      },
+      "api_key": {
+        "type": "string",
+        "description": "API key for the tap to use."
+      },
+      "complex_setting": {
+        "type": "object",
+        "description": "A complex setting, with sub-settings.",
+        "properties": {
+          "sub_setting": {
+            "type": "string",
+            "description": "A sub-setting."
+          }
+        }
+      }
+    },
+    "required": [
+      "api_key"
+    ]
+  }
+}

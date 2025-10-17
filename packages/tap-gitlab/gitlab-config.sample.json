@@ -1,0 +1,7 @@
+{
+    "auth_token": "dummy_key",
+    "project_ids": [
+        "meltano/sdk",
+        "meltano/meltano"
+    ]
+}

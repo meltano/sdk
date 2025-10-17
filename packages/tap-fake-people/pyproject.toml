@@ -1,0 +1,39 @@
+[project]
+name = "tap-fake-people"
+version = "0.1.0"
+description = "Singer tap for fake people, built with the Meltano Singer SDK"
+authors = [{ name = "Meltano Team", email = "hello@meltano.com" }]
+keywords = [
+    "ELT",
+    "CSV",
+    "Comma-separated values",
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+license = "Apache-2.0"
+requires-python = ">=3.10"
+dependencies = [
+    "faker",
+    "singer-sdk",
+    "typing-extensions>=4.5.0; python_version < '3.12'",
+]
+
+[project.scripts]
+tap-fake-people = 'tap_fake_people.tap:TapFakePeople.cli'
+
+[tool.mypy]
+warn_unused_configs = true
+
+[tool.uv.sources]
+singer-sdk = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -25,6 +25,8 @@ plugins:
   - name: "{{cookiecutter.mapper_id}}"
     namespace: "{{cookiecutter.library_name}}"
     pip_url: -e .
+    capabilities:
+    - structured-logging
 
     # TODO: Declare settings and their types here:
     settings:

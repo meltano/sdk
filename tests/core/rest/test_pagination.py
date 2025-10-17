@@ -7,7 +7,7 @@ import typing as t
 from urllib.parse import parse_qs, urlparse
 
 import pytest
-from requests import PreparedRequest, Response
+from requests import Response
 
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
@@ -24,6 +24,8 @@ from singer_sdk.pagination import (
 from singer_sdk.streams.rest import RESTStream
 
 if t.TYPE_CHECKING:
+    from requests import PreparedRequest
+
     from singer_sdk.tap_base import Tap
 
 

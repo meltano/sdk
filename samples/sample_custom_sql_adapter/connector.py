@@ -1,3 +1,5 @@
+"""Custom SQL dialect."""
+
 from __future__ import annotations
 
 import typing as t
@@ -13,9 +15,6 @@ class CustomSQLDialect(DefaultDialect):
 
     name = "myrdbms"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     @classmethod
     def import_dbapi(cls):
         """Import the sqlite3 DBAPI."""
@@ -29,4 +28,4 @@ class CustomSQLDialect(DefaultDialect):
 
         NOTE: This is a legacy method that will stop being used by SQLAlchemy at some point.
         """  # noqa: E501
-        return cls.import_dbapi()
+        return cls.import_dbapi()  # type: ignore[no-any-return]

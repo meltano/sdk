@@ -7,6 +7,7 @@ The following pages contain useful information for developers building on top of
 
 porting
 pagination-classes
+schema-sources
 custom-clis
 config-schema
 performance

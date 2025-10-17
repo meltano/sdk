@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 from contextlib import contextmanager
 
 import pytest
-from typing_extensions import override
 
 from singer_sdk import Stream, Tap
 from singer_sdk.helpers._compat import datetime_fromisoformat
@@ -19,6 +19,11 @@ from singer_sdk.typing import (
     Property,
     StringType,
 )
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 class SimpleTestStream(Stream):

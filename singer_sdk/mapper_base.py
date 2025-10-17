@@ -7,14 +7,14 @@ import typing as t
 
 import click
 
-from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
+from singer_sdk.helpers.capabilities import PluginCapabilities
 from singer_sdk.plugin_base import BaseSingerReader, BaseSingerWriter, _ConfigInput
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
     import singer_sdk.singerlib as singer
+    from singer_sdk.helpers.capabilities import CapabilitiesEnum
     from singer_sdk.singerlib.encoding.base import (
         GenericSingerReader,
         GenericSingerWriter,
@@ -23,6 +23,14 @@ if t.TYPE_CHECKING:
 
 class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
     """Abstract base class for inline mappers."""
+
+    #: A list of plugin capabilities.
+    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+        PluginCapabilities.ABOUT,
+        PluginCapabilities.STREAM_MAPS,
+        PluginCapabilities.FLATTENING,
+        PluginCapabilities.STRUCTURED_LOGGING,
+    ]
 
     def __init__(
         self,
@@ -41,17 +49,6 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
         )
         self.message_reader = message_reader or self.message_reader_class()
         self.message_writer = message_writer or self.message_writer_class()
-
-    @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
-        """Get capabilities.
-
-        Returns:
-            A list of plugin capabilities.
-        """
-        return [
-            PluginCapabilities.STREAM_MAPS,
-        ]
 
     def _write_messages(self, messages: t.Iterable[singer.Message]) -> None:
         for message in messages:
@@ -130,7 +127,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
 
     @classmethod
     def invoke(  # type: ignore[override]
-        cls: type[InlineMapper],
+        cls,
         *,
         about: bool = False,
         about_format: str | None = None,
@@ -158,7 +155,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
         mapper.listen(file_input)
 
     @classmethod
-    def get_singer_command(cls: type[InlineMapper]) -> click.Command:
+    def get_singer_command(cls) -> click.Command:
         """Execute standard CLI handler for inline mappers.
 
         Returns:

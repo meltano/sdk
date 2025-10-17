@@ -33,6 +33,7 @@ from singer_sdk.typing import (
     CustomType,
     DateTimeType,
     DateType,
+    DecimalType,
     DiscriminatedUnion,
     DurationType,
     EmailType,
@@ -41,8 +42,6 @@ from singer_sdk.typing import (
     IPv4Type,
     IPv6Type,
     JSONPointerType,
-    JSONTypeHelper,
-    NumberType,
     ObjectType,
     PropertiesList,
     Property,
@@ -62,6 +61,7 @@ if t.TYPE_CHECKING:
     from pytest_snapshot.plugin import Snapshot
 
     from singer_sdk.streams.core import Stream
+    from singer_sdk.typing import JSONTypeHelper
 
 TYPE_FN_CHECKS: set[t.Callable] = {
     is_array_type,
@@ -141,7 +141,8 @@ def test_to_json():
                                         "null"
                                     ]
                                 }
-                            }
+                            },
+                            "additionalProperties": true
                         },
                         {
                             "type": "object",
@@ -152,7 +153,8 @@ def test_to_json():
                                         "null"
                                     ]
                                 }
-                            }
+                            },
+                            "additionalProperties": true
                         }
                     ]
                 }
@@ -385,7 +387,7 @@ def test_property_title():
             },
         ),
         (
-            NumberType,
+            DecimalType,
             {
                 "type": ["number"],
             },
@@ -469,6 +471,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                             "writeOnly": True,
                         },
                     },
+                    "additionalProperties": True,
                 },
             },
             {is_object_type, is_secret_type},
@@ -921,7 +924,11 @@ def test_custom_type():
 )
 def test_type_check_variations(property_schemas, type_check_functions, results):
     for property_schema in property_schemas:
-        for type_check_function, result in zip(type_check_functions, results):
+        for type_check_function, result in zip(
+            type_check_functions,
+            results,
+            strict=False,
+        ):
             assert type_check_function(property_schema) == result
 
 
