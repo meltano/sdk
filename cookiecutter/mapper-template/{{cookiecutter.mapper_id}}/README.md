@@ -109,20 +109,16 @@ Your project comes with a custom `meltano.yml` project file already created. Ope
 the file.
 -->
 
-Next, install Meltano (if you haven't already) and any needed plugins:
+Use Meltano to run an EL pipeline:
 
 ```bash
 # Install meltano
 uv tool install meltano
-# Initialize meltano within this directory
-cd {{ cookiecutter.mapper_id }}
-meltano install
-```
 
-Now you can test and orchestrate using Meltano:
+# Test invocation
+meltano invoke {{ cookiecutter.mapper_id }} --version
 
-```bash
-# Run a test `run` pipeline:
+# Run a test EL pipeline
 meltano run tap-smoke-test {{ cookiecutter.mapper_id }} target-jsonl
 ```
 
