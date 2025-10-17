@@ -89,7 +89,7 @@ def python_versions(package_metadata: PackageMetadata) -> list[str]:
     classifiers = [
         classifier.split("::")[-1].strip()
         for classifier in package_metadata.get_all("Classifier", [])
-        if classifier.startswith("Programming Language :: Python ::")
+        if classifier.startswith("Programming Language :: Python :: 3.")
     ]
 
     return list(

@@ -13,6 +13,7 @@ from singer_sdk.about import (
     AboutFormatter,
     AboutInfo,
     get_supported_pythons,
+    python_versions,
 )
 from singer_sdk.helpers.capabilities import TapCapabilities
 from singer_sdk.plugin_base import SDK_PACKAGE_NAME
@@ -108,6 +109,33 @@ def test_get_supported_pythons_sdk():
     supported_pythons = list(get_supported_pythons(requires_python))
     assert supported_pythons[0] == f"3.{_PY_MIN_VERSION}"
     assert supported_pythons[-1] == f"3.{_PY_MAX_VERSION}"
+
+
+def test_python_versions_filters_non_version_classifiers():
+    """Test that non-version classifiers like '3 :: Only' are filtered out."""
+
+    # Create a mock package metadata with various classifiers
+    class MockMetadata:
+        def get(self, key, default=None):
+            if key == "Requires-Python":
+                return ">=3.10"
+            return default
+
+        def get_all(self, key, default=None):
+            if key == "Classifier":
+                return [
+                    "Programming Language :: Python :: 3.10",
+                    "Programming Language :: Python :: 3.11",
+                    "Programming Language :: Python :: 3 :: Only",
+                    "Operating System :: OS Independent",
+                ]
+            return default or []
+
+    versions = python_versions(MockMetadata())
+    # Should only include actual version numbers, not "Only"
+    assert "Only" not in versions
+    assert "3.10" in versions
+    assert "3.11" in versions
 
 
 @pytest.mark.parametrize(
