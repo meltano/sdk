@@ -334,7 +334,7 @@ Custom backoff and retry behaviour can be added by overriding the methods:
 For example, to use a constant retry:
 
 ```
-def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:
+def backoff_wait_generator() -> Callable[..., Generator[float, Any, None]]:
     return backoff.constant(interval=10)
 ```
 

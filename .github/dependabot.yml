@@ -1,7 +1,7 @@
 version: 2
 enable-beta-ecosystems: true
 updates:
-  - package-ecosystem: "uv"
+  - package-ecosystem: uv
     directory: "/"
     schedule:
       interval: weekly
@@ -13,6 +13,8 @@ updates:
       runtime-dependencies:
         dependency-type: production
     versioning-strategy: lockfile-only
+    cooldown:
+      default-days: 7
   - package-ecosystem: pip
     directory: "/.github/workflows/resources"
     schedule:
@@ -23,6 +25,8 @@ updates:
       ci:
         patterns:
           - "*"
+    cooldown:
+      default-days: 7
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
@@ -32,3 +36,5 @@ updates:
       actions:
         patterns:
           - "*"
+    cooldown:
+      default-days: 7

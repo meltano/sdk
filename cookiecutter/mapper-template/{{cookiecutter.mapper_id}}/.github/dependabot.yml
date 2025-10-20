@@ -20,6 +20,8 @@ updates:
         update-types:
           - "patch"
     versioning-strategy: increase-if-necessary
+    cooldown:
+      default-days: 7
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
@@ -30,3 +32,5 @@ updates:
       actions:
         patterns:
           - "*"
+    cooldown:
+      default-days: 7

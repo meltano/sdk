@@ -307,6 +307,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             max_tries=self.backoff_max_tries,
             on_backoff=self.backoff_handler,
             jitter=self.backoff_jitter,
+            logger=self.logger,
         )(func)
         return decorator
 
