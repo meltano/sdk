@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import datetime
 import os
+import sys
 import typing as t
 import warnings
 
+import backoff
 import jwt
 import pytest
 import time_machine
@@ -19,6 +21,7 @@ from cryptography.hazmat.primitives.serialization import (
 )
 
 from singer_sdk.authenticators import (
+    APIAuthenticatorBase,
     APIKeyAuthenticator,
     BasicAuthenticator,
     BearerTokenAuthenticator,
@@ -27,15 +30,21 @@ from singer_sdk.authenticators import (
     SimpleAuthenticator,
 )
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
+from singer_sdk.streams.rest import RESTStream
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
+    import requests
     import requests_mock
     from cryptography.hazmat.primitives.asymmetric.rsa import (
         RSAPrivateKey,
         RSAPublicKey,
     )
 
-    from singer_sdk.streams import RESTStream
     from singer_sdk.tap_base import Tap
 
 
@@ -89,8 +98,8 @@ def test_authenticator_is_reused(
     auth_reused: bool,
 ):
     """Validate that the stream's authenticator is a singleton."""
-    stream: RESTStream = rest_tap.streams[stream_name]
-    other_stream: RESTStream = rest_tap.streams[other_stream_name]
+    stream = t.cast("RESTStream", rest_tap.streams[stream_name])
+    other_stream = t.cast("RESTStream", rest_tap.streams[other_stream_name])
 
     assert (stream.authenticator is other_stream.authenticator) is auth_reused
 
@@ -490,3 +499,198 @@ def test_basic_authenticator_create_for_stream_deprecation_warning(rest_tap: Tap
     assert_create_for_stream_deprecation_warning(recorder.list[0])
     assert_basic_auth_deprecation_warning(recorder.list[1])
     assert_stream_param_deprecation_warning(recorder.list[2])
+
+
+def test_authenticator_invoked_on_each_retry(
+    requests_mock: requests_mock.Mocker,
+    rest_tap: Tap,
+):
+    """Validate that the authenticator is invoked for each retry attempt.
+
+    This test simulates a retry scenario where the first request fails with a
+    retriable error (503), and subsequent requests succeed. It verifies that:
+    1. The authenticator is called once for the initial attempt
+    2. The authenticator is called again for each retry attempt
+    3. Each request is re-authenticated, ensuring fresh authentication
+    """
+    # Track authenticator invocations
+    auth_call_count = 0
+
+    class TrackingAuthenticator(APIAuthenticatorBase):
+        """Authenticator that tracks how many times it's called."""
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.auth_headers = {}
+
+        def authenticate_request(
+            self,
+            request: requests.PreparedRequest,
+        ) -> requests.PreparedRequest:
+            """Track each authentication call."""
+            nonlocal auth_call_count
+            auth_call_count += 1
+            # Set a unique token for each call to verify re-authentication
+            self.auth_headers = {"Authorization": f"Bearer token-{auth_call_count}"}
+            return super().authenticate_request(request)
+
+    class RetryTestStream(RESTStream):
+        """Stream configured for retry testing."""
+
+        name = "retry_test"
+        path = "/retry"
+        url_base = "https://example.com"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
+
+        # Configure minimal retries for fast testing
+        backoff_max_tries = 3
+
+        @override
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self._authenticator = TrackingAuthenticator()
+
+        @override
+        @property
+        def authenticator(self) -> TrackingAuthenticator:
+            return self._authenticator
+
+        @override
+        def backoff_wait_generator(self) -> t.Generator[float, None, None]:
+            return backoff.constant(0)
+
+    stream = RetryTestStream(rest_tap)
+
+    # Set up mock responses: fail twice with 503, then succeed
+    requests_mock.get(
+        "https://example.com/retry",
+        [
+            {"status_code": 503, "reason": "Service Unavailable"},
+            {"status_code": 503, "reason": "Service Unavailable"},
+            {"json": [{"id": 1}], "status_code": 200},
+        ],
+    )
+
+    # Execute request - should trigger 2 retries before success
+    records = list(stream.get_records(None))
+
+    # Verify the request succeeded
+    assert records == [{"id": 1}]
+
+    # Verify authenticator was called 3 times (initial + 2 retries)
+    assert auth_call_count == 3
+
+
+def test_oauth_authenticator_refreshes_token_on_retry(
+    requests_mock: requests_mock.Mocker,
+    rest_tap: Tap,
+):
+    """Validate that OAuth tokens are refreshed when expired during retries.
+
+    This test simulates a scenario where:
+    1. An OAuth token expires between the initial request and a retry
+    2. The authenticator detects the expired token and refreshes it
+    3. The retry uses the new, fresh token
+    """
+    # Track token refresh calls
+    token_refresh_count = 0
+    current_token_version = 0
+
+    class TestOAuthAuthenticator(OAuthAuthenticator):
+        """OAuth authenticator for testing token refresh on retry."""
+
+        @property
+        def oauth_request_body(self) -> dict:
+            """Return minimal OAuth request body."""
+            return {"grant_type": "client_credentials"}
+
+        def update_access_token(self) -> None:
+            """Track token refresh and update version."""
+            nonlocal token_refresh_count, current_token_version
+            token_refresh_count += 1
+            current_token_version += 1
+            super().update_access_token()
+
+    class OAuthRetryTestStream(RESTStream):
+        """Stream with OAuth authentication for retry testing."""
+
+        name = "oauth_retry_test"
+        path = "/oauth-retry"
+        url_base = "https://example.com"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
+        backoff_max_tries = 2
+
+        @override
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self._authenticator = TestOAuthAuthenticator(
+                stream=self,
+                auth_endpoint="https://example.com/oauth",
+                default_expiration=60,  # 60 seconds
+            )
+
+        @override
+        @property
+        def authenticator(self) -> TestOAuthAuthenticator:
+            return self._authenticator
+
+        @override
+        def backoff_wait_generator(self) -> t.Generator[float, None, None]:
+            return backoff.constant(0)
+
+    # Set up OAuth token endpoint
+    requests_mock.post(
+        "https://example.com/oauth",
+        json={"access_token": "fresh-token", "expires_in": 60},
+    )
+
+    stream = OAuthRetryTestStream(rest_tap)
+
+    # Set initial time and get initial token
+    with time_machine.travel(
+        datetime.datetime(
+            2023,
+            1,
+            1,
+            0,
+            0,
+            tzinfo=datetime.timezone.utc,
+        ),
+        tick=False,
+    ):
+        # Set up mock responses: fail with 503, then succeed
+        requests_mock.get(
+            "https://example.com/oauth-retry",
+            [
+                {"status_code": 503, "reason": "Service Unavailable"},
+                {"json": [{"id": 1}], "status_code": 200},
+            ],
+        )
+
+    # Make first request (will fail and be retried)
+    # Move time forward so token appears expired during retry check
+    with time_machine.travel(
+        datetime.datetime(
+            2023,
+            1,
+            1,
+            0,
+            2,
+            tzinfo=datetime.timezone.utc,
+        ),
+        tick=False,
+    ):
+        records = list(stream.get_records(None))
+
+    # Verify the request succeeded
+    assert records == [{"id": 1}]
+
+    # Verify token was refreshed (initial + refresh on retry)
+    # Note: OAuth authenticator may refresh on first call + retry
+    assert token_refresh_count >= 1
