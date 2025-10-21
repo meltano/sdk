@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.52.0 (2025-10-21)
+
+### ✨ New
+
+- [#3311](https://github.com/meltano/sdk/issues/3311) New `Stream.preprocess_context` lets developers make changes to the stream context before it is frozen
+
+### 🐛 Fixes
+
+- [#3322](https://github.com/meltano/sdk/issues/3322) Improved error message when a request is being retried, including URL path and status code
+- [#3313](https://github.com/meltano/sdk/issues/3313) Ignore the `Programming Language :: Python :: 3 :: Only` classifier when generating `--about` output
+- [#3312](https://github.com/meltano/sdk/issues/3312) Update template readmes to use fewer commands
+
+### ⚙️ Under the Hood
+
+- [#3321](https://github.com/meltano/sdk/issues/3321) Delay stream request authentication until right before the request is sent, so the request is re-authenticated if it needs to be retried
+- [#3315](https://github.com/meltano/sdk/issues/3315) Pass stream logger to the backoff handler
+- [#3314](https://github.com/meltano/sdk/issues/3314) Add `schema` to extra log fields when schema validation fails
+
+### 📚 Documentation Improvements
+
+- [#3316](https://github.com/meltano/sdk/issues/3316) Update annotation of `backoff_wait_generator` in example
+
 ## v0.51.0 (2025-10-17)
 
 ### ✨ New
