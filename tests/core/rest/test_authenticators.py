@@ -562,6 +562,10 @@ def test_authenticator_invoked_on_each_retry(
         def backoff_wait_generator(self) -> t.Generator[float, None, None]:
             return backoff.constant(0)
 
+        @override
+        def backoff_jitter(self, value: float) -> float:
+            return 0
+
     stream = RetryTestStream(rest_tap)
 
     # Set up mock responses: fail twice with 503, then succeed
@@ -643,6 +647,10 @@ def test_oauth_authenticator_refreshes_token_on_retry(
         @override
         def backoff_wait_generator(self) -> t.Generator[float, None, None]:
             return backoff.constant(0)
+
+        @override
+        def backoff_jitter(self, value: float) -> float:
+            return 0
 
     # Set up OAuth token endpoint
     requests_mock.post(
