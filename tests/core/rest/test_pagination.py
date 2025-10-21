@@ -366,25 +366,30 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
 
         def _request(
             self,
-            prepared_request: PreparedRequest,
-            context: dict | None,  # noqa: ARG002
-        ) -> Response:
-            r = Response()
-            r.status_code = 200
+            context: dict | None,
+            next_page_token: int | None,
+        ) -> tuple[PreparedRequest, Response]:
+            prepared_request = self.prepare_request(context, next_page_token)
+            response = Response()
+            response.status_code = 200
 
             parsed = urlparse(prepared_request.url)
             query = parse_qs(parsed.query)
 
             if query.get("page", ["1"]) == ["1"]:
-                r._content = json.dumps({"data": [{"id": 1}, {"id": 2}]}).encode()
+                response._content = json.dumps(
+                    {"data": [{"id": 1}, {"id": 2}]}
+                ).encode()
             elif query.get("page", ["2"]) == ["2"]:
-                r._content = json.dumps({"data": []}).encode()
+                response._content = json.dumps({"data": []}).encode()
             elif query.get("page", ["3"]) == ["3"]:
-                r._content = json.dumps({"data": [{"id": 3}, {"id": 4}]}).encode()
+                response._content = json.dumps(
+                    {"data": [{"id": 3}, {"id": 4}]}
+                ).encode()
             else:
-                r._content = json.dumps({"data": []}).encode()
+                response._content = json.dumps({"data": []}).encode()
 
-            return r
+            return prepared_request, response
 
     stream = MyAPIStream(tap=tap)
 
@@ -437,35 +442,36 @@ def test_continue_if_empty(tap: Tap):
 
         def _request(
             self,
-            prepared_request: PreparedRequest,
-            context: dict | None,  # noqa: ARG002
-        ) -> Response:
-            r = Response()
-            r.status_code = 200
+            context: dict | None,
+            next_page_token: int | None,
+        ) -> tuple[PreparedRequest, Response]:
+            prepared_request = self.prepare_request(context, next_page_token)
+            response = Response()
+            response.status_code = 200
 
             parsed = urlparse(prepared_request.url)
             query = parse_qs(parsed.query)
 
             if query.get("page", ["1"]) == ["1"]:
-                r._content = json.dumps(
+                response._content = json.dumps(
                     {
                         "data": [{"id": 1}, {"id": 2}],
                         "hasMore": True,
                     }
                 ).encode()
             elif query.get("page", ["2"]) == ["2"]:
-                r._content = json.dumps({"data": [], "hasMore": True}).encode()
+                response._content = json.dumps({"data": [], "hasMore": True}).encode()
             elif query.get("page", ["3"]) == ["3"]:
-                r._content = json.dumps(
+                response._content = json.dumps(
                     {
                         "data": [{"id": 3}, {"id": 4}],
                         "hasMore": True,
                     }
                 ).encode()
             else:
-                r._content = json.dumps({"data": [], "hasMore": False}).encode()
+                response._content = json.dumps({"data": [], "hasMore": False}).encode()
 
-            return r
+            return prepared_request, response
 
     stream = MyAPIStream(tap=tap)
     records_iter = stream.request_records(context=None)
@@ -504,14 +510,15 @@ def test_no_paginator(tap: Tap):
 
         def _request(
             self,
-            prepared_request: PreparedRequest,  # noqa: ARG002
-            context: dict | None,  # noqa: ARG002
-        ) -> Response:
-            r = Response()
-            r.status_code = 200
-            r._content = json.dumps({"data": [{"id": 1}, {"id": 2}]}).encode()
+            context: dict | None,
+            next_page_token: None,
+        ) -> tuple[PreparedRequest, Response]:
+            prepared_request = self.prepare_request(context, next_page_token)
+            response = Response()
+            response.status_code = 200
+            response._content = json.dumps({"data": [{"id": 1}, {"id": 2}]}).encode()
 
-            return r
+            return prepared_request, response
 
     stream = MyAPIStream(tap=tap)
     records_iter = stream.request_records(context=None)

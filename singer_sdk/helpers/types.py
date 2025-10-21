@@ -17,7 +17,7 @@ Context: t.TypeAlias = Mapping[str, t.Any]
 Record: t.TypeAlias = dict[str, t.Any]
 Auth: t.TypeAlias = t.Callable[[requests.PreparedRequest], requests.PreparedRequest]
 RequestFunc: t.TypeAlias = t.Callable[
-    [requests.PreparedRequest, Context | None],
+    [Context | None, t.Any],
     requests.Response,
 ]
 StrPath: t.TypeAlias = str | os.PathLike[str]

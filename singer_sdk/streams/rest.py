@@ -313,18 +313,23 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
 
     def _request(
         self,
-        prepared_request: requests.PreparedRequest,
         context: Context | None,
-    ) -> requests.Response:
-        """TODO.
+        next_page_token: _TToken | None,
+    ) -> tuple[requests.PreparedRequest, requests.Response]:
+        """Execute an HTTP request, preparing it fresh on each call.
+
+        This method prepares a new request on each invocation, ensuring that
+        authentication and other request preparation logic is re-executed on retries.
 
         Args:
-            prepared_request: TODO
             context: Stream partition or context dictionary.
+            next_page_token: Token, page number or any request argument to request the
+                next page of data.
 
         Returns:
-            TODO
+            A tuple of (prepared_request, response).
         """
+        prepared_request = self.prepare_request(context, next_page_token)
         response = self.requests_session.send(
             prepared_request,
             timeout=self.timeout,
@@ -339,7 +344,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             else None,
         )
         self.validate_response(response)
-        return response
+        return prepared_request, response
 
     def get_url_params(  # noqa: PLR6301
         self,
@@ -446,7 +451,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         """
         return metrics.http_request_counter(self.name, endpoint=self.path)
 
-    def request_records(self, context: Context | None) -> t.Iterable[dict]:
+    def request_records(self, context: Context | None) -> t.Iterator[dict]:
         """Request records from REST endpoint(s), returning response records.
 
         If pagination is detected, pages will be recursed automatically.
@@ -465,11 +470,10 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             request_counter.with_context(context)
 
             while not paginator.finished:
-                prepared_request = self.prepare_request(
+                prepared_request, resp = decorated_request(
                     context,
-                    next_page_token=paginator.current_value,
+                    paginator.current_value,
                 )
-                resp = decorated_request(prepared_request, context)
                 request_counter.increment()
                 self.update_sync_costs(prepared_request, resp, context)
                 records = iter(self.parse_response(resp))
@@ -727,6 +731,23 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             details: backoff invocation details
                 https://github.com/litl/backoff#event-handlers
         """
+        if (
+            (value := details.get("value"))
+            and isinstance(value, RetriableAPIError)
+            and value.response is not None
+        ):
+            self.log(
+                "Backing off %0.2f seconds after %d tries "
+                "for URL %s, failing with status %s: %s",
+                details.get("wait"),
+                details.get("tries"),
+                self.path,
+                value.response.status_code,
+                value.response.reason,
+                level=logging.ERROR,
+            )
+            return
+
         self.log(
             "Backing off %0.2f seconds after %d tries "
             "calling function %s with args %s and kwargs "
