@@ -325,8 +325,9 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         Returns:
             TODO
         """
+        authenticated_request = self.authenticator(prepared_request)
         response = self.requests_session.send(
-            prepared_request,
+            authenticated_request,
             timeout=self.timeout,
             allow_redirects=self.allow_redirects,
         )
@@ -334,7 +335,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             endpoint=self.path,
             response=response,
             context=context,
-            extra_tags={"url": prepared_request.path_url}
+            extra_tags={"url": authenticated_request.path_url}
             if self._LOG_REQUEST_METRIC_URLS
             else None,
         )
@@ -392,7 +393,6 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             A :class:`requests.PreparedRequest` object.
         """
         request = requests.Request(*args, **kwargs)
-        self.requests_session.auth = self.authenticator
         return self.requests_session.prepare_request(request)
 
     def prepare_request(
@@ -426,7 +426,6 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             "url": url,
             "params": params,
             "headers": headers,
-            "auth": self.authenticator,
         }
 
         if self.payload_as_json:
