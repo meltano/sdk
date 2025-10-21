@@ -414,13 +414,13 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
     def load_streams_from_catalog(self, catalog: Catalog) -> Iterable[Stream]:  # noqa: ARG002
         """Recreate streams from the input catalog.
 
+        Note:
+            The `catalog` argument is currently unused. For backwards compatibility,
+            this method calls `self.load_streams()`.
+
         Returns:
             Iterable[Stream]: An iterable of Stream objects recreated from the input
                 catalog.
-        For backwards compatibility calls `self.load_streams()`
-
-        Returns:
-            A mapping of names to streams, using provided catalog.
         """
         return self.load_streams()
 
