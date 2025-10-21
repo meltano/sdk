@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import datetime
+import http
+import logging
 import os
 import sys
 import typing as t
@@ -504,6 +506,7 @@ def test_basic_authenticator_create_for_stream_deprecation_warning(rest_tap: Tap
 def test_authenticator_invoked_on_each_retry(
     requests_mock: requests_mock.Mocker,
     rest_tap: Tap,
+    caplog: pytest.LogCaptureFixture,
 ):
     """Validate that the authenticator is invoked for each retry attempt.
 
@@ -567,25 +570,45 @@ def test_authenticator_invoked_on_each_retry(
             return 0
 
     stream = RetryTestStream(rest_tap)
+    error_status = http.HTTPStatus.SERVICE_UNAVAILABLE
+    error_reason = "Service Unavailable"
 
     # Set up mock responses: fail twice with 503, then succeed
     requests_mock.get(
         "https://example.com/retry",
         [
-            {"status_code": 503, "reason": "Service Unavailable"},
-            {"status_code": 503, "reason": "Service Unavailable"},
+            {"status_code": error_status, "reason": error_reason},
+            {"status_code": error_status, "reason": error_reason},
             {"json": [{"id": 1}], "status_code": 200},
         ],
     )
 
     # Execute request - should trigger 2 retries before success
-    records = list(stream.get_records(None))
+    with caplog.at_level(logging.ERROR):
+        records = list(stream.get_records(None))
 
     # Verify the request succeeded
     assert records == [{"id": 1}]
 
     # Verify authenticator was called 3 times (initial + 2 retries)
     assert auth_call_count == 3
+
+    assert len(caplog.records) == 2
+    assert all(rec.levelname == "ERROR" for rec in caplog.records)
+    assert caplog.records[0].args == (
+        0,  # Backoff seconds
+        1,  # Retry number
+        "/retry",
+        error_status,
+        error_reason,
+    )
+    assert caplog.records[1].args == (
+        0,  # Backoff seconds
+        2,  # Retry number
+        "/retry",
+        error_status,
+        error_reason,
+    )
 
 
 def test_oauth_authenticator_refreshes_token_on_retry(
