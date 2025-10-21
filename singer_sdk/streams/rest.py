@@ -726,6 +726,23 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             details: backoff invocation details
                 https://github.com/litl/backoff#event-handlers
         """
+        if (
+            (exc := details.get("exception"))
+            and isinstance(exc, RetriableAPIError)
+            and exc.response is not None
+        ):
+            self.log(
+                "Backing off %0.2f seconds after %d tries "
+                "for URL %s, failing with status %s: %s",
+                details.get("wait"),
+                details.get("tries"),
+                self.path,
+                exc.response.status_code,
+                exc.response.reason,
+                level=logging.ERROR,
+            )
+            return
+
         self.log(
             "Backing off %0.2f seconds after %d tries "
             "calling function %s with args %s and kwargs "
