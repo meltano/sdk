@@ -351,6 +351,11 @@ def _flatten_schema(  # noqa: C901, PLR0912
             elif next(iter(field_schema.values()))[0]["type"] == "object":
                 next(iter(field_schema.values()))[0]["type"] = ["null", "object"]
                 items.append((new_key, next(iter(field_schema.values()))[0]))
+        else:
+            # Handle properties with no type definition (e.g., empty schema {})
+            # Treat them as nullable strings to preserve them in the flattened schema
+            # This fixes issue #1886 where typeless properties were being dropped
+            items.append((new_key, {"type": ["string", "null"]}))
 
     # Sort and check for duplicates
     def _key_func(item: tuple[str, dict]) -> str:

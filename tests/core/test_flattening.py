@@ -3,7 +3,11 @@ from __future__ import annotations
 import pytest
 
 from singer_sdk.exceptions import ConfigValidationError
-from singer_sdk.helpers._flattening import flatten_record, get_flattening_options
+from singer_sdk.helpers._flattening import (
+    flatten_record,
+    flatten_schema,
+    get_flattening_options,
+)
 
 
 @pytest.mark.parametrize(
@@ -85,3 +89,35 @@ def test_get_flattening_options_missing_max_depth():
         exc.value.errors[0]
         == "flattening_max_depth is required when flattening is enabled"
     )
+
+
+def test_flatten_schema_with_typeless_properties():
+    """Test that properties without type definitions are preserved during flattening.
+
+    Reproduces issue #1886 where properties defined as empty objects {} are dropped
+    from the flattened schema.
+    """
+    schema = {
+        "type": "object",
+        "properties": {
+            "Id": {"type": "string"},
+            "OldValue": {},  # typeless property
+            "NewValue": {},  # typeless property
+            "Details": {
+                "type": "object",
+                "properties": {
+                    "Nested": {},  # nested typeless property
+                    "Count": {"type": "integer"},
+                },
+            },
+        },
+    }
+
+    flattened = flatten_schema(schema, max_level=1, separator="__")
+
+    # All properties should be present in the flattened schema, including typeless ones
+    assert "Id" in flattened["properties"]
+    assert "OldValue" in flattened["properties"]
+    assert "NewValue" in flattened["properties"]
+    assert "Details__Nested" in flattened["properties"]
+    assert "Details__Count" in flattened["properties"]
