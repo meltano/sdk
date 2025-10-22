@@ -258,14 +258,11 @@ class SQLSink(BatchSink, t.Generic[_C]):
         """
         return [self.conform_name(key, "column") for key in super().key_properties]
 
-    def start_batch(self, context: dict) -> None:  # noqa: ARG002
-        """Start a new batch with the given context.
+    def _ensure_table_prepared(self) -> None:
+        """Ensure the target table is prepared.
 
-        This method prepares the target table on the first batch to ensure that
+        This method prepares the target table on first call to ensure that
         records are not lost when multiple schema messages arrive for the same stream.
-
-        Args:
-            context: Stream partition or context dictionary.
         """
         if not self._table_prepared:
             self.connector.prepare_table(
@@ -276,6 +273,17 @@ class SQLSink(BatchSink, t.Generic[_C]):
             )
             self._table_prepared = True
 
+    def start_batch(self, context: dict) -> None:  # noqa: ARG002
+        """Start a new batch with the given context.
+
+        This method prepares the target table on the first batch to ensure that
+        records are not lost when multiple schema messages arrive for the same stream.
+
+        Args:
+            context: Stream partition or context dictionary.
+        """
+        self._ensure_table_prepared()
+
     def process_batch(self, context: dict) -> None:
         """Process a batch with the given batch context.
 
@@ -285,6 +293,10 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Args:
             context: Stream partition or context dictionary.
         """
+        # Ensure table is prepared before processing batch
+        # This is needed for BATCH messages that bypass start_batch()
+        self._ensure_table_prepared()
+
         # If duplicates are merged, these can be tracked via
         # :meth:`~singer_sdk.Sink.tally_duplicate_merged()`.
         self.bulk_insert_records(
@@ -407,10 +419,8 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Args:
             new_version: The version number to activate.
         """
-        # There's nothing to do if the table doesn't exist yet
-        # (which it won't the first time the stream is processed)
-        if not self.connector.table_exists(self.full_table_name):
-            return
+        # Ensure table is prepared before activating version
+        self._ensure_table_prepared()
 
         deleted_at = utc_now()
 
