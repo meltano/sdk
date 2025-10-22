@@ -25,6 +25,7 @@ These are code samples taken from other projects. Use these as a reference if yo
 - [Define a simple GraphQL-based stream with schema defined in a file](./code_samples.md#define-a-simple-graphql-based-stream-with-schema-defined-in-a-file)
 - [Define a REST-based stream with a JSONPath expression](./code_samples.md#define-a-rest-based-stream-with-a-jsonpath-expression)
 - [Use a JSONPath expression to extract the next page URL from a HATEOAS response](./code_samples.md#use-a-jsonpath-expression-to-extract-the-next-page-url-from-a-hateoas-response)
+- [Extended JSONPath patterns for different API response structures](./code_samples.md#extended-jsonpath-patterns-for-different-api-response-structures)
 - [Dynamically discovering `schema` for a stream](./code_samples.md#dynamically-discovering-schema-for-a-stream)
 - [Initialize a collection of tap streams with differing types](./code_samples.md#initialize-a-collection-of-tap-streams-with-differing-types)
 - [Run the standard built-in tap tests](./code_samples.md#run-the-standard-built-in-tap-tests)
@@ -106,6 +107,53 @@ class MyStream(RESTStream):
 
     # Gets the href property from the links item where rel="next"
     next_page_token_jsonpath = "$.links[?(@.rel=='next')].href"
+```
+
+### Extended JSONPath patterns for different API response structures
+
+The SDK uses the [jsonpath-ng](https://github.com/h2non/jsonpath-ng) extended parser, which supports advanced filtering and selection patterns. Here are common patterns for different API response formats:
+
+**Array at root:**
+
+```python
+records_jsonpath = "$[*]"
+# Matches: [{"id": 1}, {"id": 2}]
+```
+
+**Nested array:**
+
+```python
+records_jsonpath = "$.data[*]"
+# Matches: {"data": [{"id": 1}, {"id": 2}]}
+
+records_jsonpath = "$.data.records[*]"
+# Matches: {"data": {"records": [{"id": 1}, {"id": 2}]}}
+```
+
+**Single object:**
+
+```python
+records_jsonpath = "$"
+# Matches: {"id": 1, "name": "example"}
+```
+
+**Object with dynamic keys:**
+
+```python
+records_jsonpath = "$.data.*"
+# Matches: {"data": {"key1": {"id": 1}, "key2": {"id": 2}}}
+```
+
+**Filter expressions:**
+
+```python
+# Select by attribute value
+next_page_token_jsonpath = "$.links[?(@.rel=='next')].href"
+# Matches: {"links": [{"rel": "prev", "href": "..."}, {"rel": "next", "href": "url"}]}
+
+# Select active items
+records_jsonpath = "$.items[?(@.status=='active')]"
+# Matches: {"items": [{"status": "active"}, {"status": "inactive"}]}
 ```
 
 ### Dynamically discovering `schema` for a stream
