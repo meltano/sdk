@@ -35,3 +35,42 @@ If the stream attribute [`is_sorted`](singer_sdk.Stream.is_sorted) (default: `Fa
 class MyStream(Stream):
     is_sorted = True
 ```
+
+## Why is my stream sync not resumed after it's interrupted?
+
+For a stream to be resumable, it must meet these criteria:
+
+1. **Use incremental replication** - The stream must have `replication_method = "INCREMENTAL"` and a `replication_key` defined
+1. **Be declared as sorted** - The stream must have `is_sorted = True` (see below)
+1. **Not use custom state partitioning** - Streams with custom `state_partitioning_keys` are not resumable
+
+Full-table syncs and unsorted incremental streams cannot resume from interruptions. They must complete successfully before the state becomes valid.
+
+## How do I declare my stream as sorted?
+
+To enable resumability, set the `is_sorted` property to `True` in your stream class:
+
+```python
+class MyIncrementalStream(Stream):
+    replication_method = "INCREMENTAL"
+    replication_key = "updated_at"
+    is_sorted = True  # Records are sorted by replication_key
+```
+
+Only declare a stream as sorted if the source API guarantees that records are returned in ascending order by the replication key. This means each record's replication key value must be greater than or equal to the previous record's value.
+
+## What happens if records arrive out of order in a sorted stream?
+
+If you declare `is_sorted = True` but records arrive out of order, the SDK will raise an `InvalidStreamSortException` and the sync will fail immediately. This protects data integrity by ensuring you don't miss records.
+
+For example, if a record with `updated_at = "2024-01-15"` arrives after a record with `updated_at = "2024-01-20"`, the SDK detects this violation and stops the sync.
+
+To bypass this check (not recommended), set `check_sorted = False`:
+
+```python
+class MyStream(Stream):
+    is_sorted = True
+    check_sorted = False  # Disable out-of-order detection
+```
+
+However, disabling this check may result in data loss if records truly are out of order.
