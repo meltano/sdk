@@ -8,7 +8,7 @@
   "serialization_method": ["Per record", "Per batch", "SQL"],
   "faker_extra": false,
   "include_ci_files": ["GitHub", "None (Skip)"],
-  "license": ["Apache-2.0"],
+  "license": ["Apache-2.0", "MIT", "None"],
   "ide": ["VSCode", "None"],
   "__prompts__": {
     "name": "The name of the mapper, in CamelCase",

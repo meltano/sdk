@@ -37,8 +37,17 @@ if __name__ == "__main__":
     if "{{ cookiecutter.stream_type }}" == "SQL":
         PACKAGE_PATH.joinpath("streams.py").unlink()
 
-    if "{{ cookiecutter.license }}" == "None":
-        Path("LICENSE").unlink()
+    # Handle license selection
+    license_choice = "{{ cookiecutter.license }}"
+    if license_choice == "Apache-2.0":
+        Path("LICENSE-Apache-2.0").rename("LICENSE")
+        Path("LICENSE-MIT").unlink()
+    elif license_choice == "MIT":
+        Path("LICENSE-MIT").rename("LICENSE")
+        Path("LICENSE-Apache-2.0").unlink()
+    elif license_choice == "None":
+        Path("LICENSE-Apache-2.0").unlink()
+        Path("LICENSE-MIT").unlink()
 
     if "{{ cookiecutter.include_ci_files }}" != "GitHub":
         shutil.rmtree(".github")
