@@ -56,6 +56,28 @@ AWS S3
 
 The `encoding` field is used to specify the format and compression of the batch files. Currently `jsonl`, `gzip` and `parquet` are supported.
 
+#### JSONL Batch File Format
+
+When using the `jsonl` encoding format, batch files should contain **raw JSON records only**, with one record per line. They should **NOT** contain Singer protocol `RECORD` messages.
+
+**Correct format** (raw JSON records):
+
+```jsonl
+{"id": 1, "name": "Alice", "email": "alice@example.com"}
+{"id": 2, "name": "Bob", "email": "bob@example.com"}
+{"id": 3, "name": "Charlie", "email": "charlie@example.com"}
+```
+
+**Incorrect format** (Singer RECORD messages):
+
+```jsonl
+{"type": "RECORD", "stream": "users", "record": {"id": 1, "name": "Alice", "email": "alice@example.com"}}
+{"type": "RECORD", "stream": "users", "record": {"id": 2, "name": "Bob", "email": "bob@example.com"}}
+{"type": "RECORD", "stream": "users", "record": {"id": 3, "name": "Charlie", "email": "charlie@example.com"}}
+```
+
+The Singer protocol messages (like `RECORD`, `SCHEMA`, `STATE`, and `BATCH`) are used for communication between taps and targets, but the batch files themselves contain only the record data.
+
 ### `manifest`
 
 The `manifest` field is used to specify the paths to the batch files. The paths are relative to the `root` directory specified in the [`batch_config`](#batch-configuration) storage configuration.
