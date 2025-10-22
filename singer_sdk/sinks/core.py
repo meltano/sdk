@@ -760,6 +760,9 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
     ) -> None:
         """Process a batch file with the given batch context.
 
+        For JSONL-encoded batch files, expects raw JSON records (one per line),
+        not Singer protocol messages.
+
         Args:
             encoding: The batch file encoding.
             files: The batch files to process.

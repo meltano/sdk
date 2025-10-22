@@ -13,7 +13,11 @@ __all__ = ["JSONLinesBatcher"]
 
 
 class JSONLinesBatcher(BaseBatcher):
-    """JSON Lines Record Batcher."""
+    """JSON Lines Record Batcher.
+
+    Writes raw JSON records to JSONL batch files, with one record per line.
+    The batch files contain only the record data, not Singer protocol messages.
+    """
 
     def get_batches(
         self,
@@ -21,8 +25,10 @@ class JSONLinesBatcher(BaseBatcher):
     ) -> t.Iterator[list[str]]:
         """Yield manifest of batches.
 
+        Creates JSONL batch files containing raw JSON records (one per line).
+
         Args:
-            records: The records to batch.
+            records: The raw record dictionaries to batch.
 
         Yields:
             A list of file paths (called a manifest).
