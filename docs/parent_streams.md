@@ -66,6 +66,26 @@ class EpicIssuesStream(GitlabStream):
     # ...
 ```
 
+### How Path Parameter Replacement Works
+
+In the example above, the `path` contains placeholders like `{group_id}` and `{epic_iid}`. These are **not** instance properties—they're context variables that get automatically replaced.
+
+The SDK's `get_url_params()` method extracts these values from the context dictionary returned by the parent's `get_child_context()`. For each parent record, the child stream receives a context like:
+
+```python
+{
+    "group_id": 123,
+    "epic_id": 456,
+    "epic_iid": 789,
+}
+```
+
+The SDK then substitutes these into the path, producing URLs like:
+
+```
+/groups/123/epics/789/issues
+```
+
 ```{note}
 All the keys in the `context` dictionary are added to the child's record, but they will be automatically removed if they are not present in the child's schema. If you wish to preserve these keys in the child's record, you must add them to the child's schema.
 ```
