@@ -56,6 +56,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         """
         self._connector: _C
         self._connector = connector or self.connector_class(dict(target.config))
+        self._table_prepared = False
         super().__init__(target, stream_name, schema, key_properties)
 
     @property
@@ -250,6 +251,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
             primary_keys=self.key_properties,
             as_temp_table=False,
         )
+        self._table_prepared = True
 
     @property
     def key_properties(self) -> t.Sequence[str]:
