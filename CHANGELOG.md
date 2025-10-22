@@ -11,7 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#3328](https://github.com/meltano/sdk/issues/3328) Support MIT as a license option in templates
 - [#3327](https://github.com/meltano/sdk/issues/3327) Emit a log when requesting a new access token in OAuth taps
-- Emit a log when requesting a new access token in OAuth taps
 
 ## v0.52.1 (2025-10-22)
 
