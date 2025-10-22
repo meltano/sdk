@@ -2372,7 +2372,7 @@ wheels = [
 name = "singer-sdk"
 source = { editable = "." }
 dependencies = [
-    { name = "backoff" },
+    { name = "backoff", marker = "python_full_version < '4'" },
     { name = "backports-datetime-fromisoformat", marker = "python_full_version < '3.11'" },
     { name = "click" },
     { name = "fsspec" },
@@ -2525,7 +2525,7 @@ typing = [
 
 [package.metadata]
 requires-dist = [
-    { name = "backoff", specifier = ">=2.2.0,<4" },
+    { name = "backoff", marker = "python_full_version < '4'", specifier = ">=2.2.0" },
     { name = "backports-datetime-fromisoformat", marker = "python_full_version < '3.11'", specifier = ">=2.0.1" },
     { name = "click", specifier = ">=8.2,<9" },
     { name = "cryptography", marker = "extra == 'jwt'", specifier = ">=3.4.6" },
