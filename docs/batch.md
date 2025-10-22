@@ -62,7 +62,7 @@ When using the `jsonl` encoding format, batch files should contain **raw JSON re
 
 **Correct format** (raw JSON records):
 
-```jsonl
+```json
 {"id": 1, "name": "Alice", "email": "alice@example.com"}
 {"id": 2, "name": "Bob", "email": "bob@example.com"}
 {"id": 3, "name": "Charlie", "email": "charlie@example.com"}
@@ -70,7 +70,7 @@ When using the `jsonl` encoding format, batch files should contain **raw JSON re
 
 **Incorrect format** (Singer RECORD messages):
 
-```jsonl
+```json
 {"type": "RECORD", "stream": "users", "record": {"id": 1, "name": "Alice", "email": "alice@example.com"}}
 {"type": "RECORD", "stream": "users", "record": {"id": 2, "name": "Bob", "email": "bob@example.com"}}
 {"type": "RECORD", "stream": "users", "record": {"id": 3, "name": "Charlie", "email": "charlie@example.com"}}
