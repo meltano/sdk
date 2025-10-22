@@ -16,7 +16,7 @@
   ],
   "faker_extra": false,
   "include_ci_files": ["GitHub", "None"],
-  "license": ["Apache-2.0", "None"],
+  "license": ["Apache-2.0", "MIT", "None"],
   "ide": ["VSCode", "None"],
   "__prompts__": {
     "source_name": "The name of the source, in CamelCase",
