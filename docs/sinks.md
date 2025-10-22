@@ -13,6 +13,8 @@ This is the default, where only one sink is active for each incoming stream name
 - In the case that a sink is archived because of a superseding STATE message, all
   prior version(s) of the stream's sink are guaranteed to be drained in creation order.
 
+_Note: Targets write state payloads to stdout whenever sinks drain. See [Target State Output](implementation/state.md#target-state-output) for details on capturing the final state._
+
 ### Database sink example
 
 A database-type target where each stream will land in a dedicated table. Each sink is of the same class, with a different target table based on stream_name.
