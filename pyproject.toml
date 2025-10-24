@@ -469,7 +469,6 @@ max-args = 9
 required-version = ">=0.5.19"
 
 [tool.uv.sources]
-pyarrow = { index = "scientific-python-nightly-wheels" }
 mapper-custom = { workspace = true }
 tap-countries = { workspace = true }
 tap-csv = { workspace = true }
