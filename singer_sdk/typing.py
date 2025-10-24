@@ -81,8 +81,12 @@ __all__ = [
     "DurationType",
     "EmailType",
     "HostnameType",
+    "IDNEmailType",
+    "IDNHostnameType",
     "IPv4Type",
     "IPv6Type",
+    "IRIReferenceType",
+    "IRIType",
     "IntegerType",
     "JSONPointerType",
     "JSONTypeHelper",
@@ -366,10 +370,22 @@ class EmailType(StringType):
     string_format = "email"
 
 
+class IDNEmailType(StringType):
+    """Internationalized email type."""
+
+    string_format = "idn-email"
+
+
 class HostnameType(StringType):
     """Hostname type."""
 
     string_format = "hostname"
+
+
+class IDNHostnameType(StringType):
+    """Internationalized hostname type."""
+
+    string_format = "idn-hostname"
 
 
 class IPv4Type(StringType):
@@ -399,10 +415,22 @@ class URIType(StringType):
     string_format = "uri"
 
 
+class IRIType(StringType):
+    """IRI type."""
+
+    string_format = "iri"
+
+
 class URIReferenceType(StringType):
     """URIReference type."""
 
     string_format = "uri-reference"
+
+
+class IRIReferenceType(StringType):
+    """IRIReference type."""
+
+    string_format = "iri-reference"
 
 
 class URITemplateType(StringType):
