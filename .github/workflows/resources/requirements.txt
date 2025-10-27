@@ -1,4 +1,4 @@
 griffe~=1.14
-nox==2025.5.1
+nox==2025.10.16
 pre-commit==4.3.0
 twine==6.2.0
