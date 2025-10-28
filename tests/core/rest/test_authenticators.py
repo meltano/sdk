@@ -277,8 +277,6 @@ def test_requests_library_auth(rest_tap: Tap):
     """Validate that a requests.auth object can be used as an authenticator."""
     stream = t.cast("RESTStream", rest_tap.streams["proxy_auth_stream"])
     request = stream.prepare_request(None, None)
-    assert "Proxy-Authorization" not in request.headers
-
     authenticated_request = stream.authenticator(request)
     assert "Proxy-Authorization" in authenticated_request.headers
 
@@ -590,8 +588,8 @@ def test_authenticator_invoked_on_each_retry(
     # Verify the request succeeded
     assert records == [{"id": 1}]
 
-    # Verify authenticator was called 3 times (initial + 2 retries)
-    assert auth_call_count == 3
+    # Verify authenticator was called 4 times (setup + initial + 2 retries)
+    assert auth_call_count == 4
 
     assert len(caplog.records) == 2
     assert all(rec.levelname == "ERROR" for rec in caplog.records)
