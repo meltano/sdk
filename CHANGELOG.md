@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.52.3 (2025-10-28)
+
+### 🐛 Fixes
+
+- [#3343](https://github.com/meltano/sdk/issues/3343) Fix regression in v0.52.0 where the `auth` attribute was removed from the `RESTStream.requests_session` instance
+- [#3333](https://github.com/meltano/sdk/issues/3333) Add more context and clear instructions to cookiecutter prompts
+
+### 📚 Documentation Improvements
+
+- [#3338](https://github.com/meltano/sdk/issues/3338) Document how to cast values to different data types in inline stream maps
+- [#3337](https://github.com/meltano/sdk/issues/3337) FAQ - my stream sync is not resumed after it is interrupted in the middle of a run
+- [#3336](https://github.com/meltano/sdk/issues/3336) Explain parameter replacement in parent-child streams
+- [#3335](https://github.com/meltano/sdk/issues/3335) Improve documentation around extended JSONPath parser
+- [#3332](https://github.com/meltano/sdk/issues/3332) Clarify that JSONL batch files should contain raw records and not Singer `RECORD` messages
+- [#3331](https://github.com/meltano/sdk/issues/3331) Document that multiple state messages can be output from a single target run
+
 ## v0.52.2 (2025-10-22)
 
 ### 🐛 Fixes
