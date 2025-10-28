@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import typing as t
 from importlib import resources
 
 from singer_sdk import typing as th  # JSON Schema typing helpers
@@ -55,7 +54,7 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
             ),
         ),
     ).to_dict()
-    primary_keys: t.ClassVar[list[str]] = ["id"]
+    primary_keys = ("id",)
     replication_key = None
     graphql_query = """
         users {
@@ -82,7 +81,7 @@ class GroupsStream({{ cookiecutter.source_name }}Stream):
         th.Property("id", th.StringType),
         th.Property("modified", th.DateTimeType),
     ).to_dict()
-    primary_keys: t.ClassVar[list[str]] = ["id"]
+    primary_keys = ("id",)
     replication_key = "modified"
     graphql_query = """
         groups {
@@ -105,7 +104,7 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
 {%- if cookiecutter.stream_type == "REST" %}
     path = "/users"
 {%- endif %}
-    primary_keys: t.ClassVar[list[str]] = ["id"]
+    primary_keys = ("id",)
     replication_key = None
     # Optionally, you may also use `schema_filepath` in place of `schema`:
     # schema_filepath = SCHEMAS_DIR / "users.json"  # noqa: ERA001
@@ -144,7 +143,7 @@ class GroupsStream({{ cookiecutter.source_name }}Stream):
 {%- if cookiecutter.stream_type == "REST" %}
     path = "/groups"
 {%- endif %}
-    primary_keys: t.ClassVar[list[str]] = ["id"]
+    primary_keys = ("id",)
     replication_key = "modified"
     schema = th.PropertiesList(
         th.Property("name", th.StringType),
