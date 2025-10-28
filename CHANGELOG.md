@@ -11,7 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#3343](https://github.com/meltano/sdk/issues/3343) Fix regression in v0.52.0 where the `auth` attribute was removed from the `RESTStream.requests_session` instance
 - [#3333](https://github.com/meltano/sdk/issues/3333) Add more context and clear instructions to cookiecutter prompts
-- Add more context and clear instructions to cookiecutter prompts
 
 ### 📚 Documentation Improvements
 
