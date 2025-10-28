@@ -393,6 +393,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             A :class:`requests.PreparedRequest` object.
         """
         request = requests.Request(*args, **kwargs)
+        self.requests_session.auth = self.authenticator
         return self.requests_session.prepare_request(request)
 
     def prepare_request(
