@@ -129,3 +129,58 @@ def test_flatten_schema_with_typeless_properties():
     # These properties should be typed as string to allow JSON serialization
     assert "string" in flattened["properties"]["changes__OldValue"]["type"]
     assert "string" in flattened["properties"]["changes__NewValue"]["type"]
+
+
+def test_flatten_record_with_typeless_property_values():
+    """Test that records with typeless properties are flattened correctly.
+
+    This test verifies that actual data in typeless properties is properly
+    JSON-serialized when flattening records, addressing issue #1886.
+    """
+    schema = {
+        "type": "object",
+        "properties": {
+            "id": {"type": "string"},
+            "changes": {
+                "type": "object",
+                "properties": {
+                    "field": {"type": "string"},
+                    "OldValue": {},  # Typeless property
+                    "NewValue": {},  # Typeless property
+                },
+            },
+        },
+    }
+
+    # First, flatten the schema
+    flattened_schema = flatten_schema(schema, max_level=1)
+
+    # Create a record with various types of values in the typeless properties
+    record = {
+        "id": "123",
+        "changes": {
+            "field": "status",
+            "OldValue": {"nested": "object", "with": ["array", "values"]},
+            "NewValue": "simple string",
+        },
+    }
+
+    # Flatten the record using the flattened schema
+    flattened_record = flatten_record(
+        record, flattened_schema=flattened_schema, max_level=1
+    )
+
+    # Verify the flattened record structure
+    assert flattened_record["id"] == "123"
+    assert flattened_record["changes__field"] == "status"
+
+    # Typeless properties with complex values should be JSON-serialized
+    assert "changes__OldValue" in flattened_record
+    assert (
+        flattened_record["changes__OldValue"]
+        == '{"nested":"object","with":["array","values"]}'
+    )
+
+    # Typeless properties with simple values should be preserved
+    assert "changes__NewValue" in flattened_record
+    assert flattened_record["changes__NewValue"] == "simple string"
