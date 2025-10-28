@@ -19,15 +19,18 @@ class ConfigValidationError(Exception):
         message: str,
         *,
         errors: list[str] | None = None,
+        schema: dict | None = None,
     ) -> None:
         """Initialize a ConfigValidationError.
 
         Args:
             message: A message describing the error.
             errors: A list of errors which caused the validation error.
+            schema: The JSON schema that was used for validation.
         """
         super().__init__(message)
-        self.errors = errors or []
+        self.errors: list[str] = errors or []
+        self.schema: dict | None = schema
 
 
 class DiscoveryError(Exception):

@@ -42,6 +42,24 @@ The SDK will automatically generate and emit STATE messages according to the con
 `Stream.STATE_MSG_FREQUENCY`, which designates how many RECORD messages should be processed
 before an updated STATE message should be emitted.
 
+## Target State Output
+
+Targets write state payloads to stdout whenever they commit data to the target system. This happens:
+
+- When a new STATE message is received from the tap (triggering a sink drain, as described in [Sinks](../sinks.md))
+- When records exceed the maximum age threshold (default: 5 minutes)
+- When the sync completes
+
+This means targets emit **multiple state payloads** during long-running syncs, not just one at completion. Each payload represents the furthest point of confirmed progress.
+
+To capture the final state for use in subsequent runs:
+
+```bash
+tap | target | tail -n 1 > state.json
+```
+
+The last state payload represents the last successfully committed checkpoint, providing fault tolerance if the sync is interrupted.
+
 ## Backwards Compatibility
 
 While the exact specification of STATE messages may change between versions, it is

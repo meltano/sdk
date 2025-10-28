@@ -54,7 +54,6 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
             name: The name of the stream.
             filepaths: List of file paths to read.
             filesystem: The filesystem implementation object to use.
-            mode: The read mode for the stream.
 
         Raises:
             ConfigValidationError: If no file paths are provided.
@@ -81,9 +80,6 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
 
     def _get_full_schema(self) -> dict[str, t.Any]:
         """Return the full schema for the stream.
-
-        Args:
-            context: Stream partition or context dictionary.
 
         Returns:
             The full schema for the stream.

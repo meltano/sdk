@@ -101,7 +101,7 @@ class SQLTarget(Target):
         Returns:
             A new sink for the stream.
         """
-        self.logger.debug("Initializing '%s' target sink...", self.name)
+        self.logger.debug("Initializing target sink '%s'...", self.name)
         sink_class = self.get_sink_class(stream_name=stream_name)
         sink = sink_class(
             target=self,

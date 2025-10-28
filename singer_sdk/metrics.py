@@ -200,6 +200,14 @@ class Meter(metaclass=abc.ABCMeta):
         Args:
             value: A context dictionary.
         """
+        self.with_context(value)
+
+    def with_context(self, value: types.Context | None) -> None:
+        """Set the context for this meter.
+
+        Args:
+            value: A context dictionary.
+        """
         if value is None:
             self.tags.pop(Tag.CONTEXT, None)
         else:

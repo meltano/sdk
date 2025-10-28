@@ -31,7 +31,7 @@ license-files = ["LICENSE"]
 requires-python = ">=3.10"
 
 dependencies = [
-    "backoff>=2.0.0,<4",
+    'backoff>=2.2.0; python_version<"4"',
     'backports-datetime-fromisoformat>=2.0.1; python_version<"3.11"',
     "click>=8.2,<9",
     "fsspec>=2024.9.0",
@@ -155,7 +155,7 @@ typing = [
 ]
 benchmark = [
     {"include-group" = "testing"},
-    "pytest-codspeed>=2.2.0",
+    "pytest-codspeed>=2.2.0,!=4.1.0",
 ]
 
 [tool.hatch.build.targets.sdist]
@@ -195,8 +195,6 @@ filterwarnings = [
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
     # TODO: Address this SQLite warning in Python 3.13+
     "ignore::ResourceWarning",
-    # universal-pathlib
-    "once:in a future version of UPath this will be set to None:PendingDeprecationWarning",
     # Our own warnings
     "once::singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
 ]
@@ -218,7 +216,7 @@ xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.50.1"
+version = "0.52.3"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -488,6 +486,11 @@ target-sqlite = { workspace = true }
 members = [
     "packages/*",
 ]
+
+[[tool.uv.index]]
+name = "scientific-python-nightly-wheels"
+url = "https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"
+explicit = true
 
 [tool.codespell]
 skip = "*.csv,samples/aapl/*.json,packages/*/schemas/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"

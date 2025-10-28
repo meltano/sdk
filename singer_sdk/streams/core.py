@@ -68,7 +68,9 @@ REPLICATION_LOG_BASED = "LOG_BASED"
 class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for tap streams.
 
-    :ivar context: Stream partition or context dictionary.
+    :ivar context: Stream partition or context dictionary. This is a read-only
+        (frozen) dictionary. To modify the context before it is used, override
+        the :meth:`~singer_sdk.Stream.preprocess_context` method.
 
     .. versionadded:: 0.39.0
        The ``context`` attribute.
@@ -1053,6 +1055,58 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if len(self._sync_costs) > 0:
             self.log(f"Total Sync costs for stream {self.name}: {self._sync_costs}")
 
+    def get_record_counter(
+        self,
+        *,
+        endpoint: str | None = None,
+        log_interval: float = metrics.DEFAULT_LOG_INTERVAL,
+    ) -> metrics.Counter:
+        """Get a counter for counting records retrieved from the source.
+
+        This method can be overridden to customize the record counter, for example
+        to add custom tags or modify the logging behavior.
+
+        Args:
+            endpoint: The endpoint name to include in metrics.
+            log_interval: The interval at which to log the count.
+
+        Returns:
+            A counter for counting records.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.record_counter(
+            self.name,
+            endpoint=endpoint,
+            log_interval=log_interval,
+        )
+
+    def get_batch_counter(self) -> metrics.Counter:
+        """Get a counter for counting batches sent to the target.
+
+        This method can be overridden to customize the batch counter, for example
+        to add custom tags or modify the logging behavior.
+
+        Returns:
+            A counter for counting batches.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.batch_counter(self.name)
+
+    def get_sync_timer(self) -> metrics.Timer:
+        """Get a timer for timing the sync of this stream.
+
+        This method can be overridden to customize the sync timer, for example
+        to add custom tags or modify the logging behavior.
+
+        Returns:
+            A timer for timing the sync of this stream.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.sync_timer(self.name)
+
     def _check_max_record_limit(self, current_record_index: int) -> None:
         """Raise an exception if dry run record limit exceeded.
 
@@ -1214,8 +1268,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         context_list: list[types.Context] | list[dict] | None
 
         # Initialize metrics
-        record_counter = metrics.record_counter(self.name)
-        timer = metrics.sync_timer(self.name)
+        record_counter = self.get_record_counter()
+        timer = self.get_sync_timer()
 
         record_index = 0
         context_list = [context] if context is not None else self.partitions
@@ -1223,8 +1277,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         with record_counter, timer:
             for context_element in context_list or [{}]:
-                record_counter.context = context_element
-                timer.context = context_element
+                record_counter.with_context(context_element)
+                timer.with_context(context_element)
 
                 current_context = context_element or None
                 state_partition_context = self._get_state_partition_context(
@@ -1317,7 +1371,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             batch_config: The batch configuration.
             context: Stream partition or context dictionary.
         """
-        with metrics.batch_counter(self.name, context=context) as counter:
+        with self.get_batch_counter() as counter:
             for encoding, manifest in self.get_batches(batch_config, context):
                 counter.increment()
                 self._write_batch_message(encoding=encoding, manifest=manifest)
@@ -1334,10 +1388,17 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             context: Stream partition or context dictionary.
         """
-        msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
+        # Preprocess context before it's frozen
+        context = self.preprocess_context(context) if context else None
+
+        log_msg = "Beginning sync of '%s' in %s mode"
+        log_args: list[t.Any] = [self.name, self.replication_method.lower()]
         if context:
-            msg += f" with context: {context}"
-        self.log(msg)
+            log_msg += " with context: %s"
+            log_args.append(context)
+
+        self.log(log_msg, *log_args)
+
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
@@ -1603,6 +1664,40 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         records = self._sync_records(context, write_messages=False)
         for manifest in batcher.get_batches(records=records):
             yield batch_config.encoding, manifest
+
+    def preprocess_context(  # noqa: PLR6301
+        self,
+        context: types.Context,
+    ) -> types.Context:
+        """Preprocess the context dictionary before it is used during sync operations.
+
+        This method provides an opportunity to clean, transform, or reduce the context
+        dictionary before it is frozen and used throughout the stream's sync lifecycle.
+        Common use cases include:
+
+        - Removing large data payloads from parent streams that are not needed
+        - Extracting only the necessary keys from parent context
+        - Transforming context values to a more convenient format
+        - Validating or sanitizing context values
+
+        This is the **only** appropriate place to modify the context dictionary. Once
+        this method returns, the context will be frozen (immutable) for the remainder
+        of the sync operation.
+
+        .. important::
+           The context object must not contain sensitive information such as API keys
+           or secrets, as it is sent to the target, stored in the state file, and
+           logged to the console.
+
+        Args:
+            context: Stream partition or context dictionary from the parent stream.
+
+        Returns:
+            The preprocessed context dictionary.
+
+        .. versionadded:: 0.52.0
+        """
+        return context
 
     def post_process(  # noqa: PLR6301
         self,

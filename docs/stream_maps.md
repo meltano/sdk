@@ -292,12 +292,167 @@ records being generated.
 
 The following logic is applied in determining the SCHEMA of the transformed stream:
 
-1. Calculations which begin with the text `str(`, `float(`, `int(` will be
+1. Calculations which begin with the text `str(`, `float(`, `int(`, or `bool(` will be
    assumed to be belonging to the specified type.
 1. Otherwise, if the property already existed in the original stream, it will be assumed
    to have the same data type as the original stream.
 1. Otherwise, if no type is detected using the above rules, any new stream properties will
    be assumed to be of type `str` .
+
+#### Type Casting
+
+Stream maps support explicit type casting to convert values to different data types. By wrapping expressions with type casting functions, you can ensure proper schema detection and data type conversion.
+
+##### Supported Type Casting Functions
+
+The following type casting functions are available in stream mapping expressions:
+
+| Function | Target Type | JSON Schema Type | Description |
+| :------- | :---------- | :--------------- | :---------- |
+| `int()` | Integer | `integer` | Converts a value to an integer type |
+| `float()` | Decimal/Number | `number` | Converts a value to a floating-point number |
+| `str()` | String | `string` | Converts a value to a string type |
+| `bool()` | Boolean | `boolean` | Converts a value to a boolean type |
+
+##### Type Casting Examples
+
+**Converting string values to integers:**
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  mystream:
+    # Convert a string literal to integer
+    int_test: int('0')
+    # Convert a calculation result to integer
+    fixed_count: int(count - 1)
+    # Extract year from date as integer
+    create_year: int(datetime.date.fromisoformat(create_date).year)
+```
+````
+
+````{tab} JSON
+```json
+{
+  "stream_maps": {
+    "mystream": {
+      "int_test": "int('0')",
+      "fixed_count": "int(count - 1)",
+      "create_year": "int(datetime.date.fromisoformat(create_date).year)"
+    }
+  }
+}
+```
+````
+
+**Converting values to floats:**
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  mystream:
+    # Convert timestamp to float
+    joined_timestamp: float(datetime.datetime.fromisoformat(joined_at).timestamp())
+```
+````
+
+````{tab} JSON
+```json
+{
+  "stream_maps": {
+    "mystream": {
+      "joined_timestamp": "float(datetime.datetime.fromisoformat(joined_at).timestamp())"
+    }
+  }
+}
+```
+````
+
+**Converting values to strings:**
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  repositories:
+    # Explicitly cast to string (useful for schema detection)
+    description: str('[masked]')
+```
+````
+
+````{tab} JSON
+```json
+{
+  "stream_maps": {
+    "repositories": {
+      "description": "str('[masked]')"
+    }
+  }
+}
+```
+````
+
+**Converting values to booleans:**
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  mystream:
+    # Convert to boolean with null handling
+    is_active: bool(status_value) if status_value else None
+```
+````
+
+````{tab} JSON
+```json
+{
+  "stream_maps": {
+    "mystream": {
+      "is_active": "bool(status_value) if status_value else None"
+    }
+  }
+}
+```
+````
+
+##### When to Use Type Casting
+
+Type casting is particularly useful in the following scenarios:
+
+1. **Schema Detection Hints**: When creating new calculated fields, wrap the expression in a type casting function to ensure the SDK correctly detects the output type in the schema.
+
+1. **Type Conversion**: When you need to convert a value from one type to another (e.g., converting a numeric string to an actual integer).
+
+1. **Consistent Data Types**: When working with data that may have inconsistent types in the source, you can enforce a specific type in the output.
+
+**Example combining type casting with conditional logic:**
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  nested_jellybean:
+    # Extract custom field value and cast to integer, handling null values
+    custom_field_2: >-
+      int(dict([(x["id"], x["value"]) for x in custom_fields]).get(2))
+      if dict([(x["id"], x["value"]) for x in custom_fields]).get(2)
+      else None
+```
+````
+
+````{tab} JSON
+```json
+{
+  "stream_maps": {
+    "nested_jellybean": {
+      "custom_field_2": "int(dict([(x[\"id\"], x[\"value\"]) for x in custom_fields]).get(2)) if dict([(x[\"id\"], x[\"value\"]) for x in custom_fields]).get(2) else None"
+    }
+  }
+}
+```
+````
+
+:::{note}
+Type casting functions are standard Python built-ins that are available in the stream mapping expression evaluator. The SDK performs static type detection by examining the beginning of the expression string, so the type casting function must appear at the start of the expression for proper schema detection.
+:::
 
 ## Customized `stream_map` Behaviors
 

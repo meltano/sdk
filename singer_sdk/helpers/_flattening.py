@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import collections
 import collections.abc
 import itertools
 import re
@@ -352,6 +351,10 @@ def _flatten_schema(  # noqa: C901, PLR0912
             elif next(iter(field_schema.values()))[0]["type"] == "object":
                 next(iter(field_schema.values()))[0]["type"] = ["null", "object"]
                 items.append((new_key, next(iter(field_schema.values()))[0]))
+        else:
+            # Handle typeless properties (e.g., "PropertyName": {})
+            # Treat them as string type to allow JSON serialization
+            items.append((new_key, {"type": ["null", "string"]}))
 
     # Sort and check for duplicates
     def _key_func(item: tuple[str, dict]) -> str:

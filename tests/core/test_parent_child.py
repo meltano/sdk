@@ -261,7 +261,6 @@ def test_child_sync_exception(
 @time_machine.travel(DATETIME, tick=False)
 @pytest.mark.snapshot
 def test_one_parent_many_children(
-    tap: MyTap,
     caplog: pytest.LogCaptureFixture,
     snapshot: Snapshot,
 ):
@@ -308,6 +307,8 @@ def test_one_parent_many_children(
 
         def get_records(self, context: dict | None):
             """Get dummy records."""
+            assert context is not None
+
             yield {
                 "id": context["child_id"],
                 "composite_id": f"{context['pid']}-{context['child_id']}",
@@ -338,4 +339,118 @@ def test_one_parent_many_children(
     buf.seek(0)
 
     snapshot.assert_match(buf.read(), "singer.jsonl")
+    snapshot.assert_match(caplog.text, "stderr.log")
+
+
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_preprocess_context_removes_large_payload(
+    caplog: pytest.LogCaptureFixture,
+    snapshot: Snapshot,
+):
+    """Test that preprocess_context can remove large payloads from parent context."""
+
+    class ParentWithLargePayload(Stream):
+        """A parent stream that passes large data in context."""
+
+        name = "parent_large"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string"},
+            },
+        }
+
+        def get_child_context(
+            self,
+            record: dict,
+            context: dict | None,  # noqa: ARG002
+        ) -> dict | None:
+            """Create context with large payload for child streams."""
+            return {
+                "parent_id": record["id"],
+                "parent_name": record["name"],
+                # Simulate large payload that should be removed
+                "large_payload": list(range(1, 1001)),
+            }
+
+        def get_records(self, context: dict | None):  # noqa: ARG002
+            """Get dummy records."""
+            yield {"id": 1, "name": "Parent A"}
+            yield {"id": 2, "name": "Parent B"}
+
+    class ChildWithPreprocess(Stream):
+        """A child stream that preprocesses context to remove large payloads."""
+
+        name = "child_preprocessed"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "parent_id": {"type": "integer"},
+                "parent_name": {"type": "string"},
+                "sum": {"type": "integer"},
+            },
+        }
+        parent_stream_type = ParentWithLargePayload
+
+        def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
+            super().__init__(*args, **kwargs)
+            self._numbers = []
+
+        def set_numbers(self, numbers: list[int]) -> None:
+            self._numbers = numbers
+
+        def preprocess_context(self, context: dict) -> dict:
+            """Remove large payload from parent context."""
+            self.set_numbers(context.pop("large_payload", []))
+            return context
+
+        def get_records(self, context: dict | None):
+            """Get dummy records."""
+            # Verify that large_payload was removed
+            assert context is not None
+            assert "large_payload" not in context
+            assert "parent_id" in context
+            assert "parent_name" in context
+
+            yield {
+                "id": 1,
+                "parent_id": context["parent_id"],
+                "parent_name": context["parent_name"],
+                "sum": sum(self._numbers),
+            }
+
+    class TapWithPreprocess(Tap):
+        """A tap testing preprocess_context functionality."""
+
+        name = "tap-preprocess"
+
+        def discover_streams(self):
+            """Discover streams."""
+            return [
+                ParentWithLargePayload(self),
+                ChildWithPreprocess(self),
+            ]
+
+    tap = TapWithPreprocess()
+
+    buf = io.StringIO()
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap.name)),
+    ):
+        tap.sync_all()
+
+    buf.seek(0)
+
+    output = buf.read()
+
+    # Verify that large_payload doesn't appear in the output
+    assert "large_payload" not in output
+    assert '"data": "xxx' not in output
+
+    snapshot.assert_match(output, "singer.jsonl")
     snapshot.assert_match(caplog.text, "stderr.log")

@@ -307,6 +307,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             max_tries=self.backoff_max_tries,
             on_backoff=self.backoff_handler,
             jitter=self.backoff_jitter,
+            logger=self.logger,
         )(func)
         return decorator
 
@@ -324,8 +325,9 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         Returns:
             TODO
         """
+        authenticated_request = self.authenticator(prepared_request)
         response = self.requests_session.send(
-            prepared_request,
+            authenticated_request,
             timeout=self.timeout,
             allow_redirects=self.allow_redirects,
         )
@@ -333,7 +335,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             endpoint=self.path,
             response=response,
             context=context,
-            extra_tags={"url": prepared_request.path_url}
+            extra_tags={"url": authenticated_request.path_url}
             if self._LOG_REQUEST_METRIC_URLS
             else None,
         )
@@ -425,7 +427,6 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             "url": url,
             "params": params,
             "headers": headers,
-            "auth": self.authenticator,
         }
 
         if self.payload_as_json:
@@ -434,6 +435,16 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             prepare_kwargs["data"] = request_data
 
         return self.build_prepared_request(**prepare_kwargs)
+
+    def get_http_request_counter(self) -> metrics.Counter:
+        """Get the HTTP request counter for the stream.
+
+        Returns:
+            The HTTP request counter for the stream.
+
+        .. versionadded:: 0.51.0
+        """
+        return metrics.http_request_counter(self.name, endpoint=self.path)
 
     def request_records(self, context: Context | None) -> t.Iterable[dict]:
         """Request records from REST endpoint(s), returning response records.
@@ -450,8 +461,8 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         decorated_request = self.request_decorator(self._request)
         pages = 0
 
-        with metrics.http_request_counter(self.name, self.path) as request_counter:
-            request_counter.context = context
+        with self.get_http_request_counter() as request_counter:
+            request_counter.with_context(context)
 
             while not paginator.finished:
                 prepared_request = self.prepare_request(
@@ -491,11 +502,14 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         """TODO.
 
         Args:
-            endpoint: TODO
-            response: TODO
+            endpoint: The endpoint of the request.
+            response: The response object.
             context: Stream partition or context dictionary.
-            extra_tags: TODO
+            extra_tags: A dictionary of extra tags to add to the metric.
         """
+        if not self._LOG_REQUEST_METRICS:
+            return
+
         extra_tags = extra_tags or {}
         if context:
             extra_tags[metrics.Tag.CONTEXT] = context
@@ -713,6 +727,23 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             details: backoff invocation details
                 https://github.com/litl/backoff#event-handlers
         """
+        if (
+            (exc := details.get("exception"))
+            and isinstance(exc, RetriableAPIError)
+            and exc.response is not None
+        ):
+            self.log(
+                "Backing off %0.2f seconds after %d tries "
+                "for URL %s, failing with status %s: %s",
+                details.get("wait"),
+                details.get("tries"),
+                self.path,
+                exc.response.status_code,
+                exc.response.reason,
+                level=logging.ERROR,
+            )
+            return
+
         self.log(
             "Backing off %0.2f seconds after %d tries "
             "calling function %s with args %s and kwargs "

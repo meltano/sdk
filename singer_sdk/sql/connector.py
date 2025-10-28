@@ -162,7 +162,6 @@ class SQLToJSONSchema:
 
         Args:
             config: The configuration dictionary.
-            use_singer_decimal: Whether to represent numbers as `string` with
                 the `x-singer.decimal` format instead of as `number`.
 
         Returns:
@@ -1011,7 +1010,6 @@ class SQLConnector:  # noqa: PLR0904
             schema_name: Schema name to inspect
             table_name: Name of the table or a view
             is_view: Flag whether this object is a view, returned by `get_object_names`
-            reflect_indices: Whether to reflect indices
             reflected_columns: List of reflected columns
             reflected_pk: Reflected primary key
             reflected_indices: List of reflected indices

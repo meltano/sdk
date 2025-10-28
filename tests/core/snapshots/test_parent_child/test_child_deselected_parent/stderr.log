@@ -1,6 +1,6 @@
-INFO my-tap.parent Beginning full_table sync of 'parent'
+INFO my-tap.parent Beginning sync of 'parent' in full_table mode
 INFO my-tap.parent Flushing 2 child contexts for stream 'parent'
-INFO my-tap.child Beginning full_table sync of 'child' with context: {'pid': 1}
-INFO my-tap.child Beginning full_table sync of 'child' with context: {'pid': 2}
+INFO my-tap.child Beginning sync of 'child' in full_table mode with context: {'pid': 1}
+INFO my-tap.child Beginning sync of 'child' in full_table mode with context: {'pid': 2}
 INFO my-tap.parent Flushing 1 child contexts for stream 'parent'
-INFO my-tap.child Beginning full_table sync of 'child' with context: {'pid': 3}
+INFO my-tap.child Beginning sync of 'child' in full_table mode with context: {'pid': 3}

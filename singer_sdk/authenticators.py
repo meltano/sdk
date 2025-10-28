@@ -636,6 +636,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         Raises:
             RuntimeError: When OAuth login fails.
         """
+        self.logger.info("Requesting new access token")
         request_time = utc_now()
         auth_request_payload = self.oauth_request_payload
         token_response = requests.post(

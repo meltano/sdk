@@ -5,6 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.52.3 (2025-10-28)
+
+### 🐛 Fixes
+
+- [#3343](https://github.com/meltano/sdk/issues/3343) Fix regression in v0.52.0 where the `auth` attribute was removed from the `RESTStream.requests_session` instance
+- [#3333](https://github.com/meltano/sdk/issues/3333) Add more context and clear instructions to cookiecutter prompts
+
+### 📚 Documentation Improvements
+
+- [#3338](https://github.com/meltano/sdk/issues/3338) Document how to cast values to different data types in inline stream maps
+- [#3337](https://github.com/meltano/sdk/issues/3337) FAQ - my stream sync is not resumed after it is interrupted in the middle of a run
+- [#3336](https://github.com/meltano/sdk/issues/3336) Explain parameter replacement in parent-child streams
+- [#3335](https://github.com/meltano/sdk/issues/3335) Improve documentation around extended JSONPath parser
+- [#3332](https://github.com/meltano/sdk/issues/3332) Clarify that JSONL batch files should contain raw records and not Singer `RECORD` messages
+- [#3331](https://github.com/meltano/sdk/issues/3331) Document that multiple state messages can be output from a single target run
+
+## v0.52.2 (2025-10-22)
+
+### 🐛 Fixes
+
+- [#3328](https://github.com/meltano/sdk/issues/3328) Support MIT as a license option in templates
+- [#3327](https://github.com/meltano/sdk/issues/3327) Emit a log when requesting a new access token in OAuth taps
+
+## v0.52.1 (2025-10-22)
+
+### 📦 Packaging changes
+
+- [#3325](https://github.com/meltano/sdk/issues/3325) Fix `python_version` marker in `backoff` dependency
+
+## v0.52.0 (2025-10-21)
+
+### ✨ New
+
+- [#3311](https://github.com/meltano/sdk/issues/3311) New `Stream.preprocess_context` lets developers make changes to the stream context before it is frozen
+
+### 🐛 Fixes
+
+- [#3322](https://github.com/meltano/sdk/issues/3322) Improved error message when a request is being retried, including URL path and status code
+- [#3313](https://github.com/meltano/sdk/issues/3313) Ignore the `Programming Language :: Python :: 3 :: Only` classifier when generating `--about` output
+- [#3312](https://github.com/meltano/sdk/issues/3312) Update template readmes to use fewer commands
+
+### ⚙️ Under the Hood
+
+- [#3321](https://github.com/meltano/sdk/issues/3321) Delay stream request authentication until right before the request is sent, so the request is re-authenticated if it needs to be retried
+- [#3315](https://github.com/meltano/sdk/issues/3315) Pass stream logger to the backoff handler
+- [#3314](https://github.com/meltano/sdk/issues/3314) Add `schema` to extra log fields when schema validation fails
+
+### 📚 Documentation Improvements
+
+- [#3316](https://github.com/meltano/sdk/issues/3316) Update annotation of `backoff_wait_generator` in example
+
+## v0.51.0 (2025-10-17)
+
+### ✨ New
+
+- [#3307](https://github.com/meltano/sdk/issues/3307) Allow the user to override stream and sink meters (i.e. counters & timers)
+
+### ⚙️ Under the Hood
+
+- [#3302](https://github.com/meltano/sdk/issues/3302) In target logs, put the sink name in a trailing position
+
+## v0.50.2 (2025-10-06)
+
+### 🐛 Fixes
+
+- [#3297](https://github.com/meltano/sdk/issues/3297) Honor the `_LOG_REQUEST_METRICS` stream parameter
+
 ## v0.50.1 (2025-10-03)
 
 ### 🐛 Fixes

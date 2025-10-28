@@ -111,23 +111,16 @@ Your project comes with a custom `meltano.yml` project file already created. Ope
 the file.
 -->
 
-Next, install Meltano (if you haven't already) and any needed plugins:
+Use Meltano to run an EL pipeline:
 
 ```bash
 # Install meltano
 uv tool install meltano
-# Initialize meltano within this directory
-cd {{ cookiecutter.target_id }}
-meltano install
-```
 
-Now you can test and orchestrate using Meltano:
-
-```bash
-# Test invocation:
+# Test invocation
 meltano invoke {{ cookiecutter.target_id }} --version
 
-# OR run a test ELT pipeline with the Smoke Test sample tap:
+# Run a test EL pipeline
 meltano run tap-smoke-test {{ cookiecutter.target_id }}
 ```
 
