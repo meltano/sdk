@@ -7,6 +7,7 @@ import json
 import sys
 import typing as t
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from functools import cached_property
 from pathlib import Path
 from types import ModuleType
@@ -40,6 +41,9 @@ if t.TYPE_CHECKING:
     from singer_sdk.streams.core import Stream
 
 
+Schema: t.TypeAlias = dict[str, t.Any]
+
+
 class SchemaNotFoundError(DiscoveryError):
     """Raised when a schema is not found."""
 
@@ -55,15 +59,37 @@ class UnsupportedOpenAPISpec(Exception):
 _TKey = TypeVar("_TKey", bound=t.Hashable, default=str)
 
 
+class SchemaPreprocessor(t.Protocol):
+    """The schema protocol pre-processor protocol."""
+
+    def preprocess_schema(self, schema: Schema) -> Schema:
+        """Pre-process schema."""
+
+
 class SchemaSource(ABC, t.Generic[_TKey]):
     """Abstract base class for schema sources."""
 
     def __init__(self) -> None:
         """Initialize the schema source with caching."""
-        self._schema_cache: dict[_TKey, dict[str, t.Any]] = {}
+        self._schema_cache: dict[_TKey, Schema] = {}
+        self._preprocessor: SchemaPreprocessor | None = None
 
     @t.final
-    def get_schema(self, key: _TKey, /) -> dict[str, t.Any]:
+    def preprocess_schema(self, schema: Schema) -> Schema:
+        """Pre-process the schema before providing it to the stream.
+
+        Args:
+            schema: A JSON schema.
+
+        Returns:
+            The pre-processed schema.
+        """
+        if self._preprocessor is None:
+            return schema
+        return self._preprocessor.preprocess_schema(schema)
+
+    @t.final
+    def get_schema(self, key: _TKey, /) -> Schema:
         """Convenience method to get a schema component.
 
         Args:
@@ -86,10 +112,11 @@ class SchemaSource(ABC, t.Generic[_TKey]):
                 msg = "Schema must be a JSON object"  # type: ignore[unreachable]
                 raise SchemaNotValidError(msg)
             self._schema_cache[key] = schema
-        return self._schema_cache[key]
+
+        return self.preprocess_schema(self._schema_cache[key])
 
     @abstractmethod
-    def fetch_schema(self, key: _TKey) -> dict[str, t.Any]:
+    def fetch_schema(self, key: _TKey) -> Schema:
         """Retrieve a JSON schema from this source.
 
         Args:
@@ -113,6 +140,13 @@ class StreamSchema(t.Generic[_TKey]):
     Example:
         class MyStream(Stream):
             schema = StreamSchema(SchemaDirectory("schemas"))
+
+    Example with OpenAPI normalization:
+        class MyStream(Stream):
+            schema = StreamSchema(
+                OpenAPISchema("openapi.json"),
+                normalize=True,
+            )
     """
 
     def __init__(
@@ -132,7 +166,7 @@ class StreamSchema(t.Generic[_TKey]):
         self.key = key
 
     @t.final
-    def __get__(self, obj: Stream, objtype: type[Stream]) -> dict[str, t.Any]:
+    def __get__(self, obj: Stream, objtype: type[Stream]) -> Schema:
         """Get the schema from the schema source.
 
         Args:
@@ -144,11 +178,7 @@ class StreamSchema(t.Generic[_TKey]):
         """
         return self.get_stream_schema(obj, objtype)
 
-    def get_stream_schema(
-        self,
-        stream: Stream,
-        stream_class: type[Stream],  # noqa: ARG002
-    ) -> dict[str, t.Any]:
+    def get_stream_schema(self, stream: Stream, stream_class: type[Stream]) -> Schema:  # noqa: ARG002
         """Get the schema from the stream instance or class.
 
         Args:
@@ -167,6 +197,86 @@ def _load_yaml(content: bytes) -> dict[str, t.Any]:
     return yaml.safe_load(content)  # type: ignore[no-any-return]
 
 
+class OpenAPISchemaNormalizer(SchemaPreprocessor):
+    """A schema pre-processor that normalizes OpenAPI JSON schemas."""
+
+    def handle_object(self, schema: Schema) -> Schema:
+        """Handle JSON object schemas.
+
+        Args:
+            schema: A JSON schema.
+
+        Returns:
+            The processed object schema.
+        """
+        for prop, prop_schema in schema.get("properties", {}).items():
+            schema["properties"][prop] = self.normalize_schema(prop_schema)
+        return schema
+
+    def handle_array_items(self, schema: Schema) -> Schema:
+        """Handle JSON array item schemas.
+
+        Args:
+            schema: A JSON schema.
+
+        Returns:
+            The processed array items schema.
+        """
+        return self.normalize_schema(schema)
+
+    def handle_enum(self, schema: Schema) -> Schema:  # noqa: PLR6301
+        """Handle enum values in a JSON schema.
+
+        Args:
+            schema: A JSON schema.
+
+        Returns:
+            The schema with `enum` handled.
+        """
+        schema.pop("enum", None)
+        return schema
+
+    def normalize_schema(self, schema: Schema) -> Schema:
+        """Normalize an OpenAPI schema to standard JSON Schema.
+
+        This method applies a series of transformations to convert OpenAPI-specific
+        schema features (like 'nullable') into standard JSON Schema constructs.
+
+        Args:
+            schema: The schema to normalize.
+
+        Returns:
+            A normalized schema dictionary.
+        """
+        result = deepcopy(schema)
+        schema_type: str | list[str] = result.get("type", [])
+
+        if "object" in schema_type:
+            result = self.handle_object(result)
+
+        elif "array" in schema_type and (items := result.get("items")):
+            result["items"] = self.handle_array_items(items)
+
+        if "oneOf" in result and len(result["oneOf"]) == 1:
+            inner = result.pop("oneOf")[0]
+            result.update(self.normalize_schema(inner))
+            schema_type = result.get("type", [])
+
+        types = [schema_type] if isinstance(schema_type, str) else schema_type
+        if result.pop("nullable", False) and "null" not in types:
+            result["type"] = [*types, "null"]
+
+        # Remove 'enum' keyword
+        if "enum" in result:
+            result = self.handle_enum(result)
+
+        return result
+
+    @override
+    def preprocess_schema(self, schema: Schema) -> Schema:
+        return self.normalize_schema(schema)
+
+
 class OpenAPISchema(SchemaSource[_TKey]):
     """Schema source for OpenAPI specifications.
 
@@ -182,6 +292,7 @@ class OpenAPISchema(SchemaSource[_TKey]):
         self,
         source: str | Path | Traversable,
         *args: t.Any,
+        preprocessor: OpenAPISchemaNormalizer | None = None,
         **kwargs: t.Any,
     ) -> None:
         """Initialize the OpenAPI schema source.
@@ -189,6 +300,7 @@ class OpenAPISchema(SchemaSource[_TKey]):
         Args:
             source: URL, file path, or Traversable object pointing to an OpenAPI spec
                 in JSON or YAML format.
+            preprocessor: OpenAPI schema normalizer.
             *args: Additional arguments to pass to the superclass constructor.
             **kwargs: Additional keyword arguments to pass to the superclass
                 constructor.
@@ -200,6 +312,7 @@ class OpenAPISchema(SchemaSource[_TKey]):
             ".yaml": _load_yaml,
             ".yml": _load_yaml,
         }
+        self._preprocessor = preprocessor or OpenAPISchemaNormalizer()
 
     @cached_property
     def spec(self) -> dict[str, t.Any]:
@@ -286,7 +399,7 @@ class OpenAPISchema(SchemaSource[_TKey]):
 
         assert_never(self.spec_version)
 
-    def resolve_schema(self, key: _TKey) -> dict[str, t.Any]:
+    def resolve_schema(self, key: _TKey) -> Schema:
         """Resolve the schema references.
 
         Args:
@@ -313,7 +426,7 @@ class OpenAPISchema(SchemaSource[_TKey]):
         return resolved_schema
 
     @override
-    def fetch_schema(self, key: _TKey) -> dict[str, t.Any]:
+    def fetch_schema(self, key: _TKey) -> Schema:
         """Retrieve a schema from the OpenAPI specification.
 
         Args:
@@ -356,7 +469,7 @@ class SchemaDirectory(SchemaSource):
         self.extension = extension
 
     @override
-    def fetch_schema(self, key: str) -> dict[str, t.Any]:
+    def fetch_schema(self, key: str) -> Schema:
         """Retrieve schema from the file.
 
         Args:
