@@ -66,7 +66,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
                     ),
                     Property(
                         "__filter__",
-                        StringType(pattern=r"^bool\((.*)\)$"),
+                        StringType(),
                         title="Filter",
                         description=(
                             "Filter out records from a stream. A string expression "
@@ -79,7 +79,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
                     ),
                     Property(
                         "__key_properties__",
-                        ArrayType(StringType),
+                        ArrayType(StringType()),
                         title="Key Properties",
                         description="Primary key properties for the stream.",
                         nullable=False,
