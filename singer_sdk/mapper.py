@@ -443,10 +443,9 @@ class CustomStreamMap(StreamMap):
         """
         stream_map = copy.copy(stream_map)
 
-        filter_rule: str | None = None
+        filter_rule: str | None = stream_map.pop(MAPPER_FILTER_OPTION, None)
         include_by_default = True
-        if stream_map and MAPPER_FILTER_OPTION in stream_map:
-            filter_rule = stream_map.pop(MAPPER_FILTER_OPTION)
+        if filter_rule is not None:
             try:
                 filter_rule_parsed: ast.Expr = ast.parse(filter_rule).body[0]  # type: ignore[assignment]
             except (SyntaxError, IndexError) as ex:
