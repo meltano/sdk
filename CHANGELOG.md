@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🐛 Fixes
 
 - [#3350](https://github.com/meltano/sdk/issues/3350) Configuration schema now reflects that casting to `bool(...)` in stream map `__filter__` expressions is not required
-- Configuration schema now reflects that casting to `bool(...)` in stream map `__filter__` expressions is not required
 - [#3349](https://github.com/meltano/sdk/issues/3349) Update templates
 
 ## v0.52.4 (2025-10-28)
