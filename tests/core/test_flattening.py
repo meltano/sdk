@@ -3,7 +3,11 @@ from __future__ import annotations
 import pytest
 
 from singer_sdk.exceptions import ConfigValidationError
-from singer_sdk.helpers._flattening import flatten_record, get_flattening_options
+from singer_sdk.helpers._flattening import (
+    flatten_record,
+    flatten_schema,
+    get_flattening_options,
+)
 
 
 @pytest.mark.parametrize(
@@ -85,3 +89,98 @@ def test_get_flattening_options_missing_max_depth():
         exc.value.errors[0]
         == "flattening_max_depth is required when flattening is enabled"
     )
+
+
+def test_flatten_schema_with_typeless_properties():
+    """Test that properties without explicit types are preserved during flattening.
+
+    This test demonstrates issue #1886 where properties defined as empty objects
+    (e.g., "PropertyName": {}) are dropped from the schema during flattening,
+    causing validation failures when records contain these fields.
+    """
+    schema = {
+        "type": "object",
+        "properties": {
+            "id": {"type": "string"},
+            "changes": {
+                "type": "object",
+                "properties": {
+                    "field": {"type": "string"},
+                    "OldValue": {},  # Typeless property
+                    "NewValue": {},  # Typeless property
+                },
+            },
+        },
+    }
+
+    # Flatten with max_level=1 to flatten one level deep
+    flattened = flatten_schema(schema, max_level=1)
+
+    # The typeless properties should be preserved in the flattened schema
+    # They should be converted to string type to hold JSON-serialized values
+    assert "changes__field" in flattened["properties"]
+    assert "changes__OldValue" in flattened["properties"], (
+        "Typeless property 'OldValue' should be preserved in flattened schema"
+    )
+    assert "changes__NewValue" in flattened["properties"], (
+        "Typeless property 'NewValue' should be preserved in flattened schema"
+    )
+
+    # These properties should be typed as string to allow JSON serialization
+    assert "string" in flattened["properties"]["changes__OldValue"]["type"]
+    assert "string" in flattened["properties"]["changes__NewValue"]["type"]
+
+
+def test_flatten_record_with_typeless_property_values():
+    """Test that records with typeless properties are flattened correctly.
+
+    This test verifies that actual data in typeless properties is properly
+    JSON-serialized when flattening records, addressing issue #1886.
+    """
+    schema = {
+        "type": "object",
+        "properties": {
+            "id": {"type": "string"},
+            "changes": {
+                "type": "object",
+                "properties": {
+                    "field": {"type": "string"},
+                    "OldValue": {},  # Typeless property
+                    "NewValue": {},  # Typeless property
+                },
+            },
+        },
+    }
+
+    # First, flatten the schema
+    flattened_schema = flatten_schema(schema, max_level=1)
+
+    # Create a record with various types of values in the typeless properties
+    record = {
+        "id": "123",
+        "changes": {
+            "field": "status",
+            "OldValue": {"nested": "object", "with": ["array", "values"]},
+            "NewValue": "simple string",
+        },
+    }
+
+    # Flatten the record using the flattened schema
+    flattened_record = flatten_record(
+        record, flattened_schema=flattened_schema, max_level=1
+    )
+
+    # Verify the flattened record structure
+    assert flattened_record["id"] == "123"
+    assert flattened_record["changes__field"] == "status"
+
+    # Typeless properties with complex values should be JSON-serialized
+    assert "changes__OldValue" in flattened_record
+    assert (
+        flattened_record["changes__OldValue"]
+        == '{"nested":"object","with":["array","values"]}'
+    )
+
+    # Typeless properties with simple values should be preserved
+    assert "changes__NewValue" in flattened_record
+    assert flattened_record["changes__NewValue"] == "simple string"
