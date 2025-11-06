@@ -13,7 +13,7 @@ from {{ cookiecutter.library_name }}.sinks import (
 
 
 class Target{{ cookiecutter.destination_name }}({{ target_class }}):
-    """Sample target for {{ cookiecutter.destination_name }}."""
+    """Target for {{ cookiecutter.destination_name }}."""
 
     name = "{{ cookiecutter.target_id }}"
 
