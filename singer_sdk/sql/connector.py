@@ -1396,28 +1396,22 @@ class SQLConnector:  # noqa: PLR0904
             as_temp_table: True to create a temp table.
         """
         table_key = str(full_table_name)
-        table_exists = self.table_exists(full_table_name=full_table_name)
         table_already_prepared = self._tables_prepared.get(table_key, False)
-
-        if not table_exists:
-            self.create_empty_table(
-                full_table_name=full_table_name,
-                schema=schema,
-                primary_keys=primary_keys,
-                partition_keys=partition_keys,
-                as_temp_table=as_temp_table,
-            )
-            self._tables_prepared[table_key] = True
-            return
 
         # Only drop/recreate on OVERWRITE if this is the first time preparing the table
         # in this target run. Subsequent schema changes should add columns
         # incrementally.
         if (
-            self.config["load_method"] == TargetLoadMethods.OVERWRITE
-            and not table_already_prepared
+            (
+                self.config["load_method"] == TargetLoadMethods.OVERWRITE
+                and not table_already_prepared
+            )
+            or not self.table_exists(full_table_name=full_table_name)  # First-time sync
         ):
-            self.get_table(full_table_name=full_table_name).drop(self._engine)
+            _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+            meta = sa.MetaData()
+            table = sa.Table(table_name, meta, schema=schema_name)
+            table.drop(self._engine, checkfirst=True)
             self.create_empty_table(
                 full_table_name=full_table_name,
                 schema=schema,
