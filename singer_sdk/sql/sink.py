@@ -56,7 +56,6 @@ class SQLSink(BatchSink, t.Generic[_C]):
         """
         self._connector: _C
         self._connector = connector or self.connector_class(dict(target.config))
-        self._table_prepared = False
         super().__init__(target, stream_name, schema, key_properties)
 
     @property
@@ -264,14 +263,12 @@ class SQLSink(BatchSink, t.Generic[_C]):
         This method prepares the target table on first call to ensure that
         records are not lost when multiple schema messages arrive for the same stream.
         """
-        if not self._table_prepared:
-            self.connector.prepare_table(
-                full_table_name=self.full_table_name,
-                schema=self.conform_schema(self.schema),
-                primary_keys=self.key_properties,
-                as_temp_table=False,
-            )
-            self._table_prepared = True
+        self.connector.prepare_table(
+            full_table_name=self.full_table_name,
+            schema=self.conform_schema(self.schema),
+            primary_keys=self.key_properties,
+            as_temp_table=False,
+        )
 
     def start_batch(self, context: dict) -> None:  # noqa: ARG002
         """Start a new batch with the given context.

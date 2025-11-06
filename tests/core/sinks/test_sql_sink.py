@@ -5,6 +5,7 @@ import typing as t
 
 import pytest
 import sqlalchemy
+import sqlalchemy.engine
 import sqlalchemy.types
 
 from singer_sdk.connectors import SQLConnector
@@ -199,7 +200,8 @@ class TestSQLSink:
 
         with subtests.test("table does not exist yet"):
             # Verify table is NOT prepared during setup
-            assert sink._table_prepared is False
+            table_key = str(sink.full_table_name)
+            assert not sink.connector._tables_prepared.get(table_key, False)
             # Verify table does not exist yet
             assert not sink.connector.table_exists(sink.full_table_name)
 
@@ -209,7 +211,213 @@ class TestSQLSink:
             _ = sink._get_context(record)
 
             # After getting context (which calls start_batch), table should be prepared
-            assert sink._table_prepared is True
+            table_key = str(sink.full_table_name)
+            assert sink.connector._tables_prepared.get(table_key, False) is True
 
             # Verify table now exists
             assert sink.connector.table_exists(sink.full_table_name)
+
+    def test_schema_change_does_not_drop_table(self):
+        """Test that schema changes don't cause table drops in OVERWRITE mode.
+
+        This test verifies the complete fix for issue #3237 where a schema change
+        mid-stream would cause the second sink to drop and recreate the table,
+        losing data from the first sink that hadn't been drained yet.
+
+        The test verifies that:
+        1. First sink creates the table with initial schema
+        2. Records are inserted by first sink
+        3. Second sink (with new schema) does NOT drop the table
+        4. Table retains records from first sink
+        5. New columns are added to support the new schema
+        """
+        target = DummySQLTarget(
+            config={
+                "sqlalchemy_url": "sqlite:///",
+                "load_method": "overwrite",
+            }
+        )
+
+        initial_schema = {
+            "properties": {
+                "id": {"type": ["string", "null"]},
+                "name": {"type": ["string", "null"]},
+            },
+        }
+
+        # Create first sink with initial schema
+        sink1: SQLSink = target.get_sink(
+            "test_stream",
+            schema=initial_schema,
+            key_properties=["id"],
+        )
+
+        # Process a record through sink1 (this creates the table)
+        record1 = {"id": "1", "name": "Alice"}
+        _ = sink1._get_context(record1)
+
+        # Verify table exists and has the expected columns
+        assert sink1.connector.table_exists(sink1.full_table_name)
+        table = sink1.connector.get_table(sink1.full_table_name)
+        assert "id" in table.columns
+        assert "name" in table.columns
+
+        # Insert a record
+        sink1.bulk_insert_records(
+            full_table_name=sink1.full_table_name,
+            schema=initial_schema,
+            records=[record1],
+        )
+
+        # Now simulate a schema change - new schema has an additional column
+        new_schema = {
+            "properties": {
+                "id": {"type": ["string", "null"]},
+                "name": {"type": ["string", "null"]},
+                "age": {"type": ["integer", "null"]},
+            },
+        }
+
+        # Create second sink with new schema (this simulates what happens
+        # when a schema message arrives mid-stream)
+        sink2: SQLSink = target.get_sink(
+            "test_stream",
+            schema=new_schema,
+            key_properties=["id"],
+        )
+
+        # Process a record through sink2
+        record2 = {"id": "2", "name": "Bob", "age": 30}
+        _ = sink2._get_context(record2)
+
+        # CRITICAL: Table should still exist (not dropped and recreated)
+        assert sink2.connector.table_exists(sink2.full_table_name)
+
+        # Verify the table now has all three columns
+        table: sqlalchemy.Table = sink2.connector.get_table(sink2.full_table_name)
+        assert "id" in table.columns
+        assert "name" in table.columns
+        assert "age" in table.columns
+
+        # CRITICAL: Verify that data from sink1 is still present
+        # (this is the key test - data should NOT have been lost)
+        with sink2.connector._connect() as conn:
+            result: sqlalchemy.engine.CursorResult = conn.execute(
+                sqlalchemy.text(f"SELECT * FROM {sink2.full_table_name}")  # noqa: S608
+            )
+            rows = result.fetchall()
+            # Should have the record we inserted through sink1
+            assert len(rows) == 1
+            assert rows == [("1", "Alice", None)]
+
+    def test_schema_change_with_undrained_records(self):
+        """Test the exact scenario from PR #3340 comment.
+
+        This test simulates the scenario described in
+        https://github.com/meltano/sdk/pull/3340#issuecomment-3461649362:
+
+        1. First sink drains some records (id=1,2)
+        2. First sink has buffered but undrained record (id=3)
+        3. Schema change occurs, new sink created
+        4. New sink's table preparation should NOT drop the table
+        5. First sink should still be able to drain its buffered record
+        6. All records should be preserved
+        """
+        target = DummySQLTarget(
+            config={
+                "sqlalchemy_url": "sqlite:///",
+                "load_method": "overwrite",
+            }
+        )
+
+        initial_schema = {
+            "properties": {
+                "id": {"type": ["string", "null"]},
+            },
+        }
+
+        # Create first sink with initial schema
+        sink1: SQLSink = target.get_sink(
+            "test_stream",
+            schema=initial_schema,
+            key_properties=["id"],
+        )
+
+        # Simulate processing and draining records 1-2
+        _ = sink1._get_context({"id": "1"})
+        sink1.bulk_insert_records(
+            full_table_name=sink1.full_table_name,
+            schema=initial_schema,
+            records=[
+                {"id": "1"},
+                {"id": "2"},
+            ],
+        )
+
+        # Verify records 1-2 are in the table
+        with sink1.connector._connect() as conn:
+            result = conn.execute(
+                sqlalchemy.text(f"SELECT COUNT(*) as cnt FROM {sink1.full_table_name}")  # noqa: S608
+            )
+            count = next(iter(result)).cnt
+            assert count == 2, "Should have 2 records after first drain"
+
+        # Now simulate a schema change - new schema has an additional column
+        new_schema = {
+            "properties": {
+                "id": {"type": ["string", "null"]},
+                "name": {"type": ["string", "null"]},
+            },
+        }
+
+        # Create second sink with new schema (simulates schema message mid-stream)
+        sink2: SQLSink = target.get_sink(
+            "test_stream",
+            schema=new_schema,
+            key_properties=["id"],
+        )
+
+        # Process records through sink2
+        _ = sink2._get_context({"id": "4", "name": "Dave"})
+
+        # CRITICAL: Records 1-2 should STILL be in the table (not lost to drop/recreate)
+        with sink2.connector._connect() as conn:
+            result = conn.execute(
+                sqlalchemy.text(f"SELECT COUNT(*) as cnt FROM {sink2.full_table_name}")  # noqa: S608
+            )
+            count = next(iter(result)).cnt
+            assert count == 2, "Records 1-2 should still exist after schema change"
+
+        # Now simulate draining a buffered record from sink1 (with old schema)
+        # This tests that the old sink can still drain to the evolved table
+        sink1.bulk_insert_records(
+            full_table_name=sink1.full_table_name,
+            schema=initial_schema,
+            records=[{"id": "3"}],
+        )
+
+        # Drain records from sink2
+        sink2.bulk_insert_records(
+            full_table_name=sink2.full_table_name,
+            schema=new_schema,
+            records=[{"id": "4", "name": "Dave"}, {"id": "5", "name": "Eve"}],
+        )
+
+        # Verify all records are present
+        with sink2.connector._connect() as conn:
+            result: sqlalchemy.engine.CursorResult = conn.execute(
+                sqlalchemy.text(
+                    f"SELECT id, name FROM {sink2.full_table_name} ORDER BY id"  # noqa: S608
+                )
+            )
+            rows = result.fetchall()
+            assert len(rows) == 5, "Should have all 5 records"
+
+            # Records from both sinks should be present
+            assert rows == [
+                ("1", None),
+                ("2", None),
+                ("3", None),
+                ("4", "Dave"),
+                ("5", "Eve"),
+            ]
