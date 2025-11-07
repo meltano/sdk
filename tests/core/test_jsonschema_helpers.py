@@ -38,9 +38,13 @@ from singer_sdk.typing import (
     DurationType,
     EmailType,
     HostnameType,
+    IDNEmailType,
+    IDNHostnameType,
     IntegerType,
     IPv4Type,
     IPv6Type,
+    IRIReferenceType,
+    IRIType,
     JSONPointerType,
     ObjectType,
     PropertiesList,
@@ -305,10 +309,24 @@ def test_property_title():
             },
         ),
         (
+            IDNEmailType,
+            {
+                "type": ["string"],
+                "format": "idn-email",
+            },
+        ),
+        (
             HostnameType,
             {
                 "type": ["string"],
                 "format": "hostname",
+            },
+        ),
+        (
+            IDNHostnameType,
+            {
+                "type": ["string"],
+                "format": "idn-hostname",
             },
         ),
         (
@@ -340,10 +358,24 @@ def test_property_title():
             },
         ),
         (
+            IRIType,
+            {
+                "type": ["string"],
+                "format": "iri",
+            },
+        ),
+        (
             URIReferenceType,
             {
                 "type": ["string"],
                 "format": "uri-reference",
+            },
+        ),
+        (
+            IRIReferenceType,
+            {
+                "type": ["string"],
+                "format": "iri-reference",
             },
         ),
         (
