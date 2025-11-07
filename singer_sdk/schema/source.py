@@ -60,10 +60,20 @@ _TKey = TypeVar("_TKey", bound=t.Hashable, default=str)
 
 
 class SchemaPreprocessor(t.Protocol):
-    """The schema protocol pre-processor protocol."""
+    """Protocol for schema preprocessors that transform schemas before use.
+
+    Implementations can normalize, validate, or modify schemas as needed.
+    """
 
     def preprocess_schema(self, schema: Schema) -> Schema:
-        """Pre-process schema."""
+        """Pre-process a schema.
+
+        Args:
+            schema: A JSON schema to preprocess.
+
+        Returns:
+            The preprocessed schema.
+        """
 
 
 class SchemaSource(ABC, t.Generic[_TKey]):
@@ -141,11 +151,17 @@ class StreamSchema(t.Generic[_TKey]):
         class MyStream(Stream):
             schema = StreamSchema(SchemaDirectory("schemas"))
 
-    Example with OpenAPI normalization:
+    Example with OpenAPI:
+        class MyStream(Stream):
+            schema = StreamSchema(OpenAPISchema("openapi.json"))
+
+    Example with custom OpenAPI preprocessor:
         class MyStream(Stream):
             schema = StreamSchema(
-                OpenAPISchema("openapi.json"),
-                normalize=True,
+                OpenAPISchema(
+                    "openapi.json",
+                    preprocessor=CustomPreprocessor(),
+                )
             )
     """
 
@@ -198,7 +214,14 @@ def _load_yaml(content: bytes) -> dict[str, t.Any]:
 
 
 class OpenAPISchemaNormalizer(SchemaPreprocessor):
-    """A schema pre-processor that normalizes OpenAPI JSON schemas."""
+    """A schema pre-processor that normalizes OpenAPI JSON schemas.
+
+    Converts OpenAPI-specific schema features into standard JSON Schema constructs:
+    - Converts `nullable: true` to type arrays with "null"
+    - Unwraps single-element `oneOf` constructs
+    - Removes `enum` keywords
+    - Recursively processes nested object properties and array items
+    """
 
     def handle_object(self, schema: Schema) -> Schema:
         """Handle JSON object schemas.
@@ -300,7 +323,9 @@ class OpenAPISchema(SchemaSource[_TKey]):
         Args:
             source: URL, file path, or Traversable object pointing to an OpenAPI spec
                 in JSON or YAML format.
-            preprocessor: OpenAPI schema normalizer.
+            preprocessor: Optional schema normalizer. If not provided, an
+                OpenAPISchemaNormalizer instance will be created automatically to
+                normalize OpenAPI schemas to standard JSON Schema.
             *args: Additional arguments to pass to the superclass constructor.
             **kwargs: Additional keyword arguments to pass to the superclass
                 constructor.
