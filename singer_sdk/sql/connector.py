@@ -1412,6 +1412,7 @@ class SQLConnector:  # noqa: PLR0904
             meta = sa.MetaData()
             table = sa.Table(table_name, meta, schema=schema_name)
             table.drop(self._engine, checkfirst=True)
+            self.logger.info("Creating empty table %s", full_table_name)
             self.create_empty_table(
                 full_table_name=full_table_name,
                 schema=schema,
