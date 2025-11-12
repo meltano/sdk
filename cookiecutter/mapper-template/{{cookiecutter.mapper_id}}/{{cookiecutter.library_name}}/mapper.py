@@ -20,7 +20,7 @@ if t.TYPE_CHECKING:
 
 
 class {{ cookiecutter.name }}Mapper(InlineMapper):
-    """Sample mapper for {{ cookiecutter.name }}."""
+    """Mapper for {{ cookiecutter.name }}."""
 
     name = "{{ cookiecutter.mapper_id }}"
 

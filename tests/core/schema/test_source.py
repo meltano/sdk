@@ -665,3 +665,118 @@ class TestStreamSchemaDescriptor:
         ) as exc:
             _ = stream.schema
         assert isinstance(exc.value.__cause__, FileNotFoundError)
+
+
+class TestOpenAPISchemaNormalization:
+    """Test OpenAPI schema normalization functionality."""
+
+    @pytest.fixture
+    def openapi(self) -> dict[str, t.Any]:
+        """OpenAPI 3.0 spec with nullable attributes."""
+        return {
+            "openapi": "3.0.0",
+            "info": {"title": "Test API", "version": "1.0.0"},
+            "components": {
+                "schemas": {
+                    "User": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "string"},
+                            "name": {"type": "string", "nullable": True},
+                            "email": {"type": "string", "nullable": True},
+                            "age": {"type": "integer", "nullable": True},
+                        },
+                        "required": ["id"],
+                    },
+                    "Product": {
+                        "type": "object",
+                        "properties": {
+                            "sku": {"type": "string"},
+                            "title": {"type": "string", "nullable": True},
+                            "tags": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "nullable": True,
+                            },
+                        },
+                    },
+                    "SimpleOneOf": {
+                        "oneOf": [{"type": "string"}],
+                    },
+                    "NestedOneOf": {
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "oneOf": [{"type": "integer", "nullable": True}],
+                            },
+                        },
+                    },
+                    "Status": {
+                        "type": "string",
+                        "enum": ["active", "inactive", "pending"],
+                    },
+                    "Priority": {
+                        "type": "integer",
+                        "enum": [1, 2, 3, 4, 5],
+                    },
+                }
+            },
+        }
+
+    def test_normalize(
+        self,
+        tmp_path: Path,
+        openapi: dict[str, t.Any],
+        subtests: pytest.Subtests,
+    ):
+        """Test that nullable attributes are converted to type arrays."""
+        openapi_file = tmp_path / "openapi.json"
+        openapi_file.write_text(json.dumps(openapi))
+
+        source = OpenAPISchema(openapi_file)
+        schema = source.get_schema("User")
+
+        # Apply normalization without key properties
+        normalized = source.preprocess_schema(schema)
+
+        with subtests.test("nullable is handled"):
+            # Check that nullable properties have type arrays
+            assert normalized["properties"]["name"]["type"] == ["string", "null"]
+            assert normalized["properties"]["email"]["type"] == ["string", "null"]
+            assert normalized["properties"]["age"]["type"] == ["integer", "null"]
+
+            # nullable attribute is removed
+            assert "nullable" not in normalized["properties"]["name"]
+
+        with subtests.test("oneOf is handled"):
+            # Test simple oneOf
+            schema = source.get_schema("SimpleOneOf")
+            normalized = source.preprocess_schema(schema)
+            assert normalized == {"type": "string"}
+            assert "oneOf" not in normalized
+
+            # Test nested oneOf with nullable
+            schema = source.get_schema("NestedOneOf")
+            normalized = source.preprocess_schema(schema)
+            assert "oneOf" not in normalized["properties"]["value"]
+            assert normalized["properties"]["value"]["type"] == ["integer", "null"]
+
+        with subtests.test("enum is handled"):
+            # Test string enum
+            schema = source.get_schema("Status")
+            normalized = source.preprocess_schema(schema)
+            assert "enum" not in normalized
+            assert normalized["type"] == "string"
+
+            # Test integer enum
+            schema = source.get_schema("Priority")
+            normalized = source.preprocess_schema(schema)
+            assert "enum" not in normalized
+            assert normalized["type"] == "integer"
+
+        with subtests.test("arrays are handled"):
+            schema = source.get_schema("Product")
+            normalized = source.preprocess_schema(schema)
+
+            # Check that the array itself can be nullable
+            assert normalized["properties"]["tags"]["type"] == ["array", "null"]

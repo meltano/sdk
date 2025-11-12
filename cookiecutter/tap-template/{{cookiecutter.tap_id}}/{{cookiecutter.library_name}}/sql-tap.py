@@ -9,7 +9,7 @@ from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }
 
 
 class Tap{{ cookiecutter.source_name }}(SQLTap):
-    """{{ cookiecutter.source_name }} tap class."""
+    """Singer tap for {{ cookiecutter.source_name }}."""
 
     name = "{{ cookiecutter.tap_id }}"
 

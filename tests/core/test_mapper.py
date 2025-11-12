@@ -977,10 +977,16 @@ class MappedTap(Tap):
             id="json_dumps",
         ),
         pytest.param(
-            {"mystream": {"__filter__": "bool(count < 20)"}},
+            {"mystream": {"__filter__": "count < 20"}},
             {"flattening_enabled": False, "flattening_max_depth": 0},
             "filter_records.jsonl",
             id="filter_records",
+        ),
+        pytest.param(
+            {"mystream": {"__filter__": "bool(count < 20)"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "filter_records_cast_to_bool.jsonl",
+            id="filter_records_cast_to_bool",
         ),
         pytest.param(
             {"mystream": "__NULL__"},

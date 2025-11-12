@@ -11,20 +11,20 @@ If the default [`JSONSchemaToSQL`](connectors.sql.JSONSchemaToSQL) instance does
 ```python
 import functools
 
-import sqlalchemy as sa
 from singer_sdk import typing as th
 from singer_sdk.connectors import JSONSchemaToSQL, SQLConnector
+from sqlalchemy.types import VARCHAR
 
 from my_sqlalchemy_dialect import VectorType
 
 
-def custom_array_to_sql(jsonschema: dict) -> VectorType | sa.types.VARCHAR:
+def custom_array_to_sql(jsonschema: dict) -> VectorType | VARCHAR:
     """Custom mapping for arrays of numbers."""
     if items := jsonschema.get("items"):
         if items.get("type") == "number":
             return VectorType()
 
-    return sa.types.VARCHAR()
+    return VARCHAR()
 
 
 class MyConnector(SQLConnector):
@@ -62,14 +62,14 @@ class MyConnector(SQLConnector):
 You can register new type handlers for the `x-sql-datatype` extension:
 
 ```python
-from my_sqlalchemy_dialect import URI
+from sqlalchemy.types import SMALLINT
 
 
 class MyConnector(SQLConnector):
     @functools.cached_property
     def jsonschema_to_sql(self):
         to_sql = JSONSchemaToSQL()
-        to_sql.register_sql_datatype_handler("smallint", sa.types.SMALLINT)
+        to_sql.register_sql_datatype_handler("smallint", SMALLINT)
         return to_sql
 ```
 
