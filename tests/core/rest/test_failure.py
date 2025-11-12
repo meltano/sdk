@@ -2,12 +2,7 @@ from __future__ import annotations
 
 import json
 import typing as t
-
-try:
-    from contextlib import nullcontext
-except ImportError:
-    from contextlib2 import nullcontext
-
+from contextlib import nullcontext
 from enum import Enum
 
 import pytest
