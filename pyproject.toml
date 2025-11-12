@@ -62,7 +62,7 @@ parquet = [
 ]
 
 testing = [
-    "pytest>=7.5",
+    "pytest>=9",
 ]
 
 faker = [
@@ -106,7 +106,7 @@ dev = [
 docs = [
     "furo>=2024.5.6",
     "myst-parser>=3",
-    "pytest>=8",
+    "pytest>=9",
     "sphinx>=7",
     "sphinx-copybutton>=0.5.2",
     "sphinx-inline-tabs>=2023.4.21",
@@ -131,7 +131,7 @@ packages = [
 testing = [
     "coverage[toml]>=7.9",
     "fastjsonschema>=2.19.1",
-    "pytest>=7.2.1",
+    "pytest>=9",
     "pytest-benchmark>=4.0.0",
     "pytest-github-actions-annotate-failures>=0.3.0",
     "pytest-snapshot>=0.9.0",
@@ -178,7 +178,7 @@ include = [
 fallback-version = "0.0.0"
 source = "vcs"
 
-[tool.pytest.ini_options]
+[tool.pytest]
 addopts = [
     "--durations=10",
     "-m",
@@ -188,15 +188,15 @@ addopts = [
     "--strict-markers",
 ]
 filterwarnings = [
-    "error",
-    "once:'asyncio.iscoroutinefunction' is deprecated:DeprecationWarning",  # https://github.com/litl/backoff/pull/220
-    "once:No records were available to test:UserWarning",
+    'error',
+    '''once:'asyncio.iscoroutinefunction' is deprecated:DeprecationWarning''',  # https://github.com/litl/backoff/pull/220
+    'once:No records were available to test:UserWarning',
     # https://github.com/meltano/sdk/issues/1354
-    "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
+    'ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning',
     # TODO: Address this SQLite warning in Python 3.13+
-    "ignore::ResourceWarning",
+    'ignore::ResourceWarning',
     # Our own warnings
-    "once::singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
+    'once::singer_sdk.helpers._compat.SingerSDKDeprecationWarning',
 ]
 log_cli_level = "INFO"
 log_format = "%(levelname)s %(name)s %(message)s"
@@ -209,9 +209,9 @@ markers = [
     "darwin: Tests that only run on Darwin",
     "snapshot: Tests that use pytest-snapshot",
 ]
-minversion = "7"
+minversion = "9"
 testpaths = ["tests"]
-norecursedirs = "cookiecutter"
+norecursedirs = ["cookiecutter"]
 xfail_strict = false
 
 [tool.commitizen]
