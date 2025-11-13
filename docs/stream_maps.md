@@ -47,12 +47,23 @@ three distinct fields:
 - `user__last_name`
 - `user__id`
 
+#### Flattening Configuration Options
+
+When flattening is enabled, the following configuration options are available:
+
+- `flattening_enabled`: Set to `true` to enable schema flattening.
+- `flattening_max_depth`: The maximum depth of nested properties to flatten (required when flattening is enabled).
+- `flattening_max_key_length`: The maximum length of flattened key names (optional, defaults to 255 characters).
+
+When a flattened key would exceed the `flattening_max_key_length`, the SDK automatically abbreviates parent key names to keep the total length under the limit while preserving all the key components.
+
 #### Flattening Example
 
 ````{tab} meltano.yml
 ```yaml
 flattening_enabled: true
 flattening_max_depth: 1   # flatten only top-level properties
+flattening_max_key_length: 100  # optional, defaults to 255
 ```
 ````
 
@@ -60,7 +71,8 @@ flattening_max_depth: 1   # flatten only top-level properties
 ```json
 {
   "flattening_enabled": true,
-  "flattening_max_depth": 1
+  "flattening_max_depth": 1,
+  "flattening_max_key_length": 100
 }
 ```
 ````

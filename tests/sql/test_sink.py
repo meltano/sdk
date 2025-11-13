@@ -7,9 +7,9 @@ import pytest
 import sqlalchemy
 import sqlalchemy.types
 
-from singer_sdk.connectors import SQLConnector
+from singer_sdk import SQLTarget
+from singer_sdk.connectors.sql import SQLConnector
 from singer_sdk.sinks.sql import SQLSink
-from singer_sdk.target_base import SQLTarget
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003

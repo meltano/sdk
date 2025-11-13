@@ -6,13 +6,14 @@ Starting with version `0.42.0`, the Meltano Singer SDK provides a clean way to m
 
 ### Custom JSON Schema mapping
 
-If the default [`JSONSchemaToSQL`](connectors.sql.JSONSchemaToSQL) instance doesn't cover all the types supported by the SQLAlchemy dialect in your target, you can override the {attr}`SQLConnector.jsonschema_to_sql <singer_sdk.SQLConnector.jsonschema_to_sql>` property and register a new type handler for the type you need to support:
+If the default [`JSONSchemaToSQL`](sql.connector.JSONSchemaToSQL) instance doesn't cover all the types supported by the SQLAlchemy dialect in your target, you can override the {attr}`SQLConnector.jsonschema_to_sql <singer_sdk.sql.SQLConnector.jsonschema_to_sql>` property and register a new type handler for the type you need to support:
 
 ```python
 import functools
 
 from singer_sdk import typing as th
-from singer_sdk.connectors import JSONSchemaToSQL, SQLConnector
+from singer_sdk.sql import SQLConnector
+from singer_sdk.sql.connector import JSONSchemaToSQL
 from sqlalchemy.types import VARCHAR
 
 from my_sqlalchemy_dialect import VectorType

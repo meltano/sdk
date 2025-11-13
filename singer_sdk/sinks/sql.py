@@ -11,6 +11,9 @@ import warnings
 
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 
+if t.TYPE_CHECKING:
+    from singer_sdk.sql import SQLSink  # noqa: F401
+
 
 def __getattr__(name: str) -> t.Any:  # noqa: ANN401
     """Provide backward compatibility for moved SQL classes.
