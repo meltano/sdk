@@ -12,9 +12,6 @@ from singer_sdk import SQLTarget
 from singer_sdk.connectors.sql import SQLConnector
 from singer_sdk.sinks.sql import SQLSink
 
-if t.TYPE_CHECKING:
-    from pytest_subtests import SubTests
-
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
 else:
@@ -169,53 +166,6 @@ class TestSQLSink:
 
         assert sink.table_name == expected_table_name
         assert sink.schema_name == expected_schema_name
-
-    def test_table_preparation_deferred_until_first_batch(self, subtests: SubTests):
-        """Test that table preparation is deferred until first batch.
-
-        This test verifies the fix for issue #3237 where table preparation
-        occurred during setup() instead of during the first batch, causing
-        data loss when multiple schema messages arrived for the same stream.
-
-        The test verifies that:
-        1. Table is NOT prepared during sink setup()
-        2. Table IS prepared during the first batch (start_batch)
-        3. This prevents data loss when schemas change mid-stream
-        """
-        target = DummySQLTarget(config={"sqlalchemy_url": "sqlite:///"})
-
-        schema = {
-            "properties": {
-                "id": {"type": ["string", "null"]},
-                "name": {"type": ["string", "null"]},
-            },
-        }
-
-        # Create a sink
-        sink: SQLSink = target.get_sink(
-            "test_stream",
-            schema=schema,
-            key_properties=["id"],
-        )
-
-        with subtests.test("table does not exist yet"):
-            # Verify table is NOT prepared during setup
-            table_key = str(sink.full_table_name)
-            assert not sink.connector._tables_prepared.get(table_key, False)
-            # Verify table does not exist yet
-            assert not sink.connector.table_exists(sink.full_table_name)
-
-        with subtests.test("table is prepared after first batch"):
-            # Process a record (this triggers _get_context which calls start_batch)
-            record = {"id": "1", "name": "Alice"}
-            _ = sink._get_context(record)
-
-            # After getting context (which calls start_batch), table should be prepared
-            table_key = str(sink.full_table_name)
-            assert sink.connector._tables_prepared.get(table_key, False) is True
-
-            # Verify table now exists
-            assert sink.connector.table_exists(sink.full_table_name)
 
     def test_schema_change_does_not_drop_table(self):
         """Test that schema changes don't cause table drops in OVERWRITE mode.

@@ -239,14 +239,17 @@ class SQLSink(BatchSink, t.Generic[_C]):
     def setup(self) -> None:
         """Set up Sink.
 
-        This method is called on Sink creation, and creates the required Schema
-        entity in the target database.
-
-        Note: Table preparation is deferred to the first batch to avoid data loss
-        when multiple schema messages arrive for the same stream.
+        This method is called on Sink creation, and creates the required Schema and
+        Table entities in the target database.
         """
         if self.schema_name:
             self.connector.prepare_schema(self.schema_name)
+        self.connector.prepare_table(
+            full_table_name=self.full_table_name,
+            schema=self.conform_schema(self.schema),
+            primary_keys=self.key_properties,
+            as_temp_table=False,
+        )
 
     @property
     def key_properties(self) -> t.Sequence[str]:
@@ -257,30 +260,6 @@ class SQLSink(BatchSink, t.Generic[_C]):
         """
         return [self.conform_name(key, "column") for key in super().key_properties]
 
-    def _ensure_table_prepared(self) -> None:
-        """Ensure the target table is prepared.
-
-        This method prepares the target table on first call to ensure that
-        records are not lost when multiple schema messages arrive for the same stream.
-        """
-        self.connector.prepare_table(
-            full_table_name=self.full_table_name,
-            schema=self.conform_schema(self.schema),
-            primary_keys=self.key_properties,
-            as_temp_table=False,
-        )
-
-    def start_batch(self, context: dict) -> None:  # noqa: ARG002
-        """Start a new batch with the given context.
-
-        This method prepares the target table on the first batch to ensure that
-        records are not lost when multiple schema messages arrive for the same stream.
-
-        Args:
-            context: Stream partition or context dictionary.
-        """
-        self._ensure_table_prepared()
-
     def process_batch(self, context: dict) -> None:
         """Process a batch with the given batch context.
 
@@ -290,10 +269,6 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Args:
             context: Stream partition or context dictionary.
         """
-        # Ensure table is prepared before processing batch
-        # This is needed for BATCH messages that bypass start_batch()
-        self._ensure_table_prepared()
-
         # If duplicates are merged, these can be tracked via
         # :meth:`~singer_sdk.Sink.tally_duplicate_merged()`.
         self.bulk_insert_records(
@@ -416,8 +391,10 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Args:
             new_version: The version number to activate.
         """
-        # Ensure table is prepared before activating version
-        self._ensure_table_prepared()
+        # There's nothing to do if the table doesn't exist yet
+        # (which it won't the first time the stream is processed)
+        if not self.connector.table_exists(self.full_table_name):
+            return
 
         deleted_at = utc_now()
 
