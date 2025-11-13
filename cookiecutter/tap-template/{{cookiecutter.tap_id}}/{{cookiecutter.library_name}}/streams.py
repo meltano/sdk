@@ -2,17 +2,12 @@
 
 from __future__ import annotations
 
-from importlib import resources
-
 from singer_sdk import typing as th  # JSON Schema typing helpers
 
 from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }}Stream
 
-# TODO: Delete this is if not using json files for schema definition
-SCHEMAS_DIR = resources.files(__package__) / "schemas"
-
-
 {%- if cookiecutter.stream_type == "GraphQL" %}
+
 # TODO: - Override `UsersStream` and `GroupsStream` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
 
@@ -93,6 +88,7 @@ class GroupsStream({{ cookiecutter.source_name }}Stream):
 
 
 {%- elif cookiecutter.stream_type in ("Other", "REST") %}
+
 # TODO: - Override `UsersStream` and `GroupsStream` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
 

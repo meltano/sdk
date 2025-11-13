@@ -9,12 +9,14 @@ import typing as t
 
 import pytest
 
-from singer_sdk import SQLConnector
+from singer_sdk import SQLTarget
 from singer_sdk import typing as th
+from singer_sdk.connectors.sql import SQLConnector
 from singer_sdk.helpers._typing import DatetimeErrorTreatmentEnum
 from singer_sdk.helpers.capabilities import PluginCapabilities
-from singer_sdk.sinks import BatchSink, SQLSink
-from singer_sdk.target_base import SQLTarget, Target
+from singer_sdk.sinks import BatchSink
+from singer_sdk.sinks.sql import SQLSink
+from singer_sdk.target_base import Target
 
 if t.TYPE_CHECKING:
     from _pytest.config import Config
@@ -139,7 +141,7 @@ class SQLConnectorMock(SQLConnector):
     """A Mock SQLConnector class."""
 
 
-class SQLSinkMock(SQLSink[SQLConnectorMock]):
+class SQLSinkMock(SQLSink):
     """A mock Sink class."""
 
     name = "sql-sink-mock"

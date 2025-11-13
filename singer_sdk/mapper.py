@@ -107,7 +107,7 @@ class StreamMap(metaclass=abc.ABCMeta):
         """
         return (
             self.flattening_options is not None
-            and self.flattening_options.flattening_enabled
+            and self.flattening_options.enabled
             and self.flattening_options.max_level > 0
         )
 
@@ -130,6 +130,7 @@ class StreamMap(metaclass=abc.ABCMeta):
             flattened_schema=self.transformed_schema,
             max_level=self.flattening_options.max_level,
             separator=self.flattening_options.separator,
+            max_key_length=self.flattening_options.max_key_length,
         )
 
     def flatten_schema(self, raw_schema: dict) -> dict:
@@ -148,6 +149,7 @@ class StreamMap(metaclass=abc.ABCMeta):
             raw_schema,
             separator=self.flattening_options.separator,
             max_level=self.flattening_options.max_level,
+            max_key_length=self.flattening_options.max_key_length,
         )
 
     @abc.abstractmethod
@@ -679,7 +681,7 @@ class PluginMapper:
         self.stream_maps: dict[str, list[StreamMap]] = {}
         self.map_config = plugin_config.get("stream_map_config", {})
         self.faker_config = plugin_config.get("faker_config", {})
-        self.flattening_options = get_flattening_options(plugin_config)
+        self.flattening_options = get_flattening_options(plugin_config)  # type: ignore[arg-type]
         self.default_mapper_type: type[DefaultStreamMap] = SameRecordTransform
         self.logger = logger
 

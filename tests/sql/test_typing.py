@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 import sqlalchemy.types
+from sqlalchemy import types
 
 from singer_sdk import typing as th
 
@@ -75,3 +76,28 @@ def test_convert_sql_type_to_jsonschema_type(
         result = th.to_jsonschema_type(sql_type)
 
     assert result == is_of_jsonschema_type
+
+
+@pytest.mark.filterwarnings("ignore:Use `JSONSchemaToSQL` instead.:DeprecationWarning")
+@pytest.mark.parametrize(
+    "jsonschema_type,expected",
+    [
+        ({"type": ["string", "null"]}, types.VARCHAR),
+        ({"type": ["integer", "null"]}, types.INTEGER),
+        ({"type": ["number", "null"]}, types.DECIMAL),
+        ({"type": ["boolean", "null"]}, types.BOOLEAN),
+        ({"type": "object", "properties": {}}, types.VARCHAR),
+        ({"type": "array"}, types.VARCHAR),
+        ({"format": "date", "type": ["string", "null"]}, types.DATE),
+        ({"format": "time", "type": ["string", "null"]}, types.TIME),
+        ({"format": "date-time", "type": ["string", "null"]}, types.DATETIME),
+        (
+            {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+            types.DATETIME,
+        ),
+        ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, types.INTEGER),
+        ({"type": ["array", "object", "boolean", "null"]}, types.VARCHAR),
+    ],
+)
+def test_to_sql_type(jsonschema_type, expected):
+    assert isinstance(th.to_sql_type(jsonschema_type), expected)

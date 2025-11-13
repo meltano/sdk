@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import logging
-import typing as t
 from pathlib import Path
 
 import pytest
@@ -10,16 +9,13 @@ import pytest
 import singer_sdk.typing as th
 from singer_sdk.configuration._dict_config import parse_environment_config
 
-if t.TYPE_CHECKING:
-    from pytest_subtests import SubTests
-
 CONFIG_JSONSCHEMA = th.PropertiesList(
     th.Property("prop1", th.StringType, required=True),
     th.Property("prop2", th.StringType),
-    th.Property("prop3", th.ArrayType(th.StringType)),
+    th.Property("prop3", th.ArrayType(th.StringType())),
     th.Property("prop4", th.IntegerType),
     th.Property("prop5", th.BooleanType),
-    th.Property("prop6", th.ArrayType(th.IntegerType)),
+    th.Property("prop6", th.ArrayType(th.IntegerType())),
     th.Property(
         "prop7",
         th.ObjectType(
@@ -50,7 +46,7 @@ def config_file2(tmpdir) -> str:
 
 def test_get_env_var_config(
     monkeypatch: pytest.MonkeyPatch,
-    subtests: SubTests,
+    subtests: pytest.Subtests,
     caplog: pytest.LogCaptureFixture,
 ):
     """Test settings parsing from environment variables."""
