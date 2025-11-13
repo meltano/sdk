@@ -1,7 +1,7 @@
-﻿singer_sdk.SQLTap
-=================
+﻿singer_sdk.sql.SQLTap
+=====================
 
-.. currentmodule:: singer_sdk
+.. currentmodule:: singer_sdk.sql
 
 .. autoclass:: SQLTap
     :members:

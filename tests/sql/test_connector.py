@@ -8,6 +8,9 @@ from unittest import mock
 
 import pytest
 import sqlalchemy
+import sqlalchemy.engine
+import sqlalchemy.exc
+import sqlalchemy.schema
 import sqlalchemy.types
 from sqlalchemy.dialects import registry, sqlite
 from sqlalchemy.engine.default import DefaultDialect
@@ -720,18 +723,27 @@ def test_custom_type_to_jsonschema():
 
             For example, a scale of 4 translates to a multipleOf 0.0001.
             """
-            return {"type": ["number"], "multipleOf": 10**-column_type.scale}
+            schema = {"type": ["number"]}
+            if column_type.scale is not None:
+                schema["multipleOf"] = 10**-column_type.scale
+            return schema
 
         @to_jsonschema.register(MyType)
-        def my_type_to_jsonschema(self, column_type) -> dict:  # noqa: ARG002
-            return {"type": ["string"], "contentEncoding": "base64"}
+        def my_type_to_jsonschema(self, column_type: MyType) -> dict:
+            return {
+                "type": ["string"],
+                "contentEncoding": "base64",
+                "x-impl": column_type.__class__.__name__,
+            }
 
     m = MyMap()
 
     assert m.to_jsonschema(MyType()) == {
         "type": ["string"],
         "contentEncoding": "base64",
+        "x-impl": "MyType",
     }
+    assert m.to_jsonschema(sqlalchemy.NUMERIC()) == {"type": ["number"]}
     assert m.to_jsonschema(sqlalchemy.NUMERIC(scale=2)) == {
         "type": ["number"],
         "multipleOf": 0.01,

@@ -9,7 +9,6 @@ import logging
 import typing as t
 
 import pytest
-from sqlalchemy import types
 
 from singer_sdk.helpers._typing import (
     TypeConformanceLevel,
@@ -23,7 +22,6 @@ from singer_sdk.typing import (
     Property,
     StringType,
     append_type,
-    to_sql_type,
 )
 
 if t.TYPE_CHECKING:
@@ -402,31 +400,6 @@ def test_conform_object_no_additional_properties(
 )
 def test_conform_primitives(value: t.Any, type_dict: dict, expected: t.Any):
     assert _conform_primitive_property(value, type_dict) == expected
-
-
-@pytest.mark.filterwarnings("ignore:Use `JSONSchemaToSQL` instead.:DeprecationWarning")
-@pytest.mark.parametrize(
-    "jsonschema_type,expected",
-    [
-        ({"type": ["string", "null"]}, types.VARCHAR),
-        ({"type": ["integer", "null"]}, types.INTEGER),
-        ({"type": ["number", "null"]}, types.DECIMAL),
-        ({"type": ["boolean", "null"]}, types.BOOLEAN),
-        ({"type": "object", "properties": {}}, types.VARCHAR),
-        ({"type": "array"}, types.VARCHAR),
-        ({"format": "date", "type": ["string", "null"]}, types.DATE),
-        ({"format": "time", "type": ["string", "null"]}, types.TIME),
-        ({"format": "date-time", "type": ["string", "null"]}, types.DATETIME),
-        (
-            {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
-            types.DATETIME,
-        ),
-        ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, types.INTEGER),
-        ({"type": ["array", "object", "boolean", "null"]}, types.VARCHAR),
-    ],
-)
-def test_to_sql_type(jsonschema_type, expected):
-    assert isinstance(to_sql_type(jsonschema_type), expected)
 
 
 @pytest.mark.parametrize(
