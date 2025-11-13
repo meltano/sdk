@@ -38,6 +38,7 @@ if t.TYPE_CHECKING:
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.singerlib.encoding.base import GenericSingerReader
     from singer_sdk.sinks import Sink
+    from singer_sdk.sql import SQLTarget  # noqa: F401
 
 _MAX_PARALLELISM = 8
 

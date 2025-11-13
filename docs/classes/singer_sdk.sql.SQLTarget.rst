@@ -1,7 +1,7 @@
-﻿singer_sdk.SQLTarget
-====================
+﻿singer_sdk.sql.SQLTarget
+========================
 
-.. currentmodule:: singer_sdk
+.. currentmodule:: singer_sdk.sql
 
 .. autoclass:: SQLTarget
     :members:

@@ -12,9 +12,9 @@ Plugin Classes
 
     Tap
     Target
-    SQLTap
-    SQLTarget
     InlineMapper
+    sql.SQLTap
+    sql.SQLTarget
 
 Stream Classes
 --------------
@@ -26,7 +26,7 @@ Stream Classes
     Stream
     RESTStream
     GraphQLStream
-    SQLStream
+    sql.SQLStream
 
 Sink Classes
 ------------
@@ -38,7 +38,7 @@ Sink Classes
     Sink
     RecordSink
     BatchSink
-    SQLSink
+    sql.SQLSink
 
 SQL Connector for SQL Taps and Targets
 --------------------------------------
@@ -47,7 +47,7 @@ SQL Connector for SQL Taps and Targets
     :toctree: classes
     :template: class.rst
 
-    SQLConnector
+    sql.SQLConnector
 
 Authenticator Classes
 ---------------------
@@ -151,5 +151,5 @@ Other
     :toctree: classes
     :template: class.rst
 
-    connectors.sql.SQLToJSONSchema
-    connectors.sql.JSONSchemaToSQL
+    sql.connector.SQLToJSONSchema
+    sql.connector.JSONSchemaToSQL

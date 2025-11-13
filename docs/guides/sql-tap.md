@@ -10,7 +10,7 @@ Starting with version `0.41.0`, the Meltano Singer SDK provides a clean way to m
 
 ### Default type mapping
 
-The Singer SDK automatically handles the most common SQLAlchemy column types, using [`functools.singledispatchmethod`](inv:python:py:class:#functools.singledispatchmethod) to process each type. See the [`SQLToJSONSchema`](connectors.sql.SQLToJSONSchema) reference documentation for details.
+The Singer SDK automatically handles the most common SQLAlchemy column types, using [`functools.singledispatchmethod`](inv:python:py:class:#functools.singledispatchmethod) to process each type. See the [`SQLToJSONSchema`](sql.connector.SQLToJSONSchema) reference documentation for details.
 
 ### Custom type mapping
 
@@ -21,8 +21,8 @@ import functools
 
 from sqlalchemy import Numeric
 from singer_sdk import typing as th
-from singer_sdk.connectors import SQLConnector
-from singer_sdk.connectors.sql import SQLToJSONSchema
+from singer_sdk.sql import SQLConnector
+from singer_sdk.sql.connector import SQLToJSONSchema
 
 from my_sqlalchemy_dialect import VectorType
 
