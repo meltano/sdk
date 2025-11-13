@@ -9,7 +9,6 @@ import logging
 import typing as t
 
 import pytest
-import sqlalchemy as sa
 
 from singer_sdk.helpers._typing import (
     TypeConformanceLevel,
@@ -23,7 +22,6 @@ from singer_sdk.typing import (
     Property,
     StringType,
     append_type,
-    to_sql_type,
 )
 
 if t.TYPE_CHECKING:
@@ -60,7 +58,7 @@ def test_simple_schema_conforms_types():
 
 def test_primitive_arrays_are_conformed():
     schema = PropertiesList(
-        Property("list", ArrayType(BooleanType)),
+        Property("list", ArrayType(BooleanType())),
     ).to_dict()
 
     record = {
@@ -83,7 +81,7 @@ def test_only_root_fields_are_conformed_for_root_level():
     schema = PropertiesList(
         Property("primitive", BooleanType),
         Property("object", PropertiesList(Property("value", BooleanType))),
-        Property("list", ArrayType(BooleanType)),
+        Property("list", ArrayType(BooleanType())),
     ).to_dict()
 
     record = {
@@ -112,7 +110,7 @@ def test_no_fields_are_conformed_for_none_level():
     schema = PropertiesList(
         Property("primitive", BooleanType),
         Property("object", PropertiesList(Property("value", BooleanType))),
-        Property("list", ArrayType(BooleanType)),
+        Property("list", ArrayType(BooleanType())),
     ).to_dict()
 
     record = {
@@ -404,37 +402,6 @@ def test_conform_primitives(value: t.Any, type_dict: dict, expected: t.Any):
     assert _conform_primitive_property(value, type_dict) == expected
 
 
-@pytest.mark.filterwarnings("ignore:Use `JSONSchemaToSQL` instead.:DeprecationWarning")
-@pytest.mark.parametrize(
-    "jsonschema_type,expected",
-    [
-        ({"type": ["string", "null"]}, sa.types.VARCHAR),
-        ({"type": ["integer", "null"]}, sa.types.INTEGER),
-        ({"type": ["number", "null"]}, sa.types.DECIMAL),
-        ({"type": ["boolean", "null"]}, sa.types.BOOLEAN),
-        ({"type": "object", "properties": {}}, sa.types.VARCHAR),
-        ({"type": "array"}, sa.types.VARCHAR),
-        ({"format": "date", "type": ["string", "null"]}, sa.types.DATE),
-        ({"format": "time", "type": ["string", "null"]}, sa.types.TIME),
-        (
-            {"format": "date-time", "type": ["string", "null"]},
-            sa.types.DATETIME,
-        ),
-        (
-            {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
-            sa.types.DATETIME,
-        ),
-        ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, sa.types.INTEGER),
-        (
-            {"type": ["array", "object", "boolean", "null"]},
-            sa.types.VARCHAR,
-        ),
-    ],
-)
-def test_to_sql_type(jsonschema_type, expected):
-    assert isinstance(to_sql_type(jsonschema_type), expected)
-
-
 @pytest.mark.parametrize(
     "type_dict,expected",
     [
@@ -468,7 +435,7 @@ def test_append_null(type_dict: dict, expected: dict):
 def test_iterate_properties_list():
     primitive_property = Property("primitive", BooleanType)
     object_property = Property("object", PropertiesList(Property("value", BooleanType)))
-    list_property = Property("list", ArrayType(BooleanType))
+    list_property = Property("list", ArrayType(BooleanType()))
 
     properties_list = PropertiesList(primitive_property, object_property, list_property)
 

@@ -1,7 +1,7 @@
-﻿singer_sdk.SQLStream
-====================
+﻿singer_sdk.sql.SQLStream
+========================
 
-.. currentmodule:: singer_sdk
+.. currentmodule:: singer_sdk.sql
 
 .. autoclass:: SQLStream
     :members:

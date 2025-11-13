@@ -37,8 +37,6 @@ else:
 if t.TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from pytest_subtests.plugin import SubTests
-
 
 @pytest.fixture(scope="session")
 def resolved_user_schema() -> dict[str, t.Any]:
@@ -729,7 +727,7 @@ class TestOpenAPISchemaNormalization:
         self,
         tmp_path: Path,
         openapi: dict[str, t.Any],
-        subtests: SubTests,
+        subtests: pytest.Subtests,
     ):
         """Test that nullable attributes are converted to type arrays."""
         openapi_file = tmp_path / "openapi.json"

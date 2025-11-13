@@ -128,7 +128,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
             ),
             Property(
                 "locale",
-                OneOf(StringType, ArrayType(StringType)),
+                OneOf(StringType, ArrayType(StringType())),
                 title="Faker Locale",
                 description=(
                     "One or more LCID locale strings to produce localized output for: "
@@ -160,6 +160,12 @@ FLATTENING_CONFIG = PropertiesList(
         IntegerType(),
         title="Max Flattening Depth",
         description="The max depth to flatten schemas.",
+    ),
+    Property(
+        "flattening_max_key_length",
+        IntegerType(),
+        title="Max Key Length",
+        description="The maximum length of a flattened key.",
     ),
 ).to_dict()
 BATCH_CONFIG = PropertiesList(

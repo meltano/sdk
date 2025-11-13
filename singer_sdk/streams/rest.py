@@ -277,6 +277,9 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         if response.content:
             msg += f", content is {response.text}"
 
+        if response.headers:
+            msg += f", headers: {','.join(response.headers.keys())}"
+
         return msg
 
     def request_decorator(self, func: RequestFunc) -> RequestFunc:

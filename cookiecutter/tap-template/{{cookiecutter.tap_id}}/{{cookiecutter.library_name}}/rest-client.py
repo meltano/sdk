@@ -4,40 +4,53 @@ from __future__ import annotations
 
 import decimal
 import sys
-import typing as t
 {% if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from functools import cached_property
 {% endif -%}
-from importlib import resources
+from typing import TYPE_CHECKING, Any, ClassVar
 
 {% if cookiecutter.auth_method  == "API Key" -%}
+from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.authenticators import APIKeyAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
+from {{ cookiecutter.library_name }} import schemas
+
 {% elif cookiecutter.auth_method  == "Bearer Token" -%}
+from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.authenticators import BearerTokenAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
+from {{ cookiecutter.library_name }} import schemas
+
 {% elif cookiecutter.auth_method == "Basic Auth" -%}
 from requests.auth import HTTPBasicAuth
+from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+
+from {{ cookiecutter.library_name }} import schemas
 
 {% elif cookiecutter.auth_method == "Custom or N/A" -%}
+from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+
+from {{ cookiecutter.library_name }} import schemas
 
 {% elif cookiecutter.auth_method in ("OAuth2", "JWT") -%}
+from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
+from {{ cookiecutter.library_name }} import schemas
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
 
 {% endif -%}
@@ -47,7 +60,9 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
-if t.TYPE_CHECKING:
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     import requests
     {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
     from singer_sdk.helpers.types import Auth, Context
@@ -57,7 +72,7 @@ if t.TYPE_CHECKING:
 
 
 # TODO: Delete this is if not using json files for schema definition
-SCHEMAS_DIR = resources.files(__package__) / "schemas"
+SCHEMAS_DIR = SchemaDirectory(schemas)
 
 
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
@@ -68,6 +83,8 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 
     # Update this value if necessary or override `get_new_paginator`.
     next_page_token_jsonpath = "$.next_page"  # noqa: S105
+
+    schema: ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
 
     @override
     @property
@@ -173,8 +190,8 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     def get_url_params(
         self,
         context: Context | None,
-        next_page_token: t.Any | None,
-    ) -> dict[str, t.Any]:
+        next_page_token: Any | None,
+    ) -> dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization.
 
         Args:
@@ -196,7 +213,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     def prepare_request_payload(
         self,
         context: Context | None,
-        next_page_token: t.Any | None,
+        next_page_token: Any | None,
     ) -> dict | None:
         """Prepare the data payload for the REST API request.
 
@@ -213,7 +230,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return None
 
     @override
-    def parse_response(self, response: requests.Response) -> t.Iterable[dict]:
+    def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result records.
 
         Args:
