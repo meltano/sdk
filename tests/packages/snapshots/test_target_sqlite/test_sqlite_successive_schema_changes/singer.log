@@ -1,0 +1,6 @@
+INFO target-sqlite Skipping parse of env var settings...
+INFO sqlconnector Creating empty table zzz_tmp_schema_changes
+INFO target-sqlite Schema has changed for stream 'zzz_tmp_schema_changes'. Mapping definitions will be reset.
+INFO target-sqlite Schema or key properties for 'zzz_tmp_schema_changes' stream have changed. Initializing a new 'zzz_tmp_schema_changes' sink...
+INFO target-sqlite.zzz_tmp_schema_changes Inserting with SQL: INSERT INTO zzz_tmp_schema_changes (id) VALUES (:id)
+INFO target-sqlite.zzz_tmp_schema_changes Inserting with SQL: INSERT INTO zzz_tmp_schema_changes (id, name) VALUES (:id, :name)
