@@ -711,6 +711,33 @@ class TestOpenAPISchemaNormalization:
                             },
                         },
                     },
+                    "AllOfNoElements": {
+                        "allOf": [],
+                    },
+                    "AllOfSingleElement": {
+                        "allOf": [{"type": "string"}],
+                    },
+                    "AllOfSchemas": {
+                        "allOf": [
+                            {
+                                "properties": {
+                                    "references": {
+                                        "additionalProperties": {"type": "string"},
+                                        "type": "object",
+                                    }
+                                },
+                                "type": "object",
+                            },
+                            {
+                                "properties": {
+                                    "created": {"type": "string"},
+                                    "name": {"type": "string"},
+                                }
+                            },
+                        ],
+                        "required": ["created", "name"],
+                        "type": "object",
+                    },
                     "Status": {
                         "type": "string",
                         "enum": ["active", "inactive", "pending"],
@@ -760,6 +787,34 @@ class TestOpenAPISchemaNormalization:
             normalized = source.preprocess_schema(schema)
             assert "oneOf" not in normalized["properties"]["value"]
             assert normalized["properties"]["value"]["type"] == ["integer", "null"]
+
+        with subtests.test("allOf with no elements"):
+            schema = source.get_schema("AllOfNoElements")
+            normalized = source.preprocess_schema(schema)
+            assert normalized == {}
+            assert "allOf" not in normalized
+
+        with subtests.test("allOf with a single element"):
+            schema = source.get_schema("AllOfSingleElement")
+            normalized = source.preprocess_schema(schema)
+            assert normalized == {"type": "string"}
+            assert "allOf" not in normalized
+
+        with subtests.test("simple allOf is handled my merging schemas"):
+            schema = source.get_schema("AllOfSchemas")
+            normalized = source.preprocess_schema(schema)
+            assert normalized == {
+                "type": "object",
+                "properties": {
+                    "references": {
+                        "type": "object",
+                        "additionalProperties": {"type": "string"},
+                    },
+                    "created": {"type": "string"},
+                    "name": {"type": "string"},
+                },
+            }
+            assert "allOf" not in normalized
 
         with subtests.test("enum is handled"):
             # Test string enum
