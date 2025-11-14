@@ -1,0 +1,4 @@
+INFO my-tap-failing Skipping parse of env var settings...
+INFO my-tap-failing Added 'failing_child' as child stream to 'parent'
+ERROR my-tap-failing.failing_child An unhandled error occurred while syncing 'failing_child'
+ERROR my-tap-failing.parent Error syncing child stream 'failing_child'
