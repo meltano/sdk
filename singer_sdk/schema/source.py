@@ -34,7 +34,7 @@ else:
     from typing_extensions import TypeVar
 
 if t.TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
 
     from singer_sdk.helpers._compat import Traversable
     from singer_sdk.streams.core import Stream
@@ -64,11 +64,17 @@ class SchemaPreprocessor(t.Protocol):
     Implementations can normalize, validate, or modify schemas as needed.
     """
 
-    def preprocess_schema(self, schema: Schema) -> Schema:
+    def preprocess_schema(
+        self,
+        schema: Schema,
+        *,
+        key_properties: Sequence[str] = (),
+    ) -> Schema:
         """Pre-process a schema.
 
         Args:
             schema: A JSON schema to preprocess.
+            key_properties: The stream's key properties.
 
         Returns:
             The preprocessed schema.
@@ -84,25 +90,41 @@ class SchemaSource(ABC, t.Generic[_TKey]):
         self._preprocessor: SchemaPreprocessor | None = None
 
     @t.final
-    def preprocess_schema(self, schema: Schema) -> Schema:
+    def preprocess_schema(
+        self,
+        schema: Schema,
+        *,
+        key_properties: Sequence[str] = (),
+    ) -> Schema:
         """Pre-process the schema before providing it to the stream.
 
         Args:
             schema: A JSON schema.
+            key_properties: The stream's key properties.
 
         Returns:
             The pre-processed schema.
         """
         if self._preprocessor is None:
             return schema
-        return self._preprocessor.preprocess_schema(schema)
+        return self._preprocessor.preprocess_schema(
+            schema,
+            key_properties=key_properties,
+        )
 
     @t.final
-    def get_schema(self, key: _TKey, /) -> Schema:
+    def get_schema(
+        self,
+        key: _TKey,
+        /,
+        *,
+        key_properties: Sequence[str] = (),
+    ) -> Schema:
         """Convenience method to get a schema component.
 
         Args:
             key: The schema component name to retrieve.
+            key_properties: The stream's key properties.
 
         Returns:
             A JSON schema dictionary.
@@ -122,7 +144,10 @@ class SchemaSource(ABC, t.Generic[_TKey]):
                 raise SchemaNotValidError(msg)
             self._schema_cache[key] = schema
 
-        return self.preprocess_schema(self._schema_cache[key])
+        return self.preprocess_schema(
+            self._schema_cache[key],
+            key_properties=key_properties,
+        )
 
     @abstractmethod
     def fetch_schema(self, key: _TKey) -> Schema:
@@ -203,7 +228,10 @@ class StreamSchema(t.Generic[_TKey]):
         Returns:
             A JSON schema dictionary.
         """
-        return self.schema_source.get_schema(self.key or stream.name)  # type: ignore[arg-type]
+        return self.schema_source.get_schema(
+            self.key or stream.name,  # type: ignore[arg-type]
+            key_properties=stream.primary_keys,
+        )
 
 
 def _load_yaml(content: bytes) -> dict[str, t.Any]:
@@ -223,16 +251,24 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
     - Recursively processes nested object properties and array items
     """
 
-    def handle_object(self, schema: Schema) -> Schema:
+    def handle_object(
+        self,
+        schema: Schema,
+        *,
+        key_properties: Sequence[str] = (),
+    ) -> Schema:
         """Handle JSON object schemas.
 
         Args:
             schema: A JSON schema.
+            key_properties: The stream's key properties.
 
         Returns:
             The processed object schema.
         """
+        schema["nullable"] = len(key_properties) == 0
         for prop, prop_schema in schema.get("properties", {}).items():
+            prop_schema["nullable"] = prop not in key_properties
             schema["properties"][prop] = self.normalize_schema(prop_schema)
         return schema
 
@@ -290,7 +326,12 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
 
         return result
 
-    def normalize_schema(self, schema: Schema) -> Schema:
+    def normalize_schema(
+        self,
+        schema: Schema,
+        *,
+        key_properties: Sequence[str] = (),
+    ) -> Schema:
         """Normalize an OpenAPI schema to standard JSON Schema.
 
         This method applies a series of transformations to convert OpenAPI-specific
@@ -298,6 +339,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
 
         Args:
             schema: The schema to normalize.
+            key_properties: The stream's key properties.
 
         Returns:
             A normalized schema dictionary.
@@ -306,7 +348,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         schema_type: str | list[str] = result.get("type", [])
 
         if "object" in schema_type:
-            result = self.handle_object(result)
+            result = self.handle_object(result, key_properties=key_properties)
 
         elif "array" in schema_type and (items := result.get("items")):
             result["items"] = self.handle_array_items(items)
@@ -330,8 +372,13 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         return result
 
     @override
-    def preprocess_schema(self, schema: Schema) -> Schema:
-        return self.normalize_schema(schema)
+    def preprocess_schema(
+        self,
+        schema: Schema,
+        *,
+        key_properties: Sequence[str] = (),
+    ) -> Schema:
+        return self.normalize_schema(schema, key_properties=key_properties)
 
 
 class OpenAPISchema(SchemaSource[_TKey]):

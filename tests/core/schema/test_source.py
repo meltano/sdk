@@ -45,8 +45,8 @@ def resolved_user_schema() -> dict[str, t.Any]:
         "type": "object",
         "properties": {
             "id": {"type": "string"},
-            "name": {"type": "string"},
-            "email": {"type": "string", "format": "email"},
+            "name": {"type": ["string", "null"]},
+            "email": {"type": ["string", "null"], "format": "email"},
         },
         "required": ["id", "name"],
     }
@@ -410,7 +410,7 @@ class TestOpenAPISchema:
         openapi_file.write_text(content)
 
         source = OpenAPISchema(openapi_file)
-        result = source.get_schema("User")
+        result = source.get_schema("User", key_properties=("id",))
         assert result == resolved_user_schema
 
     def test_openapi_unknown_spec(
@@ -475,7 +475,7 @@ class TestOpenAPISchema:
         path.write_text(json.dumps(openapi_spec))
 
         source = OpenAPISchema(path)
-        result = source.get_schema("User")
+        result = source.get_schema("User", key_properties=("id",))
         assert result == resolved_user_schema
 
     def test_openapi_schema_with_unknown_file_type(
@@ -568,11 +568,11 @@ class TestCustomOpenAPISchema:
         expected_schema = {
             "type": "array",
             "items": {
-                "type": "object",
+                "type": ["object", "null"],
                 "properties": {
-                    "id": {"type": "string"},
-                    "name": {"type": "string"},
-                    "email": {"type": "string", "format": "email"},
+                    "id": {"type": ["string", "null"]},
+                    "name": {"type": ["string", "null"]},
+                    "email": {"type": ["string", "null"], "format": "email"},
                 },
                 "required": ["id", "name"],
             },
@@ -630,6 +630,7 @@ class TestStreamSchemaDescriptor:
         class FooStream:
             name = "foo"
             schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source)
+            primary_keys = ("id",)
 
         stream = FooStream()
         assert stream.schema == foo_schema
@@ -644,6 +645,7 @@ class TestStreamSchemaDescriptor:
         class BarStream:
             name = "bar"
             schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source, key="foo")
+            primary_keys = ("id",)
 
         stream = BarStream()
         assert stream.schema == foo_schema
@@ -657,6 +659,7 @@ class TestStreamSchemaDescriptor:
         class BarStream:
             name = "bar"
             schema: t.ClassVar[StreamSchema] = StreamSchema(schema_source)
+            primary_keys = ("id",)
 
         stream = BarStream()
         with pytest.raises(
@@ -804,14 +807,14 @@ class TestOpenAPISchemaNormalization:
             schema = source.get_schema("AllOfSchemas")
             normalized = source.preprocess_schema(schema)
             assert normalized == {
-                "type": "object",
+                "type": ["object", "null"],
                 "properties": {
                     "references": {
-                        "type": "object",
+                        "type": ["object", "null"],
                         "additionalProperties": {"type": "string"},
                     },
-                    "created": {"type": "string"},
-                    "name": {"type": "string"},
+                    "created": {"type": ["string", "null"]},
+                    "name": {"type": ["string", "null"]},
                 },
             }
             assert "allOf" not in normalized
