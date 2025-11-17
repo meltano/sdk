@@ -8,6 +8,7 @@ import sys
 import typing as t
 from abc import ABC, abstractmethod
 from copy import deepcopy
+from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
 from types import ModuleType
@@ -212,6 +213,7 @@ def _load_yaml(content: bytes) -> dict[str, t.Any]:
     return yaml.safe_load(content)  # type: ignore[no-any-return]
 
 
+@dataclass
 class OpenAPISchemaNormalizer(SchemaPreprocessor):
     """A schema pre-processor that normalizes OpenAPI JSON schemas.
 
@@ -223,17 +225,31 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
     - Recursively processes nested object properties and array items
     """
 
-    def handle_object(self, schema: Schema) -> Schema:
+    #: The strategy to use for nullable properties.
+    #: - "strict": Convert properties with `nullable: true` to `type: [<type>, null]`
+    #: - "all": Convert ALL properties to `type: [<type>, null]`
+    nullable_strategy: t.Literal["strict", "all"] | None = None
+
+    def handle_object(
+        self,
+        schema: Schema,
+        *,
+        breadcrumb: tuple[str, ...] = (),
+    ) -> Schema:
         """Handle JSON object schemas.
 
         Args:
             schema: A JSON schema.
+            breadcrumb: The breadcrumb of the schema.
 
         Returns:
             The processed object schema.
         """
         for prop, prop_schema in schema.get("properties", {}).items():
-            schema["properties"][prop] = self.normalize_schema(prop_schema)
+            schema["properties"][prop] = self.normalize_schema(
+                prop_schema,
+                breadcrumb=(*breadcrumb, "properties", prop),
+            )
         return schema
 
     def handle_array_items(self, schema: Schema) -> Schema:
@@ -290,7 +306,12 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
 
         return result
 
-    def normalize_schema(self, schema: Schema) -> Schema:
+    def normalize_schema(
+        self,
+        schema: Schema,
+        *,
+        breadcrumb: tuple[str, ...] = (),
+    ) -> Schema:
         """Normalize an OpenAPI schema to standard JSON Schema.
 
         This method applies a series of transformations to convert OpenAPI-specific
@@ -298,15 +319,17 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
 
         Args:
             schema: The schema to normalize.
+            breadcrumb: The breadcrumb of the schema.
 
         Returns:
             A normalized schema dictionary.
         """
         result = deepcopy(schema)
         schema_type: str | list[str] = result.get("type", [])
+        nullable_strategy = self.nullable_strategy or "strict"
 
         if "object" in schema_type:
-            result = self.handle_object(result)
+            result = self.handle_object(result, breadcrumb=breadcrumb)
 
         elif "array" in schema_type and (items := result.get("items")):
             result["items"] = self.handle_array_items(items)
@@ -320,7 +343,11 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
             schema_type = result.get("type", [])
 
         types = [schema_type] if isinstance(schema_type, str) else schema_type
-        if result.pop("nullable", False) and "null" not in types:
+        if (
+            (result.pop("nullable", False) or nullable_strategy == "all")  # style
+            and breadcrumb
+            and "null" not in types
+        ):
             result["type"] = [*types, "null"]
 
         # Remove 'enum' keyword

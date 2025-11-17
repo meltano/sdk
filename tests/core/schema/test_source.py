@@ -20,6 +20,7 @@ from toolz.dicttoolz import get_in
 from singer_sdk.helpers._compat import Traversable
 from singer_sdk.schema.source import (
     OpenAPISchema,
+    OpenAPISchemaNormalizer,
     SchemaDirectory,
     SchemaNotFoundError,
     SchemaNotValidError,
@@ -786,7 +787,7 @@ class TestOpenAPISchemaNormalization:
             schema = source.get_schema("NestedOneOf")
             normalized = source.preprocess_schema(schema)
             assert "oneOf" not in normalized["properties"]["value"]
-            assert normalized["properties"]["value"]["type"] == ["integer", "null"]
+            assert normalized["properties"]["value"]["type"] == "integer"
 
         with subtests.test("allOf with no elements"):
             schema = source.get_schema("AllOfNoElements")
@@ -835,3 +836,235 @@ class TestOpenAPISchemaNormalization:
 
             # Check that the array itself can be nullable
             assert normalized["properties"]["tags"]["type"] == ["array", "null"]
+
+    def test_normalize_strict_nullable_strategy(
+        self,
+        tmp_path: Path,
+        openapi: dict[str, t.Any],
+        subtests: pytest.Subtests,
+    ):
+        """Test the 'strict' nullable strategy (default behavior)."""
+        openapi_file = tmp_path / "openapi.json"
+        openapi_file.write_text(json.dumps(openapi))
+
+        # Create a normalizer with 'strict' strategy
+        normalizer = OpenAPISchemaNormalizer(nullable_strategy="strict")
+        source = OpenAPISchema(openapi_file, preprocessor=normalizer)
+
+        with subtests.test("only explicitly nullable properties are nullable"):
+            schema = source.get_schema("User")
+            normalized = source.preprocess_schema(schema)
+
+            # Properties with nullable=True should be converted to type arrays
+            assert normalized["properties"]["name"]["type"] == ["string", "null"]
+            assert normalized["properties"]["email"]["type"] == ["string", "null"]
+            assert normalized["properties"]["age"]["type"] == ["integer", "null"]
+
+            # Properties without nullable should NOT be nullable
+            assert normalized["properties"]["id"]["type"] == "string"
+
+    def test_normalize_all_nullable_strategy(
+        self,
+        tmp_path: Path,
+        openapi: dict[str, t.Any],
+        subtests: pytest.Subtests,
+    ):
+        """Test the 'all' nullable strategy."""
+        openapi_file = tmp_path / "openapi.json"
+        openapi_file.write_text(json.dumps(openapi))
+
+        # Create a normalizer with 'all' strategy
+        normalizer = OpenAPISchemaNormalizer(nullable_strategy="all")
+        source = OpenAPISchema(openapi_file, preprocessor=normalizer)
+
+        with subtests.test("all properties are nullable"):
+            schema = source.get_schema("User")
+            normalized = source.preprocess_schema(schema)
+
+            # ALL properties should be converted to type arrays
+            assert normalized["properties"]["id"]["type"] == ["string", "null"]
+            assert normalized["properties"]["name"]["type"] == ["string", "null"]
+            assert normalized["properties"]["email"]["type"] == ["string", "null"]
+            assert normalized["properties"]["age"]["type"] == ["integer", "null"]
+
+        with subtests.test("all nested properties are nullable"):
+            schema = source.get_schema("Product")
+            normalized = source.preprocess_schema(schema)
+
+            # ALL properties should be nullable including those without explicit
+            # nullable
+            assert normalized["properties"]["sku"]["type"] == ["string", "null"]
+            assert normalized["properties"]["title"]["type"] == ["string", "null"]
+            assert normalized["properties"]["tags"]["type"] == ["array", "null"]
+
+        with subtests.test("enum properties are nullable"):
+            schema = source.get_schema("Status")
+            normalized = source.preprocess_schema(schema)
+
+            # Even enum properties should be nullable
+            assert normalized["type"] == "string"
+            assert "enum" not in normalized
+
+    def test_normalize_default_nullable_strategy(
+        self,
+        tmp_path: Path,
+        openapi: dict[str, t.Any],
+        subtests: pytest.Subtests,
+    ):
+        """Test the default nullable strategy (None, same as 'strict')."""
+        openapi_file = tmp_path / "openapi.json"
+        openapi_file.write_text(json.dumps(openapi))
+
+        # Create a normalizer with default strategy (None)
+        normalizer = OpenAPISchemaNormalizer(nullable_strategy=None)
+        source = OpenAPISchema(openapi_file, preprocessor=normalizer)
+
+        with subtests.test("only explicitly nullable properties are nullable"):
+            schema = source.get_schema("User")
+            normalized = source.preprocess_schema(schema)
+
+            # Properties with nullable=True should be converted to type arrays
+            assert normalized["properties"]["name"]["type"] == ["string", "null"]
+            assert normalized["properties"]["email"]["type"] == ["string", "null"]
+            assert normalized["properties"]["age"]["type"] == ["integer", "null"]
+
+            # Properties without nullable should NOT be nullable
+            assert normalized["properties"]["id"]["type"] == "string"
+
+    def test_normalize_nullable_strategy_with_complex_schemas(
+        self,
+        tmp_path: Path,
+        subtests: pytest.Subtests,
+    ):
+        """Test nullable strategies with complex schemas (allOf, oneOf)."""
+        openapi = {
+            "openapi": "3.0.0",
+            "info": {"title": "Test API", "version": "1.0.0"},
+            "components": {
+                "schemas": {
+                    "ComplexSchema": {
+                        "allOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "field1": {"type": "string"},
+                                },
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "field2": {"type": "integer", "nullable": True},
+                                },
+                            },
+                        ],
+                    },
+                    "OneOfSchema": {
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "value": {"type": "string"},
+                                },
+                            }
+                        ],
+                    },
+                }
+            },
+        }
+
+        openapi_file = tmp_path / "openapi.json"
+        openapi_file.write_text(json.dumps(openapi))
+
+        with subtests.test("allOf with 'all' nullable strategy"):
+            normalizer = OpenAPISchemaNormalizer(nullable_strategy="all")
+            source = OpenAPISchema(openapi_file, preprocessor=normalizer)
+
+            schema = source.get_schema("ComplexSchema")
+            normalized = source.preprocess_schema(schema)
+
+            # All merged properties should be nullable
+            assert normalized["properties"]["field1"]["type"] == ["string", "null"]
+            assert normalized["properties"]["field2"]["type"] == ["integer", "null"]
+
+        with subtests.test("oneOf with 'all' nullable strategy"):
+            normalizer = OpenAPISchemaNormalizer(nullable_strategy="all")
+            source = OpenAPISchema(openapi_file, preprocessor=normalizer)
+
+            schema = source.get_schema("OneOfSchema")
+            normalized = source.preprocess_schema(schema)
+
+            # Unwrapped oneOf properties should be nullable
+            assert normalized["properties"]["value"]["type"] == ["string", "null"]
+
+        with subtests.test("allOf with 'strict' nullable strategy"):
+            normalizer = OpenAPISchemaNormalizer(nullable_strategy="strict")
+            source = OpenAPISchema(openapi_file, preprocessor=normalizer)
+
+            schema = source.get_schema("ComplexSchema")
+            normalized = source.preprocess_schema(schema)
+
+            # Properties should NOT be nullable by default
+            assert normalized["properties"]["field1"]["type"] == "string"
+            assert normalized["properties"]["field2"]["type"] == ["integer", "null"]
+
+    def test_normalize_nullable_strategy_with_arrays(
+        self,
+        tmp_path: Path,
+        subtests: pytest.Subtests,
+    ):
+        """Test nullable strategies with array schemas."""
+        openapi = {
+            "openapi": "3.0.0",
+            "info": {"title": "Test API", "version": "1.0.0"},
+            "components": {
+                "schemas": {
+                    "ArraySchema": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "string", "nullable": False},
+                                "value": {"type": "integer", "nullable": True},
+                            },
+                        },
+                    },
+                }
+            },
+        }
+
+        openapi_file = tmp_path / "openapi.json"
+        openapi_file.write_text(json.dumps(openapi))
+
+        with subtests.test("array items with 'all' nullable strategy"):
+            normalizer = OpenAPISchemaNormalizer(nullable_strategy="all")
+            source = OpenAPISchema(openapi_file, preprocessor=normalizer)
+
+            schema = source.get_schema("ArraySchema")
+            normalized = source.preprocess_schema(schema)
+
+            # Array itself should be nullable
+            assert normalized["type"] == "array"
+
+            # Array item properties should also be nullable
+            assert normalized["items"]["properties"]["id"]["type"] == ["string", "null"]
+            assert normalized["items"]["properties"]["value"]["type"] == [
+                "integer",
+                "null",
+            ]
+
+        with subtests.test("array items with 'strict' nullable strategy"):
+            normalizer = OpenAPISchemaNormalizer(nullable_strategy="strict")
+            source = OpenAPISchema(openapi_file, preprocessor=normalizer)
+
+            schema = source.get_schema("ArraySchema")
+            normalized = source.preprocess_schema(schema)
+
+            # Array itself should NOT be nullable (no explicit nullable)
+            assert normalized["type"] == "array"
+
+            # Array item properties should NOT be nullable
+            assert normalized["items"]["properties"]["id"]["type"] == "string"
+            assert normalized["items"]["properties"]["value"]["type"] == [
+                "integer",
+                "null",
+            ]
