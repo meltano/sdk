@@ -31,7 +31,6 @@ license-files = ["LICENSE"]
 requires-python = ">=3.10"
 
 dependencies = [
-    'backoff>=2.2.0; python_version<"4"',
     'backports-datetime-fromisoformat>=2.0.1; python_version<"3.11"',
     "click>=8.2,<9",
     "fsspec>=2024.9.0",
@@ -41,6 +40,7 @@ dependencies = [
     "jsonpath-ng>=1.5.3",
     "jsonschema>=4.16.0",
     "packaging>=23.1",
+    'python-backoff>=2.2.2',
     "python-dotenv>=0.20",
     "PyYAML>=6.0",
     "referencing>=0.30.0",
@@ -188,7 +188,6 @@ addopts = [
 ]
 filterwarnings = [
     'error',
-    '''once:'asyncio.iscoroutinefunction' is deprecated:DeprecationWarning''',  # https://github.com/litl/backoff/pull/220
     'once:No records were available to test:UserWarning',
     # https://github.com/meltano/sdk/issues/1354
     'ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning',
