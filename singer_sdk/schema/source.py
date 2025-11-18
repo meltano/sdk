@@ -290,6 +290,21 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
 
         return result
 
+    def handle_nullable(self, schema: Schema) -> Schema:  # noqa: PLR6301
+        """Handle nullable properties in a JSON schema.
+
+        Args:
+            schema: A JSON schema.
+
+        Returns:
+            The schema with `nullable` handled.
+        """
+        schema_type: str | list[str] = schema.get("type", [])
+        types = [schema_type] if isinstance(schema_type, str) else schema_type
+        if schema.pop("nullable", False) and "null" not in types:
+            schema["type"] = [*types, "null"]
+        return schema
+
     def normalize_schema(self, schema: Schema) -> Schema:
         """Normalize an OpenAPI schema to standard JSON Schema.
 
@@ -319,9 +334,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
             result.update(self.normalize_schema(inner))
             schema_type = result.get("type", [])
 
-        types = [schema_type] if isinstance(schema_type, str) else schema_type
-        if result.pop("nullable", False) and "null" not in types:
-            result["type"] = [*types, "null"]
+        result = self.handle_nullable(result)
 
         # Remove 'enum' keyword
         if "enum" in result:
