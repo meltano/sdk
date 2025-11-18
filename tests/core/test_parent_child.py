@@ -20,6 +20,8 @@ DATETIME = datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc)
 class Parent(Stream):
     """A parent stream."""
 
+    QUEUE_MAX_SIZE = 2
+
     name = "parent"
     schema: t.ClassVar[dict] = {
         "type": "object",
@@ -191,6 +193,64 @@ def test_deselected_child(
         caplog.filtering(logging.Filter(tap_with_deselected_child.name)),
     ):
         tap_with_deselected_child.sync_all()
+
+    buf.seek(0)
+
+    snapshot.assert_match(buf.read(), "singer.jsonl")
+    snapshot.assert_match(caplog.text, "stderr.log")
+
+
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_child_sync_exception(
+    caplog: pytest.LogCaptureFixture,
+    snapshot: Snapshot,
+):
+    """Test that exceptions in child stream sync are caught and logged."""
+
+    class FailingChild(Stream):
+        """A child stream that raises an exception during sync."""
+
+        name = "failing_child"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "pid": {"type": "integer"},
+            },
+        }
+        parent_stream_type = Parent
+
+        def get_records(self, context: dict | None):
+            """Raise an exception."""
+            if context and context.get("pid") == 1:
+                msg = "Intentional failure in child stream"
+                raise ValueError(msg)
+            yield {"id": 1}
+            yield {"id": 2}
+            yield {"id": 3}
+
+    class MyTapWithFailingChild(Tap):
+        """A tap with a failing child stream."""
+
+        name = "my-tap-failing"
+
+        def discover_streams(self):
+            """Discover streams."""
+            return [
+                Parent(self),
+                FailingChild(self),
+            ]
+
+    failing_tap = MyTapWithFailingChild()
+
+    buf = io.StringIO()
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("ERROR"),
+        caplog.filtering(logging.Filter(failing_tap.name)),
+    ):
+        failing_tap.sync_all()
 
     buf.seek(0)
 
