@@ -15,7 +15,7 @@ jobs:
       name: {{ '${{ steps.baipp.outputs.package_name }}' }}
       version: {{ '${{ steps.baipp.outputs.package_version }}' }}
     steps:
-    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+    - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
     - uses: hynek/build-and-inspect-python-package@efb823f52190ad02594531168b7a2d5790e66516 # v2.14.0
       id: baipp
 
