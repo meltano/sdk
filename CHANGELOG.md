@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.53.0 (2025-11-18)
+
+### ✨ New
+
+- [#3369](https://github.com/meltano/sdk/issues/3369) In OpenAPI schema normalization, treat all fields as `nullable` unless they are part of a primary key
+- [#3058](https://github.com/meltano/sdk/issues/3058) Queue parent contexts and sync child streams only when the queue is full
+- [#3364](https://github.com/meltano/sdk/issues/3364) Normalize `allOf` components in OpenAPI spec schemas
+- [#3363](https://github.com/meltano/sdk/issues/3363) Add `flattening_max_key_length` configuration option
+- [#3359](https://github.com/meltano/sdk/issues/3359) Log response header names when backing off requests
+- [#3348](https://github.com/meltano/sdk/issues/3348) Automatic normalization of OpenAPI schema features
+- [#3329](https://github.com/meltano/sdk/issues/3329) Add new IDN/IRI JSON Schema types
+
+### 🐛 Fixes
+
+- [#3368](https://github.com/meltano/sdk/issues/3368) Migrate from `backoff` to `python-backoff`
+- [#3367](https://github.com/meltano/sdk/issues/3367) Remove `branches` condition from pull request workflow trigger
+- [#3340](https://github.com/meltano/sdk/issues/3340) Track table preparation to prevent data loss on schema changes
+- [#3357](https://github.com/meltano/sdk/issues/3357) Update dependencies and `meltano.yml` in templates, use `SchemaDirectory`
+- [#3354](https://github.com/meltano/sdk/issues/3354) Fix class docstrings in tap, target and mapper templates
+- [#3352](https://github.com/meltano/sdk/issues/3352) Update templates
+
+### ⚙️ Under the Hood
+
+- [#3355](https://github.com/meltano/sdk/issues/3355) Make the deprecation warning in `singer_sdk.sinks.sql` more specific
+
+### 📚 Documentation Improvements
+
+- [#3362](https://github.com/meltano/sdk/issues/3362) Move SQL tap, target and stream docs to reflect their location in the package
+- [#3358](https://github.com/meltano/sdk/issues/3358) Fix code examples in SQL target guide
+
+### 📦 Packaging changes
+
+- [#3360](https://github.com/meltano/sdk/issues/3360) Require Pytest 9+
+
 ## v0.52.5 (2025-10-30)
 
 ### 🐛 Fixes
