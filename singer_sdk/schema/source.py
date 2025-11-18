@@ -23,7 +23,6 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import assert_never
 
-
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
 else:
@@ -219,6 +218,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
     Converts OpenAPI-specific schema features into standard JSON Schema constructs:
     - Converts `nullable: true` to type arrays with "null"
     - Unwraps single-element `oneOf` constructs
+    - Merges `allOf` constructs into a single object schema
     - Removes `enum` keywords
     - Recursively processes nested object properties and array items
     """
@@ -259,6 +259,37 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         schema.pop("enum", None)
         return schema
 
+    def handle_all_of(self, subschemas: list[Schema]) -> Schema:  # noqa: PLR6301
+        """Handle allOf constructs in a JSON schema.
+
+        Args:
+            subschemas: A list of JSON schemas.
+
+        Returns:
+            A merged JSON schema.
+        """
+        if not subschemas:
+            return {}
+
+        # If the allOf array has only one element, just flatten it.
+        if len(subschemas) == 1:
+            return subschemas[0]
+
+        # TODO: merge subschemas:
+        # - Taking the most restrictive constraints for each property
+        # - Merging `required` arrays
+        # - Handling type intersections carefully
+        result: dict[str, t.Any] = {}
+        for subschema in subschemas:
+            for key, value in subschema.items():
+                if key == "properties" and key in result:
+                    # Deep merge properties
+                    result["properties"] |= value
+                else:
+                    result[key] = value
+
+        return result
+
     def normalize_schema(self, schema: Schema) -> Schema:
         """Normalize an OpenAPI schema to standard JSON Schema.
 
@@ -280,8 +311,11 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         elif "array" in schema_type and (items := result.get("items")):
             result["items"] = self.handle_array_items(items)
 
+        if "allOf" in result:
+            result = self.normalize_schema(self.handle_all_of(result["allOf"]))
+
         if "oneOf" in result and len(result["oneOf"]) == 1:
-            inner = result.pop("oneOf")[0]
+            (inner,) = result.pop("oneOf")
             result.update(self.normalize_schema(inner))
             schema_type = result.get("type", [])
 

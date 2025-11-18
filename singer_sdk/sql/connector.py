@@ -604,6 +604,7 @@ class SQLConnector:  # noqa: PLR0904
         """
         self._config: dict[str, t.Any] = config or {}
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
+        self._tables_prepared: dict[str, bool] = {}
 
     @property
     def config(self) -> dict:
@@ -1394,7 +1395,24 @@ class SQLConnector:  # noqa: PLR0904
             partition_keys: list of partition keys.
             as_temp_table: True to create a temp table.
         """
-        if not self.table_exists(full_table_name=full_table_name):
+        table_key = str(full_table_name)
+        table_already_prepared = self._tables_prepared.get(table_key, False)
+
+        # Only drop/recreate on OVERWRITE if this is the first time preparing the table
+        # in this target run. Subsequent schema changes should add columns
+        # incrementally.
+        if (
+            (
+                self.config["load_method"] == TargetLoadMethods.OVERWRITE
+                and not table_already_prepared
+            )
+            or not self.table_exists(full_table_name=full_table_name)  # First-time sync
+        ):
+            _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+            meta = sa.MetaData()
+            table = sa.Table(table_name, meta, schema=schema_name)
+            table.drop(self._engine, checkfirst=True)
+            self.logger.info("Creating empty table %s", full_table_name)
             self.create_empty_table(
                 full_table_name=full_table_name,
                 schema=schema,
@@ -1402,18 +1420,11 @@ class SQLConnector:  # noqa: PLR0904
                 partition_keys=partition_keys,
                 as_temp_table=as_temp_table,
             )
-            return
-        if self.config["load_method"] == TargetLoadMethods.OVERWRITE:
-            self.get_table(full_table_name=full_table_name).drop(self._engine)
-            self.create_empty_table(
-                full_table_name=full_table_name,
-                schema=schema,
-                primary_keys=primary_keys,
-                partition_keys=partition_keys,
-                as_temp_table=as_temp_table,
-            )
+            self._tables_prepared[table_key] = True
             return
 
+        # For non-OVERWRITE modes or subsequent schema changes, add columns
+        # incrementally
         for property_name, property_def in schema["properties"].items():
             self.prepare_column(
                 full_table_name,
@@ -1425,6 +1436,8 @@ class SQLConnector:  # noqa: PLR0904
             full_table_name=full_table_name,
             primary_keys=primary_keys,
         )
+
+        self._tables_prepared[table_key] = True
 
     def prepare_primary_key(
         self,
