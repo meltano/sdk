@@ -483,7 +483,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             context: Stream partition or context dictionary.
         """
-        if self.replication_method != REPLICATION_INCREMENTAL:
+        if self.replication_method == REPLICATION_FULL_TABLE:
             self.log(
                 (
                     "Stream is not configured for incremental replication. Not "
@@ -1151,7 +1151,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         self._write_state_message()  # Write out state message if pending.
 
-        if self.replication_method == "FULL_TABLE":
+        if self.replication_method == REPLICATION_FULL_TABLE:
             msg = "Sync operation aborted for stream in 'FULL_TABLE' replication mode."
             raise AbortedSyncFailedException(msg) from abort_reason
 
