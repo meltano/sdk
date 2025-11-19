@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.53.1 (2025-11-19)
+
+### 🐛 Fixes
+
+- [#3374](https://github.com/meltano/sdk/issues/3374) For log-based streams, write starting bookmark to the state to ensure the sync runs "incrementally"
+
 ## v0.53.0 (2025-11-18)
 
 ### ✨ New
