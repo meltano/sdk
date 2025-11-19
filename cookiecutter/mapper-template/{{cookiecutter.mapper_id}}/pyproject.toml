@@ -53,7 +53,7 @@ dev = [
     { include-group = "test" },
 ]
 test = [
-    "pytest>=8",
+    "pytest>=9",
     {%- if cookiecutter.include_ci_files == "GitHub" %}
     "pytest-github-actions-annotate-failures>=0.3",
     {%- endif %}
@@ -71,7 +71,8 @@ packages = [
 ]
 {%- endif %}
 
-[tool.pytest.ini_options]
+[tool.pytest]
+minversion = "9.0"
 addopts = [
     "--durations=10",
 ]
@@ -81,7 +82,7 @@ warn_unused_configs = true
 
 [tool.ruff]
 line-length = 100
-required-version = ">=0.13"
+required-version = ">=0.14"
 
 [tool.ruff.lint]
 future-annotations = true
