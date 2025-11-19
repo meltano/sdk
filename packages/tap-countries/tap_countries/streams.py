@@ -44,6 +44,8 @@ class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
             backend="filesystem",
             serializer="json",
             allowable_methods=("POST", "HEAD"),
+            ignored_parameters=["User-Agent"],
+            match_headers=True,
         )
 
 
