@@ -1,6 +1,6 @@
 [project]
 name = "tap-fundamentals"
-version = "0.1.0"
+dynamic = [ "version" ]
 description = "Singer tap for AAPL data, built with the Meltano Singer SDK"
 authors = [{ name = "Meltano Team", email = "hello@meltano.com" }]
 keywords = [
@@ -30,9 +30,13 @@ tap-fundamentals = 'tap_fundamentals:Fundamentals.cli'
 [tool.mypy]
 warn_unused_configs = true
 
+[tool.hatch.version]
+fallback-version = "0.0.0"
+source = "vcs"
+
 [tool.uv.sources]
 singer-sdk = { workspace = true }
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
