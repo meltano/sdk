@@ -1,6 +1,6 @@
 [project]
 name = "tap-dummyjson"
-version = "0.1.0"
+dynamic = [ "version" ]
 description = "Singer tap for DummyJSON, built with the Meltano Singer SDK"
 readme = "README.md"
 authors = [{ name = "Meltano Team", email = "hello@meltano.com" }]
@@ -40,6 +40,10 @@ dev = [
     "singer-sdk[testing]",
 ]
 
+[tool.hatch.version]
+fallback-version = "0.0.0"
+source = "vcs"
+
 [tool.mypy]
 python_version = "3.12"
 warn_unused_configs = true
@@ -48,5 +52,5 @@ warn_unused_configs = true
 singer-sdk = { workspace = true }
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"

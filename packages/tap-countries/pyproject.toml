@@ -1,6 +1,6 @@
 [project]
 name = "tap-countries"
-version = "0.1.0"
+dynamic = [ "version" ]
 description = "Singer tap for countries.trevorblades.com, built with the Meltano Singer SDK"
 authors = [{ name = "Meltano Team", email = "hello@meltano.com" }]
 keywords = [
@@ -32,9 +32,13 @@ tap-countries = 'tap_countries.tap:TapCountries.cli'
 [tool.mypy]
 warn_unused_configs = true
 
+[tool.hatch.version]
+fallback-version = "0.0.0"
+source = "vcs"
+
 [tool.uv.sources]
 singer-sdk = { workspace = true }
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
