@@ -64,6 +64,11 @@ You can register new type handlers for the `x-sql-datatype` extension:
 
 ```python
 from sqlalchemy.types import SMALLINT
+from my_sqlalchemy_dialect import VectorType
+
+
+def vector_to_sql(jsonschema: dict) -> VectorType:
+    return VectorType(**jsonschema.get("x-sql-datatype-properties", {}))
 
 
 class MyConnector(SQLConnector):
@@ -71,6 +76,7 @@ class MyConnector(SQLConnector):
     def jsonschema_to_sql(self):
         to_sql = JSONSchemaToSQL()
         to_sql.register_sql_datatype_handler("smallint", SMALLINT)
+        to_sql.register_sql_datatype_handler("vector", custom_vector_to_sql)
         return to_sql
 ```
 
@@ -86,6 +92,10 @@ plugins:
       addresses:
         number:
           x-sql-datatype: smallint
+      values:
+        x-sql-datatype: vector
+        x-sql-datatype-properties:
+          dim: 10
 ```
 ````
 
