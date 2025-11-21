@@ -1,23 +1,23 @@
 {
   "cookies": {
-    "__cf_bm": "acJyb598oWNadbi8iA3B0cl0GYPJf9_8o0PiTw3QrZM-1760466689-1.0.1.1-wIqCEfx_qHvB0JqBl_Q27LYjcs9SqDzUSYB9JWmW7SEoeiKOrVc.DrfSp_BmGZZg4D23K6tb.SeYeRNjVYlRLA6PD1Wfmsm06Mal.DiNWPs",
-    "_cfuvid": "BTY2V4CA8_lbNYLMulCnnJoQYj5AmWMvnoIHnG7QtNY-1760466689717-0.0.1.1-604800000"
+    "__cf_bm": "gp04FEELG1_YpHut_QytuU.N5RVkFx2BGQOz.vi9PeQ-1763701831-1.0.1.1-l2LYmpmacg81ii_e.OLVk7k1fHx4SVdqLK86pBNXfgsZQTQSyrY728uob_MOIr64inr6k20O.7Il6T7SrkqmlnFH4JTKb68o0lSGa2Eyrc0",
+    "_cfuvid": "IJ6FTcarr5kw4rF9Pm2L2a1TaMzinF0M3aNiKgqevZY-1763701831938-0.0.1.1-604800000"
   },
-  "created_at": "2025-10-14T18:31:29.645027+00:00",
-  "elapsed": 0.449986,
+  "created_at": "2025-11-21T05:10:31.838181+00:00",
+  "elapsed": 0.506259,
   "encoding": "utf-8",
   "headers": {
     "CF-Cache-Status": "MISS",
-    "CF-Ray": "98e927687a66c478-QRO",
+    "CF-Ray": "9a1dae5f3fe2efc4-QRO",
     "Cache-Control": "max-age=0, private, must-revalidate",
     "Connection": "keep-alive",
     "Content-Encoding": "gzip",
     "Content-Type": "application/json",
-    "Date": "Tue, 14 Oct 2025 18:31:29 GMT",
-    "ETag": "W/\"fd7a8fde0c81664d7f6a37460d742a3c\"",
+    "Date": "Fri, 21 Nov 2025 05:10:31 GMT",
+    "ETag": "W/\"5cd4bc4ae902c9879f96241ef6b46967\"",
     "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/108/issues?epic_iid=108&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/108/issues?epic_iid=108&id=2524164&page=1&per_page=20>; rel=\"last\"",
     "Server": "cloudflare",
-    "Set-Cookie": "__cf_bm=acJyb598oWNadbi8iA3B0cl0GYPJf9_8o0PiTw3QrZM-1760466689-1.0.1.1-wIqCEfx_qHvB0JqBl_Q27LYjcs9SqDzUSYB9JWmW7SEoeiKOrVc.DrfSp_BmGZZg4D23K6tb.SeYeRNjVYlRLA6PD1Wfmsm06Mal.DiNWPs; path=/; expires=Tue, 14-Oct-25 19:01:29 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=BTY2V4CA8_lbNYLMulCnnJoQYj5AmWMvnoIHnG7QtNY-1760466689717-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Set-Cookie": "__cf_bm=gp04FEELG1_YpHut_QytuU.N5RVkFx2BGQOz.vi9PeQ-1763701831-1.0.1.1-l2LYmpmacg81ii_e.OLVk7k1fHx4SVdqLK86pBNXfgsZQTQSyrY728uob_MOIr64inr6k20O.7Il6T7SrkqmlnFH4JTKb68o0lSGa2Eyrc0; path=/; expires=Fri, 21-Nov-25 05:40:31 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=IJ6FTcarr5kw4rF9Pm2L2a1TaMzinF0M3aNiKgqevZY-1763701831938-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
     "Strict-Transport-Security": "max-age=31536000",
     "Transfer-Encoding": "chunked",
     "Vary": "Origin, Accept-Encoding",
@@ -25,16 +25,21 @@
     "gitlab-lb": "haproxy-main-17-lb-gprd",
     "gitlab-sv": "api-gke-us-east1-c",
     "nel": "{\"max_age\": 0}",
+    "ratelimit-limit": "2000",
+    "ratelimit-name": "throttle_authenticated_api",
+    "ratelimit-observed": "44",
+    "ratelimit-remaining": "1956",
+    "ratelimit-reset": "1763701860",
     "referrer-policy": "strict-origin-when-cross-origin",
     "x-content-type-options": "nosniff",
     "x-frame-options": "SAMEORIGIN",
-    "x-gitlab-meta": "{\"correlation_id\":\"b3286af8caac8bc3206d3325327eff8f\",\"version\":\"1\"}",
+    "x-gitlab-meta": "{\"correlation_id\":\"9a1dae5f5382efc4-ATL\",\"version\":\"1\"}",
     "x-next-page": "",
     "x-page": "1",
     "x-per-page": "20",
     "x-prev-page": "",
-    "x-request-id": "b3286af8caac8bc3206d3325327eff8f",
-    "x-runtime": "0.236452",
+    "x-request-id": "9a1dae5f5382efc4-ATL",
+    "x-runtime": "0.280529",
     "x-total": "11",
     "x-total-pages": "1"
   },
@@ -153,7 +158,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -259,7 +264,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -364,7 +369,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -471,7 +476,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -577,7 +582,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -683,7 +688,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -789,7 +794,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -895,7 +900,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1001,7 +1006,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1107,7 +1112,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1213,7 +1218,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,

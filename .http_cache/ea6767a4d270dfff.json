@@ -1,40 +1,45 @@
 {
   "cookies": {
-    "__cf_bm": "pd4FZzvxohUbITPJ7C.MSCATomG055.diY5UE7vl1k0-1760466725-1.0.1.1-nYP.gnN29rVZc3Ao99M29PIz9CbQq7GVBdxl_CJr4bcb8nL_YaoqgQzyXsEZ1sLNF3QjA_oyHfX3FeoiG4wFadZzd_VO7bkJCEc.GzHhPQs",
-    "_cfuvid": "hKWWRVA8OiWj76lSnHEtEL7iTg4K69SY6XdxW9Nwz.Q-1760466725099-0.0.1.1-604800000"
+    "__cf_bm": "iXM.0NZYOvkFkoNbJOlKamP47tjcHT1VTjuDXCBK5_c-1763701872-1.0.1.1-FCxX9JCaSsDUZCqYBiSuuwKxWSxuN5p2Y5T.WzTbf9z2Mtv4mN3rFTapXJfAM9witbdlGPDmObWBazjtztiRs.AXwT3.o9lynWHgVcFnir4",
+    "_cfuvid": "Rc9976FhcsEp4TvfD05S2YifQDPQs1P8SG0S3RI23BY-1763701872713-0.0.1.1-604800000"
   },
-  "created_at": "2025-10-14T18:32:05.064111+00:00",
-  "elapsed": 0.572625,
+  "created_at": "2025-11-21T05:11:12.605745+00:00",
+  "elapsed": 0.743837,
   "encoding": "utf-8",
   "headers": {
     "CF-Cache-Status": "MISS",
-    "CF-Ray": "98e92844cbe03293-QRO",
+    "CF-Ray": "9a1daf5c8855a634-QRO",
     "Cache-Control": "max-age=0, private, must-revalidate",
     "Connection": "keep-alive",
     "Content-Encoding": "gzip",
     "Content-Type": "application/json",
-    "Date": "Tue, 14 Oct 2025 18:32:05 GMT",
-    "ETag": "W/\"08414d9f8315c8506e2b7eeeb77e8e6b\"",
+    "Date": "Fri, 21 Nov 2025 05:11:12 GMT",
+    "ETag": "W/\"654c24befa4b5fa71b04000576b39a61\"",
     "Link": "<https://gitlab.com/api/v4/projects/meltano%2Fsdk/issues?id=meltano%2Fsdk&order_by=updated_at&page=2&per_page=20&scope=all&sort=asc&state=all&updated_after=2022-01-01T00%3A00%3A00%2B00%3A00&with_labels_details=false>; rel=\"prev\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/issues?id=meltano%2Fsdk&order_by=updated_at&page=4&per_page=20&scope=all&sort=asc&state=all&updated_after=2022-01-01T00%3A00%3A00%2B00%3A00&with_labels_details=false>; rel=\"next\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/issues?id=meltano%2Fsdk&order_by=updated_at&page=1&per_page=20&scope=all&sort=asc&state=all&updated_after=2022-01-01T00%3A00%3A00%2B00%3A00&with_labels_details=false>; rel=\"first\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/issues?id=meltano%2Fsdk&order_by=updated_at&page=10&per_page=20&scope=all&sort=asc&state=all&updated_after=2022-01-01T00%3A00%3A00%2B00%3A00&with_labels_details=false>; rel=\"last\"",
     "Server": "cloudflare",
-    "Set-Cookie": "__cf_bm=pd4FZzvxohUbITPJ7C.MSCATomG055.diY5UE7vl1k0-1760466725-1.0.1.1-nYP.gnN29rVZc3Ao99M29PIz9CbQq7GVBdxl_CJr4bcb8nL_YaoqgQzyXsEZ1sLNF3QjA_oyHfX3FeoiG4wFadZzd_VO7bkJCEc.GzHhPQs; path=/; expires=Tue, 14-Oct-25 19:02:05 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=hKWWRVA8OiWj76lSnHEtEL7iTg4K69SY6XdxW9Nwz.Q-1760466725099-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Set-Cookie": "__cf_bm=iXM.0NZYOvkFkoNbJOlKamP47tjcHT1VTjuDXCBK5_c-1763701872-1.0.1.1-FCxX9JCaSsDUZCqYBiSuuwKxWSxuN5p2Y5T.WzTbf9z2Mtv4mN3rFTapXJfAM9witbdlGPDmObWBazjtztiRs.AXwT3.o9lynWHgVcFnir4; path=/; expires=Fri, 21-Nov-25 05:41:12 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=Rc9976FhcsEp4TvfD05S2YifQDPQs1P8SG0S3RI23BY-1763701872713-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
     "Strict-Transport-Security": "max-age=31536000",
     "Transfer-Encoding": "chunked",
     "Vary": "Origin, Accept-Encoding",
     "content-security-policy": "default-src 'none'",
-    "gitlab-lb": "haproxy-main-38-lb-gprd",
-    "gitlab-sv": "api-gke-us-east1-c",
+    "gitlab-lb": "haproxy-main-39-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-d",
     "nel": "{\"max_age\": 0}",
+    "ratelimit-limit": "2000",
+    "ratelimit-name": "throttle_authenticated_api",
+    "ratelimit-observed": "20",
+    "ratelimit-remaining": "1980",
+    "ratelimit-reset": "1763701920",
     "referrer-policy": "strict-origin-when-cross-origin",
     "x-content-type-options": "nosniff",
     "x-frame-options": "SAMEORIGIN",
-    "x-gitlab-meta": "{\"correlation_id\":\"eeedc89821bd3586b85336da691ad85c\",\"version\":\"1\"}",
+    "x-gitlab-meta": "{\"correlation_id\":\"9a1daf5ca573a634-ATL\",\"version\":\"1\"}",
     "x-next-page": "4",
     "x-page": "3",
     "x-per-page": "20",
     "x-prev-page": "2",
-    "x-request-id": "eeedc89821bd3586b85336da691ad85c",
-    "x-runtime": "0.326995",
+    "x-request-id": "9a1daf5ca573a634-ATL",
+    "x-runtime": "0.406122",
     "x-total": "200",
     "x-total-pages": "10"
   },
@@ -643,7 +648,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null
@@ -861,7 +866,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null
@@ -1779,7 +1784,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null
@@ -1883,7 +1888,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2423</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null
