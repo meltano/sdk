@@ -46,7 +46,7 @@ jobs:
       pull-requests: write  # to create and update PRs
 
     steps:
-    - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+    - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       with:
         fetch-depth: 0
         persist-credentials: false
@@ -55,7 +55,7 @@ jobs:
 
     - name: Bump version
       id: cz-bump
-      uses: commitizen-tools/commitizen-action@9615e7be1cf341393c52e865ebbdaa0712176d81 # 0.25.0
+      uses: commitizen-tools/commitizen-action@bb4f1df6601e2a1a891506581b0c53acdc88e07d # 0.26.0
       with:
         increment: ${{ github.event.inputs.bump != 'auto' && github.event.inputs.bump || '' }}
         prerelease: ${{ github.event.inputs.prerelease != 'none' && github.event.inputs.prerelease || '' }}
