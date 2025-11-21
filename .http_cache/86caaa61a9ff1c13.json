@@ -1,6 +1,6 @@
 {
-  "created_at": "2025-10-14T18:32:57.535668+00:00",
-  "elapsed": 0.269931,
+  "created_at": "2025-11-21T05:09:51.451249+00:00",
+  "elapsed": 0.309401,
   "encoding": "utf-8",
   "headers": {
     "Connection": "keep-alive",
@@ -12,22 +12,22 @@
     "access-control-allow-origin": "*",
     "access-control-expose-headers": "*",
     "access-control-max-age": "600",
-    "age": "1018",
+    "age": "3857",
     "alt-svc": "h3=\":443\"; ma=86400",
     "cache-control": "public, s-maxage=2628000, stale-while-revalidate=2628000",
     "content-encoding": "gzip",
     "content-type": "application/json; charset=utf-8",
-    "date": "Tue, 14 Oct 2025 18:16:00 GMT",
+    "date": "Fri, 21 Nov 2025 04:05:35 GMT",
     "gcdn-cache": "HIT",
-    "stellate-rate-limit-budget-remaining": "46",
+    "stellate-rate-limit-budget-remaining": "40",
     "stellate-rate-limit-budget-required": "19",
     "stellate-rate-limit-decision": "pass",
-    "stellate-rate-limit-rules": "\"IP limit\";type=\"RequestCount\";budget=50;limited=?0;remaining=46;refill=46",
+    "stellate-rate-limit-rules": "\"IP limit\";type=\"RequestCount\";budget=50;limited=?0;remaining=40;refill=28",
     "vary": "accept-encoding",
     "x-cache": "HIT",
-    "x-cache-hits": "3",
+    "x-cache-hits": "27",
     "x-powered-by": "Stellate",
-    "x-served-by": "cache-dfw-ktki8620091-DFW"
+    "x-served-by": "cache-pdk-katl1840093-PDK"
   },
   "reason": "",
   "request": {
@@ -38,7 +38,7 @@
       "Connection": "keep-alive",
       "Content-Length": "147",
       "Content-Type": "application/json",
-      "User-Agent": "tap-countries/0.1.0"
+      "User-Agent": "tap-countries/0.0.0"
     },
     "method": "POST",
     "url": "https://countries.trevorblades.com/"

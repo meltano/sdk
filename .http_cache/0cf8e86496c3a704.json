@@ -1,40 +1,45 @@
 {
   "cookies": {
-    "__cf_bm": "kF0aUBW84.H9HW0EqDbGOERkRk2XQcKlFgAA.IbXkQQ-1760466704-1.0.1.1-EnpU6BCxnI0iCFT5.IGA9Q9Evmle.9FyoKjtT.oK2AqFcX03itLQB13b5qIbR9GwCqqWVq0LM389y2RVqVZADmcjXpgY2qpRPv9OWSacz5Y",
-    "_cfuvid": "6ljuZfLL4w6rbxgklKKsHklk.WdX.oDriVwvvSuVT_Q-1760466704538-0.0.1.1-604800000"
+    "__cf_bm": "FjWj_jDL3cgsgsA8pPoyeUVWJ6lY_gi_9JB5vMKJhM8-1763701849-1.0.1.1-I7XyQK0tz33GSJ.AEVyS8bUXSt5CLAYqR_OIR.UcD47mVaxuk0cvmUn4rXDXA3f_o_TFomzjOPFF9dm.7u4NVA7r675.Qifx92SJnFThDp0",
+    "_cfuvid": "9Pa_FV4t9ucgo7nv3dFpeK8V4j.0HMNAgRlR0DLTf2U-1763701849653-0.0.1.1-604800000"
   },
-  "created_at": "2025-10-14T18:31:44.499882+00:00",
-  "elapsed": 0.681618,
+  "created_at": "2025-11-21T05:10:49.544832+00:00",
+  "elapsed": 0.845946,
   "encoding": "utf-8",
   "headers": {
     "CF-Cache-Status": "MISS",
-    "CF-Ray": "98e927c398f1d980-QRO",
+    "CF-Ray": "9a1daecbddedeee9-QRO",
     "Cache-Control": "max-age=0, private, must-revalidate",
     "Connection": "keep-alive",
     "Content-Encoding": "gzip",
     "Content-Type": "application/json",
-    "Date": "Tue, 14 Oct 2025 18:31:44 GMT",
-    "ETag": "W/\"752344f9400d8d2abdc6e04628922afb\"",
+    "Date": "Fri, 21 Nov 2025 05:10:49 GMT",
+    "ETag": "W/\"a0ab489c7f266627627fe3a127bf36c3\"",
     "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/78/issues?epic_iid=78&id=2524164&page=1&per_page=20>; rel=\"prev\", <https://gitlab.com/api/v4/groups/2524164/epics/78/issues?epic_iid=78&id=2524164&page=3&per_page=20>; rel=\"next\", <https://gitlab.com/api/v4/groups/2524164/epics/78/issues?epic_iid=78&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/78/issues?epic_iid=78&id=2524164&page=4&per_page=20>; rel=\"last\"",
     "Server": "cloudflare",
-    "Set-Cookie": "__cf_bm=kF0aUBW84.H9HW0EqDbGOERkRk2XQcKlFgAA.IbXkQQ-1760466704-1.0.1.1-EnpU6BCxnI0iCFT5.IGA9Q9Evmle.9FyoKjtT.oK2AqFcX03itLQB13b5qIbR9GwCqqWVq0LM389y2RVqVZADmcjXpgY2qpRPv9OWSacz5Y; path=/; expires=Tue, 14-Oct-25 19:01:44 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=6ljuZfLL4w6rbxgklKKsHklk.WdX.oDriVwvvSuVT_Q-1760466704538-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
+    "Set-Cookie": "__cf_bm=FjWj_jDL3cgsgsA8pPoyeUVWJ6lY_gi_9JB5vMKJhM8-1763701849-1.0.1.1-I7XyQK0tz33GSJ.AEVyS8bUXSt5CLAYqR_OIR.UcD47mVaxuk0cvmUn4rXDXA3f_o_TFomzjOPFF9dm.7u4NVA7r675.Qifx92SJnFThDp0; path=/; expires=Fri, 21-Nov-25 05:40:49 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=9Pa_FV4t9ucgo7nv3dFpeK8V4j.0HMNAgRlR0DLTf2U-1763701849653-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
     "Strict-Transport-Security": "max-age=31536000",
     "Transfer-Encoding": "chunked",
     "Vary": "Origin, Accept-Encoding",
     "content-security-policy": "default-src 'none'",
-    "gitlab-lb": "haproxy-main-39-lb-gprd",
-    "gitlab-sv": "api-gke-us-east1-d",
+    "gitlab-lb": "haproxy-main-23-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-c",
     "nel": "{\"max_age\": 0}",
+    "ratelimit-limit": "2000",
+    "ratelimit-name": "throttle_authenticated_api",
+    "ratelimit-observed": "67",
+    "ratelimit-remaining": "1933",
+    "ratelimit-reset": "1763701860",
     "referrer-policy": "strict-origin-when-cross-origin",
     "x-content-type-options": "nosniff",
     "x-frame-options": "SAMEORIGIN",
-    "x-gitlab-meta": "{\"correlation_id\":\"1952624aca97a3652e93c7c77e4fb5c2\",\"version\":\"1\"}",
+    "x-gitlab-meta": "{\"correlation_id\":\"9a1daecc23a2eee9-ATL\",\"version\":\"1\"}",
     "x-next-page": "3",
     "x-page": "2",
     "x-per-page": "20",
     "x-prev-page": "1",
-    "x-request-id": "1952624aca97a3652e93c7c77e4fb5c2",
-    "x-runtime": "0.404647",
+    "x-request-id": "9a1daecc23a2eee9-ATL",
+    "x-runtime": "0.475281",
     "x-total": "79",
     "x-total-pages": "4"
   },
@@ -152,7 +157,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -261,7 +266,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -367,7 +372,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -473,7 +478,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -582,7 +587,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -688,7 +693,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -794,7 +799,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -920,7 +925,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1026,7 +1031,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1131,7 +1136,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1237,7 +1242,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1362,7 +1367,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1487,7 +1492,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1612,7 +1617,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1737,7 +1742,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1843,7 +1848,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1967,7 +1972,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -2091,7 +2096,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -2216,7 +2221,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -2341,7 +2346,7 @@
         "title": "Meltano UI Improvements",
         "url": "/groups/meltano/-/epics/78",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1413</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1451</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
