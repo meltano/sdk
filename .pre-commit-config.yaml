@@ -81,10 +81,10 @@ repos:
       )$
 
 - repo: https://github.com/executablebooks/mdformat
-  rev: 0.7.22
+  rev: 1.0.0
   hooks:
   - id: mdformat
     exclude: tests/snapshots/about_format/markdown\.snap\.md
-    args: [--extensions, frontmatter]
+    args: [--strict-front-matter]
     additional_dependencies:
-    - mdformat-frontmatter
+    - mdformat-front-matters
