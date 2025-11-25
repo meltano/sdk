@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#3387](https://github.com/meltano/sdk/issues/3387) Do not leave dangling `nullable` field in OpenAPI schema properties
 - [#3386](https://github.com/meltano/sdk/issues/3386) Do not add `"type": ["null"]` to OpenAPI spec properties without a type
-- [#3380](https://github.com/meltano/sdk/issues/3380) Use Pytest 9+ in templates
+- [#3380](https://github.com/meltano/sdk/issues/3380) Use pytest 9+ in templates
 
 ### ⚙️ Under the Hood
 
