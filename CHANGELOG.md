@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.53.3 (2025-11-25)
+
+### 🐛 Fixes
+
+- [#3387](https://github.com/meltano/sdk/issues/3387) Do not leave dangling `nullable` field in OpenAPI schema properties
+- [#3386](https://github.com/meltano/sdk/issues/3386) Do not add `"type": ["null"]` to OpenAPI spec properties without a type
+- [#3380](https://github.com/meltano/sdk/issues/3380) Use pytest 9+ in templates
+
+### ⚙️ Under the Hood
+
+- [#3388](https://github.com/meltano/sdk/issues/3388) Deprecate `Stream.reset_state_progress_markers` since it is not being used
+
 ## v0.53.2 (2025-11-19)
 
 ### 🐛 Fixes
