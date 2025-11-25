@@ -838,3 +838,26 @@ class TestOpenAPISchemaNormalization:
 
             # Check that the array itself can be nullable
             assert normalized["properties"]["tags"]["type"] == ["array", "null"]
+
+    def test_normalize_properties_with_no_type(self, tmp_path: Path):
+        """Test that properties with no type are handled."""
+        schema = {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "anyOf": [
+                        {"type": "string"},
+                        {"type": "null"},
+                    ],
+                },
+            },
+        }
+        openapi_file = tmp_path / "openapi.json"
+        openapi_file.write_text(json.dumps(schema))
+        source = OpenAPISchema(openapi_file)
+        normalized = source.preprocess_schema(schema)
+        assert "type" not in normalized["properties"]["id"]
+        assert normalized["properties"]["id"]["anyOf"] == [
+            {"type": "string"},
+            {"type": "null"},
+        ]
