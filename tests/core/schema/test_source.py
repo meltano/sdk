@@ -857,6 +857,7 @@ class TestOpenAPISchemaNormalization:
         source = OpenAPISchema(openapi_file)
         normalized = source.preprocess_schema(schema)
         assert "type" not in normalized["properties"]["id"]
+        assert "nullable" not in normalized["properties"]["id"]
         assert normalized["properties"]["id"]["anyOf"] == [
             {"type": "string"},
             {"type": "null"},
