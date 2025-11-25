@@ -29,6 +29,7 @@ from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import (
     SingerSDKDeprecationWarning,
     datetime_fromisoformat,
+    deprecated,
 )
 from singer_sdk.helpers._flattening import get_flattening_options
 from singer_sdk.helpers._state import (
@@ -1154,7 +1155,15 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     # Handle interim stream state
 
-    def reset_state_progress_markers(self, state: dict | None = None) -> None:
+    @deprecated(
+        "This method is currently unused and will be removed by March 2026",
+        category=SingerSDKDeprecationWarning,
+        stacklevel=2,
+    )
+    def reset_state_progress_markers(  # pragma: no cover
+        self,
+        state: dict | None = None,
+    ) -> None:
         """Reset progress markers. If all=True, all state contexts will be set.
 
         This method is internal to the SDK and should not need to be overridden.
