@@ -362,7 +362,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
             schema_type = result.get("type", [])
 
         types = [schema_type] if isinstance(schema_type, str) else schema_type
-        if types and result.pop("nullable", False) and "null" not in types:
+        if result.pop("nullable", False) and types and "null" not in types:
             result["type"] = [*types, "null"]
 
         # Remove 'enum' keyword
