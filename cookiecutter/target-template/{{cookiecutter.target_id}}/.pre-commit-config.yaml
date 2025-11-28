@@ -1,6 +1,6 @@
 ci:
   autofix_prs: true
-  autoupdate_schedule: weekly
+  autoupdate_schedule: monthly
   autoupdate_commit_msg: 'chore: pre-commit autoupdate'
   skip:
   - uv-lock
@@ -35,7 +35,7 @@ repos:
     args: [--diff]
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.9.11
+  rev: 0.9.13
   hooks:
   - id: uv-lock
   - id: uv-sync
