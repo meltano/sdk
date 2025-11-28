@@ -661,7 +661,7 @@ class TestWriteReplicationKeySignpost:
     ):
         """Test that empty value does not write signpost."""
         state_manager.write_replication_key_signpost(None, "")
-        assert tap_state == {}
+        assert not tap_state
 
     def test_none_value_does_nothing(
         self,
@@ -670,7 +670,7 @@ class TestWriteReplicationKeySignpost:
     ):
         """Test that None value does not write signpost."""
         state_manager.write_replication_key_signpost(None, None)
-        assert tap_state == {}
+        assert not tap_state
 
 
 class TestLogSortError:
