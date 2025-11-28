@@ -56,6 +56,7 @@ class UnsupportedOpenAPISpec(Exception):
 
 
 _TKey = TypeVar("_TKey", bound=t.Hashable, default=str)
+_TStream = TypeVar("_TStream", bound="Stream", default="Stream")
 
 
 class SchemaPreprocessor(t.Protocol):
@@ -218,7 +219,11 @@ class StreamSchema(t.Generic[_TKey]):
         """
         return self.get_stream_schema(obj, objtype)
 
-    def get_stream_schema(self, stream: Stream, stream_class: type[Stream]) -> Schema:  # noqa: ARG002
+    def get_stream_schema(
+        self,
+        stream: _TStream,
+        stream_class: type[_TStream],  # noqa: ARG002
+    ) -> Schema:
         """Get the schema from the stream instance or class.
 
         Args:
