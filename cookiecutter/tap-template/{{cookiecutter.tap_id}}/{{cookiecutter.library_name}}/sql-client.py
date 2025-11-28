@@ -20,7 +20,7 @@ else:
     from typing_extensions import override
 
 if t.TYPE_CHECKING:
-    from singer_sdk.helpers.types import Context
+    from singer_sdk.helpers.types import Context, Record
     from sqlalchemy.engine import Engine
     from sqlalchemy.engine.reflection import Inspector
 
@@ -278,7 +278,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
         return query
 
     @override
-    def get_records(self, partition: Context | None) -> t.Iterable[dict[str, t.Any]]:
+    def get_records(self, context: Context | None) -> t.Iterable[Record]:
         """Return a generator of record-type dictionary objects.
 
         Developers may override this method to implement custom record retrieval
@@ -306,7 +306,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
             replication_key_col = table.columns[self.replication_key]
             query = query.order_by(replication_key_col)
 
-            start_val = self.get_starting_replication_key_value(partition)
+            start_val = self.get_starting_replication_key_value(context)
             if start_val:
                 query = query.where(replication_key_col >= start_val)
 
@@ -316,7 +316,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
                 yield dict(record)
 
         # Alternative: Use the default implementation
-        # yield from super().get_records(partition)
+        # yield from super().get_records(context)
 
     # Uncomment and customize these methods as needed for your specific database:
 
