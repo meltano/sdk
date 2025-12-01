@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.53.4 (2025-11-28)
+
+### 🐛 Fixes
+
+- [#3393](https://github.com/meltano/sdk/issues/3393) Make `StreamSchema.get_stream_schema` generic to avoid downstream warnings about violation of the LSP
+
+### ⚙️ Under the Hood
+
+- [#3391](https://github.com/meltano/sdk/issues/3391) Move to monthly instead of weekly updates to pre-commit hooks in templates
+
 ## v0.53.3 (2025-11-25)
 
 ### 🐛 Fixes
