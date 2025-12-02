@@ -133,6 +133,31 @@ class TestGetContextState:
         state = manager.get_context_state(context)
         assert state["replication_key_value"] == "2021-01-01"
 
+    def test_with_state_partitioning_keys(self, tap_state: types.TapState) -> None:
+        """Test that state partitioning keys are used to create partition state."""
+        state_context = {"tenant_id": "abc123"}
+        partition_context = {**state_context, "extra": "ignored"}
+        tap_state["bookmarks"] = {
+            "test_stream": {
+                "partitions": [
+                    {
+                        "context": state_context,
+                        "replication_key_value": "2021-01-01",
+                    },
+                ],
+            },
+        }
+        manager = StreamStateManager(
+            tap_name="test-tap",
+            stream_name="test_stream",
+            tap_state=tap_state,
+            state_partitioning_keys=["tenant_id"],
+        )
+
+        state = manager.get_context_state(partition_context)
+        assert state["context"] == state_context
+        assert state["replication_key_value"] == "2021-01-01"
+
 
 class TestGetStatePartitionContext:
     """Tests for get_state_partition_context method."""
