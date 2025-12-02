@@ -32,7 +32,7 @@ def state_manager(tap_state: types.TapState) -> StreamStateManager:
 class TestStreamStateManagerInit:
     """Tests for StreamStateManager initialization."""
 
-    def test_init_sets_attributes(self, tap_state: types.TapState):
+    def test_init_sets_attributes(self, tap_state: types.TapState) -> None:
         """Test that init sets all attributes correctly."""
         manager = StreamStateManager(
             tap_name="my-tap",
@@ -46,7 +46,7 @@ class TestStreamStateManagerInit:
         assert manager.state_partitioning_keys == ["tenant_id"]
         assert manager.is_flushed is True
 
-    def test_init_default_partitioning_keys(self, tap_state: types.TapState):
+    def test_init_default_partitioning_keys(self, tap_state: types.TapState) -> None:
         """Test that state_partitioning_keys defaults to None."""
         manager = StreamStateManager(
             tap_name="test-tap",
@@ -63,13 +63,13 @@ class TestStreamState:
         self,
         state_manager: StreamStateManager,
         tap_state: types.TapState,
-    ):
+    ) -> None:
         """Test that accessing stream_state creates bookmark entry."""
         assert tap_state == {}
         _ = state_manager.stream_state
         assert tap_state == {"bookmarks": {"test_stream": {}}}
 
-    def test_stream_state_returns_existing(self, tap_state: types.TapState):
+    def test_stream_state_returns_existing(self, tap_state: types.TapState) -> None:
         """Test that stream_state returns existing bookmark."""
         tap_state["bookmarks"] = {
             "test_stream": {"replication_key_value": "2021-01-01"}
@@ -90,7 +90,7 @@ class TestGetContextState:
         self,
         state_manager: StreamStateManager,
         tap_state: types.TapState,
-    ):
+    ) -> None:
         """Test that None context returns stream state."""
         state = state_manager.get_context_state(None)
         assert state == {}
@@ -100,7 +100,7 @@ class TestGetContextState:
         self,
         state_manager: StreamStateManager,
         tap_state: types.TapState,
-    ):
+    ) -> None:
         """Test that context creates partition state."""
         context = {"tenant_id": "abc123"}
         state = state_manager.get_context_state(context)
@@ -109,7 +109,10 @@ class TestGetContextState:
             {"context": {"tenant_id": "abc123"}}
         ]
 
-    def test_context_returns_existing_partition(self, tap_state: types.TapState):
+    def test_context_returns_existing_partition(
+        self,
+        tap_state: types.TapState,
+    ) -> None:
         """Test that existing partition is returned."""
         tap_state["bookmarks"] = {
             "test_stream": {
@@ -142,13 +145,13 @@ class TestGetStatePartitionContext:
     def test_no_partitioning_keys_returns_full_context(
         self,
         state_manager: StreamStateManager,
-    ):
+    ) -> None:
         """Test that full context is returned when no partitioning keys."""
         context = {"tenant_id": "abc", "date": "2021-01-01"}
         result = state_manager.get_state_partition_context(context)
         assert result == context
 
-    def test_partitioning_keys_filters_context(self, tap_state: types.TapState):
+    def test_partitioning_keys_filters_context(self, tap_state: types.TapState) -> None:
         """Test that context is filtered by partitioning keys."""
         manager = StreamStateManager(
             tap_name="test-tap",
@@ -164,11 +167,14 @@ class TestGetStatePartitionContext:
 class TestIsFlushed:
     """Tests for is_flushed flag behavior."""
 
-    def test_initial_state_is_flushed(self, state_manager: StreamStateManager):
+    def test_initial_state_is_flushed(self, state_manager: StreamStateManager) -> None:
         """Test that is_flushed starts as True."""
         assert state_manager.is_flushed is True
 
-    def test_finalize_state_marks_not_flushed(self, state_manager: StreamStateManager):
+    def test_finalize_state_marks_not_flushed(
+        self,
+        state_manager: StreamStateManager,
+    ) -> None:
         """Test that finalize_state sets is_flushed to False."""
         state_manager.finalize_state({})
         assert state_manager.is_flushed is False
@@ -181,7 +187,7 @@ class TestIncrementState:
         self,
         state_manager: StreamStateManager,
         tap_state: types.TapState,
-    ):
+    ) -> None:
         """Test that increment_state updates replication key value."""
         state_manager.increment_state(
             {"updated_at": "2021-05-17T20:41:16Z"},
@@ -193,7 +199,7 @@ class TestIncrementState:
         assert stream_state["replication_key"] == "updated_at"
         assert stream_state["replication_key_value"] == "2021-05-17T20:41:16Z"
 
-    def test_increment_state_with_context(self, tap_state: types.TapState):
+    def test_increment_state_with_context(self, tap_state: types.TapState) -> None:
         """Test increment_state with partition context."""
         manager = StreamStateManager(
             tap_name="test-tap",
@@ -217,7 +223,7 @@ class TestIncrementState:
         self,
         state_manager: StreamStateManager,
         tap_state: types.TapState,
-    ):
+    ) -> None:
         """Test that unsorted streams create progress markers."""
         state_manager.increment_state(
             {"updated_at": "2021-05-17T20:41:16Z"},
@@ -233,7 +239,10 @@ class TestIncrementState:
 class TestFinalizeState:
     """Tests for finalize_state method."""
 
-    def test_finalize_promotes_progress_markers(self, tap_state: types.TapState):
+    def test_finalize_promotes_progress_markers(
+        self,
+        tap_state: types.TapState,
+    ) -> None:
         """Test that finalize_state promotes progress markers."""
         tap_state["bookmarks"] = {
             "test_stream": {
@@ -263,14 +272,14 @@ class TestFinalizeProgressMarkers:
         self,
         state_manager: StreamStateManager,
         tap_state: types.TapState,
-    ):
+    ) -> None:
         """Test finalize_progress_markers with no state creates stream bookmark."""
         state_manager.finalize_progress_markers()
         assert "bookmarks" in tap_state
         assert "test_stream" in tap_state["bookmarks"]
         assert state_manager.is_flushed is False
 
-    def test_finalize_with_partitions(self, tap_state: types.TapState):
+    def test_finalize_with_partitions(self, tap_state: types.TapState) -> None:
         """Test finalize_progress_markers with partitions."""
         manager = StreamStateManager(
             tap_name="test-tap",
@@ -284,7 +293,7 @@ class TestFinalizeProgressMarkers:
         assert "partitions" in stream_state
         assert len(stream_state["partitions"]) == 2
 
-    def test_finalize_non_empty_state(self):
+    def test_finalize_non_empty_state(self) -> None:
         """Test that finalize_progress_markers does nothing with empty state."""
         tap_state: types.TapState = {
             "bookmarks": {
@@ -324,7 +333,7 @@ class TestFinalizeProgressMarkers:
 class TestResetProgressMarkers:
     """Tests for reset_progress_markers method."""
 
-    def test_reset_clears_progress_markers(self, tap_state: types.TapState):
+    def test_reset_clears_progress_markers(self, tap_state: types.TapState) -> None:
         """Test that reset_progress_markers clears markers."""
         tap_state["bookmarks"] = {
             "test_stream": {
@@ -345,8 +354,9 @@ class TestResetProgressMarkers:
         assert "progress_markers" not in state
 
     def test_reset_clears_progress_markers_with_partitions(
-        self, tap_state: types.TapState
-    ):
+        self,
+        tap_state: types.TapState,
+    ) -> None:
         """Test that reset_progress_markers clears markers with partitions."""
         tap_state["bookmarks"] = {
             "test_stream": {
@@ -385,7 +395,9 @@ class TestResetProgressMarkers:
         assert "progress_markers" not in state["partitions"][0]
         assert state["partitions"][0] == {"context": {"tenant_id": "a"}}
 
-    def test_reset_all_partitions_when_state_is_none(self, tap_state: types.TapState):
+    def test_reset_all_partitions_when_state_is_none(
+        self, tap_state: types.TapState
+    ) -> None:
         """Test that reset_progress_markers resets all partitions when state=None."""
         tap_state["bookmarks"] = {
             "test_stream": {
@@ -436,12 +448,15 @@ class TestResetProgressMarkers:
 class TestGetStatePartitions:
     """Tests for get_state_partitions method."""
 
-    def test_no_partitions_returns_none(self, state_manager: StreamStateManager):
+    def test_no_partitions_returns_none(
+        self,
+        state_manager: StreamStateManager,
+    ) -> None:
         """Test that None is returned when no partitions exist."""
         result = state_manager.get_state_partitions()
         assert result is None
 
-    def test_returns_existing_partitions(self, tap_state: types.TapState):
+    def test_returns_existing_partitions(self, tap_state: types.TapState) -> None:
         """Test that existing partitions are returned."""
         tap_state["bookmarks"] = {
             "test_stream": {
@@ -464,7 +479,7 @@ class TestGetStatePartitions:
 class TestGetStartingReplicationValue:
     """Tests for get_starting_replication_value method."""
 
-    def test_full_table_returns_none(self, tap_state: types.TapState):
+    def test_full_table_returns_none(self, tap_state: types.TapState) -> None:
         """Test that FULL_TABLE replication returns None."""
         tap_state["bookmarks"] = {
             "test_stream": {"replication_key_value": "2021-01-01"}
@@ -477,7 +492,7 @@ class TestGetStartingReplicationValue:
         result = manager.get_starting_replication_value(None, REPLICATION_FULL_TABLE)
         assert result is None
 
-    def test_incremental_returns_value(self, tap_state: types.TapState):
+    def test_incremental_returns_value(self, tap_state: types.TapState) -> None:
         """Test that INCREMENTAL replication returns bookmark value."""
         tap_state["bookmarks"] = {
             "test_stream": {
@@ -493,10 +508,51 @@ class TestGetStartingReplicationValue:
         result = manager.get_starting_replication_value(None, REPLICATION_INCREMENTAL)
         assert result == "2021-05-17T20:41:16Z"
 
-    def test_no_state_returns_none(self, state_manager: StreamStateManager):
+    def test_no_state_returns_none(self, state_manager: StreamStateManager) -> None:
         """Test that no prior state returns None."""
         result = state_manager.get_starting_replication_value(
-            None, REPLICATION_INCREMENTAL
+            None,
+            REPLICATION_INCREMENTAL,
+        )
+        assert result is None
+
+    def test_multiple_partitions(self, tap_state: types.TapState) -> None:
+        """Test retrieving starting replication value for multiple partitions."""
+        tap_state["bookmarks"] = {
+            "test_stream": {
+                "partitions": [
+                    {
+                        "context": {"tenant_id": "a"},
+                        "starting_replication_value": "2021-05-17T20:41:16Z",
+                    },
+                    {
+                        "context": {"tenant_id": "b"},
+                        "starting_replication_value": "2021-05-18T10:30:00Z",
+                    },
+                ]
+            }
+        }
+        manager = StreamStateManager(
+            tap_name="test-tap",
+            stream_name="test_stream",
+            tap_state=tap_state,
+        )
+
+        result = manager.get_starting_replication_value(
+            {"tenant_id": "a"},
+            REPLICATION_INCREMENTAL,
+        )
+        assert result == "2021-05-17T20:41:16Z"
+
+        result = manager.get_starting_replication_value(
+            {"tenant_id": "b"},
+            REPLICATION_INCREMENTAL,
+        )
+        assert result == "2021-05-18T10:30:00Z"
+
+        result = manager.get_starting_replication_value(
+            {"tenant_id": "c"},
+            REPLICATION_INCREMENTAL,
         )
         assert result is None
 
@@ -504,11 +560,17 @@ class TestGetStartingReplicationValue:
 class TestIsStateNonResumable:
     """Tests for is_state_non_resumable method."""
 
-    def test_no_progress_markers_is_resumable(self, state_manager: StreamStateManager):
+    def test_no_progress_markers_is_resumable(
+        self,
+        state_manager: StreamStateManager,
+    ) -> None:
         """Test that state without progress markers is resumable."""
         assert state_manager.is_state_non_resumable() is False
 
-    def test_with_progress_markers_is_non_resumable(self, tap_state: types.TapState):
+    def test_with_progress_markers_is_non_resumable(
+        self,
+        tap_state: types.TapState,
+    ) -> None:
         """Test that state with progress markers is non-resumable."""
         tap_state["bookmarks"] = {
             "test_stream": {
@@ -533,7 +595,7 @@ class TestWriteStartingReplicationValue:
         self,
         state_manager: StreamStateManager,
         tap_state: types.TapState,
-    ):
+    ) -> None:
         """Test that FULL_TABLE replication does not write starting value."""
         state_manager.write_starting_replication_value(
             context=None,
@@ -544,7 +606,7 @@ class TestWriteStartingReplicationValue:
         # Stream state should exist but be empty (no starting_replication_value)
         assert tap_state == {}
 
-    def test_incremental_writes_starting_value(self, tap_state: types.TapState):
+    def test_incremental_writes_starting_value(self, tap_state: types.TapState) -> None:
         """Test that INCREMENTAL replication writes starting value from state."""
         tap_state["bookmarks"] = {
             "test_stream": {
@@ -566,7 +628,10 @@ class TestWriteStartingReplicationValue:
         state = manager.stream_state
         assert state["starting_replication_value"] == "2021-05-17T20:41:16Z"
 
-    def test_uses_start_date_when_no_state(self, state_manager: StreamStateManager):
+    def test_uses_start_date_when_no_state(
+        self,
+        state_manager: StreamStateManager,
+    ) -> None:
         """Test that start_date from config is used when no prior state."""
         state_manager.write_starting_replication_value(
             context=None,
@@ -577,7 +642,7 @@ class TestWriteStartingReplicationValue:
         state = state_manager.stream_state
         assert state["starting_replication_value"] == "2020-01-01"
 
-    def test_compare_start_date_fn_used(self, tap_state: types.TapState):
+    def test_compare_start_date_fn_used(self, tap_state: types.TapState) -> None:
         """Test that compare_start_date_fn is called to compare values."""
         tap_state["bookmarks"] = {
             "test_stream": {
@@ -606,7 +671,7 @@ class TestWriteStartingReplicationValue:
         # compare_fn returns second arg (start_date)
         assert state["starting_replication_value"] == "2020-01-01"
 
-    def test_compare_start_date_no_fn_used(self, tap_state: types.TapState):
+    def test_compare_start_date_no_fn_used(self, tap_state: types.TapState) -> None:
         """Test that compare_start_date_fn is not called if no function is provided."""
         tap_state["bookmarks"] = {
             "test_stream": {
@@ -630,7 +695,10 @@ class TestWriteStartingReplicationValue:
         state = manager.stream_state
         assert state["starting_replication_value"] == "2021-05-17"
 
-    def test_no_replication_key_does_nothing(self, state_manager: StreamStateManager):
+    def test_no_replication_key_does_nothing(
+        self,
+        state_manager: StreamStateManager,
+    ) -> None:
         """Test that no replication key does not write starting value."""
         state_manager.write_starting_replication_value(
             context=None,
@@ -648,7 +716,7 @@ class TestWriteReplicationKeySignpost:
         self,
         state_manager: StreamStateManager,
         tap_state: types.TapState,
-    ):
+    ) -> None:
         """Test that signpost value is written to state."""
         state_manager.write_replication_key_signpost(None, "2021-05-17T20:41:16Z")
         state = tap_state["bookmarks"]["test_stream"]
@@ -658,7 +726,7 @@ class TestWriteReplicationKeySignpost:
         self,
         state_manager: StreamStateManager,
         tap_state: dict,
-    ):
+    ) -> None:
         """Test that empty value does not write signpost."""
         state_manager.write_replication_key_signpost(None, "")
         assert not tap_state
@@ -667,7 +735,7 @@ class TestWriteReplicationKeySignpost:
         self,
         state_manager: StreamStateManager,
         tap_state: dict,
-    ):
+    ) -> None:
         """Test that None value does not write signpost."""
         state_manager.write_replication_key_signpost(None, None)
         assert not tap_state
@@ -680,7 +748,7 @@ class TestLogSortError:
         self,
         state_manager: StreamStateManager,
         caplog: pytest.LogCaptureFixture,
-    ):
+    ) -> None:
         """Test that sort error is logged."""
         ex = Exception("Sort order violated")
         state_manager.log_sort_error(
@@ -698,7 +766,7 @@ class TestLogSortError:
         self,
         state_manager: StreamStateManager,
         caplog: pytest.LogCaptureFixture,
-    ):
+    ) -> None:
         """Test that partition record count is included when different."""
         ex = Exception("Sort order violated")
         state_manager.log_sort_error(
