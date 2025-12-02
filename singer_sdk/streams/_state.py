@@ -150,11 +150,10 @@ class StreamStateManager:
                 value = replication_key_value
 
             # Use start_date if it is more recent than the replication_key state
-            start_date_value: str | None = config.get("start_date")
-            if start_date_value:
+            if start_date_value := config.get("start_date"):
                 if not value:
                     value = start_date_value
-                elif compare_start_date_fn:
+                elif compare_start_date_fn and value:
                     value = compare_start_date_fn(value, start_date_value)
 
             self._logger.info(
