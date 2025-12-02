@@ -9,6 +9,7 @@
       "stream_type": "REST",
       "auth_method": "OAuth2",
       "include_ci_files": "None (Skip)",
+      "include_agents_md": false,
       "faker_extra": false,
       "license": "Apache-2.0",
       "ide": "VSCode",

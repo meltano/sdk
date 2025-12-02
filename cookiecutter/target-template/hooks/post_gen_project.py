@@ -49,3 +49,6 @@ if __name__ == "__main__":
     # Clean up the unused sink files
     for template in ["sinks_record.py", "sinks_batch.py", "sinks_sql.py"]:
         (BASE_PATH / template).unlink(missing_ok=True)
+
+    if not {{ cookiecutter.include_agents_md }}:
+        Path("AGENTS.md").unlink(missing_ok=True)
