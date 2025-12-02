@@ -19,9 +19,9 @@ This tap follows the Singer specification and uses the Meltano Singer SDK to ext
 1. **Tap Class** (`{{ cookiecutter.library_name }}/tap.py`): Main entry point, defines streams and configuration
 1. **Client** (`{{ cookiecutter.library_name }}/client.py`): Handles API communication and authentication
 1. **Streams** (`{{ cookiecutter.library_name }}/streams.py`): Define data streams and their schemas
-{% if cookiecutter.auth_method in ['OAuth2', 'JWT'] -%}
+   {% if cookiecutter.auth_method in ['OAuth2', 'JWT'] -%}
 1. **Authentication** (`{{ cookiecutter.library_name }}/auth.py`): Implements {{ cookiecutter.auth_method }} authentication logic
-{% endif -%}
+   {% endif -%}
 
 ## Development Guidelines for AI Agents
 
