@@ -39,6 +39,9 @@ if t.TYPE_CHECKING:
         ReflectedPrimaryKeyConstraint,
     )
 
+    from singer_sdk.sql.load_strategies import LoadMethodStrategy
+    from singer_sdk.sql.sink import SQLSink
+
 
 class FullyQualifiedName(UserString):
     """A fully qualified table name.
@@ -605,6 +608,7 @@ class SQLConnector:  # noqa: PLR0904
         self._config: dict[str, t.Any] = config or {}
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
         self._tables_prepared: dict[str, bool] = {}
+        self._load_strategy: LoadMethodStrategy | None = None
 
     @property
     def config(self) -> dict:
@@ -646,6 +650,51 @@ class SQLConnector:  # noqa: PLR0904
             self.config,
             max_varchar_length=self.max_varchar_length,
         )
+
+    def _create_load_strategy(
+        self,
+        sink: SQLSink,  # SQLSink, but avoid circular import
+    ) -> LoadMethodStrategy:  # LoadMethodStrategy
+        """Create appropriate load strategy based on config.
+
+        This factory method instantiates the correct strategy class based on the
+        load_method configuration. Developers can override this to provide custom
+        strategies for their database.
+
+        Args:
+            sink: The SQLSink instance that will use this strategy.
+
+        Returns:
+            The appropriate LoadMethodStrategy instance.
+
+        Raises:
+            ValueError: If load_method is unknown or unsupported.
+        """
+        # Import here to avoid circular dependency
+        from singer_sdk.sql.load_strategies import (  # noqa: PLC0415
+            AppendOnlyStrategy,
+            OverwriteStrategy,
+            UpsertStrategy,
+        )
+
+        load_method = self.config.get("load_method", TargetLoadMethods.APPEND_ONLY)
+
+        # Map load methods to strategy classes
+        strategies: dict[str, type[LoadMethodStrategy]] = {
+            TargetLoadMethods.APPEND_ONLY: AppendOnlyStrategy,
+            TargetLoadMethods.UPSERT: UpsertStrategy,
+            TargetLoadMethods.OVERWRITE: OverwriteStrategy,
+        }
+
+        strategy_class = strategies.get(load_method)
+        if not strategy_class:
+            msg = (
+                f"Unknown load_method: {load_method}. "
+                f"Supported methods: {list(strategies.keys())}"
+            )
+            raise ValueError(msg)
+
+        return strategy_class(connector=self, sink=sink)
 
     @contextmanager
     def _connect(self) -> t.Iterator[sa.Connection]:
@@ -1387,6 +1436,56 @@ class SQLConnector:  # noqa: PLR0904
         as_temp_table: bool = False,  # noqa: FBT002, FBT001
     ) -> None:
         """Adapt target table to provided schema if possible.
+
+        Args:
+            full_table_name: the target table name.
+            schema: the JSON Schema for the table.
+            primary_keys: list of key properties.
+            partition_keys: list of partition keys.
+            as_temp_table: True to create a temp table.
+        """
+        # If temp table, always use legacy path (strategies don't handle temp tables)
+        if as_temp_table:
+            self._prepare_table_legacy(
+                full_table_name=full_table_name,
+                schema=schema,
+                primary_keys=primary_keys,
+                partition_keys=partition_keys,
+                as_temp_table=as_temp_table,
+            )
+            return
+
+        # Check if we have a load strategy (new path)
+        if self._load_strategy:
+            # Delegate to load strategy
+            self._load_strategy.prepare_table(
+                full_table_name=str(full_table_name),
+                schema=schema,
+                primary_keys=primary_keys,
+            )
+            return
+
+        # Backward compatibility: use legacy path if no strategy
+        self._prepare_table_legacy(
+            full_table_name=full_table_name,
+            schema=schema,
+            primary_keys=primary_keys,
+            partition_keys=partition_keys,
+            as_temp_table=as_temp_table,
+        )
+
+    def _prepare_table_legacy(
+        self,
+        full_table_name: str | FullyQualifiedName,
+        schema: dict,
+        primary_keys: t.Sequence[str],
+        partition_keys: list[str] | None = None,
+        as_temp_table: bool = False,  # noqa: FBT002, FBT001
+    ) -> None:
+        """Legacy table preparation logic (backward compatibility).
+
+        This method contains the original prepare_table() implementation,
+        kept for backward compatibility when load strategies are not used.
 
         Args:
             full_table_name: the target table name.

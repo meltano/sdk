@@ -23,6 +23,7 @@ if t.TYPE_CHECKING:
     from sqlalchemy.sql import Executable
 
     from singer_sdk.sql.connector import FullyQualifiedName
+    from singer_sdk.sql.load_strategies import LoadMethodStrategy
     from singer_sdk.target_base import Target
 
 __all__ = ["SQLSink"]
@@ -55,6 +56,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
             connector: Optional connector to reuse.
         """
         self._connector: _C
+        self._load_strategy: LoadMethodStrategy | None = None
         self._connector = connector or self.connector_class(dict(target.config))
         super().__init__(target, stream_name, schema, key_properties)
 
@@ -66,6 +68,21 @@ class SQLSink(BatchSink, t.Generic[_C]):
             The connector object.
         """
         return self._connector
+
+    @property
+    def load_strategy(self) -> LoadMethodStrategy:
+        """Get the load method strategy for this sink.
+
+        The strategy encapsulates table preparation and batch loading logic
+        for the configured load_method (append-only, upsert, overwrite).
+
+        Returns:
+            The LoadMethodStrategy instance for this sink's load method.
+        """
+        if self._load_strategy is None:
+            self._load_strategy = self.connector._create_load_strategy(self)  # noqa: SLF001
+            self._load_strategy.validate_config()
+        return self._load_strategy
 
     @property
     def connection(self) -> sa.Connection:
@@ -244,11 +261,15 @@ class SQLSink(BatchSink, t.Generic[_C]):
         """
         if self.schema_name:
             self.connector.prepare_schema(self.schema_name)
-        self.connector.prepare_table(
-            full_table_name=self.full_table_name,
+
+        # Initialize load strategy and store on connector for prepare_table delegation
+        self.connector._load_strategy = self.load_strategy  # noqa: SLF001
+
+        # Strategy handles table preparation
+        self.load_strategy.prepare_table(
+            full_table_name=str(self.full_table_name),
             schema=self.conform_schema(self.schema),
             primary_keys=self.key_properties,
-            as_temp_table=False,
         )
 
     @property
@@ -269,10 +290,11 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Args:
             context: Stream partition or context dictionary.
         """
+        # Use load strategy to handle batch loading
         # If duplicates are merged, these can be tracked via
         # :meth:`~singer_sdk.Sink.tally_duplicate_merged()`.
-        self.bulk_insert_records(
-            full_table_name=self.full_table_name,
+        self.load_strategy.load_batch(
+            full_table_name=str(self.full_table_name),
             schema=self.schema,
             records=context["records"],
         )

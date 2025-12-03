@@ -22,6 +22,8 @@ class DummySQLConnector(SQLConnector):
     """Dummy SQL connector."""
 
     allow_column_alter = True
+    allow_overwrite = True  # Enable OVERWRITE load method for tests
+    allow_merge_upsert = True  # Enable UPSERT load method for tests
 
     @override
     @staticmethod
