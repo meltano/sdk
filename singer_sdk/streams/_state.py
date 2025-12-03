@@ -239,8 +239,8 @@ class StreamStateManager:
         """
         if state is None or state == {}:
             # Reset all partition states
-            partition_list = partitions or []
-            for partition_context in partition_list or [{}]:
+            partition_list = partitions or [{}]
+            for partition_context in partition_list:
                 partition_state = self.get_context_state(partition_context or None)
                 reset_state_progress_markers(partition_state)
             return
