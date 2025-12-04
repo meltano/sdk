@@ -54,3 +54,6 @@ if __name__ == "__main__":
 
     if "{{ cookiecutter.ide }}" != "VSCode":
         shutil.rmtree(".vscode", ignore_errors=True)
+
+    if not {{ cookiecutter.include_agents_md }}:
+        Path("AGENTS.md").unlink(missing_ok=True)

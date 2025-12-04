@@ -7,6 +7,7 @@
   "variant": "None (Skip)",
   "faker_extra": false,
   "include_ci_files": ["GitHub", "None (Skip)"],
+  "include_agents_md": true,
   "license": ["Apache-2.0", "MIT", "None"],
   "ide": ["VSCode", "None"],
   "__prompts__": {
@@ -17,6 +18,7 @@
     "library_name": "The name of the library, in snake_case (e.g., 'mapper_mymapper'). This is how the library will be imported in Python.",
     "faker_extra": "Add [bold orange1][link=https://faker.readthedocs.io/en/master/]Faker[/link][/] as an extra dependency to support generating fake data in stream maps?",
     "include_ci_files": "Whether to include CI files for a common CI services",
+    "include_agents_md": "Include an AGENTS.md file with guidelines for agentic programming and AI-assisted development?",
     "license": "The license for the project",
     "ide": "Add configuration files for your preferred IDE"
   }
