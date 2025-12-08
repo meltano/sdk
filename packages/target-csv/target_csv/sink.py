@@ -1,11 +1,11 @@
-"""Sample Parquet target stream class, which handles writing streams."""
+"""Sample CSV target stream class, which handles writing streams."""
 
 from __future__ import annotations
 
 import csv
 from pathlib import Path
 
-from singer_sdk.sinks import BatchSink
+from singer_sdk.sinks import BatchContext, BatchSink
 
 
 class CSVSink(BatchSink):
@@ -23,9 +23,17 @@ class CSVSink(BatchSink):
         """Return target filepath."""
         return self.target_folder / f"{self.stream_name}.csv"
 
-    def process_batch(self, context: dict) -> None:
-        """Write `records_to_drain` out to file."""
-        records_to_drain = context["records"]
+    def load_batch(self, batch: BatchContext) -> None:
+        """Write batch records out to CSV file.
+
+        This demonstrates the modern, type-safe batch loading pattern.
+
+        Args:
+            batch: The batch context containing records and metadata.
+        """
+        # Type-safe access to records (IDE autocomplete works!)
+        records_to_drain = batch.records
+
         self.logger.debug("Draining records...")
         records_written = 0
         newfile = False
@@ -49,3 +57,9 @@ class CSVSink(BatchSink):
                     writer.writerow(record.keys())
                 writer.writerow(record.values())
                 records_written += 1
+
+    # Legacy implementation (no longer needed - kept for reference):
+    # def process_batch(self, context: dict) -> None:
+    #     """Write `records_to_drain` out to file."""
+    #     records_to_drain = context["records"]  # Magic key - no type safety!
+    #     ... (same logic as above)

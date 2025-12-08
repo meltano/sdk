@@ -56,6 +56,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         """
         self._connector: _C
         self._connector = connector or self.connector_class(dict(target.config))
+        self._table_prepared = False
         super().__init__(target, stream_name, schema, key_properties)
 
     @property
@@ -239,17 +240,14 @@ class SQLSink(BatchSink, t.Generic[_C]):
     def setup(self) -> None:
         """Set up Sink.
 
-        This method is called on Sink creation, and creates the required Schema and
-        Table entities in the target database.
+        This method is called on Sink creation, and creates the required Schema
+        entity in the target database.
+
+        Note: Table preparation is deferred to the first batch to avoid data loss
+        when multiple schema messages arrive for the same stream.
         """
         if self.schema_name:
             self.connector.prepare_schema(self.schema_name)
-        self.connector.prepare_table(
-            full_table_name=self.full_table_name,
-            schema=self.conform_schema(self.schema),
-            primary_keys=self.key_properties,
-            as_temp_table=False,
-        )
 
     @property
     def key_properties(self) -> t.Sequence[str]:
@@ -259,6 +257,24 @@ class SQLSink(BatchSink, t.Generic[_C]):
             A list of key properties, conformed with `self.conform_name()`
         """
         return [self.conform_name(key, "column") for key in super().key_properties]
+
+    def start_batch(self, context: dict) -> None:  # noqa: ARG002
+        """Start a new batch with the given context.
+
+        This method prepares the target table on the first batch to ensure that
+        records are not lost when multiple schema messages arrive for the same stream.
+
+        Args:
+            context: Stream partition or context dictionary.
+        """
+        if not self._table_prepared:
+            self.connector.prepare_table(
+                full_table_name=self.full_table_name,
+                schema=self.conform_schema(self.schema),
+                primary_keys=self.key_properties,
+                as_temp_table=False,
+            )
+            self._table_prepared = True
 
     def process_batch(self, context: dict) -> None:
         """Process a batch with the given batch context.
