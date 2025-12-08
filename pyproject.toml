@@ -315,7 +315,7 @@ module = [
 
 [build-system]
 requires = [
-    "hatchling==1.27",
+    "hatchling==1.28",
     "hatch-vcs==0.5",
 ]
 build-backend = "hatchling.build"
