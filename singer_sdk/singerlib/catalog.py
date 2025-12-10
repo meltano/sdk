@@ -190,6 +190,9 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
             forced_replication_method=replication_method,
             valid_replication_keys=valid_replication_keys,
             selected_by_default=selected_by_default,
+            replication_key=valid_replication_keys[0]
+            if valid_replication_keys
+            else None,
         )
 
         def _add_subfield_metadata(
