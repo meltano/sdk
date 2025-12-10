@@ -191,7 +191,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
             valid_replication_keys=valid_replication_keys,
             selected_by_default=selected_by_default,
             replication_key=valid_replication_keys[0]
-            if valid_replication_keys
+            if valid_replication_keys and len(valid_replication_keys) == 1
             else None,
         )
 
