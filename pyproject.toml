@@ -115,18 +115,18 @@ docs = [
 ]
 # Workspace packages needed for end-to-end tests
 packages = [
-    "mapper-custom",
-    "tap-countries",
-    "tap-csv",
-    "tap-dummyjson",
-    "tap-fake-people",
-    "tap-fundamentals",
-    "tap-gitlab",
-    "tap-hostile",
-    "tap-sqlite",
-    "target-csv",
-    "target-parquet",
-    "target-sqlite",
+    "meltano-mapper-custom",
+    "meltano-tap-countries",
+    "meltano-tap-csv",
+    "meltano-tap-dummyjson",
+    "meltano-tap-fake-people",
+    "meltano-tap-fundamentals",
+    "meltano-tap-gitlab",
+    "meltano-tap-hostile",
+    "meltano-tap-sqlite",
+    "meltano-target-csv",
+    "meltano-target-parquet",
+    "meltano-target-sqlite",
 ]
 testing = [
     "backports-zstd>=1.0.0; python_version < '3.14'",
@@ -315,7 +315,7 @@ module = [
 
 [build-system]
 requires = [
-    "hatchling==1.27",
+    "hatchling==1.28",
     "hatch-vcs==0.5",
 ]
 build-backend = "hatchling.build"
@@ -468,18 +468,18 @@ max-args = 9
 required-version = ">=0.5.19"
 
 [tool.uv.sources]
-mapper-custom = { workspace = true }
-tap-countries = { workspace = true }
-tap-csv = { workspace = true }
-tap-dummyjson = { workspace = true }
-tap-fake-people = { workspace = true }
-tap-fundamentals = { workspace = true }
-tap-gitlab = { workspace = true }
-tap-hostile = { workspace = true }
-tap-sqlite = { workspace = true }
-target-csv = { workspace = true }
-target-parquet = { workspace = true }
-target-sqlite = { workspace = true }
+meltano-mapper-custom = { workspace = true }
+meltano-tap-countries = { workspace = true }
+meltano-tap-csv = { workspace = true }
+meltano-tap-dummyjson = { workspace = true }
+meltano-tap-fake-people = { workspace = true }
+meltano-tap-fundamentals = { workspace = true }
+meltano-tap-gitlab = { workspace = true }
+meltano-tap-hostile = { workspace = true }
+meltano-tap-sqlite = { workspace = true }
+meltano-target-csv = { workspace = true }
+meltano-target-parquet = { workspace = true }
+meltano-target-sqlite = { workspace = true }
 
 [tool.uv.workspace]
 members = [

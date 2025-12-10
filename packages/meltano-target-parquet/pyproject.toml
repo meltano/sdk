@@ -1,0 +1,44 @@
+[project]
+name = "meltano-target-parquet"
+dynamic = [ "version" ]
+description = "Singer target for Parquet files, built with the Meltano Singer SDK"
+authors = [{ name = "Meltano Team", email = "hello@meltano.com" }]
+keywords = [
+    "ELT",
+    "Parquet",
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+license = "Apache-2.0"
+requires-python = ">=3.10"
+dependencies = [
+    "pyarrow",
+    "singer-sdk",
+]
+
+[project.scripts]
+target-parquet = 'target_parquet.target:TargetParquet.cli'
+
+[tool.hatch.build.targets.wheel]
+packages = ["target_parquet"]
+
+[tool.hatch.version]
+fallback-version = "0.0.0"
+source = "vcs"
+
+[tool.mypy]
+warn_unused_configs = true
+
+[tool.uv.sources]
+singer-sdk = { workspace = true }
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"

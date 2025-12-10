@@ -1,9 +1,7 @@
 ci:
   autofix_prs: true
-  autoupdate_schedule: monthly
+  autoupdate_schedule: weekly
   autoupdate_commit_msg: 'chore: pre-commit autoupdate'
-  skip:
-  - uv-lock
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -12,7 +10,7 @@ repos:
   - id: check-json
     exclude: |
       (?x)^(
-        .*/launch.json
+        \.vscode/.*\.json
       )$
   - id: check-toml
   - id: check-yaml
@@ -30,12 +28,5 @@ repos:
   rev: v0.14.8
   hooks:
   - id: ruff-check
-    args: [--diff]
+    args: [--fix, --exit-non-zero-on-fix, --show-fixes]
   - id: ruff-format
-    args: [--diff]
-
-- repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.9.15
-  hooks:
-  - id: uv-lock
-  - id: uv-sync
