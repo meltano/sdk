@@ -8,19 +8,19 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "mapper-custom",
+    "meltano-mapper-custom",
+    "meltano-tap-countries",
+    "meltano-tap-csv",
+    "meltano-tap-dummyjson",
+    "meltano-tap-fake-people",
+    "meltano-tap-fundamentals",
+    "meltano-tap-gitlab",
+    "meltano-tap-hostile",
+    "meltano-tap-sqlite",
+    "meltano-target-csv",
+    "meltano-target-parquet",
+    "meltano-target-sqlite",
     "singer-sdk",
-    "tap-countries",
-    "tap-csv",
-    "tap-dummyjson",
-    "tap-fake-people",
-    "tap-fundamentals",
-    "tap-gitlab",
-    "tap-hostile",
-    "tap-sqlite",
-    "target-csv",
-    "target-parquet",
-    "target-sqlite",
 ]
 
 [[package]]
@@ -894,7 +894,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -1324,16 +1324,6 @@ wheels = [
 ]
 
 [[package]]
-name = "mapper-custom"
-source = { editable = "packages/mapper-custom" }
-dependencies = [
-    { name = "singer-sdk" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "singer-sdk", editable = "." }]
-
-[[package]]
 name = "markdown-it-py"
 version = "3.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1449,6 +1439,193 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba", size = 8729, upload-time = "2022-08-14T12:40:10.846Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979, upload-time = "2022-08-14T12:40:09.779Z" },
+]
+
+[[package]]
+name = "meltano-mapper-custom"
+source = { editable = "packages/meltano-mapper-custom" }
+dependencies = [
+    { name = "singer-sdk" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "singer-sdk", editable = "." }]
+
+[[package]]
+name = "meltano-tap-countries"
+source = { editable = "packages/meltano-tap-countries" }
+dependencies = [
+    { name = "msgspec" },
+    { name = "requests-cache" },
+    { name = "singer-sdk" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "msgspec", specifier = ">=0.19.0" },
+    { name = "requests-cache", specifier = "~=1.2.1" },
+    { name = "singer-sdk", editable = "." },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
+]
+
+[[package]]
+name = "meltano-tap-csv"
+source = { editable = "packages/meltano-tap-csv" }
+dependencies = [
+    { name = "singer-sdk" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "singer-sdk", editable = "." }]
+
+[[package]]
+name = "meltano-tap-dummyjson"
+source = { editable = "packages/meltano-tap-dummyjson" }
+dependencies = [
+    { name = "requests" },
+    { name = "requests-cache" },
+    { name = "singer-sdk" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+]
+
+[package.optional-dependencies]
+s3 = [
+    { name = "s3fs" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "singer-sdk", extra = ["testing"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "requests", specifier = "~=2.32.3" },
+    { name = "requests-cache", specifier = "~=1.2.1" },
+    { name = "s3fs", marker = "extra == 's3'", specifier = ">=2025.9.0" },
+    { name = "singer-sdk", editable = "." },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
+]
+provides-extras = ["s3"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=8" },
+    { name = "singer-sdk", extras = ["testing"], editable = "." },
+]
+
+[[package]]
+name = "meltano-tap-fake-people"
+source = { editable = "packages/meltano-tap-fake-people" }
+dependencies = [
+    { name = "faker" },
+    { name = "singer-sdk" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "faker" },
+    { name = "singer-sdk", editable = "." },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
+]
+
+[[package]]
+name = "meltano-tap-fundamentals"
+source = { editable = "packages/meltano-tap-fundamentals" }
+dependencies = [
+    { name = "singer-sdk" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "singer-sdk", editable = "." },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
+]
+
+[[package]]
+name = "meltano-tap-gitlab"
+source = { editable = "packages/meltano-tap-gitlab" }
+dependencies = [
+    { name = "singer-sdk" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "singer-sdk", editable = "." },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
+]
+
+[[package]]
+name = "meltano-tap-hostile"
+source = { editable = "packages/meltano-tap-hostile" }
+dependencies = [
+    { name = "singer-sdk" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "singer-sdk", editable = "." },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
+]
+
+[[package]]
+name = "meltano-tap-sqlite"
+source = { editable = "packages/meltano-tap-sqlite" }
+dependencies = [
+    { name = "msgspec" },
+    { name = "singer-sdk" },
+    { name = "sqlalchemy" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "msgspec", specifier = ">=0.19.0" },
+    { name = "singer-sdk", editable = "." },
+    { name = "sqlalchemy" },
+]
+
+[[package]]
+name = "meltano-target-csv"
+source = { editable = "packages/meltano-target-csv" }
+dependencies = [
+    { name = "singer-sdk" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "singer-sdk", editable = "." }]
+
+[[package]]
+name = "meltano-target-parquet"
+source = { editable = "packages/meltano-target-parquet" }
+dependencies = [
+    { name = "pyarrow" },
+    { name = "singer-sdk" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pyarrow" },
+    { name = "singer-sdk", editable = "." },
+]
+
+[[package]]
+name = "meltano-target-sqlite"
+source = { editable = "packages/meltano-target-sqlite" }
+dependencies = [
+    { name = "msgspec" },
+    { name = "singer-sdk" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "msgspec", specifier = ">=0.19.0" },
+    { name = "singer-sdk", editable = "." },
 ]
 
 [[package]]
@@ -2653,18 +2830,18 @@ docs = [
     { name = "sphinx-reredirects", version = "1.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
 packages = [
-    { name = "mapper-custom" },
-    { name = "tap-countries" },
-    { name = "tap-csv" },
-    { name = "tap-dummyjson" },
-    { name = "tap-fake-people" },
-    { name = "tap-fundamentals" },
-    { name = "tap-gitlab" },
-    { name = "tap-hostile" },
-    { name = "tap-sqlite" },
-    { name = "target-csv" },
-    { name = "target-parquet" },
-    { name = "target-sqlite" },
+    { name = "meltano-mapper-custom" },
+    { name = "meltano-tap-countries" },
+    { name = "meltano-tap-csv" },
+    { name = "meltano-tap-dummyjson" },
+    { name = "meltano-tap-fake-people" },
+    { name = "meltano-tap-fundamentals" },
+    { name = "meltano-tap-gitlab" },
+    { name = "meltano-tap-hostile" },
+    { name = "meltano-tap-sqlite" },
+    { name = "meltano-target-csv" },
+    { name = "meltano-target-parquet" },
+    { name = "meltano-target-sqlite" },
 ]
 testing = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'" },
@@ -2785,18 +2962,18 @@ docs = [
     { name = "sphinx-reredirects", specifier = ">=0.1.5" },
 ]
 packages = [
-    { name = "mapper-custom", editable = "packages/mapper-custom" },
-    { name = "tap-countries", editable = "packages/tap-countries" },
-    { name = "tap-csv", editable = "packages/tap-csv" },
-    { name = "tap-dummyjson", editable = "packages/tap-dummyjson" },
-    { name = "tap-fake-people", editable = "packages/tap-fake-people" },
-    { name = "tap-fundamentals", editable = "packages/tap-fundamentals" },
-    { name = "tap-gitlab", editable = "packages/tap-gitlab" },
-    { name = "tap-hostile", editable = "packages/tap-hostile" },
-    { name = "tap-sqlite", editable = "packages/tap-sqlite" },
-    { name = "target-csv", editable = "packages/target-csv" },
-    { name = "target-parquet", editable = "packages/target-parquet" },
-    { name = "target-sqlite", editable = "packages/target-sqlite" },
+    { name = "meltano-mapper-custom", editable = "packages/meltano-mapper-custom" },
+    { name = "meltano-tap-countries", editable = "packages/meltano-tap-countries" },
+    { name = "meltano-tap-csv", editable = "packages/meltano-tap-csv" },
+    { name = "meltano-tap-dummyjson", editable = "packages/meltano-tap-dummyjson" },
+    { name = "meltano-tap-fake-people", editable = "packages/meltano-tap-fake-people" },
+    { name = "meltano-tap-fundamentals", editable = "packages/meltano-tap-fundamentals" },
+    { name = "meltano-tap-gitlab", editable = "packages/meltano-tap-gitlab" },
+    { name = "meltano-tap-hostile", editable = "packages/meltano-tap-hostile" },
+    { name = "meltano-tap-sqlite", editable = "packages/meltano-tap-sqlite" },
+    { name = "meltano-target-csv", editable = "packages/meltano-target-csv" },
+    { name = "meltano-target-parquet", editable = "packages/meltano-target-parquet" },
+    { name = "meltano-target-sqlite", editable = "packages/meltano-target-sqlite" },
 ]
 testing = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'", specifier = ">=1.0.0" },
@@ -3092,183 +3269,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/32/d5/0e66097fc64fa266f29a7963296b40a80d6a997b7ac13806183700676f86/sqlalchemy-2.0.44-cp313-cp313-win32.whl", hash = "sha256:ee51625c2d51f8baadf2829fae817ad0b66b140573939dd69284d2ba3553ae73", size = 2101275, upload-time = "2025-10-10T15:03:26.096Z" },
     { url = "https://files.pythonhosted.org/packages/03/51/665617fe4f8c6450f42a6d8d69243f9420f5677395572c2fe9d21b493b7b/sqlalchemy-2.0.44-cp313-cp313-win_amd64.whl", hash = "sha256:c1c80faaee1a6c3428cecf40d16a2365bcf56c424c92c2b6f0f9ad204b899e9e", size = 2127901, upload-time = "2025-10-10T15:03:27.548Z" },
     { url = "https://files.pythonhosted.org/packages/9c/5e/6a29fa884d9fb7ddadf6b69490a9d45fded3b38541713010dad16b77d015/sqlalchemy-2.0.44-py3-none-any.whl", hash = "sha256:19de7ca1246fbef9f9d1bff8f1ab25641569df226364a0e40457dc5457c54b05", size = 1928718, upload-time = "2025-10-10T15:29:45.32Z" },
-]
-
-[[package]]
-name = "tap-countries"
-source = { editable = "packages/tap-countries" }
-dependencies = [
-    { name = "msgspec" },
-    { name = "requests-cache" },
-    { name = "singer-sdk" },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "msgspec", specifier = ">=0.19.0" },
-    { name = "requests-cache", specifier = "~=1.2.1" },
-    { name = "singer-sdk", editable = "." },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
-]
-
-[[package]]
-name = "tap-csv"
-source = { editable = "packages/tap-csv" }
-dependencies = [
-    { name = "singer-sdk" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "singer-sdk", editable = "." }]
-
-[[package]]
-name = "tap-dummyjson"
-source = { editable = "packages/tap-dummyjson" }
-dependencies = [
-    { name = "requests" },
-    { name = "requests-cache" },
-    { name = "singer-sdk" },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
-]
-
-[package.optional-dependencies]
-s3 = [
-    { name = "s3fs" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "singer-sdk", extra = ["testing"] },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "requests", specifier = "~=2.32.3" },
-    { name = "requests-cache", specifier = "~=1.2.1" },
-    { name = "s3fs", marker = "extra == 's3'", specifier = ">=2025.9.0" },
-    { name = "singer-sdk", editable = "." },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
-]
-provides-extras = ["s3"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=8" },
-    { name = "singer-sdk", extras = ["testing"], editable = "." },
-]
-
-[[package]]
-name = "tap-fake-people"
-source = { editable = "packages/tap-fake-people" }
-dependencies = [
-    { name = "faker" },
-    { name = "singer-sdk" },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "faker" },
-    { name = "singer-sdk", editable = "." },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
-]
-
-[[package]]
-name = "tap-fundamentals"
-source = { editable = "packages/tap-fundamentals" }
-dependencies = [
-    { name = "singer-sdk" },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "singer-sdk", editable = "." },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
-]
-
-[[package]]
-name = "tap-gitlab"
-source = { editable = "packages/tap-gitlab" }
-dependencies = [
-    { name = "singer-sdk" },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "singer-sdk", editable = "." },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
-]
-
-[[package]]
-name = "tap-hostile"
-source = { editable = "packages/tap-hostile" }
-dependencies = [
-    { name = "singer-sdk" },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "singer-sdk", editable = "." },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
-]
-
-[[package]]
-name = "tap-sqlite"
-source = { editable = "packages/tap-sqlite" }
-dependencies = [
-    { name = "msgspec" },
-    { name = "singer-sdk" },
-    { name = "sqlalchemy" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "msgspec", specifier = ">=0.19.0" },
-    { name = "singer-sdk", editable = "." },
-    { name = "sqlalchemy" },
-]
-
-[[package]]
-name = "target-csv"
-source = { editable = "packages/target-csv" }
-dependencies = [
-    { name = "singer-sdk" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "singer-sdk", editable = "." }]
-
-[[package]]
-name = "target-parquet"
-source = { editable = "packages/target-parquet" }
-dependencies = [
-    { name = "pyarrow" },
-    { name = "singer-sdk" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "pyarrow" },
-    { name = "singer-sdk", editable = "." },
-]
-
-[[package]]
-name = "target-sqlite"
-source = { editable = "packages/target-sqlite" }
-dependencies = [
-    { name = "msgspec" },
-    { name = "singer-sdk" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "msgspec", specifier = ">=0.19.0" },
-    { name = "singer-sdk", editable = "." },
 ]
 
 [[package]]
