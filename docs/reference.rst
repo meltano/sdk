@@ -3,7 +3,7 @@ Classes Reference
 
 .. currentmodule:: singer_sdk
 
-.. comment::
+..
    MAINTAINER NOTE: This file is manually maintained to provide semantic organization
    of the SDK's public API. When adding new public classes or functions:
 

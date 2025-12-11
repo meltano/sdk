@@ -199,7 +199,36 @@ def linkcode_resolve(domain: str, info: dict) -> str | None:
         return None
     if not info["module"]:
         return None
-    filename = info["module"].replace(".", "/")
+
+    # Map re-exported classes to their canonical source files
+    module = info["module"]
+    fullname = info.get("fullname", "")
+
+    # Extract the class name (first part before any dots for nested items)
+    classname = fullname.split(".")[0] if fullname else ""
+
+    # Classes re-exported from singer_sdk.__init__ but defined elsewhere
+    if module == "singer_sdk" and classname:
+        canonical_locations = {
+            "Tap": "singer_sdk/tap_base",
+            "Target": "singer_sdk/target_base",
+            "InlineMapper": "singer_sdk/mapper_base",
+            "PluginBase": "singer_sdk/plugin_base",
+            "Stream": "singer_sdk/streams/core",
+            "RESTStream": "singer_sdk/streams/rest",
+            "GraphQLStream": "singer_sdk/streams/graphql",
+            "Sink": "singer_sdk/sinks/core",
+            "RecordSink": "singer_sdk/sinks/core",
+            "BatchSink": "singer_sdk/sinks/core",
+            "SchemaSource": "singer_sdk/schema/source",
+            "SchemaDirectory": "singer_sdk/schema/source",
+            "StreamSchema": "singer_sdk/schema/source",
+            "OpenAPISchema": "singer_sdk/schema/source",
+        }
+        if classname in canonical_locations:
+            return f"https://github.com/meltano/sdk/tree/main/{canonical_locations[classname]}.py"
+
+    filename = module.replace(".", "/")
 
     if filename == "singer_sdk":
         filename = "singer_sdk/__init__"
