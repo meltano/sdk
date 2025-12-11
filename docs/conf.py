@@ -148,6 +148,15 @@ myst_enable_extensions = {
 
 redirects = {
     "porting.html": "guides/porting.html",
+    # Schema source redirects (re-exported from main __init__.py)
+    "classes/singer_sdk.SchemaSource.html": "classes/singer_sdk.schema.source.SchemaSource.html",  # noqa: E501
+    "classes/singer_sdk.SchemaDirectory.html": "classes/singer_sdk.schema.source.SchemaDirectory.html",  # noqa: E501
+    "classes/singer_sdk.StreamSchema.html": "classes/singer_sdk.schema.source.StreamSchema.html",  # noqa: E501
+    "classes/singer_sdk.OpenAPISchema.html": "classes/singer_sdk.schema.source.OpenAPISchema.html",  # noqa: E501
+    # Deprecated batch encoder redirect
+    "classes/singer_sdk.batch.JSONLinesBatcher.html": "classes/singer_sdk.contrib.batch_encoder_jsonl.JSONLinesBatcher.html",  # noqa: E501
+    # Testing module redirects (re-exported from testing.__init__.py)
+    "classes/singer_sdk.testing.SuiteConfig.html": "classes/singer_sdk.testing.config.SuiteConfig.html",  # noqa: E501
 }
 
 # -- Options for extlinks -----------------------------------------------------
