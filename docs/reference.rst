@@ -3,27 +3,6 @@ Classes Reference
 
 .. currentmodule:: singer_sdk
 
-.. note::
-   **Maintaining this file:**
-
-   This file is manually maintained to provide semantic organization of the SDK's public API.
-   When adding new public classes or functions:
-
-   1. **Use canonical module paths** - Document classes at their canonical location, not re-export locations.
-      Example: Use ``schema.source.SchemaSource`` not ``SchemaSource``
-
-   2. **Add to the appropriate section** - Place classes in semantic sections (Plugin Classes,
-      Stream Classes, Testing, etc.) rather than by module structure
-
-   3. **Update redirects** - If a class is re-exported from the main package or other ``__init__.py``
-      files, add a redirect in ``conf.py`` to point from the re-export path to the canonical path
-
-   4. **Choose the right template**:
-
-      - ``plugin_class.rst`` - For Tap, Target, and related plugin classes
-      - ``stream_class.rst`` - For Stream subclasses (shows inherited members from Stream)
-      - ``class.rst`` - For all other classes (default)
-
 Plugin Classes
 --------------
 
@@ -428,3 +407,27 @@ Other
 
     sql.connector.SQLToJSONSchema
     sql.connector.JSONSchemaToSQL
+
+----
+
+.. comment::
+   MAINTAINER NOTE: This file is manually maintained to provide semantic organization
+   of the SDK's public API. When adding new public classes or functions:
+
+   1. Use canonical module paths - Document classes at their canonical location, not
+      re-export locations. Example: Use "schema.source.SchemaSource" not "SchemaSource"
+
+   2. Add to the appropriate section - Place classes in semantic sections (Plugin
+      Classes, Stream Classes, Testing, etc.) rather than by module structure
+
+   3. Update redirects - If a class is re-exported from the main package or other
+      __init__.py files, add a redirect in conf.py to point from the re-export path
+      to the canonical path
+
+   4. Choose the right template:
+      - plugin_class.rst - For Tap, Target, and related plugin classes
+      - stream_class.rst - For Stream subclasses (shows inherited members from Stream)
+      - class.rst - For all other classes (default)
+
+   Future consideration: See issue #3408 for migrating to sphinx-autoapi to automate
+   this process.
