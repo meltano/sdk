@@ -26,7 +26,7 @@ env:
 
 jobs:
   pytest:
-    name: Integration Tests
+    name: Integration Tests / Python {{ '${{ matrix.python-version }}' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -49,7 +49,7 @@ jobs:
         version: ">=0.8"
     - name: Run Tox
       run: |
-        uvx --with=tox-uv tox -e $(echo py{{ '${{ matrix.python-version }}' }} | tr -d .)
+        uvx --with=tox-uv tox -e {{ '${{ matrix.python-version }}' }}
 
   typing:
     name: Type Checking
