@@ -200,6 +200,88 @@ def test_flatten_record_with_typeless_property_values():
     assert flattened_record["changes__NewValue"] == "simple string"
 
 
+def test_flatten_combined_schemas():
+    """Test that combined schemas are flattened correctly.
+
+    Examples of combined schemas:
+    - oneOf
+    - anyOf
+    - allOf
+
+    https://json-schema.org/understanding-json-schema/reference/combining
+    """
+    schema = {
+        "type": "object",
+        "properties": {
+            "name": {
+                "oneOf": [
+                    {"type": "string"},
+                    {
+                        "type": "object",
+                        "properties": {
+                            "first_name": {"type": "string"},
+                            "last_name": {"type": "string"},
+                        },
+                    },
+                ],
+            },
+            "address": {
+                "anyOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "street": {"type": "string"},
+                            "city": {"type": "string"},
+                            "state": {"type": "string"},
+                            "zip": {"type": "string"},
+                        },
+                    },
+                ],
+            },
+            "phones": {
+                "allOf": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "type": {"type": "string"},
+                                "number": {"type": "string"},
+                            },
+                        },
+                    },
+                ],
+            },
+        },
+    }
+    flattened = flatten_schema(schema, max_level=1)
+    assert flattened == {
+        "type": "object",
+        "properties": {
+            "name": {"type": ["null", "string"]},
+            "address": {
+                "type": ["null", "object"],
+                "properties": {
+                    "street": {"type": "string"},
+                    "city": {"type": "string"},
+                    "state": {"type": "string"},
+                    "zip": {"type": "string"},
+                },
+            },
+            "phones": {
+                "type": ["null", "array"],
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "type": {"type": "string"},
+                        "number": {"type": "string"},
+                    },
+                },
+            },
+        },
+    }
+
+
 def test_flatten_key_with_long_names(subtests: pytest.Subtests):
     """Test that flatten_key abbreviates long key names to stay under 255 chars.
 
