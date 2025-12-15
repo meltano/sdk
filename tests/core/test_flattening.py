@@ -105,6 +105,18 @@ def test_get_flattening_options_max_key_length():
     assert options.max_key_length == 30
 
 
+def test_get_flattening_options_custom_separator():
+    options = get_flattening_options(
+        {
+            "flattening_enabled": True,
+            "flattening_max_depth": 5,
+            "flattening_max_key_length": 30,
+            "flattening_separator": ".",
+        }
+    )
+    assert options.separator == "."
+
+
 def test_flatten_schema_with_typeless_properties():
     """Test that properties without explicit types are preserved during flattening.
 
@@ -333,3 +345,61 @@ def test_flatten_key_with_long_names(subtests: pytest.Subtests):
         )
         assert len(result_custom_length) < 100
         assert result_custom_length.count("__") == len(parent_keys)
+
+def test_flatten_schema_with_custom_separator():
+    """Test flatten_schema to obey the separator parameter.
+    """
+    schema = {
+        "type": "object",
+        "properties": {
+            "key_1": {"type": "string"},
+            "key_2": {
+                "type": "object",
+                "properties": {
+                    "key_3": {"type": "string"},
+                    "key_4": {
+                        "type": "object",
+                        "properties": {
+                            "key_5": {"type": "integer"},
+                            "key_6": {"type": "array"}
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    expected = {
+        "type": "object",
+        "properties": {
+            "key_1": {"type": "string"},
+            "key_2.key_3": {"type": "string"},
+            "key_2.key_4.key_5": {"type": "integer"},
+            "key_2.key_4.key_6": {"type": "string"}
+        }
+    }
+    assert expected == flatten_schema(schema, max_level=99, separator=".")
+
+def test_flatten_record_with_custom_separator():
+    """Test flatten_record to obey the separator parameter."""
+    flattened_schema = {
+        "properties": {
+            "key_1": {"type": ["null", "integer"]},
+            "key_2.key_3": {"type": ["null", "string"]},
+            "key_2.key_4": {"type": ["null", "object"]},
+        }
+    }
+    record = {
+        "key_1": 1,
+        "key_2": {"key_3": "value", "key_4": {"key_5": 1, "key_6": ["a", "b"]}},
+    }
+
+    result = flatten_record(
+        record, max_level=99, flattened_schema=flattened_schema, separator="."
+    )
+    expected = {
+        "key_1": 1,
+        "key_2.key_3": "value",
+        "key_2.key_4": '{"key_5":1,"key_6":["a","b"]}',
+    }
+    assert expected == result

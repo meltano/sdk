@@ -30,6 +30,7 @@ class PluginFlatteningConfig(t.TypedDict):
     flattening_enabled: bool
     flattening_max_depth: int
     flattening_max_key_length: int
+    flattening_separator: str
 
 
 @dataclass
@@ -60,6 +61,9 @@ class FlatteningOptions:
 
         if (max_key_length := data.get("flattening_max_key_length")) is not None:
             kwargs["max_key_length"] = max_key_length
+
+        if (separator := data.get("flattening_separator")) is not None:
+            kwargs["separator"] = separator
 
         return cls(enabled=data.get("flattening_enabled", False), **kwargs)
 
