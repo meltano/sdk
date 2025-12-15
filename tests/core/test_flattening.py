@@ -346,9 +346,9 @@ def test_flatten_key_with_long_names(subtests: pytest.Subtests):
         assert len(result_custom_length) < 100
         assert result_custom_length.count("__") == len(parent_keys)
 
+
 def test_flatten_schema_with_custom_separator():
-    """Test flatten_schema to obey the separator parameter.
-    """
+    """Test flatten_schema to obey the separator parameter."""
     schema = {
         "type": "object",
         "properties": {
@@ -361,12 +361,12 @@ def test_flatten_schema_with_custom_separator():
                         "type": "object",
                         "properties": {
                             "key_5": {"type": "integer"},
-                            "key_6": {"type": "array"}
-                        }
-                    }
-                }
-            }
-        }
+                            "key_6": {"type": "array"},
+                        },
+                    },
+                },
+            },
+        },
     }
 
     expected = {
@@ -375,10 +375,11 @@ def test_flatten_schema_with_custom_separator():
             "key_1": {"type": "string"},
             "key_2.key_3": {"type": "string"},
             "key_2.key_4.key_5": {"type": "integer"},
-            "key_2.key_4.key_6": {"type": "string"}
-        }
+            "key_2.key_4.key_6": {"type": "string"},
+        },
     }
     assert expected == flatten_schema(schema, max_level=99, separator=".")
+
 
 def test_flatten_record_with_custom_separator():
     """Test flatten_record to obey the separator parameter."""
