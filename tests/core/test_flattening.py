@@ -252,6 +252,12 @@ def test_flatten_combined_schemas():
                     },
                 ],
             },
+            "id": {
+                "oneOf": [
+                    {"type": "integer"},
+                    {"type": "string", "format": "uuid"},
+                ],
+            },
         },
     }
     flattened = flatten_schema(schema, max_level=1)
