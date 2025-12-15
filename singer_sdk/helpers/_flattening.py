@@ -17,6 +17,12 @@ from singer_sdk.singerlib.json import serialize_json
 DEFAULT_FLATTENING_SEPARATOR = "__"
 DEFAULT_MAX_KEY_LENGTH = 255
 
+_T = t.TypeVar("_T")
+
+
+def _first(iterable: t.Iterable[_T]) -> _T | None:
+    return next(iter(iterable), None)
+
 
 class PluginFlatteningConfig(t.TypedDict):
     """Plugin flattening configuration."""
@@ -380,18 +386,22 @@ def _flatten_schema(  # noqa: C901, PLR0912
                 items.append((new_key, {"type": types}))
             else:
                 items.append((new_key, field_schema))
-        # TODO: Figure out what this really does, try breaking it.
-        # If it's not needed, remove it.
-        elif len(field_schema.values()) > 0:
-            if next(iter(field_schema.values()))[0]["type"] == "string":
-                next(iter(field_schema.values()))[0]["type"] = ["null", "string"]
-                items.append((new_key, next(iter(field_schema.values()))[0]))
-            elif next(iter(field_schema.values()))[0]["type"] == "array":
-                next(iter(field_schema.values()))[0]["type"] = ["null", "array"]
-                items.append((new_key, next(iter(field_schema.values()))[0]))
-            elif next(iter(field_schema.values()))[0]["type"] == "object":
-                next(iter(field_schema.values()))[0]["type"] = ["null", "object"]
-                items.append((new_key, next(iter(field_schema.values()))[0]))
+        # Handle oneOf, anyOf, etc.
+        elif (
+            (composite := _first(field_schema.values()))
+            and isinstance(composite, list)
+            and len(composite) > 0
+            and (first_element := _first(composite))
+        ):
+            if first_element["type"] == "string":
+                first_element["type"] = ["null", "string"]
+                items.append((new_key, first_element))
+            elif first_element["type"] == "array":
+                first_element["type"] = ["null", "array"]
+                items.append((new_key, first_element))
+            elif first_element["type"] == "object":
+                first_element["type"] = ["null", "object"]
+                items.append((new_key, first_element))
         else:
             # Handle typeless properties (e.g., "PropertyName": {})
             # Treat them as string type to allow JSON serialization
