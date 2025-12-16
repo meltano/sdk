@@ -544,7 +544,7 @@ def _should_jsondump_value(
     ):
         return False
 
-    return (
+    return (  # type: ignore[no-any-return]
         flattened_schema.get("properties", {})
         .get(key, {})
         .get("x-json-serialize", False)
