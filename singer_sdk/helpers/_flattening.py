@@ -129,6 +129,10 @@ def flatten_schema(
 ) -> dict:
     """Flatten the provided schema up to a depth of max_level.
 
+    Combined schemas (oneOf/anyOf/allOf) and typeless properties are coerced to
+    string type and marked with `x-json-serialize: true` to ensure proper
+    JSON encoding during record flattening.
+
     Args:
         schema: The schema definition to flatten.
         separator: The string to use when concatenating key names.
@@ -325,7 +329,7 @@ def flatten_schema(
     return new_schema
 
 
-def _flatten_schema(  # noqa: C901, PLR0912
+def _flatten_schema(
     schema_node: dict,
     parent_keys: list[str] | None = None,
     separator: str = "__",
@@ -336,6 +340,10 @@ def _flatten_schema(  # noqa: C901, PLR0912
 ) -> dict:
     """Flatten the provided schema node, recursively up to depth of `max_level`.
 
+    Combined schemas (oneOf/anyOf/allOf) and typeless properties are coerced to
+    string type and marked with `x-json-serialize: true` to indicate that values
+    should be JSON-encoded during record flattening.
+
     Args:
         schema_node: The schema node to flatten.
         parent_keys: The parent's key, provided as a list of node names.
@@ -345,7 +353,7 @@ def _flatten_schema(  # noqa: C901, PLR0912
         max_key_length: The maximum length of the key. Defaults to 255.
 
     Returns:
-        A flattened version of the provided node.
+        A flattened version of the provided node with `x-json-serialize` markers.
     """
     if parent_keys is None:
         parent_keys = []
@@ -386,26 +394,16 @@ def _flatten_schema(  # noqa: C901, PLR0912
                 items.append((new_key, {"type": types}))
             else:
                 items.append((new_key, field_schema))
-        # Handle oneOf, anyOf, etc.
-        elif (
-            (composite := _first(field_schema.values()))
-            and isinstance(composite, list)
-            and len(composite) > 0
-            and (first_element := _first(composite))
-        ):
-            if first_element["type"] == "string":
-                first_element["type"] = ["null", "string"]
-                items.append((new_key, first_element))
-            elif first_element["type"] == "array":
-                first_element["type"] = ["null", "array"]
-                items.append((new_key, first_element))
-            elif first_element["type"] == "object":
-                first_element["type"] = ["null", "object"]
-                items.append((new_key, first_element))
         else:
-            # Handle typeless properties (e.g., "PropertyName": {})
-            # Treat them as string type to allow JSON serialization
-            items.append((new_key, {"type": ["null", "string"]}))
+            # Handle oneOf, anyOf, allOf, and typeless properties
+            # (e.g., "PropertyName": {}).
+            # Treat them as string type to allow JSON serialization.
+            items.append(
+                (
+                    new_key,
+                    {"type": ["null", "string"], "x-json-serialize": True},
+                ),
+            )
 
     # Sort and check for duplicates
     def _key_func(item: tuple[str, dict]) -> str:
@@ -507,7 +505,7 @@ def _flatten_record(
                 (
                     new_key,
                     serialize_json(v)
-                    if _should_jsondump_value(k, v, flattened_schema)
+                    if _should_jsondump_value(new_key, v, flattened_schema)
                     else v,
                 ),
             )
@@ -522,20 +520,32 @@ def _should_jsondump_value(
 ) -> bool:
     """Return True if json.dump() should be used to serialize the value.
 
+    Values are JSON-encoded if they are complex types (dict/list) or if the
+    flattened schema has marked the field with `x-json-serialize: true`.
+
     Args:
-        key: [description]
-        value: [description]
-        flattened_schema: [description]. Defaults to None.
+        key: The field key in the flattened schema.
+        value: The value to potentially serialize.
+        flattened_schema: The flattened schema dictionary.
 
     Returns:
-        [description]
+        True if the value should be JSON-encoded, False otherwise.
     """
+    # Always JSON-encode complex types
     if isinstance(value, (dict, list)):
         return True
 
-    return bool(
+    # Check if schema exists and has type info
+    if not (
         flattened_schema
-        and key in flattened_schema
-        and "type" in flattened_schema[key]
-        and set(flattened_schema[key]["type"]) == {"null", "object", "array"}
+        and "properties" in flattened_schema
+        and key in flattened_schema["properties"]
+        and "type" in flattened_schema["properties"][key]
+    ):
+        return False
+
+    return (
+        flattened_schema.get("properties", {})
+        .get(key, {})
+        .get("x-json-serialize", False)
     )
