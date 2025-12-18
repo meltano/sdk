@@ -200,7 +200,7 @@ class TestSQLSink:
             "test_stream",
             schema=initial_schema,
             key_properties=["id"],
-        )
+        )  # ty:ignore[invalid-assignment]
 
         # Process a record through sink1 (this creates the table)
         record1 = {"id": "1", "name": "Alice"}
@@ -234,7 +234,7 @@ class TestSQLSink:
             "test_stream",
             schema=new_schema,
             key_properties=["id"],
-        )
+        )  # ty:ignore[invalid-assignment]
 
         # Process a record through sink2
         record2 = {"id": "2", "name": "Bob", "age": 30}
@@ -291,7 +291,7 @@ class TestSQLSink:
             "test_stream",
             schema=initial_schema,
             key_properties=["id"],
-        )
+        )  # ty:ignore[invalid-assignment]
 
         # Simulate processing and draining records 1-2
         _ = sink1._get_context({"id": "1"})
@@ -325,7 +325,7 @@ class TestSQLSink:
             "test_stream",
             schema=new_schema,
             key_properties=["id"],
-        )
+        )  # ty:ignore[invalid-assignment]
 
         # Process records through sink2
         _ = sink2._get_context({"id": "4", "name": "Dave"})

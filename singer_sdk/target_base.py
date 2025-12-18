@@ -42,8 +42,10 @@ if t.TYPE_CHECKING:
 
 _MAX_PARALLELISM = 8
 
+_TSink = t.TypeVar("_TSink", bound="Sink")
 
-class Target(BaseSingerReader, metaclass=abc.ABCMeta):
+
+class Target(BaseSingerReader, t.Generic[_TSink], metaclass=abc.ABCMeta):
     """Abstract base class for targets.
 
     The `Target` class manages config information and is responsible for processing the
@@ -101,8 +103,8 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
 
         self._latest_state: dict[str, dict] | None = None
         self._drained_state: dict[str, dict] = {}
-        self._sinks_active: dict[str, Sink] = {}
-        self._sinks_to_clear: list[Sink] = []
+        self._sinks_active: dict[str, _TSink] = {}
+        self._sinks_to_clear: list[_TSink] = []
         self._max_parallelism: int | None = _MAX_PARALLELISM
 
         # Approximated for max record age enforcement
@@ -145,7 +147,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         record: dict | None = None,
         schema: dict | None = None,
         key_properties: t.Sequence[str] | None = None,
-    ) -> Sink:
+    ) -> _TSink:
         """Return a sink for the given stream name.
 
         A new sink will be created if `schema` is provided and if either `schema` or
@@ -191,7 +193,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
 
         return existing_sink
 
-    def get_sink_class(self, stream_name: str) -> type[Sink]:
+    def get_sink_class(self, stream_name: str) -> type[_TSink]:
         """Get sink for a stream.
 
         Developers can override this method to return a custom Sink type depending
@@ -234,7 +236,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         stream_name: str,
         schema: dict,
         key_properties: t.Sequence[str] | None = None,
-    ) -> Sink:
+    ) -> _TSink:
         """Create a sink and register it.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -491,7 +493,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         self._reset_max_record_age()
 
     @t.final
-    def drain_one(self, sink: Sink) -> None:  # noqa: PLR6301
+    def drain_one(self, sink: _TSink) -> None:  # noqa: PLR6301
         """Drain a specific sink.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -507,13 +509,13 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
             sink.process_batch(draining_status)
         sink.mark_drained()
 
-    def _drain_all(self, sink_list: Iterable[Sink], parallelism: int) -> None:
+    def _drain_all(self, sink_list: Iterable[_TSink], parallelism: int) -> None:
         if parallelism == 1:
             for sink in sink_list:
                 self.drain_one(sink)
             return
 
-        def _drain_sink(sink: Sink) -> None:
+        def _drain_sink(sink: _TSink) -> None:
             self.drain_one(sink)
 
         with parallel_config(backend="threading", n_jobs=parallelism):

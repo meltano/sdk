@@ -10,18 +10,17 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
     TargetCapabilities,
 )
+from singer_sdk.sql.sink import SQLSink
 from singer_sdk.target_base import Target
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
-    from singer_sdk.sinks.core import Sink
     from singer_sdk.sql.connector import SQLConnector
-    from singer_sdk.sql.sink import SQLSink
 
 __all__ = ["SQLTarget"]
 
 
-class SQLTarget(Target):
+class SQLTarget(Target[SQLSink]):
     """Target implementation for SQL destinations."""
 
     _target_connector: SQLConnector | None = None
@@ -88,7 +87,7 @@ class SQLTarget(Target):
         stream_name: str,
         schema: dict,
         key_properties: t.Sequence[str] | None = None,
-    ) -> Sink:
+    ) -> SQLSink:
         """Create a sink and register it.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -146,7 +145,7 @@ class SQLTarget(Target):
         record: dict | None = None,
         schema: dict | None = None,
         key_properties: t.Sequence[str] | None = None,
-    ) -> Sink:
+    ) -> SQLSink:
         """Return a sink for the given stream name.
 
         A new sink will be created if `schema` is provided and if either `schema` or

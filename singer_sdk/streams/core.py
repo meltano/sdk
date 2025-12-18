@@ -170,11 +170,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self.child_streams: list[Stream] = []
         if schema:
             if isinstance(schema, (PathLike, str)):
-                if not Path(schema).is_file():
+                if not Path(schema).is_file():  # ty:ignore[invalid-argument-type]
                     msg = f"Could not find schema file '{self.schema_filepath}'."
                     raise FileNotFoundError(msg)
 
-                self._schema_filepath = Path(schema)
+                self._schema_filepath = Path(schema)  # ty:ignore[invalid-argument-type]
                 warnings.warn(
                     "Passing a schema filepath is deprecated. Please pass a schema "
                     "dictionary or a Singer Schema object instead.",
@@ -247,7 +247,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     stream_alias=self.name,
                     raw_schema=self.schema,
                     key_properties=self.primary_keys,
-                    flattening_options=get_flattening_options(self.config),
+                    flattening_options=get_flattening_options(self.config),  # ty:ignore[invalid-argument-type]
                 ),
             ]
         return self._stream_maps

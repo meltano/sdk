@@ -24,7 +24,7 @@ _TestCSVMerge = get_tap_test_class(
 )
 
 
-class TestCSVMerge(_TestCSVMerge):
+class TestCSVMerge(_TestCSVMerge):  # ty:ignore[unsupported-base]
     pass
 
 
@@ -38,7 +38,7 @@ _TestCSVOneStreamPerFile = get_tap_test_class(
 )
 
 
-class TestCSVOneStreamPerFile(_TestCSVOneStreamPerFile):
+class TestCSVOneStreamPerFile(_TestCSVOneStreamPerFile):  # ty:ignore[unsupported-base]
     pass
 
 
@@ -80,7 +80,7 @@ _TestCSVOneStreamPerFileIncremental = get_tap_test_class(
 )
 
 
-class TestCSVOneStreamPerFileIncremental(_TestCSVOneStreamPerFileIncremental):
+class TestCSVOneStreamPerFileIncremental(_TestCSVOneStreamPerFileIncremental):  # ty:ignore[unsupported-base]
     @pytest.mark.xfail(
         reason="There are no records because the state is set to the future.",
         strict=True,

@@ -633,7 +633,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     date_val = handle_invalid_timestamp_in_record(
                         record,
                         [key],
-                        date_val,
+                        date_val,  # ty:ignore[invalid-argument-type]
                         datelike_type,
                         ex,
                         treatment,

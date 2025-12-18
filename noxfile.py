@@ -66,6 +66,7 @@ def mypy(session: nox.Session) -> None:
         "packages",
         "samples",
         "singer_sdk",
+        "tests",
     ]
     args = session.posargs or default_locations
     session.run_install(

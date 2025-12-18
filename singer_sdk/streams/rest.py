@@ -854,7 +854,7 @@ class RESTStream(_HTTPStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
                 DeprecationWarning,
                 stacklevel=2,
             )
-            return LegacyStreamPaginator(self)
+            return LegacyStreamPaginator(self)  # ty:ignore[invalid-argument-type]
 
         if self.next_page_token_jsonpath:
             return JSONPathPaginator(self.next_page_token_jsonpath)
