@@ -145,6 +145,7 @@ testing = [
     "xdoctest[colors]>=1.1.1",
 ]
 typing = [
+    {"include-group" = "testing"},
     "mypy>=1.17",
     "pyarrow-stubs>=19.1",
     "types-jsonschema>=4.17.0.6",
