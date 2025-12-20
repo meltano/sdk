@@ -148,6 +148,7 @@ typing = [
     {"include-group" = "testing"},
     "mypy>=1.17",
     "pyarrow-stubs>=19.1",
+    "ty>=0.0.4",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-requests>=2.28.11",

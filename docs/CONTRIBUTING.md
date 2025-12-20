@@ -78,11 +78,14 @@ First clone, then...
 To run tests:
 
 ```bash
-# Run just the core and cookiecutter tests (no external creds required):
+# Run just the core and cookiecutter tests (no external credentials required):
 nox -rs tests
 
-# Run all tests (external creds required):
+# Run all tests (external credentials required):
 nox -rs test-external
+
+# Run type checks
+nox -rt typing
 ```
 
 To view the code coverage report in HTML format:
