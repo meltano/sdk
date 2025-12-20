@@ -449,11 +449,11 @@ class BasicAuthenticator(APIAuthenticatorBase):
         category=SingerSDKDeprecationWarning,
     )
     def create_for_stream(
-        cls: type[BasicAuthenticator],
+        cls: type[BasicAuthenticator],  # ty: ignore[deprecated]
         stream: _HTTPStream,
         username: str,
         password: str,
-    ) -> BasicAuthenticator:
+    ) -> BasicAuthenticator:  # ty: ignore[deprecated]
         """Create an Authenticator object specific to the Stream class.
 
         Args:
@@ -758,7 +758,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
                 password=passphrase,
                 backend=default_backend(),
             )
-        private_key_string: str | t.Any = private_key.decode("UTF-8")
+        private_key_string: str | t.Any = private_key.decode("UTF-8")  # ty: ignore[possibly-missing-attribute]
         return {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": jwt.encode(

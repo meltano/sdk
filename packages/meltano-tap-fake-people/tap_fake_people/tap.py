@@ -57,7 +57,7 @@ class TapFakePeople(Tap):
     package_name: str = "meltano-tap-fake-people"
 
     @override  # type: ignore[misc]
-    def write_message(self, message: Message) -> None:
+    def write_message(self, message: Message) -> None:  # ty: ignore[override-of-final-method]
         if message.type == SingerMessageType.STATE:
             return
         super().write_message(message)
