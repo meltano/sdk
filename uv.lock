@@ -904,7 +904,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -2313,11 +2313,11 @@ wheels = [
 
 [[package]]
 name = "python-backoff"
-version = "2.3.0"
+version = "2.3.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/cb/00/e39cd102ffa3405e14d32a1dfb03c163746e8c6797eee2a29efa45f15612/python_backoff-2.3.0.tar.gz", hash = "sha256:84f251492fc76ad615faaf8d4826dcb563bf98df53aad8ac887379857264b74a", size = 18422, upload-time = "2025-11-30T17:29:20.899Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3b/5a/c8a85e7b0019ba54e46756b0b02ead4c054e098dc23c4fdeaa80996a6872/python_backoff-2.3.1.tar.gz", hash = "sha256:54d67283073afa5deb3bb3f8b335952747c5869e7d8f76bf5a87da42bd86c4d6", size = 18715, upload-time = "2025-12-18T21:30:09.845Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c2/8c/61f291f88d900e815d766f56189c774ef1b7dbbefe42bd0a5080a086dd04/python_backoff-2.3.0-py3-none-any.whl", hash = "sha256:0d9eb5c63a470e6031ab2abb9cc974cf1846fc2c6c1b749b1f9ff5634d013b88", size = 15418, upload-time = "2025-11-30T17:29:19.743Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/ea/a3adc8d2cda57480cd7020ae6857f57b17ce1720bb6a652bbb0516fa4dff/python_backoff-2.3.1-py3-none-any.whl", hash = "sha256:d3cfcc0938ec78683edc530bbeb5f5c08252477a40270516497d2bb500da392b", size = 15106, upload-time = "2025-12-18T21:30:08.601Z" },
 ]
 
 [[package]]
