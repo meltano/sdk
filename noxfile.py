@@ -34,6 +34,7 @@ python_versions = nox.project.python_versions(PYPROJECT)
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = [
     f"mypy-{main_python}",
+    f"ty-{main_python}",
     f"tests-{main_python}",
     "doctest",
     "deps",
