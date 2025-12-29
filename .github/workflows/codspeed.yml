@@ -59,7 +59,7 @@ jobs:
         uv export --all-packages --no-editable --frozen --no-hashes --no-dev --all-extras --group benchmark --output-file requirements.codspeed.txt
         uv pip install --system -r requirements.codspeed.txt
 
-    - uses: CodSpeedHQ/action@346a2d8a8d9d38909abd0bc3d23f773110f076ad # v4.4.1
+    - uses: CodSpeedHQ/action@972e3437949c89e1357ebd1a2dbc852fcbc57245 # v4.5.1
       with:
         token: ${{ secrets.CODSPEED_TOKEN }}
         run: pytest tests/ --codspeed
