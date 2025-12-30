@@ -416,7 +416,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             context: Stream partition or context dictionary.
             value: TODO
         """
-        self._state_manager.write_replication_key_signpost(context, value)
+        self._state_manager.write_replication_key_signpost(value, context=context)
 
     def _parse_datetime(self, value: str) -> datetime.datetime:  # noqa: PLR6301
         """Parse a datetime string.

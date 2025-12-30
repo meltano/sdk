@@ -166,8 +166,9 @@ class StreamStateManager:
 
     def write_replication_key_signpost(
         self,
-        context: types.Context | None,
         value: datetime.datetime | str | float | None,
+        *,
+        context: types.Context | None = None,
     ) -> None:
         """Write the signpost value, if available.
 

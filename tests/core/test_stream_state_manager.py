@@ -318,38 +318,30 @@ class TestFinalizeProgressMarkers:
         assert "partitions" in stream_state
         assert len(stream_state["partitions"]) == 2
 
-    def test_finalize_non_empty_state(self) -> None:
-        """Test that finalize_progress_markers does nothing with empty state."""
-        tap_state: types.TapState = {
-            "bookmarks": {
-                "test_stream": {
-                    "replication_key": "updated_at",
-                    "replication_key_value": "2021-05-17T20:41:16Z",
-                }
-            }
-        }
+    def test_finalize_beyond_signpost(self) -> None:
+        """Test finalize_progress_markers with replication key value beyond signpost."""
+        signpost_value = "2021-05-17T00:00:00Z"
+        replication_key_value = "2021-05-17T20:41:16Z"
+
+        tap_state: types.TapState = {}
         manager = StreamStateManager(
             tap_name="test-tap",
             stream_name="test_stream",
             tap_state=tap_state,
         )
-        manager.finalize_progress_markers(
-            state={
-                "replication_key": "updated_at",
-                "replication_key_value": "2021-05-17T20:41:16Z",
-                "progress_markers": {
-                    "replication_key": "updated_at",
-                    "replication_key_value": "2021-05-17T20:41:16Z",
-                },
-                "starting_replication_value": "2021-05-17T20:41:16Z",
-                "replication_key_signpost": "2021-05-17T20:41:16Z",
-            }
+        manager.increment_state(
+            latest_record={"updated_at": replication_key_value},
+            replication_key="updated_at",
+            is_sorted=False,
+            check_sorted=False,
         )
+        manager.write_replication_key_signpost(signpost_value)
+        manager.finalize_progress_markers()
         assert tap_state == {
             "bookmarks": {
                 "test_stream": {
                     "replication_key": "updated_at",
-                    "replication_key_value": "2021-05-17T20:41:16Z",
+                    "replication_key_value": signpost_value,
                 }
             }
         }
@@ -743,7 +735,7 @@ class TestWriteReplicationKeySignpost:
         tap_state: types.TapState,
     ) -> None:
         """Test that signpost value is written to state."""
-        state_manager.write_replication_key_signpost(None, "2021-05-17T20:41:16Z")
+        state_manager.write_replication_key_signpost("2021-05-17T20:41:16Z")
         state = tap_state["bookmarks"]["test_stream"]
         assert state["replication_key_signpost"] == "2021-05-17T20:41:16Z"
 
@@ -753,7 +745,7 @@ class TestWriteReplicationKeySignpost:
         tap_state: dict,
     ) -> None:
         """Test that empty value does not write signpost."""
-        state_manager.write_replication_key_signpost(None, "")
+        state_manager.write_replication_key_signpost("")
         assert not tap_state
 
     def test_none_value_does_nothing(
@@ -762,7 +754,7 @@ class TestWriteReplicationKeySignpost:
         tap_state: dict,
     ) -> None:
         """Test that None value does not write signpost."""
-        state_manager.write_replication_key_signpost(None, None)
+        state_manager.write_replication_key_signpost(None)
         assert not tap_state
 
 
