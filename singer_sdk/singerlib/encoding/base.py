@@ -35,7 +35,7 @@ class SingerMessageType(str, enum.Enum):
     BATCH = "BATCH"
 
 
-class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
+class GenericSingerReader(abc.ABC, t.Generic[T]):
     """Interface for all plugins reading Singer messages as strings or bytes."""
 
     def __init__(self) -> None:
@@ -114,7 +114,7 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
         raise ValueError(msg)
 
 
-class GenericSingerWriter(t.Generic[T, M], metaclass=abc.ABCMeta):
+class GenericSingerWriter(abc.ABC, t.Generic[T, M]):
     """Interface for all plugins writing Singer messages as strings or bytes."""
 
     def format_message(self, message: M) -> T:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sys
 import typing as t
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from urllib.parse import ParseResult, urlparse
 
 from singer_sdk.helpers.jsonpath import extract_jsonpath
@@ -36,7 +36,7 @@ def first(iterable: t.Iterable[T]) -> T:
     return next(iter(iterable))
 
 
-class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
+class BaseAPIPaginator(ABC, t.Generic[TPageToken]):
     """An API paginator object."""
 
     def __init__(self, start_value: TPageToken) -> None:
@@ -197,7 +197,7 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
         return
 
 
-class BaseHATEOASPaginator(BaseAPIPaginator[ParseResult | None], metaclass=ABCMeta):
+class BaseHATEOASPaginator(BaseAPIPaginator[ParseResult | None], ABC):
     """Paginator class for APIs supporting HATEOAS links in their response bodies.
 
     HATEOAS stands for "Hypermedia as the Engine of Application State". See
@@ -355,7 +355,7 @@ class SimpleHeaderPaginator(BaseAPIPaginator[str | None]):
         return response.headers.get(self._key, None)
 
 
-class BasePageNumberPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
+class BasePageNumberPaginator(BaseAPIPaginator[int], ABC):
     """Paginator class for APIs that use page number."""
 
     @override
@@ -371,7 +371,7 @@ class BasePageNumberPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         return self._value + 1
 
 
-class BaseOffsetPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
+class BaseOffsetPaginator(BaseAPIPaginator[int], ABC):
     """Paginator class for APIs that use page offset."""
 
     def __init__(

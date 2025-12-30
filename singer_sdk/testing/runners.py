@@ -23,7 +23,7 @@ if t.TYPE_CHECKING:
 T = t.TypeVar("T", bound=PluginBase)
 
 
-class SingerTestRunner(t.Generic[T], metaclass=abc.ABCMeta):
+class SingerTestRunner(abc.ABC, t.Generic[T]):
     """Base Singer Test Runner."""
 
     def __init__(
