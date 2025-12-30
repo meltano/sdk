@@ -250,7 +250,7 @@ def _greater_than_signpost(
 ) -> bool:
     """Compare and return True if new_value is greater than signpost."""
     # fails if signpost and bookmark are incompatible types
-    return new_value > signpost
+    return new_value > signpost  # ty: ignore[unsupported-operator]
 
 
 def is_state_non_resumable(stream_or_partition_state: dict) -> bool:

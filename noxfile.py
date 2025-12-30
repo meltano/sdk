@@ -34,6 +34,7 @@ python_versions = nox.project.python_versions(PYPROJECT)
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = [
     f"mypy-{main_python}",
+    f"ty-{main_python}",
     f"tests-{main_python}",
     "doctest",
     "deps",
@@ -59,7 +60,7 @@ def _install_env(session: nox.Session) -> dict[str, str]:
     return env
 
 
-@nox.session(python=[python_versions[0], main_python])
+@nox.session(python=[python_versions[0], main_python], tags=["typing"])
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
     default_locations = [
@@ -75,9 +76,30 @@ def mypy(session: nox.Session) -> None:
         "--all-extras",
         env=_install_env(session),
     )
-    session.run("mypy", *args)
+    python = session.python if isinstance(session.python, str) else main_python
+    session.run("mypy", "--python-version", python, *args)
     if not session.posargs:
         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
+
+
+@nox.session(python=[python_versions[0], main_python], tags=["typing"])
+def ty(session: nox.Session) -> None:
+    """Check types with ty."""
+    default_locations = [
+        "packages",
+        "samples",
+        "singer_sdk",
+    ]
+    args = session.posargs or default_locations
+    session.run_install(
+        *UV_SYNC_COMMAND,
+        "--group=packages",
+        "--group=typing",
+        "--all-extras",
+        env=_install_env(session),
+    )
+    python = session.python if isinstance(session.python, str) else main_python
+    session.run("ty", "check", "--python-version", python, *args)
 
 
 def _run_pytest(session: nox.Session, *pytest_args: str, coverage: bool = True) -> None:
