@@ -80,7 +80,7 @@ repos:
         packages/.*\.json|
       )$
 
-- repo: https://github.com/executablebooks/mdformat
+- repo: https://github.com/hukkin/mdformat
   rev: 1.0.0
   hooks:
   - id: mdformat
