@@ -318,6 +318,24 @@ class TestFinalizeProgressMarkers:
         assert "partitions" in stream_state
         assert len(stream_state["partitions"]) == 2
 
+    def test_finalize_with_explicit_state(
+        self,
+        state_manager: StreamStateManager,
+    ) -> None:
+        """Test finalize_progress_markers with explicit state."""
+        state = {
+            "progress_markers": {
+                "replication_key": "updated_at",
+                "replication_key_value": "2021-05-17T20:41:16Z",
+            }
+        }
+
+        state_manager.finalize_progress_markers(state=state)
+        assert state == {
+            "replication_key": "updated_at",
+            "replication_key_value": "2021-05-17T20:41:16Z",
+        }
+
     def test_finalize_beyond_signpost(self) -> None:
         """Test finalize_progress_markers with replication key value beyond signpost."""
         signpost_value = "2021-05-17T00:00:00Z"
