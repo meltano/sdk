@@ -201,6 +201,7 @@ filterwarnings = [
 ]
 log_cli_level = "INFO"
 log_format = "%(levelname)s %(name)s %(message)s"
+log_level = "INFO"
 markers = [
     "contrib: Tests for contrib (experimental or optional) modules",
     "external: Tests relying on external resources",
