@@ -318,8 +318,10 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
             "\n\n"
             + "\n".join(
                 [
-                    "A full list of supported settings and capabilities "
-                    f"is available by running: `{about_info.name} --about`",
+                    (
+                        "A full list of supported settings and capabilities "
+                        f"is available by running: `{about_info.name} --about`"
+                    ),
                 ],
             )
             + "\n"
