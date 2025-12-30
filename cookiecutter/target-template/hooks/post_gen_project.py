@@ -49,3 +49,12 @@ if __name__ == "__main__":
     # Clean up the unused sink files
     for template in ["sinks_record.py", "sinks_batch.py", "sinks_sql.py"]:
         (BASE_PATH / template).unlink(missing_ok=True)
+
+    if {{ cookiecutter.include_agents_md }}:
+        # Generate both AGENTS.md (for ecosystem) and CLAUDE.md (for Claude Code)
+        agents_md = Path("AGENTS.md")
+        if agents_md.exists():
+            shutil.copy2(agents_md, "CLAUDE.md")
+    else:
+        Path("AGENTS.md").unlink(missing_ok=True)
+        Path("CLAUDE.md").unlink(missing_ok=True)
