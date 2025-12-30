@@ -390,10 +390,7 @@ select = [
     "PTH",  # flake8-use-pathlib
     "ERA",  # eradicate
     "PGH",  # pygrep-hooks
-    "PLC",  # pylint (convention)
-    "PLE",  # pylint (error)
-    "PLR",  # pylint (refactor)
-    "PLW",  # pylint (warning)
+    "PL",   # pylint
     "TRY",  # tryceratops
     "FLY",  # flynt
     "PERF", # perflint
