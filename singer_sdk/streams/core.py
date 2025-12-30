@@ -66,7 +66,7 @@ REPLICATION_INCREMENTAL = "INCREMENTAL"
 REPLICATION_LOG_BASED = "LOG_BASED"
 
 
-class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
+class Stream(abc.ABC):  # noqa: PLR0904
     """Abstract base class for tap streams.
 
     :ivar context: Stream partition or context dictionary. This is a read-only

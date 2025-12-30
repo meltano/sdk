@@ -381,11 +381,11 @@ def test_conform_object_no_additional_properties(
         ),
         pytest.param(1, {"type": ["boolean"]}, True, id="one_to_boolean_single_type"),
         # Number conversions
-        pytest.param(3.14, {"type": "number"}, 3.14, id="float_to_number"),
+        pytest.param(1.618, {"type": "number"}, 1.618, id="float_to_number"),
         pytest.param(
-            decimal.Decimal("3.14"),
+            decimal.Decimal("1.618"),
             {"type": "integer"},
-            decimal.Decimal("3.14"),
+            decimal.Decimal("1.618"),
             id="decimal_to_integer",
         ),
         pytest.param(float("nan"), {"type": "number"}, None, id="float_nan_to_number"),

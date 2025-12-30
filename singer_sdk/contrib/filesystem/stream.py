@@ -30,7 +30,7 @@ SDC_META_FILEPATH = "_sdc_path"
 SDC_META_MODIFIED_AT = "_sdc_modified_at"
 
 
-class FileStream(Stream, metaclass=abc.ABCMeta):
+class FileStream(Stream, abc.ABC):
     """Abstract base class for file streams."""
 
     SDC_PROPERTIES: t.ClassVar[dict[str, dict]] = {
