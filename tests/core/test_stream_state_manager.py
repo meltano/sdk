@@ -743,6 +743,30 @@ class TestWriteStartingReplicationValue:
         )
         assert state_manager.stream_state == {"starting_replication_value": None}
 
+    def test_replication_key_changed_does_nothing(self) -> None:
+        """Test that replication key changed does not write a starting value."""
+        tap_state: types.TapState = {
+            "bookmarks": {
+                "test_stream": {
+                    "replication_key": "old_replication_key",
+                    "replication_key_value": "2021-05-17T20:41:16Z",
+                }
+            }
+        }
+        manager = StreamStateManager(
+            tap_name="test-tap",
+            stream_name="test_stream",
+            tap_state=tap_state,
+        )
+        manager.write_starting_replication_value(
+            context=None,
+            replication_method=REPLICATION_INCREMENTAL,
+            replication_key="new_replication_key",
+            config={},
+        )
+        value = manager.get_starting_replication_value(None, REPLICATION_INCREMENTAL)
+        assert value is None
+
 
 class TestWriteReplicationKeySignpost:
     """Tests for write_replication_key_signpost method."""

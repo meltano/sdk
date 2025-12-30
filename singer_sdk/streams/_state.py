@@ -143,11 +143,10 @@ class StreamStateManager:
         state = self.get_context_state(context)
 
         if replication_key:
-            replication_key_value = state.get("replication_key_value")
-            if replication_key_value and replication_key == state.get(
-                "replication_key",
-            ):
-                value = replication_key_value
+            # Don't set value if it's falsey or the replication key changed
+            rk_value = state.get("replication_key_value")
+            if rk_value and replication_key == state.get("replication_key"):
+                value = rk_value
 
             # Use start_date if it is more recent than the replication_key state
             if start_date_value := config.get("start_date"):
