@@ -868,6 +868,16 @@ class MappedTap(Tap):
             id="flatten_all",
         ),
         pytest.param(
+            {},
+            {
+                "flattening_enabled": True,
+                "flattening_max_depth": 2,
+                "flattening_separator": ".",
+            },
+            "flatten_all_with_dot_separator.jsonl",
+            id="flatten_all_with_dot_separator",
+        ),
+        pytest.param(
             {
                 "mystream": {
                     "email_hash": "md5(email)",
