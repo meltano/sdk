@@ -125,7 +125,7 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
             raise InvalidRecord(e.message, record) from e
 
 
-class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
+class Sink(abc.ABC):  # noqa: PLR0904
     """Abstract base class for target sinks."""
 
     # max timestamp/datetime supported, used to reset invalid dates

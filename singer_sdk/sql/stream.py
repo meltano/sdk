@@ -24,7 +24,7 @@ if t.TYPE_CHECKING:
 __all__ = ["SQLStream"]
 
 
-class SQLStream(Stream, metaclass=abc.ABCMeta):
+class SQLStream(Stream, abc.ABC):
     """Base class for SQLAlchemy-based streams."""
 
     connector_class = SQLConnector

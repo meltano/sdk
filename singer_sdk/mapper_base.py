@@ -21,7 +21,7 @@ if t.TYPE_CHECKING:
     )
 
 
-class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
+class InlineMapper(BaseSingerReader, BaseSingerWriter, abc.ABC):
     """Abstract base class for inline mappers."""
 
     #: A list of plugin capabilities.

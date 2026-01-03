@@ -13,7 +13,7 @@ if t.TYPE_CHECKING:
 _TToken = t.TypeVar("_TToken")
 
 
-class GraphQLStream(RESTStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
+class GraphQLStream(RESTStream, abc.ABC, t.Generic[_TToken]):
     """Abstract base class for API-type streams.
 
     GraphQL streams inherit from the class `GraphQLStream`, which in turn inherits from
