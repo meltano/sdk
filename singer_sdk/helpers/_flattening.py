@@ -24,7 +24,7 @@ def _first(iterable: t.Iterable[_T]) -> _T | None:
     return next(iter(iterable), None)
 
 
-class PluginFlatteningConfig(t.TypedDict):
+class PluginFlatteningConfig(t.TypedDict, total=False):
     """Plugin flattening configuration."""
 
     flattening_enabled: bool

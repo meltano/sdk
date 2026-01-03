@@ -40,7 +40,7 @@ dependencies = [
     "jsonpath-ng>=1.5.3",
     "jsonschema>=4.16.0",
     "packaging>=23.1",
-    'python-backoff>=2.2.2',
+    "python-backoff>=2.2.2",
     "python-dotenv>=0.20",
     "PyYAML>=6.0",
     "referencing>=0.30.0",
@@ -148,6 +148,7 @@ typing = [
     {"include-group" = "testing"},
     "mypy>=1.17",
     "pyarrow-stubs>=19.1",
+    "ty>=0.0.4",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-requests>=2.28.11",
@@ -200,6 +201,7 @@ filterwarnings = [
 ]
 log_cli_level = "INFO"
 log_format = "%(levelname)s %(name)s %(message)s"
+log_level = "INFO"
 markers = [
     "contrib: Tests for contrib (experimental or optional) modules",
     "external: Tests relying on external resources",
@@ -371,6 +373,7 @@ select = [
     "FA",   # flake8-future-annotations
     "ISC",  # flake8-implicit-str-concat
     "ICN",  # flake8-import-conventions
+    "LOG",  # flake8-logging
     "G",    # flake8-logging-format
     "INP",  # flake8-no-pep420
     "PIE",  # flake8-pie
@@ -388,10 +391,7 @@ select = [
     "PTH",  # flake8-use-pathlib
     "ERA",  # eradicate
     "PGH",  # pygrep-hooks
-    "PLC",  # pylint (convention)
-    "PLE",  # pylint (error)
-    "PLR",  # pylint (refactor)
-    "PLW",  # pylint (warning)
+    "PL",   # pylint
     "TRY",  # tryceratops
     "FLY",  # flynt
     "PERF", # perflint

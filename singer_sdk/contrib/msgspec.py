@@ -60,7 +60,7 @@ def serialize_jsonl(obj: object, **kwargs: t.Any) -> bytes:  # noqa: ARG001
     """
     encoder.encode_into(obj, _jsonl_msg_buffer)
     _jsonl_msg_buffer.extend(b"\n")
-    return _jsonl_msg_buffer
+    return _jsonl_msg_buffer  # ty: ignore[invalid-return-type]
 
 
 class MsgSpecReader(GenericSingerReader[str]):

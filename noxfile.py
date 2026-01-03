@@ -1,3 +1,9 @@
+#!/usr/bin/env -S uv run --script
+
+# /// script
+# dependencies = ["nox"]
+# ///
+
 """Nox configuration."""
 
 from __future__ import annotations
@@ -11,6 +17,7 @@ import nox
 
 nox.needs_version = ">=2025.2.9"
 nox.options.default_venv_backend = "uv"
+nox.options.reuse_venv = "yes"
 
 RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
@@ -32,13 +39,6 @@ package = "singer_sdk"
 main_python = Path(".python-version").read_text(encoding="utf-8").rstrip()
 python_versions = nox.project.python_versions(PYPROJECT)
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
-nox.options.sessions = [
-    f"mypy-{main_python}",
-    f"tests-{main_python}",
-    "doctest",
-    "deps",
-    "docs",
-]
 
 
 def _install_env(session: nox.Session) -> dict[str, str]:
@@ -59,7 +59,7 @@ def _install_env(session: nox.Session) -> dict[str, str]:
     return env
 
 
-@nox.session(python=[python_versions[0], main_python])
+@nox.session(python=[python_versions[0], main_python], tags=["typing"])
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
     default_locations = [
@@ -75,9 +75,30 @@ def mypy(session: nox.Session) -> None:
         "--all-extras",
         env=_install_env(session),
     )
-    session.run("mypy", *args)
+    python = session.python if isinstance(session.python, str) else main_python
+    session.run("mypy", "--python-version", python, *args)
     if not session.posargs:
         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
+
+
+@nox.session(python=[python_versions[0], main_python], tags=["typing"])
+def ty(session: nox.Session) -> None:
+    """Check types with ty."""
+    default_locations = [
+        "packages",
+        "samples",
+        "singer_sdk",
+    ]
+    args = session.posargs or default_locations
+    session.run_install(
+        *UV_SYNC_COMMAND,
+        "--group=packages",
+        "--group=typing",
+        "--all-extras",
+        env=_install_env(session),
+    )
+    python = session.python if isinstance(session.python, str) else main_python
+    session.run("ty", "check", "--python-version", python, *args)
 
 
 def _run_pytest(session: nox.Session, *pytest_args: str, coverage: bool = True) -> None:
@@ -118,7 +139,7 @@ def tests(session: nox.Session) -> None:
     )
 
 
-@nox.session(name="test-external", python=main_python, tags=["test"])
+@nox.session(name="test-external", python=main_python, tags=["test"], default=False)
 def test_external(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
     session.run_install(
@@ -142,6 +163,7 @@ def test_external(session: nox.Session) -> None:
     name="test-contrib",
     python=[python_versions[0], main_python],
     tags=["test"],
+    default=False,
 )
 def test_contrib(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
@@ -169,6 +191,7 @@ def test_contrib(session: nox.Session) -> None:
     name="test-packages",
     python=[python_versions[0], main_python],
     tags=["test"],
+    default=False,
 )
 def test_packages(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
@@ -193,7 +216,12 @@ def test_packages(session: nox.Session) -> None:
     )
 
 
-@nox.session(name="test-lowest", python=python_versions[0], tags=["test"])
+@nox.session(
+    name="test-lowest",
+    python=python_versions[0],
+    tags=["test"],
+    default=False,
+)
 def test_lowest_requirements(session: nox.Session) -> None:
     """Test the package with the lowest dependency versions."""
     install_env = _install_env(session)
@@ -234,7 +262,7 @@ def test_lowest_requirements(session: nox.Session) -> None:
     )
 
 
-@nox.session(tags=["test"])
+@nox.session(tags=["test"], default=False)
 def benches(session: nox.Session) -> None:
     """Run benchmarks."""
     session.run_install(
@@ -255,7 +283,7 @@ def benches(session: nox.Session) -> None:
     )
 
 
-@nox.session()
+@nox.session(default=False)
 def coverage(session: nox.Session) -> None:
     """Generate coverage report."""
     args = session.posargs or ["report", "-m"]
@@ -296,7 +324,7 @@ def dependencies(session: nox.Session) -> None:
     session.run("deptry", "singer_sdk", *session.posargs)
 
 
-@nox.session(name="snap")
+@nox.session(name="snap", default=False)
 def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
     session.run_install(
@@ -354,7 +382,7 @@ def docs(session: nox.Session) -> None:
     session.run("sphinx-build", *args)
 
 
-@nox.session(name="docs-serve")
+@nox.session(name="docs-serve", default=False)
 def docs_serve(session: nox.Session) -> None:
     """Build the documentation."""
     args = session.posargs or [
@@ -383,7 +411,7 @@ def docs_serve(session: nox.Session) -> None:
 
 
 @nox.parametrize("replay_file_path", COOKIECUTTER_REPLAY_FILES)
-@nox.session()
+@nox.session(default=False)
 def templates(session: nox.Session, replay_file_path: Path) -> None:
     """Uses the tap template to build an empty cookiecutter.
 
@@ -445,29 +473,7 @@ def templates(session: nox.Session, replay_file_path: Path) -> None:
     session.run("uvx", "--with=tox-uv", "tox", "-e=typing")
 
 
-@nox.session(name="version-bump")
-def version_bump(session: nox.Session) -> None:
-    """Run commitizen."""
-    session.install(
-        "commitizen",
-        "commitizen-version-bump @ git+https://github.com/meltano/commitizen-version-bump.git@main",
-    )
-    default_args = [
-        "--changelog",
-        "--files-only",
-        "--check-consistency",
-        "--changelog-to-stdout",
-    ]
-    args = session.posargs or default_args
-
-    session.run(
-        "cz",
-        "bump",
-        *args,
-    )
-
-
-@nox.session(name="api")
+@nox.session(name="api", default=False)
 def api_changes(session: nox.Session) -> None:
     """Check for API changes."""
     args = [
@@ -483,3 +489,7 @@ def api_changes(session: nox.Session) -> None:
         args.append("-f=github")
 
     session.run("uvx", "griffe", *args, external=True)
+
+
+if __name__ == "__main__":
+    nox.main()
