@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
-- [#3436](https://github.com/meltano/sdk/issues/3436) Do not try to parse error response from OAuth token request as JSON to avoid deserialization errors
+- [#3436](https://github.com/meltano/sdk/issues/3436) Do not try to parse the error response from the OAuth token request as JSON to avoid deserialization errors
 - [#3432](https://github.com/meltano/sdk/issues/3432) Add details to the `variant` prompt in templates
 - [#3426](https://github.com/meltano/sdk/issues/3426) Update template dependencies
 - [#3412](https://github.com/meltano/sdk/issues/3412) Add concurrency config to CI workflows in templates
