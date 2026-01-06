@@ -660,7 +660,11 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         try:
             token_response.raise_for_status()
         except requests.HTTPError as ex:
-            msg = f"Failed OAuth login, response was '{token_response.text}'. {ex}"
+            self.handle_error(
+                content=ex.response.text,
+                status_code=ex.response.status_code,
+            )
+            msg = f"Failed to update access token (status={ex.response.status_code})"
             raise RuntimeError(msg) from ex
 
         self.logger.debug("OAuth authorization attempt was successful")
@@ -676,6 +680,21 @@ class OAuthAuthenticator(APIAuthenticatorBase):
                 "expires.",
             )
         self.last_refreshed = request_time
+
+    def handle_error(self, *, content: str, status_code: int) -> None:
+        """Handle an OAuth error.
+
+        Args:
+            content: The content of the error response.
+            status_code: The status code of the error response.
+        """
+        limit = 1000
+        snippet = f"{content[:limit]}..." if len(content) > limit else content
+        self.logger.error(
+            "Failed OAuth login with status code %d, response was '%s'",
+            status_code,
+            snippet,
+        )
 
 
 class OAuthJWTAuthenticator(OAuthAuthenticator):

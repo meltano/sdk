@@ -230,6 +230,32 @@ def test_oauth_authenticator_token_expiry_handling(
         assert not authenticator.expires_in or not authenticator.is_token_valid()
 
 
+def test_oauth_authenticator_handle_error(
+    rest_tap: Tap,
+    requests_mock: requests_mock.Mocker,
+    caplog: pytest.LogCaptureFixture,
+):
+    authenticator = _FakeOAuthAuthenticator(
+        stream=rest_tap.streams["some_stream"],
+        auth_endpoint="https://example.com/oauth",
+    )
+    requests_mock.post(
+        "https://example.com/oauth",
+        json={"error": "invalid_client"},
+        status_code=401,
+    )
+    with (
+        pytest.raises(RuntimeError, match="Failed to update access token"),
+        caplog.at_level(logging.ERROR),
+    ):
+        authenticator.update_access_token()
+
+    assert (
+        'Failed OAuth login with status code 401, response was \'{"error": "invalid_client"}\''  # noqa: E501
+        in caplog.text
+    )
+
+
 @pytest.fixture
 def private_key() -> RSAPrivateKey:
     return generate_private_key(public_exponent=65537, key_size=4096)
@@ -838,7 +864,7 @@ def test_oauth_authenticator_does_not_retry_client_errors(rest_tap: Tap):
     )
 
     # Expect RuntimeError to be raised (existing error handling)
-    with pytest.raises(RuntimeError, match="Failed OAuth login"):
+    with pytest.raises(RuntimeError, match="Failed to update access token"):
         authenticator.update_access_token()
 
     # Verify only 1 request was made (no retries for 401)
