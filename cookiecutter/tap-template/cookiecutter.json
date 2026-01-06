@@ -24,6 +24,7 @@
     "admin_email": "Provide your [bold yellow]email[/]",
     "tap_id": "The ID of the tap, in kebab-case (e.g., 'tap-mysource')",
     "library_name": "The name of the library, in snake_case (e.g., 'tap_mysource'). This is how the library will be imported in Python.",
+    "variant": "If you are planning to distribute your project on PyPI and the tap_id is already in use, you can set a variant name. e.g. 'meltanolabs' or 'pipelinewise'.",
     "stream_type": "The type of stream the source provides",
     "auth_method": "The [bold red]authentication[/] method used by the source, for REST and GraphQL sources",
     "faker_extra": "Add [bold orange1][link=https://faker.readthedocs.io/en/master/]Faker[/link][/] as an extra dependency to support generating fake data in stream maps?",

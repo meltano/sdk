@@ -49,7 +49,7 @@ First clone, then...
 1. Most development tasks you might need should be covered by `nox` sessions. You can use `nox -l` to list all available tasks.
    For example:
 
-   - Run unit tests: `nox -r`.
+   - Run all default checks: `nox`.
 
      We use `coverage` for code coverage metrics.
 
@@ -61,7 +61,7 @@ First clone, then...
      [mypy](https://mypy.readthedocs.io/en/stable/).
      The project-wide max line length is `88`.
 
-   - Build documentation: `nox -rs docs`
+   - Build documentation: `nox -s docs`
 
      We use `sphinx` to build documentation.
 
@@ -78,18 +78,25 @@ First clone, then...
 To run tests:
 
 ```bash
-# Run just the core and cookiecutter tests (no external creds required):
-nox -rs tests
+# Run just the core and cookiecutter tests (no external credentials required):
+nox -s tests
 
-# Run all tests (external creds required):
-nox -rs test-external
+# Run all tests (external credentials required):
+nox -s test-external
+
+# Run type checks
+nox -t typing
 ```
 
 To view the code coverage report in HTML format:
 
 ```bash
-nox -rs coverage -- html && open ./htmlcov/index.html
+nox -s coverage -- html && open ./htmlcov/index.html
 ```
+
+:::{tip}
+You can execute the Noxfile directly, for example: `./noxfile.py -s tests`.
+:::
 
 ### Platform-specific Testing
 
@@ -136,7 +143,7 @@ def test_snapshot(snapshot, snapshot_dir):
 To update or generate snapshots, run the nox `update_snapshots` session
 
 ```bash
-nox -rs snap
+nox -s snap
 ```
 
 or use the `--snapshot-update` flag
@@ -158,7 +165,7 @@ versions of the docs for us.
 To build the docs and live-reload them locally:
 
 ```bash
-nox -rs docs-serve
+nox -s docs-serve
 ```
 
 Sphinx will automatically generate class stubs, so be sure to `git add` them.

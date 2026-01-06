@@ -51,7 +51,7 @@ jobs:
       NOXFORCEPYTHON: ${{ matrix.python-version }}
       NOXSESSION: ${{ matrix.session }}
     permissions:
-      contents: read
+      contents: read  # read repository contents
     outputs:
       os: ${{ matrix.os }}
       nox-session: ${{ matrix.session }}
@@ -69,8 +69,6 @@ jobs:
         - "3.14"
         include:
         - { session: doctest,       python-version: "3.14", os: "ubuntu-latest" }
-        - { session: mypy,          python-version: "3.14", os: "ubuntu-latest" }
-        - { session: mypy,          python-version: "3.10",  os: "ubuntu-latest" }
         - { session: deps,          python-version: "3.14", os: "ubuntu-latest" }
         - { session: test-lowest,   python-version: "3.10",  os: "ubuntu-latest" }
         - { session: test-contrib,  python-version: "3.10",  os: "ubuntu-latest" }
@@ -89,7 +87,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
         allow-prereleases: true
 
-    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+    - uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b # v7.2.0
       with:
         version: ${{ env.UV_VERSION }}
 
@@ -108,6 +106,42 @@ jobs:
         include-hidden-files: true
         name: coverage-data-nox_${{ matrix.session }}-${{ matrix.os }}-py${{ matrix.python-version }}
         path: ".coverage.*"
+
+  typing:
+    name: Typing
+    runs-on: ubuntu-latest
+    needs: tests
+    env:
+      NOXFORCEPYTHON: ${{ matrix.python-version }}
+    permissions:
+      contents: read  # read repository contents
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+        - "3.10"
+        - "3.14"
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b # v7.2.0
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: Install Nox
+        run: |
+          uv tool install nox
+          nox --version
+
+      - name: Run Nox
+        run: |
+          nox --verbose --tags typing
 
   tests-external:
     name: External Tests
@@ -128,7 +162,7 @@ jobs:
 
     - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
 
-    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+    - uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b # v7.2.0
       with:
         version: ${{ env.UV_VERSION }}
 
@@ -168,7 +202,7 @@ jobs:
         pattern: coverage-data-nox_${{ matrix.nox-session }}-*
         merge-multiple: true
 
-    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+    - uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b # v7.2.0
       with:
         version: ${{ env.UV_VERSION }}
 
