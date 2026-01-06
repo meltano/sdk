@@ -652,7 +652,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
                 content=ex.response.text,
                 status_code=ex.response.status_code,
             )
-            msg = "Failed to update access token"
+            msg = f"Failed to update access token (status={ex.response.status_code})"
             raise RuntimeError(msg) from ex
 
         self.logger.debug("OAuth authorization attempt was successful")
