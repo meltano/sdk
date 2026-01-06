@@ -12,6 +12,8 @@ from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import requests
+import requests.adapters
+import urllib3
 
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.helpers._util import utc_now
@@ -521,6 +523,16 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         self.refresh_token: str | None = None
         self.last_refreshed: datetime.datetime | None = None
         self.expires_in: int | None = None
+        self._session = requests.Session()
+        self._session.mount(
+            "https://",
+            requests.adapters.HTTPAdapter(
+                max_retries=urllib3.Retry(
+                    backoff_factor=0.1,
+                    allowed_methods=["POST"],
+                )
+            ),
+        )
 
     def authenticate_request(
         self,
@@ -639,7 +651,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         self.logger.info("Requesting new access token")
         request_time = utc_now()
         auth_request_payload = self.oauth_request_payload
-        token_response = requests.post(
+        token_response = self._session.post(
             self.auth_endpoint,
             headers=self._oauth_headers,
             data=auth_request_payload,
@@ -648,7 +660,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         try:
             token_response.raise_for_status()
         except requests.HTTPError as ex:
-            msg = f"Failed OAuth login, response was '{token_response.json()}'. {ex}"
+            msg = f"Failed OAuth login, response was '{token_response.text}'. {ex}"
             raise RuntimeError(msg) from ex
 
         self.logger.debug("OAuth authorization attempt was successful")
