@@ -1,9 +1,8 @@
 ci:
   autofix_prs: true
+  autofix_commit_msg: "style: pre-commit fixes"
   autoupdate_schedule: monthly
   autoupdate_commit_msg: 'chore: pre-commit autoupdate'
-  skip:
-  - uv-lock
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -27,7 +26,7 @@ repos:
   - id: check-meltano
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.14.10
+  rev: v0.14.11
   hooks:
   - id: ruff-check
     args: [--diff]
