@@ -24,3 +24,12 @@ if __name__ == "__main__":
 
     if "{{ cookiecutter.ide }}" != "VSCode":
         shutil.rmtree(".vscode", ignore_errors=True)
+
+    if {{ cookiecutter.include_agents_md }}:
+        # Generate both AGENTS.md (for ecosystem) and CLAUDE.md (for Claude Code)
+        agents_md = Path("AGENTS.md")
+        if agents_md.exists():
+            shutil.copy2(agents_md, "CLAUDE.md")
+    else:
+        Path("AGENTS.md").unlink(missing_ok=True)
+        Path("CLAUDE.md").unlink(missing_ok=True)
