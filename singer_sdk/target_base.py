@@ -43,7 +43,7 @@ if t.TYPE_CHECKING:
 _MAX_PARALLELISM = 8
 
 
-class Target(BaseSingerReader, metaclass=abc.ABCMeta):
+class Target(BaseSingerReader, abc.ABC):
     """Abstract base class for targets.
 
     The `Target` class manages config information and is responsible for processing the

@@ -71,7 +71,7 @@ def sha256(string: str) -> str:
 StreamMapsDict: t.TypeAlias = dict[str, str | dict | None]
 
 
-class StreamMap(metaclass=abc.ABCMeta):
+class StreamMap(abc.ABC):
     """Abstract base class for all map classes."""
 
     def __init__(

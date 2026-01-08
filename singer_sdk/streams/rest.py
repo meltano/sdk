@@ -47,7 +47,7 @@ _TToken = t.TypeVar("_TToken")
 _TNum = t.TypeVar("_TNum", int, float)
 
 
-class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PLR0904
+class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
     """Abstract base class for HTTP streams."""
 
     _page_size: int = DEFAULT_PAGE_SIZE
@@ -785,7 +785,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             exception = yield value(exception)
 
 
-class RESTStream(_HTTPStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
+class RESTStream(_HTTPStream, abc.ABC, t.Generic[_TToken]):
     """Abstract base class for REST API streams."""
 
     #: Optional JSONPath expression to extract a pagination token from the API response.
