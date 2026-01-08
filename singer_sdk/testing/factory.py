@@ -352,11 +352,31 @@ class TargetTestClassFactory:
                 yield  # noqa: PT022
 
             @pytest.fixture
-            def runner(self) -> TargetTestRunner:  # noqa: PLR6301
+            def plugin_config(self) -> dict | None:  # noqa: PLR6301
+                """Plugin configuration fixture.
+
+                Override this fixture in your test class to provide a custom
+                config generated from other fixtures.
+
+                Returns:
+                    The plugin configuration dict, or None to use default.
+                """
+                return config
+
+            @pytest.fixture
+            def runner(self, plugin_config: dict | None) -> TargetTestRunner:  # noqa: PLR6301
+                """Create the test runner.
+
+                Args:
+                    plugin_config: The plugin configuration from the plugin_config fixture.
+
+                Returns:
+                    A test runner instance.
+                """
                 # Instantiate new runner class and populate records for use in tests
                 return TargetTestRunner(
                     target_class=target_class,
-                    config=config,
+                    config=plugin_config,
                     suite_config=suite_config,
                     **kwargs,
                 )
