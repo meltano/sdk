@@ -72,13 +72,33 @@ packages = [
 {%- endif %}
 
 [tool.pytest]
-minversion = "9.0"
 addopts = [
     "--durations=10",
+    "-ra",
+    "--strict-config",
+    "--strict-markers",
 ]
+filterwarnings = [
+    "error",
+    "once:No records were available to test:UserWarning",
+]
+log_level = "INFO"
+minversion = "9.0"
+testpaths = [
+    "tests",
+]
+xfail_strict = true
 
 [tool.mypy]
+enable_error_code = [
+    "ignore-without-code",
+    "redundant-expr",
+    "truthy-bool",
+]
+warn_redundant_casts = true
+warn_unreachable = true
 warn_unused_configs = true
+warn_unused_ignores = true
 
 [tool.ruff]
 line-length = 100
