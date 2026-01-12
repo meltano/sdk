@@ -92,7 +92,7 @@ class StructuredFormatter(logging.Formatter):
 
         # Extract basic exception info
         exception_data: _ExceptionData = {
-            "type": exc_type.__name__,  # ty: ignore[possibly-missing-attribute]
+            "type": exc_type.__name__,
             "module": exc_type.__module__,
             "message": str(exc_value),
         }
