@@ -21,7 +21,7 @@ TRUTHY = ("true", "1", "yes", "on")
 
 
 def _parse_array(value: str) -> list[str]:
-    return load_json(value)  # type: ignore[return-value]
+    return load_json(value)  # type: ignore[return-value] # ty: ignore[invalid-return-type]
 
 
 def _legacy_parse_array_of_strings(value: str) -> list[str]:

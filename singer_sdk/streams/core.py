@@ -1186,7 +1186,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             state: State object to promote progress markers with.
         """
-        state = finalize_state_progress_markers(state)  # type: ignore[arg-type]
+        state = finalize_state_progress_markers(state)  # type: ignore[arg-type] # ty: ignore[invalid-argument-type]
         self._is_state_flushed = False
 
     def finalize_state_progress_markers(self, state: dict | None = None) -> None:
@@ -1462,7 +1462,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         if entry := catalog.get_stream(self.name):
             stream_metadata: StreamMetadata | None
-            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment]
+            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment] # ty: ignore[invalid-assignment]
                 table_key_properties = stream_metadata.table_key_properties
                 table_replication_key = stream_metadata.replication_key
                 table_replication_method = stream_metadata.forced_replication_method
