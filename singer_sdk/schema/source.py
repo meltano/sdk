@@ -234,7 +234,7 @@ class StreamSchema(t.Generic[_TKey]):
             A JSON schema dictionary.
         """
         return self.schema_source.get_schema(
-            self.key or stream.name,  # type: ignore[arg-type]
+            self.key or stream.name,  # type: ignore[arg-type] # ty: ignore[invalid-argument-type]
             key_properties=stream.primary_keys,
         )
 

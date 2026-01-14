@@ -85,7 +85,7 @@ def python_versions(package_metadata: PackageMetadata) -> list[str]:
     """
     # TODO: Remove these ignores when we drop support for Python 3.12
     # (This PackageMetadata protocol is a hot mess)
-    requires_python = package_metadata.get("Requires-Python", f">={_PY_MIN_VERSION}")  # type: ignore[attr-defined,unused-ignore]
+    requires_python = package_metadata.get("Requires-Python", f">={_PY_MIN_VERSION}")  # type: ignore[attr-defined,unused-ignore] # ty: ignore[unresolved-attribute]
     classifiers = [
         classifier.split("::")[-1].strip()
         for classifier in package_metadata.get_all("Classifier", [])
@@ -318,8 +318,10 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
             "\n\n"
             + "\n".join(
                 [
-                    "A full list of supported settings and capabilities "
-                    f"is available by running: `{about_info.name} --about`",
+                    (
+                        "A full list of supported settings and capabilities "
+                        f"is available by running: `{about_info.name} --about`"
+                    ),
                 ],
             )
             + "\n"

@@ -521,7 +521,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             super()._handle_termination(signum, frame)
 
     @classmethod
-    def invoke(  # type: ignore[override]
+    def invoke(  # type: ignore[override] # ty: ignore[invalid-method-override]
         cls,
         *,
         about: bool = False,

@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.53.5 (2026-01-06)
+
+### 🐛 Fixes
+
+- [#3436](https://github.com/meltano/sdk/issues/3436) Do not try to parse the error response from the OAuth token request as JSON to avoid deserialization errors
+- [#3432](https://github.com/meltano/sdk/issues/3432) Add details to the `variant` prompt in templates
+- [#3426](https://github.com/meltano/sdk/issues/3426) Update template dependencies
+- [#3412](https://github.com/meltano/sdk/issues/3412) Add concurrency config to CI workflows in templates
+- [#3411](https://github.com/meltano/sdk/issues/3411) Simplify Python version handling in templates
+
+### 📚 Documentation Improvements
+
+- [#3417](https://github.com/meltano/sdk/issues/3417) Bump the furo theme to 2025.12.19
+
+### 📦 Packaging changes
+
+- [#3405](https://github.com/meltano/sdk/issues/3405) Bump build requirement hatchling to 1.28.0
+
 ## v0.53.4 (2025-11-28)
 
 ### 🐛 Fixes
