@@ -36,7 +36,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
 
-    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+    - uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b # v7.2.0
       with:
         version: ${{ env.UV_VERSION }}
 
@@ -54,6 +54,8 @@ jobs:
         echo "ref=${GIT_REF}" >> $GITHUB_OUTPUT
 
     # Check API against the latest commit on the base branch
-    - name: Run Nox  # zizmor: ignore[template-injection]
+    - name: Run Nox
       run: |
-        nox -- ${{ steps.set-ref.outputs.ref }}
+        nox -- ${STEPS_SET_REF_OUTPUTS_REF}
+      env:
+        STEPS_SET_REF_OUTPUTS_REF: ${{ steps.set-ref.outputs.ref }}

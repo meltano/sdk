@@ -1,8 +1,14 @@
+from __future__ import annotations
+
 import logging
 import time
+from typing import TYPE_CHECKING
 
 import requests
 from singer_sdk.authenticators import SingletonMeta
+
+if TYPE_CHECKING:
+    from requests import PreparedRequest, Response
 
 logger = logging.getLogger(__name__)
 
@@ -10,19 +16,25 @@ EXPIRES_IN_MINS = 30
 
 
 class DummyJSONAuthenticator(metaclass=SingletonMeta):
-    def __init__(self, auth_url, refresh_token_url, username, password):
+    def __init__(
+        self,
+        auth_url: str,
+        refresh_token_url: str,
+        username: str,
+        password: str,
+    ):
         self.auth_url = auth_url
         self.refresh_token_url = refresh_token_url
         self.username = username
         self.password = password
 
-        self.token = None
-        self.refresh_token = None
+        self.token: str | None = None
+        self.refresh_token: str | None = None
 
-        self.expires = 0
+        self.expires: float | None = None
         self.session = requests.Session()
 
-    def __call__(self, request):
+    def __call__(self, request: PreparedRequest) -> PreparedRequest:
         if not self.refresh_token:
             logger.info("Retrieving token")
             self.auth()
@@ -38,9 +50,9 @@ class DummyJSONAuthenticator(metaclass=SingletonMeta):
         return request
 
     def needs_refresh(self) -> bool:
-        return True if self.expires is None else self.expires < time.time()
+        return self.expires is None or self.expires < time.time()
 
-    def _handle_response(self, response):
+    def _handle_response(self, response: Response) -> None:
         if response.status_code != 200:
             logger.error("Error: %s", response.text)
             response.raise_for_status()
@@ -51,7 +63,7 @@ class DummyJSONAuthenticator(metaclass=SingletonMeta):
         self.expires = time.time() + EXPIRES_IN_MINS * 60
         logger.info("Authenticated")
 
-    def refresh(self):
+    def refresh(self) -> None:
         response = self.session.post(
             self.refresh_token_url,
             json={
@@ -61,7 +73,7 @@ class DummyJSONAuthenticator(metaclass=SingletonMeta):
         )
         self._handle_response(response)
 
-    def auth(self):
+    def auth(self) -> None:
         response = self.session.post(
             self.auth_url,
             json={
