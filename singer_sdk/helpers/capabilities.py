@@ -388,7 +388,7 @@ class DeprecatedEnumMeta(EnumMeta):
         Returns:
             Enum member.
         """
-        obj: Enum = super().__getitem__(name)  # ty: ignore[invalid-assignment]
+        obj: Enum = super().__getitem__(name)  # ty: ignore[invalid-assignment] # ty: ignore[invalid-argument-type]
         if isinstance(obj, DeprecatedEnum) and obj.deprecation_message:
             obj.emit_warning()
         return obj

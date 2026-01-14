@@ -495,3 +495,6 @@ explicit = true
 [tool.codespell]
 skip = "*.csv,samples/aapl/*.json,packages/*/schemas/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"
 ignore-words-list = "fo,intoto"
+
+[tool.ty.analysis]
+respect-type-ignore-comments = false
