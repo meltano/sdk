@@ -218,7 +218,7 @@ xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.53.4"
+version = "0.53.5"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -495,3 +495,6 @@ explicit = true
 [tool.codespell]
 skip = "*.csv,samples/aapl/*.json,packages/*/schemas/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"
 ignore-words-list = "fo,intoto"
+
+[tool.ty.analysis]
+respect-type-ignore-comments = false
