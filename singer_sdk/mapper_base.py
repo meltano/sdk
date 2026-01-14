@@ -126,7 +126,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
     # CLI handler
 
     @classmethod
-    def invoke(  # type: ignore[override]
+    def invoke(  # type: ignore[override] # ty: ignore[invalid-method-override]
         cls,
         *,
         about: bool = False,

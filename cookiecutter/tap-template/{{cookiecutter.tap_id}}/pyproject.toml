@@ -35,9 +35,9 @@ license-files = [ "LICENSE" ]
 requires-python = ">=3.10"
 dependencies = [
     {%- if extras %}
-    "singer-sdk[{{ extras|join(',') }}]~=0.53.4",
+    "singer-sdk[{{ extras|join(',') }}]~=0.53.5",
     {%- else %}
-    "singer-sdk~=0.53.4",
+    "singer-sdk~=0.53.5",
     {%- endif %}
     {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
     "requests~=2.32.3",
@@ -86,18 +86,33 @@ packages = [
 {%- endif %}
 
 [tool.pytest]
-minversion = "9.0"
 addopts = [
     "--durations=10",
+    "-ra",
+    "--strict-config",
+    "--strict-markers",
 ]
+filterwarnings = [
+    "error",
+    "once:No records were available to test:UserWarning",
+]
+log_level = "INFO"
+minversion = "9.0"
+testpaths = [
+    "tests",
+]
+xfail_strict = true
 
 [tool.mypy]
+enable_error_code = [
+    "ignore-without-code",
+    "redundant-expr",
+    "truthy-bool",
+]
+warn_redundant_casts = true
+warn_unreachable = true
 warn_unused_configs = true
-{#- TODO: Remove this after support for SQLAlchemy 1 is dropped in v1 -#}
-{#- https://github.com/meltano/sdk/pull/1931 -#}
-{%- if cookiecutter.stream_type == 'SQL' %}
-plugins = "sqlmypy"
-{%- endif %}
+warn_unused_ignores = true
 
 [tool.ruff]
 line-length = 100

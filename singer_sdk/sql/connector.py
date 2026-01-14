@@ -716,7 +716,7 @@ class SQLConnector:  # noqa: PLR0904
             SingerSDKDeprecationWarning,
             stacklevel=2,
         )
-        return self.create_sqlalchemy_connection()
+        return self.create_sqlalchemy_connection()  # ty: ignore[deprecated]
 
     @property
     def sqlalchemy_url(self) -> str:
@@ -792,7 +792,7 @@ class SQLConnector:  # noqa: PLR0904
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
             )
-            return th.to_jsonschema_type(sql_type)
+            return th.to_jsonschema_type(sql_type)  # ty: ignore[deprecated]
 
         if isinstance(sql_type, type):  # pragma: no cover
             warnings.warn(
@@ -802,7 +802,7 @@ class SQLConnector:  # noqa: PLR0904
                 stacklevel=2,
             )
             if issubclass(sql_type, sqlalchemy.types.TypeEngine):
-                return th.to_jsonschema_type(sql_type)
+                return th.to_jsonschema_type(sql_type)  # ty: ignore[deprecated]
 
             msg = f"Unexpected type received: '{sql_type.__name__}'"
             raise ValueError(msg)
@@ -850,7 +850,7 @@ class SQLConnector:  # noqa: PLR0904
            A ``FullyQualifiedName`` object is now returned.
         """
         return FullyQualifiedName(
-            table=table_name,  # type: ignore[arg-type]
+            table=table_name,  # type: ignore[arg-type] # ty: ignore[invalid-argument-type]
             schema=schema_name,
             database=db_name,
             delimiter=delimiter,
@@ -1033,7 +1033,7 @@ class SQLConnector:  # noqa: PLR0904
         # An element of the columns list is ``None`` if it's an expression and is
         # returned in the ``expressions`` list of the reflected index.
         possible_primary_keys.extend(
-            index_def["column_names"]  # type: ignore[misc]
+            index_def["column_names"]  # type: ignore[misc] # ty: ignore[invalid-argument-type]
             for index_def in reflected_indices
             if index_def.get("unique", False)
         )
@@ -1738,8 +1738,8 @@ class SQLConnector:  # noqa: PLR0904
              The removed collation as a string.
         """
         if hasattr(column_type, "collation") and column_type.collation:
-            column_type_collation: str = column_type.collation
-            column_type.collation = None
+            column_type_collation: str = column_type.collation  # ty: ignore[invalid-assignment]
+            column_type.collation = None  # ty: ignore[invalid-assignment]
             return column_type_collation
         return None
 
@@ -1755,7 +1755,7 @@ class SQLConnector:  # noqa: PLR0904
             collation: The colation
         """
         if hasattr(column_type, "collation") and collation:
-            column_type.collation = collation
+            column_type.collation = collation  # ty: ignore[invalid-assignment]
 
     def _adapt_column_type(
         self,

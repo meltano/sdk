@@ -40,7 +40,7 @@ dependencies = [
     "jsonpath-ng>=1.5.3",
     "jsonschema>=4.16.0",
     "packaging>=23.1",
-    'python-backoff>=2.2.2',
+    "python-backoff>=2.2.2",
     "python-dotenv>=0.20",
     "PyYAML>=6.0",
     "referencing>=0.30.0",
@@ -145,8 +145,10 @@ testing = [
     "xdoctest[colors]>=1.1.1",
 ]
 typing = [
+    {"include-group" = "testing"},
     "mypy>=1.17",
     "pyarrow-stubs>=19.1",
+    "ty>=0.0.4",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-requests>=2.28.11",
@@ -199,6 +201,7 @@ filterwarnings = [
 ]
 log_cli_level = "INFO"
 log_format = "%(levelname)s %(name)s %(message)s"
+log_level = "INFO"
 markers = [
     "contrib: Tests for contrib (experimental or optional) modules",
     "external: Tests relying on external resources",
@@ -215,7 +218,7 @@ xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.53.4"
+version = "0.53.5"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -370,6 +373,7 @@ select = [
     "FA",   # flake8-future-annotations
     "ISC",  # flake8-implicit-str-concat
     "ICN",  # flake8-import-conventions
+    "LOG",  # flake8-logging
     "G",    # flake8-logging-format
     "INP",  # flake8-no-pep420
     "PIE",  # flake8-pie
@@ -387,10 +391,7 @@ select = [
     "PTH",  # flake8-use-pathlib
     "ERA",  # eradicate
     "PGH",  # pygrep-hooks
-    "PLC",  # pylint (convention)
-    "PLE",  # pylint (error)
-    "PLR",  # pylint (refactor)
-    "PLW",  # pylint (warning)
+    "PL",   # pylint
     "TRY",  # tryceratops
     "FLY",  # flynt
     "PERF", # perflint
@@ -494,3 +495,6 @@ explicit = true
 [tool.codespell]
 skip = "*.csv,samples/aapl/*.json,packages/*/schemas/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"
 ignore-words-list = "fo,intoto"
+
+[tool.ty.analysis]
+respect-type-ignore-comments = false

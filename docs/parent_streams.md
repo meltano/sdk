@@ -19,7 +19,7 @@ from a parent record each time the child stream is invoked.
 1. If the number of _parent_ items is very large (thousands or tens of thousands), you can
    optionally set [`state_partitioning_keys`](singer_sdk.Stream.state_partitioning_keys) on the child stream to specify a subset of context keys to use
    in state bookmarks. (When not set, the number of bookmarks will be equal to the number
-   of parent items.) If you do not wish to store any state bookmarks for the child stream, set[`state_partitioning_keys`](singer_sdk.Stream.state_partitioning_keys) to `[]`.
+   of parent items.) If you do not wish to store any state bookmarks for the child stream, set [`state_partitioning_keys`](singer_sdk.Stream.state_partitioning_keys) to `[]`.
 
 ## Example parent-child implementation
 
@@ -58,7 +58,7 @@ class EpicIssuesStream(GitlabStream):
     parent_stream_type = EpicsStream
 
     # Assume epics don't have `updated_at` incremented when issues are changed:
-    ignore_parent_replication_keys = True
+    ignore_parent_replication_key = True
 
     # Path is auto-populated using parent context keys:
     path = "/groups/{group_id}/epics/{epic_iid}/issues"

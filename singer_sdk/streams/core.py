@@ -170,11 +170,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self.child_streams: list[Stream] = []
         if schema:
             if isinstance(schema, (PathLike, str)):
-                if not Path(schema).is_file():
+                if not Path(schema).is_file():  # ty: ignore[invalid-argument-type]
                     msg = f"Could not find schema file '{self.schema_filepath}'."
                     raise FileNotFoundError(msg)
 
-                self._schema_filepath = Path(schema)
+                self._schema_filepath = Path(schema)  # ty: ignore[invalid-argument-type]
                 warnings.warn(
                     "Passing a schema filepath is deprecated. Please pass a schema "
                     "dictionary or a Singer Schema object instead.",
@@ -247,7 +247,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     stream_alias=self.name,
                     raw_schema=self.schema,
                     key_properties=self.primary_keys,
-                    flattening_options=get_flattening_options(self.config),
+                    flattening_options=get_flattening_options(self.config),  # ty: ignore[invalid-argument-type]
                 ),
             ]
         return self._stream_maps
@@ -1186,7 +1186,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             state: State object to promote progress markers with.
         """
-        state = finalize_state_progress_markers(state)  # type: ignore[arg-type]
+        state = finalize_state_progress_markers(state)  # type: ignore[arg-type] # ty: ignore[invalid-argument-type]
         self._is_state_flushed = False
 
     def finalize_state_progress_markers(self, state: dict | None = None) -> None:
@@ -1462,7 +1462,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         if entry := catalog.get_stream(self.name):
             stream_metadata: StreamMetadata | None
-            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment]
+            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment] # ty: ignore[invalid-assignment]
                 table_key_properties = stream_metadata.table_key_properties
                 table_replication_key = stream_metadata.replication_key
                 table_replication_method = stream_metadata.forced_replication_method

@@ -214,7 +214,7 @@ class BatchConfig:
             self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)  # type: ignore[unreachable]
 
         if isinstance(self.storage, dict):
-            self.storage = StorageTarget.from_dict(self.storage)
+            self.storage = StorageTarget.from_dict(self.storage)  # ty: ignore[invalid-argument-type]
 
         if self.batch_size is None:
             self.batch_size = DEFAULT_BATCH_SIZE  # type: ignore[unreachable]
