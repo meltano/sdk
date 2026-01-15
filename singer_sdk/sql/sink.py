@@ -30,7 +30,7 @@ __all__ = ["SQLSink"]
 _C = t.TypeVar("_C", bound=SQLConnector)
 
 
-class SQLSink(BatchSink, t.Generic[_C]):
+class SQLSink(BatchSink, t.Generic[_C]):  # noqa: PLR0904
     """SQL-type sink type."""
 
     connector_class: type[_C]
@@ -273,24 +273,16 @@ class SQLSink(BatchSink, t.Generic[_C]):
         # :meth:`~singer_sdk.Sink.tally_duplicate_merged()`.
         records = context["records"]
 
-        # Handle hard delete for LOG_BASED replication: records with _sdc_deleted_at
-        # set should be physically deleted from the target table.
-        if self.config.get("hard_delete", False) and self.key_properties:
-            to_delete, to_insert = self._split_records_for_hard_delete(records)
-
-            if to_delete:
-                count = self.hard_delete_records(to_delete)
-                self.logger.info(
-                    "Deleted %d records because they were deleted upstream",
-                    count,
-                )
-
-            if to_insert:
-                self.bulk_insert_records(
-                    full_table_name=self.full_table_name,
-                    schema=self.schema,
-                    records=to_insert,
-                )
+        # When hard_delete is enabled, use upsert to handle records that may
+        # already exist (for LOG_BASED replication with _sdc_deleted_at).
+        # After upserting, delete records where _sdc_deleted_at is set.
+        if self.config.get("hard_delete", False):
+            self.bulk_upsert_records(
+                full_table_name=self.full_table_name,
+                schema=self.schema,
+                records=records,
+            )
+            self.hard_delete_records()
         else:
             self.bulk_insert_records(
                 full_table_name=self.full_table_name,
@@ -298,61 +290,25 @@ class SQLSink(BatchSink, t.Generic[_C]):
                 records=records,
             )
 
-    def _split_records_for_hard_delete(
-        self,
-        records: t.Iterable[dict],
-    ) -> tuple[list[dict], list[dict]]:
-        """Split records into those to delete and those to insert.
-
-        Records with a non-null ``_sdc_deleted_at`` value are marked for deletion
-        in LOG_BASED replication.
-
-        Args:
-            records: The records to split.
-
-        Returns:
-            A tuple of (records_to_delete, records_to_insert). Records to delete
-            are returned as conformed records (column names match target schema).
-        """
-        conformed_delete_col = self.conform_name(
-            self.soft_delete_column_name,
-            "column",
-        )
-        records_to_delete = []
-        records_to_insert = []
-
-        for record in records:
-            conformed_record = self.conform_record(record)
-            if conformed_record.get(conformed_delete_col) is not None:
-                records_to_delete.append(conformed_record)
-            else:
-                records_to_insert.append(record)
-
-        return records_to_delete, records_to_insert
-
-    def hard_delete_records(
-        self,
-        records: t.Sequence[dict],
-    ) -> int:
+    def hard_delete_records(self) -> int:
         """Hard delete records from the target table.
 
         This method deletes records that have been marked for deletion in LOG_BASED
-        replication (i.e., records with ``_sdc_deleted_at`` set).
+        replication (i.e., records where ``_sdc_deleted_at`` is not null).
 
         Subclasses can override this method to customize deletion behavior.
-
-        Args:
-            records: Conformed records to delete. Must contain the key properties.
 
         Returns:
             The number of records deleted.
 
         .. versionadded:: 0.54.0
         """
-        return self.connector.delete_by_key(
+        return self.connector.delete_where_sdc_deleted_at_is_not_null(
             full_table_name=self.full_table_name,
-            key_columns=self.key_properties,
-            key_values=records,
+            sdc_deleted_at_column=self.conform_name(
+                self.soft_delete_column_name,
+                "column",
+            ),
         )
 
     def generate_insert_statement(
@@ -437,6 +393,61 @@ class SQLSink(BatchSink, t.Generic[_C]):
 
         with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
             result = conn.execute(insert_sql, new_records)
+
+        return result.rowcount
+
+    def bulk_upsert_records(
+        self,
+        full_table_name: str | FullyQualifiedName,
+        schema: dict,
+        records: t.Iterable[dict[str, t.Any]],
+    ) -> int | None:
+        """Bulk upsert records to an existing destination table.
+
+        This method inserts new records and updates existing records based on
+        the primary key. It is used when ``hard_delete=True`` to ensure records
+        marked for deletion can be inserted/updated before being deleted.
+
+        The default implementation uses ``INSERT OR REPLACE`` syntax which is
+        supported by SQLite. Subclasses should override this method to provide
+        database-specific upsert implementations.
+
+        Args:
+            full_table_name: the target table name.
+            schema: the JSON schema for the new table, to be used when inferring
+                column names.
+            records: the input records.
+
+        Returns:
+            The number of records affected, or None if not detectable.
+
+        .. versionadded:: 0.54.0
+        """
+        conformed_schema = self.conform_schema(schema)
+        property_names = list(conformed_schema["properties"].keys())
+        conformed_records = [self.conform_record(record) for record in records]
+
+        # Create new record dicts with missing properties filled in with None
+        new_records = [
+            {name: record.get(name) for name in property_names}
+            for record in conformed_records
+        ]
+
+        if not new_records:
+            return 0
+
+        # Build INSERT OR REPLACE statement (SQLite syntax)
+        columns = ", ".join(property_names)
+        placeholders = ", ".join(f":{name}" for name in property_names)
+        upsert_sql = sa.text(
+            f"INSERT OR REPLACE INTO {full_table_name} ({columns}) "  # noqa: S608
+            f"VALUES ({placeholders})",
+        )
+
+        self.logger.info("Upserting with SQL: %s", upsert_sql)
+
+        with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
+            result = conn.execute(upsert_sql, new_records)
 
         return result.rowcount
 
