@@ -233,6 +233,7 @@ TARGET_SCHEMA_CONFIG = PropertiesList(
     Property(
         "default_target_schema",
         StringType(),
+        aliases=["schema"],
         title="Default Target Schema",
         description="The default target database schema name to use for all streams.",
     ),
