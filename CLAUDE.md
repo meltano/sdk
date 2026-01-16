@@ -5,7 +5,7 @@ This is the Meltano Singer SDK, a Python framework for building Singer taps (dat
 ## Development Setup
 
 ```bash
-uv sync --all-groups --all-extras  # Full development environment
+uv sync --all-groups --all-extras --all-packages  # Full development environment
 ```
 
 ## Common Commands
