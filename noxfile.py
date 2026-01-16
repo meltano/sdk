@@ -236,7 +236,9 @@ def test_lowest_requirements(session: nox.Session) -> None:
         "--all-extras",
         env=install_env,
     )
-    tmpdir = session.create_tmp()
+    tmpdir = Path(session.create_tmp())
+    tmpfile = tmpdir / "requirements.txt"
+    tmpfile.unlink(missing_ok=True)
 
     session.run_install(
         "uv",
@@ -249,7 +251,7 @@ def test_lowest_requirements(session: nox.Session) -> None:
         "--universal",
         "--no-sources",
         "--resolution=lowest-direct",
-        f"-o={tmpdir}/requirements.txt",
+        f"-o={tmpfile.as_posix()}",
         env=install_env,
     )
 
