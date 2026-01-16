@@ -9,7 +9,7 @@
       "stream_type": "REST",
       "auth_method": "Bearer Token",
       "include_ci_files": "None (Skip)",
-      "include_agents_md": true,
+      "include_agent_instructions": "AGENTS.md",
       "faker_extra": true,
       "license": "Apache-2.0",
       "ide": "VSCode",

@@ -7,7 +7,7 @@
   "variant": "None (Skip)",
   "faker_extra": false,
   "include_ci_files": ["GitHub", "None (Skip)"],
-  "include_agents_md": true,
+  "include_agent_instructions": ["AGENTS.md", "CLAUDE.md", "None"],
   "license": ["Apache-2.0", "MIT", "None"],
   "ide": ["VSCode", "None"],
   "__prompts__": {
@@ -19,7 +19,7 @@
     "variant": "If you are planning to distribute your project on PyPI and the mapper_id is already in use, you can set a variant name. e.g. 'meltanolabs' or 'pipelinewise'.",
     "faker_extra": "Add [bold orange1][link=https://faker.readthedocs.io/en/master/]Faker[/link][/] as an extra dependency to support generating fake data in stream maps?",
     "include_ci_files": "Whether to include CI files for a common CI services",
-    "include_agents_md": "Include an AGENTS.md file with guidelines for agentic programming and AI-assisted development?",
+    "include_agent_instructions": "Include an agent instructions file? AGENTS.md is the cross-tool standard; CLAUDE.md is specific to Claude Code.",
     "license": "The license for the project",
     "ide": "Add configuration files for your preferred IDE"
   }

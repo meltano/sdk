@@ -8,7 +8,7 @@
       "variant": "None (Skip)",
       "faker_extra": false,
       "include_ci_files": "None (Skip)",
-      "include_agents_md": true,
+      "include_agent_instructions": "AGENTS.md",
       "license": "Apache-2.0",
       "ide": "VSCode",
       "_template": "../mapper-template/",
