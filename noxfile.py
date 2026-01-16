@@ -118,13 +118,17 @@ def _run_pytest(session: nox.Session, *pytest_args: str, coverage: bool = True) 
 @nox.session(python=python_versions, tags=["test"])
 def tests(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
+    env = _install_env(session)
+    if session.python not in python_versions:
+        env["PYO3_USE_ABI3_FORWARD_COMPATIBILITY"] = "1"
+
     session.run_install(
         *UV_SYNC_COMMAND,
         "--group=testing",
         "--extra=faker",
         "--extra=jwt",
         "--extra=s3",
-        env=_install_env(session),
+        env=env,
     )
 
     _run_pytest(
