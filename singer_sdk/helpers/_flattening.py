@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import collections.abc
 import itertools
+import operator
 import re
 import typing as t
 from copy import deepcopy
@@ -30,6 +31,7 @@ class PluginFlatteningConfig(t.TypedDict, total=False):
     flattening_enabled: bool
     flattening_max_depth: int
     flattening_max_key_length: int
+    flattening_separator: str
 
 
 @dataclass
@@ -60,6 +62,9 @@ class FlatteningOptions:
 
         if (max_key_length := data.get("flattening_max_key_length")) is not None:
             kwargs["max_key_length"] = max_key_length
+
+        if (separator := data.get("flattening_separator")) is not None:
+            kwargs["separator"] = separator
 
         return cls(enabled=data.get("flattening_enabled", False), **kwargs)
 
@@ -408,11 +413,9 @@ def _flatten_schema(  # noqa: C901, PLR0912
             items.append((new_key, {"type": ["null", "string"]}))
 
     # Sort and check for duplicates
-    def _key_func(item: tuple[str, dict]) -> str:
-        return item[0]  # first item in tuple is the key name.
-
-    sorted_items = sorted(items, key=_key_func)
-    for field_name, g in itertools.groupby(sorted_items, key=_key_func):
+    key_func = operator.itemgetter(0)
+    sorted_items = sorted(items, key=key_func)
+    for field_name, g in itertools.groupby(sorted_items, key=key_func):
         if len(list(g)) > 1:
             msg = f"Duplicate column name produced in schema: {field_name}"
             raise ValueError(msg)

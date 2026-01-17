@@ -397,6 +397,7 @@ select = [
     "TRY",  # tryceratops
     "FLY",  # flynt
     "PERF", # perflint
+    "FURB", # refurb
     "RUF",  # ruff
 ]
 unfixable = [
