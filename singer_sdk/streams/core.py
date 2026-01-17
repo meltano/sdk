@@ -55,7 +55,7 @@ if t.TYPE_CHECKING:
     from singer_sdk.tap_base import Tap
 
 
-class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
+class Stream(abc.ABC):  # noqa: PLR0904
     """Abstract base class for tap streams.
 
     :ivar context: Stream partition or context dictionary. This is a read-only
@@ -474,7 +474,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def get_replication_key_signpost(
         self,
-        context: types.Context | None,  # noqa: ARG002
+        context: types.Context | None = None,  # noqa: ARG002
     ) -> datetime.datetime | t.Any | None:  # noqa: ANN401
         """Get the replication signpost.
 
@@ -1349,8 +1349,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
-        signpost = self.get_replication_key_signpost(context)
-        if signpost:
+        if signpost := self.get_replication_key_signpost(context):
             self._write_replication_key_signpost(context, signpost)
 
         # Send a SCHEMA message to the downstream target:
