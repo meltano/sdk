@@ -67,7 +67,7 @@ from sqlalchemy.types import SMALLINT
 from my_sqlalchemy_dialect import VectorType
 
 
-def vector_to_sql(jsonschema: dict) -> VectorType:
+def custom_vector_to_sql(jsonschema: dict) -> VectorType:
     return VectorType(**jsonschema.get("x-sql-datatype-properties", {}))
 
 
