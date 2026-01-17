@@ -54,3 +54,9 @@ if __name__ == "__main__":
 
     if "{{ cookiecutter.ide }}" != "VSCode":
         shutil.rmtree(".vscode", ignore_errors=True)
+
+    agent_instructions = "{{ cookiecutter.include_agent_instructions }}"
+    if agent_instructions == "CLAUDE.md":
+        Path("AGENTS.md").rename("CLAUDE.md")
+    elif agent_instructions == "None":
+        Path("AGENTS.md").unlink(missing_ok=True)
