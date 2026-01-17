@@ -40,7 +40,7 @@ Before making changes, ensure you understand these Singer concepts:
 #### Adding a New Stream
 
 1. Define stream class in `{{ cookiecutter.library_name }}/streams.py`
-1. Set `name`, `path`, `primary_keys`, and `replication_key`
+1. Set `name`, `path`, `primary_keys`, and `replication_key` (set this to `None` if not applicable)
 1. Define schema using `PropertiesList` or JSON Schema
 1. Register stream in the tap's `discover_streams()` method
 
