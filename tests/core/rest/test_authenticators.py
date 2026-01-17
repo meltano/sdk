@@ -844,18 +844,22 @@ def test_oauth_authenticator_retries_on_rate_limit(rest_tap: Tap):
     assert rsp2.call_count == 1
 
 
+@pytest.mark.parametrize("status_code", [400, 401, 403, 404])
 @responses.activate(registry=responses.registries.OrderedRegistry)
-def test_oauth_authenticator_does_not_retry_client_errors(rest_tap: Tap):
+def test_oauth_authenticator_does_not_retry_client_errors(
+    rest_tap: Tap,
+    status_code: int,
+):
     """Verify client errors (4xx except 429) are NOT retried.
 
-    Tests that authentication failures like 401 Unauthorized do not trigger
-    retries, as these are not transient errors.
+    Tests that authentication failures with 4xx statuses (except 429) do not
+    trigger retries, as these are not transient errors.
     """
-    # Mock: 401 error (should not retry)
+    # Mock: client error (should not retry)
     rsp = responses.post(
         "https://example.com/oauth",
         json={"error": "Invalid credentials"},
-        status=401,
+        status=status_code,
     )
 
     authenticator = _FakeOAuthAuthenticator(
@@ -867,7 +871,7 @@ def test_oauth_authenticator_does_not_retry_client_errors(rest_tap: Tap):
     with pytest.raises(RuntimeError, match="Failed to update access token"):
         authenticator.update_access_token()
 
-    # Verify only 1 request was made (no retries for 401)
+    # Verify only 1 request was made (no retries for non-429 4xx)
     assert rsp.call_count == 1
 
 
