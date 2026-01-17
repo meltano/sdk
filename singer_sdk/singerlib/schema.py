@@ -46,6 +46,7 @@ STANDARD_KEYS = [
     "oneOf",
     # JSON Schema extensions
     "x-sql-datatype",
+    "x-sql-datatype-properties",
 ]
 
 
@@ -89,6 +90,7 @@ class Schema:
     contentEncoding: str | None = None  # noqa: N815
     # JSON Schema extensions
     x_sql_datatype: str | None = None
+    x_sql_datatype_properties: dict[str, t.Any] | None = None
 
     deprecated: bool | None = None
     oneOf: t.Any | None = None  # noqa: N815
