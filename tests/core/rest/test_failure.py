@@ -3,13 +3,15 @@ from __future__ import annotations
 import json
 import typing as t
 from contextlib import nullcontext
-from enum import Enum
 
 import pytest
 import requests
 
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.streams.rest import RESTStream
+
+if t.TYPE_CHECKING:
+    from contextlib import AbstractContextManager
 
 
 class CustomResponseValidationStream(RESTStream):
@@ -20,7 +22,7 @@ class CustomResponseValidationStream(RESTStream):
     schema: t.ClassVar[dict] = {"type": "object", "properties": {}}
     path = "/dummy"
 
-    class StatusMessage(str, Enum):
+    class StatusMessage:
         """Possible status messages."""
 
         OK = "OK"
@@ -175,7 +177,11 @@ def test_status_code_validation(
     ],
     ids=["fatal", "retriable", "ok"],
 )
-def test_status_message_api(custom_validation_stream, message, expectation):
+def test_status_message_api(
+    custom_validation_stream: CustomResponseValidationStream,
+    message: str,
+    expectation: AbstractContextManager,
+):
     fake_response = requests.Response()
     fake_response.status_code = 200
     fake_response._content = json.dumps({"status": message}).encode()
