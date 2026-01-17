@@ -22,7 +22,7 @@ Breadcrumb = tuple[str, ...]
 logger = logging.getLogger(__name__)
 
 
-class SelectionMask(dict[Breadcrumb, bool]):
+class SelectionMask(dict[Breadcrumb, bool]):  # noqa: FURB189
     """Boolean mask for property selection in schemas and records."""
 
     def __missing__(self, breadcrumb: Breadcrumb) -> bool:
@@ -102,7 +102,7 @@ class StreamMetadata(Metadata):
 AnyMetadata: t.TypeAlias = Metadata | StreamMetadata
 
 
-class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
+class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
     """Stream metadata mapping."""
 
     @classmethod
@@ -375,7 +375,7 @@ class CatalogEntry:
         return result
 
 
-class Catalog(dict[str, CatalogEntry]):
+class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
     """Singer catalog mapping of stream entries."""
 
     @classmethod

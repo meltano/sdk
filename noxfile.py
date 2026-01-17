@@ -459,8 +459,7 @@ def templates(session: nox.Session, replay_file_path: Path) -> None:
     )
     session.chdir(cc_test_output)
 
-    with Path("ruff.toml").open("w", encoding="utf-8") as ruff_toml:
-        ruff_toml.write(RUFF_OVERRIDES)
+    Path("ruff.toml").write_text(RUFF_OVERRIDES, encoding="utf-8")
 
     # Use the local singer-sdk
     session.run("uv", "add", f"singer-sdk @ {sdk_dir}")
