@@ -508,7 +508,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     def get_replication_key_signpost(
         self,
-        context: types.Context | None,  # noqa: ARG002
+        context: types.Context | None = None,  # noqa: ARG002
     ) -> datetime.datetime | t.Any | None:  # noqa: ANN401
         """Get the replication signpost.
 
@@ -1399,8 +1399,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         self.context = MappingProxyType(context) if context else None
 
         # Use a replication signpost, if available
-        signpost = self.get_replication_key_signpost(context)
-        if signpost:
+        if signpost := self.get_replication_key_signpost(context):
             self._write_replication_key_signpost(context, signpost)
 
         # Send a SCHEMA message to the downstream target:
