@@ -49,3 +49,9 @@ if __name__ == "__main__":
     # Clean up the unused sink files
     for template in ["sinks_record.py", "sinks_batch.py", "sinks_sql.py"]:
         (BASE_PATH / template).unlink(missing_ok=True)
+
+    agent_instructions = "{{ cookiecutter.include_agent_instructions }}"
+    if agent_instructions == "CLAUDE.md":
+        Path("AGENTS.md").rename("CLAUDE.md")
+    elif agent_instructions == "None":
+        Path("AGENTS.md").unlink(missing_ok=True)
