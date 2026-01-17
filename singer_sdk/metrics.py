@@ -169,7 +169,7 @@ def log(logger: logging.Logger, point: Point) -> None:
     logger.info("METRIC: %s", point)
 
 
-class Meter(metaclass=abc.ABCMeta):
+class Meter(abc.ABC):
     """Base class for all meters."""
 
     def __init__(self, metric: Metric, tags: dict | None = None) -> None:

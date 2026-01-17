@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import collections.abc
 import itertools
+import operator
 import re
 import typing as t
 from copy import deepcopy
@@ -408,11 +409,9 @@ def _flatten_schema(  # noqa: C901, PLR0912
             items.append((new_key, {"type": ["null", "string"]}))
 
     # Sort and check for duplicates
-    def _key_func(item: tuple[str, dict]) -> str:
-        return item[0]  # first item in tuple is the key name.
-
-    sorted_items = sorted(items, key=_key_func)
-    for field_name, g in itertools.groupby(sorted_items, key=_key_func):
+    key_func = operator.itemgetter(0)
+    sorted_items = sorted(items, key=key_func)
+    for field_name, g in itertools.groupby(sorted_items, key=key_func):
         if len(list(g)) > 1:
             msg = f"Duplicate column name produced in schema: {field_name}"
             raise ValueError(msg)

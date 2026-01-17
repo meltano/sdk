@@ -65,7 +65,7 @@ class MaxRecordsLimitException(RequestedAbortException):
     """Exception indicating the sync aborted due to too many records."""
 
 
-class AbortedSyncExceptionBase(Exception, metaclass=abc.ABCMeta):
+class AbortedSyncExceptionBase(Exception, abc.ABC):
     """Base exception to raise when a stream sync is aborted.
 
     Developers should not raise this directly, and instead should use:

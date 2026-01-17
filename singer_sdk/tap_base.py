@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import collections.abc
 import contextlib
 import typing as t
 import warnings
@@ -50,7 +51,7 @@ class CliTestOptionValue(Enum):
     Disabled = "disabled"
 
 
-class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
+class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
     """Abstract base class for taps.
 
     The Tap class governs configuration, validation, and stream discovery for tap
@@ -121,8 +122,8 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         # Process input catalog
         if isinstance(catalog, Catalog):
             self._input_catalog = catalog
-        elif isinstance(catalog, dict):
-            self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type]
+        elif isinstance(catalog, collections.abc.MutableMapping):
+            self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type] # ty: ignore[invalid-argument-type]
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
             warnings.warn(
