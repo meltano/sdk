@@ -377,14 +377,16 @@ TARGET_{{ cookiecutter.destination_name | upper | replace(' ', '_') }}_BATCH_SIZ
 | `DateTimeType` | `date_iso8601` |
 | `ArrayType` | `array` |
 | `ObjectType` | `object` |
-| Secret properties | `password` |
+
+Any properties with `secret=True` should be marked with `sensitive: true` in `meltano.yml`.
 
 **Best practices:**
 
-- Always update both files in the same commit
-- Use the same default values in both locations
-- Mirror the `secret=True` flag with `kind: password`
+- Always update all three files (`target.py`, `meltano.yml`, `.env.example`) in the same commit
+- Use the same default values in all locations
 - Keep descriptions consistent between code docstrings and `meltano.yml` `description` fields
+
+> **Note:** This guidance is consistent with tap and mapper templates in the Singer SDK. See the [SDK documentation](https://sdk.meltano.com) for canonical reference.
 
 ### Common Pitfalls
 
