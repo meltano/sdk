@@ -316,6 +316,76 @@ def process_state_message(self, message_dict: dict) -> None:
     # Optional: Checkpoint or log state
 ```
 
+### Keeping meltano.yml and Target Settings in Sync
+
+When this target is used with Meltano, the settings defined in `meltano.yml` must stay in sync with the `config_jsonschema` in the target class. Configuration drift between these two sources causes confusion and runtime errors.
+
+**When to sync:**
+
+- Adding new configuration properties to the target
+- Removing or renaming existing properties
+- Changing property types, defaults, or descriptions
+- Marking properties as required or secret
+
+**How to sync:**
+
+1. Update `config_jsonschema` in `{{ cookiecutter.library_name }}/target.py`
+1. Update the corresponding `settings` block in `meltano.yml`
+1. Update `.env.example` with the new environment variable
+
+Example - adding a new `batch_size` setting:
+
+```python
+# {{ cookiecutter.library_name }}/target.py
+config_jsonschema = th.PropertiesList(
+    th.Property("api_url", th.StringType, required=True),
+    th.Property("api_key", th.StringType, required=True, secret=True),
+    th.Property("batch_size", th.IntegerType, default=1000),  # New setting
+).to_dict()
+```
+
+```yaml
+# meltano.yml
+plugins:
+  loaders:
+    - name: {{ cookiecutter.target_id }}
+      settings:
+        - name: api_url
+          kind: string
+        - name: api_key
+          kind: password
+        - name: batch_size  # New setting
+          kind: integer
+          value: 1000
+```
+
+```bash
+# .env.example
+TARGET_{{ cookiecutter.destination_name | upper | replace(' ', '_') }}_API_URL=https://api.example.com
+TARGET_{{ cookiecutter.destination_name | upper | replace(' ', '_') }}_API_KEY=your_api_key_here
+TARGET_{{ cookiecutter.destination_name | upper | replace(' ', '_') }}_BATCH_SIZE=1000  # New setting
+```
+
+**Setting kind mappings:**
+
+| Python Type | Meltano Kind |
+|-------------|--------------|
+| `StringType` | `string` |
+| `IntegerType` | `integer` |
+| `BooleanType` | `boolean` |
+| `NumberType` | `number` |
+| `DateTimeType` | `date_iso8601` |
+| `ArrayType` | `array` |
+| `ObjectType` | `object` |
+| Secret properties | `password` |
+
+**Best practices:**
+
+- Always update both files in the same commit
+- Use the same default values in both locations
+- Mirror the `secret=True` flag with `kind: password`
+- Keep descriptions consistent between code docstrings and `meltano.yml` `description` fields
+
 ### Common Pitfalls
 
 1. **Memory Leaks**: Clear batch data after processing

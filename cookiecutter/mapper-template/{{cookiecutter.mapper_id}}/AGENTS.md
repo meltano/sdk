@@ -342,6 +342,73 @@ stream_maps = {
    - Filtering reduces downstream load
    - Removing fields reduces message size
 
+### Keeping meltano.yml and Mapper Settings in Sync
+
+When this mapper is used with Meltano, the settings defined in `meltano.yml` must stay in sync with the `config_jsonschema` in the mapper class. Configuration drift between these two sources causes confusion and runtime errors.
+
+**When to sync:**
+
+- Adding new configuration properties to the mapper
+- Removing or renaming existing properties
+- Changing property types, defaults, or descriptions
+- Marking properties as required or secret
+
+**How to sync:**
+
+1. Update `config_jsonschema` in `{{ cookiecutter.library_name }}/mapper.py`
+1. Update the corresponding `settings` block in `meltano.yml`
+1. Update `.env.example` with the new environment variable
+
+Example - adding a new `hash_algorithm` setting:
+
+```python
+# {{ cookiecutter.library_name }}/mapper.py
+config_jsonschema = th.PropertiesList(
+    th.Property("hash_email", th.BooleanType, default=False),
+    th.Property("hash_algorithm", th.StringType, default="md5"),  # New setting
+).to_dict()
+```
+
+```yaml
+# meltano.yml
+plugins:
+  mappers:
+    - name: {{ cookiecutter.mapper_id }}
+      settings:
+        - name: hash_email
+          kind: boolean
+          value: false
+        - name: hash_algorithm  # New setting
+          kind: string
+          value: md5
+```
+
+```bash
+# .env.example
+{{ cookiecutter.mapper_id | upper | replace('-', '_') }}_HASH_EMAIL=false
+{{ cookiecutter.mapper_id | upper | replace('-', '_') }}_HASH_ALGORITHM=md5  # New setting
+```
+
+**Setting kind mappings:**
+
+| Python Type | Meltano Kind |
+|-------------|--------------|
+| `StringType` | `string` |
+| `IntegerType` | `integer` |
+| `BooleanType` | `boolean` |
+| `NumberType` | `number` |
+| `DateTimeType` | `date_iso8601` |
+| `ArrayType` | `array` |
+| `ObjectType` | `object` |
+| Secret properties | `password` |
+
+**Best practices:**
+
+- Always update both files in the same commit
+- Use the same default values in both locations
+- Mirror the `secret=True` flag with `kind: password`
+- Keep descriptions consistent between code docstrings and `meltano.yml` `description` fields
+
 ### Common Pitfalls
 
 1. **Null Handling**: Check for null before operations
