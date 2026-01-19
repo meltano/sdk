@@ -259,7 +259,8 @@ plugins:
         - name: api_url
           kind: string
         - name: api_key
-          kind: password
+          kind: string
+          sensitive: true
         - name: batch_size  # New setting
           kind: integer
           value: 100
