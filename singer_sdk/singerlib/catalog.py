@@ -17,9 +17,14 @@ if t.TYPE_CHECKING:
     else:
         from typing_extensions import Self
 
-Breadcrumb = tuple[str, ...]
+Breadcrumb: t.TypeAlias = tuple[str, ...]
 
 logger = logging.getLogger(__name__)
+
+# Replication methods
+REPLICATION_FULL_TABLE = "FULL_TABLE"
+REPLICATION_INCREMENTAL = "INCREMENTAL"
+REPLICATION_LOG_BASED = "LOG_BASED"
 
 
 class SelectionMask(dict[Breadcrumb, bool]):  # noqa: FURB189
