@@ -222,6 +222,79 @@ Example test with config:
 {{ cookiecutter.tap_id }} --config config.json --catalog catalog.json
 ```
 
+### Keeping meltano.yml and Tap Settings in Sync
+
+When this tap is used with Meltano, the settings defined in `meltano.yml` must stay in sync with the `config_jsonschema` in the tap class. Configuration drift between these two sources causes confusion and runtime errors.
+
+**When to sync:**
+
+- Adding new configuration properties to the tap
+- Removing or renaming existing properties
+- Changing property types, defaults, or descriptions
+- Marking properties as required or secret
+
+**How to sync:**
+
+1. Update `config_jsonschema` in `{{ cookiecutter.library_name }}/tap.py`
+1. Update the corresponding `settings` block in `meltano.yml`
+1. Update `.env.example` with the new environment variable
+
+Example - adding a new `batch_size` setting:
+
+```python
+# {{ cookiecutter.library_name }}/tap.py
+config_jsonschema = th.PropertiesList(
+    th.Property("api_url", th.StringType, required=True),
+    th.Property("api_key", th.StringType, required=True, secret=True),
+    th.Property("batch_size", th.IntegerType, default=100),  # New setting
+).to_dict()
+```
+
+```yaml
+# meltano.yml
+plugins:
+  extractors:
+    - name: {{ cookiecutter.tap_id }}
+      settings:
+        - name: api_url
+          kind: string
+        - name: api_key
+          kind: string
+          sensitive: true
+        - name: batch_size  # New setting
+          kind: integer
+          value: 100
+```
+
+```bash
+# .env.example
+TAP_{{ cookiecutter.source_name | upper | replace(' ', '_') }}_API_URL=https://api.example.com
+TAP_{{ cookiecutter.source_name | upper | replace(' ', '_') }}_API_KEY=your_api_key_here
+TAP_{{ cookiecutter.source_name | upper | replace(' ', '_') }}_BATCH_SIZE=100  # New setting
+```
+
+**Setting kind mappings:**
+
+| Python Type | Meltano Kind |
+|-------------|--------------|
+| `StringType` | `string` |
+| `IntegerType` | `integer` |
+| `BooleanType` | `boolean` |
+| `NumberType` | `number` |
+| `DateTimeType` | `date_iso8601` |
+| `ArrayType` | `array` |
+| `ObjectType` | `object` |
+
+Any properties with `secret=True` should be marked with `sensitive: true` in `meltano.yml`.
+
+**Best practices:**
+
+- Always update all three files (`tap.py`, `meltano.yml`, `.env.example`) in the same commit
+- Use the same default values in all locations
+- Keep descriptions consistent between code docstrings and `meltano.yml` `description` fields
+
+> **Note:** This guidance is consistent with target and mapper templates in the Singer SDK. See the [SDK documentation](https://sdk.meltano.com) for canonical reference.
+
 ### Common Pitfalls
 
 1. **Rate Limiting**: Implement backoff using `RESTStream` built-in retry logic
