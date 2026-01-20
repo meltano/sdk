@@ -320,8 +320,8 @@ module = [
 
 [build-system]
 requires = [
-    "hatchling==1.28",
-    "hatch-vcs==0.5",
+    "hatchling>=1,<2",
+    "hatch-vcs",
 ]
 build-backend = "hatchling.build"
 
