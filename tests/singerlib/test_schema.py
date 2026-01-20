@@ -28,6 +28,14 @@ OBJECT_DICT = {
     "additionalProperties": True,
     "required": ["a_string"],
 }
+SCHEMA_WITH_CUSTOM_SQL_DATATYPE = Schema(
+    x_sql_datatype="vector",
+    x_sql_datatype_properties={"dimensions": 10},
+)
+SCHEMA_WITH_CUSTOM_SQL_DATATYPE_DICT = {
+    "x-sql-datatype": "vector",
+    "x-sql-datatype-properties": {"dimensions": 10},
+}
 
 
 @pytest.mark.parametrize(
@@ -52,6 +60,11 @@ OBJECT_DICT = {
             OBJECT_SCHEMA,
             OBJECT_DICT,
             id="object_to_dict",
+        ),
+        pytest.param(
+            SCHEMA_WITH_CUSTOM_SQL_DATATYPE,
+            SCHEMA_WITH_CUSTOM_SQL_DATATYPE_DICT,
+            id="schema_with_custom_sql_datatype_to_dict",
         ),
     ],
 )
@@ -81,6 +94,11 @@ def test_schema_to_dict(schema, expected):
             OBJECT_DICT,
             OBJECT_SCHEMA,
             id="schema_from_object_dict",
+        ),
+        pytest.param(
+            SCHEMA_WITH_CUSTOM_SQL_DATATYPE_DICT,
+            SCHEMA_WITH_CUSTOM_SQL_DATATYPE,
+            id="schema_from_custom_sql_datatype_dict",
         ),
     ],
 )

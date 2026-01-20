@@ -50,6 +50,7 @@ dependencies = [
     "sqlalchemy>=2",
     "typing-extensions>=4.5.0; python_version < '3.13'",
     "universal-pathlib>=0.2.6",
+    "urllib3>=1.26.20",
 ]
 
 [project.optional-dependencies]
@@ -139,6 +140,7 @@ testing = [
     "pytz>=2022.2.1",
     "requests-cache>=1.2.1",
     "requests-mock>=1.10.0",
+    "responses>=0.25.8",
     "rfc3339-validator>=0.1.4",
     "time-machine>=2.10.0",
     "toolz>=1.0.0",
@@ -395,6 +397,7 @@ select = [
     "TRY",  # tryceratops
     "FLY",  # flynt
     "PERF", # perflint
+    "FURB", # refurb
     "RUF",  # ruff
 ]
 unfixable = [

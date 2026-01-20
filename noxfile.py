@@ -118,13 +118,17 @@ def _run_pytest(session: nox.Session, *pytest_args: str, coverage: bool = True) 
 @nox.session(python=python_versions, tags=["test"])
 def tests(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
+    env = _install_env(session)
+    if session.python not in python_versions:
+        env["PYO3_USE_ABI3_FORWARD_COMPATIBILITY"] = "1"
+
     session.run_install(
         *UV_SYNC_COMMAND,
         "--group=testing",
         "--extra=faker",
         "--extra=jwt",
         "--extra=s3",
-        env=_install_env(session),
+        env=env,
     )
 
     _run_pytest(
@@ -232,7 +236,9 @@ def test_lowest_requirements(session: nox.Session) -> None:
         "--all-extras",
         env=install_env,
     )
-    tmpdir = session.create_tmp()
+    tmpdir = Path(session.create_tmp())
+    tmpfile = tmpdir / "requirements.txt"
+    tmpfile.unlink(missing_ok=True)
 
     session.run_install(
         "uv",
@@ -245,7 +251,7 @@ def test_lowest_requirements(session: nox.Session) -> None:
         "--universal",
         "--no-sources",
         "--resolution=lowest-direct",
-        f"-o={tmpdir}/requirements.txt",
+        f"-o={tmpfile.as_posix()}",
         env=install_env,
     )
 
@@ -453,8 +459,7 @@ def templates(session: nox.Session, replay_file_path: Path) -> None:
     )
     session.chdir(cc_test_output)
 
-    with Path("ruff.toml").open("w", encoding="utf-8") as ruff_toml:
-        ruff_toml.write(RUFF_OVERRIDES)
+    Path("ruff.toml").write_text(RUFF_OVERRIDES, encoding="utf-8")
 
     # Use the local singer-sdk
     session.run("uv", "add", f"singer-sdk @ {sdk_dir}")

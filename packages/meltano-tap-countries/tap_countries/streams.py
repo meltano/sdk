@@ -28,7 +28,7 @@ else:
 SCHEMAS_DIR = SchemaDirectory(schemas)
 
 
-class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
+class CountriesAPIStream(GraphQLStream, abc.ABC):
     """Sample tap test for countries.
 
     NOTE: This API does not require authentication.
@@ -44,6 +44,8 @@ class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
             backend="filesystem",
             serializer="json",
             allowable_methods=("POST", "HEAD"),
+            ignored_parameters=["User-Agent"],
+            match_headers=True,
         )
 
 

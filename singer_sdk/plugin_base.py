@@ -189,7 +189,7 @@ def _plugin_log_level(*, plugin_name: str) -> str:
     return level.upper() if level is not None else DEFAULT_LOG_LEVEL
 
 
-class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
+class PluginBase(abc.ABC):  # noqa: PLR0904
     """Abstract base class for taps."""
 
     #: The executable name of the tap or target plugin. e.g. tap-foo
@@ -771,7 +771,7 @@ class BaseSingerIO(PluginBase):
         return instance or default_cls()
 
 
-class BaseSingerReader(BaseSingerIO, metaclass=abc.ABCMeta):
+class BaseSingerReader(BaseSingerIO, abc.ABC):
     """Base class for Singer readers."""
 
     message_reader_class: type[GenericSingerReader] = SingerReader

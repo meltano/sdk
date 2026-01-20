@@ -353,3 +353,44 @@ def test_standard_metadata(
         assert rk_metadata.selected is None
 
     assert set(metadata) == breadcrumbs
+
+
+def test_standard_metadata_default_replication_key(subtests: pytest.Subtests):
+    """Validate the default replication key in standard metadata."""
+    with subtests.test("a single valid replication key"):
+        metadata = MetadataMapping.get_standard_metadata(
+            schema={
+                "properties": {
+                    "id": {"type": "integer"},
+                    "modified_at": {"type": "string", "format": "date-time"},
+                },
+            },
+            valid_replication_keys=["modified_at"],
+        )
+        assert (
+            metadata["properties", "modified_at"].inclusion
+            == Metadata.InclusionType.AUTOMATIC
+        )
+        assert metadata["properties", "modified_at"].selected is None
+        assert metadata.root.replication_key == "modified_at"
+        assert metadata.root.forced_replication_method is None
+
+    with subtests.test("no valid replication keys"):
+        metadata = MetadataMapping.get_standard_metadata(
+            schema={"properties": {"id": {"type": "integer"}}},
+        )
+        assert metadata.root.replication_key is None
+        assert metadata.root.forced_replication_method is None
+
+    with subtests.test("multiple valid replication keys"):
+        metadata = MetadataMapping.get_standard_metadata(
+            schema={
+                "properties": {
+                    "id": {"type": "integer"},
+                    "modified_at": {"type": "string", "format": "date-time"},
+                },
+            },
+            valid_replication_keys=["id", "modified_at"],
+        )
+        assert metadata.root.replication_key is None
+        assert metadata.root.forced_replication_method is None
