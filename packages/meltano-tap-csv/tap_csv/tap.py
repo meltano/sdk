@@ -44,11 +44,4 @@ class TapCSV(FolderTap):
             title="Double Quote",
             description="Whether quotechar inside a field should be doubled.",
         ),
-        th.Property(
-            "lineterminator",
-            th.StringType,
-            default="\r\n",
-            title="Line Terminator",
-            description="Line terminator character.",
-        ),
     ).to_dict()
