@@ -46,12 +46,22 @@ PYARROW_TO_JSONSCHEMA: dict[str, dict[str, t.Any]] = {
 }
 
 
-def pyarrow_type_to_jsonschema(pa_type: pa.DataType) -> dict[str, t.Any]:
+def pyarrow_type_to_jsonschema(
+    pa_type: pa.DataType,
+    *,
+    nullable: bool = False,
+) -> dict[str, t.Any]:
     """Convert a PyArrow type to a JSON Schema type."""
     type_str = str(pa_type)
     # Handle parameterized types like timestamp[us, tz=UTC]
     base_type = type_str.split("[", maxsplit=1)[0]
-    return PYARROW_TO_JSONSCHEMA.get(base_type, {"type": "string"})
+    schema = PYARROW_TO_JSONSCHEMA.get(base_type, {"type": "string"}).copy()
+
+    if nullable:
+        # Convert {"type": "string"} to {"type": ["string", "null"]}
+        schema["type"] = [schema["type"], "null"]
+
+    return schema
 
 
 class CSVStream(FileStream):
@@ -78,7 +88,10 @@ class CSVStream(FileStream):
             schema: dict[str, t.Any] = {
                 "type": "object",
                 "properties": {
-                    field.name: pyarrow_type_to_jsonschema(field.type)
+                    field.name: pyarrow_type_to_jsonschema(
+                        field.type,
+                        nullable=field.nullable,
+                    )
                     for field in reader.schema
                 },
             }
