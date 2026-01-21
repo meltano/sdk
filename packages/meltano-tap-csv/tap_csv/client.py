@@ -102,8 +102,11 @@ class CSVStream(FileStream):
     def read_file(self, path: str) -> t.Iterable[Record]:
         """Read the given file and emit records."""
         with self.filesystem.open(path, mode="rb") as file:
-            table = pyarrow.csv.read_csv(file, parse_options=self._get_parse_options())
-            for i, record in enumerate(table.to_pylist(), start=2):
-                # Line numbers start at 2 (1 is the header)
-                record[SDC_META_LINE_NUMBER] = i
-                yield record
+            # Use streaming reader to avoid loading entire file into memory
+            reader = pyarrow.csv.open_csv(file, parse_options=self._get_parse_options())
+            line_number = 2  # Line 1 is the header
+            for batch in reader:
+                for record in batch.to_pylist():
+                    record[SDC_META_LINE_NUMBER] = line_number
+                    line_number += 1
+                    yield record
