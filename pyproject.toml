@@ -142,6 +142,7 @@ testing = [
     "requests-mock>=1.10.0",
     "responses>=0.25.8",
     "rfc3339-validator>=0.1.4",
+    "sqlalchemy>=2.0.0.dev0",
     "time-machine>=2.10.0",
     "toolz>=1.0.0",
     "xdoctest[colors]>=1.1.1",
@@ -469,6 +470,7 @@ convention = "google"
 max-args = 9
 
 [tool.uv]
+prerelease = "if-necessary-or-explicit"
 required-version = ">=0.5.19"
 
 [tool.uv.sources]
