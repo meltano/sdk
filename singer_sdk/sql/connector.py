@@ -212,7 +212,7 @@ class SQLToJSONSchema:
     @to_jsonschema.register
     def float_to_jsonschema(
         self,
-        column_type: sqlalchemy.types.Float | sqlalchemy.types.Numeric,  # noqa: ARG002
+        column_type: t.Union[sqlalchemy.types.Float, sqlalchemy.types.Numeric],  # noqa: ARG002, UP007
     ) -> dict:
         """Return a JSON Schema representation of a generic number type.
 
