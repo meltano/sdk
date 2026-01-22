@@ -225,7 +225,7 @@ class SQLToJSONSchema:
         """Return a JSON Schema representation of a generic number type.
 
         Args:
-            column_type (:column_type:`Float`): The column type.
+            column_type (:column_type:`Numeric`): The column type.
         """
         if self.use_singer_decimal:
             return th.SingerDecimalType.type_dict  # type: ignore[no-any-return]
