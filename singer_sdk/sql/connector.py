@@ -210,11 +210,14 @@ class SQLToJSONSchema:
         return th.IntegerType.type_dict  # type: ignore[no-any-return]
 
     @to_jsonschema.register
-    def float_to_jsonschema(self, column_type: sqlalchemy.types.Numeric) -> dict:  # noqa: ARG002
+    def float_to_jsonschema(
+        self,
+        column_type: sqlalchemy.types.Float | sqlalchemy.types.Numeric,  # noqa: ARG002
+    ) -> dict:
         """Return a JSON Schema representation of a generic number type.
 
         Args:
-            column_type (:column_type:`Numeric`): The column type.
+            column_type (:column_type:`Float`): The column type.
         """
         if self.use_singer_decimal:
             return th.SingerDecimalType.type_dict  # type: ignore[no-any-return]
