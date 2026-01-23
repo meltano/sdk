@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from singer_sdk.sql import load_methods
 from singer_sdk.sql.connector import SQLConnector
 from singer_sdk.sql.sink import SQLSink
 from singer_sdk.sql.stream import SQLStream
@@ -14,4 +15,5 @@ __all__ = [
     "SQLStream",
     "SQLTap",
     "SQLTarget",
+    "load_methods",
 ]

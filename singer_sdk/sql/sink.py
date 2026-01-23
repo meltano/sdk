@@ -18,11 +18,17 @@ from singer_sdk.helpers._conformers import replace_leading_digit
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.sinks.batch import BatchSink
 from singer_sdk.sql.connector import SQLConnector
+from singer_sdk.sql.load_methods import (
+    LoadContext,
+    LoadMethodResolver,
+    get_dialect_helper,
+)
 
 if t.TYPE_CHECKING:
     from sqlalchemy.sql import Executable
 
     from singer_sdk.sql.connector import FullyQualifiedName
+    from singer_sdk.sql.load_methods import DialectHelper, LoadMethodComposite
     from singer_sdk.target_base import Target
 
 __all__ = ["SQLSink"]
@@ -36,6 +42,11 @@ class SQLSink(BatchSink, t.Generic[_C]):
     connector_class: type[_C]
     soft_delete_column_name = "_sdc_deleted_at"
     version_column_name = "_sdc_table_version"
+
+    #: Enable the new load method strategies architecture. When True, uses the
+    #: strategy pattern for load methods (append, upsert, overwrite). When False,
+    #: uses the legacy implementation for backwards compatibility.
+    use_load_method_strategies: bool = False
 
     def __init__(
         self,
@@ -57,6 +68,16 @@ class SQLSink(BatchSink, t.Generic[_C]):
         self._connector: _C
         self._connector = connector or self.connector_class(dict(target.config))
         super().__init__(target, stream_name, schema, key_properties)
+
+        # Initialize load method strategy if enabled
+        self._load_method_composite: LoadMethodComposite | None = None
+        self._load_context: LoadContext | None = None
+        self._batch_count: int = 0
+
+        if self.use_load_method_strategies:
+            self._load_method_composite = LoadMethodResolver.resolve(
+                dict(target.config)
+            )
 
     @property
     def connector(self) -> _C:
@@ -141,6 +162,73 @@ class SQLSink(BatchSink, t.Generic[_C]):
         return self.connector.get_fully_qualified_name(
             schema_name=self.schema_name,
             db_name=self.database_name,
+        )
+
+    @property
+    def load_method_composite(self) -> LoadMethodComposite | None:
+        """Return the load method composite if using strategies.
+
+        Returns:
+            The LoadMethodComposite instance, or None if not using strategies.
+        """
+        return self._load_method_composite
+
+    @functools.cached_property
+    def _dialect_helper(self) -> DialectHelper:
+        """Return the dialect helper for the connector's engine.
+
+        Creates a DialectHelper appropriate for the database dialect.
+
+        Returns:
+            A DialectHelper instance for the current database.
+        """
+        return get_dialect_helper(self.connector._engine)  # noqa: SLF001
+
+    def _get_load_context(self) -> LoadContext:
+        """Create or return the current LoadContext.
+
+        Creates a LoadContext with current sink state for use with load
+        method strategies.
+
+        Returns:
+            A LoadContext instance with current configuration and state.
+        """
+        is_first_batch = self._batch_count == 0
+
+        return LoadContext(
+            key_properties=tuple(self.key_properties),
+            hard_delete=self.config.get("hard_delete", False),
+            add_record_metadata=self.config.get("add_record_metadata", False),
+            soft_delete_column=self.soft_delete_column_name,
+            version_column=self.version_column_name,
+            is_first_batch=is_first_batch,
+            _batch_count=self._batch_count,
+        )
+
+    def _build_table(self) -> sa.Table:
+        """Build a SQLAlchemy Table from the stream schema.
+
+        Creates a Table object with columns derived from the conformed
+        JSON Schema. This Table is passed to load method strategies.
+
+        Returns:
+            A SQLAlchemy Table object representing the target table.
+        """
+        conformed_schema = self.conform_schema(self.schema)
+        properties = conformed_schema.get("properties", {})
+
+        columns = []
+        for prop_name, prop_def in properties.items():
+            sql_type = self._dialect_helper.to_sql_type(prop_def)
+            is_primary = prop_name in self.key_properties
+            columns.append(sa.Column(prop_name, sql_type, primary_key=is_primary))
+
+        metadata = sa.MetaData()
+        return sa.Table(
+            self.table_name,
+            metadata,
+            *columns,
+            schema=self.schema_name,
         )
 
     def conform_name(  # noqa: PLR6301
@@ -244,12 +332,21 @@ class SQLSink(BatchSink, t.Generic[_C]):
         """
         if self.schema_name:
             self.connector.prepare_schema(self.schema_name)
-        self.connector.prepare_table(
-            full_table_name=self.full_table_name,
-            schema=self.conform_schema(self.schema),
-            primary_keys=self.key_properties,
-            as_temp_table=False,
-        )
+
+        if self.use_load_method_strategies and self._load_method_composite:
+            # Use strategy-based table preparation with Table object
+            table = self._build_table()
+            context = self._get_load_context()
+            engine = self.connector._engine  # noqa: SLF001
+            self._load_method_composite.strategy.prepare_table(table, context, engine)
+        else:
+            # Legacy implementation
+            self.connector.prepare_table(
+                full_table_name=self.full_table_name,
+                schema=self.conform_schema(self.schema),
+                primary_keys=self.key_properties,
+                as_temp_table=False,
+            )
 
     @property
     def key_properties(self) -> t.Sequence[str]:
@@ -269,13 +366,53 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Args:
             context: Stream partition or context dictionary.
         """
-        # If duplicates are merged, these can be tracked via
-        # :meth:`~singer_sdk.Sink.tally_duplicate_merged()`.
-        self.bulk_insert_records(
-            full_table_name=self.full_table_name,
-            schema=self.schema,
-            records=context["records"],
-        )
+        if self.use_load_method_strategies and self._load_method_composite:
+            # Use strategy-based batch processing with Table object
+            table = self._build_table()
+            load_context = self._get_load_context()
+
+            # Conform records before passing to strategy
+            conformed_records = [
+                self.conform_record(record) for record in context["records"]
+            ]
+
+            # Process soft delete records if applicable
+            processed_records = []
+            for record in conformed_records:
+                if record.get(self.soft_delete_column_name) is not None:
+                    # Record has soft delete marker
+                    result = (
+                        self._load_method_composite.strategy.handle_soft_delete_record(
+                            load_context, record
+                        )
+                    )
+                    if result is not None:
+                        processed_records.append(result)
+                else:
+                    processed_records.append(record)
+
+            # Process the batch through the strategy with Table + Engine
+            engine = self.connector._engine  # noqa: SLF001
+            result = self._load_method_composite.strategy.process_batch(
+                table, load_context, processed_records, engine, self._dialect_helper
+            )
+
+            # Track duplicates merged if reported
+            if result.duplicates_merged > 0:
+                for _ in range(result.duplicates_merged):
+                    self.tally_duplicate_merged()
+
+            # Increment batch count
+            self._batch_count += 1
+        else:
+            # Legacy implementation - always bulk insert
+            # If duplicates are merged, these can be tracked via
+            # :meth:`~singer_sdk.Sink.tally_duplicate_merged()`.
+            self.bulk_insert_records(
+                full_table_name=self.full_table_name,
+                schema=self.schema,
+                records=context["records"],
+            )
 
     def generate_insert_statement(
         self,
@@ -391,6 +528,22 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Args:
             new_version: The version number to activate.
         """
+        if (
+            self.use_load_method_strategies
+            and self._load_method_composite
+            and self._load_method_composite.supports_activate_version()
+            and self._load_method_composite.activate_version_handler
+        ):
+            # Use strategy-based ACTIVATE_VERSION handling with Table object
+            table = self._build_table()
+            context = self._get_load_context()
+            engine = self.connector._engine  # noqa: SLF001
+            self._load_method_composite.activate_version_handler.activate_version(
+                table, context, new_version, engine
+            )
+            return
+
+        # Legacy implementation
         # There's nothing to do if the table doesn't exist yet
         # (which it won't the first time the stream is processed)
         if not self.connector.table_exists(self.full_table_name):
