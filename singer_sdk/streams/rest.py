@@ -6,6 +6,7 @@ import abc
 import copy
 import decimal
 import logging
+import sys
 import typing as t
 from functools import cached_property
 from http import HTTPStatus
@@ -29,6 +30,11 @@ from singer_sdk.pagination import (
 )
 from singer_sdk.streams.core import Stream
 
+if sys.version_info >= (3, 13):
+    from typing import TypeVar  # noqa: ICN003
+else:
+    from typing_extensions import TypeVar
+
 if t.TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from datetime import datetime
@@ -43,7 +49,7 @@ if t.TYPE_CHECKING:
 DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
-_TToken = t.TypeVar("_TToken")
+_TToken = TypeVar("_TToken", default=t.Any)
 _TNum = t.TypeVar("_TNum", int, float)
 
 
