@@ -17,12 +17,17 @@ if t.TYPE_CHECKING:
     else:
         from typing_extensions import Self
 
-Breadcrumb = tuple[str, ...]
+Breadcrumb: t.TypeAlias = tuple[str, ...]
 
 logger = logging.getLogger(__name__)
 
+# Replication methods
+REPLICATION_FULL_TABLE = "FULL_TABLE"
+REPLICATION_INCREMENTAL = "INCREMENTAL"
+REPLICATION_LOG_BASED = "LOG_BASED"
 
-class SelectionMask(dict[Breadcrumb, bool]):
+
+class SelectionMask(dict[Breadcrumb, bool]):  # noqa: FURB189
     """Boolean mask for property selection in schemas and records."""
 
     def __missing__(self, breadcrumb: Breadcrumb) -> bool:
@@ -102,7 +107,7 @@ class StreamMetadata(Metadata):
 AnyMetadata: t.TypeAlias = Metadata | StreamMetadata
 
 
-class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
+class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
     """Stream metadata mapping."""
 
     @classmethod
@@ -190,6 +195,9 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
             forced_replication_method=replication_method,
             valid_replication_keys=valid_replication_keys,
             selected_by_default=selected_by_default,
+            replication_key=valid_replication_keys[0]
+            if valid_replication_keys and len(valid_replication_keys) == 1
+            else None,
         )
 
         def _add_subfield_metadata(
@@ -375,7 +383,7 @@ class CatalogEntry:
         return result
 
 
-class Catalog(dict[str, CatalogEntry]):
+class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
     """Singer catalog mapping of stream entries."""
 
     @classmethod

@@ -13,6 +13,8 @@ import warnings
 import backoff
 import jwt
 import pytest
+import responses
+import responses.registries
 import time_machine
 from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.serialization import (
@@ -749,3 +751,164 @@ def test_oauth_authenticator_refreshes_token_on_retry(
     # Verify token was refreshed (initial + refresh on retry)
     # Note: OAuth authenticator may refresh on first call + retry
     assert token_refresh_count >= 1
+
+
+@pytest.mark.xfail(
+    reason="Blocked by https://github.com/getsentry/responses/issues/768",
+    strict=True,
+)
+@responses.activate(registry=responses.registries.OrderedRegistry)
+def test_oauth_authenticator_retries_on_503_error(rest_tap: Tap):
+    """Verify OAuth token requests automatically retry on 503 errors.
+
+    Uses the responses library to mock HTTP responses and verify that
+    urllib3's retry mechanism successfully retries 503 Service Unavailable
+    errors with Retry-After headers.
+
+    NOTE: This test is marked xfail because the responses library doesn't yet
+    support Retry-After header behavior without status_forcelist. See:
+    https://github.com/getsentry/responses/pull/772
+    """
+    fake_token = "token-after-retry"  # noqa: S105
+
+    # Mock: 2 failures (503) then success
+    rsp1 = responses.post(
+        "https://example.com/oauth",
+        status=503,
+        headers={"Retry-After": "0"},
+    )
+    rsp2 = responses.post(
+        "https://example.com/oauth",
+        status=503,
+        headers={"Retry-After": "0"},
+    )
+    rsp3 = responses.post(
+        "https://example.com/oauth",
+        json={"access_token": fake_token, "expires_in": 3600},
+        status=200,
+    )
+
+    authenticator = _FakeOAuthAuthenticator(
+        stream=rest_tap.streams["some_stream"],
+        auth_endpoint="https://example.com/oauth",
+    )
+    authenticator.update_access_token()
+
+    # Verify token was obtained after retries
+    assert authenticator.access_token == fake_token
+    assert authenticator.expires_in == 3600
+
+    # Verify each response was called exactly once
+    assert rsp1.call_count == 1
+    assert rsp2.call_count == 1
+    assert rsp3.call_count == 1
+
+
+@pytest.mark.xfail(
+    reason="Blocked by https://github.com/getsentry/responses/issues/768",
+    strict=True,
+)
+@responses.activate(registry=responses.registries.OrderedRegistry)
+def test_oauth_authenticator_retries_on_rate_limit(rest_tap: Tap):
+    """Verify OAuth token requests automatically retry on 429 rate limits.
+
+    Tests that API rate limiting (429 Too Many Requests) with Retry-After
+    headers triggers automatic retry behavior.
+
+    NOTE: This test is marked xfail because the responses library doesn't yet
+    support Retry-After header behavior. See: https://github.com/getsentry/responses/pull/772
+    """
+    fake_token = "token-after-rate-limit"  # noqa: S105
+
+    # Mock: 1 rate limit then success
+    rsp1 = responses.post(
+        "https://example.com/oauth",
+        status=429,
+        headers={"Retry-After": "0"},
+    )
+    rsp2 = responses.post(
+        "https://example.com/oauth",
+        json={"access_token": fake_token, "expires_in": 3600},
+        status=200,
+    )
+
+    authenticator = _FakeOAuthAuthenticator(
+        stream=rest_tap.streams["some_stream"],
+        auth_endpoint="https://example.com/oauth",
+    )
+    authenticator.update_access_token()
+
+    # Verify token was obtained after rate limit
+    assert authenticator.access_token == fake_token
+    assert rsp1.call_count == 1
+    assert rsp2.call_count == 1
+
+
+@pytest.mark.parametrize("status_code", [400, 401, 403, 404])
+@responses.activate(registry=responses.registries.OrderedRegistry)
+def test_oauth_authenticator_does_not_retry_client_errors(
+    rest_tap: Tap,
+    status_code: int,
+):
+    """Verify client errors (4xx except 429) are NOT retried.
+
+    Tests that authentication failures with 4xx statuses (except 429) do not
+    trigger retries, as these are not transient errors.
+    """
+    # Mock: client error (should not retry)
+    rsp = responses.post(
+        "https://example.com/oauth",
+        json={"error": "Invalid credentials"},
+        status=status_code,
+    )
+
+    authenticator = _FakeOAuthAuthenticator(
+        stream=rest_tap.streams["some_stream"],
+        auth_endpoint="https://example.com/oauth",
+    )
+
+    # Expect RuntimeError to be raised (existing error handling)
+    with pytest.raises(RuntimeError, match="Failed to update access token"):
+        authenticator.update_access_token()
+
+    # Verify only 1 request was made (no retries for non-429 4xx)
+    assert rsp.call_count == 1
+
+
+@pytest.mark.xfail(
+    reason="Blocked by https://github.com/getsentry/responses/issues/768",
+    strict=True,
+)
+@responses.activate(registry=responses.registries.OrderedRegistry)
+def test_oauth_authenticator_fails_after_max_retries(rest_tap: Tap):
+    """Verify OAuth token requests fail after exceeding max retries.
+
+    Tests that the retry mechanism respects the maximum retry limit (10)
+    and eventually raises an error after exhausting all retry attempts.
+
+    NOTE: This test is marked xfail because the responses library doesn't yet
+    support Retry-After header behavior. See: https://github.com/getsentry/responses/pull/772
+    """
+    # Mock: 15 consecutive 503 errors (exceeds total=10 max retries)
+    # We expect 11 calls (1 initial + 10 retries), so the last 4 won't be used
+    rsps = []
+    for _ in range(15):
+        rsp = responses.post(
+            "https://example.com/oauth",
+            status=503,
+            headers={"Retry-After": "0"},
+        )
+        rsps.append(rsp)
+
+    authenticator = _FakeOAuthAuthenticator(
+        stream=rest_tap.streams["some_stream"],
+        auth_endpoint="https://example.com/oauth",
+    )
+
+    # Expect RuntimeError after max retries exhausted
+    with pytest.raises(RuntimeError, match="Failed OAuth login"):
+        authenticator.update_access_token()
+
+    # Verify max retries: 1 initial + 10 retries = 11 total
+    total_calls = sum(rsp.call_count for rsp in rsps)
+    assert total_calls == 11

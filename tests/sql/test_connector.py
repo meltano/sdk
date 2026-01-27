@@ -757,6 +757,10 @@ def test_numeric_to_singer_decimal():
         "type": ["string"],
         "format": "singer.decimal",
     }
+    assert converter.to_jsonschema(sqlalchemy.FLOAT()) == {
+        "type": ["string"],
+        "format": "singer.decimal",
+    }
 
 
 class TestJSONSchemaToSQL:  # noqa: PLR0904

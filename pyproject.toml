@@ -50,6 +50,7 @@ dependencies = [
     "sqlalchemy>=2",
     "typing-extensions>=4.5.0; python_version < '3.13'",
     "universal-pathlib>=0.2.6",
+    "urllib3>=1.26.20",
 ]
 
 [project.optional-dependencies]
@@ -139,7 +140,9 @@ testing = [
     "pytz>=2022.2.1",
     "requests-cache>=1.2.1",
     "requests-mock>=1.10.0",
+    "responses>=0.25.8",
     "rfc3339-validator>=0.1.4",
+    "sqlalchemy>=2.0.0.dev0",
     "time-machine>=2.10.0",
     "toolz>=1.0.0",
     "xdoctest[colors]>=1.1.1",
@@ -318,8 +321,8 @@ module = [
 
 [build-system]
 requires = [
-    "hatchling==1.28",
-    "hatch-vcs==0.5",
+    "hatchling>=1,<2",
+    "hatch-vcs",
 ]
 build-backend = "hatchling.build"
 
@@ -395,6 +398,7 @@ select = [
     "TRY",  # tryceratops
     "FLY",  # flynt
     "PERF", # perflint
+    "FURB", # refurb
     "RUF",  # ruff
 ]
 unfixable = [
@@ -466,6 +470,7 @@ convention = "google"
 max-args = 9
 
 [tool.uv]
+prerelease = "if-necessary-or-explicit"
 required-version = ">=0.5.19"
 
 [tool.uv.sources]

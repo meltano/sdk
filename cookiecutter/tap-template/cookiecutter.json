@@ -16,6 +16,7 @@
   ],
   "faker_extra": false,
   "include_ci_files": ["GitHub", "None"],
+  "include_agent_instructions": ["AGENTS.md", "CLAUDE.md", "None"],
   "license": ["Apache-2.0", "MIT", "None"],
   "ide": ["VSCode", "None"],
   "__prompts__": {
@@ -29,6 +30,7 @@
     "auth_method": "The [bold red]authentication[/] method used by the source, for REST and GraphQL sources",
     "faker_extra": "Add [bold orange1][link=https://faker.readthedocs.io/en/master/]Faker[/link][/] as an extra dependency to support generating fake data in stream maps?",
     "include_ci_files": "Whether to include CI files for a common CI services",
+    "include_agent_instructions": "Include an agent instructions file? AGENTS.md is the cross-tool standard; CLAUDE.md is specific to Claude Code.",
     "license": "The license for the project",
     "ide": "Add configuration files for your preferred IDE"
   }

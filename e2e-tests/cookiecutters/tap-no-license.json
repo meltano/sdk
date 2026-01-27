@@ -9,6 +9,7 @@
       "stream_type": "REST",
       "auth_method": "Basic Auth",
       "include_ci_files": "None (Skip)",
+      "include_agent_instructions": "AGENTS.md",
       "faker_extra": false,
       "license": "None",
       "ide": "VSCode",

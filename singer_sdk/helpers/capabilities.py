@@ -167,6 +167,12 @@ FLATTENING_CONFIG = PropertiesList(
         title="Max Key Length",
         description="The maximum length of a flattened key.",
     ),
+    Property(
+        "flattening_separator",
+        StringType(),
+        title="Flattening Separator",
+        description="The separator to use when flattening keys.",
+    ),
 ).to_dict()
 BATCH_CONFIG = PropertiesList(
     Property(
