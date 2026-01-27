@@ -83,7 +83,10 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Returns:
             The default target schema.
         """
-        return self.config.get("default_target_schema", None)  # type: ignore[no-any-return]
+        return (  # type: ignore[no-any-return]
+            self.config.get("default_target_schema", None)  # Takes precedence
+            or self.config.get("schema", None)
+        )
 
     @property
     def table_name(self) -> str:

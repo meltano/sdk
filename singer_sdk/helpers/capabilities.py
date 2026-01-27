@@ -239,9 +239,21 @@ TARGET_SCHEMA_CONFIG = PropertiesList(
     Property(
         "default_target_schema",
         StringType(),
-        aliases=["schema"],
         title="Default Target Schema",
-        description="The default target database schema name to use for all streams.",
+        description=(
+            "The default target database schema name to use for all streams. "
+            "This is the preferred way to set the target schema name."
+        ),
+    ),
+    Property(
+        "schema",
+        StringType(),
+        title="Schema",
+        description=(
+            "The default target database schema name to use for all streams. "
+            "This is an alias for `default_target_schema`, and `default_target_schema` "
+            "takes precedence if both are set."
+        ),
     ),
 ).to_dict()
 EMIT_ACTIVATE_VERSION_CONFIG = PropertiesList(
