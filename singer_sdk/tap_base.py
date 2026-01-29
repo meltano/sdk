@@ -263,7 +263,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
     def run_sync_dry_run(
         self,
         dry_run_record_limit: int | None = 1,
-        streams: t.Iterable[Stream] | None = None,
+        streams: t.Iterable[Stream | str] | None = None,
     ) -> bool:
         """Run connection test.
 
@@ -280,15 +280,24 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         if streams is None:
             streams = self.streams.values()
 
-        for stream in streams:
+        selected_streams: list[Stream] = []
+
+        for stream_or_name in streams:
+            stream = (
+                self.streams[stream_or_name]
+                if isinstance(stream_or_name, str)
+                else stream_or_name
+            )
+
             if not stream.child_streams:  # pragma: no branch
                 # Initialize streams' record limits before beginning the sync test.
                 stream.ABORT_AT_RECORD_COUNT = dry_run_record_limit
 
             # Force selection of streams.
             stream.selected = True
+            selected_streams.append(stream)
 
-        for stream in streams:
+        for stream in selected_streams:
             if stream.parent_stream_type:
                 self.logger.debug(
                     "Child stream '%s' should be called by "
