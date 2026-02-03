@@ -174,9 +174,9 @@ class TextFormatter(AboutFormatter, format_name="text"):
 
         if about_info.supported_python_versions:
             output += "\nSupported Python Versions:\n"
-            output += "\n".join(
-                [f"  - {v}" for v in about_info.supported_python_versions]
-            )
+            output += "\n".join([
+                f"  - {v}" for v in about_info.supported_python_versions
+            ])
 
         output += "\nCapabilities:\n"
         output += "\n".join([f"  - {c}" for c in about_info.capabilities])

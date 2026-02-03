@@ -95,25 +95,21 @@ def test_get_flattening_options_missing_max_depth():
 
 
 def test_get_flattening_options_max_key_length():
-    options = get_flattening_options(
-        {
-            "flattening_enabled": True,
-            "flattening_max_depth": 5,
-            "flattening_max_key_length": 30,
-        }
-    )
+    options = get_flattening_options({
+        "flattening_enabled": True,
+        "flattening_max_depth": 5,
+        "flattening_max_key_length": 30,
+    })
     assert options.max_key_length == 30
 
 
 def test_get_flattening_options_custom_separator():
-    options = get_flattening_options(
-        {
-            "flattening_enabled": True,
-            "flattening_max_depth": 5,
-            "flattening_max_key_length": 30,
-            "flattening_separator": ".",
-        }
-    )
+    options = get_flattening_options({
+        "flattening_enabled": True,
+        "flattening_max_depth": 5,
+        "flattening_max_key_length": 30,
+        "flattening_separator": ".",
+    })
     assert options.separator == "."
 
 

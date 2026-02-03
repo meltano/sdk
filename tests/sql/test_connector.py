@@ -781,12 +781,10 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         json_schema_to_sql: JSONSchemaToSQL,
     ):
         json_schema_to_sql.register_format_handler("my-format", sqlalchemy.LargeBinary)
-        result = json_schema_to_sql.to_sql_type(
-            {
-                "type": "string",
-                "format": "my-format",
-            }
-        )
+        result = json_schema_to_sql.to_sql_type({
+            "type": "string",
+            "format": "my-format",
+        })
         assert isinstance(result, sqlalchemy.LargeBinary)
 
     def test_string(self, json_schema_to_sql: JSONSchemaToSQL):

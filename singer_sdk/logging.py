@@ -120,21 +120,17 @@ class StructuredFormatter(logging.Formatter):
 
         # Handle exception chaining (__cause__ and __context__)
         if hasattr(exc_value, "__cause__") and exc_value.__cause__:
-            exception_data["cause"] = self._format_exception(
-                (
-                    type(exc_value.__cause__),
-                    exc_value.__cause__,
-                    exc_value.__cause__.__traceback__,
-                )
-            )
+            exception_data["cause"] = self._format_exception((
+                type(exc_value.__cause__),
+                exc_value.__cause__,
+                exc_value.__cause__.__traceback__,
+            ))
         elif hasattr(exc_value, "__context__") and exc_value.__context__:
-            exception_data["context"] = self._format_exception(
-                (
-                    type(exc_value.__context__),
-                    exc_value.__context__,
-                    exc_value.__context__.__traceback__,
-                )
-            )
+            exception_data["context"] = self._format_exception((
+                type(exc_value.__context__),
+                exc_value.__context__,
+                exc_value.__context__.__traceback__,
+            ))
 
         return exception_data
 

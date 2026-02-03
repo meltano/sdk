@@ -462,9 +462,10 @@ class OpenAPISchema(SchemaSource[_TKey]):
             UnsupportedOpenAPISpec: If the OpenAPI specification file type is not
                 supported.
         """
-        if isinstance(self.source, str) and self.source.startswith(
-            ("http://", "https://")
-        ):
+        if isinstance(self.source, str) and self.source.startswith((
+            "http://",
+            "https://",
+        )):
             response = requests.get(self.source, timeout=30)
             response.raise_for_status()
             content = response.content

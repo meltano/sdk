@@ -244,9 +244,9 @@ def resolve_schema_references(
     registry: Registry = Registry()
     schema_resource = DRAFT202012.create_resource(schema)
     registry = registry.with_resource("", schema_resource)
-    registry = registry.with_resources(
-        [(k, DRAFT202012.create_resource(v)) for k, v in refs.items()]
-    )
+    registry = registry.with_resources([
+        (k, DRAFT202012.create_resource(v)) for k, v in refs.items()
+    ])
 
     resolver = registry.resolver()
     return _resolve_schema_references(schema, resolver)

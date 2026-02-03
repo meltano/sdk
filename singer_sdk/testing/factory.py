@@ -245,20 +245,18 @@ class TapTestClassFactory:
             test_params = []
             for stream in streams:
                 final_schema = stream.stream_maps[-1].transformed_schema["properties"]
-                test_params.extend(
-                    [
-                        TestParam(
-                            id=f"{stream.name}.{prop_name}",
-                            values=StreamAttributeTestParams(stream, prop_name),
-                        )
-                        for prop_name, prop_schema in final_schema.items()
-                        if test_class.evaluate(
-                            stream=stream,
-                            property_name=prop_name,
-                            property_schema=prop_schema,
-                        )
-                    ]
-                )
+                test_params.extend([
+                    TestParam(
+                        id=f"{stream.name}.{prop_name}",
+                        values=StreamAttributeTestParams(stream, prop_name),
+                    )
+                    for prop_name, prop_schema in final_schema.items()
+                    if test_class.evaluate(
+                        stream=stream,
+                        property_name=prop_name,
+                        property_schema=prop_schema,
+                    )
+                ])
 
             if test_params:
                 setattr(
