@@ -447,21 +447,17 @@ def test_continue_if_empty(tap: Tap):
             query = parse_qs(parsed.query)
 
             if query.get("page", ["1"]) == ["1"]:
-                r._content = json.dumps(
-                    {
-                        "data": [{"id": 1}, {"id": 2}],
-                        "hasMore": True,
-                    }
-                ).encode()
+                r._content = json.dumps({
+                    "data": [{"id": 1}, {"id": 2}],
+                    "hasMore": True,
+                }).encode()
             elif query.get("page", ["2"]) == ["2"]:
                 r._content = json.dumps({"data": [], "hasMore": True}).encode()
             elif query.get("page", ["3"]) == ["3"]:
-                r._content = json.dumps(
-                    {
-                        "data": [{"id": 3}, {"id": 4}],
-                        "hasMore": True,
-                    }
-                ).encode()
+                r._content = json.dumps({
+                    "data": [{"id": 3}, {"id": 4}],
+                    "hasMore": True,
+                }).encode()
             else:
                 r._content = json.dumps({"data": [], "hasMore": False}).encode()
 
