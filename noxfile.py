@@ -479,7 +479,7 @@ def templates(session: nox.Session, replay_file_path: Path) -> None:
 
     session.run("git", "init", "-b", "main", external=True)
     session.run("git", "add", "-A", external=True)
-    session.run("uvx", "pre-commit", "run", "--all-files")
+    session.run("uvx", "prek", "run", "--all-files")
     session.run("uvx", "--with=tox-uv", "tox", "-e=typing")
 
 
