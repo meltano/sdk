@@ -6,7 +6,6 @@ import sys
 from typing import TYPE_CHECKING, Any
 
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.connectors.sql import FullyQualifiedName
 from singer_sdk.sinks import SQLSink
 
 if sys.version_info >= (3, 12):
@@ -16,6 +15,8 @@ else:
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
+    from singer_sdk.connectors.sql import FullyQualifiedName
 
 
 class {{ cookiecutter.destination_name }}Connector(SQLConnector):

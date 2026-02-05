@@ -61,7 +61,7 @@ test = [
 ]
 typing = [
     "mypy>=1.16.0",
-    "ty>=0.0.1-alpha.16",
+    "ty>=0.0.15",
 ]
 
 {%- if cookiecutter.variant != "None (Skip)" %}
@@ -100,9 +100,12 @@ warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
+[tool.ty.rules]
+unused-type-ignore-comment = "ignore"
+
 [tool.ruff]
 line-length = 100
-required-version = ">=0.14"
+required-version = ">=0.15"
 
 [tool.ruff.lint]
 future-annotations = true

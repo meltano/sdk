@@ -23,7 +23,12 @@ RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
 
 [lint]
-extend-ignore = ["TD002", "TD003", "FIX002"]
+extend-ignore = [
+  # Ignore TODO comments
+  "TD002",
+  "TD003",
+  "FIX002",
+]
 """
 
 COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))

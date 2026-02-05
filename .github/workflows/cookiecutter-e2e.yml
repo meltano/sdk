@@ -28,7 +28,7 @@ concurrency:
 env:
   FORCE_COLOR: "1"
   UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
-  UV_VERSION: ">=0.9,<0.10"
+  UV_VERSION: ">=0.9"
 
 permissions: {}
 
