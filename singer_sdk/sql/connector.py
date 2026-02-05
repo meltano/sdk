@@ -861,7 +861,7 @@ class SQLConnector:  # noqa: PLR0904
            A ``FullyQualifiedName`` object is now returned.
         """
         return FullyQualifiedName(
-            table=table_name,  # type: ignore[arg-type] # ty: ignore[invalid-argument-type]
+            table=table_name,  # type: ignore[arg-type]
             schema=schema_name,
             database=db_name,
             delimiter=delimiter,
@@ -1044,7 +1044,7 @@ class SQLConnector:  # noqa: PLR0904
         # An element of the columns list is ``None`` if it's an expression and is
         # returned in the ``expressions`` list of the reflected index.
         possible_primary_keys.extend(
-            index_def["column_names"]  # type: ignore[misc] # ty: ignore[invalid-argument-type]
+            index_def["column_names"]  # type: ignore[misc]
             for index_def in reflected_indices
             if index_def.get("unique", False)
         )

@@ -74,7 +74,7 @@ class CSVStream(FileStream):
         return pyarrow.csv.ParseOptions(
             delimiter=self.config["delimiter"],
             quote_char=self.config["quotechar"],
-            escape_char=self.config.get("escapechar"),  # type: ignore[arg-type] # ty: ignore[invalid-argument-type]
+            escape_char=self.config.get("escapechar"),  # type: ignore[arg-type]
             double_quote=self.config["doublequote"],
         )
 

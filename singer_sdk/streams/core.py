@@ -1411,7 +1411,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         if entry := catalog.get_stream(self.name):
             stream_metadata: StreamMetadata | None
-            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment] # ty: ignore[invalid-assignment]
+            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment]
                 table_key_properties = stream_metadata.table_key_properties
                 table_replication_key = stream_metadata.replication_key
                 table_replication_method = stream_metadata.forced_replication_method

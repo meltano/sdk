@@ -151,7 +151,7 @@ typing = [
     {"include-group" = "testing"},
     "mypy>=1.17",
     "pyarrow-stubs>=19.1",
-    "ty>=0.0.4",
+    "ty>=0.0.15",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-requests>=2.28.11",
@@ -502,5 +502,5 @@ explicit = true
 skip = "*.csv,samples/aapl/*.json,packages/*/schemas/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"
 ignore-words-list = "fo,intoto"
 
-[tool.ty.analysis]
-respect-type-ignore-comments = false
+[tool.ty.rules]
+unused-type-ignore-comment = "ignore"

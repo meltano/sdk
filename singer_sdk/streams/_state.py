@@ -220,7 +220,7 @@ class StreamStateManager:
         Args:
             state: State object to promote progress markers with.
         """
-        finalize_state_progress_markers(state)  # type: ignore[arg-type] # ty: ignore[invalid-argument-type]
+        finalize_state_progress_markers(state)  # type: ignore[arg-type]
         self.is_flushed = False
 
     def reset_progress_markers(

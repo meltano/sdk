@@ -123,7 +123,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         if isinstance(catalog, Catalog):
             self._input_catalog = catalog
         elif isinstance(catalog, collections.abc.MutableMapping):
-            self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type] # ty: ignore[invalid-argument-type]
+            self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type]
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
             warnings.warn(
@@ -522,7 +522,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
             super()._handle_termination(signum, frame)
 
     @classmethod
-    def invoke(  # type: ignore[override] # ty: ignore[invalid-method-override]
+    def invoke(  # type: ignore[override]
         cls,
         *,
         about: bool = False,

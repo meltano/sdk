@@ -174,7 +174,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
             )
-            return self.rest_method  # type: ignore[no-any-return] # ty: ignore[invalid-return-type]
+            return self.rest_method  # type: ignore[no-any-return]
 
         return "GET"
 
