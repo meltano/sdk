@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sys
-import typing as t
+from typing import TYPE_CHECKING
 
 from singer_sdk.streams import Stream
 
@@ -12,7 +12,9 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
-if t.TYPE_CHECKING:
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from singer_sdk.helpers.types import Context
 
 
@@ -23,7 +25,7 @@ class {{ cookiecutter.source_name }}Stream(Stream):
     def get_records(
         self,
         context: Context | None,
-    ) -> t.Iterable[dict]:
+    ) -> Iterable[dict]:
         """Return a generator of record-type dictionary objects.
 
         The optional `context` argument is used to identify a specific slice of the

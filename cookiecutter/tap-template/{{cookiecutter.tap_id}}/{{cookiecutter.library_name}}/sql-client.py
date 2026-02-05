@@ -7,9 +7,8 @@ from __future__ import annotations
 
 import functools
 import sys
-import typing as t
+from typing import TYPE_CHECKING, Any
 
-import sqlalchemy
 from singer_sdk import SQLConnector, SQLStream
 from singer_sdk.connectors.sql import SQLToJSONSchema
 from singer_sdk.helpers._typing import TypeConformanceLevel
@@ -19,7 +18,10 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
-if t.TYPE_CHECKING:
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    import sqlalchemy
     from singer_sdk.helpers.types import Context, Record
     from sqlalchemy.engine import Engine
     from sqlalchemy.engine.reflection import Inspector
@@ -33,7 +35,12 @@ class {{ cookiecutter.source_name }}SQLToJSONSchema(SQLToJSONSchema):
     or non-standard SQL types.
     """
 
-    def __init__(self, *, custom_config_option: bool = False, **kwargs):
+    def __init__(
+        self,
+        *,
+        custom_config_option: bool = False,
+        **kwargs: Any,
+    ) -> None:
         """Initialize the SQL to JSON Schema converter.
 
         Args:
@@ -63,7 +70,7 @@ class {{ cookiecutter.source_name }}SQLToJSONSchema(SQLToJSONSchema):
 
     @override
     @functools.singledispatchmethod
-    def to_jsonschema(self, column_type: t.Any) -> dict:
+    def to_jsonschema(self, column_type: Any) -> dict:
         """Customize the JSON Schema for {{ cookiecutter.source_name }} types.
 
         Developers should not need to override this base method. Instead, register
@@ -87,8 +94,8 @@ class {{ cookiecutter.source_name }}SQLToJSONSchema(SQLToJSONSchema):
     #     for specific SQLAlchemy column types.
     #     """
     #     if self.custom_config_option:
-    #         return {"type": ["string", "null"]}
-    #     return {"type": ["object", "null"], "additionalProperties": True}
+    #         return {"type": ["string", "null"]}  # noqa: ERA001
+    #     return {"type": ["object", "null"], "additionalProperties": True}  # noqa: ERA001
 
 
 class {{ cookiecutter.source_name }}Connector(SQLConnector):
@@ -152,7 +159,7 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
         conversion needs, consider overriding the sql_to_jsonschema_converter class.
 
         Args:
-            from_type: The SQL type as a string or as a TypeEngine. If a TypeEngine is
+            sql_type: The SQL type as a string or as a TypeEngine. If a TypeEngine is
                 provided, it may be provided as a class or a specific object instance.
 
         Returns:
@@ -178,56 +185,6 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
         # Optionally, add custom logic before calling the parent SQLConnector method.
         # You may delete this method if overrides are not needed.
         return super().to_sql_type(jsonschema_type)
-
-    # Uncomment and customize these methods as needed for your specific database:
-
-    # @override
-    # def get_object_names(
-    #     self, engine: Engine, inspected: Inspector, schema_name: str
-    # ) -> list[tuple[str, bool]]:
-    #     """Return a list of syncable objects in the given schema.
-    #
-    #     Developers may override this method to customize which database objects
-    #     (tables, views) are discoverable by the tap.
-    #
-    #     Args:
-    #         engine: SQLAlchemy engine
-    #         inspected: SQLAlchemy inspector instance
-    #         schema_name: Schema name to inspect
-    #
-    #     Returns:
-    #         List of tuples: (object_name, is_view)
-    #     """
-    #     return super().get_object_names(engine, inspected, schema_name)
-
-    # @override
-    # def prepare_column(
-    #     self, full_table_name: str, column_name: str, sql_type: sqlalchemy.types.TypeEngine
-    # ) -> sqlalchemy.Column:
-    #     """Prepare a column object for table creation or modification.
-    #
-    #     Developers may override this method to customize column definitions,
-    #     such as adding database-specific constraints or modifiers.
-    #     """
-    #     return super().prepare_column(full_table_name, column_name, sql_type)
-
-    # @override
-    # def create_engine(self) -> sqlalchemy.engine.Engine:
-    #     """Create a SQLAlchemy engine for database connections.
-    #
-    #     Developers may override this method to customize engine creation,
-    #     such as adding connection pooling, custom dialects, or connection arguments.
-    #     """
-    #     return super().create_engine()
-
-    # @override
-    # def open_connection(self) -> sqlalchemy.engine.Connection:
-    #     """Open a new database connection.
-    #
-    #     Developers may override this method to customize connection behavior,
-    #     such as setting session variables or connection-specific configurations.
-    #     """
-    #     return super().open_connection()
 
 
 class {{ cookiecutter.source_name }}Stream(SQLStream):
@@ -273,12 +230,12 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
         query = super().apply_query_filters(query, table, context=context)
 
         # Add custom WHERE clauses from configuration, etc.
-        # query = query.where(...)
+        # query = query.where(...)  # noqa: ERA001
 
-        return query
+        return query  # noqa: RET504
 
     @override
-    def get_records(self, context: Context | None) -> t.Iterable[Record]:
+    def get_records(self, context: Context | None) -> Iterable[Record]:
         """Return a generator of record-type dictionary objects.
 
         Developers may override this method to implement custom record retrieval
@@ -287,7 +244,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
         provides batch-optimized record retrieval mechanisms.
 
         Args:
-            partition: If provided, will read specifically from this data slice.
+            context: If provided, will read specifically from this data slice.
 
         Yields:
             One dict per record.
@@ -311,74 +268,9 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
                 query = query.where(replication_key_col >= start_val)
 
         # 3. Execute query and yield records
-        with self.connector._connect() as connection:
+        with self.connector._connect() as connection:  # noqa: SLF001
             for record in connection.execute(query).mappings():
                 yield dict(record)
 
         # Alternative: Use the default implementation
-        # yield from super().get_records(context)
-
-    # Uncomment and customize these methods as needed for your specific database:
-
-    # @override
-    # def get_starting_replication_key_value(
-    #     self, context: Context | None
-    # ) -> t.Any | None:
-    #     """Get starting replication key value for incremental sync.
-    #
-    #     Developers may override this method to customize how the starting
-    #     replication key value is determined, such as converting timestamps
-    #     to native database types.
-    #     """
-    #     return super().get_starting_replication_key_value(context)
-
-    # @override
-    # def post_process(self, row: dict, context: Context | None = None) -> dict | None:
-    #     """Process a single record after it's been retrieved from the database.
-    #
-    #     Developers may override this method to apply custom transformations,
-    #     data validation, or filtering to individual records before they are
-    #     emitted to the output stream.
-    #
-    #     Args:
-    #         row: Individual record dictionary
-    #         context: Stream partition or context dictionary
-    #
-    #     Returns:
-    #         Processed record dictionary, or None to skip the record
-    #     """
-    #     return row
-
-    # @override
-    # def validate_config(self) -> None:
-    #     """Validate tap configuration.
-    #
-    #     Developers may override this method to add custom configuration
-    #     validation logic specific to their database requirements.
-    #     """
-    #     super().validate_config()
-    #
-    #     # Example: Validate required custom configuration
-    #     # if not self.config.get("custom_required_field"):
-    #     #     raise ValueError("custom_required_field is required")
-
-    # @override
-    # @property
-    # def is_sorted(self) -> bool:
-    #     """Indicate whether the stream is sorted by replication key.
-    #
-    #     Developers may override this property to indicate whether their
-    #     query results are naturally sorted by the replication key, which
-    #     can enable more efficient incremental sync processing.
-    #     """
-    #     return bool(self.replication_key)
-
-    # def _increment_stream_state(
-    #     self, latest_record: dict, *, context: Context | None = None
-    # ) -> None:
-    #     """Update the stream state with the latest record's replication key value.
-    #
-    #     Developers typically should not need to override this method unless
-    #     implementing custom state management logic (e.g., for log-based replication).
-    #     """
-    #     return super()._increment_stream_state(latest_record, context=context)
+        # yield from super().get_records(context)  # noqa: ERA001

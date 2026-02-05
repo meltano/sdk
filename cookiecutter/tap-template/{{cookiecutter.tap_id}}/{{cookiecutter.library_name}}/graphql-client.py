@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import decimal
 import sys
-import typing as t
+from typing import TYPE_CHECKING
 
 import requests  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
@@ -19,7 +19,9 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
-if t.TYPE_CHECKING:
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from singer_sdk.helpers.types import Context
 
 
@@ -62,7 +64,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return {}
 
     @override
-    def parse_response(self, response: requests.Response) -> t.Iterable[dict]:
+    def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result records.
 
         Args:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import typing as t
+from typing import Any
 
 import pytest
 from singer_sdk.testing import get_target_test_class
@@ -10,7 +10,7 @@ from singer_sdk.testing import get_target_test_class
 from {{ cookiecutter.library_name }}.target import Target{{ cookiecutter.destination_name }}
 
 # TODO: Initialize minimal target config
-SAMPLE_CONFIG: dict[str, t.Any] = {}
+SAMPLE_CONFIG: dict[str, Any] = {}
 
 
 # Run standard built-in target tests from the SDK:
