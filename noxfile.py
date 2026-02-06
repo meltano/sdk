@@ -103,7 +103,14 @@ def ty(session: nox.Session) -> None:
         env=_install_env(session),
     )
     python = session.python if isinstance(session.python, str) else main_python
-    session.run("ty", "check", "--python-version", python, *args)
+    output_format = "github" if os.getenv("GITHUB_ACTIONS") == "true" else "concise"
+    session.run(
+        "ty",
+        "check",
+        f"--output-format={output_format}",
+        f"--python-version={python}",
+        *args,
+    )
 
 
 def _run_pytest(session: nox.Session, *pytest_args: str, coverage: bool = True) -> None:
