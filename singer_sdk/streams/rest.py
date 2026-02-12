@@ -114,6 +114,7 @@ class HTTPRequest:
         :py:func:`urllib.parse.urlencode`:
 
         .. code-block:: python
+
            from urllib.parse import urlencode
 
 
@@ -496,8 +497,8 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         """Get an HTTP request for this stream.
 
         Args:
-            context: An :class:`HTTPRequestContext` object containing the stream
-                partition or context dictionary, and the next page token if applicable.
+            context: An object containing the stream partition or context dictionary,
+                and the next page token if applicable.
 
         Returns:
             An HTTP request for this stream.
