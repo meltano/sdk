@@ -42,8 +42,7 @@ class DummyJSONStream(RESTStream):
     @override
     def authenticator(self) -> DummyJSONAuthenticator:
         return DummyJSONAuthenticator(
-            auth_url=f"{self.url_base}/auth/login",
-            refresh_token_url=f"{self.url_base}/refresh",
+            base_url=self.config["api_url"],
             username=self.config["username"],
             password=self.config["password"],
         )

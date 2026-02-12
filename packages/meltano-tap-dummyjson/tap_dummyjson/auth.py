@@ -1,11 +1,19 @@
 from __future__ import annotations
 
 import logging
+import sys
 import time
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import requests
+import requests.auth
 from singer_sdk.authenticators import SingletonMeta
+
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 
 if TYPE_CHECKING:
     from requests import PreparedRequest, Response
@@ -15,70 +23,77 @@ logger = logging.getLogger(__name__)
 EXPIRES_IN_MINS = 30
 
 
-class DummyJSONAuthenticator(metaclass=SingletonMeta):
+@dataclass(slots=True, kw_only=True)
+class _Token:
+    access_token: str
+    refresh_token: str
+    expires: float
+
+    def is_expired(self) -> bool:
+        return self.expires < time.time()
+
+
+class DummyJSONAuthenticator(requests.auth.AuthBase, metaclass=SingletonMeta):
     """DummyJSON authenticator class."""
 
     def __init__(
         self,
-        auth_url: str,
-        refresh_token_url: str,
+        *,
+        base_url: str,
         username: str,
         password: str,
     ) -> None:
-        self.auth_url = auth_url
-        self.refresh_token_url = refresh_token_url
+        self.auth_url = f"{base_url}/auth/login"
+        self.refresh_token_url = f"{base_url}/refresh"
         self.username = username
         self.password = password
 
-        self.token: str | None = None
-        self.refresh_token: str | None = None
-
-        self.expires: float | None = None
+        self._token: _Token | None = None
         self.session = requests.Session()
 
-    def __call__(self, request: PreparedRequest) -> PreparedRequest:
-        if not self.refresh_token:
-            logger.info("Retrieving token")
-            self.auth()
+    @override
+    def __call__(self, r: PreparedRequest) -> PreparedRequest:
+        r.headers["Authorization"] = f"Bearer {self._get_access_token()}"
+        return r
 
-        if self.needs_refresh():
-            logger.info("Refreshing token")
-            self.refresh()
-
-        request.headers["Authorization"] = f"Bearer {self.token}"
-        return request
-
-    def needs_refresh(self) -> bool:
-        return self.expires is None or self.expires < time.time()
-
-    def _handle_response(self, response: Response) -> None:
+    @staticmethod
+    def _handle_response(response: Response) -> _Token:
         if response.status_code != 200:
             logger.error("Error: %s", response.text)
             response.raise_for_status()
 
         data = response.json()
-        self.token = data["accessToken"]
-        self.refresh_token = data["refreshToken"]
-        self.expires = time.time() + EXPIRES_IN_MINS * 60
-        logger.info("Authenticated")
-
-    def refresh(self) -> None:
-        response = self.session.post(
-            self.refresh_token_url,
-            json={
-                "refreshToken": self.refresh_token,
-                "expiresInMins": EXPIRES_IN_MINS,
-            },
+        return _Token(
+            access_token=data["accessToken"],
+            refresh_token=data["refreshToken"],
+            expires=time.time() + EXPIRES_IN_MINS * 60,
         )
-        self._handle_response(response)
 
-    def auth(self) -> None:
-        response = self.session.post(
-            self.auth_url,
-            json={
-                "username": self.username,
-                "password": self.password,
-                "expiresInMins": EXPIRES_IN_MINS,
-            },
-        )
-        self._handle_response(response)
+    def _get_access_token(self) -> str:
+        match self._token:
+            case None:  # No token, need to authenticate
+                response = self.session.post(
+                    self.auth_url,
+                    json={
+                        "username": self.username,
+                        "password": self.password,
+                        "expiresInMins": EXPIRES_IN_MINS,
+                    },
+                )
+                self._token = self._handle_response(response)
+                return self._token.access_token
+
+            case _Token(refresh_token=refresh_token) if self._token.is_expired():
+                logger.info("Token expired, refreshing")
+                response = self.session.post(
+                    self.refresh_token_url,
+                    json={
+                        "refreshToken": refresh_token,
+                        "expiresInMins": EXPIRES_IN_MINS,
+                    },
+                )
+                self._token = self._handle_response(response)
+                return self._token.access_token
+
+            case _Token(access_token=access_token):  # Token is still valid
+                return access_token
