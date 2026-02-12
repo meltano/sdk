@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import logging
+import sys
 import typing as t
 
 import pytest
 
 from singer_sdk import metrics
 from singer_sdk.streams.rest import RESTStream
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     import requests_mock
@@ -23,7 +29,8 @@ class _BaseTestStream(RESTStream):
     url_base = "https://example.com"
     schema = SCHEMA
 
-    def get_url_params(self, *args: t.Any, **kwargs: t.Any) -> dict[str, t.Any] | str:  # noqa: ARG002
+    @override
+    def get_url_params(self, *args: t.Any, **kwargs: t.Any) -> dict[str, t.Any]:
         return {"user_id": 1}
 
 
@@ -51,6 +58,7 @@ def test_metrics_logging(
     assert all(record.msg.startswith("METRIC") for record in caplog.records)
 
     assert caplog.records[0].args
+    assert isinstance(caplog.records[0].args, tuple)
     point_1 = caplog.records[0].args[0]
     assert isinstance(point_1, metrics.Point)
     assert point_1.metric == "http_request_duration"
@@ -62,6 +70,7 @@ def test_metrics_logging(
     )
 
     assert caplog.records[1].args
+    assert isinstance(caplog.records[1].args, tuple)
     point_2 = caplog.records[1].args[0]
     assert isinstance(point_2, metrics.Point)
     assert point_2.metric == "http_request_count"
@@ -87,6 +96,7 @@ def test_disable_request_metrics(
     assert caplog.records[0].msg.startswith("METRIC")
 
     assert caplog.records[0].args
+    assert isinstance(caplog.records[0].args, tuple)
     point = caplog.records[0].args[0]
     assert isinstance(point, metrics.Point)
     assert point.metric == "http_request_count"
