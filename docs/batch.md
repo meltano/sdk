@@ -120,7 +120,7 @@ class MyStream(Stream):
             [
                 "s3://my-bucket/my-batch-file-1.parquet",
                 "s3://my-bucket/my-batch-file-2.parquet",
-            ]
+            ],
         )
 ```
 

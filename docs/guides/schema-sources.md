@@ -25,9 +25,12 @@ from myproject import schemas
 # then the following code will load the schemas from the schemas subpackage:
 SCHEMAS_DIR = SchemaDirectory(schemas)
 
+
 class ProjectsStream(RESTStream):
     name = "projects"
-    schema: ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)  # Loads from projects.json
+
+    # Loads from projects.json
+    schema: ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
 ```
 
 ## OpenAPI Integration
@@ -40,9 +43,12 @@ from singer_sdk import OpenAPISchema, StreamSchema
 # Load from OpenAPI spec
 openapi_source = OpenAPISchema("https://api.example.com/openapi.json")
 
+
 class UsersStream(RESTStream):
     name = "users"
-    schema: ClassVar[StreamSchema] = StreamSchema(openapi_source, key="User")  # Load "User" component
+
+    # Load "User" component
+    schema: ClassVar[StreamSchema] = StreamSchema(openapi_source, key="User")
 ```
 
 ## Migrating from File-Path Based Schemas
@@ -56,6 +62,7 @@ from pathlib import Path
 from singer_sdk import RESTStream
 
 SCHEMAS_DIR = Path(__file__).parent / "schemas"
+
 
 class ProjectsStream(RESTStream):
     """Projects stream with file-path based schema."""
@@ -72,6 +79,7 @@ from singer_sdk import RESTStream, SchemaDirectory, StreamSchema
 from myproject import schemas  # Your schemas module/package
 
 SCHEMAS_DIR = SchemaDirectory(schemas)
+
 
 class ProjectsStream(RESTStream):
     """Projects stream with schema source."""
@@ -118,6 +126,7 @@ class ProjectsStream(RESTStream):
    class MyStream(RESTStream):
        schema_filepath = SCHEMAS_DIR / "my_stream.json"
 
+
    # After
    class MyStream(RESTStream):
        schema: ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
@@ -129,7 +138,9 @@ class ProjectsStream(RESTStream):
    # If your stream name doesn't match the schema file name
    class ProjectDetailsStream(RESTStream):
        name = "project_details"
-       schema: ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR, key="ProjectDetail")  # Uses ProjectDetail.json
+
+       # Uses ProjectDetail.json
+       schema: ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR, key="ProjectDetail")
    ```
 
 ### Benefits of Migration

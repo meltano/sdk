@@ -33,6 +33,7 @@ class can be used to handle this pattern.
 # Original implementation
 from urllib.parse import parse_qsl
 
+
 class MyStream(RESTStream):
     def get_next_page_token(self, response, previous_token):
         data = response.json()
@@ -51,6 +52,7 @@ class MyStream(RESTStream):
 # New implementation
 
 from singer_sdk.pagination import BaseHATEOASPaginator
+
 
 class MyPaginator(BaseHATEOASPaginator):
     def get_next_url(self, response):

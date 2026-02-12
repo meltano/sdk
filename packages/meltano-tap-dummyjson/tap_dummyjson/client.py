@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from typing import TYPE_CHECKING
 
 from requests_cache import CachedSession
 from singer_sdk.pagination import BaseOffsetPaginator
@@ -10,10 +11,13 @@ from singer_sdk.streams import RESTStream
 
 from .auth import DummyJSONAuthenticator
 
-if sys.version_info < (3, 12):
-    from typing_extensions import override
-else:
+if TYPE_CHECKING:
+    from singer_sdk.helpers.types import Context, Record
+
+if sys.version_info >= (3, 12):
     from typing import override
+else:
+    from typing_extensions import override
 
 PAGE_SIZE = 25
 
@@ -25,8 +29,9 @@ class DummyJSONStream(RESTStream):
 
     @property
     @override
-    def url_base(self):
-        return self.config["api_url"]
+    def url_base(self) -> str:
+        """Return the API URL root, configurable via tap settings."""
+        return self.config["api_url"]  # type: ignore[no-any-return]
 
     @property
     @override
@@ -39,7 +44,7 @@ class DummyJSONStream(RESTStream):
 
     @property
     @override
-    def authenticator(self):
+    def authenticator(self) -> DummyJSONAuthenticator:
         return DummyJSONAuthenticator(
             auth_url=f"{self.url_base}/auth/login",
             refresh_token_url=f"{self.url_base}/refresh",
@@ -48,16 +53,24 @@ class DummyJSONStream(RESTStream):
         )
 
     @override
-    def get_new_paginator(self):
+    def get_new_paginator(self) -> BaseOffsetPaginator:
         return BaseOffsetPaginator(start_value=0, page_size=PAGE_SIZE)
 
     @override
-    def get_url_params(self, context, next_page_token):
+    def get_url_params(
+        self,
+        context: Context | None,
+        next_page_token: int | None,
+    ) -> dict[str, int | None]:
         return {
             "skip": next_page_token,
             "limit": PAGE_SIZE,
         }
 
     @override
-    def post_process(self, row, context=None):
+    def post_process(
+        self,
+        row: Record,
+        context: Context | None = None,
+    ) -> Record | None:
         return row

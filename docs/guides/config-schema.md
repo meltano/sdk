@@ -15,9 +15,23 @@ class MyTap(Tap):
     name = "my-tap"
 
     config_jsonschema = th.PropertiesList(
-        th.Property("api_key", th.StringType(nullable=False), required=True, title="API Key"),
-        th.Property("base_url", th.StringType(nullable=True), default="https://api.example.com", title="Base URL"),
-        th.Property("start_date", th.DateTimeType(nullable=True), title="Start Date"),
+        th.Property(
+            "api_key",
+            th.StringType(nullable=False),
+            required=True,
+            title="API Key",
+        ),
+        th.Property(
+            "base_url",
+            th.StringType(nullable=True),
+            default="https://api.example.com",
+            title="Base URL",
+        ),
+        th.Property(
+            "start_date",
+            th.DateTimeType(nullable=True),
+            title="Start Date",
+        ),
     ).to_dict()
 ```
 

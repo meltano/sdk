@@ -16,13 +16,15 @@ EXPIRES_IN_MINS = 30
 
 
 class DummyJSONAuthenticator(metaclass=SingletonMeta):
+    """DummyJSON authenticator class."""
+
     def __init__(
         self,
         auth_url: str,
         refresh_token_url: str,
         username: str,
         password: str,
-    ):
+    ) -> None:
         self.auth_url = auth_url
         self.refresh_token_url = refresh_token_url
         self.username = username
