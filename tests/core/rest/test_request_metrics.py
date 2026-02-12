@@ -17,6 +17,7 @@ else:
 if t.TYPE_CHECKING:
     import requests_mock
 
+    from singer_sdk.streams.rest import HTTPRequest, HTTPRequestContext
     from singer_sdk.tap_base import Tap
 
 
@@ -30,8 +31,10 @@ class _BaseTestStream(RESTStream):
     schema = SCHEMA
 
     @override
-    def get_url_params(self, *args: t.Any, **kwargs: t.Any) -> dict[str, t.Any]:
-        return {"user_id": 1}
+    def get_http_request(self, *, context: HTTPRequestContext[None]) -> HTTPRequest:
+        request = super().get_http_request(context=context)
+        request.params["user_id"] = 1
+        return request
 
 
 @pytest.mark.parametrize("context", [None, {"partition": "p1"}])

@@ -33,6 +33,7 @@ if t.TYPE_CHECKING:
     from requests import PreparedRequest
 
     from singer_sdk.helpers.types import Context
+    from singer_sdk.streams.rest import HTTPRequest, HTTPRequestContext
     from singer_sdk.tap_base import Tap
 
 
@@ -373,15 +374,11 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
             return BasePageNumberPaginator(1)
 
         @override
-        def get_url_params(
-            self,
-            context: Context | None,
-            next_page_token: int | None,
-        ) -> dict[str, t.Any]:
-            params = {}
-            if next_page_token:
-                params["page"] = next_page_token
-            return params
+        def get_http_request(self, *, context: HTTPRequestContext[int]) -> HTTPRequest:
+            request = super().get_http_request(context=context)
+            if context.next_page is not None:
+                request.params["page"] = context.next_page
+            return request
 
         @override
         def _request(
@@ -453,15 +450,11 @@ def test_continue_if_empty(tap: Tap):
             return _TestPaginator(1)
 
         @override
-        def get_url_params(
-            self,
-            context: Context | None,
-            next_page_token: int | None,
-        ) -> dict[str, t.Any]:
-            params = {}
-            if next_page_token:
-                params["page"] = next_page_token
-            return params
+        def get_http_request(self, *, context: HTTPRequestContext[int]) -> HTTPRequest:
+            request = super().get_http_request(context=context)
+            if context.next_page is not None:
+                request.params["page"] = context.next_page
+            return request
 
         @override
         def _request(
@@ -523,15 +516,11 @@ def test_no_paginator(tap: Tap):
             return None
 
         @override
-        def get_url_params(
-            self,
-            context: Context | None,
-            next_page_token: None,
-        ) -> dict[str, t.Any]:
-            params = {}
-            if next_page_token:
-                params["page"] = next_page_token
-            return params
+        def get_http_request(self, *, context: HTTPRequestContext[None]) -> HTTPRequest:
+            request = super().get_http_request(context=context)
+            if context.next_page is not None:
+                request.params["page"] = context.next_page
+            return request
 
         @override
         def _request(

@@ -28,6 +28,8 @@ extend-ignore = [
   "TD002",
   "TD003",
   "FIX002",
+  # Commented code
+  "ERA001",
 ]
 """
 
