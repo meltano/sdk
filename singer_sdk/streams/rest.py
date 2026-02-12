@@ -488,6 +488,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             A :class:`requests.PreparedRequest` object.
         """
         request = requests.Request(*args, **kwargs)
+        request.headers.setdefault("User-Agent", self.user_agent)
         self.requests_session.auth = self.authenticator
         return self.requests_session.prepare_request(request)
 
@@ -543,7 +544,6 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
                 next_page=next_page_token,
             )
         )
-        http_request.headers.setdefault("User-Agent", self.user_agent)
 
         prepare_kwargs: dict[str, t.Any] = {
             "method": http_request.method,
