@@ -31,7 +31,6 @@ class can be used to handle this pattern.
 
 ```python
 # Original implementation
-from urllib.parse import parse_qsl
 
 
 class MyStream(RESTStream):
@@ -39,13 +38,12 @@ class MyStream(RESTStream):
         data = response.json()
         return data.get("next")
 
-    def get_url_params(self, context, next_page_token):
-        params = {}
-
-        if next_page_token:
-            params.update(parse_qsl(next_page_token.query))
-
-        return params
+    def get_http_request(self, *, context):
+        request = super().get_http_request(context=context)
+        if context.next_page:
+            # Next page token is a URL, so we can to set the request URL directly
+            request.url = context.next_page
+        return request
 ```
 
 ```python
@@ -64,14 +62,12 @@ class MyStream(RESTStream):
     def get_new_paginator(self):
         return MyPaginator()
 
-    def get_url_params(self, context, next_page_token):
-        params = {}
-
-        # Next page token is a URL, so we can to parse it to extract the query string
-        if next_page_token:
-            params.update(parse_qsl(next_page_token.query))
-
-        return params
+    def get_http_request(self, *, context):
+        request = super().get_http_request(context=context)
+        if context.next_page:
+            # Next page token is a URL, so we can to set the request URL directly
+            request.url = context.next_page.geturl()
+        return request
 ```
 
 ### Example: Offset pagination
@@ -90,12 +86,9 @@ class MyStream(RESTStream):
     def get_new_paginator(self):
         return BaseOffsetPaginator(start_value=0, page_size=250)
 
-    def get_url_params(self, context, next_page_token):
-        params = {}
-
-        # Next page token is an offset
-        if next_page_token:
-            params["offset"] = next_page_token
-
-        return params
+    def get_http_request(self, *, context: HTTPRequestContext[int]) -> HTTPRequest:
+        request = super().get_http_request(context=context)
+        if context.next_page is not None:
+            request.params["offset"] = context.next_page
+        return request
 ```
