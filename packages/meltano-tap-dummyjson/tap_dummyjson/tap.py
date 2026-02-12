@@ -1,7 +1,14 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from singer_sdk import Tap
 from singer_sdk import typing as th  # JSON schema typing helpers
 
 from . import streams
+
+if TYPE_CHECKING:
+    from singer_sdk import Stream
 
 
 class TapDummyJSON(Tap):
@@ -41,7 +48,7 @@ class TapDummyJSON(Tap):
         ),
     ).to_dict()
 
-    def discover_streams(self):
+    def discover_streams(self) -> list[Stream]:
         """Return a list of discovered streams.
 
         Returns:

@@ -63,6 +63,7 @@ repos:
       (?x)^(
         cookiecutter/.*
       )$
+    types_or: [python, markdown]
 
 - repo: https://github.com/astral-sh/uv-pre-commit
   rev: 0.10.0
