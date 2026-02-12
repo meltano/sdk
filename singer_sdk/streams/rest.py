@@ -72,7 +72,7 @@ _TToken = TypeVar("_TToken", default=t.Any)
 _TNum = t.TypeVar("_TNum", int, float)
 
 
-@dataclass
+@dataclass(slots=True)
 class HTTPRequest:
     """HTTP request for a stream.
 
@@ -127,7 +127,7 @@ class HTTPRequest:
         return urlencode(self._get_url_params(), doseq=True)
 
 
-@dataclass
+@dataclass(slots=True)
 class HTTPRequestContext(t.Generic[_TToken]):
     """Context for an HTTP request.
 
