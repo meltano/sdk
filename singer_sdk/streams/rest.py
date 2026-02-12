@@ -60,6 +60,7 @@ if t.TYPE_CHECKING:
 
 __all__ = [
     "HTTPRequest",
+    "HTTPRequestContext",
     "RESTStream",
 ]
 
@@ -124,6 +125,20 @@ class HTTPRequest:
             A string of encoded parameters.
         """
         return urlencode(self._get_url_params(), doseq=True)
+
+
+@dataclass
+class HTTPRequestContext(t.Generic[_TToken]):
+    """Context for an HTTP request.
+
+    .. versionadded:: NEXT_VERSION
+    """
+
+    #: The stream partition or context dictionary.
+    stream_context: Context | None
+
+    #: The next page token, if applicable.
+    next_page: _TToken | None
 
 
 class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
@@ -477,18 +492,12 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         self.requests_session.auth = self.authenticator
         return self.requests_session.prepare_request(request)
 
-    def get_http_request(
-        self,
-        *,
-        context: Context | None,
-        next_page_token: _TToken | None,
-    ) -> HTTPRequest:
+    def get_http_request(self, *, context: HTTPRequestContext) -> HTTPRequest:
         """Get an HTTP request for this stream.
 
         Args:
-            context: Stream partition or context dictionary.
-            next_page_token: Token, page number or any request argument to request the
-                next page of data.
+            context: An :class:`HTTPRequestContext` object containing the stream
+                partition or context dictionary, and the next page token if applicable.
 
         Returns:
             An HTTP request for this stream.
@@ -496,11 +505,17 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         .. versionadded:: NEXT_VERSION
         """
         return HTTPRequest(
-            url=self.get_url(context),
+            url=self.get_url(context.stream_context),
             method=self.http_method,
             headers=self.http_headers,
-            params=self.get_url_params(context, next_page_token),
-            data=self.prepare_request_payload(context, next_page_token),
+            params=self.get_url_params(
+                context.stream_context,
+                context.next_page,
+            ),
+            data=self.prepare_request_payload(
+                context.stream_context,
+                context.next_page,
+            ),
         )
 
     def prepare_request(
@@ -524,8 +539,10 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             HTTP headers and authenticator.
         """
         http_request = self.get_http_request(
-            context=context,
-            next_page_token=next_page_token,
+            context=HTTPRequestContext(
+                stream_context=context,
+                next_page=next_page_token,
+            )
         )
         prepare_kwargs: dict[str, t.Any] = {
             "method": http_request.method,
