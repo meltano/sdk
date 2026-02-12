@@ -246,7 +246,6 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             Dictionary of HTTP headers to use as a base for every request.
         """
         return {
-            "User-Agent": self.user_agent,
             **self._http_headers,
         }
 
@@ -544,6 +543,8 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
                 next_page=next_page_token,
             )
         )
+        http_request.headers.setdefault("User-Agent", self.user_agent)
+
         prepare_kwargs: dict[str, t.Any] = {
             "method": http_request.method,
             "url": http_request.url,
