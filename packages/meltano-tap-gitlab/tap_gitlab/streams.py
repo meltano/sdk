@@ -29,6 +29,7 @@ else:
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Context
+    from singer_sdk.streams.rest import HTTPRequest, HTTPRequestContext
 
 
 SCHEMAS_DIR = SchemaDirectory(schemas)
@@ -67,19 +68,15 @@ class GitlabStream(RESTStream[str]):
         )
 
     @override
-    def get_url_params(
-        self,
-        context: Context | None,
-        next_page_token: str | None,
-    ) -> dict[str, t.Any]:
-        """Return a dictionary of values to be used in URL parameterization."""
-        params: dict = {}
-        if next_page_token:
-            params["page"] = next_page_token
+    def get_http_request(self, *, context: HTTPRequestContext[str]) -> HTTPRequest:
+        """Get the HTTP request for the given context."""
+        request = super().get_http_request(context=context)
+        if context.next_page:
+            request.params["page"] = context.next_page
         if self.replication_key:
-            params["sort"] = "asc"
-            params["order_by"] = self.replication_key
-        return params
+            request.params["sort"] = "asc"
+            request.params["order_by"] = self.replication_key
+        return request
 
     @override
     def get_new_paginator(self) -> SimpleHeaderPaginator:
@@ -228,14 +225,10 @@ class EpicIssuesStream(GitlabStream):
     parent_stream_type = EpicsStream  # Stream should wait for parents to complete.
 
     @override
-    def get_url_params(
-        self,
-        context: Context | None,
-        next_page_token: str | None,
-    ) -> dict[str, t.Any]:
-        """Return a dictionary of values to be used in parameterization."""
-        result = super().get_url_params(context, next_page_token)
-        if not context or "epic_id" not in context:
+    def get_http_request(self, *, context: HTTPRequestContext[str]) -> HTTPRequest:
+        """Get the HTTP request for the given context."""
+        request = super().get_http_request(context=context)
+        if not context.stream_context or "epic_id" not in context.stream_context:
             msg = "Cannot sync epic issues without already known epic IDs."
             raise ValueError(msg)
-        return result
+        return request
