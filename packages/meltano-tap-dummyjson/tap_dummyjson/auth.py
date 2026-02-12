@@ -40,15 +40,12 @@ class DummyJSONAuthenticator(metaclass=SingletonMeta):
         if not self.refresh_token:
             logger.info("Retrieving token")
             self.auth()
-            request.headers["Authorization"] = f"Bearer {self.token}"
-            return request
 
         if self.needs_refresh():
             logger.info("Refreshing token")
             self.refresh()
-            request.headers["Authorization"] = f"Bearer {self.token}"
-            return request
 
+        request.headers["Authorization"] = f"Bearer {self.token}"
         return request
 
     def needs_refresh(self) -> bool:
