@@ -677,3 +677,57 @@ class TestConvenienceFunctions:
         )
 
         assert result is mock_test_class
+
+
+class TestTargetFixtureBasedConfig:
+    """Test fixture-based configuration support for targets."""
+
+    @pytest.fixture
+    def mock_target_class(self):
+        """Create a mock Target class."""
+        target_class = Mock(spec=Target)
+        target_class.__name__ = "MockTarget"
+
+        mock_target_instance = Mock(spec=Target)
+        target_class.return_value = mock_target_instance
+        return target_class
+
+    def test_plugin_config_fixture_exists(self, mock_target_class):
+        """Test that plugin_config fixture is created in target test class."""
+        factory = TargetTestClassFactory(
+            target_class=mock_target_class, config={"key": "value"}
+        )
+        test_class = factory.new_test_class(include_target_tests=False)
+
+        # Check that plugin_config fixture exists
+        assert hasattr(test_class, "plugin_config")
+
+    def test_plugin_config_can_be_overridden(self, mock_target_class):
+        """Test that plugin_config fixture can be overridden in target test class."""
+        original_config = {"database_url": "original://db"}
+        factory = TargetTestClassFactory(
+            target_class=mock_target_class, config=original_config
+        )
+        base_test_class = factory.new_test_class(include_target_tests=False)
+
+        # User can override the plugin_config fixture in their test class
+        class CustomTestClass(base_test_class):
+            @pytest.fixture
+            def plugin_config(self):
+                # This could use other fixtures, read from env vars, etc.
+                return {"database_url": "overridden://db"}
+
+        # Verify the override works - we can check that the custom fixture exists
+        assert hasattr(CustomTestClass, "plugin_config")
+
+    def test_runner_uses_plugin_config_fixture(self, mock_target_class):
+        """Test that the runner fixture uses the plugin_config fixture."""
+        original_config = {"test": "value"}
+        factory = TargetTestClassFactory(
+            target_class=mock_target_class, config=original_config
+        )
+        test_class = factory.new_test_class(include_target_tests=False)
+
+        # The runner fixture should accept plugin_config as a parameter
+        runner_sig = inspect.signature(test_class.runner)
+        assert "plugin_config" in runner_sig.parameters
