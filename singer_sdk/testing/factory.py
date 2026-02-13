@@ -17,6 +17,8 @@ from .suites import (
 )
 
 if t.TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from singer_sdk import Stream, Tap, Target
     from singer_sdk.testing.templates import (
         AttributeTestTemplate,
@@ -91,6 +93,7 @@ class TapTestClassFactory:
         include_stream_attribute_tests: bool = True,
         custom_suites: list | None = None,
         suite_config: SuiteConfig | None = None,
+        streams: Sequence[str] | None = None,
         **kwargs: t.Any,
     ) -> type[BaseTestClass]:
         """Get a new test class.
@@ -102,6 +105,9 @@ class TapTestClassFactory:
                 Include stream attribute tests in the test class.
             custom_suites: List of custom test suites to include in the test class.
             suite_config: SuiteConfig instance to be used when instantiating tests.
+            streams: Optional list of stream names to test. If provided, only the
+                specified streams will be tested during dry run execution. If omitted
+                or None, all available streams will be tested.
             kwargs: Default arguments to be passed to tap on create.
 
         Returns:
@@ -124,6 +130,7 @@ class TapTestClassFactory:
             tap_class=self.tap_class,
             config=self.config,
             suite_config=suite_config,
+            streams=streams,
             **kwargs,
         )
 
@@ -192,7 +199,17 @@ class TapTestClassFactory:
                 self._with_tap_tests(empty_test_class, suite)
 
             if suite.kind in {"tap_stream", "tap_stream_attribute"}:
-                streams = list(test_runner.new_tap().streams.values())
+                all_streams = list(test_runner.new_tap().streams.values())
+
+                # Filter streams if specific streams were requested
+                if test_runner.streams is not None:
+                    streams = [
+                        stream
+                        for stream in all_streams
+                        if stream.name in test_runner.streams
+                    ]
+                else:
+                    streams = all_streams
 
                 if suite.kind == "tap_stream":
                     self._with_stream_tests(empty_test_class, suite, streams)
@@ -394,6 +411,7 @@ def get_tap_test_class(
     include_stream_attribute_tests: bool = True,
     custom_suites: list | None = None,
     suite_config: SuiteConfig | None = None,
+    streams: Sequence[str] | None = None,
     **kwargs: t.Any,
 ) -> type[BaseTestClass]:
     """Get Tap Test Class.
@@ -406,10 +424,23 @@ def get_tap_test_class(
         include_stream_attribute_tests: Include Tap stream attribute tests.
         custom_suites: Custom test suites to add to standard tests.
         suite_config: SuiteConfig instance to pass to tests.
+        streams: Optional list of stream names to test. If provided, only the
+            specified streams will be tested during dry run execution. If omitted
+            or None, all available streams will be tested. This is useful for
+            focusing tests on specific streams or reducing test execution time.
         kwargs: Keyword arguments to pass to the TapRunner.
 
     Returns:
         A test class usable by pytest.
+
+    Example:
+        Test only specific streams::
+
+            TestMyTap = get_tap_test_class(
+                tap_class=MyTap,
+                config=SAMPLE_CONFIG,
+                streams=["users", "orders"],
+            )
     """
     factory = TapTestClassFactory(
         tap_class=tap_class,
@@ -421,6 +452,7 @@ def get_tap_test_class(
         include_tap_tests=include_tap_tests,
         include_stream_tests=include_stream_tests,
         include_stream_attribute_tests=include_stream_attribute_tests,
+        streams=streams,
         **kwargs,
     )
 
