@@ -94,8 +94,8 @@ class {{ cookiecutter.source_name }}SQLToJSONSchema(SQLToJSONSchema):
     #     for specific SQLAlchemy column types.
     #     """
     #     if self.custom_config_option:
-    #         return {"type": ["string", "null"]}  # noqa: ERA001
-    #     return {"type": ["object", "null"], "additionalProperties": True}  # noqa: ERA001
+    #         return {"type": ["string", "null"]}
+    #     return {"type": ["object", "null"], "additionalProperties": True}
 
 
 class {{ cookiecutter.source_name }}Connector(SQLConnector):
@@ -230,7 +230,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
         query = super().apply_query_filters(query, table, context=context)
 
         # Add custom WHERE clauses from configuration, etc.
-        # query = query.where(...)  # noqa: ERA001
+        # query = query.where(...)
 
         return query  # noqa: RET504
 
@@ -273,4 +273,4 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
                 yield dict(record)
 
         # Alternative: Use the default implementation
-        # yield from super().get_records(context)  # noqa: ERA001
+        # yield from super().get_records(context)

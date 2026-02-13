@@ -153,3 +153,5 @@ Other
 
     sql.connector.SQLToJSONSchema
     sql.connector.JSONSchemaToSQL
+    streams.rest.HTTPRequest
+    streams.rest.HTTPRequestContext

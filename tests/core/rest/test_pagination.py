@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import json
+import sys
 import typing as t
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import ParseResult, parse_qs, urlparse
 
 import pytest
 from requests import Response
@@ -23,9 +24,16 @@ from singer_sdk.pagination import (
 )
 from singer_sdk.streams.rest import RESTStream
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 if t.TYPE_CHECKING:
     from requests import PreparedRequest
 
+    from singer_sdk.helpers.types import Context
+    from singer_sdk.streams.rest import HTTPRequest, HTTPRequestContext
     from singer_sdk.tap_base import Tap
 
 
@@ -100,6 +108,7 @@ def test_paginator_page_number():
     """Validate paginator that uses the page number."""
 
     class _TestPageNumberPaginator(BasePageNumberPaginator):
+        @override
         def has_more(self, response: Response) -> bool:
             return response.json()["hasMore"]
 
@@ -145,6 +154,7 @@ def test_paginator_offset():
             super().__init__(start_value, page_size, *args, **kwargs)
             self._records_jsonpath = records_jsonpath
 
+        @override
         def has_more(self, response: Response) -> bool:
             """Check if response has any records.
 
@@ -227,7 +237,7 @@ def test_paginator_header():
     assert paginator.current_value == "abc"
     assert paginator.count == 1
 
-    response.headers[key] = None
+    del response.headers[key]
     paginator.advance(response)
     assert paginator.finished
     assert paginator.count == 2
@@ -250,6 +260,7 @@ def test_paginator_header_links():
     )
     paginator.advance(response)
     assert not paginator.finished
+    assert isinstance(paginator.current_value, ParseResult)
     assert paginator.current_value.hostname == api_hostname
     assert paginator.current_value.path == resource_path
     assert paginator.current_value.query == "page=2&limit=100"
@@ -265,6 +276,7 @@ def test_paginator_header_links():
     )
     paginator.advance(response)
     assert not paginator.finished
+    assert isinstance(paginator.current_value, ParseResult)
     assert paginator.current_value.hostname == api_hostname
     assert paginator.current_value.path == resource_path
     assert paginator.current_value.query == "page=3&limit=100"
@@ -282,6 +294,7 @@ def test_paginator_custom_hateoas():
     """Validate paginator that uses HATEOAS links."""
 
     class _CustomHATEOASPaginator(BaseHATEOASPaginator):
+        @override
         def get_next_url(self, response: Response) -> str | None:
             """Get a parsed HATEOAS link for the next, if the response has one."""
 
@@ -315,6 +328,7 @@ def test_paginator_custom_hateoas():
     ).encode()
     paginator.advance(response)
     assert not paginator.finished
+    assert isinstance(paginator.current_value, ParseResult)
     assert paginator.current_value.path == resource_path
     assert paginator.current_value.query == "page=2&limit=100"
     assert paginator.count == 1
@@ -331,6 +345,7 @@ def test_paginator_custom_hateoas():
     ).encode()
     paginator.advance(response)
     assert not paginator.finished
+    assert isinstance(paginator.current_value, ParseResult)
     assert paginator.current_value.path == resource_path
     assert paginator.current_value.query == "page=3&limit=100"
     assert paginator.count == 2
@@ -349,29 +364,32 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
         url_base = "https://my.api.test"
         path = "/path/to/resource"
         records_jsonpath = "$.data[*]"
-        schema = {"type": "object", "properties": {"id": {"type": "integer"}}}  # noqa: RUF012
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
 
+        @override
         def get_new_paginator(self) -> BasePageNumberPaginator:
             return BasePageNumberPaginator(1)
 
-        def get_url_params(
-            self,
-            context: dict | None,  # noqa: ARG002
-            next_page_token: int | None,
-        ) -> dict[str, t.Any] | str:
-            params = {}
-            if next_page_token:
-                params["page"] = next_page_token
-            return params
+        @override
+        def get_http_request(self, *, context: HTTPRequestContext[int]) -> HTTPRequest:
+            request = super().get_http_request(context=context)
+            if context.next_page is not None:
+                request.params["page"] = context.next_page
+            return request
 
+        @override
         def _request(
             self,
             prepared_request: PreparedRequest,
-            context: dict | None,  # noqa: ARG002
+            context: Context | None,
         ) -> Response:
             r = Response()
             r.status_code = 200
 
+            assert isinstance(prepared_request.url, str)
             parsed = urlparse(prepared_request.url)
             query = parse_qs(parsed.query)
 
@@ -388,7 +406,7 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
 
     stream = MyAPIStream(tap=tap)
 
-    records_iter = stream.request_records(context=None)
+    records_iter = iter(stream.request_records(context=None))
 
     assert next(records_iter) == {"id": 1}
     assert next(records_iter) == {"id": 2}
@@ -407,10 +425,12 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
 
 def test_continue_if_empty(tap: Tap):
     class _TestPaginator(BasePageNumberPaginator):
+        @override
         def has_more(self, response: Response) -> bool:
             return response.json().get("hasMore", False)
 
-        def continue_if_empty(self, response: Response) -> bool:  # noqa: ARG002
+        @override
+        def continue_if_empty(self, response: Response) -> bool:
             return True
 
     class MyAPIStream(RESTStream[int]):
@@ -420,29 +440,32 @@ def test_continue_if_empty(tap: Tap):
         url_base = "https://my.api.test"
         path = "/path/to/resource"
         records_jsonpath = "$.data[*]"
-        schema = {"type": "object", "properties": {"id": {"type": "integer"}}}  # noqa: RUF012
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
 
+        @override
         def get_new_paginator(self) -> BasePageNumberPaginator:
             return _TestPaginator(1)
 
-        def get_url_params(
-            self,
-            context: dict | None,  # noqa: ARG002
-            next_page_token: int | None,
-        ) -> dict[str, t.Any] | str:
-            params = {}
-            if next_page_token:
-                params["page"] = next_page_token
-            return params
+        @override
+        def get_http_request(self, *, context: HTTPRequestContext[int]) -> HTTPRequest:
+            request = super().get_http_request(context=context)
+            if context.next_page is not None:
+                request.params["page"] = context.next_page
+            return request
 
+        @override
         def _request(
             self,
             prepared_request: PreparedRequest,
-            context: dict | None,  # noqa: ARG002
+            context: Context | None,
         ) -> Response:
             r = Response()
             r.status_code = 200
 
+            assert isinstance(prepared_request.url, str)
             parsed = urlparse(prepared_request.url)
             query = parse_qs(parsed.query)
 
@@ -464,7 +487,7 @@ def test_continue_if_empty(tap: Tap):
             return r
 
     stream = MyAPIStream(tap=tap)
-    records_iter = stream.request_records(context=None)
+    records_iter = iter(stream.request_records(context=None))
 
     assert next(records_iter) == {"id": 1}
     assert next(records_iter) == {"id": 2}
@@ -483,25 +506,27 @@ def test_no_paginator(tap: Tap):
         url_base = "https://my.api.test"
         path = "/path/to/resource"
         records_jsonpath = "$.data[*]"
-        schema = {"type": "object", "properties": {"id": {"type": "integer"}}}  # noqa: RUF012
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
 
+        @override
         def get_new_paginator(self) -> None:
             return None
 
-        def get_url_params(
-            self,
-            context: dict | None,  # noqa: ARG002
-            next_page_token: None,
-        ) -> dict[str, t.Any] | str:
-            params = {}
-            if next_page_token:
-                params["page"] = next_page_token
-            return params
+        @override
+        def get_http_request(self, *, context: HTTPRequestContext[None]) -> HTTPRequest:
+            request = super().get_http_request(context=context)
+            if context.next_page is not None:
+                request.params["page"] = context.next_page
+            return request
 
+        @override
         def _request(
             self,
-            prepared_request: PreparedRequest,  # noqa: ARG002
-            context: dict | None,  # noqa: ARG002
+            prepared_request: PreparedRequest,
+            context: Context | None,
         ) -> Response:
             r = Response()
             r.status_code = 200
@@ -510,7 +535,7 @@ def test_no_paginator(tap: Tap):
             return r
 
     stream = MyAPIStream(tap=tap)
-    records_iter = stream.request_records(context=None)
+    records_iter = iter(stream.request_records(context=None))
 
     assert next(records_iter) == {"id": 1}
     assert next(records_iter) == {"id": 2}

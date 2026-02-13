@@ -17,7 +17,7 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
 
     name = "users"
     # Optionally, you may also use `schema_filepath` in place of `schema`:
-    # schema_filepath = SCHEMAS_DIR / "users.json"  # noqa: ERA001
+    # schema_filepath = SCHEMAS_DIR / "users.json"
     schema = th.PropertiesList(
         th.Property("name", th.StringType),
         th.Property(
@@ -103,7 +103,7 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
     primary_keys = ("id",)
     replication_key = None
     # Optionally, you may also use `schema_filepath` in place of `schema`:
-    # schema_filepath = SCHEMAS_DIR / "users.json"  # noqa: ERA001
+    # schema_filepath = SCHEMAS_DIR / "users.json"
     schema = th.PropertiesList(
         th.Property("name", th.StringType),
         th.Property(
