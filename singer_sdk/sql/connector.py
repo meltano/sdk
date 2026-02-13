@@ -1882,3 +1882,43 @@ class SQLConnector:  # noqa: PLR0904
                     f"WHERE {version_column_name} < {current_version}",
                 ),
             )
+
+    def delete_by_key(
+        self,
+        *,
+        full_table_name: str | FullyQualifiedName,
+        key_columns: t.Sequence[str],
+        key_values: t.Sequence[dict[str, t.Any]],
+    ) -> int:
+        """Hard-delete rows from the table by primary key.
+
+        This is used to delete records marked as deleted in LOG_BASED replication
+        when ``hard_delete`` is enabled.
+
+        Args:
+            full_table_name: The fully qualified table name.
+            key_columns: The names of the primary key columns.
+            key_values: A sequence of dicts containing key column values for
+                records to delete.
+
+        Returns:
+            The number of rows deleted.
+
+        .. versionadded:: 0.54.0
+        """
+        # Build WHERE clause and bind values in a single pass:
+        # (key1 = :k0_0 AND key2 = :k0_1) OR (key1 = :k1_0 AND key2 = :k1_1) ...
+        conditions = []
+        bind_values = {}
+        for i, record in enumerate(key_values):
+            key_conditions = []
+            for j, col in enumerate(key_columns):
+                param = f"k{i}_{j}"
+                key_conditions.append(f"{col} = :{param}")
+                bind_values[param] = record.get(col)
+            conditions.append(f"({' AND '.join(key_conditions)})")
+
+        query = f"DELETE FROM {full_table_name} WHERE {' OR '.join(conditions)}"  # noqa: S608
+        with self._connect() as conn, conn.begin():
+            result = conn.execute(sa.text(query), bind_values)
+            return result.rowcount
