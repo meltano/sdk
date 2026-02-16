@@ -272,10 +272,88 @@ class SQLSink(BatchSink, t.Generic[_C]):
         """
         # If duplicates are merged, these can be tracked via
         # :meth:`~singer_sdk.Sink.tally_duplicate_merged()`.
-        self.bulk_insert_records(
+        records = context["records"]
+
+        # Handle hard delete for LOG_BASED replication: records with _sdc_deleted_at
+        # set should be physically deleted from the target table.
+        if self.config.get("hard_delete", False) and self.key_properties:
+            to_delete, to_insert = self._split_records_for_hard_delete(records)
+
+            if to_delete:
+                count = self.hard_delete_records(to_delete)
+                self.logger.info(
+                    "Deleted %d records because they were deleted upstream",
+                    count,
+                )
+
+            if to_insert:
+                self.bulk_insert_records(
+                    full_table_name=self.full_table_name,
+                    schema=self.schema,
+                    records=to_insert,
+                )
+        else:
+            self.bulk_insert_records(
+                full_table_name=self.full_table_name,
+                schema=self.schema,
+                records=records,
+            )
+
+    def _split_records_for_hard_delete(
+        self,
+        records: t.Iterable[dict],
+    ) -> tuple[list[dict], list[dict]]:
+        """Split records into those to delete and those to insert.
+
+        Records with a non-null ``_sdc_deleted_at`` value are marked for deletion
+        in LOG_BASED replication.
+
+        Args:
+            records: The records to split.
+
+        Returns:
+            A tuple of (records_to_delete, records_to_insert). Records to delete
+            are returned as conformed records (column names match target schema).
+        """
+        conformed_delete_col = self.conform_name(
+            self.soft_delete_column_name,
+            "column",
+        )
+        records_to_delete = []
+        records_to_insert = []
+
+        for record in records:
+            conformed_record = self.conform_record(record)
+            if conformed_record.get(conformed_delete_col) is not None:
+                records_to_delete.append(conformed_record)
+            else:
+                records_to_insert.append(record)
+
+        return records_to_delete, records_to_insert
+
+    def hard_delete_records(
+        self,
+        records: t.Sequence[dict],
+    ) -> int:
+        """Hard delete records from the target table.
+
+        This method deletes records that have been marked for deletion in LOG_BASED
+        replication (i.e., records with ``_sdc_deleted_at`` set).
+
+        Subclasses can override this method to customize deletion behavior.
+
+        Args:
+            records: Conformed records to delete. Must contain the key properties.
+
+        Returns:
+            The number of records deleted.
+
+        .. versionadded:: 0.54.0
+        """
+        return self.connector.delete_by_key(
             full_table_name=self.full_table_name,
-            schema=self.schema,
-            records=context["records"],
+            key_columns=self.key_properties,
+            key_values=records,
         )
 
     def generate_insert_statement(
