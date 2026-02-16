@@ -1,3 +1,2 @@
-INFO sqlconnector Creating empty table zzz_tmp_test_sqlite_no_activate_version
+INFO target-sqlite.zzz_tmp_test_sqlite_no_activate_version Creating table zzz_tmp_test_sqlite_no_activate_version
 WARNING target-sqlite `ACTIVATE_VERSION` messages are not enabled for 'zzz_tmp_test_sqlite_no_activate_version'. Ignoring.
-INFO target-sqlite.zzz_tmp_test_sqlite_no_activate_version Inserting with SQL: INSERT INTO zzz_tmp_test_sqlite_no_activate_version (col_a) VALUES (:col_a)
