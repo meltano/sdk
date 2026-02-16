@@ -112,6 +112,7 @@ class TestTapTestClassFactory:
     ):
         """Test new_test_class creates class with default test suites."""
         mock_runner = Mock()
+        mock_runner.streams = None  # No stream filtering
         mock_runner_class.return_value = mock_runner
 
         # Mock streams for stream tests with proper stream_maps structure
@@ -136,6 +137,51 @@ class TestTapTestClassFactory:
             tap_class=factory.tap_class,
             config=factory.config,
             suite_config=None,
+            streams=None,
+            parse_env_config=True,
+        )
+
+    @patch("singer_sdk.testing.factory.TapTestRunner")
+    @pytest.mark.parametrize(
+        "streams",
+        [
+            None,
+            [],
+            ["stream1"],
+            ["stream1", "stream2"],
+        ],
+    )
+    def test_new_test_class_with_streams_parameter(
+        self,
+        mock_runner_class,
+        factory: TapTestClassFactory,
+        streams,
+    ):
+        """Test new_test_class with various streams parameter values."""
+        mock_runner = Mock()
+        mock_runner.streams = streams  # Set the streams attribute on the runner
+        mock_runner_class.return_value = mock_runner
+
+        mock_stream = Mock(spec=Stream)
+        mock_stream.name = "test_stream"
+        mock_stream_map = Mock()
+        mock_stream_map.transformed_schema = {"properties": {"id": {"type": "integer"}}}
+        mock_stream.stream_maps = [mock_stream_map]
+
+        mock_tap = Mock()
+        mock_tap.streams = {"test_stream": mock_stream}
+        mock_runner.new_tap.return_value = mock_tap
+
+        test_class = factory.new_test_class(streams=streams)
+
+        assert issubclass(test_class, BaseTestClass)
+
+        # Verify TapTestRunner was called with correct streams parameter
+        mock_runner_class.assert_called_once_with(
+            tap_class=factory.tap_class,
+            config=factory.config,
+            suite_config=None,
+            streams=streams,
             parse_env_config=True,
         )
 
@@ -147,6 +193,7 @@ class TestTapTestClassFactory:
     ):
         """Test new_test_class with custom kwargs."""
         mock_runner = Mock()
+        mock_runner.streams = None  # No stream filtering
         mock_runner_class.return_value = mock_runner
 
         mock_stream = Mock(spec=Stream)
@@ -176,6 +223,7 @@ class TestTapTestClassFactory:
             tap_class=factory.tap_class,
             config=factory.config,
             suite_config=suite_config,
+            streams=None,
             parse_env_config=False,
             custom_kwarg=custom_kwarg,
         )
@@ -277,6 +325,52 @@ class TestTapTestClassFactory:
             "stream",
             "attribute_name",
         }
+
+    @patch("singer_sdk.testing.factory.TapTestRunner")
+    def test_new_test_class_filters_streams_correctly(
+        self,
+        mock_runner_class,
+        factory: TapTestClassFactory,
+    ):
+        """Test that streams parameter filters which stream tests are generated."""
+        mock_runner = Mock()
+        mock_runner.streams = ["stream1"]  # Only test stream1
+        mock_runner_class.return_value = mock_runner
+
+        # Create multiple mock streams
+        stream1 = Mock(spec=Stream)
+        stream1.name = "stream1"
+        stream2 = Mock(spec=Stream)
+        stream2.name = "stream2"
+        stream3 = Mock(spec=Stream)
+        stream3.name = "stream3"
+
+        # Mock the tap to return all streams
+        mock_tap = Mock()
+        mock_tap.streams = {
+            "stream1": stream1,
+            "stream2": stream2,
+            "stream3": stream3,
+        }
+        mock_runner.new_tap.return_value = mock_tap
+
+        # Create test class with streams filter
+        test_class = factory.new_test_class(
+            streams=["stream1"],
+            include_tap_tests=False,
+            include_stream_tests=True,
+            include_stream_attribute_tests=False,
+        )
+
+        # Only stream1 should have test methods generated
+        # Check that params only contains stream1
+        for method_name, params in test_class.params.items():
+            if method_name.startswith("test_tap_stream_"):
+                # All params should be for stream1 only
+                param_ids = [param.id for param in params]
+                assert param_ids == ["stream1"], (
+                    f"Expected only stream1 tests, but found: {param_ids}"
+                )
 
     def test_get_empty_test_class(self, factory: TapTestClassFactory):
         """Test _get_empty_test_class creates proper fixtures."""
@@ -636,7 +730,56 @@ class TestConvenienceFunctions:
             include_tap_tests=True,
             include_stream_tests=False,
             include_stream_attribute_tests=True,
+            streams=None,
             custom_kwarg="value",
+        )
+
+        assert result is mock_test_class
+
+    @patch("singer_sdk.testing.factory.TapTestClassFactory")
+    @pytest.mark.parametrize(
+        "streams",
+        [
+            None,
+            [],
+            ["stream1"],
+            ["stream1", "stream2"],
+        ],
+    )
+    def test_get_tap_test_class_with_streams_parameter(
+        self,
+        mock_factory_class,
+        mock_tap_class,
+        streams,
+    ):
+        """Test get_tap_test_class with various streams parameter values."""
+        mock_factory = Mock()
+        mock_test_class = Mock()
+        mock_factory.new_test_class.return_value = mock_test_class
+        mock_factory_class.return_value = mock_factory
+
+        config = {"test": "config"}
+
+        result = get_tap_test_class(
+            tap_class=mock_tap_class,
+            config=config,
+            streams=streams,
+        )
+
+        # Verify factory was created correctly
+        mock_factory_class.assert_called_once_with(
+            tap_class=mock_tap_class,
+            config=config,
+        )
+
+        # Verify new_test_class was called with correct streams parameter
+        mock_factory.new_test_class.assert_called_once_with(
+            custom_suites=None,
+            suite_config=None,
+            include_tap_tests=True,
+            include_stream_tests=True,
+            include_stream_attribute_tests=True,
+            streams=streams,
         )
 
         assert result is mock_test_class

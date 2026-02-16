@@ -50,7 +50,7 @@ class TestSingerTestRunner:
         assert runner.default_kwargs == {}
 
 
-class TestTapTestRunner:
+class TestTapTestRunner:  # noqa: PLR0904
     """Test TapTestRunner functionality."""
 
     @pytest.fixture
@@ -175,7 +175,101 @@ class TestTapTestRunner:
         assert result is True
         mock_tap.run_sync_dry_run.assert_called_once_with(
             dry_run_record_limit=runner.suite_config.max_records_limit,
+            streams=None,
         )
+
+    def test_init_with_streams_parameter(self, mock_tap_class):
+        """Test TapTestRunner initialization with streams parameter."""
+        config = {"test": "config"}
+        streams = ["users", "orders", "products"]
+
+        runner = TapTestRunner(
+            tap_class=mock_tap_class,
+            config=config,
+            streams=streams,
+        )
+
+        assert runner.streams == streams
+        assert runner.singer_class is mock_tap_class
+        assert runner.config == config
+
+    def test_init_with_streams_none(self, mock_tap_class):
+        """Test TapTestRunner initialization with streams=None."""
+        runner = TapTestRunner(
+            tap_class=mock_tap_class,
+            streams=None,
+        )
+
+        assert runner.streams is None
+
+    def test_init_with_streams_empty_sequence(self, mock_tap_class):
+        """Test TapTestRunner initialization with empty streams sequence."""
+        runner = TapTestRunner(
+            tap_class=mock_tap_class,
+            streams=[],
+        )
+
+        assert runner.streams == []
+
+    def test_run_sync_dry_run_with_streams(self, mock_tap_class):
+        """Test run_sync_dry_run method with streams parameter."""
+        streams = ["users", "orders"]
+        runner = TapTestRunner(
+            tap_class=mock_tap_class,
+            streams=streams,
+        )
+
+        mock_tap = Mock(spec=Tap)
+        mock_tap.run_sync_dry_run.return_value = True
+
+        with patch.object(runner, "new_tap", return_value=mock_tap):
+            result = runner.run_sync_dry_run()
+
+        assert result is True
+        mock_tap.run_sync_dry_run.assert_called_once_with(
+            dry_run_record_limit=runner.suite_config.max_records_limit,
+            streams=streams,
+        )
+
+    def test_run_sync_dry_run_with_tuple_streams(self, mock_tap_class):
+        """Test run_sync_dry_run method with tuple streams parameter."""
+        streams = ("users", "orders", "products")
+        runner = TapTestRunner(
+            tap_class=mock_tap_class,
+            streams=streams,
+        )
+
+        mock_tap = Mock(spec=Tap)
+        mock_tap.run_sync_dry_run.return_value = True
+
+        with patch.object(runner, "new_tap", return_value=mock_tap):
+            result = runner.run_sync_dry_run()
+
+        assert result is True
+        mock_tap.run_sync_dry_run.assert_called_once_with(
+            dry_run_record_limit=runner.suite_config.max_records_limit,
+            streams=streams,
+        )
+
+    def test_streams_parameter_with_other_kwargs(self, mock_tap_class):
+        """Test streams parameter works with other keyword arguments."""
+        config = {"api_key": "test"}
+        suite_config = SuiteConfig(max_records_limit=500)
+        streams = ["users"]
+        kwargs = {"parse_env_config": True}
+
+        runner = TapTestRunner(
+            tap_class=mock_tap_class,
+            config=config,
+            suite_config=suite_config,
+            streams=streams,
+            **kwargs,
+        )
+
+        assert runner.streams == streams
+        assert runner.config == config
+        assert runner.suite_config is suite_config
+        assert runner.default_kwargs == kwargs
 
     def test_clean_sync_output(self):
         """Test _clean_sync_output static method."""
@@ -534,6 +628,53 @@ class TestRunnerIntegration:
 
         # Verify tap was created with correct config
         mock_tap_class.assert_called_with(config=config)
+
+    def test_tap_runner_with_streams_parameter(self):
+        """Test a complete tap runner workflow with streams parameter."""
+        # Create a minimal mock tap that behaves more realistically
+        mock_tap_class = Mock(spec=Tap)
+        mock_tap_instance = Mock(spec=Tap)
+        mock_tap_class.return_value = mock_tap_instance
+
+        # Configure realistic return values
+        mock_tap_instance.run_discovery.return_value = '{"streams": []}'
+        mock_tap_instance.run_connection_test.return_value = True
+        mock_tap_instance.run_sync_dry_run.return_value = True
+
+        config = {"api_key": "test_key"}
+        suite_config = SuiteConfig(max_records_limit=100)
+        streams = ["users", "orders"]
+
+        runner = TapTestRunner(
+            tap_class=mock_tap_class,
+            config=config,
+            suite_config=suite_config,
+            streams=streams,
+        )
+
+        # Test that streams are stored correctly
+        assert runner.streams == streams
+
+        # Test discovery (should not use streams)
+        catalog = runner.run_discovery()
+        assert catalog == '{"streams": []}'
+
+        # Test connection (should not use streams)
+        connection_ok = runner.run_connection_test()
+        assert connection_ok is True
+
+        # Test dry run (should pass streams parameter)
+        dry_run_ok = runner.run_sync_dry_run()
+        assert dry_run_ok is True
+
+        # Verify tap was created with correct config
+        mock_tap_class.assert_called_with(config=config)
+
+        # Verify that run_sync_dry_run was called with streams parameter
+        mock_tap_instance.run_sync_dry_run.assert_called_once_with(
+            dry_run_record_limit=100,
+            streams=streams,
+        )
 
     def test_target_runner_with_real_input_data(self, tmp_path: Path):
         """Test target runner with realistic input data."""
