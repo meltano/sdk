@@ -7,7 +7,11 @@ import logging
 import typing as t
 from dataclasses import dataclass, fields
 
+from typing_extensions import Self
+
 from singer_sdk.singerlib.schema import Schema
+
+_FIELD_KEY_PAIRS: dict[type, tuple[tuple[str, str], ...]] = {}
 
 if t.TYPE_CHECKING:
     import sys
@@ -70,12 +74,14 @@ class Metadata:
         Returns:
             Metadata object.
         """
-        return cls(
-            **{
-                object_field.name: value.get(object_field.name.replace("_", "-"))
+        pairs = _FIELD_KEY_PAIRS.get(cls)
+        if pairs is None:
+            pairs = tuple(
+                (object_field.name, object_field.name.replace("_", "-"))
                 for object_field in fields(cls)
-            },
-        )
+            )
+            _FIELD_KEY_PAIRS[cls] = pairs
+        return cls(**{name: value.get(src_key) for name, src_key in pairs})
 
     def to_dict(self) -> dict[str, t.Any]:
         """Convert metadata to a JSON-encodable dictionary.
