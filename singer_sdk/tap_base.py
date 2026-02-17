@@ -40,6 +40,8 @@ if t.TYPE_CHECKING:
     from singer_sdk.singerlib.encoding.base import GenericSingerWriter
     from singer_sdk.streams import Stream
 
+_CACHED_SQL_CLASSES: dict[str, t.Any] = {}
+
 STREAM_MAPS_CONFIG = "stream_maps"
 
 
@@ -684,9 +686,14 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
             SingerSDKDeprecationWarning,
             stacklevel=2,
         )
-        from singer_sdk.sql import SQLTap  # noqa: PLC0415
+        cls = _CACHED_SQL_CLASSES.get("SQLTap")
+        if cls is None:
+            from singer_sdk.sql import SQLTap  # noqa: PLC0415
 
-        return SQLTap
+            cls = SQLTap
+            _CACHED_SQL_CLASSES["SQLTap"] = cls
+
+        return cls
 
     msg = f"module {__name__!r} has no attribute {name!r}"
     raise AttributeError(msg)
