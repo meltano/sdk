@@ -55,6 +55,7 @@ from __future__ import annotations
 import json
 import typing as t
 
+import sqlalchemy.types
 from jsonschema import validators
 
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
@@ -1349,26 +1350,10 @@ def to_jsonschema_type(
     Returns:
         A compatible JSON Schema type definition.
     """
-    import sqlalchemy.types  # noqa: PLC0415
+    # Use local references to avoid repeated global lookups
+    lookup = sqltype_lookup
+    str_type_attr = "type_dict"
 
-    sqltype_lookup: dict[str, dict] = {
-        # NOTE: This is an ordered mapping, with earlier mappings taking precedence.
-        #       If the SQL-provided type contains the type name on the left, the mapping
-        #       will return the respective singer type.
-        "timestamp": DateTimeType.type_dict,
-        "datetime": DateTimeType.type_dict,
-        "date": DateType.type_dict,
-        "int": IntegerType.type_dict,
-        "number": NumberType.type_dict,
-        "decimal": NumberType.type_dict,
-        "double": NumberType.type_dict,
-        "float": NumberType.type_dict,
-        "string": StringType.type_dict,
-        "text": StringType.type_dict,
-        "char": StringType.type_dict,
-        "bool": BooleanType.type_dict,
-        "variant": StringType.type_dict,
-    }
     if isinstance(from_type, str):  # pragma: no cover
         type_name = from_type
     elif isinstance(from_type, sqlalchemy.types.TypeEngine):  # pragma: no cover
@@ -1380,14 +1365,15 @@ def to_jsonschema_type(
         # TODO: this should be a TypeError, but it's a breaking change.
         raise ValueError(msg)  # noqa: TRY004
 
-    return next(
-        (
-            jsonschema_type
-            for sqltype, jsonschema_type in sqltype_lookup.items()
-            if sqltype.lower() in type_name.lower()
-        ),
-        sqltype_lookup["string"],  # safe failover to str
-    )
+    tl = type_name.lower()
+    for sqltype, jsonschema_cls in lookup:
+        if sqltype in tl:
+            # Call getattr each time to trigger the DefaultInstanceProperty and
+            # produce a fresh dict per call (matching original behavior).
+            return getattr(jsonschema_cls, str_type_attr)
+
+    # safe failover to str
+    return getattr(StringType, str_type_attr)
 
 
 def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> bool:
@@ -1457,3 +1443,20 @@ def to_sql_type(  # noqa: PLR0911, C901
         return sqlalchemy.types.BOOLEAN()
 
     return sqlalchemy.types.VARCHAR()
+
+
+sqltype_lookup: list[tuple[str, type]] = [
+    ("timestamp", DateTimeType),
+    ("datetime", DateTimeType),
+    ("date", DateType),
+    ("int", IntegerType),
+    ("number", NumberType),
+    ("decimal", NumberType),
+    ("double", NumberType),
+    ("float", NumberType),
+    ("string", StringType),
+    ("text", StringType),
+    ("char", StringType),
+    ("bool", BooleanType),
+    ("variant", StringType),
+]
