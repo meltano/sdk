@@ -9,6 +9,8 @@ import sys
 import typing as t
 from types import TracebackType
 
+from typing_extensions import Required
+
 from singer_sdk import metrics
 
 if sys.version_info >= (3, 11):
@@ -103,15 +105,19 @@ class StructuredFormatter(logging.Formatter):
             frames: list[_FrameData] = []
             tb = exc_traceback
             while tb is not None:
+                f_code = tb.tb_frame.f_code
+                lineno = tb.tb_lineno
                 frame_info: _FrameData = {
-                    "filename": tb.tb_frame.f_code.co_filename,
-                    "function": tb.tb_frame.f_code.co_name,
-                    "lineno": tb.tb_lineno,
+                    "filename": f_code.co_filename,
+                    "function": f_code.co_name,
+                    "lineno": lineno,
+                    # TODO: Ensure newlines are stripped?
+                    # TODO: Include one line above and one line below for context?
                     # TODO: Ensure newlines are stripped?
                     # TODO: Include one line above and one line below for context?
                     "line": linecache.getline(
-                        tb.tb_frame.f_code.co_filename,
-                        tb.tb_lineno,
+                        f_code.co_filename,
+                        lineno,
                     ),
                 }
                 frames.append(frame_info)
@@ -119,18 +125,28 @@ class StructuredFormatter(logging.Formatter):
             exception_data["traceback"] = frames
 
         # Handle exception chaining (__cause__ and __context__)
-        if hasattr(exc_value, "__cause__") and exc_value.__cause__:
-            exception_data["cause"] = self._format_exception((
-                type(exc_value.__cause__),
-                exc_value.__cause__,
-                exc_value.__cause__.__traceback__,
-            ))
-        elif hasattr(exc_value, "__context__") and exc_value.__context__:
-            exception_data["context"] = self._format_exception((
-                type(exc_value.__context__),
-                exc_value.__context__,
-                exc_value.__context__.__traceback__,
-            ))
+        try:
+            cause = exc_value.__cause__
+            if cause:
+                exception_data["cause"] = self._format_exception((
+                    type(cause),
+                    cause,
+                    cause.__traceback__,
+                ))
+        except AttributeError:
+            pass
+        else:
+            if not cause:
+                try:
+                    context = exc_value.__context__
+                    if context:
+                        exception_data["context"] = self._format_exception((
+                            type(context),
+                            context,
+                            context.__traceback__,
+                        ))
+                except AttributeError:
+                    pass
 
         return exception_data
 
