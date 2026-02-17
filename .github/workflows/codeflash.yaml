@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CODEFLASH_API_KEY: ${{ secrets.CODEFLASH_API_KEY }}
-    
+
     steps:
         - name: Checkout
         uses: actions/checkout@v4
