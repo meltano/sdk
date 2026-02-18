@@ -158,7 +158,6 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             Dictionary of HTTP headers to use as a base for every request.
         """
         return {
-            "User-Agent": self.user_agent,
             **self._http_headers,
         }
 
@@ -402,6 +401,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             A :class:`requests.PreparedRequest` object.
         """
         request = requests.Request(*args, **kwargs)
+        request.headers.setdefault("User-Agent", self.user_agent)
         self.requests_session.auth = self.authenticator
         return self.requests_session.prepare_request(request)
 
