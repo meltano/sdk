@@ -26,6 +26,7 @@ class DummyJSONStream(RESTStream):
     """DummyJSON stream class."""
 
     records_jsonpath: str = "$[*]"
+    timeout = 1
 
     @property
     @override
@@ -36,18 +37,13 @@ class DummyJSONStream(RESTStream):
     @property
     @override
     def requests_session(self) -> CachedSession:
-        return CachedSession(
-            ".http_cache",
-            backend="filesystem",
-            serializer="json",
-        )
+        return CachedSession(".http_cache", backend="filesystem", serializer="json")
 
     @property
     @override
     def authenticator(self) -> DummyJSONAuthenticator:
         return DummyJSONAuthenticator(
-            auth_url=f"{self.url_base}/auth/login",
-            refresh_token_url=f"{self.url_base}/refresh",
+            base_url=self.config["api_url"],
             username=self.config["username"],
             password=self.config["password"],
         )
