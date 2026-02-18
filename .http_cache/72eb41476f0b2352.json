@@ -1,0 +1,1522 @@
+{
+  "created_at": "2026-02-18T06:37:09.300705+00:00",
+  "elapsed": 2.384607,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-RAY": "9cfb83a478b024cb-ATL",
+    "Connection": "keep-alive",
+    "Content-Encoding": "zstd",
+    "Content-Type": "application/json; charset=utf-8",
+    "Date": "Wed, 18 Feb 2026 06:37:09 GMT",
+    "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=EUFkN2FmJJEPaTre%2BE2LfQsSHfA%2BGQ8uVpDCXaDnjIGkz6HmsoOVXJ0WJCZeDlHz0ovboD5P%2BA%2B48%2FaPTnwt9ji7bfSgxBw8tpAmMvc%3D\"}]}",
+    "Server": "cloudflare",
+    "Transfer-Encoding": "chunked",
+    "access-control-allow-origin": "*",
+    "cf-cache-status": "DYNAMIC",
+    "etag": "W/\"8a1d-wUlPWJTx2XItcLJW7OssPjIvkw0\"",
+    "strict-transport-security": "max-age=15552000; includeSubDomains",
+    "vary": "Accept-Encoding",
+    "x-content-type-options": "nosniff",
+    "x-dns-prefetch-control": "off",
+    "x-download-options": "noopen",
+    "x-frame-options": "SAMEORIGIN",
+    "x-ratelimit-limit": "100",
+    "x-ratelimit-remaining": "99",
+    "x-ratelimit-reset": "1771396634",
+    "x-xss-protection": "1; mode=block"
+  },
+  "reason": "OK",
+  "request": {
+    "body": null,
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate, zstd",
+      "Authorization": "REDACTED",
+      "Connection": "keep-alive",
+      "User-Agent": "tap-dummyjson/0.0.0"
+    },
+    "method": "GET",
+    "url": "https://dummyjson.com/products?limit=25&skip=25"
+  },
+  "status_code": 200,
+  "url": "https://dummyjson.com/products?limit=25&skip=25",
+  "_decoded_content": {
+    "products": [
+      {
+        "id": 26,
+        "title": "Green Chili Pepper",
+        "description": "Spicy green chili pepper, ideal for adding heat to your favorite recipes.",
+        "category": "groceries",
+        "price": 0.99,
+        "discountPercentage": 1,
+        "rating": 3.66,
+        "stock": 3,
+        "tags": [
+          "vegetables"
+        ],
+        "sku": "GRO-BRD-GRE-026",
+        "weight": 7,
+        "dimensions": {
+          "width": 15.38,
+          "height": 18.12,
+          "depth": 19.92
+        },
+        "warrantyInformation": "2 year warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "Low Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Luna Russell",
+            "reviewerEmail": "luna.russell@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Waste of money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Noah Lewis",
+            "reviewerEmail": "noah.lewis@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Clara Berry",
+            "reviewerEmail": "clara.berry@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 39,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "9335000538563",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/green-chili-pepper/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/green-chili-pepper/thumbnail.webp"
+      },
+      {
+        "id": 27,
+        "title": "Honey Jar",
+        "description": "Pure and natural honey in a convenient jar, perfect for sweetening beverages or drizzling over food.",
+        "category": "groceries",
+        "price": 6.99,
+        "discountPercentage": 14.4,
+        "rating": 3.97,
+        "stock": 34,
+        "tags": [
+          "condiments"
+        ],
+        "sku": "GRO-BRD-HON-027",
+        "weight": 2,
+        "dimensions": {
+          "width": 9.28,
+          "height": 21.72,
+          "depth": 17.74
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 1,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Autumn Gomez",
+            "reviewerEmail": "autumn.gomez@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Benjamin Wilson",
+            "reviewerEmail": "benjamin.wilson@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nicholas Edwards",
+            "reviewerEmail": "nicholas.edwards@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 47,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "6354306346329",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/honey-jar/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/honey-jar/thumbnail.webp"
+      },
+      {
+        "id": 28,
+        "title": "Ice Cream",
+        "description": "Creamy and delicious ice cream, available in various flavors for a delightful treat.",
+        "category": "groceries",
+        "price": 5.49,
+        "discountPercentage": 8.69,
+        "rating": 3.39,
+        "stock": 27,
+        "tags": [
+          "desserts"
+        ],
+        "sku": "GRO-BRD-CRE-028",
+        "weight": 1,
+        "dimensions": {
+          "width": 14.83,
+          "height": 15.07,
+          "depth": 24.2
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Elijah Cruz",
+            "reviewerEmail": "elijah.cruz@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jace Smith",
+            "reviewerEmail": "jace.smith@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Sadie Morales",
+            "reviewerEmail": "sadie.morales@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 42,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "0788954559076",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/ice-cream/1.webp",
+          "https://cdn.dummyjson.com/product-images/groceries/ice-cream/2.webp",
+          "https://cdn.dummyjson.com/product-images/groceries/ice-cream/3.webp",
+          "https://cdn.dummyjson.com/product-images/groceries/ice-cream/4.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/ice-cream/thumbnail.webp"
+      },
+      {
+        "id": 29,
+        "title": "Juice",
+        "description": "Refreshing fruit juice, packed with vitamins and great for staying hydrated.",
+        "category": "groceries",
+        "price": 3.99,
+        "discountPercentage": 12.06,
+        "rating": 3.94,
+        "stock": 50,
+        "tags": [
+          "beverages"
+        ],
+        "sku": "GRO-BRD-JUI-029",
+        "weight": 1,
+        "dimensions": {
+          "width": 18.56,
+          "height": 21.46,
+          "depth": 28.02
+        },
+        "warrantyInformation": "6 months warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nolan Gonzalez",
+            "reviewerEmail": "nolan.gonzalez@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Bella Grant",
+            "reviewerEmail": "bella.grant@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aria Flores",
+            "reviewerEmail": "aria.flores@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 25,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "6936112580956",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/juice/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/juice/thumbnail.webp"
+      },
+      {
+        "id": 30,
+        "title": "Kiwi",
+        "description": "Nutrient-rich kiwi, perfect for snacking or adding a tropical twist to your dishes.",
+        "category": "groceries",
+        "price": 2.49,
+        "discountPercentage": 15.22,
+        "rating": 4.93,
+        "stock": 99,
+        "tags": [
+          "fruits"
+        ],
+        "sku": "GRO-BRD-KIW-030",
+        "weight": 5,
+        "dimensions": {
+          "width": 19.4,
+          "height": 18.67,
+          "depth": 17.13
+        },
+        "warrantyInformation": "6 months warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Emily Brown",
+            "reviewerEmail": "emily.brown@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jackson Morales",
+            "reviewerEmail": "jackson.morales@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nora Russell",
+            "reviewerEmail": "nora.russell@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 30,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "2530169917252",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/kiwi/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/kiwi/thumbnail.webp"
+      },
+      {
+        "id": 31,
+        "title": "Lemon",
+        "description": "Zesty and tangy lemons, versatile for cooking, baking, or making refreshing beverages.",
+        "category": "groceries",
+        "price": 0.79,
+        "discountPercentage": 9.7,
+        "rating": 3.53,
+        "stock": 31,
+        "tags": [
+          "fruits"
+        ],
+        "sku": "GRO-BRD-LEM-031",
+        "weight": 3,
+        "dimensions": {
+          "width": 23.77,
+          "height": 9.22,
+          "depth": 12.05
+        },
+        "warrantyInformation": "No warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Logan Lawson",
+            "reviewerEmail": "logan.lawson@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Avery Perez",
+            "reviewerEmail": "avery.perez@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Benjamin Foster",
+            "reviewerEmail": "benjamin.foster@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 29,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "4871812433378",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/lemon/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/lemon/thumbnail.webp"
+      },
+      {
+        "id": 32,
+        "title": "Milk",
+        "description": "Fresh and nutritious milk, a staple for various recipes and daily consumption.",
+        "category": "groceries",
+        "price": 3.49,
+        "discountPercentage": 13.74,
+        "rating": 2.61,
+        "stock": 27,
+        "tags": [
+          "dairy"
+        ],
+        "sku": "GRO-BRD-MIL-032",
+        "weight": 5,
+        "dimensions": {
+          "width": 12.92,
+          "height": 15.76,
+          "depth": 11.29
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nicholas Bailey",
+            "reviewerEmail": "nicholas.bailey@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Harper Turner",
+            "reviewerEmail": "harper.turner@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Great value for money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Autumn Gomez",
+            "reviewerEmail": "autumn.gomez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 5,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "9835034508303",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/milk/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/milk/thumbnail.webp"
+      },
+      {
+        "id": 33,
+        "title": "Mulberry",
+        "description": "Sweet and juicy mulberries, perfect for snacking or adding to desserts and cereals.",
+        "category": "groceries",
+        "price": 4.99,
+        "discountPercentage": 12.87,
+        "rating": 4.95,
+        "stock": 99,
+        "tags": [
+          "fruits"
+        ],
+        "sku": "GRO-BRD-MUL-033",
+        "weight": 5,
+        "dimensions": {
+          "width": 12.8,
+          "height": 18.54,
+          "depth": 6.31
+        },
+        "warrantyInformation": "2 year warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Avery Barnes",
+            "reviewerEmail": "avery.barnes@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Not worth the price!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Sadie Morales",
+            "reviewerEmail": "sadie.morales@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Oscar Powers",
+            "reviewerEmail": "oscar.powers@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 43,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "2206629068605",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/mulberry/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/mulberry/thumbnail.webp"
+      },
+      {
+        "id": 34,
+        "title": "Nescafe Coffee",
+        "description": "Quality coffee from Nescafe, available in various blends for a rich and satisfying cup.",
+        "category": "groceries",
+        "price": 7.99,
+        "discountPercentage": 1.59,
+        "rating": 4.82,
+        "stock": 57,
+        "tags": [
+          "beverages",
+          "coffee"
+        ],
+        "sku": "GRO-BRD-NES-034",
+        "weight": 6,
+        "dimensions": {
+          "width": 20.54,
+          "height": 29.49,
+          "depth": 29.2
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Gabriel Adams",
+            "reviewerEmail": "gabriel.adams@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ella Cook",
+            "reviewerEmail": "ella.cook@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Logan Torres",
+            "reviewerEmail": "logan.torres@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 8,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "8572637994159",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/nescafe-coffee/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/nescafe-coffee/thumbnail.webp"
+      },
+      {
+        "id": 35,
+        "title": "Potatoes",
+        "description": "Versatile and starchy potatoes, great for roasting, mashing, or as a side dish.",
+        "category": "groceries",
+        "price": 2.29,
+        "discountPercentage": 5.38,
+        "rating": 4.81,
+        "stock": 13,
+        "tags": [
+          "vegetables"
+        ],
+        "sku": "GRO-BRD-POT-035",
+        "weight": 9,
+        "dimensions": {
+          "width": 22.65,
+          "height": 9.83,
+          "depth": 21.75
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Eleanor Collins",
+            "reviewerEmail": "eleanor.collins@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Lily Torres",
+            "reviewerEmail": "lily.torres@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ariana Ross",
+            "reviewerEmail": "ariana.ross@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 9,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "3590399655074",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/potatoes/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/potatoes/thumbnail.webp"
+      },
+      {
+        "id": 36,
+        "title": "Protein Powder",
+        "description": "Nutrient-packed protein powder, ideal for supplementing your diet with essential proteins.",
+        "category": "groceries",
+        "price": 19.99,
+        "discountPercentage": 7.59,
+        "rating": 4.18,
+        "stock": 80,
+        "tags": [
+          "health supplements"
+        ],
+        "sku": "GRO-BRD-PRO-036",
+        "weight": 9,
+        "dimensions": {
+          "width": 9.01,
+          "height": 12.53,
+          "depth": 22.35
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Very unhappy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aurora Rodriguez",
+            "reviewerEmail": "aurora.rodriguez@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Miles Stevenson",
+            "reviewerEmail": "miles.stevenson@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Clara Berry",
+            "reviewerEmail": "clara.berry@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 6,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "0435397154434",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/protein-powder/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/protein-powder/thumbnail.webp"
+      },
+      {
+        "id": 37,
+        "title": "Red Onions",
+        "description": "Flavorful and aromatic red onions, perfect for adding depth to your savory dishes.",
+        "category": "groceries",
+        "price": 1.99,
+        "discountPercentage": 9.9,
+        "rating": 4.2,
+        "stock": 82,
+        "tags": [
+          "vegetables"
+        ],
+        "sku": "GRO-BRD-ONI-037",
+        "weight": 9,
+        "dimensions": {
+          "width": 16.01,
+          "height": 24.96,
+          "depth": 12.74
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Maya Reed",
+            "reviewerEmail": "maya.reed@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very dissatisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Evelyn Gonzalez",
+            "reviewerEmail": "evelyn.gonzalez@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jackson Evans",
+            "reviewerEmail": "jackson.evans@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 8,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "4716374115631",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/red-onions/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/red-onions/thumbnail.webp"
+      },
+      {
+        "id": 38,
+        "title": "Rice",
+        "description": "High-quality rice, a staple for various cuisines and a versatile base for many dishes.",
+        "category": "groceries",
+        "price": 5.99,
+        "discountPercentage": 9.29,
+        "rating": 3.18,
+        "stock": 59,
+        "tags": [
+          "grains"
+        ],
+        "sku": "GRO-BRD-RIC-038",
+        "weight": 5,
+        "dimensions": {
+          "width": 17.21,
+          "height": 9.88,
+          "depth": 17.16
+        },
+        "warrantyInformation": "6 months warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Sophia Brown",
+            "reviewerEmail": "sophia.brown@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Grace Perry",
+            "reviewerEmail": "grace.perry@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Cameron Burke",
+            "reviewerEmail": "cameron.burke@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 20,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "7339757397015",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/rice/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/rice/thumbnail.webp"
+      },
+      {
+        "id": 39,
+        "title": "Soft Drinks",
+        "description": "Assorted soft drinks in various flavors, perfect for refreshing beverages.",
+        "category": "groceries",
+        "price": 1.99,
+        "discountPercentage": 17.48,
+        "rating": 4.75,
+        "stock": 53,
+        "tags": [
+          "beverages"
+        ],
+        "sku": "GRO-BRD-SOF-039",
+        "weight": 9,
+        "dimensions": {
+          "width": 19.75,
+          "height": 6.79,
+          "depth": 9.33
+        },
+        "warrantyInformation": "6 months warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 2,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Zachary Lee",
+            "reviewerEmail": "zachary.lee@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Oscar Powers",
+            "reviewerEmail": "oscar.powers@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Hannah Robinson",
+            "reviewerEmail": "hannah.robinson@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 10,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "2991169581178",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/soft-drinks/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/soft-drinks/thumbnail.webp"
+      },
+      {
+        "id": 40,
+        "title": "Strawberry",
+        "description": "Sweet and succulent strawberries, great for snacking, desserts, or blending into smoothies.",
+        "category": "groceries",
+        "price": 3.99,
+        "discountPercentage": 1.12,
+        "rating": 3.08,
+        "stock": 46,
+        "tags": [
+          "fruits"
+        ],
+        "sku": "GRO-BRD-STR-040",
+        "weight": 1,
+        "dimensions": {
+          "width": 28.18,
+          "height": 21.25,
+          "depth": 28.54
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Amelia Perez",
+            "reviewerEmail": "amelia.perez@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Olivia Wilson",
+            "reviewerEmail": "olivia.wilson@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Hunter Gordon",
+            "reviewerEmail": "hunter.gordon@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 12,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "0792647462295",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/strawberry/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/strawberry/thumbnail.webp"
+      },
+      {
+        "id": 41,
+        "title": "Tissue Paper Box",
+        "description": "Convenient tissue paper box for everyday use, providing soft and absorbent tissues.",
+        "category": "groceries",
+        "price": 2.49,
+        "discountPercentage": 13.28,
+        "rating": 2.69,
+        "stock": 86,
+        "tags": [
+          "household essentials"
+        ],
+        "sku": "GRO-BRD-TIS-041",
+        "weight": 1,
+        "dimensions": {
+          "width": 18.75,
+          "height": 17.58,
+          "depth": 12.43
+        },
+        "warrantyInformation": "No warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 1,
+            "comment": "Not as described!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ariana Ross",
+            "reviewerEmail": "ariana.ross@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Carter Baker",
+            "reviewerEmail": "carter.baker@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Great value for money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Penelope Harper",
+            "reviewerEmail": "penelope.harper@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 44,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "9446468291745",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/tissue-paper-box/1.webp",
+          "https://cdn.dummyjson.com/product-images/groceries/tissue-paper-box/2.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/tissue-paper-box/thumbnail.webp"
+      },
+      {
+        "id": 42,
+        "title": "Water",
+        "description": "Pure and refreshing bottled water, essential for staying hydrated throughout the day.",
+        "category": "groceries",
+        "price": 0.99,
+        "discountPercentage": 14.92,
+        "rating": 4.96,
+        "stock": 53,
+        "tags": [
+          "beverages"
+        ],
+        "sku": "GRO-BRD-WAT-042",
+        "weight": 4,
+        "dimensions": {
+          "width": 18.43,
+          "height": 7.4,
+          "depth": 17.79
+        },
+        "warrantyInformation": "3 months warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jonathan Pierce",
+            "reviewerEmail": "jonathan.pierce@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Grayson Coleman",
+            "reviewerEmail": "grayson.coleman@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Not as described!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ethan Fletcher",
+            "reviewerEmail": "ethan.fletcher@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 28,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "2409829645213",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/water/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/water/thumbnail.webp"
+      },
+      {
+        "id": 43,
+        "title": "Decoration Swing",
+        "description": "The Decoration Swing is a charming addition to your home decor. Crafted with intricate details, it adds a touch of elegance and whimsy to any room.",
+        "category": "home-decoration",
+        "price": 59.99,
+        "discountPercentage": 10.41,
+        "rating": 3.16,
+        "stock": 47,
+        "tags": [
+          "home decor",
+          "swing"
+        ],
+        "sku": "HOM-BRD-DEC-043",
+        "weight": 4,
+        "dimensions": {
+          "width": 23.84,
+          "height": 15.19,
+          "depth": 26.05
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 1,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Daniel Cook",
+            "reviewerEmail": "daniel.cook@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Hunter Gordon",
+            "reviewerEmail": "hunter.gordon@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very unhappy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Stella Morris",
+            "reviewerEmail": "stella.morris@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 8,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "9646971048759",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/home-decoration/decoration-swing/1.webp",
+          "https://cdn.dummyjson.com/product-images/home-decoration/decoration-swing/2.webp",
+          "https://cdn.dummyjson.com/product-images/home-decoration/decoration-swing/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/home-decoration/decoration-swing/thumbnail.webp"
+      },
+      {
+        "id": 44,
+        "title": "Family Tree Photo Frame",
+        "description": "The Family Tree Photo Frame is a sentimental and stylish way to display your cherished family memories. With multiple photo slots, it tells the story of your loved ones.",
+        "category": "home-decoration",
+        "price": 29.99,
+        "discountPercentage": 14.87,
+        "rating": 4.53,
+        "stock": 77,
+        "tags": [
+          "home decor",
+          "photo frame"
+        ],
+        "sku": "HOM-BRD-FAM-044",
+        "weight": 1,
+        "dimensions": {
+          "width": 17.27,
+          "height": 14.81,
+          "depth": 29.11
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Oscar Powers",
+            "reviewerEmail": "oscar.powers@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Austin Hudson",
+            "reviewerEmail": "austin.hudson@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Very dissatisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Luke Cooper",
+            "reviewerEmail": "luke.cooper@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 15,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "5398738320864",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/home-decoration/family-tree-photo-frame/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/home-decoration/family-tree-photo-frame/thumbnail.webp"
+      },
+      {
+        "id": 45,
+        "title": "House Showpiece Plant",
+        "description": "The House Showpiece Plant is an artificial plant that brings a touch of nature to your home without the need for maintenance. It adds greenery and style to any space.",
+        "category": "home-decoration",
+        "price": 39.99,
+        "discountPercentage": 7.46,
+        "rating": 4.67,
+        "stock": 28,
+        "tags": [
+          "home decor",
+          "artificial plants"
+        ],
+        "sku": "HOM-BRD-HOU-045",
+        "weight": 8,
+        "dimensions": {
+          "width": 8.55,
+          "height": 14.62,
+          "depth": 17.25
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Natalie Harris",
+            "reviewerEmail": "natalie.harris@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Max Russell",
+            "reviewerEmail": "max.russell@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nolan Gonzalez",
+            "reviewerEmail": "nolan.gonzalez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 3,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "8433795204995",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/home-decoration/house-showpiece-plant/1.webp",
+          "https://cdn.dummyjson.com/product-images/home-decoration/house-showpiece-plant/2.webp",
+          "https://cdn.dummyjson.com/product-images/home-decoration/house-showpiece-plant/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/home-decoration/house-showpiece-plant/thumbnail.webp"
+      },
+      {
+        "id": 46,
+        "title": "Plant Pot",
+        "description": "The Plant Pot is a stylish container for your favorite plants. With a sleek design, it complements your indoor or outdoor garden, adding a modern touch to your plant display.",
+        "category": "home-decoration",
+        "price": 14.99,
+        "discountPercentage": 6.84,
+        "rating": 3.01,
+        "stock": 59,
+        "tags": [
+          "home decor",
+          "plant accessories"
+        ],
+        "sku": "HOM-BRD-PLA-046",
+        "weight": 9,
+        "dimensions": {
+          "width": 9.83,
+          "height": 20.28,
+          "depth": 13.49
+        },
+        "warrantyInformation": "Lifetime warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Vivian Carter",
+            "reviewerEmail": "vivian.carter@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ella Adams",
+            "reviewerEmail": "ella.adams@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Liam Smith",
+            "reviewerEmail": "liam.smith@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 31,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "8477070578398",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/home-decoration/plant-pot/1.webp",
+          "https://cdn.dummyjson.com/product-images/home-decoration/plant-pot/2.webp",
+          "https://cdn.dummyjson.com/product-images/home-decoration/plant-pot/3.webp",
+          "https://cdn.dummyjson.com/product-images/home-decoration/plant-pot/4.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/home-decoration/plant-pot/thumbnail.webp"
+      },
+      {
+        "id": 47,
+        "title": "Table Lamp",
+        "description": "The Table Lamp is a functional and decorative lighting solution for your living space. With a modern design, it provides both ambient and task lighting, enhancing the atmosphere.",
+        "category": "home-decoration",
+        "price": 49.99,
+        "discountPercentage": 7.09,
+        "rating": 3.55,
+        "stock": 9,
+        "tags": [
+          "home decor",
+          "lighting"
+        ],
+        "sku": "HOM-BRD-TAB-047",
+        "weight": 4,
+        "dimensions": {
+          "width": 8.98,
+          "height": 13.41,
+          "depth": 5.65
+        },
+        "warrantyInformation": "3 months warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Benjamin Foster",
+            "reviewerEmail": "benjamin.foster@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Sophia Jones",
+            "reviewerEmail": "sophia.jones@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Natalie Harris",
+            "reviewerEmail": "natalie.harris@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 2,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "8806138916048",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/home-decoration/table-lamp/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/home-decoration/table-lamp/thumbnail.webp"
+      },
+      {
+        "id": 48,
+        "title": "Bamboo Spatula",
+        "description": "The Bamboo Spatula is a versatile kitchen tool made from eco-friendly bamboo. Ideal for flipping, stirring, and serving various dishes.",
+        "category": "kitchen-accessories",
+        "price": 7.99,
+        "discountPercentage": 2.84,
+        "rating": 3.27,
+        "stock": 37,
+        "tags": [
+          "kitchen tools",
+          "utensils"
+        ],
+        "sku": "KIT-BRD-BAM-048",
+        "weight": 3,
+        "dimensions": {
+          "width": 21.32,
+          "height": 23.03,
+          "depth": 25.94
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Lucas Ramirez",
+            "reviewerEmail": "lucas.ramirez@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Caleb Perkins",
+            "reviewerEmail": "caleb.perkins@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nolan Gonzalez",
+            "reviewerEmail": "nolan.gonzalez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "60 days return policy",
+        "minimumOrderQuantity": 29,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "3988181417733",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/bamboo-spatula/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/bamboo-spatula/thumbnail.webp"
+      },
+      {
+        "id": 49,
+        "title": "Black Aluminium Cup",
+        "description": "The Black Aluminium Cup is a stylish and durable cup suitable for both hot and cold beverages. Its sleek black design adds a modern touch to your drinkware collection.",
+        "category": "kitchen-accessories",
+        "price": 5.99,
+        "discountPercentage": 15.65,
+        "rating": 4.46,
+        "stock": 75,
+        "tags": [
+          "drinkware",
+          "cups"
+        ],
+        "sku": "KIT-BRD-BLA-049",
+        "weight": 7,
+        "dimensions": {
+          "width": 5.88,
+          "height": 5.11,
+          "depth": 10.03
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Alexander Hernandez",
+            "reviewerEmail": "alexander.hernandez@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Great value for money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aurora Rodriguez",
+            "reviewerEmail": "aurora.rodriguez@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Not worth the price!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Benjamin Foster",
+            "reviewerEmail": "benjamin.foster@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 48,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "5606164195748",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/black-aluminium-cup/1.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/black-aluminium-cup/2.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/black-aluminium-cup/thumbnail.webp"
+      },
+      {
+        "id": 50,
+        "title": "Black Whisk",
+        "description": "The Black Whisk is a kitchen essential for whisking and beating ingredients. Its ergonomic handle and sleek design make it a practical and stylish tool.",
+        "category": "kitchen-accessories",
+        "price": 9.99,
+        "discountPercentage": 10.24,
+        "rating": 3.9,
+        "stock": 73,
+        "tags": [
+          "kitchen tools",
+          "utensils"
+        ],
+        "sku": "KIT-BRD-BLA-050",
+        "weight": 1,
+        "dimensions": {
+          "width": 13.03,
+          "height": 5.99,
+          "depth": 20.64
+        },
+        "warrantyInformation": "3 months warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Not worth the price!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Cameron Perez",
+            "reviewerEmail": "cameron.perez@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Waste of money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Benjamin Foster",
+            "reviewerEmail": "benjamin.foster@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Paisley Bell",
+            "reviewerEmail": "paisley.bell@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 40,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "3112495795209",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/black-whisk/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/black-whisk/thumbnail.webp"
+      }
+    ],
+    "total": 194,
+    "skip": 25,
+    "limit": 25
+  }
+}

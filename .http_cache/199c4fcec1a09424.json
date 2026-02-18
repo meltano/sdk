@@ -1,0 +1,1536 @@
+{
+  "created_at": "2026-02-18T06:37:11.662906+00:00",
+  "elapsed": 2.337201,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-RAY": "9cfb83b34f6a44e7-ATL",
+    "Connection": "keep-alive",
+    "Content-Encoding": "zstd",
+    "Content-Type": "application/json; charset=utf-8",
+    "Date": "Wed, 18 Feb 2026 06:37:11 GMT",
+    "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=EXGcoNoCt6u8uDhGWUZywGKu%2BKSPXNNg%2Fbxn%2F26dYxqhV6brupcGZVSfU%2FWCpxXK4HEHZiH0d1%2FNy9zDw1PSg5onQgEIOAHo2YQNY%2Fc%3D\"}]}",
+    "Server": "cloudflare",
+    "Transfer-Encoding": "chunked",
+    "access-control-allow-origin": "*",
+    "cf-cache-status": "DYNAMIC",
+    "etag": "W/\"922f-YJx72MeR4yiInWWRtMqgdJhBHsw\"",
+    "strict-transport-security": "max-age=15552000; includeSubDomains",
+    "vary": "Accept-Encoding",
+    "x-content-type-options": "nosniff",
+    "x-dns-prefetch-control": "off",
+    "x-download-options": "noopen",
+    "x-frame-options": "SAMEORIGIN",
+    "x-ratelimit-limit": "100",
+    "x-ratelimit-remaining": "99",
+    "x-ratelimit-reset": "1771396634",
+    "x-xss-protection": "1; mode=block"
+  },
+  "reason": "OK",
+  "request": {
+    "body": null,
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate, zstd",
+      "Authorization": "REDACTED",
+      "Connection": "keep-alive",
+      "User-Agent": "tap-dummyjson/0.0.0"
+    },
+    "method": "GET",
+    "url": "https://dummyjson.com/products?limit=25&skip=50"
+  },
+  "status_code": 200,
+  "url": "https://dummyjson.com/products?limit=25&skip=50",
+  "_decoded_content": {
+    "products": [
+      {
+        "id": 51,
+        "title": "Boxed Blender",
+        "description": "The Boxed Blender is a powerful and compact blender perfect for smoothies, shakes, and more. Its convenient design and multiple functions make it a versatile kitchen appliance.",
+        "category": "kitchen-accessories",
+        "price": 39.99,
+        "discountPercentage": 7.26,
+        "rating": 4.56,
+        "stock": 9,
+        "tags": [
+          "kitchen appliances",
+          "blenders"
+        ],
+        "sku": "KIT-BRD-BOX-051",
+        "weight": 1,
+        "dimensions": {
+          "width": 9.05,
+          "height": 19.45,
+          "depth": 17.59
+        },
+        "warrantyInformation": "5 year warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ella Adams",
+            "reviewerEmail": "ella.adams@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ruby Andrews",
+            "reviewerEmail": "ruby.andrews@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aurora Lawson",
+            "reviewerEmail": "aurora.lawson@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 4,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "4823087836817",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/boxed-blender/1.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/boxed-blender/2.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/boxed-blender/3.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/boxed-blender/4.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/boxed-blender/thumbnail.webp"
+      },
+      {
+        "id": 52,
+        "title": "Carbon Steel Wok",
+        "description": "The Carbon Steel Wok is a versatile cooking pan suitable for stir-frying, saut\u00e9ing, and deep frying. Its sturdy construction ensures even heat distribution for delicious meals.",
+        "category": "kitchen-accessories",
+        "price": 29.99,
+        "discountPercentage": 6.53,
+        "rating": 4.05,
+        "stock": 40,
+        "tags": [
+          "cookware",
+          "woks"
+        ],
+        "sku": "KIT-BRD-CAR-052",
+        "weight": 2,
+        "dimensions": {
+          "width": 27.69,
+          "height": 7.54,
+          "depth": 10.11
+        },
+        "warrantyInformation": "2 year warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nolan Bryant",
+            "reviewerEmail": "nolan.bryant@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Luna Perez",
+            "reviewerEmail": "luna.perez@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Noah Lewis",
+            "reviewerEmail": "noah.lewis@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 9,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "1810862118199",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/carbon-steel-wok/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/carbon-steel-wok/thumbnail.webp"
+      },
+      {
+        "id": 53,
+        "title": "Chopping Board",
+        "description": "The Chopping Board is an essential kitchen accessory for food preparation. Made from durable material, it provides a safe and hygienic surface for cutting and chopping.",
+        "category": "kitchen-accessories",
+        "price": 12.99,
+        "discountPercentage": 8.03,
+        "rating": 3.7,
+        "stock": 14,
+        "tags": [
+          "kitchen tools",
+          "cutting boards"
+        ],
+        "sku": "KIT-BRD-CHO-053",
+        "weight": 2,
+        "dimensions": {
+          "width": 15.6,
+          "height": 6.93,
+          "depth": 8.51
+        },
+        "warrantyInformation": "3 months warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Great value for money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Xavier Wright",
+            "reviewerEmail": "xavier.wright@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Great value for money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Henry Turner",
+            "reviewerEmail": "henry.turner@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Evelyn Walker",
+            "reviewerEmail": "evelyn.walker@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 5,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "0085585730728",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/chopping-board/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/chopping-board/thumbnail.webp"
+      },
+      {
+        "id": 54,
+        "title": "Citrus Squeezer Yellow",
+        "description": "The Citrus Squeezer in Yellow is a handy tool for extracting juice from citrus fruits. Its vibrant color adds a cheerful touch to your kitchen gadgets.",
+        "category": "kitchen-accessories",
+        "price": 8.99,
+        "discountPercentage": 12.1,
+        "rating": 4.63,
+        "stock": 22,
+        "tags": [
+          "kitchen tools",
+          "juicers"
+        ],
+        "sku": "KIT-BRD-CIT-054",
+        "weight": 2,
+        "dimensions": {
+          "width": 17.16,
+          "height": 26.8,
+          "depth": 16.29
+        },
+        "warrantyInformation": "2 year warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Lucas Ramirez",
+            "reviewerEmail": "lucas.ramirez@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Eleanor Collins",
+            "reviewerEmail": "eleanor.collins@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Mila Hernandez",
+            "reviewerEmail": "mila.hernandez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "60 days return policy",
+        "minimumOrderQuantity": 38,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "2231952604189",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/citrus-squeezer-yellow/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/citrus-squeezer-yellow/thumbnail.webp"
+      },
+      {
+        "id": 55,
+        "title": "Egg Slicer",
+        "description": "The Egg Slicer is a convenient tool for slicing boiled eggs evenly. It's perfect for salads, sandwiches, and other dishes where sliced eggs are desired.",
+        "category": "kitchen-accessories",
+        "price": 6.99,
+        "discountPercentage": 14.76,
+        "rating": 3.09,
+        "stock": 40,
+        "tags": [
+          "kitchen tools",
+          "slicers"
+        ],
+        "sku": "KIT-BRD-SLI-055",
+        "weight": 2,
+        "dimensions": {
+          "width": 10.81,
+          "height": 19.15,
+          "depth": 13.18
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Very dissatisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Harper Garcia",
+            "reviewerEmail": "harper.garcia@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Lily Torres",
+            "reviewerEmail": "lily.torres@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Not worth the price!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Tyler Davis",
+            "reviewerEmail": "tyler.davis@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 32,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "6456249953517",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/egg-slicer/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/egg-slicer/thumbnail.webp"
+      },
+      {
+        "id": 56,
+        "title": "Electric Stove",
+        "description": "The Electric Stove provides a portable and efficient cooking solution. Ideal for small kitchens or as an additional cooking surface for various culinary needs.",
+        "category": "kitchen-accessories",
+        "price": 49.99,
+        "discountPercentage": 14.04,
+        "rating": 4.11,
+        "stock": 21,
+        "tags": [
+          "kitchen appliances",
+          "cooktops"
+        ],
+        "sku": "KIT-BRD-ELE-056",
+        "weight": 5,
+        "dimensions": {
+          "width": 24.17,
+          "height": 22.55,
+          "depth": 27.49
+        },
+        "warrantyInformation": "2 year warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 1,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ava Harris",
+            "reviewerEmail": "ava.harris@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Very dissatisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Liam Smith",
+            "reviewerEmail": "liam.smith@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Christian Perez",
+            "reviewerEmail": "christian.perez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 8,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "7534096777716",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/electric-stove/1.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/electric-stove/2.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/electric-stove/3.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/electric-stove/4.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/electric-stove/thumbnail.webp"
+      },
+      {
+        "id": 57,
+        "title": "Fine Mesh Strainer",
+        "description": "The Fine Mesh Strainer is a versatile tool for straining liquids and sifting dry ingredients. Its fine mesh ensures efficient filtering for smooth cooking and baking.",
+        "category": "kitchen-accessories",
+        "price": 9.99,
+        "discountPercentage": 3.5,
+        "rating": 3.04,
+        "stock": 85,
+        "tags": [
+          "kitchen tools",
+          "strainers"
+        ],
+        "sku": "KIT-BRD-FIN-057",
+        "weight": 9,
+        "dimensions": {
+          "width": 18.02,
+          "height": 13.23,
+          "depth": 15.92
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Isabella Anderson",
+            "reviewerEmail": "isabella.anderson@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aaliyah Hanson",
+            "reviewerEmail": "aaliyah.hanson@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Layla Sullivan",
+            "reviewerEmail": "layla.sullivan@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 43,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "8181672477425",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/fine-mesh-strainer/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/fine-mesh-strainer/thumbnail.webp"
+      },
+      {
+        "id": 58,
+        "title": "Fork",
+        "description": "The Fork is a classic utensil for various dining and serving purposes. Its durable and ergonomic design makes it a reliable choice for everyday use.",
+        "category": "kitchen-accessories",
+        "price": 3.99,
+        "discountPercentage": 8.07,
+        "rating": 3.11,
+        "stock": 7,
+        "tags": [
+          "kitchen tools",
+          "utensils"
+        ],
+        "sku": "KIT-BRD-FOR-058",
+        "weight": 9,
+        "dimensions": {
+          "width": 12.3,
+          "height": 25.91,
+          "depth": 22.57
+        },
+        "warrantyInformation": "No warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Elena Baker",
+            "reviewerEmail": "elena.baker@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Avery Scott",
+            "reviewerEmail": "avery.scott@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Mateo Perez",
+            "reviewerEmail": "mateo.perez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 36,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "2851192866410",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/fork/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/fork/thumbnail.webp"
+      },
+      {
+        "id": 59,
+        "title": "Glass",
+        "description": "The Glass is a versatile and elegant drinking vessel suitable for a variety of beverages. Its clear design allows you to enjoy the colors and textures of your drinks.",
+        "category": "kitchen-accessories",
+        "price": 4.99,
+        "discountPercentage": 7.92,
+        "rating": 4.02,
+        "stock": 46,
+        "tags": [
+          "drinkware",
+          "glasses"
+        ],
+        "sku": "KIT-BRD-GLA-059",
+        "weight": 10,
+        "dimensions": {
+          "width": 20.23,
+          "height": 24.56,
+          "depth": 26.97
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jackson Evans",
+            "reviewerEmail": "jackson.evans@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Waste of money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nicholas Bailey",
+            "reviewerEmail": "nicholas.bailey@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nathan Reed",
+            "reviewerEmail": "nathan.reed@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 17,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "4900880403720",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/glass/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/glass/thumbnail.webp"
+      },
+      {
+        "id": 60,
+        "title": "Grater Black",
+        "description": "The Grater in Black is a handy kitchen tool for grating cheese, vegetables, and more. Its sleek design and sharp blades make food preparation efficient and easy.",
+        "category": "kitchen-accessories",
+        "price": 10.99,
+        "discountPercentage": 3.56,
+        "rating": 3.21,
+        "stock": 84,
+        "tags": [
+          "kitchen tools",
+          "graters"
+        ],
+        "sku": "KIT-BRD-GRA-060",
+        "weight": 3,
+        "dimensions": {
+          "width": 6.32,
+          "height": 23.11,
+          "depth": 24.64
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 1,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ella Adams",
+            "reviewerEmail": "ella.adams@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Not as described!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Eli Ward",
+            "reviewerEmail": "eli.ward@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "James Garcia",
+            "reviewerEmail": "james.garcia@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "60 days return policy",
+        "minimumOrderQuantity": 5,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "2542647841284",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/grater-black/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/grater-black/thumbnail.webp"
+      },
+      {
+        "id": 61,
+        "title": "Hand Blender",
+        "description": "The Hand Blender is a versatile kitchen appliance for blending, pureeing, and mixing. Its compact design and powerful motor make it a convenient tool for various recipes.",
+        "category": "kitchen-accessories",
+        "price": 34.99,
+        "discountPercentage": 17.02,
+        "rating": 3.86,
+        "stock": 84,
+        "tags": [
+          "kitchen appliances",
+          "blenders"
+        ],
+        "sku": "KIT-BRD-HAN-061",
+        "weight": 5,
+        "dimensions": {
+          "width": 27.31,
+          "height": 21,
+          "depth": 24.27
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Hazel Evans",
+            "reviewerEmail": "hazel.evans@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Hannah Howard",
+            "reviewerEmail": "hannah.howard@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jonathan Pierce",
+            "reviewerEmail": "jonathan.pierce@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 11,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "1980575898457",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/hand-blender/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/hand-blender/thumbnail.webp"
+      },
+      {
+        "id": 62,
+        "title": "Ice Cube Tray",
+        "description": "The Ice Cube Tray is a practical accessory for making ice cubes in various shapes. Perfect for keeping your drinks cool and adding a fun element to your beverages.",
+        "category": "kitchen-accessories",
+        "price": 5.99,
+        "discountPercentage": 0.63,
+        "rating": 4.71,
+        "stock": 13,
+        "tags": [
+          "kitchen tools",
+          "ice cube trays"
+        ],
+        "sku": "KIT-BRD-CUB-062",
+        "weight": 3,
+        "dimensions": {
+          "width": 26.67,
+          "height": 18.14,
+          "depth": 5.31
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Isaac Lawrence",
+            "reviewerEmail": "isaac.lawrence@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Leo Rivera",
+            "reviewerEmail": "leo.rivera@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Henry Turner",
+            "reviewerEmail": "henry.turner@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 16,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "9123541111825",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/ice-cube-tray/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/ice-cube-tray/thumbnail.webp"
+      },
+      {
+        "id": 63,
+        "title": "Kitchen Sieve",
+        "description": "The Kitchen Sieve is a versatile tool for sifting and straining dry and wet ingredients. Its fine mesh design ensures smooth results in your cooking and baking.",
+        "category": "kitchen-accessories",
+        "price": 7.99,
+        "discountPercentage": 18.91,
+        "rating": 3.09,
+        "stock": 68,
+        "tags": [
+          "kitchen tools",
+          "strainers"
+        ],
+        "sku": "KIT-BRD-KIT-063",
+        "weight": 5,
+        "dimensions": {
+          "width": 20.68,
+          "height": 6.5,
+          "depth": 7.86
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Stella Morris",
+            "reviewerEmail": "stella.morris@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Henry Adams",
+            "reviewerEmail": "henry.adams@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Lillian Simmons",
+            "reviewerEmail": "lillian.simmons@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 5,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "7119606190291",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/kitchen-sieve/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/kitchen-sieve/thumbnail.webp"
+      },
+      {
+        "id": 64,
+        "title": "Knife",
+        "description": "The Knife is an essential kitchen tool for chopping, slicing, and dicing. Its sharp blade and ergonomic handle make it a reliable choice for food preparation.",
+        "category": "kitchen-accessories",
+        "price": 14.99,
+        "discountPercentage": 18.86,
+        "rating": 3.26,
+        "stock": 7,
+        "tags": [
+          "kitchen tools",
+          "cutlery"
+        ],
+        "sku": "KIT-BRD-KNI-064",
+        "weight": 3,
+        "dimensions": {
+          "width": 25.19,
+          "height": 18.52,
+          "depth": 20.5
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "Low Stock",
+        "reviews": [
+          {
+            "rating": 2,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aaliyah Martinez",
+            "reviewerEmail": "aaliyah.martinez@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Addison Wright",
+            "reviewerEmail": "addison.wright@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Mateo Nguyen",
+            "reviewerEmail": "mateo.nguyen@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 50,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "2258278927819",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/knife/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/knife/thumbnail.webp"
+      },
+      {
+        "id": 65,
+        "title": "Lunch Box",
+        "description": "The Lunch Box is a convenient and portable container for packing and carrying your meals. With compartments for different foods, it's perfect for on-the-go dining.",
+        "category": "kitchen-accessories",
+        "price": 12.99,
+        "discountPercentage": 10.34,
+        "rating": 4.93,
+        "stock": 94,
+        "tags": [
+          "kitchen tools",
+          "storage"
+        ],
+        "sku": "KIT-BRD-LUN-065",
+        "weight": 9,
+        "dimensions": {
+          "width": 12.45,
+          "height": 19.08,
+          "depth": 8.24
+        },
+        "warrantyInformation": "5 year warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jace Smith",
+            "reviewerEmail": "jace.smith@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Zoe Bennett",
+            "reviewerEmail": "zoe.bennett@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Michael Johnson",
+            "reviewerEmail": "michael.johnson@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 39,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "3287134465440",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/lunch-box/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/lunch-box/thumbnail.webp"
+      },
+      {
+        "id": 66,
+        "title": "Microwave Oven",
+        "description": "The Microwave Oven is a versatile kitchen appliance for quick and efficient cooking, reheating, and defrosting. Its compact size makes it suitable for various kitchen setups.",
+        "category": "kitchen-accessories",
+        "price": 89.99,
+        "discountPercentage": 12.13,
+        "rating": 4.82,
+        "stock": 59,
+        "tags": [
+          "kitchen appliances",
+          "microwaves"
+        ],
+        "sku": "KIT-BRD-MIC-066",
+        "weight": 9,
+        "dimensions": {
+          "width": 16.31,
+          "height": 27.45,
+          "depth": 13.05
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Very dissatisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nora Russell",
+            "reviewerEmail": "nora.russell@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Alice Smith",
+            "reviewerEmail": "alice.smith@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ethan Fletcher",
+            "reviewerEmail": "ethan.fletcher@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 4,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "7578271198951",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/microwave-oven/1.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/microwave-oven/2.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/microwave-oven/3.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/microwave-oven/4.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/microwave-oven/thumbnail.webp"
+      },
+      {
+        "id": 67,
+        "title": "Mug Tree Stand",
+        "description": "The Mug Tree Stand is a stylish and space-saving solution for organizing your mugs. Keep your favorite mugs easily accessible and neatly displayed in your kitchen.",
+        "category": "kitchen-accessories",
+        "price": 15.99,
+        "discountPercentage": 9.25,
+        "rating": 2.64,
+        "stock": 88,
+        "tags": [
+          "kitchen tools",
+          "organization"
+        ],
+        "sku": "KIT-BRD-TRE-067",
+        "weight": 3,
+        "dimensions": {
+          "width": 18.99,
+          "height": 27.14,
+          "depth": 27.29
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 1,
+            "comment": "Very unhappy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Bella Grant",
+            "reviewerEmail": "bella.grant@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Paisley Bell",
+            "reviewerEmail": "paisley.bell@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "David Martinez",
+            "reviewerEmail": "david.martinez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 45,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "4136081478055",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/mug-tree-stand/1.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/mug-tree-stand/2.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/mug-tree-stand/thumbnail.webp"
+      },
+      {
+        "id": 68,
+        "title": "Pan",
+        "description": "The Pan is a versatile and essential cookware item for frying, saut\u00e9ing, and cooking various dishes. Its non-stick coating ensures easy food release and cleanup.",
+        "category": "kitchen-accessories",
+        "price": 24.99,
+        "discountPercentage": 3,
+        "rating": 2.79,
+        "stock": 90,
+        "tags": [
+          "cookware",
+          "pans"
+        ],
+        "sku": "KIT-BRD-PRD-068",
+        "weight": 8,
+        "dimensions": {
+          "width": 17.14,
+          "height": 21.7,
+          "depth": 25.75
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Michael Johnson",
+            "reviewerEmail": "michael.johnson@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Adrian Flores",
+            "reviewerEmail": "adrian.flores@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Not as described!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nicholas Bailey",
+            "reviewerEmail": "nicholas.bailey@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 17,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "5159803862015",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/pan/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/pan/thumbnail.webp"
+      },
+      {
+        "id": 69,
+        "title": "Plate",
+        "description": "The Plate is a classic and essential dishware item for serving meals. Its durable and stylish design makes it suitable for everyday use or special occasions.",
+        "category": "kitchen-accessories",
+        "price": 3.99,
+        "discountPercentage": 7.31,
+        "rating": 3.65,
+        "stock": 66,
+        "tags": [
+          "dinnerware",
+          "plates"
+        ],
+        "sku": "KIT-BRD-PLA-069",
+        "weight": 4,
+        "dimensions": {
+          "width": 16.46,
+          "height": 5.39,
+          "depth": 13.15
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Disappointing product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Mia Miller",
+            "reviewerEmail": "mia.miller@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Henry Adams",
+            "reviewerEmail": "henry.adams@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nora Russell",
+            "reviewerEmail": "nora.russell@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 6,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "8084753475328",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/plate/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/plate/thumbnail.webp"
+      },
+      {
+        "id": 70,
+        "title": "Red Tongs",
+        "description": "The Red Tongs are versatile kitchen tongs suitable for various cooking and serving tasks. Their vibrant color adds a pop of excitement to your kitchen utensils.",
+        "category": "kitchen-accessories",
+        "price": 6.99,
+        "discountPercentage": 14.52,
+        "rating": 4.42,
+        "stock": 82,
+        "tags": [
+          "kitchen tools",
+          "tongs"
+        ],
+        "sku": "KIT-BRD-TON-070",
+        "weight": 7,
+        "dimensions": {
+          "width": 22.86,
+          "height": 26.2,
+          "depth": 17
+        },
+        "warrantyInformation": "No warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Xavier Wright",
+            "reviewerEmail": "xavier.wright@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Stella Hughes",
+            "reviewerEmail": "stella.hughes@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jaxon Barnes",
+            "reviewerEmail": "jaxon.barnes@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 23,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "1919888449594",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/red-tongs/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/red-tongs/thumbnail.webp"
+      },
+      {
+        "id": 71,
+        "title": "Silver Pot With Glass Cap",
+        "description": "The Silver Pot with Glass Cap is a stylish and functional cookware item for boiling, simmering, and preparing delicious meals. Its glass cap allows you to monitor cooking progress.",
+        "category": "kitchen-accessories",
+        "price": 39.99,
+        "discountPercentage": 5.7,
+        "rating": 3.22,
+        "stock": 40,
+        "tags": [
+          "cookware",
+          "pots"
+        ],
+        "sku": "KIT-BRD-SIL-071",
+        "weight": 7,
+        "dimensions": {
+          "width": 21.03,
+          "height": 11.7,
+          "depth": 6.69
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Julian Newton",
+            "reviewerEmail": "julian.newton@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Noah Lewis",
+            "reviewerEmail": "noah.lewis@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Disappointing product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Brayden Hill",
+            "reviewerEmail": "brayden.hill@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 10,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "9757232943842",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/silver-pot-with-glass-cap/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/silver-pot-with-glass-cap/thumbnail.webp"
+      },
+      {
+        "id": 72,
+        "title": "Slotted Turner",
+        "description": "The Slotted Turner is a kitchen utensil designed for flipping and turning food items. Its slotted design allows excess liquid to drain, making it ideal for frying and saut\u00e9ing.",
+        "category": "kitchen-accessories",
+        "price": 8.99,
+        "discountPercentage": 13.35,
+        "rating": 3.4,
+        "stock": 88,
+        "tags": [
+          "kitchen tools",
+          "turners"
+        ],
+        "sku": "KIT-BRD-SLO-072",
+        "weight": 8,
+        "dimensions": {
+          "width": 14.41,
+          "height": 27.15,
+          "depth": 14.76
+        },
+        "warrantyInformation": "Lifetime warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 1,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ava Taylor",
+            "reviewerEmail": "ava.taylor@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Liam Smith",
+            "reviewerEmail": "liam.smith@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Gabriel Mitchell",
+            "reviewerEmail": "gabriel.mitchell@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 34,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "4396291569672",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/slotted-turner/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/slotted-turner/thumbnail.webp"
+      },
+      {
+        "id": 73,
+        "title": "Spice Rack",
+        "description": "The Spice Rack is a convenient organizer for your spices and seasonings. Keep your kitchen essentials within reach and neatly arranged with this stylish spice rack.",
+        "category": "kitchen-accessories",
+        "price": 19.99,
+        "discountPercentage": 12.09,
+        "rating": 4.87,
+        "stock": 79,
+        "tags": [
+          "kitchen tools",
+          "organization"
+        ],
+        "sku": "KIT-BRD-SPI-073",
+        "weight": 7,
+        "dimensions": {
+          "width": 28.06,
+          "height": 22.43,
+          "depth": 26.34
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Elena Baker",
+            "reviewerEmail": "elena.baker@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Owen Fisher",
+            "reviewerEmail": "owen.fisher@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Waste of money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Sadie Morales",
+            "reviewerEmail": "sadie.morales@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 18,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "6149284465708",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/spice-rack/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/spice-rack/thumbnail.webp"
+      },
+      {
+        "id": 74,
+        "title": "Spoon",
+        "description": "The Spoon is a versatile kitchen utensil for stirring, serving, and tasting. Its ergonomic design and durable construction make it an essential tool for every kitchen.",
+        "category": "kitchen-accessories",
+        "price": 4.99,
+        "discountPercentage": 1.53,
+        "rating": 4.03,
+        "stock": 59,
+        "tags": [
+          "kitchen tools",
+          "utensils"
+        ],
+        "sku": "KIT-BRD-SPO-074",
+        "weight": 6,
+        "dimensions": {
+          "width": 8.49,
+          "height": 26.04,
+          "depth": 27.78
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Waste of money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jackson Evans",
+            "reviewerEmail": "jackson.evans@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Disappointing product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Elena Baker",
+            "reviewerEmail": "elena.baker@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Bella Gonzalez",
+            "reviewerEmail": "bella.gonzalez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 15,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "7769627934740",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/spoon/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/spoon/thumbnail.webp"
+      },
+      {
+        "id": 75,
+        "title": "Tray",
+        "description": "The Tray is a functional and decorative item for serving snacks, appetizers, or drinks. Its stylish design makes it a versatile accessory for entertaining guests.",
+        "category": "kitchen-accessories",
+        "price": 16.99,
+        "discountPercentage": 7.48,
+        "rating": 4.62,
+        "stock": 71,
+        "tags": [
+          "serveware",
+          "trays"
+        ],
+        "sku": "KIT-BRD-TRA-075",
+        "weight": 10,
+        "dimensions": {
+          "width": 12.7,
+          "height": 7.52,
+          "depth": 9.72
+        },
+        "warrantyInformation": "5 year warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Samantha Howard",
+            "reviewerEmail": "samantha.howard@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Benjamin Wilson",
+            "reviewerEmail": "benjamin.wilson@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Caleb Nelson",
+            "reviewerEmail": "caleb.nelson@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 23,
+        "meta": {
+          "createdAt": "2025-04-30T09:41:02.053Z",
+          "updatedAt": "2025-04-30T09:41:02.053Z",
+          "barcode": "5239514403214",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/tray/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/tray/thumbnail.webp"
+      }
+    ],
+    "total": 194,
+    "skip": 50,
+    "limit": 25
+  }
+}
