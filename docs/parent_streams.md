@@ -6,7 +6,7 @@ from a parent record each time the child stream is invoked.
 
 ## If you do want to utilize parent-child streams
 
-1. Set `parent_stream_type` in the child-stream's class to the class of the parent.
+1. Set [`parent_stream_type`](singer_sdk.Stream.parent_stream_type) in the child-stream's class to the class of the parent.
 1. Implement one of the below methods to pass context from the parent to the child:
    1. Override [`get_child_context`](singer_sdk.Stream.get_child_context) to return a new
       child context object based on records and any existing context from the parent stream.
