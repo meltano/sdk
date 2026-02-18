@@ -102,6 +102,7 @@ dev = [
     {"include-group" = "docs"},
     {"include-group" = "testing"},
     {"include-group" = "typing"},
+    "codeflash>=0.20.0",
     "deptry>=0.15.0",
 ]
 docs = [
@@ -506,3 +507,10 @@ ignore-words-list = "fo,intoto"
 
 [tool.ty.rules]
 unused-type-ignore-comment = "ignore"
+
+[tool.codeflash]
+# All paths are relative to this pyproject.toml's directory.
+module-root = "singer_sdk"
+tests-root = "tests"
+ignore-paths = []
+formatter-cmds = ["ruff check --exit-zero --fix $file", "ruff format $file"]
