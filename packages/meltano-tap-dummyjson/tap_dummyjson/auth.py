@@ -58,7 +58,6 @@ class DummyJSONAuthenticator(requests.auth.AuthBase, metaclass=SingletonMeta):
 
     @override
     def __call__(self, r: PreparedRequest) -> PreparedRequest:
-        logger.info("Authenticating request: %s", r.url)
         r.headers["Authorization"] = f"Bearer {self._get_access_token()}"
         return r
 
@@ -68,9 +67,7 @@ class DummyJSONAuthenticator(requests.auth.AuthBase, metaclass=SingletonMeta):
             logger.error("Error: %s", response.text)
             response.raise_for_status()
 
-        logger.info("Response status code: %s", response.status_code)
         data = response.json()
-        logger.info("Token data: %s", data)
         return _Token(
             access_token=data["accessToken"],
             refresh_token=data["refreshToken"],
