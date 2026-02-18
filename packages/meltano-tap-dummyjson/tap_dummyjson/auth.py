@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+AUTH_TIMEOUT_SECONDS = 5
 EXPIRES_IN_MINS = 30
 
 
@@ -85,7 +86,7 @@ class DummyJSONAuthenticator(requests.auth.AuthBase, metaclass=SingletonMeta):
                         "password": self.password,
                         "expiresInMins": EXPIRES_IN_MINS,
                     },
-                    timeout=0.1,
+                    timeout=AUTH_TIMEOUT_SECONDS,
                 )
                 logger.info("Response status code: %s", response.status_code)
                 self._token = self._handle_response(response)
@@ -99,7 +100,7 @@ class DummyJSONAuthenticator(requests.auth.AuthBase, metaclass=SingletonMeta):
                         "refreshToken": refresh_token,
                         "expiresInMins": EXPIRES_IN_MINS,
                     },
-                    timeout=0.1,
+                    timeout=AUTH_TIMEOUT_SECONDS,
                 )
                 self._token = self._handle_response(response)
                 return self._token.access_token
