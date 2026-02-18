@@ -12,5 +12,5 @@ CONFIG = {
 TestTapDummyJSON = get_tap_test_class(
     tap_class=TapDummyJSON,
     config=CONFIG,
-    suite_config=SuiteConfig(max_records_limit=15),
+    suite_config=SuiteConfig(max_records_limit=60),
 )

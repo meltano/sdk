@@ -6,8 +6,8 @@ import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-import requests
 import requests.auth
+from requests_cache import CachedSession
 from singer_sdk.authenticators import SingletonMeta
 
 if sys.version_info >= (3, 12):
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+AUTH_TIMEOUT_SECONDS = 5
 EXPIRES_IN_MINS = 30
 
 
@@ -49,7 +50,14 @@ class DummyJSONAuthenticator(requests.auth.AuthBase, metaclass=SingletonMeta):
         self.password = password
 
         self._token: _Token | None = None
-        self.session = requests.Session()
+        self.session = CachedSession(
+            ".http_cache",
+            backend="filesystem",
+            serializer="json",
+            allowable_methods=("POST",),
+            ignored_parameters=["User-Agent"],
+            match_headers=True,
+        )
 
     @override
     def __call__(self, r: PreparedRequest) -> PreparedRequest:
@@ -72,6 +80,7 @@ class DummyJSONAuthenticator(requests.auth.AuthBase, metaclass=SingletonMeta):
     def _get_access_token(self) -> str:
         match self._token:
             case None:  # No token, need to authenticate
+                logger.info("No token, authenticating")
                 response = self.session.post(
                     self.auth_url,
                     json={
@@ -79,7 +88,9 @@ class DummyJSONAuthenticator(requests.auth.AuthBase, metaclass=SingletonMeta):
                         "password": self.password,
                         "expiresInMins": EXPIRES_IN_MINS,
                     },
+                    timeout=AUTH_TIMEOUT_SECONDS,
                 )
+                logger.info("Response status code: %s", response.status_code)
                 self._token = self._handle_response(response)
                 return self._token.access_token
 
@@ -91,6 +102,7 @@ class DummyJSONAuthenticator(requests.auth.AuthBase, metaclass=SingletonMeta):
                         "refreshToken": refresh_token,
                         "expiresInMins": EXPIRES_IN_MINS,
                     },
+                    timeout=AUTH_TIMEOUT_SECONDS,
                 )
                 self._token = self._handle_response(response)
                 return self._token.access_token

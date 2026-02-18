@@ -11,6 +11,8 @@ from referencing.jsonschema import DRAFT202012
 if t.TYPE_CHECKING:
     from referencing._core import Resolver
 
+_SchemaDict: t.TypeAlias = dict[str, t.Any]
+
 META_KEYS = [
     "id",
     "schema",
@@ -97,7 +99,7 @@ class Schema:
 
     _: KW_ONLY
 
-    def to_dict(self) -> dict[str, t.Any]:
+    def to_dict(self) -> _SchemaDict:
         """Return the raw JSON Schema as a (possibly nested) dict.
 
         Returns:
@@ -223,8 +225,8 @@ class _SchemaKey:
 
 
 def resolve_schema_references(
-    schema: dict[str, t.Any],
-    refs: dict[str, str] | None = None,
+    schema: _SchemaDict,
+    refs: dict[str, _SchemaDict] | None = None,
 ) -> dict:
     """Resolves and replaces json-schema $refs with the appropriate dict.
 
@@ -253,10 +255,10 @@ def resolve_schema_references(
 
 
 def _resolve_schema_references(  # noqa: C901, PLR0912
-    schema: dict[str, t.Any],
+    schema: _SchemaDict,
     resolver: Resolver,
     visited_refs: tuple[str, ...] | None = None,
-) -> dict[str, t.Any]:
+) -> _SchemaDict:
     """Recursively resolve schema references while handling circular references.
 
     Args:
