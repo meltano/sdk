@@ -55,6 +55,7 @@ from __future__ import annotations
 import json
 import typing as t
 
+import sqlalchemy.types
 from jsonschema import validators
 
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
@@ -1430,13 +1431,16 @@ def to_sql_type(  # noqa: PLR0911, C901
     """
     import sqlalchemy.types  # noqa: PLC0415
 
-    if _jsonschema_type_check(jsonschema_type, ("object",)):
+    # Collect all declared types once to avoid repeated recursive scans.
+    types = _collect_jsonschema_types(jsonschema_type)
+
+    if "object" in types:
         return sqlalchemy.types.VARCHAR()
 
-    if _jsonschema_type_check(jsonschema_type, ("array",)):
+    if "array" in types:
         return sqlalchemy.types.VARCHAR()
 
-    if _jsonschema_type_check(jsonschema_type, ("string",)):
+    if "string" in types:
         datelike_type = get_datelike_property_type(jsonschema_type)
         if datelike_type:
             if datelike_type == "date-time":
@@ -1449,11 +1453,69 @@ def to_sql_type(  # noqa: PLR0911, C901
         maxlength = jsonschema_type.get("maxLength")
         return sqlalchemy.types.VARCHAR(maxlength)
 
-    if _jsonschema_type_check(jsonschema_type, ("integer",)):
+    if "integer" in types:
         return sqlalchemy.types.INTEGER()
-    if _jsonschema_type_check(jsonschema_type, ("number",)):
+    if "number" in types:
         return sqlalchemy.types.DECIMAL()
-    if _jsonschema_type_check(jsonschema_type, ("boolean",)):
+    if "boolean" in types:
         return sqlalchemy.types.BOOLEAN()
 
     return sqlalchemy.types.VARCHAR()
+
+
+def _collect_jsonschema_types(jsonschema_type: dict) -> set[str]:
+    """Traverse the schema once and collect all 'type' string values.
+
+    This mirrors the recursive exploration of _jsonschema_type_check but gathers
+    all type names in a single pass to avoid repeated recursion. It intentionally
+    uses the same attribute access patterns ("type" in obj and obj.get(...))
+    so that exception behavior for non-dict-like inputs remains consistent with
+    the original implementation.
+    """
+    types: set[str] = set()
+    stack = [jsonschema_type]
+    while stack:
+        current = stack.pop()
+        # The checks below intentionally mirror the original patterns to keep
+        # behavior (including possible exceptions) consistent.
+        if "type" in current:
+            t = current["type"]
+            if isinstance(t, (list, tuple)):
+                types.update(t)
+            else:
+                types.add(t)
+        any_of = current.get("anyOf", ())
+        if any_of:
+            # Extend without converting so behavior on unusual anyOf values
+            # remains consistent with the original implementation.
+            stack.extend(any_of)
+    return types
+
+
+def _collect_jsonschema_types(jsonschema_type: dict) -> set[str]:
+    """Traverse the schema once and collect all 'type' string values.
+
+    This mirrors the recursive exploration of _jsonschema_type_check but gathers
+    all type names in a single pass to avoid repeated recursion. It intentionally
+    uses the same attribute access patterns ("type" in obj and obj.get(...))
+    so that exception behavior for non-dict-like inputs remains consistent with
+    the original implementation.
+    """
+    types: set[str] = set()
+    stack = [jsonschema_type]
+    while stack:
+        current = stack.pop()
+        # The checks below intentionally mirror the original patterns to keep
+        # behavior (including possible exceptions) consistent.
+        if "type" in current:
+            t = current["type"]
+            if isinstance(t, (list, tuple)):
+                types.update(t)
+            else:
+                types.add(t)
+        any_of = current.get("anyOf", ())
+        if any_of:
+            # Extend without converting so behavior on unusual anyOf values
+            # remains consistent with the original implementation.
+            stack.extend(any_of)
+    return types
