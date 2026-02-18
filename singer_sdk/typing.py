@@ -1400,17 +1400,22 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
     Returns:
         True if the schema supports the type.
     """
-    if "type" in jsonschema_type:
-        if isinstance(jsonschema_type["type"], (list, tuple)):
-            for schema_type in jsonschema_type["type"]:
-                if schema_type in type_check:
-                    return True
-        elif jsonschema_type.get("type") in type_check:
-            return True
+    stack: list[dict] = [jsonschema_type]
 
-    return any(
-        _jsonschema_type_check(t, type_check) for t in jsonschema_type.get("anyOf", ())
-    )
+    while stack:
+        current = stack.pop()
+        if "type" in current:
+            if isinstance(current["type"], (list, tuple)):
+                for schema_type in current["type"]:
+                    if schema_type in type_check:
+                        return True
+            elif current.get("type") in type_check:
+                return True
+
+        for t in current.get("anyOf", ()):
+            stack.append(t)
+
+    return False
 
 
 @deprecated(
