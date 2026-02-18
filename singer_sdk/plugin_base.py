@@ -28,6 +28,7 @@ from singer_sdk.configuration._dict_config import (
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
+from singer_sdk.helpers._packaging import SDK_PACKAGE_NAME, get_package_version
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
     FLATTENING_CONFIG,
@@ -53,7 +54,6 @@ if t.TYPE_CHECKING:
         GenericSingerWriter,
     )
 
-SDK_PACKAGE_NAME = "singer_sdk"
 DEFAULT_LOG_LEVEL = "INFO"
 
 JSONSchemaValidator = extend_validator_with_defaults(DEFAULT_JSONSCHEMA_VALIDATOR)
@@ -391,7 +391,7 @@ class PluginBase(abc.ABC):  # noqa: PLR0904
         Returns:
             The package version number.
         """
-        return cls._get_package_version(cls.package_name or cls.name)
+        return get_package_version(cls.package_name or cls.name)
 
     @classmethod
     def get_sdk_version(cls) -> str:
@@ -400,7 +400,7 @@ class PluginBase(abc.ABC):  # noqa: PLR0904
         Returns:
             The package version number.
         """
-        return cls._get_package_version(SDK_PACKAGE_NAME)
+        return get_package_version(SDK_PACKAGE_NAME)
 
     @classmethod
     def get_supported_python_versions(cls) -> list[str] | None:

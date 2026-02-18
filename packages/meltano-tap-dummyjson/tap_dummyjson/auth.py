@@ -55,6 +55,8 @@ class DummyJSONAuthenticator(requests.auth.AuthBase, metaclass=SingletonMeta):
             backend="filesystem",
             serializer="json",
             allowable_methods=("POST",),
+            ignored_parameters=["User-Agent"],
+            match_headers=True,
         )
 
     @override

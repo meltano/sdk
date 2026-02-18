@@ -37,7 +37,13 @@ class DummyJSONStream(RESTStream):
     @property
     @override
     def requests_session(self) -> CachedSession:
-        return CachedSession(".http_cache", backend="filesystem", serializer="json")
+        return CachedSession(
+            ".http_cache",
+            backend="filesystem",
+            serializer="json",
+            ignored_parameters=["Authorization", "User-Agent"],
+            match_headers=True,
+        )
 
     @property
     @override
