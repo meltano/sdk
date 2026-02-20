@@ -95,6 +95,9 @@ class HTTPRequest:
     #: The data of the request.
     data: JSONPayload = None
 
+    #: ASCII characters that should not be quoted when encoding URL parameters.
+    safe_query_chars: str = ""
+
     def _get_url_params(self) -> list[tuple[str, t.Any]]:
         """Encode parameters as a list of tuples.
 
@@ -110,23 +113,13 @@ class HTTPRequest:
     def encode_params(self) -> str:
         """Encode parameters as a string.
 
-        Override this method if your source needs special handling and, for example,
-        parentheses should not be encoded. You can return a string constructed with
-        :py:func:`urllib.parse.urlencode`:
-
-        .. code-block:: python
-
-           from urllib.parse import urlencode
-
-
-           class MyHTTPRequest(HTTPRequest):
-               def encode_params(self) -> str:
-                   return urlencode(self._get_url_params(), safe="()", doseq=True)
+        Constructs a string of URL parameters for the request. Uses
+        :py:func:`urllib.parse.urlencode` to encode the parameters.
 
         Returns:
             A string of encoded parameters.
         """
-        return urlencode(self._get_url_params(), doseq=True)
+        return urlencode(self._get_url_params(), safe=self.safe_query_chars, doseq=True)
 
 
 @dataclass(slots=True)
