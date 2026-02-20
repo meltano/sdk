@@ -39,8 +39,8 @@ class {{ cookiecutter.source_name }}Stream(Stream):
             NotImplementedError: If the implementation is TODO
         """
         # TODO: Write logic to extract data from the upstream source.
-        # records = mysource.getall()  # noqa: ERA001
+        # records = mysource.getall()
         # for record in records:
-        #     yield record.to_dict()  # noqa: ERA001
+        #     yield record.to_dict()
         errmsg = "The method is not yet implemented (TODO)"
         raise NotImplementedError(errmsg)
