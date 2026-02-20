@@ -352,7 +352,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         self,
         context: Context | None,  # noqa: ARG002
         next_page_token: _TToken | None,  # noqa: ARG002
-    ) -> dict[str, t.Any] | str:
+    ) -> dict[str, t.Any]:
         """Return a dictionary or string of URL query parameters.
 
         If paging is supported, developers may override with specific paging logic.
@@ -377,8 +377,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
                 next page of data.
 
         Returns:
-            Dictionary or encoded string with URL query parameters to use in the
-                request.
+            Dictionary with URL query parameters to use in the request.
         """
         return {}
 
