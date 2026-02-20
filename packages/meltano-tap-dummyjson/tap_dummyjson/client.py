@@ -12,7 +12,7 @@ from singer_sdk.streams import RESTStream
 from .auth import DummyJSONAuthenticator
 
 if TYPE_CHECKING:
-    from singer_sdk.helpers.types import Context, Record
+    from singer_sdk.streams.rest import HTTPRequest, HTTPRequestContext
 
 if sys.version_info >= (3, 12):
     from typing import override
@@ -59,20 +59,7 @@ class DummyJSONStream(RESTStream):
         return BaseOffsetPaginator(start_value=0, page_size=PAGE_SIZE)
 
     @override
-    def get_url_params(
-        self,
-        context: Context | None,
-        next_page_token: int | None,
-    ) -> dict[str, int | None]:
-        return {
-            "skip": next_page_token,
-            "limit": PAGE_SIZE,
-        }
-
-    @override
-    def post_process(
-        self,
-        row: Record,
-        context: Context | None = None,
-    ) -> Record | None:
-        return row
+    def get_http_request(self, *, context: HTTPRequestContext[int]) -> HTTPRequest:
+        request = super().get_http_request(context=context)
+        request.params = {"skip": context.next_page, "limit": PAGE_SIZE}
+        return request

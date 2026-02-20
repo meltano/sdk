@@ -69,6 +69,7 @@ if TYPE_CHECKING:
     {%- else %}
     from singer_sdk.helpers.types import Context
     {%- endif %}
+    from singer_sdk.streams.rest import HTTPRequest, HTTPRequestContext
 
 
 # TODO: Delete this is if not using json files for schema definition
@@ -187,47 +188,26 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return super().get_new_paginator()
 
     @override
-    def get_url_params(
-        self,
-        context: Context | None,
-        next_page_token: Any | None,
-    ) -> dict[str, Any]:
-        """Return a dictionary of values to be used in URL parameterization.
+    def get_http_request(self, *, context: HTTPRequestContext[Any]) -> HTTPRequest:
+        """Return a request object for this stream.
 
         Args:
-            context: The stream context.
-            next_page_token: The next page index or value.
+            context: An object containing the stream partition or context dictionary,
+                and the next page token if applicable.
 
         Returns:
-            A dictionary of URL query parameters.
+            An HTTP request for this stream.
         """
-        params: dict = {}
-        if next_page_token:
-            params["page"] = next_page_token
+        request = super().get_http_request(context=context)
+        if context.next_page:
+            request.params["page"] = context.next_page
         if self.replication_key:
-            params["sort"] = "asc"
-            params["order_by"] = self.replication_key
-        return params
+            request.params["sort"] = "asc"
+            request.params["order_by"] = self.replication_key
 
-    @override
-    def prepare_request_payload(
-        self,
-        context: Context | None,
-        next_page_token: Any | None,
-    ) -> dict | None:
-        """Prepare the data payload for the REST API request.
-
-        By default, no payload will be sent (return None).
-
-        Args:
-            context: The stream context.
-            next_page_token: The next page index or value.
-
-        Returns:
-            A dictionary with the JSON body for a POST requests.
-        """
-        # TODO: Delete this method if no payload is required. (Most REST APIs.)
-        return None
+        # Optionally, add the payload for a POST request
+        # request.data = ...
+        return request
 
     @override
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
