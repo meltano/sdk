@@ -18,11 +18,13 @@ import responses.registries
 import time_machine
 from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.serialization import (
+    BestAvailableEncryption,
     Encoding,
     NoEncryption,
     PrivateFormat,
     PublicFormat,
 )
+from dirty_equals import IsPositiveInt
 
 from singer_sdk.authenticators import (
     APIAuthenticatorBase,
@@ -283,22 +285,84 @@ def public_key_string(public_key: RSAPublicKey) -> str:
     ).decode("utf-8")
 
 
+@pytest.fixture
+def passphrase() -> str:
+    return "private-key-passphrase"
+
+
+@pytest.fixture
+def private_key_with_passphrase(private_key: RSAPrivateKey, passphrase: str) -> str:
+    return private_key.private_bytes(
+        Encoding.PEM,
+        format=PrivateFormat.PKCS8,
+        encryption_algorithm=BestAvailableEncryption(passphrase.encode("utf-8")),
+    ).decode("utf-8")
+
+
 def test_oauth_jwt_authenticator_payload(
-    rest_tap: Tap,
     private_key_string: str,
     public_key_string: str,
 ):
-    class _FakeOAuthJWTAuthenticator(OAuthJWTAuthenticator):
-        private_key = private_key_string
-        oauth_request_body = {"some": "payload"}  # noqa: RUF012
+    client_id = "client-id"
+    oauth_scopes = "one,two,three"
+    auth_endpoint = "https://example.com/oauth"
 
-    authenticator = _FakeOAuthJWTAuthenticator(stream=rest_tap.streams["some_stream"])
+    authenticator = OAuthJWTAuthenticator(
+        client_id=client_id,
+        private_key=private_key_string,
+        auth_endpoint=auth_endpoint,
+        oauth_scopes=oauth_scopes,
+    )
 
-    body = authenticator.oauth_request_body
     payload = authenticator.oauth_request_payload
     token = payload["assertion"]
 
-    assert jwt.decode(token, public_key_string, algorithms=["RS256"]) == body
+    assert jwt.decode(
+        token,
+        public_key_string,
+        algorithms=["RS256"],
+        audience="https://example.com/oauth",
+    ) == {
+        "aud": auth_endpoint,
+        "exp": IsPositiveInt(),
+        "iat": IsPositiveInt(),
+        "iss": client_id,
+        "scope": oauth_scopes,
+    }
+
+
+def test_oauth_jwt_authenticator_payload_with_passphrase(
+    public_key_string: str,
+    private_key_with_passphrase: str,
+    passphrase: str,
+):
+    auth_endpoint = "https://example.com/oauth"
+    client_id = "client-id"
+    oauth_scopes = "one,two,three"
+
+    authenticator = OAuthJWTAuthenticator(
+        client_id=client_id,
+        auth_endpoint=auth_endpoint,
+        private_key=private_key_with_passphrase,
+        private_key_passphrase=passphrase,
+        oauth_scopes=oauth_scopes,
+    )
+
+    payload = authenticator.oauth_request_payload
+    token = payload["assertion"]
+
+    assert jwt.decode(
+        token,
+        public_key_string,
+        algorithms=["RS256"],
+        audience="https://example.com/oauth",
+    ) == {
+        "aud": auth_endpoint,
+        "exp": IsPositiveInt(),
+        "iat": IsPositiveInt(),
+        "iss": client_id,
+        "scope": oauth_scopes,
+    }
 
 
 def test_requests_library_auth(rest_tap: Tap):
