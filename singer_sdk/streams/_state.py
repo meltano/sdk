@@ -42,7 +42,7 @@ class StreamStateManager:
         tap_name: str,
         stream_name: str,
         tap_state: types.TapState,
-        state_partitioning_keys: list[str] | None = None,
+        state_partitioning_keys: t.Sequence[str] | None = None,
     ) -> None:
         """Initialize the StreamStateManager.
 

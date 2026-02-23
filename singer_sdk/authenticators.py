@@ -781,15 +781,21 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             msg = "Missing 'private_key' property for OAuth payload."
             raise ValueError(msg)
 
-        private_key: bytes | t.Any = bytes(self.private_key, "UTF-8")
+        private_key_bytes = bytes(self.private_key, "UTF-8")
         if self.private_key_passphrase:
             passphrase = bytes(self.private_key_passphrase, "UTF-8")
-            private_key = serialization.load_pem_private_key(
-                private_key,
+            pkey = serialization.load_pem_private_key(
+                private_key_bytes,
                 password=passphrase,
                 backend=default_backend(),
             )
-        private_key_string: str | t.Any = private_key.decode("UTF-8")  # ty: ignore[possibly-missing-attribute]
+            private_key_bytes = pkey.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.NoEncryption(),
+            )
+
+        private_key_string: str | t.Any = private_key_bytes.decode("UTF-8")
         return {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": jwt.encode(
