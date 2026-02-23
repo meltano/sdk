@@ -902,6 +902,15 @@ wheels = [
 ]
 
 [[package]]
+name = "dirty-equals"
+version = "0.11"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/30/1d/c5913ac9d6615515a00f4bdc71356d302437cb74ff2e9aaccd3c14493b78/dirty_equals-0.11.tar.gz", hash = "sha256:f4ac74ee88f2d11e2fa0f65eb30ee4f07105c5f86f4dc92b09eb1138775027c3", size = 128067, upload-time = "2025-11-17T01:51:24.451Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bb/8d/dbff05239043271dbeace563a7686212a3dd517864a35623fe4d4a64ca19/dirty_equals-0.11-py3-none-any.whl", hash = "sha256:b1d7093273fc2f9be12f443a8ead954ef6daaf6746fd42ef3a5616433ee85286", size = 28051, upload-time = "2025-11-17T01:51:22.849Z" },
+]
+
+[[package]]
 name = "docutils"
 version = "0.21.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2815,6 +2824,7 @@ testing = [
 benchmark = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'" },
     { name = "coverage", extra = ["toml"] },
+    { name = "dirty-equals" },
     { name = "fastjsonschema" },
     { name = "pytest" },
     { name = "pytest-benchmark" },
@@ -2835,6 +2845,7 @@ dev = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'" },
     { name = "coverage", extra = ["toml"] },
     { name = "deptry" },
+    { name = "dirty-equals" },
     { name = "fastjsonschema" },
     { name = "furo" },
     { name = "mypy" },
@@ -2900,6 +2911,7 @@ packages = [
 testing = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'" },
     { name = "coverage", extra = ["toml"] },
+    { name = "dirty-equals" },
     { name = "fastjsonschema" },
     { name = "pytest" },
     { name = "pytest-benchmark" },
@@ -2918,6 +2930,7 @@ testing = [
 typing = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'" },
     { name = "coverage", extra = ["toml"] },
+    { name = "dirty-equals" },
     { name = "fastjsonschema" },
     { name = "mypy" },
     { name = "pyarrow-stubs" },
@@ -2980,6 +2993,7 @@ provides-extras = ["faker", "jwt", "msgspec", "parquet", "s3", "sql", "ssh", "te
 benchmark = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'", specifier = ">=1.0.0" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.9" },
+    { name = "dirty-equals", specifier = ">=0.11" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
     { name = "pytest", specifier = ">=9" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
@@ -3000,6 +3014,7 @@ dev = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'", specifier = ">=1.0.0" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.9" },
     { name = "deptry", specifier = ">=0.15.0" },
+    { name = "dirty-equals", specifier = ">=0.11" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
     { name = "furo", specifier = ">=2024.5.6" },
     { name = "mypy", specifier = ">=1.17" },
@@ -3057,6 +3072,7 @@ packages = [
 testing = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'", specifier = ">=1.0.0" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.9" },
+    { name = "dirty-equals", specifier = ">=0.11" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
     { name = "pytest", specifier = ">=9" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
@@ -3075,6 +3091,7 @@ testing = [
 typing = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'", specifier = ">=1.0.0" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.9" },
+    { name = "dirty-equals", specifier = ">=0.11" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
     { name = "mypy", specifier = ">=1.17" },
     { name = "pyarrow-stubs", specifier = ">=19.1" },
