@@ -284,21 +284,29 @@ def public_key_string(public_key: RSAPublicKey) -> str:
 
 
 def test_oauth_jwt_authenticator_payload(
-    rest_tap: Tap,
     private_key_string: str,
     public_key_string: str,
 ):
-    class _FakeOAuthJWTAuthenticator(OAuthJWTAuthenticator):
-        private_key = private_key_string
-        oauth_request_body = {"some": "payload"}  # noqa: RUF012
-
-    authenticator = _FakeOAuthJWTAuthenticator(stream=rest_tap.streams["some_stream"])
+    authenticator = OAuthJWTAuthenticator(
+        client_id="client-id",
+        private_key=private_key_string,
+        auth_endpoint="https://example.com/oauth",
+        oauth_scopes="scope",
+    )
 
     body = authenticator.oauth_request_body
     payload = authenticator.oauth_request_payload
     token = payload["assertion"]
 
-    assert jwt.decode(token, public_key_string, algorithms=["RS256"]) == body
+    assert (
+        jwt.decode(
+            token,
+            public_key_string,
+            algorithms=["RS256"],
+            audience="https://example.com/oauth",
+        )
+        == body
+    )
 
 
 def test_requests_library_auth(rest_tap: Tap):
