@@ -18,6 +18,7 @@ import responses.registries
 import time_machine
 from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.serialization import (
+    BestAvailableEncryption,
     Encoding,
     NoEncryption,
     PrivateFormat,
@@ -283,6 +284,20 @@ def public_key_string(public_key: RSAPublicKey) -> str:
     ).decode("utf-8")
 
 
+@pytest.fixture
+def passphrase() -> str:
+    return "private-key-passphrase"
+
+
+@pytest.fixture
+def private_key_with_passphrase(private_key: RSAPrivateKey, passphrase: str) -> str:
+    return private_key.private_bytes(
+        Encoding.PEM,
+        format=PrivateFormat.PKCS8,
+        encryption_algorithm=BestAvailableEncryption(passphrase.encode("utf-8")),
+    ).decode("utf-8")
+
+
 def test_oauth_jwt_authenticator_payload(
     private_key_string: str,
     public_key_string: str,
@@ -292,6 +307,33 @@ def test_oauth_jwt_authenticator_payload(
         private_key=private_key_string,
         auth_endpoint="https://example.com/oauth",
         oauth_scopes="scope",
+    )
+
+    body = authenticator.oauth_request_body
+    payload = authenticator.oauth_request_payload
+    token = payload["assertion"]
+
+    assert (
+        jwt.decode(
+            token,
+            public_key_string,
+            algorithms=["RS256"],
+            audience="https://example.com/oauth",
+        )
+        == body
+    )
+
+
+def test_oauth_jwt_authenticator_payload_with_passphrase(
+    public_key_string: str,
+    private_key_with_passphrase: str,
+    passphrase: str,
+):
+    authenticator = OAuthJWTAuthenticator(
+        client_id="client-id",
+        auth_endpoint="https://example.com/oauth",
+        private_key=private_key_with_passphrase,
+        private_key_passphrase=passphrase,
     )
 
     body = authenticator.oauth_request_body
