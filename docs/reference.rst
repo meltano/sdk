@@ -133,6 +133,8 @@ Pagination
     pagination.BaseOffsetPaginator
     pagination.LegacyPaginatedStreamProtocol
     pagination.LegacyStreamPaginator
+    pagination.OffsetPaginator
+    pagination.PageNumberPaginator
 
 Batch
 -----

@@ -6,7 +6,7 @@ import sys
 from typing import TYPE_CHECKING
 
 from requests_cache import CachedSession
-from singer_sdk.pagination import BaseOffsetPaginator
+from singer_sdk.pagination import OffsetPaginator
 from singer_sdk.streams import RESTStream
 
 from .auth import DummyJSONAuthenticator
@@ -57,14 +57,14 @@ class DummyJSONStream(RESTStream):
         )
 
     @override
-    def get_new_paginator(self) -> BaseOffsetPaginator:
-        return BaseOffsetPaginator(start_value=0, page_size=PAGE_SIZE)
+    def get_new_paginator(self) -> OffsetPaginator:
+        return OffsetPaginator(start_value=0, page_size=PAGE_SIZE)
 
     @override
     def get_http_request(
         self,
         *,
-        context: HTTPRequestContext[BaseOffsetPaginator],
+        context: HTTPRequestContext[OffsetPaginator],
     ) -> HTTPRequest:
         request = super().get_http_request(context=context)
         request.params = {

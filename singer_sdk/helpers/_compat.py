@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import sys
+from functools import partial
 from importlib import resources as importlib_resources
 
 if sys.version_info >= (3, 13):
@@ -33,6 +34,9 @@ time_fromisoformat = datetime.time.fromisoformat
 
 class SingerSDKDeprecationWarning(DeprecationWarning):
     """Custom deprecation warning for the Singer SDK."""
+
+
+singer_sdk_deprecated = partial(deprecated, category=SingerSDKDeprecationWarning)
 
 
 __all__ = [

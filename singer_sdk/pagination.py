@@ -7,6 +7,7 @@ import typing as t
 from abc import ABC, abstractmethod
 from urllib.parse import ParseResult, urlparse
 
+from singer_sdk.helpers._compat import singer_sdk_deprecated
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 
 if sys.version_info >= (3, 12):
@@ -356,7 +357,7 @@ class SimpleHeaderPaginator(BaseAPIPaginator[str | None]):
         return response.headers.get(self._key, None)
 
 
-class BasePageNumberPaginator(BaseAPIPaginator[int], ABC):
+class PageNumberPaginator(BaseAPIPaginator[int]):
     """Paginator class for APIs that use page number."""
 
     @override
@@ -372,7 +373,18 @@ class BasePageNumberPaginator(BaseAPIPaginator[int], ABC):
         return self._value + 1
 
 
-class BaseOffsetPaginator(BaseAPIPaginator[int], ABC):
+@singer_sdk_deprecated(
+    "BasePageNumberPaginator is deprecated and will be removed in a future version. "
+    "Use PageNumberPaginator instead."
+)
+class BasePageNumberPaginator(PageNumberPaginator):
+    """DEPRECATED.
+
+    Use :class:`singer_sdk.pagination.PageNumberPaginator` instead.
+    """
+
+
+class OffsetPaginator(BaseAPIPaginator[int], ABC):
     """Paginator class for APIs that use page offset."""
 
     def __init__(
@@ -409,6 +421,17 @@ class BaseOffsetPaginator(BaseAPIPaginator[int], ABC):
             The next page offset.
         """
         return self._value + self._page_size
+
+
+@singer_sdk_deprecated(
+    "BaseOffsetPaginator is deprecated and will be removed in a future version. "
+    "Use OffsetPaginator instead."
+)
+class BaseOffsetPaginator(OffsetPaginator):
+    """DEPRECATED.
+
+    Use :class:`singer_sdk.pagination.OffsetPaginator` instead.
+    """
 
 
 class LegacyPaginatedStreamProtocol(t.Protocol[TPageToken]):

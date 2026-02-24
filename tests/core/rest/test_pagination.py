@@ -10,6 +10,7 @@ from urllib.parse import ParseResult, parse_qs, urlparse
 import pytest
 from requests import Response
 
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
     BaseAPIPaginator,
@@ -18,6 +19,8 @@ from singer_sdk.pagination import (
     BasePageNumberPaginator,
     HeaderLinkPaginator,
     JSONPathPaginator,
+    OffsetPaginator,
+    PageNumberPaginator,
     SimpleHeaderPaginator,
     SinglePagePaginator,
     first,
@@ -107,7 +110,7 @@ def test_paginator_loop():
 def test_paginator_page_number():
     """Validate paginator that uses the page number."""
 
-    class _TestPageNumberPaginator(BasePageNumberPaginator):
+    class _TestPageNumberPaginator(PageNumberPaginator):
         @override
         def has_more(self, response: Response) -> bool:
             return response.json()["hasMore"]
@@ -139,10 +142,20 @@ def test_paginator_page_number():
     assert paginator.count == 3
 
 
+def test_paginator_page_number_deprecated():
+    """Validate that BasePageNumberPaginator is deprecated."""
+
+    with pytest.warns(
+        SingerSDKDeprecationWarning,
+        match="BasePageNumberPaginator is deprecated",
+    ):
+        BasePageNumberPaginator(0)
+
+
 def test_paginator_offset():
     """Validate paginator that uses the page offset."""
 
-    class _TestOffsetPaginator(BaseOffsetPaginator):
+    class _TestOffsetPaginator(OffsetPaginator):
         def __init__(
             self,
             start_value: int,
@@ -178,6 +191,8 @@ def test_paginator_offset():
 
     response = Response()
     paginator = _TestOffsetPaginator(0, 2, "$[*]")
+    assert paginator.page_size == 2
+
     assert not paginator.finished
     assert paginator.current_value == 0
     assert paginator.count == 0
@@ -198,6 +213,16 @@ def test_paginator_offset():
     paginator.advance(response)
     assert paginator.finished
     assert paginator.count == 3
+
+
+def test_paginator_offset_deprecated():
+    """Validate that BaseOffsetPaginator is deprecated."""
+
+    with pytest.warns(
+        SingerSDKDeprecationWarning,
+        match="BaseOffsetPaginator is deprecated",
+    ):
+        BaseOffsetPaginator(0, 2)
 
 
 def test_paginator_jsonpath():
@@ -370,8 +395,8 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
         }
 
         @override
-        def get_new_paginator(self) -> BasePageNumberPaginator:
-            return BasePageNumberPaginator(1)
+        def get_new_paginator(self) -> PageNumberPaginator:
+            return PageNumberPaginator(1)
 
         @override
         def get_http_request(
@@ -427,7 +452,7 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
 
 
 def test_continue_if_empty(tap: Tap):
-    class _TestPaginator(BasePageNumberPaginator):
+    class _TestPaginator(PageNumberPaginator):
         @override
         def has_more(self, response: Response) -> bool:
             return response.json().get("hasMore", False)
@@ -449,7 +474,7 @@ def test_continue_if_empty(tap: Tap):
         }
 
         @override
-        def get_new_paginator(self) -> BasePageNumberPaginator:
+        def get_new_paginator(self) -> _TestPaginator:
             return _TestPaginator(1)
 
         @override
