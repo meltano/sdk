@@ -505,8 +505,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
            class MyStream(RESTStream):
                def get_http_request(self, *, context):
                    request = super().get_http_request(context=context)
-                   if context.next_page:
-                       request.params["page"] = context.next_page
+                   request.params["page"] = context.paginator.current_value
                    return request
 
         Args:

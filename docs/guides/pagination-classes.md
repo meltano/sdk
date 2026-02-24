@@ -40,9 +40,9 @@ class MyStream(RESTStream):
 
     def get_http_request(self, *, context):
         request = super().get_http_request(context=context)
-        if context.next_page:
+        if context.paginator.current_value:
             # Next page token is a URL, so we can to set the request URL directly
-            request.url = context.next_page
+            request.url = context.paginator.current_value.geturl()
         return request
 ```
 
@@ -64,9 +64,9 @@ class MyStream(RESTStream):
 
     def get_http_request(self, *, context):
         request = super().get_http_request(context=context)
-        if context.next_page:
+        if context.paginator.current_value:
             # Next page token is a URL, so we can to set the request URL directly
-            request.url = context.next_page.geturl()
+            request.url = context.paginator.current_value.geturl()
         return request
 ```
 
@@ -88,7 +88,6 @@ class MyStream(RESTStream):
 
     def get_http_request(self, *, context: HTTPRequestContext[int]) -> HTTPRequest:
         request = super().get_http_request(context=context)
-        if context.next_page is not None:
-            request.params["offset"] = context.next_page
+        request.params["offset"] = context.paginator.current_value
         return request
 ```

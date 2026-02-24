@@ -27,8 +27,7 @@ class CommentsStream(RESTStream):
         if starting_date := self.get_starting_timestamp(context.stream_context):
             request.params["after"] = starting_date.isoformat()
 
-        if context.next_page is not None:
-            request.params["page"] = next_page
+        request.params["page"] = context.paginator.current_value
 
         self.logger.info("QUERY PARAMS: %s", request.params)
         return request
