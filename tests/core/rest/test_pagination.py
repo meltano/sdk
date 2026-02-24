@@ -573,3 +573,90 @@ def test_no_paginator(tap: Tap):
 
     with pytest.raises(StopIteration):
         next(records_iter)
+
+
+def test_prepare_request_override_emits_deprecation(tap: Tap):
+    """Validate that overriding prepare_request emits a deprecation warning."""
+
+    class MyAPIStream(RESTStream):
+        name = "my-api-stream"
+        url_base = "https://my.api.test"
+        path = "/path/to/resource"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
+
+        @override
+        def prepare_request(
+            self,
+            context: Context | None,
+            next_page_token: t.Any,
+        ) -> PreparedRequest:
+            return super().prepare_request(context, next_page_token)
+
+        @override
+        def _request(
+            self,
+            prepared_request: PreparedRequest,
+            context: Context | None,
+        ) -> Response:
+            r = Response()
+            r.status_code = 200
+            r._content = json.dumps({"data": [{"id": 1}]}).encode()
+            return r
+
+    stream = MyAPIStream(tap=tap)
+    with pytest.warns(SingerSDKDeprecationWarning, match="prepare_request"):
+        list(stream.request_records(context=None))
+
+
+def test_prepare_request_override_in_intermediate_class_emits_deprecation(tap: Tap):
+    """Validate that a prepare_request override in an intermediate class is detected.
+
+    Regression test for the case where the override is on a base tap stream class
+    (e.g. TapGitlabStream) and the concrete stream (e.g. IssuesStream) does not
+    itself define prepare_request — self.__class__.__dict__ would miss this.
+    """
+
+    class TapGitlabStream(RESTStream):
+        """Intermediate base class that overrides prepare_request."""
+
+        name = "gitlab-base"
+        url_base = "https://my.api.test"
+        path = "/path/to/resource"
+        records_jsonpath = "$.data[*]"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
+
+        @override
+        def prepare_request(
+            self,
+            context: Context | None,
+            next_page_token: t.Any,
+        ) -> PreparedRequest:
+            return super().prepare_request(context, next_page_token)
+
+    class IssuesStream(TapGitlabStream):
+        """Concrete stream — does NOT itself override prepare_request."""
+
+        name = "issues"
+
+        @override
+        def _request(
+            self,
+            prepared_request: PreparedRequest,
+            context: Context | None,
+        ) -> Response:
+            r = Response()
+            r.status_code = 200
+            r._content = json.dumps({"data": [{"id": 42}]}).encode()
+            return r
+
+    stream = IssuesStream(tap=tap)
+    with pytest.warns(SingerSDKDeprecationWarning, match="prepare_request"):
+        records = list(stream.request_records(context=None))
+
+    assert records == [{"id": 42}]
