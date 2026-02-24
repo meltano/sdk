@@ -12,8 +12,6 @@ from singer_sdk.streams import RESTStream
 from .auth import DummyJSONAuthenticator
 
 if TYPE_CHECKING:
-    import requests
-    from singer_sdk.helpers.types import Context
     from singer_sdk.streams.rest import HTTPRequest, HTTPRequestContext
 
 if sys.version_info >= (3, 12):
@@ -71,15 +69,4 @@ class DummyJSONStream(RESTStream):
             "skip": context.paginator.current_value,
             "limit": context.paginator.page_size,
         }
-        return request
-
-    @override
-    def prepare_request(
-        self,
-        context: Context | None,
-        next_page_token: int | None,
-    ) -> requests.PreparedRequest:
-        request = super().prepare_request(context, next_page_token)
-        if next_page_token is not None:
-            request.headers["X-Custom-Header"] = "value"
         return request
