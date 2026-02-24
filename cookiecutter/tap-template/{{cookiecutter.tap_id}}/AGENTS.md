@@ -133,9 +133,9 @@ The SDK provides built-in pagination classes. **Use these instead of overriding 
 For complex pagination logic, create a custom paginator class:
 
 ```python
-from singer_sdk.pagination import BasePageNumberPaginator
+from singer_sdk.pagination import PageNumberPaginator
 
-class MyCustomPaginator(BasePageNumberPaginator):
+class MyCustomPaginator(PageNumberPaginator):
     def has_more(self, response):
         """Check if there are more pages."""
         data = response.json()
@@ -156,10 +156,10 @@ class MyStream({{ cookiecutter.source_name }}Stream):
 
 **Common Pagination Patterns:**
 
-- **Offset-based**: Extend `BaseOffsetPaginator`
-- **Page-based**: Extend `BasePageNumberPaginator`
-- **Cursor-based**: Extend `BaseAPIPaginator` with custom logic
-- **HATEOAS/HAL**: Use `JSONPathPaginator` with appropriate JSON path
+- **Offset-based**: Use `OffsetPaginator`
+- **Page-based**: Use `PageNumberPaginator`
+- **Cursor-based**: Use or extend `JSONPathPaginator`
+- **HATEOAS/HAL**: Extend `BaseHATEOASPaginator` with a custom `get_next_url()` method to extract the next URL from the response.
 
 Only override `get_next_page_token()` as a last resort for very simple cases.
 
