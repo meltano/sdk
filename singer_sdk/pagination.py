@@ -427,7 +427,7 @@ class OffsetPaginator(BaseAPIPaginator[int], ABC):
     "Use OffsetPaginator instead."
 )
 class BaseOffsetPaginator(OffsetPaginator):
-    """DEPRECATED   .
+    """DEPRECATED.
 
     Use :class:`singer_sdk.pagination.OffsetPaginator` instead.
     """
