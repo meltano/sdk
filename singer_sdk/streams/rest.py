@@ -107,7 +107,7 @@ class HTTPRequest:
         """
         result: list[tuple[str, t.Any]] = []
         for k, v in self.params.items():
-            values = [v] if not isinstance(v, list) else v
+            values = [v] if not isinstance(v, (list, tuple)) else v
             result.extend((k, v) for v in values if v is not None)
         return result
 

@@ -24,9 +24,13 @@ def test_encode_non_string_params():
             "number": 123,
             "bool": True,
             "list": [1, 2, 3],
+            "tuple": ("a", "b", "c"),
             "null": None,
         },
         safe_query_chars="",
     )
 
-    assert request.encode_params() == "number=123&bool=True&list=1&list=2&list=3"
+    assert (
+        request.encode_params()
+        == "number=123&bool=True&list=1&list=2&list=3&tuple=a&tuple=b&tuple=c"
+    )
