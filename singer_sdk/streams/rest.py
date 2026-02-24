@@ -71,6 +71,7 @@ DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = TypeVar("_TToken", default=t.Any)
 _TNum = t.TypeVar("_TNum", int, float)
+_TPag = TypeVar("_TPag", bound="BaseAPIPaginator")
 
 
 @dataclass(slots=True)
@@ -123,7 +124,7 @@ class HTTPRequest:
 
 
 @dataclass(slots=True)
-class HTTPRequestContext(t.Generic[_TToken]):
+class HTTPRequestContext(t.Generic[_TPag]):
     """Context for an HTTP request.
 
     .. versionadded:: NEXT_VERSION
@@ -132,8 +133,8 @@ class HTTPRequestContext(t.Generic[_TToken]):
     #: The stream partition or context dictionary.
     stream_context: Context | None
 
-    #: The next page token, if applicable.
-    next_page: _TToken | None
+    #: The active paginator instance, if applicable.
+    paginator: _TPag
 
 
 class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
@@ -523,11 +524,11 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             headers=self.http_headers,
             params=self.get_url_params(
                 context.stream_context,
-                context.next_page,
+                context.paginator.current_value,
             ),
             data=self.prepare_request_payload(
                 context.stream_context,
-                context.next_page,
+                context.paginator.current_value,
             ),
         )
 
@@ -551,10 +552,36 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             Build a request with the stream's URL, path, query parameters,
             HTTP headers and authenticator.
         """
+        http_method = self.http_method
+        url: str = self.get_url(context)
+        params: dict | str = self.get_url_params(context, next_page_token)
+        request_data = self.prepare_request_payload(context, next_page_token)
+        headers = self.http_headers
+
+        prepare_kwargs: dict[str, t.Any] = {
+            "method": http_method,
+            "url": url,
+            "params": params,
+            "headers": headers,
+        }
+
+        if self.payload_as_json:
+            prepare_kwargs["json"] = request_data
+        else:
+            prepare_kwargs["data"] = request_data
+
+        return self.build_prepared_request(**prepare_kwargs)
+
+    def _prepare_request(
+        self,
+        *,
+        context: Context | None,
+        paginator: _TPag,
+    ) -> requests.PreparedRequest:
         http_request = self.get_http_request(
             context=HTTPRequestContext(
                 stream_context=context,
-                next_page=next_page_token,
+                paginator=paginator,
             )
         )
 
@@ -601,10 +628,22 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             request_counter.with_context(context)
 
             while not paginator.finished:
-                prepared_request = self.prepare_request(
-                    context,
-                    next_page_token=paginator.current_value,
-                )
+                if type(self).prepare_request is not _HTTPStream.prepare_request:
+                    warn(
+                        "prepare_request is deprecated, use get_http_request instead",
+                        SingerSDKDeprecationWarning,
+                        stacklevel=2,
+                    )
+                    prepared_request = self.prepare_request(
+                        context,
+                        paginator.current_value,
+                    )
+                else:
+                    prepared_request = self._prepare_request(
+                        context=context,
+                        paginator=paginator,
+                    )
+
                 resp = decorated_request(prepared_request, context)
                 request_counter.increment()
                 self.update_sync_costs(prepared_request, resp, context)
@@ -784,7 +823,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         ...
 
     @abc.abstractmethod
-    def get_new_paginator(self) -> BaseAPIPaginator | None:
+    def get_new_paginator(self) -> BaseAPIPaginator[_TToken] | None:
         """Get a fresh paginator for this endpoint.
 
         Returns:
@@ -965,7 +1004,15 @@ class RESTStream(_HTTPStream, abc.ABC, t.Generic[_TToken]):
             input=response.json(parse_float=decimal.Decimal),
         )
 
-    def get_new_paginator(self) -> BaseAPIPaginator | None:
+    def get_new_paginator(
+        self,
+    ) -> (
+        BaseAPIPaginator[_TToken]
+        | LegacyStreamPaginator[_TToken]
+        | JSONPathPaginator
+        | SimpleHeaderPaginator
+        | None
+    ):
         """Get a fresh paginator for this API endpoint.
 
         Returns:

@@ -393,6 +393,11 @@ class BaseOffsetPaginator(BaseAPIPaginator[int], ABC):
         super().__init__(start_value, *args, **kwargs)
         self._page_size = page_size
 
+    @property
+    def page_size(self) -> int:
+        """The page size."""
+        return self._page_size
+
     @override
     def get_next(self, response: requests.Response) -> int | None:
         """Get the next page offset.
