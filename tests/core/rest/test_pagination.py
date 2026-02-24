@@ -433,7 +433,6 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
             return r
 
     stream = MyAPIStream(tap=tap)
-
     records_iter = iter(stream.request_records(context=None))
 
     assert next(records_iter) == {"id": 1}
