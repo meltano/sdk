@@ -13,3 +13,20 @@ def test_custom_safe_chars():
     )
 
     assert request.encode_params() == "key=(abc)"
+
+
+def test_encode_non_string_params():
+    request = HTTPRequest(
+        method="GET",
+        url="https://example.com/api",
+        headers={"Authorization": "Bearer token"},
+        params={
+            "number": 123,
+            "bool": True,
+            "list": [1, 2, 3],
+            "null": None,
+        },
+        safe_query_chars="",
+    )
+
+    assert request.encode_params() == "number=123&bool=True&list=1&list=2&list=3"
