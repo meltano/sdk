@@ -190,6 +190,8 @@ def test_paginator_offset():
 
     response = Response()
     paginator = _TestOffsetPaginator(0, 2, "$[*]")
+    assert paginator.page_size == 2
+
     assert not paginator.finished
     assert paginator.current_value == 0
     assert paginator.count == 0
