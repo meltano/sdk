@@ -41,7 +41,7 @@ class MyStream(RESTStream):
     def get_http_request(self, *, context):
         request = super().get_http_request(context=context)
         if context.paginator.current_value:
-            # Next page token is a URL, so we can to set the request URL directly
+            # Next page token is a URL, so we can set the request URL directly
             request.url = context.paginator.current_value.geturl()
         return request
 ```
