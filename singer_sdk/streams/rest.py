@@ -623,26 +623,24 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         decorated_request = self.request_decorator(self._request)
         pages = 0
 
+        deprecated_prepare_request = False
+        if type(self).prepare_request is not _HTTPStream.prepare_request:
+            warn(
+                "prepare_request is deprecated, use get_http_request instead",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
+            deprecated_prepare_request = True
+
         with self.get_http_request_counter() as request_counter:
             request_counter.with_context(context)
 
             while not paginator.finished:
-                if type(self).prepare_request is not _HTTPStream.prepare_request:
-                    warn(
-                        "prepare_request is deprecated, use get_http_request instead",
-                        SingerSDKDeprecationWarning,
-                        stacklevel=2,
-                    )
-                    prepared_request = self.prepare_request(
-                        context,
-                        paginator.current_value,
-                    )
-                else:
-                    prepared_request = self._prepare_request(
-                        context=context,
-                        paginator=paginator,
-                    )
-
+                prepared_request = (
+                    self.prepare_request(context, paginator.current_value)
+                    if deprecated_prepare_request
+                    else self._prepare_request(context=context, paginator=paginator)
+                )
                 resp = decorated_request(prepared_request, context)
                 request_counter.increment()
                 self.update_sync_costs(prepared_request, resp, context)
