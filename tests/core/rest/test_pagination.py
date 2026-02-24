@@ -374,10 +374,13 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
             return BasePageNumberPaginator(1)
 
         @override
-        def get_http_request(self, *, context: HTTPRequestContext[int]) -> HTTPRequest:
+        def get_http_request(
+            self,
+            *,
+            context: HTTPRequestContext[BasePageNumberPaginator],
+        ) -> HTTPRequest:
             request = super().get_http_request(context=context)
-            if context.next_page is not None:
-                request.params["page"] = context.next_page
+            request.params["page"] = context.paginator.current_value
             return request
 
         @override
@@ -450,10 +453,13 @@ def test_continue_if_empty(tap: Tap):
             return _TestPaginator(1)
 
         @override
-        def get_http_request(self, *, context: HTTPRequestContext[int]) -> HTTPRequest:
+        def get_http_request(
+            self,
+            *,
+            context: HTTPRequestContext[BasePageNumberPaginator],
+        ) -> HTTPRequest:
             request = super().get_http_request(context=context)
-            if context.next_page is not None:
-                request.params["page"] = context.next_page
+            request.params["page"] = context.paginator.current_value
             return request
 
         @override
@@ -516,10 +522,11 @@ def test_no_paginator(tap: Tap):
             return None
 
         @override
-        def get_http_request(self, *, context: HTTPRequestContext[None]) -> HTTPRequest:
+        def get_http_request(
+            self, *, context: HTTPRequestContext[SinglePagePaginator]
+        ) -> HTTPRequest:
             request = super().get_http_request(context=context)
-            if context.next_page is not None:
-                request.params["page"] = context.next_page
+            assert context.paginator.current_value is None
             return request
 
         @override

@@ -68,11 +68,15 @@ class GitlabStream(RESTStream[str]):
         )
 
     @override
-    def get_http_request(self, *, context: HTTPRequestContext[str]) -> HTTPRequest:
+    def get_http_request(
+        self,
+        *,
+        context: HTTPRequestContext[SimpleHeaderPaginator],
+    ) -> HTTPRequest:
         """Get the HTTP request for the given context."""
         request = super().get_http_request(context=context)
-        if context.next_page:
-            request.params["page"] = context.next_page
+        if context.paginator.current_value:
+            request.params["page"] = context.paginator.current_value
         if self.replication_key:
             request.params["sort"] = "asc"
             request.params["order_by"] = self.replication_key
@@ -225,7 +229,11 @@ class EpicIssuesStream(GitlabStream):
     parent_stream_type = EpicsStream  # Stream should wait for parents to complete.
 
     @override
-    def get_http_request(self, *, context: HTTPRequestContext[str]) -> HTTPRequest:
+    def get_http_request(
+        self,
+        *,
+        context: HTTPRequestContext[SimpleHeaderPaginator],
+    ) -> HTTPRequest:
         """Get the HTTP request for the given context."""
         request = super().get_http_request(context=context)
         if not context.stream_context or "epic_id" not in context.stream_context:
