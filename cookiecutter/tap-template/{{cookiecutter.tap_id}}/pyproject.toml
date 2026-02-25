@@ -18,9 +18,6 @@ keywords = [
 ]
 classifiers = [
     "Intended Audience :: Developers",
-{%- if cookiecutter.license == "Apache-2.0" %}
-    "License :: OSI Approved :: Apache Software License",
-{%- endif %}
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
