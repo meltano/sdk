@@ -817,10 +817,6 @@ def test_oauth_authenticator_refreshes_token_on_retry(
     assert token_refresh_count >= 1
 
 
-@pytest.mark.xfail(
-    reason="Blocked by https://github.com/getsentry/responses/issues/768",
-    strict=True,
-)
 @responses.activate(registry=responses.registries.OrderedRegistry)
 def test_oauth_authenticator_retries_on_503_error(rest_tap: Tap):
     """Verify OAuth token requests automatically retry on 503 errors.
@@ -828,10 +824,6 @@ def test_oauth_authenticator_retries_on_503_error(rest_tap: Tap):
     Uses the responses library to mock HTTP responses and verify that
     urllib3's retry mechanism successfully retries 503 Service Unavailable
     errors with Retry-After headers.
-
-    NOTE: This test is marked xfail because the responses library doesn't yet
-    support Retry-After header behavior without status_forcelist. See:
-    https://github.com/getsentry/responses/pull/772
     """
     fake_token = "token-after-retry"  # noqa: S105
 
@@ -868,19 +860,12 @@ def test_oauth_authenticator_retries_on_503_error(rest_tap: Tap):
     assert rsp3.call_count == 1
 
 
-@pytest.mark.xfail(
-    reason="Blocked by https://github.com/getsentry/responses/issues/768",
-    strict=True,
-)
 @responses.activate(registry=responses.registries.OrderedRegistry)
 def test_oauth_authenticator_retries_on_rate_limit(rest_tap: Tap):
     """Verify OAuth token requests automatically retry on 429 rate limits.
 
     Tests that API rate limiting (429 Too Many Requests) with Retry-After
     headers triggers automatic retry behavior.
-
-    NOTE: This test is marked xfail because the responses library doesn't yet
-    support Retry-After header behavior. See: https://github.com/getsentry/responses/pull/772
     """
     fake_token = "token-after-rate-limit"  # noqa: S105
 
@@ -939,19 +924,12 @@ def test_oauth_authenticator_does_not_retry_client_errors(
     assert rsp.call_count == 1
 
 
-@pytest.mark.xfail(
-    reason="Blocked by https://github.com/getsentry/responses/issues/768",
-    strict=True,
-)
 @responses.activate(registry=responses.registries.OrderedRegistry)
 def test_oauth_authenticator_fails_after_max_retries(rest_tap: Tap):
     """Verify OAuth token requests fail after exceeding max retries.
 
     Tests that the retry mechanism respects the maximum retry limit (10)
     and eventually raises an error after exhausting all retry attempts.
-
-    NOTE: This test is marked xfail because the responses library doesn't yet
-    support Retry-After header behavior. See: https://github.com/getsentry/responses/pull/772
     """
     # Mock: 15 consecutive 503 errors (exceeds total=10 max retries)
     # We expect 11 calls (1 initial + 10 retries), so the last 4 won't be used
@@ -970,7 +948,10 @@ def test_oauth_authenticator_fails_after_max_retries(rest_tap: Tap):
     )
 
     # Expect RuntimeError after max retries exhausted
-    with pytest.raises(RuntimeError, match="Failed OAuth login"):
+    with pytest.raises(
+        RuntimeError,
+        match=r"Failed to update access token \(status=503\)",
+    ):
         authenticator.update_access_token()
 
     # Verify max retries: 1 initial + 10 retries = 11 total
