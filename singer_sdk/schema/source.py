@@ -234,7 +234,7 @@ class StreamSchema(t.Generic[_TKey]):
             A JSON schema dictionary.
         """
         return self.schema_source.get_schema(
-            self.key or stream.name,  # type: ignore[arg-type] # ty: ignore[invalid-argument-type]
+            self.key or stream.name,  # type: ignore[arg-type]
             key_properties=stream.primary_keys,
         )
 
@@ -462,9 +462,10 @@ class OpenAPISchema(SchemaSource[_TKey]):
             UnsupportedOpenAPISpec: If the OpenAPI specification file type is not
                 supported.
         """
-        if isinstance(self.source, str) and self.source.startswith(
-            ("http://", "https://")
-        ):
+        if isinstance(self.source, str) and self.source.startswith((
+            "http://",
+            "https://",
+        )):
             response = requests.get(self.source, timeout=30)
             response.raise_for_status()
             content = response.content

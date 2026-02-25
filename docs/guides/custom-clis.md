@@ -11,12 +11,14 @@ To add a custom command, you will need to add a new method to your plugin class 
 ```python
 # tap_shortcut/tap.py
 
+
 class ShortcutTap(Tap):
     """Shortcut tap class."""
 
     @plugin_cli
     def update_schema(cls) -> click.Command:
         """Update the OpenAPI schema for this tap."""
+
         @click.command()
         def update():
             response = requests.get(

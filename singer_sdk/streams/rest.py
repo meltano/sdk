@@ -21,6 +21,7 @@ from singer_sdk import metrics
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
+from singer_sdk.helpers._packaging import get_sdk_version
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
     JSONPathPaginator,
@@ -158,7 +159,6 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             Dictionary of HTTP headers to use as a base for every request.
         """
         return {
-            "User-Agent": self.user_agent,
             **self._http_headers,
         }
 
@@ -174,7 +174,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
             )
-            return self.rest_method  # type: ignore[no-any-return] # ty: ignore[invalid-return-type]
+            return self.rest_method  # type: ignore[no-any-return]
 
         return "GET"
 
@@ -207,10 +207,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
 
         .. versionadded:: 0.40.0
         """
-        return self.config.get(  # type: ignore[no-any-return]
-            "user_agent",
-            f"{self.tap_name}/{self._tap.plugin_version}",
-        )
+        return self.config.get("user_agent", f"singer-sdk/{get_sdk_version()}")  # type: ignore[no-any-return]
 
     def validate_response(self, response: requests.Response) -> None:
         """Validate HTTP response.
@@ -355,7 +352,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         self,
         context: Context | None,  # noqa: ARG002
         next_page_token: _TToken | None,  # noqa: ARG002
-    ) -> dict[str, t.Any] | str:
+    ) -> dict[str, t.Any]:
         """Return a dictionary or string of URL query parameters.
 
         If paging is supported, developers may override with specific paging logic.
@@ -380,8 +377,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
                 next page of data.
 
         Returns:
-            Dictionary or encoded string with URL query parameters to use in the
-                request.
+            Dictionary with URL query parameters to use in the request.
         """
         return {}
 
@@ -402,6 +398,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             A :class:`requests.PreparedRequest` object.
         """
         request = requests.Request(*args, **kwargs)
+        request.headers.setdefault("User-Agent", self.user_agent)
         self.requests_session.auth = self.authenticator
         return self.requests_session.prepare_request(request)
 

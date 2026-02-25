@@ -23,7 +23,14 @@ RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
 
 [lint]
-extend-ignore = ["TD002", "TD003", "FIX002"]
+extend-ignore = [
+  # Ignore TODO comments
+  "TD002",
+  "TD003",
+  "FIX002",
+  # Commented code
+  "ERA001",
+]
 """
 
 COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
@@ -98,7 +105,14 @@ def ty(session: nox.Session) -> None:
         env=_install_env(session),
     )
     python = session.python if isinstance(session.python, str) else main_python
-    session.run("ty", "check", "--python-version", python, *args)
+    output_format = "github" if os.getenv("GITHUB_ACTIONS") == "true" else "concise"
+    session.run(
+        "ty",
+        "check",
+        f"--output-format={output_format}",
+        f"--python-version={python}",
+        *args,
+    )
 
 
 def _run_pytest(session: nox.Session, *pytest_args: str, coverage: bool = True) -> None:
@@ -474,7 +488,7 @@ def templates(session: nox.Session, replay_file_path: Path) -> None:
 
     session.run("git", "init", "-b", "main", external=True)
     session.run("git", "add", "-A", external=True)
-    session.run("uvx", "pre-commit", "run", "--all-files")
+    session.run("uvx", "prek", "run", "--all-files")
     session.run("uvx", "--with=tox-uv", "tox", "-e=typing")
 
 

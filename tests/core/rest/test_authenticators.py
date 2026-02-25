@@ -18,11 +18,13 @@ import responses.registries
 import time_machine
 from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.serialization import (
+    BestAvailableEncryption,
     Encoding,
     NoEncryption,
     PrivateFormat,
     PublicFormat,
 )
+from dirty_equals import IsPositiveInt
 
 from singer_sdk.authenticators import (
     APIAuthenticatorBase,
@@ -283,22 +285,84 @@ def public_key_string(public_key: RSAPublicKey) -> str:
     ).decode("utf-8")
 
 
+@pytest.fixture
+def passphrase() -> str:
+    return "private-key-passphrase"
+
+
+@pytest.fixture
+def private_key_with_passphrase(private_key: RSAPrivateKey, passphrase: str) -> str:
+    return private_key.private_bytes(
+        Encoding.PEM,
+        format=PrivateFormat.PKCS8,
+        encryption_algorithm=BestAvailableEncryption(passphrase.encode("utf-8")),
+    ).decode("utf-8")
+
+
 def test_oauth_jwt_authenticator_payload(
-    rest_tap: Tap,
     private_key_string: str,
     public_key_string: str,
 ):
-    class _FakeOAuthJWTAuthenticator(OAuthJWTAuthenticator):
-        private_key = private_key_string
-        oauth_request_body = {"some": "payload"}  # noqa: RUF012
+    client_id = "client-id"
+    oauth_scopes = "one,two,three"
+    auth_endpoint = "https://example.com/oauth"
 
-    authenticator = _FakeOAuthJWTAuthenticator(stream=rest_tap.streams["some_stream"])
+    authenticator = OAuthJWTAuthenticator(
+        client_id=client_id,
+        private_key=private_key_string,
+        auth_endpoint=auth_endpoint,
+        oauth_scopes=oauth_scopes,
+    )
 
-    body = authenticator.oauth_request_body
     payload = authenticator.oauth_request_payload
     token = payload["assertion"]
 
-    assert jwt.decode(token, public_key_string, algorithms=["RS256"]) == body
+    assert jwt.decode(
+        token,
+        public_key_string,
+        algorithms=["RS256"],
+        audience="https://example.com/oauth",
+    ) == {
+        "aud": auth_endpoint,
+        "exp": IsPositiveInt(),
+        "iat": IsPositiveInt(),
+        "iss": client_id,
+        "scope": oauth_scopes,
+    }
+
+
+def test_oauth_jwt_authenticator_payload_with_passphrase(
+    public_key_string: str,
+    private_key_with_passphrase: str,
+    passphrase: str,
+):
+    auth_endpoint = "https://example.com/oauth"
+    client_id = "client-id"
+    oauth_scopes = "one,two,three"
+
+    authenticator = OAuthJWTAuthenticator(
+        client_id=client_id,
+        auth_endpoint=auth_endpoint,
+        private_key=private_key_with_passphrase,
+        private_key_passphrase=passphrase,
+        oauth_scopes=oauth_scopes,
+    )
+
+    payload = authenticator.oauth_request_payload
+    token = payload["assertion"]
+
+    assert jwt.decode(
+        token,
+        public_key_string,
+        algorithms=["RS256"],
+        audience="https://example.com/oauth",
+    ) == {
+        "aud": auth_endpoint,
+        "exp": IsPositiveInt(),
+        "iat": IsPositiveInt(),
+        "iss": client_id,
+        "scope": oauth_scopes,
+    }
 
 
 def test_requests_library_auth(rest_tap: Tap):
@@ -753,10 +817,6 @@ def test_oauth_authenticator_refreshes_token_on_retry(
     assert token_refresh_count >= 1
 
 
-@pytest.mark.xfail(
-    reason="Blocked by https://github.com/getsentry/responses/issues/768",
-    strict=True,
-)
 @responses.activate(registry=responses.registries.OrderedRegistry)
 def test_oauth_authenticator_retries_on_503_error(rest_tap: Tap):
     """Verify OAuth token requests automatically retry on 503 errors.
@@ -764,10 +824,6 @@ def test_oauth_authenticator_retries_on_503_error(rest_tap: Tap):
     Uses the responses library to mock HTTP responses and verify that
     urllib3's retry mechanism successfully retries 503 Service Unavailable
     errors with Retry-After headers.
-
-    NOTE: This test is marked xfail because the responses library doesn't yet
-    support Retry-After header behavior without status_forcelist. See:
-    https://github.com/getsentry/responses/pull/772
     """
     fake_token = "token-after-retry"  # noqa: S105
 
@@ -804,19 +860,12 @@ def test_oauth_authenticator_retries_on_503_error(rest_tap: Tap):
     assert rsp3.call_count == 1
 
 
-@pytest.mark.xfail(
-    reason="Blocked by https://github.com/getsentry/responses/issues/768",
-    strict=True,
-)
 @responses.activate(registry=responses.registries.OrderedRegistry)
 def test_oauth_authenticator_retries_on_rate_limit(rest_tap: Tap):
     """Verify OAuth token requests automatically retry on 429 rate limits.
 
     Tests that API rate limiting (429 Too Many Requests) with Retry-After
     headers triggers automatic retry behavior.
-
-    NOTE: This test is marked xfail because the responses library doesn't yet
-    support Retry-After header behavior. See: https://github.com/getsentry/responses/pull/772
     """
     fake_token = "token-after-rate-limit"  # noqa: S105
 
@@ -875,19 +924,12 @@ def test_oauth_authenticator_does_not_retry_client_errors(
     assert rsp.call_count == 1
 
 
-@pytest.mark.xfail(
-    reason="Blocked by https://github.com/getsentry/responses/issues/768",
-    strict=True,
-)
 @responses.activate(registry=responses.registries.OrderedRegistry)
 def test_oauth_authenticator_fails_after_max_retries(rest_tap: Tap):
     """Verify OAuth token requests fail after exceeding max retries.
 
     Tests that the retry mechanism respects the maximum retry limit (10)
     and eventually raises an error after exhausting all retry attempts.
-
-    NOTE: This test is marked xfail because the responses library doesn't yet
-    support Retry-After header behavior. See: https://github.com/getsentry/responses/pull/772
     """
     # Mock: 15 consecutive 503 errors (exceeds total=10 max retries)
     # We expect 11 calls (1 initial + 10 retries), so the last 4 won't be used
@@ -906,7 +948,10 @@ def test_oauth_authenticator_fails_after_max_retries(rest_tap: Tap):
     )
 
     # Expect RuntimeError after max retries exhausted
-    with pytest.raises(RuntimeError, match="Failed OAuth login"):
+    with pytest.raises(
+        RuntimeError,
+        match=r"Failed to update access token \(status=503\)",
+    ):
         authenticator.update_access_token()
 
     # Verify max retries: 1 initial + 10 retries = 11 total

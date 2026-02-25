@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from singer_sdk import typing as th
 
 from .client import DummyJSONStream
@@ -48,7 +50,7 @@ class Products(DummyJSONStream):
                     th.Property("date", th.DateTimeType),
                     th.Property("reviewerName", th.StringType),
                     th.Property("reviewerEmail", th.StringType),
-                )
+                ),
             ),
         ),
         th.Property("returnPolicy", th.StringType),

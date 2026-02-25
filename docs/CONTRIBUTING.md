@@ -105,6 +105,7 @@ To mark a test as platform-specific, use the `@pytest.mark.<platform>` decorator
 ```python
 import pytest
 
+
 @pytest.mark.windows
 def test_windows_only():
     pass

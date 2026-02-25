@@ -259,48 +259,46 @@ def test_record_property_pop(
 
 def test_deselect_all_streams():
     """Test that deselect_all_streams sets all streams to not selected."""
-    catalog = singer.Catalog.from_dict(
-        {
-            "streams": [
-                {
-                    "tap_stream_id": "test_stream_a",
-                    "stream": "test_stream_a",
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "col_a": {
-                                "type": "string",
-                            },
+    catalog = singer.Catalog.from_dict({
+        "streams": [
+            {
+                "tap_stream_id": "test_stream_a",
+                "stream": "test_stream_a",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "col_a": {
+                            "type": "string",
                         },
                     },
-                    "metadata": [
-                        {
-                            "breadcrumb": (),
-                            "metadata": {"selected": True},
-                        },
-                    ],
                 },
-                {
-                    "tap_stream_id": "test_stream_b",
-                    "stream": "test_stream_b",
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "col_a": {
-                                "type": "string",
-                            },
+                "metadata": [
+                    {
+                        "breadcrumb": (),
+                        "metadata": {"selected": True},
+                    },
+                ],
+            },
+            {
+                "tap_stream_id": "test_stream_b",
+                "stream": "test_stream_b",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "col_a": {
+                            "type": "string",
                         },
                     },
-                    "metadata": [
-                        {
-                            "breadcrumb": (),
-                            "metadata": {"selected": True},
-                        },
-                    ],
                 },
-            ],
-        }
-    )
+                "metadata": [
+                    {
+                        "breadcrumb": (),
+                        "metadata": {"selected": True},
+                    },
+                ],
+            },
+        ],
+    })
 
     # Stream is selected
     assert catalog["test_stream_a"].metadata.root.selected is True

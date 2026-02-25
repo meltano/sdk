@@ -163,7 +163,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         Returns:
             Stream metadata.
         """
-        return self[()]  # type: ignore[return-value] # ty: ignore[invalid-return-type]
+        return self[()]  # type: ignore[return-value]
 
     @classmethod
     def get_standard_metadata(

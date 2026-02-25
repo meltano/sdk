@@ -41,6 +41,7 @@ class TapCountries(Tap):
     """Sample tap for Countries GraphQL API. This tap has no
     config options and does not require authentication.
     """
+
     name = "tap-countries"
     config_jsonschema = th.PropertiesList([]).to_dict()
 
@@ -168,8 +169,8 @@ val1,val2,val3
 val1,val2,val3
 """
 
-class ParquetStream(Stream):
 
+class ParquetStream(Stream):
     @property
     def schema(self):
         """Dynamically detect the json schema for the stream.
@@ -189,7 +190,7 @@ custom `get_jsonschema_type()` function to return the data type.
 class ParquetStream(Stream):
     """Stream class for Parquet streams."""
 
-    #...
+    # ...
 
     @property
     def schema(self) -> dict:
@@ -226,26 +227,6 @@ class TapCountries(Tap):
         ]
 ```
 
-Or equivalently:
-
-```python
-
-# Declare list of types here at the top of the file
-STREAM_TYPES = [
-    CountriesStream,
-    ContinentsStream,
-]
-
-class TapCountries(Tap):
-    # ...
-    def discover_streams(self) -> List[Stream]:
-        """Return a list with one each of all defined stream types."""
-        return [
-            stream_type(tap=self)
-            for stream_type in STREAM_TYPES
-        ]
-```
-
 ### Run the standard built-in tap tests
 
 ```python
@@ -258,6 +239,7 @@ from tap_parquet.tap import TapParquet
 SAMPLE_CONFIG = {
     # ...
 }
+
 
 def test_sdk_standard_tap_tests():
     """Run the built-in tap tests from the SDK."""
@@ -272,8 +254,10 @@ def test_sdk_standard_tap_tests():
 from singer_sdk.authenticators import OAuthAuthenticator, SingletonMeta
 from singer_sdk.streams import RESTStream
 
+
 class SingletonAuthenticator(OAuthAuthenticator, metaclass=SingletonMeta):
     """A singleton authenticator."""
+
 
 class SingletonAuthStream(RESTStream):
     """A stream with singleton authenticator."""
@@ -292,6 +276,7 @@ from functools import cached_property
 from singer_sdk.authenticators import APIAuthenticatorBase
 from singer_sdk.streams import RESTStream
 
+
 class CachedAuthStream(RESTStream):
     """A stream with singleton authenticator."""
 
@@ -306,6 +291,7 @@ class CachedAuthStream(RESTStream):
 ```python
 from requests.auth import HTTPDigestAuth
 from singer_sdk.streams import RESTStream
+
 
 class DigestAuthStream(RESTStream):
     """A stream with digest authentication."""

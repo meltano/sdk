@@ -10,12 +10,15 @@ You'll either have to manage your own [state file](https://hub.meltano.com/singe
 
 ```py
 class CommentsStream(RESTStream):
-
     replication_key = "date_gmt"
     is_sorted = True
 
     schema = th.PropertiesList(
-        th.Property("date_gmt", th.DateTimeType(nullable=True), description="Date"),
+        th.Property(
+            "date_gmt",
+            th.DateTimeType(nullable=True),
+            description="Date",
+        ),
     ).to_dict()
 
     def get_url_params(self, context, next_page_token):

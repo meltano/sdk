@@ -170,7 +170,8 @@ class SQLSink(BatchSink, t.Generic[_C]):
         # strip leading/trailing whitespace,
         # transform to lowercase and replace - . and spaces to _
         name = (
-            name.lower()
+            name
+            .lower()
             .lstrip()
             .rstrip()
             .replace(".", "_")

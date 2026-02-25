@@ -1,6 +1,6 @@
 {
-  "created_at": "2025-11-21T05:09:51.042344+00:00",
-  "elapsed": 0.338206,
+  "created_at": "2026-02-18T16:58:28.422259+00:00",
+  "elapsed": 0.730929,
   "encoding": "utf-8",
   "headers": {
     "Connection": "keep-alive",
@@ -12,33 +12,33 @@
     "access-control-allow-origin": "*",
     "access-control-expose-headers": "*",
     "access-control-max-age": "600",
-    "age": "137158",
+    "age": "1",
     "alt-svc": "h3=\":443\"; ma=86400",
     "cache-control": "public, s-maxage=2628000, stale-while-revalidate=2628000",
     "content-encoding": "gzip",
     "content-type": "application/json; charset=utf-8",
-    "date": "Wed, 19 Nov 2025 15:03:54 GMT",
-    "gcdn-cache": "HIT",
-    "stellate-rate-limit-budget-remaining": "41",
+    "date": "Wed, 18 Feb 2026 16:58:28 GMT",
+    "gcdn-cache": "MISS",
+    "stellate-rate-limit-budget-remaining": "49",
     "stellate-rate-limit-budget-required": "6",
     "stellate-rate-limit-decision": "pass",
-    "stellate-rate-limit-rules": "\"IP limit\";type=\"RequestCount\";budget=50;limited=?0;remaining=41;refill=28",
+    "stellate-rate-limit-rules": "\"IP limit\";type=\"RequestCount\";budget=50;limited=?0;remaining=49;refill=60",
     "vary": "accept-encoding",
-    "x-cache": "HIT",
-    "x-cache-hits": "33",
+    "x-cache": "MISS",
+    "x-cache-hits": "0",
     "x-powered-by": "Stellate",
-    "x-served-by": "cache-pdk-katl1840044-PDK"
+    "x-served-by": "cache-qro-mmqt1070077-QRO"
   },
   "reason": "",
   "request": {
-    "body": "dm?dlWpa5UIv^r(b!BpSAbTKVZ*FvHZe?zCb0B*lV{c?-AZ}r8WgvYZeIhI%B6eYNX<=e)Wpg4rAbWj%",
+    "body": "eyJxdWVyeSI6ICJxdWVyeSB7IGNvbnRpbmVudHMgeyBjb2RlIG5hbWUgfSB9IiwgInZhcmlhYmxlcyI6IHt9fQ==",
     "headers": {
       "Accept": "*/*",
       "Accept-Encoding": "gzip, deflate, zstd",
       "Connection": "keep-alive",
       "Content-Length": "64",
       "Content-Type": "application/json",
-      "User-Agent": "tap-countries/0.0.0"
+      "User-Agent": "REDACTED"
     },
     "method": "POST",
     "url": "https://countries.trevorblades.com/"

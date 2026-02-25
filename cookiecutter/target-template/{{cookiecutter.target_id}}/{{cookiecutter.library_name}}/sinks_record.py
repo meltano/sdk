@@ -17,4 +17,4 @@ class {{ cookiecutter.destination_name }}Sink(RecordSink):
         """
         # Sample:
         # ------
-        # client.write(record)  # noqa: ERA001
+        # client.write(record)

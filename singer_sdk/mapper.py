@@ -681,7 +681,7 @@ class PluginMapper:
         self.stream_maps: dict[str, list[StreamMap]] = {}
         self.map_config = plugin_config.get("stream_map_config", {})
         self.faker_config = plugin_config.get("faker_config", {})
-        self.flattening_options = get_flattening_options(plugin_config)  # type: ignore[arg-type] # ty: ignore[invalid-argument-type]
+        self.flattening_options = get_flattening_options(plugin_config)  # type: ignore[arg-type]
         self.default_mapper_type: type[DefaultStreamMap] = SameRecordTransform
         self.logger = logger
 

@@ -179,6 +179,5 @@ logging.config.dictConfig(
 )
 
 
-class MyTap(Tap):
-    ...
+class MyTap(Tap): ...
 ```

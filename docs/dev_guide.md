@@ -109,6 +109,7 @@ By default, the Singer SDK for REST streams assumes the API responds with a JSON
 ```python
 class EntityStream(RESTStream):
     """Entity stream from a generic REST API."""
+
     records_jsonpath = "$.data.records[*]"
 ```
 

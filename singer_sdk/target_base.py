@@ -553,7 +553,7 @@ class Target(BaseSingerReader, abc.ABC):
             super()._handle_termination(signum, frame)
 
     @classmethod
-    def invoke(  # type: ignore[override] # ty: ignore[invalid-method-override]
+    def invoke(  # type: ignore[override]
         cls,
         *,
         about: bool = False,

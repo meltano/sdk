@@ -6,7 +6,7 @@ from a parent record each time the child stream is invoked.
 
 ## If you do want to utilize parent-child streams
 
-1. Set `parent_stream_type` in the child-stream's class to the class of the parent.
+1. Set [`parent_stream_type`](singer_sdk.Stream.parent_stream_type) in the child-stream's class to the class of the parent.
 1. Implement one of the below methods to pass context from the parent to the child:
    1. Override [`get_child_context`](singer_sdk.Stream.get_child_context) to return a new
       child context object based on records and any existing context from the parent stream.
@@ -70,7 +70,7 @@ class EpicIssuesStream(GitlabStream):
 
 In the example above, the `path` contains placeholders like `{group_id}` and `{epic_iid}`. These are **not** instance properties—they're context variables that get automatically replaced.
 
-The SDK's `get_url_params()` method extracts these values from the context dictionary returned by the parent's `get_child_context()`. For each parent record, the child stream receives a context like:
+The SDK's [`get_url()`](singer_sdk.RESTStream.get_url) method extracts these values from each context dictionary yielded by the parent's [`generate_child_contexts()`](singer_sdk.Stream.generate_child_contexts). For each parent record, the child stream receives one or more context dictionaries like:
 
 ```python
 {

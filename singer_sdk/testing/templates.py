@@ -179,7 +179,7 @@ class StreamTestTemplate(TestTemplate):
             or self.stream.name in self.config.ignore_no_records_for_streams
         )
 
-    def run(  # type: ignore[override] # ty: ignore[invalid-method-override]
+    def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
         resource: t.Any,
@@ -211,7 +211,7 @@ class AttributeTestTemplate(StreamTestTemplate):
         """
         return f"{self.stream.name}__{self.attribute_name}__{self.name}"
 
-    def run(  # type: ignore[override] # ty: ignore[invalid-method-override]
+    def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
         resource: t.Any,

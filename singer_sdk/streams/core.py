@@ -149,7 +149,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
         self._primary_keys: t.Sequence[str] | None = None
-        self._state_partitioning_keys: list[str] | None = None
+        self._state_partitioning_keys: t.Sequence[str] | None = None
         self._schema_filepath: Path | Traversable | None = None
         self._metadata: singer.MetadataMapping | None = None
         self._mask: singer.SelectionMask | None = None
@@ -545,11 +545,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
         self._primary_keys = new_value
 
     @property
-    def state_partitioning_keys(self) -> list[str] | None:
+    def state_partitioning_keys(self) -> t.Sequence[str] | None:
         """Get state partition keys.
 
         If not set, a default partitioning will be inherited from the stream's context.
-        If an empty list is set (`[]`), state will be held in one bookmark per stream.
+        If an empty list or tuple is set, state will be held in one bookmark per stream.
 
         Returns:
             Partition keys for the stream state bookmarks.
@@ -557,11 +557,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
         return self._state_partitioning_keys
 
     @state_partitioning_keys.setter
-    def state_partitioning_keys(self, new_value: list[str] | None) -> None:
+    def state_partitioning_keys(self, new_value: t.Sequence[str] | None) -> None:
         """Set partition keys for the stream state bookmarks.
 
         If not set, a default partitioning will be inherited from the stream's context.
-        If an empty list is set (`[]`), state will be held in one bookmark per stream.
+        If an empty list or tuple is set, state will be held in one bookmark per stream.
 
         Args:
             new_value: the new list of keys
@@ -1411,7 +1411,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         if entry := catalog.get_stream(self.name):
             stream_metadata: StreamMetadata | None
-            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment] # ty: ignore[invalid-assignment]
+            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment]
                 table_key_properties = stream_metadata.table_key_properties
                 table_replication_key = stream_metadata.replication_key
                 table_replication_method = stream_metadata.forced_replication_method

@@ -31,10 +31,7 @@ SAMPLE_CONFIG = {
 
 
 # Run standard built-in tap tests from the SDK:
-TestTapExample = get_tap_test_class(
-    tap_class=TapExample,
-    config=SAMPLE_CONFIG
-)
+TestTapExample = get_tap_test_class(tap_class=TapExample, config=SAMPLE_CONFIG)
 ```
 
 ### Testing Targets
@@ -54,7 +51,7 @@ SAMPLE_CONFIG: Dict[str, Any] = {
 # Run standard built-in target tests from the SDK:
 StandardTargetTests = get_target_test_class(
     target_class=TargetExample,
-    config=SAMPLE_CONFIG
+    config=SAMPLE_CONFIG,
 )
 
 
@@ -92,9 +89,7 @@ SAMPLE_CONFIG = {
     "metrics_log_level": "debug",
 }
 
-TEST_SUITE_CONFIG = SuiteConfig(
-    ignore_no_records_for_streams=["tag_synonyms"]
-)
+TEST_SUITE_CONFIG = SuiteConfig(ignore_no_records_for_streams=["tag_synonyms"])
 
 TestTapStackExchange = get_tap_test_class(
     tap_class=TapStackExchange, config=SAMPLE_CONFIG, suite_config=TEST_SUITE_CONFIG
@@ -111,6 +106,7 @@ Check out [`singer_sdk/testing/tap_tests.py`](https://github.com/meltano/sdk/tre
 ```python
 class TapCLIPrintsTest(TapTestTemplate):
     "Test that the tap is able to print standard metadata."
+
     name = "cli_prints"
 
     def test(self):
@@ -122,9 +118,7 @@ class TapCLIPrintsTest(TapTestTemplate):
 Once you have created some tests, add them to a suite:
 
 ```python
-my_custom_tap_tests = TestSuite(
-    kind="tap", tests=[TapCLIPrintsTest]
-)
+my_custom_tap_tests = TestSuite(kind="tap", tests=[TapCLIPrintsTest])
 ```
 
 This suite can now be passed to {func}`get_tap_test_class <singer_sdk.testing.get_tap_test_class>` or {func}`get_target_test_class <singer_sdk.testing.get_target_test_class>` in a list of `custom_suites` along with any other suites, to generate your custom test class.

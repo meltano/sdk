@@ -33,6 +33,7 @@ class can be used to handle this pattern.
 # Original implementation
 from urllib.parse import parse_qsl
 
+
 class MyStream(RESTStream):
     def get_next_page_token(self, response, previous_token):
         data = response.json()
@@ -51,6 +52,7 @@ class MyStream(RESTStream):
 # New implementation
 
 from singer_sdk.pagination import BaseHATEOASPaginator
+
 
 class MyPaginator(BaseHATEOASPaginator):
     def get_next_url(self, response):
@@ -75,18 +77,18 @@ class MyStream(RESTStream):
 ### Example: Offset pagination
 
 Another common pattern is to use an `offset` parameter to indicate the starting point of the next
-page of results. The [`BaseOffsetPaginator`](../../classes/singer_sdk.pagination.BaseOffsetPaginator)
+page of results. The [`OffsetPaginator`](../../classes/singer_sdk.pagination.OffsetPaginator)
 class can be used to handle this pattern.
 
 ```python
 # New implementation
 
-from singer_sdk.pagination import BaseOffsetPaginator
+from singer_sdk.pagination import OffsetPaginator
 
 
 class MyStream(RESTStream):
     def get_new_paginator(self):
-        return BaseOffsetPaginator(start_value=0, page_size=250)
+        return OffsetPaginator(start_value=0, page_size=250)
 
     def get_url_params(self, context, next_page_token):
         params = {}
