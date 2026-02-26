@@ -211,7 +211,6 @@ config_jsonschema = th.PropertiesList(
     th.Property("api_url", th.StringType, required=True),
     th.Property("api_key", th.StringType, required=True, secret=True),
     th.Property("start_date", th.DateTimeType),
-    th.Property("user_agent", th.StringType, default="tap-mysource"),
 ).to_dict()
 ```
 
