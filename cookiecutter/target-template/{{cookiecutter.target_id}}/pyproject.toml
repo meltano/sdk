@@ -1,3 +1,10 @@
+[build-system]
+requires = [
+    "hatchling>=1,<2",
+    "hatch-vcs>=0.5",
+]
+build-backend = "hatchling.build"
+
 [project]
 {%- if cookiecutter.variant != "None (Skip)" %}
 name = "{{cookiecutter.variant}}-{{cookiecutter.target_id}}"
@@ -61,8 +68,8 @@ test = [
     "singer-sdk[testing]",
 ]
 typing = [
-    "mypy>=1.16.0",
-    "ty>=0.0.15",
+    "mypy>=1.19.1",
+    "ty>=0.0.18",
     {%- if cookiecutter.serialization_method == "SQL" %}
     "sqlalchemy-stubs",
     {%- else %}
@@ -76,6 +83,10 @@ packages = [
     "{{cookiecutter.library_name}}",
 ]
 {%- endif %}
+
+[tool.hatch.version]
+fallback-version = "0.1.0.dev0"
+source = "vcs"
 
 [tool.pytest]
 addopts = [
@@ -126,26 +137,18 @@ allow-star-arg-any = true
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[build-system]
-requires = [
-    "hatchling>=1,<2",
-]
-build-backend = "hatchling.build"
-
 # This configuration can be used to customize tox environments
 [tool.tox]
-min_version = "4.32"
+min_version = "4.43"
 requires = [
-    "tox>=4.32",
+    "tox>=4.43",
     "tox-uv",
 ]
 env_list = [
     "typing",
-    "py314",
-    "py313",
-    "py312",
-    "py311",
-    "py310",
+    { product = [
+        { prefix = "3.", start = 10 },
+    ] },
 ]
 
 [tool.tox.env_run_base]

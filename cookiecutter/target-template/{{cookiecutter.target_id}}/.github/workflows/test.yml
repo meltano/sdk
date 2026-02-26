@@ -29,18 +29,27 @@ env:
   FORCE_COLOR: 1
 
 jobs:
+  build-package:
+    name: Build & verify package
+    runs-on: ubuntu-latest
+    outputs:
+      supported-python-versions: {{ '${{ steps.baipp.outputs.supported_python_classifiers_json_array }}' }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: hynek/build-and-inspect-python-package@efb823f52190ad02594531168b7a2d5790e66516 # v2.14.0
+        id: baipp
+
   pytest:
-    name: Integration Tests / Python {{ '${{ matrix.python-version }}' }}
+    name: Integration
+    needs: [build-package]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version:
-        - "3.10"
-        - "3.11"
-        - "3.12"
-        - "3.13"
-        - "3.14"
+        python-version: {{ '${{ fromJson(needs.build-package.outputs.supported-python-versions) }}' }}
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Set up Python {{ '${{ matrix.python-version }}' }}
@@ -64,8 +73,6 @@ jobs:
         python-version: 3.x
     - name: Setup uv
       uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
-      with:
-        version: ">=0.10"
     - name: Run Tox
       run: |
         uvx --with=tox-uv tox -e typing
