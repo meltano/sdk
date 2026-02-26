@@ -264,10 +264,10 @@ class AbortedSyncExceptionBase(SyncLifecycleSignal, abc.ABC):
     """Base exception to raise when a stream sync is aborted.
 
     Developers should not raise this directly, and instead should use:
-    1. `FatalAbortedSyncException` - Indicates the stream aborted abnormally and was not
-       able to reach a stable and resumable state.
-    2. `PausedSyncException` - Indicates the stream aborted abnormally and successfully
-       reached a 'paused' and resumable state.
+    1. `AbortedSyncFailedException` - Indicates the stream aborted abnormally and was
+       not able to reach a stable and resumable state.
+    2. `AbortedSyncPausedException` - Indicates the stream aborted abnormally and
+       successfully reached a 'paused' and resumable state.
 
     Notes:
     - `FULL_TABLE` sync operations cannot be paused and will always trigger a fatal
