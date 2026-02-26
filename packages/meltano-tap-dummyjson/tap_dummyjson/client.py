@@ -66,7 +66,7 @@ class DummyJSONStream(RESTStream):
     ) -> HTTPRequest:
         request = super().get_http_request(context=context)
         request.params.update({
-            "skip": context.paginator.current_value,
-            "limit": context.paginator.page_size,
+            "skip": context.page.current_value,
+            "limit": context.page.page_size,
         })
         return request

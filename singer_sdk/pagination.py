@@ -233,8 +233,8 @@ class BaseHATEOASPaginator(BaseAPIPaginator[ParseResult | None], ABC):
 
            def get_http_request(self, *, context):
                request = super().get_http_request(context=context)
-               if context.paginator.current_value:
-                   request.url = context.paginator.current_value.geturl()
+               if context.page.current_value:
+                   request.url = context.page.current_value.geturl()
                return request
     """
 

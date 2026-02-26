@@ -75,8 +75,8 @@ class GitlabStream(RESTStream[str]):
     ) -> HTTPRequest:
         """Get the HTTP request for the given context."""
         request = super().get_http_request(context=context)
-        if context.paginator.current_value:
-            request.params["page"] = context.paginator.current_value
+        if context.page.current_value:
+            request.params["page"] = context.page.current_value
         if self.replication_key:
             request.params["sort"] = "asc"
             request.params["order_by"] = self.replication_key

@@ -134,7 +134,7 @@ class HTTPRequestContext(t.Generic[_TPag]):
     stream_context: Context | None
 
     #: The active paginator instance, if applicable.
-    paginator: _TPag
+    page: _TPag
 
 
 class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
@@ -505,7 +505,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
            class MyStream(RESTStream):
                def get_http_request(self, *, context):
                    request = super().get_http_request(context=context)
-                   request.params["page"] = context.paginator.current_value
+                   request.params["page"] = context.page.current_value
                    return request
 
         Args:
@@ -523,11 +523,11 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             headers=self.http_headers,
             params=self.get_url_params(
                 context.stream_context,
-                context.paginator.current_value,
+                context.page.current_value,
             ),
             data=self.prepare_request_payload(
                 context.stream_context,
-                context.paginator.current_value,
+                context.page.current_value,
             ),
         )
 
@@ -575,13 +575,10 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         self,
         *,
         context: Context | None,
-        paginator: _TPag,
+        page: _TPag,
     ) -> requests.PreparedRequest:
         http_request = self.get_http_request(
-            context=HTTPRequestContext(
-                stream_context=context,
-                paginator=paginator,
-            )
+            context=HTTPRequestContext(stream_context=context, page=page)
         )
 
         prepare_kwargs: dict[str, t.Any] = {
@@ -639,7 +636,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
                 prepared_request = (
                     self.prepare_request(context, paginator.current_value)
                     if deprecated_prepare_request
-                    else self._prepare_request(context=context, paginator=paginator)
+                    else self._prepare_request(context=context, page=paginator)
                 )
                 resp = decorated_request(prepared_request, context)
                 request_counter.increment()

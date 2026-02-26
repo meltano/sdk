@@ -199,7 +199,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
             An HTTP request for this stream.
         """
         request = super().get_http_request(context=context)
-        request.params["page"] = context.paginator.current_value
+        request.params["page"] = context.page.current_value
 
         if self.replication_key:
             request.params["sort"] = "asc"
