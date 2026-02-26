@@ -236,7 +236,8 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         Raises:
             FatalAPIError: If the request is not retriable.
             RetriableAPIError: If the request is retriable.
-            IgnorableAPIError: If the request should be silently skipped.
+            IgnorableAPIError: If the request is to be skipped after a failure
+                without raising an error to the caller (the skip is still logged).
         """  # noqa: DOC502
         if (
             response.status_code in self.extra_retry_statuses
