@@ -244,10 +244,10 @@ An example launch configuration, added to your `launch.json`, might be as follow
 
 #### PyCharm Debugging
 
-See the JetBrain's [PyCharm documentation](https://www.jetbrains.com/help/pycharm/run-debug-configuration.html) for more detail
+See the JetBrains [PyCharm documentation](https://www.jetbrains.com/help/pycharm/run-debug-configuration.html) for more detail
 
 To launch the PyCharm debugger you can select "Edit Configuration" in the main menu to open the debugger configuration.
-Click "Add new run configuration". Set the script path to the full path to your tap.py and parameters to something like `--config .secrets/config.json`.
+Click "Add new run configuration". Set the script path to the full path to your tap.py and parameters to something like `--config config.json`.
 You can pass in additional parameters like `--discover` or `--state my_state_file.json` to test the discovery or state workflows.
 
 #### Main Method

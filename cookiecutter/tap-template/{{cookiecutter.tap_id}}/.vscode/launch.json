@@ -12,8 +12,7 @@
             "program": "{{ cookiecutter.library_name }}",
             "justMyCode": false,
             "args": [
-                "--config",
-                ".secrets/config.json",
+                "--config=ENV",
             ],
         },
     ]
