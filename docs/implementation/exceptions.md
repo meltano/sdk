@@ -304,13 +304,14 @@ ______________________________________________________________________
 - Log at WARNING, return empty page, continue
 - Add unit tests for `IgnorableAPIError` in `validate_response()`
 
-### PR 4 — Wire lifecycle signals and fatal handlers
+### PR 4 — Wire lifecycle signals, fatal handlers, and per-stream outcomes
 
 **Files:** `singer_sdk/streams/core.py`, `singer_sdk/sinks/core.py`
 
 - Replace bare `except Exception` or ad-hoc exception checks with typed catches on
   `FatalSyncError` / `RetriableSyncError`
 - Ensure `SyncLifecycleSignal` subclasses are propagated correctly
+- Implement `SyncResult` and per-stream outcome tracking (see §9)
 
 ### PR 5 — Docs, changelog, deprecations
 
@@ -319,6 +320,108 @@ ______________________________________________________________________
 - Add deprecation warnings on `Exception`-suffix names if aliases are introduced
 - Update API reference
 - Add changelog entry for `IgnorableAPIError`
+
+______________________________________________________________________
+
+## 9. Per-Stream Sync Outcomes
+
+Exceptions govern *control flow* (raise, catch, abort now). Per-stream outcomes govern
+*reporting* — recording what happened to each stream after it finishes so the process
+can emit an appropriate exit code and structured log summary.
+
+These are complementary mechanisms: an exception is caught, a recovery action is taken,
+and the result of that action is written into the stream's outcome record.
+
+### 9.1 `SyncResult` enum
+
+```python
+import enum
+
+
+class SyncResult(enum.Enum):
+    """The outcome of a single stream's sync run."""
+
+    SUCCESS = "success"  # completed with no errors
+    PARTIAL = "partial"  # completed; some records skipped via IgnorableSyncError
+    FAILED = "failed"  # aborted due to FatalSyncError or exhausted RetriableSyncError
+    ABORTED = "aborted"  # stopped by SyncLifecycleSignal (e.g. MaxRecordsLimitReached)
+```
+
+Severity order (lowest → highest): `SUCCESS < PARTIAL < ABORTED < FAILED`.
+
+### 9.2 How outcomes are set
+
+Each `Stream` instance holds a `sync_result: SyncResult` attribute, initialised to
+`SUCCESS` before the sync starts. The attribute is updated at the catch sites:
+
+| Event | Outcome set |
+|---|---|
+| `IgnorableSyncError` caught; record skipped | `PARTIAL` (if current < `PARTIAL`) |
+| `SyncLifecycleSignal` caught; sync stopped | `ABORTED` (if current < `ABORTED`) |
+| `FatalSyncError` caught at top-level | `FAILED` |
+| `RetriableAPIError` retries exhausted | `FAILED` |
+
+"If current \<" means the outcome is only *escalated*, never downgraded. A stream that
+already has `FAILED` cannot be reset to `PARTIAL` by a later ignorable error.
+
+### 9.3 Child stream outcome propagation
+
+A parent stream's final outcome is the *maximum severity* of its own outcome and all
+its child streams' outcomes:
+
+```
+parent.sync_result = max(
+    parent.sync_result,
+    *[child.sync_result for child in parent.child_streams],
+    key=lambda r: list(SyncResult).index(r),
+)
+```
+
+This ensures that a parent stream is never reported as `SUCCESS` if any of its children
+failed, even if the parent's own records synced cleanly.
+
+### 9.4 Tap-level exit code
+
+The tap's exit code is derived from the worst outcome across all top-level streams
+(parents propagate children per §9.3 before this step):
+
+| Worst outcome across all streams | Exit code |
+|---|---|
+| `SUCCESS` | 0 |
+| `PARTIAL` | 0 |
+| `ABORTED` | 0 |
+| `FAILED` | 1 |
+
+`PARTIAL` and `ABORTED` exit 0 because the state artifact emitted by those runs is
+valid and resumable. `FAILED` exits 1 because the state is either absent or
+untrustworthy.
+
+### 9.5 Log summary
+
+After all streams finish, the tap logs a one-line summary per stream at INFO level:
+
+```
+Stream 'orders'          SUCCESS   (12 345 records)
+Stream 'order_items'     PARTIAL   (8 902 records, 3 skipped)
+Stream 'customers'       FAILED    (FatalAPIError: 403 Forbidden)
+```
+
+The format is intentionally machine-parseable to support downstream observability
+tooling.
+
+### 9.6 Relationship to the exception hierarchy
+
+```
+Exception raised              →  caught by            →  outcome written
+─────────────────────────────────────────────────────────────────────────
+IgnorableSyncError            →  request loop         →  PARTIAL
+SyncLifecycleSignal           →  stream.sync()        →  ABORTED
+FatalSyncError                →  tap top-level        →  FAILED
+RetriableAPIError (exhausted) →  backoff decorator    →  FAILED
+```
+
+This table is the normative mapping between §3 (hierarchy) and §9 (outcomes). Any
+catch site that handles a `SyncError` subclass **must** also update `sync_result`.
 
 ______________________________________________________________________
 
