@@ -1,22 +1,25 @@
-# Exception Hierarchy Spec
+# Exception Hierarchy — Design
 
 This document specifies the design of a clean, hierarchical exception taxonomy for
-the Meltano Singer SDK. It covers the current state, design principles, the proposed
-hierarchy, recovery semantics, and a phased implementation roadmap.
+the Meltano Singer SDK. It covers the pre-Phase-1 state, design principles, the
+implemented hierarchy, recovery semantics, and a phased implementation roadmap.
+
+**Implementation status:** Phase 1 (hierarchy scaffold) is complete. See §7 for the
+full roadmap and the status of each phase.
 
 ______________________________________________________________________
 
-## 1. Current State
+## 1. Pre-Phase-1 State
 
 ### 1.1 Flat hierarchy
 
-All exceptions in `singer_sdk/exceptions.py` inherit directly from the built-in
-`Exception` class. There is no shared base class, no grouping by domain phase, and no
-shared type that SDK users can catch to handle "any SDK-level error".
+Before Phase 1, all exceptions in `singer_sdk/exceptions.py` inherited directly from
+the built-in `Exception` class. There was no shared base class, no grouping by domain
+phase, and no shared type that SDK users could catch to handle "any SDK-level error".
 
 ### 1.2 Naming inconsistency
 
-The codebase mixes three different naming conventions, in violation of
+The codebase mixed three different naming conventions, in violation of
 [PEP 8](https://peps.python.org/pep-0008/#exception-names), which requires the `Error`
 suffix:
 
@@ -28,7 +31,7 @@ suffix:
 
 ### 1.3 Exceptions scattered across files
 
-Public exceptions are defined in at least five places, making it impossible to do a
+Public exceptions were defined in at least five places, making it impossible to do a
 single `from singer_sdk.exceptions import …` to get all of them:
 
 | File | Exceptions defined there |
@@ -41,10 +44,10 @@ single `from singer_sdk.exceptions import …` to get all of them:
 
 ### 1.4 No recovery semantics encoded in the type
 
-Because all exceptions share the same base (`Exception`), a caller cannot distinguish
-between "this request should be retried", "this record should be skipped", and "this
-sync must abort" without inspecting the concrete type. Recovery logic is scattered
-across ad-hoc `except` blocks.
+Because all exceptions shared the same base (`Exception`), a caller could not
+distinguish between "this request should be retried", "this record should be skipped",
+and "this sync must abort" without inspecting the concrete type. Recovery logic was
+scattered across ad-hoc `except` blocks.
 
 ______________________________________________________________________
 
@@ -80,46 +83,57 @@ The SDK catches an exception only when it can take a meaningful, policy-defined 
 
 ______________________________________________________________________
 
-## 3. Proposed Hierarchy
+## 3. Implemented Hierarchy
 
-### 3.1 Annotated tree
+### 3.1 Annotated tree (Phase 1)
+
+The tree below reflects the hierarchy as implemented. Nodes marked *(Phase 2+)* are
+migration candidates that will be wired in once they are moved into
+`singer_sdk/exceptions.py`. Names with the `Exception` suffix are preserved from the
+original codebase; `Error`-suffixed aliases may be introduced in a later phase (§7).
 
 ```
-SingerSDKError                          ← base for everything SDK-specific
-├── ConfigurationError                  ← invalid/missing plugin configuration
-│   └── ConfigValidationError           ← JSON Schema validation failed (existing)
-├── DiscoveryError                      ← schema catalog discovery (existing)
-│   ├── SchemaNotFoundError             ← component/path not found in source (existing)
-│   ├── SchemaNotValidError             ← schema is not a JSON object (existing)
-│   └── UnsupportedSchemaFormatError    ← file type / spec version not supported
-├── MappingError                        ← stream map configuration/evaluation
-│   ├── MapExpressionError              ← jinja/eval expression failed (existing)
-│   ├── StreamMapConfigError            ← invalid map config (existing)
-│   └── ConformedNameClashError         ← two columns conform to the same name (existing)
-├── SyncError                           ← runtime errors during extraction/load
-│   ├── FatalSyncError                  ← abort the entire sync, non-zero exit
-│   │   ├── FatalAPIError               ← non-retriable HTTP/API error (existing)
-│   │   ├── RecordsWithoutSchemaError   ← target got RECORD before SCHEMA (existing)
-│   │   ├── MissingKeyPropertiesError   ← record missing primary key fields (existing)
-│   │   └── InvalidStreamSortError      ← sort invariant violated (existing)
-│   ├── RetriableSyncError              ← retry with exponential backoff
-│   │   └── RetriableAPIError           ← retriable HTTP/API error (existing)
-│   ├── IgnorableSyncError              ← log + skip current record/page, continue
-│   │   ├── IgnorableAPIError           ← NEW (closes #1689)
-│   │   └── InvalidRecord               ← record fails schema validation (existing)
-│   └── DataError                       ← data quality / schema violations
-│       └── InvalidJSONSchema           ← malformed JSON Schema (existing)
-└── SyncLifecycleSignal                 ← control-flow signals (not "errors")
-    ├── AbortRequested                  ← graceful shutdown requested (existing)
-    │   └── MaxRecordsLimitReached      ← record cap hit (existing)
-    ├── SyncAbortedFatally              ← stopped in non-resumable state (existing)
-    └── SyncAbortedPaused               ← stopped in paused/resumable state (existing)
+SingerSDKError                             ← base for everything SDK-specific
+├── ConfigurationError                     ← invalid/missing plugin configuration
+│   └── ConfigValidationError              ← JSON Schema validation failed
+├── DiscoveryError                         ← schema catalog discovery
+│   ├── InvalidReplicationKeyException     ← replication key not in schema properties
+│   ├── SchemaNotFoundError                ← (Phase 2+, currently in schema/source.py)
+│   ├── SchemaNotValidError                ← (Phase 2+, currently in schema/source.py)
+│   └── UnsupportedSchemaFormatError       ← (Phase 2+, currently in schema/source.py)
+├── MappingError                           ← stream map configuration/evaluation
+│   ├── ConformedNameClashException        ← two columns conform to the same name
+│   ├── MapExpressionError                 ← jinja/eval expression failed
+│   └── StreamMapConfigError               ← invalid map config
+├── SyncError                              ← runtime errors during extraction/load
+│   ├── FatalSyncError                     ← abort the entire sync, non-zero exit
+│   │   ├── FatalAPIError                  ← non-retriable HTTP/API error
+│   │   ├── InvalidStreamSortException     ← sort invariant violated
+│   │   ├── MissingKeyPropertiesError      ← record missing primary key fields
+│   │   ├── RecordsWithoutSchemaException  ← target got RECORD before SCHEMA
+│   │   ├── TapStreamConnectionFailure     ← stream connection lost
+│   │   └── TooManyRecordsException        ← query exceeded max_records limit
+│   ├── RetriableSyncError                 ← retry with exponential backoff
+│   │   └── RetriableAPIError              ← retriable HTTP/API error
+│   ├── IgnorableSyncError                 ← log + skip current record/page, continue
+│   │   ├── IgnorableAPIError              ← expected non-fatal API response (NEW)
+│   │   └── InvalidRecord                  ← record fails schema validation
+│   └── DataError                          ← data quality / schema violations
+│       └── InvalidJSONSchema              ← malformed JSON Schema
+└── SyncLifecycleSignal                    ← control-flow signals (not "errors")
+    ├── RequestedAbortException            ← graceful shutdown requested
+    │   └── MaxRecordsLimitException       ← record cap hit
+    └── AbortedSyncExceptionBase  (ABC)    ← abstract base; use concrete subclasses
+        ├── AbortedSyncFailedException     ← stopped in non-resumable state
+        └── AbortedSyncPausedException     ← stopped with resumable state artifact
 ```
 
-### 3.2 Exceptions not yet in the hierarchy (migration candidates)
+### 3.2 Phase 2+ migration candidates
 
 The following exceptions are defined outside `singer_sdk/exceptions.py` and are not
-yet placed in the hierarchy. They will be migrated in Phase 2:
+yet placed in the hierarchy. `InvalidInputLine` is already re-exported from
+`singer_sdk/exceptions.py` (and included in `__all__`) but has not yet been moved or
+re-based. The rest will be migrated in Phase 2:
 
 | Current location | Class | Proposed placement |
 |---|---|---|
@@ -138,8 +152,8 @@ ______________________________________________________________________
 | `RetriableSyncError` | Exponential backoff + retry; abort after max retries | 1 (if exhausted) |
 | `IgnorableSyncError` | Log at WARNING, skip current record/page, continue sync | 0 |
 | `DataError` | Log at WARNING, continue (severity configurable) | 0 |
-| `SyncAbortedFatally` | Exit non-zero | 1 |
-| `SyncAbortedPaused` | Emit STATE, exit zero | 0 |
+| `AbortedSyncFailedException` | Exit non-zero | 1 |
+| `AbortedSyncPausedException` | Emit STATE, exit zero | 0 |
 | `ConfigurationError` | Print error, exit non-zero at startup | 1 |
 | `DiscoveryError` | Print error, exit non-zero during catalog discovery | 1 |
 
@@ -274,16 +288,18 @@ ______________________________________________________________________
 
 ## 7. Implementation Roadmap
 
-### PR 1 — Hierarchy scaffold (no behavior change)
+### PR 1 — Hierarchy scaffold ✅ Complete
 
-**Files:** `singer_sdk/exceptions.py`
+**Files:** `singer_sdk/exceptions.py`, `tests/core/test_exceptions.py`
 
-- Add `SingerSDKError` as the new root
-- Add intermediate classes: `ConfigurationError`, `SyncError`, `FatalSyncError`,
-  `RetriableSyncError`, `IgnorableSyncError`
-- Re-wire existing exceptions to new bases (additive only)
-- Add `IgnorableAPIError(IgnorableSyncError)` (closes #1689)
-- Update `__all__` in `exceptions.py`
+- Added `SingerSDKError` as the new root
+- Added intermediate classes: `ConfigurationError`, `MappingError`, `DiscoveryError`,
+  `SyncError`, `FatalSyncError`, `RetriableSyncError`, `IgnorableSyncError`, `DataError`,
+  `SyncLifecycleSignal`
+- Re-wired all existing exceptions to new bases (additive only — no renames)
+- Added `IgnorableAPIError(IgnorableSyncError)` (closes #1689)
+- Added `__all__` to `exceptions.py`
+- Added `tests/core/test_exceptions.py` with 80 hierarchy assertions
 - No behavior changes; all existing tests pass unchanged
 
 ### PR 2 — Consolidate scattered exceptions
@@ -323,7 +339,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## 9. Per-Stream Sync Outcomes
+## 8. Per-Stream Sync Outcomes
 
 Exceptions govern *control flow* (raise, catch, abort now). Per-stream outcomes govern
 *reporting* — recording what happened to each stream after it finishes so the process
@@ -344,7 +360,9 @@ class SyncResult(enum.Enum):
     SUCCESS = "success"  # completed with no errors
     PARTIAL = "partial"  # completed; some records skipped via IgnorableSyncError
     FAILED = "failed"  # aborted due to FatalSyncError or exhausted RetriableSyncError
-    ABORTED = "aborted"  # stopped by SyncLifecycleSignal (e.g. MaxRecordsLimitReached)
+    ABORTED = (
+        "aborted"  # stopped by SyncLifecycleSignal (e.g. MaxRecordsLimitException)
+    )
 ```
 
 Severity order (lowest → highest): `SUCCESS < PARTIAL < ABORTED < FAILED`.
@@ -420,12 +438,12 @@ FatalSyncError                →  tap top-level        →  FAILED
 RetriableAPIError (exhausted) →  backoff decorator    →  FAILED
 ```
 
-This table is the normative mapping between §3 (hierarchy) and §9 (outcomes). Any
+This table is the normative mapping between §3 (hierarchy) and §8 (outcomes). Any
 catch site that handles a `SyncError` subclass **must** also update `sync_result`.
 
 ______________________________________________________________________
 
-## 8. Verification
+## 9. Verification
 
 After each PR:
 
