@@ -41,6 +41,32 @@ nox -s docs               # Build Sphinx documentation
 - Line length: 88 characters
 - Ruff handles all formatting and linting
 
+## Exceptions
+
+All SDK exceptions live in `singer_sdk/exceptions.py` and inherit from `SingerSDKError`.
+Choose the right base class by recovery strategy:
+
+| Situation | Raise |
+|---|---|
+| HTTP/API error, must abort sync | `FatalAPIError` |
+| HTTP/API error, safe to retry | `RetriableAPIError` |
+| HTTP/API error, expected / skip silently | `IgnorableAPIError` |
+| Config value is wrong | `ConfigValidationError` |
+| Discovery / catalog problem | `DiscoveryError` (or a subclass) |
+| Stream map config or expression fails | `MappingError` (or a subclass) |
+
+When adding a new exception:
+
+1. Place it in `singer_sdk/exceptions.py` — never define public exceptions in other files.
+1. Inherit from the appropriate intermediate base (`FatalSyncError`, `RetriableSyncError`,
+   `IgnorableSyncError`, `DataError`, `ConfigurationError`, `MappingError`, etc.) rather
+   than from `Exception` or `SingerSDKError` directly.
+1. Add it to `__all__` in that file.
+1. Add `issubclass` assertions to `tests/core/test_exceptions.py`.
+
+See `docs/implementation/errors/hierarchy.md` for the full hierarchy and
+`docs/implementation/errors/design.md` for the design rationale.
+
 ## Architecture
 
 The SDK uses abstract base classes for its plugin system:
