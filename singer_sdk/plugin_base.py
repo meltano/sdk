@@ -25,7 +25,7 @@ from singer_sdk.configuration._dict_config import (
     merge_missing_config_jsonschema,
     parse_environment_config,
 )
-from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.exceptions import ConfigValidationError, MapperNotInitialized
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.helpers._packaging import SDK_PACKAGE_NAME, get_package_version
@@ -57,14 +57,6 @@ if t.TYPE_CHECKING:
 DEFAULT_LOG_LEVEL = "INFO"
 
 JSONSchemaValidator = extend_validator_with_defaults(DEFAULT_JSONSCHEMA_VALIDATOR)
-
-
-class MapperNotInitialized(Exception):
-    """Raised when the mapper is not initialized."""
-
-    def __init__(self) -> None:
-        """Initialize the exception."""
-        super().__init__("Mapper not initialized. Please call setup_mapper() first.")
 
 
 @dataclasses.dataclass

@@ -12,6 +12,8 @@ import uuid
 from enum import Enum
 from functools import lru_cache
 
+from singer_sdk.exceptions import EmptySchemaTypeError
+
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
 JSONSCHEMA_ANNOTATION_SECRET = "secret"  # noqa: S105
@@ -27,17 +29,6 @@ class DatetimeErrorTreatmentEnum(Enum):
     ERROR = "error"
     MAX = "max"
     NULL = "null"
-
-
-class EmptySchemaTypeError(Exception):
-    """Exception for when trying to detect type from empty type_dict."""
-
-    def __init__(self, *args: object) -> None:
-        msg = (
-            "Could not detect type from empty type_dict. Did you forget to define a "
-            "property in the stream schema?"
-        )
-        super().__init__(msg, *args)
 
 
 def to_json_compatible(val: t.Any) -> t.Any:  # noqa: ANN401

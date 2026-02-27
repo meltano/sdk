@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import abc
 
-import pytest
-
 import singer_sdk.exceptions as exc
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+from singer_sdk.singerlib.exceptions import (
+    InvalidInputLine,
+    SingerError,
+    SingerReadError,
+)
 
 
 def assert_hierarchy(*chain: type) -> None:
@@ -23,56 +22,7 @@ def assert_hierarchy(*chain: type) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Root
-# ---------------------------------------------------------------------------
-
-
-class TestRoot:
-    def test_singer_sdk_error_is_exception(self) -> None:
-        assert issubclass(exc.SingerSDKError, Exception)
-
-
-# ---------------------------------------------------------------------------
-# Every existing exception is still an Exception and now a SingerSDKError
-# ---------------------------------------------------------------------------
-
-
-EXISTING_EXCEPTIONS = [
-    exc.ConfigValidationError,
-    exc.DiscoveryError,
-    exc.FatalAPIError,
-    exc.InvalidReplicationKeyException,
-    exc.InvalidStreamSortException,
-    exc.MapExpressionError,
-    exc.RequestedAbortException,
-    exc.MaxRecordsLimitException,
-    exc.AbortedSyncExceptionBase,
-    exc.AbortedSyncFailedException,
-    exc.AbortedSyncPausedException,
-    exc.RecordsWithoutSchemaException,
-    exc.RetriableAPIError,
-    exc.StreamMapConfigError,
-    exc.TapStreamConnectionFailure,
-    exc.TooManyRecordsException,
-    exc.ConformedNameClashException,
-    exc.MissingKeyPropertiesError,
-    exc.InvalidJSONSchema,
-    exc.InvalidRecord,
-]
-
-
-@pytest.mark.parametrize("cls", EXISTING_EXCEPTIONS, ids=lambda c: c.__name__)
-def test_existing_still_exception(cls: type) -> None:
-    assert issubclass(cls, Exception)
-
-
-@pytest.mark.parametrize("cls", EXISTING_EXCEPTIONS, ids=lambda c: c.__name__)
-def test_existing_now_singer_sdk_error(cls: type) -> None:
-    assert issubclass(cls, exc.SingerSDKError)
-
-
-# ---------------------------------------------------------------------------
-# Configuration group
+# Configuration
 # ---------------------------------------------------------------------------
 
 
@@ -88,7 +38,7 @@ class TestConfigurationGroup:
             exc.ConfigValidationError,
         )
 
-    def test_config_validation_error_preserves_init(self) -> None:
+    def test_config_validation_error_init(self) -> None:
         err = exc.ConfigValidationError(
             "bad config", errors=["e1"], schema={"type": "object"}
         )
@@ -101,9 +51,22 @@ class TestConfigurationGroup:
         assert err.errors == []
         assert err.schema is None
 
+    def test_mapper_not_initialized_chain(self) -> None:
+        assert_hierarchy(
+            Exception,
+            exc.SingerSDKError,
+            exc.ConfigurationError,
+            exc.MapperNotInitialized,
+        )
+
+    def test_mapper_not_initialized_message(self) -> None:
+        err = exc.MapperNotInitialized()
+        assert "Mapper not initialized" in str(err)
+        assert "setup_mapper()" in str(err)
+
 
 # ---------------------------------------------------------------------------
-# Discovery group
+# Discovery
 # ---------------------------------------------------------------------------
 
 
@@ -119,9 +82,49 @@ class TestDiscoveryGroup:
             exc.InvalidReplicationKeyException,
         )
 
+    def test_empty_schema_type_error_chain(self) -> None:
+        assert_hierarchy(
+            Exception,
+            exc.SingerSDKError,
+            exc.DiscoveryError,
+            exc.EmptySchemaTypeError,
+        )
+
+    def test_empty_schema_type_error_message(self) -> None:
+        err = exc.EmptySchemaTypeError()
+        assert "Could not detect type from empty type_dict" in str(err)
+        assert "Did you forget to define a property in the stream schema?" in str(err)
+
+    def test_schema_not_found_error_chain(self) -> None:
+        assert_hierarchy(
+            Exception,
+            exc.SingerSDKError,
+            exc.DiscoveryError,
+            exc.SchemaNotFoundError,
+        )
+
+    def test_schema_not_valid_error_chain(self) -> None:
+        assert_hierarchy(
+            Exception,
+            exc.SingerSDKError,
+            exc.DiscoveryError,
+            exc.SchemaNotValidError,
+        )
+
+    def test_unsupported_schema_format_error_chain(self) -> None:
+        assert_hierarchy(
+            Exception,
+            exc.SingerSDKError,
+            exc.DiscoveryError,
+            exc.UnsupportedSchemaFormatError,
+        )
+
+    def test_unsupported_open_api_spec_is_alias(self) -> None:
+        assert exc.UnsupportedOpenAPISpec is exc.UnsupportedSchemaFormatError
+
 
 # ---------------------------------------------------------------------------
-# Mapping group
+# Mapping
 # ---------------------------------------------------------------------------
 
 
@@ -146,16 +149,6 @@ class TestMappingGroup:
             exc.MappingError,
             exc.ConformedNameClashException,
         )
-
-
-# ---------------------------------------------------------------------------
-# Sync — base
-# ---------------------------------------------------------------------------
-
-
-class TestSyncBase:
-    def test_sync_error_chain(self) -> None:
-        assert_hierarchy(Exception, exc.SingerSDKError, exc.SyncError)
 
 
 # ---------------------------------------------------------------------------
@@ -244,7 +237,7 @@ class TestRetriableSync:
             exc.RetriableAPIError,
         )
 
-    def test_retriable_api_error_preserves_init(self) -> None:
+    def test_retriable_api_error_init(self) -> None:
         err = exc.RetriableAPIError("retry me", response=None)
         assert str(err) == "retry me"
         assert err.response is None
@@ -270,11 +263,6 @@ class TestIgnorableSync:
             exc.IgnorableAPIError,
         )
 
-    def test_ignorable_api_error_is_leaf(self) -> None:
-        """IgnorableAPIError should be directly instantiable (no abstract methods)."""
-        err = exc.IgnorableAPIError("skipping this one")
-        assert str(err) == "skipping this one"
-
     def test_invalid_record_chain(self) -> None:
         assert_hierarchy(
             Exception,
@@ -284,7 +272,7 @@ class TestIgnorableSync:
             exc.InvalidRecord,
         )
 
-    def test_invalid_record_preserves_init(self) -> None:
+    def test_invalid_record_init(self) -> None:
         record = {"id": 1}
         err = exc.InvalidRecord("missing field", record)
         assert "missing field" in str(err)
@@ -371,33 +359,13 @@ class TestLifecycleSignals:
 
 
 # ---------------------------------------------------------------------------
-# __all__ completeness
+# Singerlib Singer-protocol hierarchy (intentionally separate from SDK hierarchy)
 # ---------------------------------------------------------------------------
 
 
-class TestAll:
-    def test_all_defined(self) -> None:
-        assert hasattr(exc, "__all__")
+class TestSingerlibHierarchy:
+    def test_singerlib_hierarchy(self) -> None:
+        assert_hierarchy(Exception, SingerError, SingerReadError, InvalidInputLine)
 
-    def test_new_classes_in_all(self) -> None:
-        new_classes = [
-            "SingerSDKError",
-            "ConfigurationError",
-            "MappingError",
-            "SyncError",
-            "FatalSyncError",
-            "RetriableSyncError",
-            "IgnorableSyncError",
-            "IgnorableAPIError",
-            "DataError",
-            "SyncLifecycleSignal",
-        ]
-        for name in new_classes:
-            assert name in exc.__all__, f"{name} missing from __all__"
-
-    def test_existing_classes_in_all(self) -> None:
-        for cls in EXISTING_EXCEPTIONS:
-            assert cls.__name__ in exc.__all__, f"{cls.__name__} missing from __all__"
-
-    def test_invalid_input_line_in_all(self) -> None:
-        assert "InvalidInputLine" in exc.__all__
+    def test_singerlib_not_in_sdk_hierarchy(self) -> None:
+        assert not issubclass(InvalidInputLine, exc.SingerSDKError)

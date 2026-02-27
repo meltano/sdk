@@ -16,9 +16,15 @@ __all__ = [  # noqa: RUF022
     # Configuration
     "ConfigurationError",
     "ConfigValidationError",
+    "MapperNotInitialized",
     # Discovery
     "DiscoveryError",
+    "EmptySchemaTypeError",
     "InvalidReplicationKeyException",
+    "SchemaNotFoundError",
+    "SchemaNotValidError",
+    "UnsupportedOpenAPISpec",
+    "UnsupportedSchemaFormatError",
     # Mapping
     "MappingError",
     "ConformedNameClashException",
@@ -96,6 +102,14 @@ class ConfigValidationError(ConfigurationError):
         self.schema: dict | None = schema
 
 
+class MapperNotInitialized(ConfigurationError):
+    """Raised when the mapper is not initialized."""
+
+    def __init__(self) -> None:
+        """Initialize the exception."""
+        super().__init__("Mapper not initialized. Please call setup_mapper() first.")
+
+
 # ---------------------------------------------------------------------------
 # Discovery
 # ---------------------------------------------------------------------------
@@ -105,8 +119,36 @@ class DiscoveryError(SingerSDKError):
     """Raised when a schema discovery error occurs."""
 
 
+class EmptySchemaTypeError(DiscoveryError):
+    """Exception for when trying to detect type from empty type_dict."""
+
+    def __init__(self, *args: object) -> None:
+        """Initialize the exception."""
+        msg = (
+            "Could not detect type from empty type_dict. "
+            "Did you forget to define a property in the stream schema?"
+        )
+        super().__init__(msg, *args)
+
+
 class InvalidReplicationKeyException(DiscoveryError):
     """Exception to raise if the replication key is not in the stream properties."""
+
+
+class SchemaNotFoundError(DiscoveryError):
+    """Raised when a schema is not found."""
+
+
+class SchemaNotValidError(DiscoveryError):
+    """Raised when a schema is not valid."""
+
+
+class UnsupportedSchemaFormatError(DiscoveryError):
+    """Raised when the schema source format is not supported."""
+
+
+# Backward-compatible alias (previously UnsupportedOpenAPISpec in schema/source.py)
+UnsupportedOpenAPISpec = UnsupportedSchemaFormatError
 
 
 # ---------------------------------------------------------------------------
