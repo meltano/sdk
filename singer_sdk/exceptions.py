@@ -5,13 +5,76 @@ from __future__ import annotations
 import abc
 import typing as t
 
-from singer_sdk.singerlib.exceptions import InvalidInputLine  # noqa: F401
+from singer_sdk.singerlib.exceptions import InvalidInputLine
 
 if t.TYPE_CHECKING:
     import requests
 
+__all__ = [  # noqa: RUF022
+    # Root
+    "SingerSDKError",
+    # Configuration
+    "ConfigurationError",
+    "ConfigValidationError",
+    # Discovery
+    "DiscoveryError",
+    "InvalidReplicationKeyException",
+    # Mapping
+    "MappingError",
+    "ConformedNameClashException",
+    "MapExpressionError",
+    "StreamMapConfigError",
+    # Sync — base
+    "SyncError",
+    # Sync — fatal
+    "FatalSyncError",
+    "FatalAPIError",
+    "InvalidStreamSortException",
+    "MissingKeyPropertiesError",
+    "RecordsWithoutSchemaException",
+    "TapStreamConnectionFailure",
+    "TooManyRecordsException",
+    # Sync — retriable
+    "RetriableSyncError",
+    "RetriableAPIError",
+    # Sync — ignorable
+    "IgnorableSyncError",
+    "IgnorableAPIError",
+    "InvalidRecord",
+    # Sync — data quality
+    "DataError",
+    "InvalidJSONSchema",
+    # Lifecycle signals
+    "SyncLifecycleSignal",
+    "AbortedSyncExceptionBase",
+    "AbortedSyncFailedException",
+    "AbortedSyncPausedException",
+    "MaxRecordsLimitException",
+    "RequestedAbortException",
+    # Re-exports
+    "InvalidInputLine",
+]
 
-class ConfigValidationError(Exception):
+
+# ---------------------------------------------------------------------------
+# Root
+# ---------------------------------------------------------------------------
+
+
+class SingerSDKError(Exception):
+    """Root base class for all Meltano Singer SDK exceptions."""
+
+
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+
+
+class ConfigurationError(SingerSDKError):
+    """Base class for configuration-related errors."""
+
+
+class ConfigValidationError(ConfigurationError):
     """Raised when a user's config settings fail validation."""
 
     def __init__(
@@ -33,27 +96,159 @@ class ConfigValidationError(Exception):
         self.schema: dict | None = schema
 
 
-class DiscoveryError(Exception):
+# ---------------------------------------------------------------------------
+# Discovery
+# ---------------------------------------------------------------------------
+
+
+class DiscoveryError(SingerSDKError):
     """Raised when a schema discovery error occurs."""
 
 
-class FatalAPIError(Exception):
-    """Exception raised when a failed request should not be considered retriable."""
-
-
-class InvalidReplicationKeyException(Exception):
+class InvalidReplicationKeyException(DiscoveryError):
     """Exception to raise if the replication key is not in the stream properties."""
 
 
-class InvalidStreamSortException(Exception):
-    """Exception to raise if sorting errors are found while syncing the records."""
+# ---------------------------------------------------------------------------
+# Mapping
+# ---------------------------------------------------------------------------
 
 
-class MapExpressionError(Exception):
+class MappingError(SingerSDKError):
+    """Base class for stream-map related errors."""
+
+
+class ConformedNameClashException(MappingError):
+    """Raised when name conforming produces clashes.
+
+    e.g. two columns conformed to the same name
+    """
+
+
+class MapExpressionError(MappingError):
     """Failed map expression evaluation."""
 
 
-class RequestedAbortException(Exception):
+class StreamMapConfigError(MappingError):
+    """Raised when a stream map has an invalid configuration."""
+
+
+# ---------------------------------------------------------------------------
+# Sync — base
+# ---------------------------------------------------------------------------
+
+
+class SyncError(SingerSDKError):
+    """Base class for runtime sync errors."""
+
+
+# ---------------------------------------------------------------------------
+# Sync — fatal
+# ---------------------------------------------------------------------------
+
+
+class FatalSyncError(SyncError):
+    """Raised when an error requires the entire sync to be aborted."""
+
+
+class FatalAPIError(FatalSyncError):
+    """Exception raised when a failed request should not be considered retriable."""
+
+
+class InvalidStreamSortException(FatalSyncError):
+    """Exception to raise if sorting errors are found while syncing the records."""
+
+
+class MissingKeyPropertiesError(FatalSyncError):
+    """Raised when a received (and/or transformed) record is missing key properties."""
+
+
+class RecordsWithoutSchemaException(FatalSyncError):
+    """Raised if a target receives RECORD messages prior to a SCHEMA message."""
+
+
+class TapStreamConnectionFailure(FatalSyncError):
+    """Exception to raise when stream connection fails or stream is disconnected."""
+
+
+class TooManyRecordsException(FatalSyncError):
+    """Exception to raise when query returns more records than max_records."""
+
+
+# ---------------------------------------------------------------------------
+# Sync — retriable
+# ---------------------------------------------------------------------------
+
+
+class RetriableSyncError(SyncError):
+    """Raised when an error can be resolved by retrying the request with backoff."""
+
+
+class RetriableAPIError(RetriableSyncError):
+    """Exception raised when a failed request can be safely retried."""
+
+    def __init__(self, message: str, response: requests.Response | None = None) -> None:
+        """Extends the default with the failed response as an attribute.
+
+        Args:
+            message (str): The Error Message
+            response (requests.Response): The response object.
+        """
+        super().__init__(message)
+        self.response = response
+
+
+# ---------------------------------------------------------------------------
+# Sync — ignorable
+# ---------------------------------------------------------------------------
+
+
+class IgnorableSyncError(SyncError):
+    """Raised when an error can be logged, skipped, and the sync continued."""
+
+
+class IgnorableAPIError(IgnorableSyncError):
+    """Raised when a failed API request can be safely ignored and the sync continued."""
+
+
+class InvalidRecord(IgnorableSyncError):
+    """Raised when a stream record is invalid according to its declared schema."""
+
+    def __init__(self, error_message: str, record: dict) -> None:
+        """Initialize an InvalidRecord exception.
+
+        Args:
+            error_message: A message describing the error.
+            record: The invalid record.
+        """
+        super().__init__(f"Record Message Validation Error: {error_message}")
+        self.error_message = error_message
+        self.record = record
+
+
+# ---------------------------------------------------------------------------
+# Sync — data quality
+# ---------------------------------------------------------------------------
+
+
+class DataError(SyncError):
+    """Raised when a data quality violation is detected during sync."""
+
+
+class InvalidJSONSchema(DataError):
+    """Raised when a JSON schema is invalid."""
+
+
+# ---------------------------------------------------------------------------
+# Lifecycle signals
+# ---------------------------------------------------------------------------
+
+
+class SyncLifecycleSignal(SingerSDKError):
+    """Base class for control-flow signals that manage sync lifecycle."""
+
+
+class RequestedAbortException(SyncLifecycleSignal):
     """Base class for abort and interrupt requests.
 
     Whenever this exception is raised, streams will attempt to shut down gracefully and
@@ -65,14 +260,14 @@ class MaxRecordsLimitException(RequestedAbortException):
     """Exception indicating the sync aborted due to too many records."""
 
 
-class AbortedSyncExceptionBase(Exception, abc.ABC):
+class AbortedSyncExceptionBase(SyncLifecycleSignal, abc.ABC):
     """Base exception to raise when a stream sync is aborted.
 
     Developers should not raise this directly, and instead should use:
-    1. `FatalAbortedSyncException` - Indicates the stream aborted abnormally and was not
-       able to reach a stable and resumable state.
-    2. `PausedSyncException` - Indicates the stream aborted abnormally and successfully
-       reached a 'paused' and resumable state.
+    1. `AbortedSyncFailedException` - Indicates the stream aborted abnormally and was
+       not able to reach a stable and resumable state.
+    2. `AbortedSyncPausedException` - Indicates the stream aborted abnormally and
+       successfully reached a 'paused' and resumable state.
 
     Notes:
     - `FULL_TABLE` sync operations cannot be paused and will always trigger a fatal
@@ -106,63 +301,3 @@ class AbortedSyncPausedException(AbortedSyncExceptionBase):
     stream. This exception signifies that bookmarks from `INCREMENTAL`
     and `LOG_BASED` streams were successfully emitted and are resumable.
     """
-
-
-class RecordsWithoutSchemaException(Exception):
-    """Raised if a target receives RECORD messages prior to a SCHEMA message."""
-
-
-class RetriableAPIError(Exception):
-    """Exception raised when a failed request can be safely retried."""
-
-    def __init__(self, message: str, response: requests.Response | None = None) -> None:
-        """Extends the default with the failed response as an attribute.
-
-        Args:
-            message (str): The Error Message
-            response (requests.Response): The response object.
-        """
-        super().__init__(message)
-        self.response = response
-
-
-class StreamMapConfigError(Exception):
-    """Raised when a stream map has an invalid configuration."""
-
-
-class TapStreamConnectionFailure(Exception):
-    """Exception to raise when stream connection fails or stream is disconnected."""
-
-
-class TooManyRecordsException(Exception):
-    """Exception to raise when query returns more records than max_records."""
-
-
-class ConformedNameClashException(Exception):
-    """Raised when name conforming produces clashes.
-
-    e.g. two columns conformed to the same name
-    """
-
-
-class MissingKeyPropertiesError(Exception):
-    """Raised when a received (and/or transformed) record is missing key properties."""
-
-
-class InvalidJSONSchema(Exception):
-    """Raised when a JSON schema is invalid."""
-
-
-class InvalidRecord(Exception):
-    """Raised when a stream record is invalid according to its declared schema."""
-
-    def __init__(self, error_message: str, record: dict) -> None:
-        """Initialize an InvalidRecord exception.
-
-        Args:
-            error_message: A message describing the error.
-            record: The invalid record.
-        """
-        super().__init__(f"Record Message Validation Error: {error_message}")
-        self.error_message = error_message
-        self.record = record
