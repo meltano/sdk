@@ -28,6 +28,7 @@ from singer_sdk.helpers.capabilities import (
 )
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import BaseSingerReader, _ConfigInput
+from singer_sdk.sinks import Sink
 
 if t.TYPE_CHECKING:
     from collections.abc import Iterable
@@ -37,13 +38,14 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.singerlib.encoding.base import GenericSingerReader
-    from singer_sdk.sinks import Sink
     from singer_sdk.sql import SQLTarget  # noqa: F401
 
 _MAX_PARALLELISM = 8
 
+_TSink = t.TypeVar("_TSink", bound=Sink)
 
-class Target(BaseSingerReader, abc.ABC):
+
+class Target(BaseSingerReader, abc.ABC, t.Generic[_TSink]):
     """Abstract base class for targets.
 
     The `Target` class manages config information and is responsible for processing the
@@ -57,7 +59,7 @@ class Target(BaseSingerReader, abc.ABC):
 
     # Default class to use for creating new sink objects.
     # Required if `Target.get_sink_class()` is not defined.
-    default_sink_class: type[Sink]
+    default_sink_class: type[_TSink]
 
     message_reader_class: type[GenericSingerReader] = SingerReader
     """The message reader class to use for reading messages."""
@@ -101,8 +103,8 @@ class Target(BaseSingerReader, abc.ABC):
 
         self._latest_state: dict[str, dict] | None = None
         self._drained_state: dict[str, dict] = {}
-        self._sinks_active: dict[str, Sink] = {}
-        self._sinks_to_clear: list[Sink] = []
+        self._sinks_active: dict[str, _TSink] = {}
+        self._sinks_to_clear: list[_TSink] = []
         self._max_parallelism: int | None = _MAX_PARALLELISM
 
         # Approximated for max record age enforcement
@@ -191,7 +193,7 @@ class Target(BaseSingerReader, abc.ABC):
 
         return existing_sink
 
-    def get_sink_class(self, stream_name: str) -> type[Sink]:
+    def get_sink_class(self, stream_name: str) -> type[_TSink]:
         """Get sink for a stream.
 
         Developers can override this method to return a custom Sink type depending
@@ -200,11 +202,11 @@ class Target(BaseSingerReader, abc.ABC):
         Args:
             stream_name: Name of the stream.
 
-        Raises:
-            ValueError: If no :class:`singer_sdk.sinks.Sink` class is defined.
-
         Returns:
             The sink class to be used with the stream.
+
+        Raises:
+            ValueError: If no :class:`singer_sdk.sinks.Sink` class is defined.
         """
         if self.default_sink_class:
             return self.default_sink_class
