@@ -14,7 +14,6 @@ from singer_sdk.target_base import Target
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
-    from singer_sdk.sinks.core import Sink
     from singer_sdk.sql.connector import SQLConnector
     from singer_sdk.sql.sink import SQLSink
 
@@ -88,7 +87,7 @@ class SQLTarget(Target):
         stream_name: str,
         schema: dict,
         key_properties: t.Sequence[str] | None = None,
-    ) -> Sink:
+    ) -> SQLSink:
         """Create a sink and register it.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -124,11 +123,11 @@ class SQLTarget(Target):
         Args:
             stream_name: Name of the stream.
 
-        Raises:
-            ValueError: If no :class:`singer_sdk.sinks.Sink` class is defined.
-
         Returns:
             The sink class to be used with the stream.
+
+        Raises:
+            ValueError: If no :class:`singer_sdk.sinks.Sink` class is defined.
         """
         if self.default_sink_class:
             return self.default_sink_class
@@ -146,7 +145,7 @@ class SQLTarget(Target):
         record: dict | None = None,
         schema: dict | None = None,
         key_properties: t.Sequence[str] | None = None,
-    ) -> Sink:
+    ) -> SQLSink:
         """Return a sink for the given stream name.
 
         A new sink will be created if `schema` is provided and if either `schema` or
