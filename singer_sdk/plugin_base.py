@@ -579,12 +579,12 @@ class PluginBase(abc.ABC):  # noqa: PLR0904
         Args:
             args: CLI arguments.
 
-        Raises:
-            FileNotFoundError: If the config file does not exist.
-
         Returns:
             A tuple containing the config dictionary and a boolean indicating whether
             the config file was found.
+
+        Raises:
+            FileNotFoundError: If the config file does not exist.
         """
         config_files = []
         parse_env_config = False

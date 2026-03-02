@@ -783,11 +783,11 @@ class SQLConnector:  # noqa: PLR0904
             sql_type: The string representation of the SQL type, a SQLAlchemy
                 TypeEngine class or object, or a custom-specified object.
 
-        Raises:
-            ValueError: If the type received could not be translated to jsonschema.
-
         Returns:
             The JSON Schema representation of the provided type.
+
+        Raises:
+            ValueError: If the type received could not be translated to jsonschema.
 
         .. versionchanged:: 0.40.0
            Support for SQLAlchemy type classes and strings in the ``sql_type`` argument
