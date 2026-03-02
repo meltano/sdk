@@ -78,11 +78,11 @@ def is_secret_type(type_dict: dict) -> bool:
     Args:
         type_dict: The JSON Schema type to check.
 
-    Raises:
-        ValueError: If type_dict is None or empty.
-
     Returns:
         True if we detect any sensitive property nodes.
+
+    Raises:
+        ValueError: If type_dict is None or empty.
     """
     if type_dict.get(JSONSCHEMA_ANNOTATION_WRITEONLY) or type_dict.get(
         JSONSCHEMA_ANNOTATION_SECRET,
@@ -153,11 +153,11 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
     Args:
         type_dict: The JSON Schema definition.
 
-    Raises:
-        ValueError: If type is empty or null.
-
     Returns:
         True if date or date-time, else False.
+
+    Raises:
+        ValueError: If type is empty or null.
     """
     if "anyOf" in type_dict:
         return any(is_date_or_datetime_type(option) for option in type_dict["anyOf"])

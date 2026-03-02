@@ -1343,11 +1343,11 @@ def to_jsonschema_type(
         from_type: The SQL type as a string or as a TypeEngine. If a TypeEngine is
             provided, it may be provided as a class or a specific object instance.
 
-    Raises:
-        ValueError: If the `from_type` value is not of type `str` or `TypeEngine`.
-
     Returns:
         A compatible JSON Schema type definition.
+
+    Raises:
+        ValueError: If the `from_type` value is not of type `str` or `TypeEngine`.
     """
     import sqlalchemy.types  # noqa: PLC0415
 
