@@ -1207,12 +1207,12 @@ class Stream(abc.ABC):  # noqa: PLR0904
             context: Stream partition or context dictionary.
             write_messages: Whether to write Singer messages to stdout.
 
+        Yields:
+            Each record from the source.
+
         Raises:
             InvalidStreamSortException: Raised if sorting errors are found while
                 syncing the records.
-
-        Yields:
-            Each record from the source.
         """
         # Type definitions
         context_element: types.Context | None
