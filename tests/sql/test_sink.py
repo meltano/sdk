@@ -12,6 +12,9 @@ from singer_sdk import SQLTarget
 from singer_sdk.connectors.sql import SQLConnector
 from singer_sdk.sinks.sql import SQLSink
 
+if t.TYPE_CHECKING:
+    from singer_sdk.sql.connector import FullyQualifiedName
+
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
 else:
@@ -26,7 +29,7 @@ class DummySQLConnector(SQLConnector):
     @override
     @staticmethod
     def get_column_alter_ddl(
-        table_name: str,
+        table_name: str | FullyQualifiedName,
         column_name: str,
         column_type: sqlalchemy.types.TypeEngine,
     ) -> sqlalchemy.DDL:

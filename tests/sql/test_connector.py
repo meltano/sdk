@@ -51,7 +51,7 @@ class DummySQLConnector(SQLConnector):
     @override
     @staticmethod
     def get_column_alter_ddl(
-        table_name: str,
+        table_name: str | FullyQualifiedName,
         column_name: str,
         column_type: sqlalchemy.types.TypeEngine,
     ) -> sqlalchemy.DDL:
@@ -943,7 +943,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         class CustomJSONSchemaToSQL(JSONSchemaToSQL):
             def handle_multiple_types(
                 self,
-                types: list[str],
+                types: t.Sequence[str],
             ) -> sqlalchemy.types.TypeEngine:
                 if "object" in types or "array" in types:
                     return sqlalchemy.JSON()

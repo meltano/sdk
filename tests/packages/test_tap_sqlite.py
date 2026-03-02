@@ -74,9 +74,10 @@ def test_sqlite_discovery(sqlite_sample_tap: SQLTap):
     assert stream.name == stream.tap_stream_id == "main-t1"
 
     md_map = MetadataMapping.from_iterable(stream.catalog_entry["metadata"])
-    assert md_map[()] is not None
-    assert md_map[()] is md_map.root
-    assert md_map[()].schema_name == "main"
+    root = md_map[()]
+    assert root is not None
+    assert root is md_map.root
+    assert root.schema_name == "main"
 
     assert stream.metadata.root.schema_name == "main"
     assert stream.fully_qualified_name == "main.t1"
@@ -104,9 +105,10 @@ def test_sqlite_input_catalog(sqlite_sample_tap: SQLTap):
         assert stream.name == stream.tap_stream_id == "main-t1"
 
     md_map = MetadataMapping.from_iterable(stream.catalog_entry["metadata"])
-    assert md_map[()] is not None
-    assert md_map[()] is md_map.root
-    assert md_map[()].schema_name == "main"
+    root = md_map[()]
+    assert root is not None
+    assert root is md_map.root
+    assert root.schema_name == "main"
 
     # Fails here (schema is None):
     assert stream.metadata.root.schema_name == "main"
