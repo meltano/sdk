@@ -6,6 +6,7 @@ import copy
 import io
 import json
 import typing as t
+from collections import Counter
 from contextlib import redirect_stdout
 
 import pytest
@@ -77,8 +78,10 @@ def test_with_catalog_entry():
     assert not tap.streams["countries"].selected
 
     stream = tap.streams["continents"]
-    record = next(stream.get_records(None))
+    record = next(iter(stream.get_records(None)))
     copied_record = copy.deepcopy(record)
+
+    assert isinstance(copied_record, dict)
 
     pop_deselected_record_properties(
         record=copied_record,
@@ -120,9 +123,9 @@ def test_batch_mode(outdir: Path):
     lines = buf.read().splitlines()
     messages = [json.loads(line) for line in lines]
 
-    def tally_messages(messages: list) -> t.Counter:
+    def tally_messages(messages: list) -> Counter:
         """Tally messages."""
-        return t.Counter(
+        return Counter(
             (message["type"], message["stream"])
             if message["type"] != "STATE"
             else (message["type"],)
