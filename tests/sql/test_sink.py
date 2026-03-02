@@ -8,9 +8,7 @@ import sqlalchemy
 import sqlalchemy.engine
 import sqlalchemy.types
 
-from singer_sdk import SQLTarget
-from singer_sdk.connectors.sql import SQLConnector
-from singer_sdk.sinks.sql import SQLSink
+from singer_sdk.sql import SQLConnector, SQLSink, SQLTarget
 
 if t.TYPE_CHECKING:
     from singer_sdk.sql.connector import FullyQualifiedName
