@@ -96,49 +96,91 @@ class TestSQLSink:
         )
 
     @pytest.mark.parametrize(
-        "stream_name, default_target_schema, expected_table_name, expected_schema_name",
+        "stream_name, config, expected_table_name, expected_schema_name",
         [
             pytest.param(
                 "foo",  # stream_name
-                None,  # default_target_schema
+                {"default_target_schema": None, "schema": None},
                 "foo",  # expected_table_name
                 None,  # expected_schema_name
                 id="no-default-schema",
             ),
             pytest.param(
                 "foo-bar",  # stream_name
-                None,  # default_target_schema
+                {"default_target_schema": None, "schema": None},
                 "bar",  # expected_table_name
                 "foo",  # expected_schema_name
                 id="no-default-schema-2-part",
             ),
             pytest.param(
                 "foo-bar-baz",  # stream_name
-                None,  # default_target_schema
+                {"default_target_schema": None, "schema": None},
                 "baz",  # expected_table_name
                 "bar",  # expected_schema_name
                 id="no-default-schema-3-part",
             ),
             pytest.param(
                 "foo",  # stream_name
-                "test",  # default_target_schema
+                {"default_target_schema": "test", "schema": None},
                 "foo",  # expected_table_name
                 "test",  # expected_schema_name
                 id="default-schema",
             ),
             pytest.param(
+                "foo",  # stream_name
+                {"default_target_schema": None, "schema": "test_schema"},
+                "foo",  # expected_table_name
+                "test_schema",  # expected_schema_name
+                id="schema-alias",
+            ),
+            pytest.param(
+                "foo",  # stream_name
+                {"default_target_schema": "test", "schema": "test_schema"},
+                "foo",  # expected_table_name
+                "test",  # expected_schema_name
+                id="both-set",
+            ),
+            pytest.param(
                 "foo-bar",  # stream_name
-                "test",  # default_target_schema
+                {"default_target_schema": "test", "schema": None},
                 "bar",  # expected_table_name
                 "test",  # expected_schema_name
                 id="default-schema-2-part",
             ),
             pytest.param(
+                "foo-bar",  # stream_name
+                {"default_target_schema": None, "schema": "test_schema"},
+                "bar",  # expected_table_name
+                "test_schema",  # expected_schema_name
+                id="schema-alias-2-part",
+            ),
+            pytest.param(
+                "foo-bar",  # stream_name
+                {"default_target_schema": "test", "schema": "test_schema"},
+                "bar",  # expected_table_name
+                "test",  # expected_schema_name
+                id="both-set-2-part",
+            ),
+            pytest.param(
                 "foo-bar-baz",  # stream_name
-                "test",  # default_target_schema
+                {"default_target_schema": "test", "schema": None},
                 "baz",  # expected_table_name
                 "test",  # expected_schema_name
                 id="default-schema-3-part",
+            ),
+            pytest.param(
+                "foo-bar-baz",  # stream_name
+                {"default_target_schema": None, "schema": "test_schema"},
+                "baz",  # expected_table_name
+                "test_schema",  # expected_schema_name
+                id="schema-alias-3-part",
+            ),
+            pytest.param(
+                "foo-bar-baz",  # stream_name
+                {"default_target_schema": "test", "schema": "test_schema"},
+                "baz",  # expected_table_name
+                "test",  # expected_schema_name
+                id="both-set-3-part",
             ),
         ],
     )
@@ -146,14 +188,14 @@ class TestSQLSink:
         self,
         schema: dict,
         stream_name: str,
-        default_target_schema: str | None,
+        config: dict[str, t.Any],
         expected_table_name: str,
         expected_schema_name: str,
     ):
         target = DummySQLTarget(
             config={
                 "sqlalchemy_url": "sqlite:///",
-                "default_target_schema": default_target_schema,
+                **config,
             },
         )
 
