@@ -1139,7 +1139,7 @@ name = "importlib-metadata"
 version = "8.7.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "zipp", marker = "python_full_version < '3.12'" },
+    { name = "zipp" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/f3/49/3b30cad09e7771a4982d9975a8cbf64f00d4a1ececb53297f1d9a7be1b10/importlib_metadata-8.7.1.tar.gz", hash = "sha256:49fef1ae6440c182052f407c8d34a68f72efc36db9ca90dc0113398f2fdde8bb", size = 57107, upload-time = "2025-12-21T10:00:19.278Z" }
 wheels = [
@@ -1208,6 +1208,9 @@ name = "jsonpath-ng"
 version = "1.8.0"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/32/58/250751940d75c8019659e15482d548a4aa3b6ce122c515102a4bfdac50e3/jsonpath_ng-1.8.0.tar.gz", hash = "sha256:54252968134b5e549ea5b872f1df1168bd7defe1a52fed5a358c194e1943ddc3", size = 74513, upload-time = "2026-02-24T14:42:06.182Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/03/99/33c7d78a3fb70d545fd5411ac67a651c81602cc09c9cf0df383733f068c5/jsonpath_ng-1.8.0-py3-none-any.whl", hash = "sha256:b8dde192f8af58d646fc031fac9c99fe4d00326afc4148f1f043c601a8cfe138", size = 67844, upload-time = "2026-02-28T00:53:19.637Z" },
+]
 
 [[package]]
 name = "jsonschema"
@@ -2839,12 +2842,14 @@ benchmark = [
     { name = "xdoctest", extra = ["colors"] },
 ]
 dev = [
+    { name = "backports-datetime-fromisoformat" },
     { name = "backports-zstd", marker = "python_full_version < '3.14'" },
     { name = "coverage", extra = ["toml"] },
     { name = "deptry" },
     { name = "dirty-equals" },
     { name = "fastjsonschema" },
     { name = "furo" },
+    { name = "importlib-metadata" },
     { name = "mypy" },
     { name = "myst-parser", version = "4.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "myst-parser", version = "5.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
@@ -2925,10 +2930,12 @@ testing = [
     { name = "xdoctest", extra = ["colors"] },
 ]
 typing = [
+    { name = "backports-datetime-fromisoformat" },
     { name = "backports-zstd", marker = "python_full_version < '3.14'" },
     { name = "coverage", extra = ["toml"] },
     { name = "dirty-equals" },
     { name = "fastjsonschema" },
+    { name = "importlib-metadata" },
     { name = "mypy" },
     { name = "pyarrow-stubs" },
     { name = "pytest" },
@@ -3008,12 +3015,14 @@ benchmark = [
     { name = "xdoctest", extras = ["colors"], specifier = ">=1.1.1" },
 ]
 dev = [
+    { name = "backports-datetime-fromisoformat" },
     { name = "backports-zstd", marker = "python_full_version < '3.14'", specifier = ">=1.0.0" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.9" },
     { name = "deptry", specifier = ">=0.15.0" },
     { name = "dirty-equals", specifier = ">=0.11" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
     { name = "furo", specifier = ">=2024.5.6" },
+    { name = "importlib-metadata" },
     { name = "mypy", specifier = ">=1.17" },
     { name = "myst-parser", specifier = ">=3" },
     { name = "pyarrow-stubs", specifier = ">=19.1" },
@@ -3086,10 +3095,12 @@ testing = [
     { name = "xdoctest", extras = ["colors"], specifier = ">=1.1.1" },
 ]
 typing = [
+    { name = "backports-datetime-fromisoformat" },
     { name = "backports-zstd", marker = "python_full_version < '3.14'", specifier = ">=1.0.0" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.9" },
     { name = "dirty-equals", specifier = ">=0.11" },
     { name = "fastjsonschema", specifier = ">=2.19.1" },
+    { name = "importlib-metadata" },
     { name = "mypy", specifier = ">=1.17" },
     { name = "pyarrow-stubs", specifier = ">=19.1" },
     { name = "pytest", specifier = ">=9" },

@@ -150,6 +150,8 @@ testing = [
 ]
 typing = [
     {"include-group" = "testing"},
+    "backports-datetime-fromisoformat",
+    "importlib-metadata",
     "mypy>=1.17",
     "pyarrow-stubs>=19.1",
     "ty>=0.0.15",
