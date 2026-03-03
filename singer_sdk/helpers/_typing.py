@@ -34,14 +34,16 @@ class DatetimeErrorTreatmentEnum(Enum):
 def to_json_compatible(val: t.Any) -> t.Any:  # noqa: ANN401
     """Return as string if datetime. JSON does not support proper datetime types."""
     if isinstance(val, (datetime.datetime,)):
-        # Make naive datetimes UTC
-        return (val.replace(tzinfo=UTC) if val.tzinfo is None else val).isoformat(
-            "T",
-            timespec="microseconds",
-        )
+        return _datetime_to_json_compatible(val)
     if isinstance(val, (uuid.UUID,)):
         return str(val)
     return val
+
+
+def _datetime_to_json_compatible(val: datetime.datetime) -> str:
+    if val.tzinfo is None:  # Make naive datetimes UTC
+        val = val.replace(tzinfo=UTC)
+    return val.isoformat("T", timespec="microseconds")
 
 
 def append_type(type_dict: dict, new_type: str) -> dict:
@@ -519,7 +521,7 @@ def _conform_primitive_property(  # noqa: PLR0911
 ) -> t.Any:  # noqa: ANN401
     """Converts a primitive (i.e. not object or array) to a json compatible type."""
     if isinstance(elem, (datetime.datetime,)):
-        return to_json_compatible(elem)
+        return _datetime_to_json_compatible(elem)
     if isinstance(elem, datetime.date):
         return elem.isoformat()
     if isinstance(elem, datetime.timedelta):
