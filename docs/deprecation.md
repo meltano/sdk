@@ -26,6 +26,38 @@ from singer_sdk.helpers._batch import BaseBatchFileEncoding
 encoding = BaseBatchFileEncoding(format="jsonl")
 ```
 
+## v0.57
+
+### SQL module reorganization
+
+The `singer_sdk.connectors.sql`, `singer_sdk.sinks.sql`, `singer_sdk.streams.sql`, and
+top-level `singer_sdk` modules no longer export SQL classes directly. Import them from
+`singer_sdk.sql` instead. The shim modules will be removed in v0.57.
+
+```python
+# Old (deprecated)
+from singer_sdk import SQLConnector, SQLSink, SQLStream, SQLTap, SQLTarget
+from singer_sdk.connectors.sql import SQLConnector
+from singer_sdk.sinks.sql import SQLSink
+from singer_sdk.streams.sql import SQLStream
+
+# New
+from singer_sdk.sql import SQLConnector, SQLSink, SQLStream, SQLTap, SQLTarget
+```
+
+See the [migration guide](./guides/consolidate-sql-imports.md) for more information.
+
+## v0.58
+
+### Authenticator `stream` parameter and related properties
+
+The `stream` parameter on all authenticator constructors, the `tap_name` and `config`
+properties on `APIAuthenticatorBase`, and the `create_for_stream` class methods on
+`APIKeyAuthenticator`, `BearerTokenAuthenticator`, and `BasicAuthenticator` are
+deprecated and will be removed in v0.58.
+
+See the [migration guide](./guides/decouple-authenticators.md) for more information.
+
 ## 1.0
 
 - The `RESTStream.get_next_page_token` method will no longer be called

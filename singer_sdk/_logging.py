@@ -13,6 +13,7 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
 
 logger = logging.getLogger(__name__)
+_warnings_logger = logging.getLogger("singer_sdk.warnings")
 
 
 def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN401 # pragma: no cover
@@ -28,6 +29,46 @@ def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN40
 
     with path.open() as f:
         return yaml.safe_load(f)
+
+
+def _setup_warning_logging() -> None:
+    """Redirect Python warnings to the Singer SDK logger with a readable format.
+
+    Replaces the default :func:`warnings.showwarning` so that each warning is
+    logged as a structured message on the ``singer_sdk.warnings`` logger instead
+    of being emitted as a pre-formatted ``py.warnings`` blob.
+
+    Warnings directed to an explicit *file* object fall back to the original
+    :func:`warnings.showwarning` behaviour unchanged.
+    """
+    import warnings  # noqa: PLC0415
+
+    original = warnings.showwarning
+
+    def _showwarning(
+        message: Warning | str,
+        category: type[Warning],
+        filename: str,
+        lineno: int,
+        file: t.TextIO | None = None,
+        line: str | None = None,
+    ) -> None:
+        if file is not None:
+            original(message, category, filename, lineno, file, line)
+            return
+        _warnings_logger.warning(
+            "%s: %s (%s:%d)",
+            category.__name__,
+            message,
+            filename,
+            lineno,
+            extra={
+                "warning_category": category.__name__,
+                "warning_source": f"{filename}:{lineno}",
+            },
+        )
+
+    warnings.showwarning = _showwarning  # ty:ignore[invalid-assignment]
 
 
 def _setup_console_logging(*, log_level: str | int | None = None) -> None:

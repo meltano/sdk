@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import datetime
 import sys
+import typing as t
 import warnings
-from functools import partial
 from importlib import resources as importlib_resources
 
 if sys.version_info >= (3, 13):
@@ -37,7 +37,33 @@ class SingerSDKDeprecationWarning(DeprecationWarning):
     """Custom deprecation warning for the Singer SDK."""
 
 
-singer_sdk_deprecated = partial(deprecated, category=SingerSDKDeprecationWarning)
+class SingerSDKPendingDeprecationWarning(PendingDeprecationWarning):
+    """Warning for deprecated features without a committed removal timeline."""
+
+
+def singer_sdk_deprecated(
+    msg: str,
+    *,
+    removal_version: str,
+    stacklevel: int = 1,
+) -> t.Any:  # noqa: ANN401
+    """Deprecation decorator that requires an explicit removal version.
+
+    Args:
+        msg: Human-readable message. Should describe the replacement but need
+             not mention the version — it is appended automatically.
+        removal_version: SDK version when this will be removed (e.g. ``"v0.58"``
+            or ``"1.0"``).
+        stacklevel: Passed through to :func:`deprecated`.
+
+    Returns:
+        A decorator that marks the target as deprecated.
+    """
+    return deprecated(
+        f"{msg} Will be removed in {removal_version}.",  # ty:ignore[invalid-argument-type]
+        category=SingerSDKDeprecationWarning,
+        stacklevel=stacklevel,
+    )
 
 
 class SingerSDKPythonEOLWarning(FutureWarning):
@@ -95,6 +121,7 @@ def warn_python_eol(
 
 __all__ = [
     "SingerSDKDeprecationWarning",
+    "SingerSDKPendingDeprecationWarning",
     "SingerSDKPythonEOLWarning",
     "Traversable",
     "date_fromisoformat",
@@ -102,6 +129,7 @@ __all__ = [
     "deprecated",
     "entry_points",
     "importlib_resources",
+    "singer_sdk_deprecated",
     "time_fromisoformat",
     "warn_python_eol",
 ]

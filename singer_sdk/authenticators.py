@@ -15,7 +15,10 @@ import requests
 import requests.adapters
 import urllib3
 
-from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
+from singer_sdk.helpers._compat import (
+    SingerSDKDeprecationWarning,
+    singer_sdk_deprecated,
+)
 from singer_sdk.helpers._util import utc_now
 
 if t.TYPE_CHECKING:
@@ -100,10 +103,7 @@ def _get_stream_param(*args: t.Any, **kwargs: t.Any) -> _HTTPStream | None:
 
 def _warn_stream_param_deprecation() -> None:
     warnings.warn(
-        (
-            "The `stream` parameter is deprecated and will be removed in a "
-            "future version"
-        ),
+        "The `stream` parameter is deprecated. Will be removed in v0.58.",
         SingerSDKDeprecationWarning,
         stacklevel=2,
     )
@@ -140,12 +140,9 @@ class APIAuthenticatorBase:
         self.logger: logging.Logger = logging.getLogger(__name__)
 
     @property
-    @deprecated(
-        (
-            "The `tap_name` property is deprecated and will be removed in a "
-            "future version"
-        ),
-        category=SingerSDKDeprecationWarning,
+    @singer_sdk_deprecated(
+        "The `tap_name` property is deprecated. Access via your tap/stream directly.",
+        removal_version="v0.58",
     )
     def tap_name(self) -> str:
         """The tap name."""
@@ -157,9 +154,9 @@ class APIAuthenticatorBase:
         self._tap_name = name
 
     @property
-    @deprecated(
-        "The `config` property is deprecated and will be removed in a future version",
-        category=SingerSDKDeprecationWarning,
+    @singer_sdk_deprecated(
+        "The `config` property is deprecated. Access via your tap/stream directly.",
+        removal_version="v0.58",
     )
     def config(self) -> t.Mapping[str, t.Any]:
         """Get stream or tap config.
@@ -302,12 +299,10 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
             self.auth_params.update(auth_credentials)
 
     @classmethod
-    @deprecated(
-        (
-            "The `create_for_stream` method is deprecated and will be removed in a "
-            "future version"
-        ),
-        category=SingerSDKDeprecationWarning,
+    @singer_sdk_deprecated(
+        "The `create_for_stream` method is deprecated. "
+        "Instantiate the authenticator directly instead.",
+        removal_version="v0.58",
     )
     def create_for_stream(
         cls: type[APIKeyAuthenticator],
@@ -366,12 +361,10 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
         self.auth_headers.update(auth_credentials)
 
     @classmethod
-    @deprecated(
-        (
-            "The `create_for_stream` method is deprecated and will be removed in a "
-            "future version"
-        ),
-        category=SingerSDKDeprecationWarning,
+    @singer_sdk_deprecated(
+        "The `create_for_stream` method is deprecated. "
+        "Instantiate the authenticator directly instead.",
+        removal_version="v0.58",
     )
     def create_for_stream(
         cls: type[BearerTokenAuthenticator],
@@ -435,12 +428,10 @@ class BasicAuthenticator(APIAuthenticatorBase):
         self.auth_headers.update(auth_credentials)
 
     @classmethod
-    @deprecated(
-        (
-            "The `create_for_stream` method is deprecated and will be removed in a "
-            "future version"
-        ),
-        category=SingerSDKDeprecationWarning,
+    @singer_sdk_deprecated(
+        "The `create_for_stream` method is deprecated. "
+        "Instantiate the authenticator directly instead.",
+        removal_version="v0.58",
     )
     def create_for_stream(
         cls: type[BasicAuthenticator],

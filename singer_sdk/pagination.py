@@ -373,8 +373,8 @@ class PageNumberPaginator(BaseAPIPaginator[int]):
 
 
 @singer_sdk_deprecated(
-    "BasePageNumberPaginator is deprecated and will be removed in a future version. "
-    "Use PageNumberPaginator instead."
+    "BasePageNumberPaginator is deprecated. Use PageNumberPaginator instead.",
+    removal_version="v0.58",
 )
 class BasePageNumberPaginator(PageNumberPaginator):
     """DEPRECATED.
@@ -423,8 +423,8 @@ class OffsetPaginator(BaseAPIPaginator[int], ABC):
 
 
 @singer_sdk_deprecated(
-    "BaseOffsetPaginator is deprecated and will be removed in a future version. "
-    "Use OffsetPaginator instead."
+    "BaseOffsetPaginator is deprecated. Use OffsetPaginator instead.",
+    removal_version="v0.58",
 )
 class BaseOffsetPaginator(OffsetPaginator):
     """DEPRECATED.

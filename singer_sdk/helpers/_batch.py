@@ -48,8 +48,8 @@ class BaseBatchFileEncoding:
 
 
 @singer_sdk_deprecated(
-    "JSONLinesEncoding is deprecated and will be removed in v0.56. "
-    "Use BaseBatchFileEncoding with format='jsonl' instead."
+    "JSONLinesEncoding is deprecated. Use BaseBatchFileEncoding with format='jsonl' instead.",
+    removal_version="v0.56",
 )
 @dataclass(slots=True)
 class JSONLinesEncoding(BaseBatchFileEncoding):
@@ -59,8 +59,9 @@ class JSONLinesEncoding(BaseBatchFileEncoding):
 
 
 @singer_sdk_deprecated(
-    "ParquetEncoding is deprecated and will be removed in v0.56. "
-    "Use BaseBatchFileEncoding with format='parquet' instead."
+    "ParquetEncoding is deprecated. "
+    "Use BaseBatchFileEncoding with format='parquet' instead.",
+    removal_version="v0.56",
 )
 @dataclass(slots=True)
 class ParquetEncoding(BaseBatchFileEncoding):

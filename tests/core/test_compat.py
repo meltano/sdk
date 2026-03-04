@@ -5,10 +5,56 @@ from __future__ import annotations
 import datetime
 import warnings
 
+import pytest
+
 from singer_sdk.helpers._compat import (
+    SingerSDKDeprecationWarning,
     SingerSDKPythonEOLWarning,
+    singer_sdk_deprecated,
     warn_python_eol,
 )
+
+# ---------------------------------------------------------------------------
+# singer_sdk_deprecated
+# ---------------------------------------------------------------------------
+
+
+def test_singer_sdk_deprecated_requires_removal_version() -> None:
+    """singer_sdk_deprecated must be called with removal_version keyword."""
+    with pytest.raises(TypeError):
+        singer_sdk_deprecated("Some message")  # type: ignore[call-arg]
+
+
+def test_singer_sdk_deprecated_message_contains_version() -> None:
+    """The emitted warning message must include the removal_version."""
+
+    @singer_sdk_deprecated("Old thing is gone. Use new thing.", removal_version="v0.99")
+    def _old_func() -> None:
+        pass
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        _old_func()
+
+    assert len(caught) == 1
+    assert "v0.99" in str(caught[0].message)
+
+
+def test_singer_sdk_deprecated_message_contains_guidance() -> None:
+    """The emitted warning message must include the original guidance text."""
+
+    @singer_sdk_deprecated("Use NewClass instead.", removal_version="v1.0")
+    class _OldClass:
+        pass
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        _OldClass()
+
+    assert len(caught) == 1
+    assert "Use NewClass instead." in str(caught[0].message)
+    assert issubclass(caught[0].category, SingerSDKDeprecationWarning)
+
 
 # ---------------------------------------------------------------------------
 # warn_python_eol

@@ -18,7 +18,11 @@ from sqlalchemy.sql import ddl
 
 from singer_sdk import typing as th
 from singer_sdk.exceptions import ConfigValidationError
-from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
+from singer_sdk.helpers._compat import (
+    SingerSDKDeprecationWarning,
+    SingerSDKPendingDeprecationWarning,
+    deprecated,
+)
 from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
 from singer_sdk.singerlib import CatalogEntry, MetadataMapping, Schema
@@ -668,7 +672,7 @@ class SQLConnector:  # noqa: PLR0904
         "If you need to execute something that isn't available "
         "on the connector currently, make a child class and "
         "add your required method on that connector.",
-        category=SingerSDKDeprecationWarning,
+        category=SingerSDKPendingDeprecationWarning,
         stacklevel=1,
     )
     def create_sqlalchemy_connection(self) -> sa.Connection:
@@ -695,7 +699,7 @@ class SQLConnector:  # noqa: PLR0904
     @deprecated(
         "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override "
         "`_engine` or `sqlalchemy_url` instead.",
-        category=SingerSDKDeprecationWarning,
+        category=SingerSDKPendingDeprecationWarning,
         stacklevel=1,
     )
     def create_sqlalchemy_engine(self) -> sa.Engine:
@@ -724,7 +728,7 @@ class SQLConnector:  # noqa: PLR0904
             "`SQLConnector.connection` is deprecated. If you need to execute something "
             "that isn't available on the connector currently, make a child "
             "class and add your required method on that connector.",
-            SingerSDKDeprecationWarning,
+            SingerSDKPendingDeprecationWarning,
             stacklevel=2,
         )
         return self.create_sqlalchemy_connection()  # ty: ignore[deprecated]
@@ -924,7 +928,7 @@ class SQLConnector:  # noqa: PLR0904
 
     @deprecated(
         "This method is deprecated. Use or override `FullyQualifiedName` instead.",
-        category=SingerSDKDeprecationWarning,
+        category=SingerSDKPendingDeprecationWarning,
     )
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting, using '.' as a name-part delimiter.
@@ -972,7 +976,7 @@ class SQLConnector:  # noqa: PLR0904
 
     @deprecated(
         "This method is deprecated.",
-        category=SingerSDKDeprecationWarning,
+        category=SingerSDKPendingDeprecationWarning,
         stacklevel=1,
     )
     def get_object_names(  # pragma: no cover
