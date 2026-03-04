@@ -391,16 +391,8 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
         return cls(stream=stream, token=token)
 
 
-@deprecated(
-    "BasicAuthenticator is deprecated and will be removed by 2026-01-01. "
-    "Use `requests.auth.HTTPBasicAuth` instead.",
-    category=SingerSDKDeprecationWarning,
-)
 class BasicAuthenticator(APIAuthenticatorBase):
     """Implements basic authentication for REST Streams.
-
-    .. deprecated:: 0.36.0
-       Use :class:`requests.auth.HTTPBasicAuth` instead.
 
     This Authenticator implements basic authentication by concatenating a
     username and password then base64 encoding the string. The resulting
