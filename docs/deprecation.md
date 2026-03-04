@@ -4,6 +4,11 @@ This page outlines when various features of the Singer SDK will be removed or ch
 incompatible way, following their deprecation, as indicated in the
 [deprecation policy](./release_process.md#deprecation-policy).
 
+## v0.54
+
+- Remove the `PluginBase.config_from_cli_args` method, which has not been used for a while.
+- `JSONLinesBatcher` was moved to `singer_sdk.contrib.batch_encoder_jsonl`. Trying to import it from `singer_sdk.batch` will now raise an `AttributeError`.
+
 ## v0.56
 
 ### Batch file encoding
