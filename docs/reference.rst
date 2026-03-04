@@ -54,7 +54,7 @@ Authenticator Classes
 
 .. autosummary::
     :toctree: classes
-    :template: class.rst
+    :template: authenticator.rst
 
     authenticators.APIAuthenticatorBase
     authenticators.APIKeyAuthenticator
