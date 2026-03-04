@@ -107,6 +107,7 @@ JSON Schema builder classes
     typing.JSONPointerType
     typing.ObjectType
     typing.OneOf
+    typing.NumberType
     typing.Property
     typing.RegexType
     typing.RelativeJSONPointerType
