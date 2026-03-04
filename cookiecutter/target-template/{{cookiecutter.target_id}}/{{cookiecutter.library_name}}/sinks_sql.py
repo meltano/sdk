@@ -5,8 +5,7 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING, Any
 
-from singer_sdk.connectors import SQLConnector
-from singer_sdk.sinks import SQLSink
+from singer_sdk.sql import SQLConnector, SQLSink
 
 if sys.version_info >= (3, 12):
     from typing import override
@@ -16,7 +15,7 @@ else:
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from singer_sdk.connectors.sql import FullyQualifiedName
+    from singer_sdk.sql.connector import FullyQualifiedName
 
 
 class {{ cookiecutter.destination_name }}Connector(SQLConnector):
