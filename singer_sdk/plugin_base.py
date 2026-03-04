@@ -27,7 +27,7 @@ from singer_sdk.configuration._dict_config import (
 )
 from singer_sdk.exceptions import ConfigValidationError, MapperNotInitialized
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, warn_python_eol
 from singer_sdk.helpers._packaging import SDK_PACKAGE_NAME, get_package_version
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -234,6 +234,7 @@ class PluginBase(abc.ABC):
         Raises:
             TypeError: If config is not a dict or path string.
         """
+        warn_python_eol()
         config = config or {}
         if isinstance(config, (str, PurePath)):
             config_dict = read_json_file(config)
