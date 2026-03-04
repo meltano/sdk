@@ -405,7 +405,7 @@ def assert_config_property_deprecation_warning(warning: warnings.WarningMessage)
 
 
 @pytest.mark.parametrize("stream_param", ["positional", "keyword"])
-def test_basic_auth_deprecation_warning(
+def test_basic_auth_stream_param_deprecation_warning(
     rest_tap: Tap, stream_param: t.Literal["positional", "keyword"]
 ):
     """Validate that a warning is emitted when using BasicAuthenticator."""
