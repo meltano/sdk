@@ -4,6 +4,23 @@ This page outlines when various features of the Singer SDK will be removed or ch
 incompatible way, following their deprecation, as indicated in the
 [deprecation policy](./release_process.md#deprecation-policy).
 
+## v0.56
+
+### Batch file encoding
+
+`JSONLinesEncoding` and `ParquetEncoding` are thin wrappers over `BaseBatchFileEncoding`
+that add no behaviour. They will be removed in v0.56.
+
+```python
+# Old (deprecated)
+from singer_sdk.helpers._batch import JSONLinesEncoding, ParquetEncoding
+
+# New
+from singer_sdk.helpers._batch import BaseBatchFileEncoding
+
+encoding = BaseBatchFileEncoding(format="jsonl")
+```
+
 ## 1.0
 
 - The `RESTStream.get_next_page_token` method will no longer be called
