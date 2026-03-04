@@ -443,11 +443,11 @@ class BasicAuthenticator(APIAuthenticatorBase):
         category=SingerSDKDeprecationWarning,
     )
     def create_for_stream(
-        cls: type[BasicAuthenticator],  # ty: ignore[deprecated]
+        cls: type[BasicAuthenticator],
         stream: _HTTPStream,
         username: str,
         password: str,
-    ) -> BasicAuthenticator:  # ty: ignore[deprecated]
+    ) -> BasicAuthenticator:
         """Create an Authenticator object specific to the Stream class.
 
         Args:
