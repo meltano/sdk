@@ -9,9 +9,9 @@ import functools
 import sys
 from typing import TYPE_CHECKING, Any
 
-from singer_sdk import SQLConnector, SQLStream
-from singer_sdk.connectors.sql import SQLToJSONSchema
-from singer_sdk.helpers._typing import TypeConformanceLevel
+from singer_sdk.helpers.conform import TypeConformanceLevel
+from singer_sdk.sql import SQLConnector, SQLStream
+from singer_sdk.sql.connector import SQLToJSONSchema
 
 if sys.version_info >= (3, 12):
     from typing import override
