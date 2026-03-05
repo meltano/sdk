@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 
 from upath import UPath
 
-from singer_sdk.helpers._compat import singer_sdk_deprecated
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.singerlib.messages import Message, SingerMessageType
 
 if t.TYPE_CHECKING:
@@ -47,9 +47,9 @@ class BaseBatchFileEncoding:
         return cls(**data)
 
 
-@singer_sdk_deprecated(
-    "JSONLinesEncoding is deprecated and will be removed in v0.56. "
-    "Use BaseBatchFileEncoding with format='jsonl' instead."
+@deprecated(
+    "Use BaseBatchFileEncoding with format='jsonl' instead. JSONLinesEncoding will be removed in v0.56.",  # noqa: E501
+    category=SingerSDKDeprecationWarning,
 )
 @dataclass(slots=True)
 class JSONLinesEncoding(BaseBatchFileEncoding):
@@ -58,9 +58,9 @@ class JSONLinesEncoding(BaseBatchFileEncoding):
     format: t.Literal["jsonl"] = "jsonl"
 
 
-@singer_sdk_deprecated(
-    "ParquetEncoding is deprecated and will be removed in v0.56. "
-    "Use BaseBatchFileEncoding with format='parquet' instead."
+@deprecated(
+    "Use BaseBatchFileEncoding with format='parquet' instead. ParquetEncoding will be removed in v0.56.",  # noqa: E501
+    category=SingerSDKDeprecationWarning,
 )
 @dataclass(slots=True)
 class ParquetEncoding(BaseBatchFileEncoding):
