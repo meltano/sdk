@@ -46,11 +46,11 @@ class SingerSDKPythonEOLWarning(FutureWarning):
 
 # EOL dates from https://devguide.python.org/versions/
 _PYTHON_EOL_DATES: dict[tuple[int, int], datetime.date] = {
-    (3, 10): datetime.date(2026, 10, 4),
-    (3, 11): datetime.date(2027, 10, 24),
-    (3, 12): datetime.date(2028, 10, 2),
-    (3, 13): datetime.date(2029, 10, 7),
-    (3, 14): datetime.date(2030, 10, 7),
+    (3, 10): datetime.date(2026, 10, 1),
+    (3, 11): datetime.date(2027, 10, 1),
+    (3, 12): datetime.date(2028, 10, 1),
+    (3, 13): datetime.date(2029, 10, 1),
+    (3, 14): datetime.date(2030, 10, 1),
 }
 _PYTHON_EOL_WARNING_PERIOD = datetime.timedelta(days=365)  # warn 1 year before EOL
 
@@ -75,7 +75,7 @@ def warn_python_eol(
 
     if today >= eol:
         warnings.warn(
-            f"{py_str} reached its end of life on {eol}. "
+            f"{py_str} reached its end of life on {eol.strftime('%Y-%m')}. "
             "The Singer SDK may drop support for it in an upcoming release. "
             "Please upgrade to a supported Python version. "
             "See https://devguide.python.org/versions/ for details.",
@@ -84,7 +84,7 @@ def warn_python_eol(
         )
     elif today >= eol - _PYTHON_EOL_WARNING_PERIOD:
         warnings.warn(
-            f"{py_str} will reach its end of life on {eol}. "
+            f"{py_str} will reach its end of life on {eol.strftime('%Y-%m')}. "
             "The Singer SDK will drop support for it in an upcoming release. "
             "Please plan to upgrade to a supported Python version. "
             "See https://devguide.python.org/versions/ for details.",
