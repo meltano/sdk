@@ -7,7 +7,7 @@ incompatible way, following their deprecation, as indicated in the
 ## v0.54
 
 - Remove the `PluginBase.config_from_cli_args` method, which has not been used for a while.
-- Remove the `StreamStateManager.reset_state_progress_markers` method, whose logic was never used at the stream level.
+- Remove the `Stream.reset_state_progress_markers` method, whose logic was never used at the stream level.
 - `JSONLinesBatcher` was moved to `singer_sdk.contrib.batch_encoder_jsonl`. Trying to import it from `singer_sdk.batch` will now raise an `AttributeError`.
 
 ## v0.56
