@@ -32,7 +32,7 @@ encoding = BaseBatchFileEncoding(format="jsonl")
 ### SQL module reorganization
 
 The `singer_sdk.connectors.sql`, `singer_sdk.sinks.sql`, `singer_sdk.streams.sql`, and
-top-level `singer_sdk` modules no longer export SQL classes directly. Import them from
+top-level `singer_sdk` module no longer exports SQL classes directly. Import them from
 `singer_sdk.sql` instead. The shim modules will be removed in v0.57.
 
 ```python
