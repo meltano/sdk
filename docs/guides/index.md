@@ -15,4 +15,5 @@ sql-tap
 sql-target
 
 migrate-to-uv
+consolidate-sql-imports
 ```

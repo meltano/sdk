@@ -1,6 +1,6 @@
 """Deprecated SQL sink module.
 
-.. deprecated:: Next Release
+.. deprecated:: v0.49
     Import from singer_sdk.sql instead.
 """
 
@@ -29,8 +29,8 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
     """
     if name == "SQLSink":
         warnings.warn(
-            f"Importing {name} from singer_sdk.sinks.sql is deprecated. "
-            f"Please import from singer_sdk.sql instead.",
+            f"Importing {name} from singer_sdk.sinks.sql is deprecated and will be "
+            f"removed in v0.57. Please import from singer_sdk.sql instead.",
             SingerSDKDeprecationWarning,
             stacklevel=2,
         )
