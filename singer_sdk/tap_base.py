@@ -678,7 +678,8 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
     """
     if name == "SQLTap":
         warnings.warn(
-            f"Importing {name} from singer_sdk.tap_base is deprecated. "
+            f"Importing {name} from singer_sdk.tap_base is deprecated and will be "
+            "removed in v0.57. "
             f"Please import from singer_sdk.sql instead: "
             f"from singer_sdk.sql import {name}",
             SingerSDKDeprecationWarning,
