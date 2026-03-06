@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import collections.abc
 import contextlib
+import sys
 import typing as t
 import warnings
 from enum import Enum
@@ -29,6 +30,7 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import BaseSingerWriter, PluginBase, _ConfigInput
 from singer_sdk.singerlib import Catalog
+from singer_sdk.streams._result import SyncResult, log_sync_result
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -470,8 +472,17 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
     # Sync methods
 
     @t.final
-    def sync_all(self) -> None:
-        """Sync all streams."""
+    def sync_all(self) -> SyncResult:
+        """Sync all streams.
+
+        A stream that raises any exception is logged and skipped; syncing
+        continues with remaining streams.
+
+        Returns:
+            The combined SyncResult of all streams.
+        """
+        result = SyncResult.SUCCESS
+
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
         if self.state:
@@ -493,13 +504,29 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
                 )
                 continue
 
-            stream.sync()
-            stream.finalize_state_progress_markers()
+            try:
+                stream.sync()
+            except (AbortedSyncFailedException, AbortedSyncPausedException) as exc:
+                # sync_result is already set inside Stream.sync().
+                # Result is logged below after the loop; continue to next stream.
+                self.logger.error(  # noqa: TRY400
+                    "Stream '%s' failed: %s",
+                    stream.name,
+                    exc.__cause__,
+                )
+            else:
+                # Only reached when stream.sync() did not raise — SUCCESS.
+                stream.finalize_state_progress_markers()
 
-        # this second loop is needed for all streams to print out their costs
-        # including child streams which are otherwise skipped in the loop above
+            result = result.combine(stream.sync_result)
+
+        # Always log results and costs — runs even when an abort exception
+        # propagates out of the per-stream loop.
         for stream in self.streams.values():
+            log_sync_result(self.logger, stream.name, stream.sync_result)
             stream.log_sync_costs()
+
+        return result
 
     # Command Line Execution
 
@@ -552,7 +579,8 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
             parse_env_config=config.parse_env,
             validate_config=True,
         )
-        tap.sync_all()
+        result = tap.sync_all()
+        sys.exit(result.exit_code())
 
     @classmethod
     def cb_discover(
