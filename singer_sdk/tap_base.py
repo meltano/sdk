@@ -477,8 +477,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         A stream that raises any exception is logged and skipped; syncing
         continues with remaining streams.
 
-        After all streams finish, streams whose :attr:`~singer_sdk.Stream.sync_result`
-        is :attr:`~singer_sdk.streams.core.SyncResult.FAILED` cause :meth:`invoke`
+        After all streams finish, streams that failed cause :meth:`invoke`
         to exit with code 1.  A
         :class:`~singer_sdk.exceptions.AbortedSyncPausedException` is treated as
         a graceful pause (exit 0); an
@@ -510,7 +509,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
                 stream.sync()
             except (AbortedSyncFailedException, AbortedSyncPausedException) as exc:
                 # sync_result is already set inside Stream.sync().
-                # Summary is logged in the finally block; continue to next stream.
+                # Result is logged below after the loop; continue to next stream.
                 self.logger.error(  # noqa: TRY400
                     "Stream '%s' failed: %s",
                     stream.name,

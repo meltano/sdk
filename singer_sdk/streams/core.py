@@ -1384,8 +1384,9 @@ class Stream(abc.ABC):  # noqa: PLR0904
             raise
         except Exception as exc:  # noqa: BLE001
             self.log(
-                "An unhandled error occurred while syncing '%s'",
+                "An error occurred while syncing '%s': %s",
                 self.name,
+                str(exc),
                 level=logging.ERROR,
             )
             self._abort_sync(exc)  # always raises

@@ -27,12 +27,14 @@ class SyncResult(enum.Enum):
     PARTIAL = "partial"
 
     def combine(self, other: SyncResult | None) -> SyncResult:
-        """Merge two results; None means 'no prior result'.
+        """Merge this result with a prior accumulated result.
 
-        Priority order: FAILED > ABORTED > PARTIAL > SUCCESS.
+        ``self`` is the new outcome being applied; ``other`` is whatever has
+        accumulated so far (``None`` means no prior result, so ``self`` wins
+        unconditionally).  Priority order: FAILED > ABORTED > PARTIAL > SUCCESS.
 
         Args:
-            other: The first SyncResult, or None to treat as no prior result.
+            other: The accumulated result so far, or None if this is the first.
 
         Returns:
             The combined SyncResult.
