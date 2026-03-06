@@ -471,16 +471,6 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
     # Sync methods
 
-    def _log_stream_sync_result(self, stream: Stream) -> None:
-        """Log a one-line sync outcome for a stream.
-
-        Called once per stream at the end of :meth:`sync_all`.
-
-        Args:
-            stream: The stream whose result to log.
-        """
-        log_sync_result(self.logger, stream.name, stream.sync_result)
-
     @t.final
     def sync_all(self) -> None:
         """Sync all streams.
@@ -502,41 +492,40 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
             self._state_writer.write_state(self.state)
 
         stream: Stream
-        try:
-            for stream in self.streams.values():
-                if not stream.selected and not stream.has_selected_descendents:
-                    self.logger.info("Skipping deselected stream '%s'.", stream.name)
-                    continue
+        for stream in self.streams.values():
+            if not stream.selected and not stream.has_selected_descendents:
+                self.logger.info("Skipping deselected stream '%s'.", stream.name)
+                continue
 
-                if stream.parent_stream_type:
-                    self.logger.debug(
-                        "Child stream '%s' is expected to be called "
-                        "by parent stream '%s'. "
-                        "Skipping direct invocation.",
-                        type(stream).__name__,
-                        stream.parent_stream_type.__name__,
-                    )
-                    continue
+            if stream.parent_stream_type:
+                self.logger.debug(
+                    "Child stream '%s' is expected to be called "
+                    "by parent stream '%s'. "
+                    "Skipping direct invocation.",
+                    type(stream).__name__,
+                    stream.parent_stream_type.__name__,
+                )
+                continue
 
-                try:
-                    stream.sync()
-                except (AbortedSyncFailedException, AbortedSyncPausedException) as exc:
-                    # sync_result is already set inside Stream.sync().
-                    # Summary is logged in the finally block; continue to next stream.
-                    self.logger.error(  # noqa: TRY400
-                        "Stream '%s' failed: %s",
-                        stream.name,
-                        exc.__cause__,
-                    )
-                else:
-                    # Only reached when stream.sync() did not raise — SUCCESS.
-                    stream.finalize_state_progress_markers()
-        finally:
-            # Always log results and costs — runs even when an abort exception
-            # propagates out of the per-stream loop.
-            for stream in self.streams.values():
-                self._log_stream_sync_result(stream)
-                stream.log_sync_costs()
+            try:
+                stream.sync()
+            except (AbortedSyncFailedException, AbortedSyncPausedException) as exc:
+                # sync_result is already set inside Stream.sync().
+                # Summary is logged in the finally block; continue to next stream.
+                self.logger.error(  # noqa: TRY400
+                    "Stream '%s' failed: %s",
+                    stream.name,
+                    exc.__cause__,
+                )
+            else:
+                # Only reached when stream.sync() did not raise — SUCCESS.
+                stream.finalize_state_progress_markers()
+
+        # Always log results and costs — runs even when an abort exception
+        # propagates out of the per-stream loop.
+        for stream in self.streams.values():
+            log_sync_result(self.logger, stream.name, stream.sync_result)
+            stream.log_sync_costs()
 
     # Command Line Execution
 

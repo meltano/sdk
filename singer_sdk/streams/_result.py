@@ -5,8 +5,6 @@ from __future__ import annotations
 import enum
 import logging
 
-__all__ = ["SyncResult", "log_sync_result"]
-
 
 class SyncResult(enum.Enum):
     """Outcome of a single stream's sync operation.

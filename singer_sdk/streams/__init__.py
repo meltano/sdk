@@ -6,12 +6,11 @@ import typing as t
 import warnings
 
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
-from singer_sdk.streams._result import SyncResult
 from singer_sdk.streams.core import Stream
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
 
-__all__ = ["GraphQLStream", "RESTStream", "Stream", "SyncResult"]
+__all__ = ["GraphQLStream", "RESTStream", "Stream"]
 
 
 def __getattr__(name: str) -> t.Any:  # noqa: ANN401
