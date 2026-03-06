@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import copy
 import datetime
+import enum
 import json
 import logging
 import typing as t
@@ -52,6 +53,27 @@ if t.TYPE_CHECKING:
     from singer_sdk.mapper import StreamMap
     from singer_sdk.singerlib.catalog import StreamMetadata
     from singer_sdk.tap_base import Tap
+
+
+class SyncResult(enum.Enum):
+    """Outcome of a single stream's sync operation.
+
+    Set on :attr:`~singer_sdk.Stream.sync_result` after
+    :meth:`~singer_sdk.Stream.sync` completes or fails.
+
+    Attributes:
+        SUCCESS: Completed without error.
+        FAILED: Raised a fatal (non-lifecycle) exception.
+        ABORTED: Raised a lifecycle abort exception
+            (:class:`~singer_sdk.exceptions.AbortedSyncFailedException` or
+            :class:`~singer_sdk.exceptions.AbortedSyncPausedException`).
+        PARTIAL: Reserved — ignorable errors with skipped records (requires PR 3).
+    """
+
+    SUCCESS = "success"
+    FAILED = "failed"
+    ABORTED = "aborted"
+    PARTIAL = "partial"
 
 
 class Stream(abc.ABC):  # noqa: PLR0904
@@ -155,6 +177,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         self._schema: dict | None = None
         self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
+        self.sync_result: SyncResult | None = None
 
         # Initialize state manager
         self._state_manager = StreamStateManager(
@@ -1311,6 +1334,10 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         Args:
             context: Stream partition or context dictionary.
+
+        Raises:
+            AbortedSyncFailedException: If the sync was aborted non-resumably.
+            AbortedSyncPausedException: If the sync was paused at a resumable point.
         """
         # Preprocess context before it's frozen
         context = self.preprocess_context(context) if context else None
@@ -1349,13 +1376,21 @@ class Stream(abc.ABC):  # noqa: PLR0904
                 # Sync the records themselves:
                 for _ in self._sync_records(context=context):
                     pass
+        except (AbortedSyncFailedException, AbortedSyncPausedException):
+            # Lifecycle abort — must not be swallowed. Mark ABORTED and re-raise
+            # so sync_all() can propagate to invoke() for proper exit-code handling.
+            self.sync_result = SyncResult.ABORTED
+            raise
         except Exception:
             self.log(
                 "An unhandled error occurred while syncing '%s'",
                 self.name,
                 level=logging.ERROR,
             )
+            self.sync_result = SyncResult.FAILED
             raise
+        else:
+            self.sync_result = SyncResult.SUCCESS
 
     def _sync_children(self, child_context: types.Context | None) -> None:
         if child_context is None:

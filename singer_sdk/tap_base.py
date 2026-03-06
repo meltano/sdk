@@ -5,6 +5,8 @@ from __future__ import annotations
 import abc
 import collections.abc
 import contextlib
+import logging
+import sys
 import typing as t
 import warnings
 from enum import Enum
@@ -29,6 +31,7 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import BaseSingerWriter, PluginBase, _ConfigInput
 from singer_sdk.singerlib import Catalog
+from singer_sdk.streams.core import SyncResult
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -469,37 +472,95 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
     # Sync methods
 
+    def _log_stream_sync_result(self, stream: Stream) -> None:
+        """Log a one-line sync outcome for a stream.
+
+        Called once per stream at the end of :meth:`sync_all`.
+
+        Args:
+            stream: The stream whose result to log.
+        """
+        result = stream.sync_result
+        if result is None:
+            # Stream was never directly synced (deselected or child stream).
+            return
+
+        level_map = {
+            SyncResult.SUCCESS: logging.INFO,
+            SyncResult.FAILED: logging.ERROR,
+            SyncResult.ABORTED: logging.WARNING,
+            SyncResult.PARTIAL: logging.WARNING,
+        }
+        self.logger.log(
+            level_map.get(result, logging.INFO),
+            "Stream '%s' sync result: %s",
+            stream.name,
+            result.value,
+        )
+
     @t.final
     def sync_all(self) -> None:
-        """Sync all streams."""
+        """Sync all streams.
+
+        A stream that raises a fatal (non-lifecycle) exception is logged and
+        skipped; syncing continues with remaining streams.
+
+        :class:`~singer_sdk.exceptions.AbortedSyncFailedException` and
+        :class:`~singer_sdk.exceptions.AbortedSyncPausedException` are *not*
+        caught here — they abort the entire run and propagate to :meth:`invoke`.
+
+        Raises:
+            AbortedSyncFailedException: If a lifecycle abort (non-resumable) occurs.
+            AbortedSyncPausedException: If a lifecycle pause (resumable) occurs.
+        """
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
         if self.state:
             self._state_writer.write_state(self.state)
 
         stream: Stream
-        for stream in self.streams.values():
-            if not stream.selected and not stream.has_selected_descendents:
-                self.logger.info("Skipping deselected stream '%s'.", stream.name)
-                continue
+        try:
+            for stream in self.streams.values():
+                if not stream.selected and not stream.has_selected_descendents:
+                    self.logger.info("Skipping deselected stream '%s'.", stream.name)
+                    continue
 
-            if stream.parent_stream_type:
-                self.logger.debug(
-                    "Child stream '%s' is expected to be called "
-                    "by parent stream '%s'. "
-                    "Skipping direct invocation.",
-                    type(stream).__name__,
-                    stream.parent_stream_type.__name__,
-                )
-                continue
+                if stream.parent_stream_type:
+                    self.logger.debug(
+                        "Child stream '%s' is expected to be called "
+                        "by parent stream '%s'. "
+                        "Skipping direct invocation.",
+                        type(stream).__name__,
+                        stream.parent_stream_type.__name__,
+                    )
+                    continue
 
-            stream.sync()
-            stream.finalize_state_progress_markers()
-
-        # this second loop is needed for all streams to print out their costs
-        # including child streams which are otherwise skipped in the loop above
-        for stream in self.streams.values():
-            stream.log_sync_costs()
+                try:
+                    stream.sync()
+                except AbortedSyncPausedException:
+                    # Graceful pause: sync reached a valid resumable state.
+                    # Finalize partial progress before propagating to invoke().
+                    stream.finalize_state_progress_markers()
+                    raise
+                except AbortedSyncFailedException:
+                    # Non-resumable abort: state is not stable — do NOT finalize.
+                    raise
+                except Exception:
+                    # stream.sync_result is already FAILED (set inside Stream.sync()).
+                    # Log and continue to the next stream.
+                    self.logger.exception(
+                        "Stream '%s' failed; continuing with remaining streams.",
+                        stream.name,
+                    )
+                else:
+                    # Only reached when stream.sync() did not raise — SUCCESS.
+                    stream.finalize_state_progress_markers()
+        finally:
+            # Always log results and costs — runs even when an abort exception
+            # propagates out of the per-stream loop.
+            for stream in self.streams.values():
+                self._log_stream_sync_result(stream)
+                stream.log_sync_costs()
 
     # Command Line Execution
 
@@ -552,7 +613,28 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
             parse_env_config=config.parse_env,
             validate_config=True,
         )
-        tap.sync_all()
+        try:
+            tap.sync_all()
+        except AbortedSyncPausedException:
+            # State already written by _abort_sync(). Sync is resumable → exit 0.
+            sys.exit(0)
+        except AbortedSyncFailedException:
+            # Sync aborted; state is not stable → exit 1.
+            sys.exit(1)
+
+        # Check for per-stream fatal errors (non-lifecycle).
+        failed_streams = [
+            name
+            for name, stream in tap.streams.items()
+            if stream.sync_result is SyncResult.FAILED
+        ]
+        if failed_streams:
+            tap.logger.error(
+                "Sync completed with %d failed stream(s): %s",
+                len(failed_streams),
+                ", ".join(failed_streams),
+            )
+            sys.exit(1)
 
     @classmethod
     def cb_discover(
