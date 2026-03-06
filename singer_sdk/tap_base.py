@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import collections.abc
 import contextlib
+import sys
 import typing as t
 import warnings
 from enum import Enum
@@ -29,7 +30,7 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import BaseSingerWriter, PluginBase, _ConfigInput
 from singer_sdk.singerlib import Catalog
-from singer_sdk.streams._result import log_sync_result
+from singer_sdk.streams._result import SyncResult, log_sync_result
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -471,19 +472,17 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
     # Sync methods
 
     @t.final
-    def sync_all(self) -> None:
+    def sync_all(self) -> SyncResult:
         """Sync all streams.
 
         A stream that raises any exception is logged and skipped; syncing
         continues with remaining streams.
 
-        After all streams finish, streams that failed cause :meth:`invoke`
-        to exit with code 1.  A
-        :class:`~singer_sdk.exceptions.AbortedSyncPausedException` is treated as
-        a graceful pause (exit 0); an
-        :class:`~singer_sdk.exceptions.AbortedSyncFailedException` is treated as
-        a failure (exit 1).
+        Returns:
+            The combined SyncResult of all streams.
         """
+        result = SyncResult.SUCCESS
+
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
         if self.state:
@@ -519,11 +518,15 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
                 # Only reached when stream.sync() did not raise — SUCCESS.
                 stream.finalize_state_progress_markers()
 
+            result = result.combine(stream.sync_result)
+
         # Always log results and costs — runs even when an abort exception
         # propagates out of the per-stream loop.
         for stream in self.streams.values():
             log_sync_result(self.logger, stream.name, stream.sync_result)
             stream.log_sync_costs()
+
+        return result
 
     # Command Line Execution
 
@@ -576,7 +579,8 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
             parse_env_config=config.parse_env,
             validate_config=True,
         )
-        tap.sync_all()
+        result = tap.sync_all()
+        sys.exit(result.exit_code())
 
     @classmethod
     def cb_discover(

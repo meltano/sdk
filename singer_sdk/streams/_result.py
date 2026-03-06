@@ -5,6 +5,8 @@ from __future__ import annotations
 import enum
 import logging
 
+logger = logging.getLogger("singer_sdk")
+
 
 class SyncResult(enum.Enum):
     """Outcome of a single stream's sync operation.
@@ -52,6 +54,14 @@ class SyncResult(enum.Enum):
             return SyncResult.PARTIAL
 
         return SyncResult.SUCCESS
+
+    def exit_code(self) -> int:
+        """Return the appropriate exit code for this result."""
+        match self:
+            case SyncResult.SUCCESS:
+                return 0
+            case SyncResult.FAILED | SyncResult.PARTIAL | SyncResult.ABORTED:
+                return 1
 
 
 _LEVEL_MAP: dict[SyncResult, int] = {

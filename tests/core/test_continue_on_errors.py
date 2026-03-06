@@ -201,7 +201,3 @@ def test_continue_on_errors(
 
     snapshot.assert_match(output, "singer_incrememtal.jsonl")
     snapshot.assert_match(caplog.text, "stderr_incremental.log")
-
-
-if __name__ == "__main__":
-    ContinueOnErrorsTap.cli()
