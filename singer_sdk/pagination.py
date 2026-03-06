@@ -7,7 +7,7 @@ import typing as t
 from abc import ABC, abstractmethod
 from urllib.parse import ParseResult, urlparse
 
-from singer_sdk.helpers._compat import singer_sdk_deprecated
+from singer_sdk.helpers._compat import SingerSDKPendingDeprecationWarning, deprecated
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 
 if sys.version_info >= (3, 12):
@@ -372,9 +372,9 @@ class PageNumberPaginator(BaseAPIPaginator[int]):
         return self._value + 1
 
 
-@singer_sdk_deprecated(
-    "BasePageNumberPaginator is deprecated and will be removed in a future version. "
-    "Use PageNumberPaginator instead."
+@deprecated(
+    "Use PageNumberPaginator instead",
+    category=SingerSDKPendingDeprecationWarning,
 )
 class BasePageNumberPaginator(PageNumberPaginator):
     """DEPRECATED.
@@ -422,10 +422,7 @@ class OffsetPaginator(BaseAPIPaginator[int], ABC):
         return self._value + self._page_size
 
 
-@singer_sdk_deprecated(
-    "BaseOffsetPaginator is deprecated and will be removed in a future version. "
-    "Use OffsetPaginator instead."
-)
+@deprecated("Use OffsetPaginator instead", category=SingerSDKPendingDeprecationWarning)
 class BaseOffsetPaginator(OffsetPaginator):
     """DEPRECATED.
 

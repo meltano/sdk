@@ -380,23 +380,11 @@ def _get_args_kwargs(
     return ((stream,), {}) if stream_param == "positional" else ((), {"stream": stream})
 
 
-def assert_basic_auth_deprecation_warning(
-    warning: warnings.WarningMessage,
-    *,
-    location: str = "authenticators.py",
-):
-    assert isinstance(warning.message, SingerSDKDeprecationWarning)
-    message = warning.message.args[0]
-    assert isinstance(message, str)
-    assert message.startswith("BasicAuthenticator is deprecated")
-    assert warning.filename.endswith(f"{os.path.sep}{location}")
-
-
 def assert_stream_param_deprecation_warning(warning: warnings.WarningMessage):
     assert isinstance(warning.message, SingerSDKDeprecationWarning)
     message = warning.message.args[0]
     assert isinstance(message, str)
-    assert message.startswith("The `stream` parameter is deprecated")
+    assert "The `stream` parameter will be removed" in message
     assert warning.filename.endswith(f"{os.path.sep}authenticators.py")
 
 
@@ -404,7 +392,7 @@ def assert_create_for_stream_deprecation_warning(warning: warnings.WarningMessag
     assert isinstance(warning.message, SingerSDKDeprecationWarning)
     message = warning.message.args[0]
     assert isinstance(message, str)
-    assert message.startswith("The `create_for_stream` method is deprecated")
+    assert "The `create_for_stream` method will be removed" in message
     assert warning.filename.endswith(f"{os.path.sep}test_authenticators.py")
 
 
@@ -412,12 +400,12 @@ def assert_config_property_deprecation_warning(warning: warnings.WarningMessage)
     assert isinstance(warning.message, SingerSDKDeprecationWarning)
     message = warning.message.args[0]
     assert isinstance(message, str)
-    assert message.startswith("The `config` property is deprecated")
+    assert "The `config` property will be removed" in message
     assert warning.filename.endswith(f"{os.path.sep}authenticators.py")
 
 
 @pytest.mark.parametrize("stream_param", ["positional", "keyword"])
-def test_basic_auth_deprecation_warning(
+def test_basic_auth_stream_param_deprecation_warning(
     rest_tap: Tap, stream_param: t.Literal["positional", "keyword"]
 ):
     """Validate that a warning is emitted when using BasicAuthenticator."""
@@ -426,12 +414,8 @@ def test_basic_auth_deprecation_warning(
     with pytest.deprecated_call() as recorder:
         BasicAuthenticator(*args, username="username", password="password", **kwargs)  # noqa: S106
 
-    assert len(recorder.list) == 2
-    assert_basic_auth_deprecation_warning(
-        recorder.list[0],
-        location="test_authenticators.py",
-    )
-    assert_stream_param_deprecation_warning(recorder.list[1])
+    assert len(recorder.list) == 1
+    assert_stream_param_deprecation_warning(recorder.list[0])
 
 
 @pytest.mark.parametrize("stream_param", ["positional", "keyword"])
@@ -587,10 +571,9 @@ def test_basic_authenticator_create_for_stream_deprecation_warning(rest_tap: Tap
         )
 
     # create_for_stream, BasicAuthenticator, and stream param warnings
-    assert len(recorder.list) == 3
+    assert len(recorder.list) == 2
     assert_create_for_stream_deprecation_warning(recorder.list[0])
-    assert_basic_auth_deprecation_warning(recorder.list[1])
-    assert_stream_param_deprecation_warning(recorder.list[2])
+    assert_stream_param_deprecation_warning(recorder.list[1])
 
 
 def test_authenticator_invoked_on_each_retry(

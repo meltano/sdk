@@ -4,8 +4,9 @@ This document specifies the design of a clean, hierarchical exception taxonomy f
 the Meltano Singer SDK. It covers the pre-Phase-1 state, design principles, the
 implemented hierarchy, recovery semantics, and a phased implementation roadmap.
 
-**Implementation status:** Phase 1 (hierarchy scaffold) is complete. See §7 for the
-full roadmap and the status of each phase.
+**Implementation status:** Phase 1 (hierarchy scaffold) and Phase 2 (consolidate
+scattered exceptions) are complete. See §7 for the full roadmap and the status of
+each phase.
 
 ______________________________________________________________________
 
@@ -85,22 +86,24 @@ ______________________________________________________________________
 
 ## 3. Implemented Hierarchy
 
-### 3.1 Annotated tree (Phase 1)
+### 3.1 Annotated tree (Phases 1 + 2)
 
-The tree below reflects the hierarchy as implemented. Nodes marked *(Phase 2+)* are
-migration candidates that will be wired in once they are moved into
-`singer_sdk/exceptions.py`. Names with the `Exception` suffix are preserved from the
-original codebase; `Error`-suffixed aliases may be introduced in a later phase (§7).
+The tree below reflects the hierarchy as implemented after Phase 2. Names with the
+`Exception` suffix are preserved from the original codebase; `Error`-suffixed aliases
+may be introduced in a later phase (§7).
 
 ```
 SingerSDKError                             ← base for everything SDK-specific
 ├── ConfigurationError                     ← invalid/missing plugin configuration
-│   └── ConfigValidationError              ← JSON Schema validation failed
+│   ├── ConfigValidationError              ← JSON Schema validation failed
+│   └── MapperNotInitialized               ← mapper not set up before use
 ├── DiscoveryError                         ← schema catalog discovery
+│   ├── EmptySchemaTypeError               ← type detection on empty schema dict
 │   ├── InvalidReplicationKeyException     ← replication key not in schema properties
-│   ├── SchemaNotFoundError                ← (Phase 2+, currently in schema/source.py)
-│   ├── SchemaNotValidError                ← (Phase 2+, currently in schema/source.py)
-│   └── UnsupportedSchemaFormatError       ← (Phase 2+, currently in schema/source.py)
+│   ├── SchemaNotFoundError                ← schema component could not be found
+│   ├── SchemaNotValidError                ← schema is not a valid JSON object
+│   └── UnsupportedSchemaFormatError       ← schema source format not supported
+│       (alias: UnsupportedOpenAPISpec)
 ├── MappingError                           ← stream map configuration/evaluation
 │   ├── ConformedNameClashException        ← two columns conform to the same name
 │   ├── MapExpressionError                 ← jinja/eval expression failed
@@ -116,7 +119,7 @@ SingerSDKError                             ← base for everything SDK-specific
 │   ├── RetriableSyncError                 ← retry with exponential backoff
 │   │   └── RetriableAPIError              ← retriable HTTP/API error
 │   ├── IgnorableSyncError                 ← log + skip current record/page, continue
-│   │   ├── IgnorableAPIError              ← expected non-fatal API response (NEW)
+│   │   ├── IgnorableAPIError              ← expected non-fatal API response
 │   │   └── InvalidRecord                  ← record fails schema validation
 │   └── DataError                          ← data quality / schema violations
 │       └── InvalidJSONSchema              ← malformed JSON Schema
@@ -128,19 +131,27 @@ SingerSDKError                             ← base for everything SDK-specific
         └── AbortedSyncPausedException     ← stopped with resumable state artifact
 ```
 
-### 3.2 Phase 2+ migration candidates
+### 3.2 Singer-protocol hierarchy (singerlib — intentionally separate)
 
-The following exceptions are defined outside `singer_sdk/exceptions.py` and are not
-yet placed in the hierarchy. `InvalidInputLine` is already re-exported from
-`singer_sdk/exceptions.py` (and included in `__all__`) but has not yet been moved or
-re-based. The rest will be migrated in Phase 2:
+`singer_sdk/singerlib/exceptions.py` maintains its own lightweight hierarchy for
+exceptions that belong to the Singer *protocol* layer rather than the SDK layer.
+These are **not** subclasses of `SingerSDKError` and are intentionally kept
+separate to reflect the layered architecture:
 
-| Current location | Class | Proposed placement |
-|---|---|---|
-| `singerlib/exceptions.py` | `InvalidInputLine` | `SyncError` → `FatalSyncError` |
-| `schema/source.py` | `UnsupportedOpenAPISpec` | `DiscoveryError` → `UnsupportedSchemaFormatError` |
-| `helpers/_typing.py` | `EmptySchemaTypeError` | `DiscoveryError` (schema introspection) |
-| `plugin_base.py` | `MapperNotInitialized` | `ConfigurationError` |
+```
+SingerError                    ← root for all Singer protocol exceptions
+└── SingerReadError            ← errors while reading a Singer message stream
+    └── InvalidInputLine       ← an input line is not a valid Singer message
+```
+
+`InvalidInputLine` was deliberately **not** migrated into `singer_sdk/exceptions.py`
+in Phase 2. It lives at the Singer protocol level and is raised deep in the message
+parsing stack before the SDK's sync machinery takes over.
+
+### 3.3 Phase 3+ migration candidates
+
+All originally scattered exceptions have been consolidated. No further migrations are
+planned at this time.
 
 ______________________________________________________________________
 
@@ -302,15 +313,25 @@ ______________________________________________________________________
 - Added `tests/core/test_exceptions.py` with 80 hierarchy assertions
 - No behavior changes; all existing tests pass unchanged
 
-### PR 2 — Consolidate scattered exceptions
+### PR 2 — Consolidate scattered exceptions ✅ Complete
 
 **Files:** `singer_sdk/exceptions.py`, `singerlib/exceptions.py`,
-`schema/source.py`, `helpers/_typing.py`, `plugin_base.py`
+`schema/source.py`, `helpers/_typing.py`, `plugin_base.py`,
+`tests/core/test_exceptions.py`
 
-- Move `InvalidInputLine`, `UnsupportedOpenAPISpec`, `EmptySchemaTypeError`,
-  `MapperNotInitialized` into `singer_sdk/exceptions.py`
-- Keep re-exports in original files for one release cycle (with `# noqa: F401`)
-- Wire migrated exceptions into the hierarchy
+- Moved `UnsupportedOpenAPISpec` → `UnsupportedSchemaFormatError(DiscoveryError)`;
+  old name kept as a module-level alias for backward compatibility
+- Moved `EmptySchemaTypeError` → `DiscoveryError` subclass
+- Moved `MapperNotInitialized` → `ConfigurationError` subclass
+- Moved `SchemaNotFoundError` and `SchemaNotValidError` (already `DiscoveryError`
+  subclasses in `schema/source.py`) into `singer_sdk/exceptions.py`
+- Re-exports remain in original files for one release cycle (`# noqa: F401`)
+- **`InvalidInputLine` intentionally not migrated**: kept in `singerlib/exceptions.py`
+  under its own Singer-protocol hierarchy (`SingerError → SingerReadError → InvalidInputLine`); see §3.2
+- `singerlib/exceptions.py` expanded with `SingerError` and `SingerReadError` root
+  classes to make the protocol layer hierarchy explicit
+- Added `TestPhase2Migrations` and `TestSingerlibHierarchy` in
+  `tests/core/test_exceptions.py` (89 assertions total)
 
 ### PR 3 — `IgnorableAPIError` handling in REST stream
 

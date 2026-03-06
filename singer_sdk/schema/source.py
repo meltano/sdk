@@ -15,7 +15,13 @@ from urllib.parse import urlparse
 
 import requests
 
-from singer_sdk.exceptions import DiscoveryError
+from singer_sdk.exceptions import (  # noqa: F401
+    DiscoveryError,
+    SchemaNotFoundError,
+    SchemaNotValidError,
+    UnsupportedOpenAPISpec,
+    UnsupportedSchemaFormatError,
+)
 from singer_sdk.singerlib.schema import resolve_schema_references
 
 if sys.version_info >= (3, 11):
@@ -41,18 +47,6 @@ if t.TYPE_CHECKING:
 
 
 Schema: t.TypeAlias = dict[str, t.Any]
-
-
-class SchemaNotFoundError(DiscoveryError):
-    """Raised when a schema is not found."""
-
-
-class SchemaNotValidError(DiscoveryError):
-    """Raised when a schema is not valid."""
-
-
-class UnsupportedOpenAPISpec(Exception):
-    """Raised when the OpenAPI specification is not supported."""
 
 
 _TKey = TypeVar("_TKey", bound=t.Hashable, default=str)

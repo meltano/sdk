@@ -55,9 +55,13 @@ The Singer SDK follows a roughly monthly release cadence. [Milestones](https://g
 
 ## Deprecation policy
 
-A [feature release](#feature-releases) may deprecate a feature, but it will not remove it until the next major release. A deprecation will be clearly documented in the changelog and in the code.
+Any [feature release](#feature-releases) may deprecate a feature for removal in a
+future release. Deprecations name a concrete removal version and must remain in place
+for **at least 3 months** (roughly 3 feature releases) before the feature is removed.
+The [deprecation timeline](./deprecation.md) lists all planned removals by version.
 
-All deprecated features will emit a `SingerSDKDeprecationWarning` when used, so users can raise them as exceptions when running their tests to ensure that they are not using any deprecated features:
+All deprecated features will emit a `SingerSDKDeprecationWarning` when used. To catch
+deprecated usage in your tests, treat the warning as an error:
 
 ```console
 $ pytest -W error::singer_sdk.helpers._compat.SingerSDKDeprecationWarning
