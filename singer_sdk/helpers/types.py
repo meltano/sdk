@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import typing as t
-from collections.abc import MutableMapping
+from collections.abc import Mapping
 
 import requests
 
@@ -13,7 +13,7 @@ __all__ = [
     "Record",
 ]
 
-Context: t.TypeAlias = MutableMapping[str, t.Any]
+Context: t.TypeAlias = Mapping[str, t.Any]
 Record: t.TypeAlias = dict[str, t.Any]
 Auth: t.TypeAlias = t.Callable[[requests.PreparedRequest], requests.PreparedRequest]
 RequestFunc: t.TypeAlias = t.Callable[
