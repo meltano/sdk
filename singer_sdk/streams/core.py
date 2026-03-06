@@ -76,6 +76,37 @@ class SyncResult(enum.Enum):
     PARTIAL = "partial"
 
 
+def _combine_sync_results(
+    result1: SyncResult | None,
+    result2: SyncResult,
+) -> SyncResult:
+    """Combine two SyncResults, treating None as SUCCESS.
+
+    This is a helper function for combining a stream's existing sync_result with a new
+    result, treating None (the default state) as SUCCESS for combination purposes.
+
+    Args:
+        result1: The first SyncResult, or None to treat as SUCCESS.
+        result2: The second SyncResult.
+
+    Returns:
+        The combined SyncResult.
+    """
+    if result1 is None:
+        return result2
+
+    if result1 is SyncResult.FAILED or result2 is SyncResult.FAILED:
+        return SyncResult.FAILED
+
+    if result1 is SyncResult.ABORTED or result2 is SyncResult.ABORTED:
+        return SyncResult.ABORTED
+
+    if result1 is SyncResult.PARTIAL or result2 is SyncResult.PARTIAL:
+        return SyncResult.PARTIAL
+
+    return SyncResult.SUCCESS
+
+
 class Stream(abc.ABC):  # noqa: PLR0904
     """Abstract base class for tap streams.
 
@@ -1377,7 +1408,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
             self.sync_result = SyncResult.ABORTED
             raise
         else:
-            self.sync_result = SyncResult.SUCCESS
+            # Only mark SUCCESS if no child failure already degraded the result.
+            self.sync_result = _combine_sync_results(
+                self.sync_result,
+                SyncResult.SUCCESS,
+            )
 
     def _run_sync(self, context: types.Context | None) -> None:
         """Execute the sync body, converting any non-lifecycle exception to one.
@@ -1426,9 +1461,9 @@ class Stream(abc.ABC):  # noqa: PLR0904
                     child_stream.sync(context=child_context)
                 except (AbortedSyncFailedException, AbortedSyncPausedException):
                     # sync_result already set inside child_stream.sync().
-                    # Continue syncing remaining children and let the parent
-                    # record be written normally.
-                    pass
+                    # Mark the parent failed too, then continue so remaining
+                    # parent records and children are still attempted.
+                    self.sync_result = SyncResult.PARTIAL
                 except Exception as exc:  # noqa: BLE001
                     # Safety net — should not normally occur since _run_sync
                     # converts all non-lifecycle exceptions before they escape.

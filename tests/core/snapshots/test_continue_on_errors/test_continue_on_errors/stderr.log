@@ -27,5 +27,5 @@ ERROR tap Stream 'child_with_errors' sync result: failed
 INFO tap Stream 'incremental_all_good' sync result: success
 WARNING tap Stream 'incremental_resumable' sync result: aborted
 ERROR tap Stream 'incremental_with_errors' sync result: failed
-INFO tap Stream 'parent' sync result: success
+WARNING tap Stream 'parent' sync result: partial
 ERROR tap Stream 'with_errors' sync result: failed
