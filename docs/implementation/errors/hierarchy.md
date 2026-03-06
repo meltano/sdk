@@ -4,14 +4,19 @@ The Singer SDK defines a structured exception hierarchy rooted at `SingerSDKErro
 Every exception raised by the SDK is a subclass of this root, so you can always catch
 all SDK-level errors with a single `except SingerSDKError` clause.
 
-## Full hierarchy
+## SDK hierarchy (`singer_sdk.exceptions`)
 
 ```
 SingerSDKError
 ├── ConfigurationError
-│   └── ConfigValidationError
+│   ├── ConfigValidationError
+│   └── MapperNotInitialized
 ├── DiscoveryError
-│   └── InvalidReplicationKeyException
+│   ├── EmptySchemaTypeError
+│   ├── InvalidReplicationKeyException
+│   ├── SchemaNotFoundError
+│   ├── SchemaNotValidError
+│   └── UnsupportedSchemaFormatError  (alias: UnsupportedOpenAPISpec)
 ├── MappingError
 │   ├── ConformedNameClashException
 │   ├── MapExpressionError
@@ -41,6 +46,20 @@ SingerSDKError
 
 All of these names can be imported from `singer_sdk.exceptions`.
 
+## Singer-protocol hierarchy (`singer_sdk.singerlib.exceptions`)
+
+A separate, lighter hierarchy covers exceptions that belong to the Singer *protocol*
+layer — raised during message parsing before the SDK's sync machinery is involved.
+These are **not** subclasses of `SingerSDKError`.
+
+```
+SingerError
+└── SingerReadError
+    └── InvalidInputLine
+```
+
+Import these from `singer_sdk.singerlib.exceptions`.
+
 ______________________________________________________________________
 
 ## Exception groups
@@ -53,6 +72,7 @@ required values.
 | Class | When raised |
 |---|---|
 | `ConfigValidationError` | The config dict fails JSON Schema validation. Carries `.errors` (list of messages) and `.schema` (the schema that was checked). |
+| `MapperNotInitialized` | `setup_mapper()` was not called before the mapper was accessed. |
 
 **Tap developers** — you do not normally raise these directly. The SDK raises
 `ConfigValidationError` automatically when `Tap.config_jsonschema` validation fails.
@@ -66,7 +86,11 @@ Raised during catalog discovery (the `--discover` run) before any records are sy
 | Class | When raised |
 |---|---|
 | `DiscoveryError` | Generic discovery failure; subclass for specific cases. |
+| `EmptySchemaTypeError` | Type detection was attempted on an empty schema dict (likely a missing property definition). |
 | `InvalidReplicationKeyException` | The stream's `replication_key` is not present in the stream's schema properties. |
+| `SchemaNotFoundError` | A schema component could not be found in the schema source. |
+| `SchemaNotValidError` | A fetched schema is not a valid JSON object. |
+| `UnsupportedSchemaFormatError` | The schema source file format is not supported. Also available as `UnsupportedOpenAPISpec` for backward compatibility. |
 
 ______________________________________________________________________
 

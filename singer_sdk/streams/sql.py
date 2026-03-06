@@ -11,7 +11,7 @@ import warnings
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 
 warnings.warn(
-    "Importing from singer_sdk.streams.sql is deprecated. "
+    "Importing from singer_sdk.streams.sql is deprecated and will be removed in v0.57. "
     "Please import from singer_sdk.sql instead.",
     SingerSDKDeprecationWarning,
     stacklevel=2,

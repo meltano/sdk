@@ -10,7 +10,7 @@ from urllib.parse import ParseResult, parse_qs, urlparse
 import pytest
 from requests import Response
 
-from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
+from singer_sdk.helpers._compat import SingerSDKPendingDeprecationWarning
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
     BaseAPIPaginator,
@@ -146,8 +146,8 @@ def test_paginator_page_number_deprecated():
     """Validate that BasePageNumberPaginator is deprecated."""
 
     with pytest.warns(
-        SingerSDKDeprecationWarning,
-        match="BasePageNumberPaginator is deprecated",
+        SingerSDKPendingDeprecationWarning,
+        match="Use PageNumberPaginator instead",
     ):
         BasePageNumberPaginator(0)
 
@@ -219,8 +219,8 @@ def test_paginator_offset_deprecated():
     """Validate that BaseOffsetPaginator is deprecated."""
 
     with pytest.warns(
-        SingerSDKDeprecationWarning,
-        match="BaseOffsetPaginator is deprecated",
+        SingerSDKPendingDeprecationWarning,
+        match="Use OffsetPaginator instead",
     ):
         BaseOffsetPaginator(0, 2)
 

@@ -9,8 +9,18 @@ import logging
 import math
 import typing as t
 import uuid
-from enum import Enum
+import warnings
 from functools import lru_cache
+
+from singer_sdk.exceptions import EmptySchemaTypeError
+from singer_sdk.helpers import conform
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
+
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers.conform import (
+        DatetimeErrorTreatmentEnum,  # noqa: F401
+        TypeConformanceLevel,  # noqa: F401
+    )
 
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
@@ -21,36 +31,49 @@ UTC = datetime.timezone.utc
 logger = logging.getLogger(__name__)
 
 
-class DatetimeErrorTreatmentEnum(Enum):
-    """Enum for treatment options for date parsing error."""
+def __getattr__(name: str) -> t.Any:  # noqa: ANN401
+    """Provide backward compatibility for classes with deprecation warnings.
 
-    ERROR = "error"
-    MAX = "max"
-    NULL = "null"
+    Args:
+        name: The name of the attribute to import.
 
+    Returns:
+        The imported attribute.
 
-class EmptySchemaTypeError(Exception):
-    """Exception for when trying to detect type from empty type_dict."""
-
-    def __init__(self, *args: object) -> None:
-        msg = (
-            "Could not detect type from empty type_dict. Did you forget to define a "
-            "property in the stream schema?"
+    Raises:
+        AttributeError: If the attribute is not found.
+    """
+    exports = {
+        "DatetimeErrorTreatmentEnum": conform.DatetimeErrorTreatmentEnum,
+        "TypeConformanceLevel": conform.TypeConformanceLevel,
+    }
+    if export := exports.get(name):
+        warnings.warn(
+            f"Importing {name} from singer_sdk.helpers._typing is deprecated. "
+            f"Please import from singer_sdk.helpers.conform instead: "
+            f"from singer_sdk.helpers.conform import {name}",
+            SingerSDKDeprecationWarning,
+            stacklevel=2,
         )
-        super().__init__(msg, *args)
+        return export
+
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)
 
 
 def to_json_compatible(val: t.Any) -> t.Any:  # noqa: ANN401
     """Return as string if datetime. JSON does not support proper datetime types."""
     if isinstance(val, (datetime.datetime,)):
-        # Make naive datetimes UTC
-        return (val.replace(tzinfo=UTC) if val.tzinfo is None else val).isoformat(
-            "T",
-            timespec="microseconds",
-        )
+        return _datetime_to_json_compatible(val)
     if isinstance(val, (uuid.UUID,)):
         return str(val)
     return val
+
+
+def _datetime_to_json_compatible(val: datetime.datetime) -> str:
+    if val.tzinfo is None:  # Make naive datetimes UTC
+        val = val.replace(tzinfo=UTC)
+    return val.isoformat("T", timespec="microseconds")
 
 
 def append_type(type_dict: dict, new_type: str) -> dict:
@@ -87,11 +110,11 @@ def is_secret_type(type_dict: dict) -> bool:
     Args:
         type_dict: The JSON Schema type to check.
 
-    Raises:
-        ValueError: If type_dict is None or empty.
-
     Returns:
         True if we detect any sensitive property nodes.
+
+    Raises:
+        ValueError: If type_dict is None or empty.
     """
     if type_dict.get(JSONSCHEMA_ANNOTATION_WRITEONLY) or type_dict.get(
         JSONSCHEMA_ANNOTATION_SECRET,
@@ -162,11 +185,11 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
     Args:
         type_dict: The JSON Schema definition.
 
-    Raises:
-        ValueError: If type is empty or null.
-
     Returns:
         True if date or date-time, else False.
+
+    Raises:
+        ValueError: If type is empty or null.
     """
     if "anyOf" in type_dict:
         return any(is_date_or_datetime_type(option) for option in type_dict["anyOf"])
@@ -215,20 +238,20 @@ def handle_invalid_timestamp_in_record(
     invalid_value: str,
     datelike_typename: str,
     ex: Exception,
-    treatment: DatetimeErrorTreatmentEnum | None,
+    treatment: conform.DatetimeErrorTreatmentEnum | None,
     logger: logging.Logger,
 ) -> t.Any:  # noqa: ANN401
     """Apply treatment or raise an error for invalid time values."""
-    treatment = treatment or DatetimeErrorTreatmentEnum.ERROR
+    treatment = treatment or conform.DatetimeErrorTreatmentEnum.ERROR
     msg = (
         f"Could not parse value '{invalid_value}' for "
         f"field '{':'.join(key_breadcrumb)}'."
     )
-    if treatment == DatetimeErrorTreatmentEnum.MAX:
+    if treatment == conform.DatetimeErrorTreatmentEnum.MAX:
         logger.warning("%s. Replacing with MAX value.\n%s\n", msg, ex)
         return _MAX_TIMESTAMP if datelike_typename != "time" else _MAX_TIME
 
-    if treatment == DatetimeErrorTreatmentEnum.NULL:
+    if treatment == conform.DatetimeErrorTreatmentEnum.NULL:
         logger.warning("%s. Replacing with NULL.\n%s\n", msg, ex)
         return None
 
@@ -371,39 +394,11 @@ def _warn_unmapped_properties(
     )
 
 
-class TypeConformanceLevel(Enum):
-    """Used to configure how data is conformed to json compatible types.
-
-    Before outputting data as JSON, it is conformed to types that are valid in json,
-    based on the current types and the schema. For example, dates are converted to
-    strings.
-
-    By default, all data is conformed recursively. If this is not necessary (because
-    data is already valid types, or you are manually converting it) then it may be more
-    performant to use a lesser conformance level.
-    """
-
-    RECURSIVE = 1
-    """
-    All data is recursively conformed
-    """
-
-    ROOT_ONLY = 2
-    """
-    Only properties on the root object, excluding array elements, are conformed
-    """
-
-    NONE = 3
-    """
-    No conformance is performed
-    """
-
-
 def conform_record_data_types(
     stream_name: str,
     record: dict[str, t.Any],
     schema: dict,
-    level: TypeConformanceLevel,
+    level: conform.TypeConformanceLevel,
     logger: logging.Logger,
 ) -> dict[str, t.Any]:
     """Translate values in record dictionary to singer-compatible data types.
@@ -423,7 +418,7 @@ def conform_record_data_types(
 def _conform_record_data_types(
     input_object: dict[str, t.Any],
     schema: dict,
-    level: TypeConformanceLevel,
+    level: conform.TypeConformanceLevel,
     parent: str | None,
 ) -> tuple[dict[str, t.Any], list[str]]:
     """Translate values in record dictionary to singer-compatible data types.
@@ -442,7 +437,7 @@ def _conform_record_data_types(
     output_object: dict[str, t.Any] = {}
     unmapped_properties: list[str] = []
 
-    if level == TypeConformanceLevel.NONE:
+    if level == conform.TypeConformanceLevel.NONE:
         return input_object, unmapped_properties
 
     for property_name, elem in input_object.items():
@@ -456,7 +451,7 @@ def _conform_record_data_types(
 
         property_schema = schema["properties"][property_name]
         if isinstance(elem, list) and is_uniform_list(property_schema):
-            if level == TypeConformanceLevel.RECURSIVE:
+            if level == conform.TypeConformanceLevel.RECURSIVE:
                 output, sub_unmapped_properties = _conform_uniform_list(
                     elem,
                     path=property_path,
@@ -472,7 +467,7 @@ def _conform_record_data_types(
             and is_object_type(property_schema)
             and "properties" in property_schema
         ):
-            if level == TypeConformanceLevel.RECURSIVE:
+            if level == conform.TypeConformanceLevel.RECURSIVE:
                 (
                     output_object[property_name],
                     sub_unmapped_properties,
@@ -498,7 +493,7 @@ def _conform_uniform_list(
     *,
     path: str,
     schema: dict,
-    level: TypeConformanceLevel,
+    level: conform.TypeConformanceLevel,
 ) -> tuple[list, list[str]]:
     item_schema = schema["items"]
     unmapped_properties = []
@@ -528,7 +523,7 @@ def _conform_primitive_property(  # noqa: PLR0911
 ) -> t.Any:  # noqa: ANN401
     """Converts a primitive (i.e. not object or array) to a json compatible type."""
     if isinstance(elem, (datetime.datetime,)):
-        return to_json_compatible(elem)
+        return _datetime_to_json_compatible(elem)
     if isinstance(elem, datetime.date):
         return elem.isoformat()
     if isinstance(elem, datetime.timedelta):

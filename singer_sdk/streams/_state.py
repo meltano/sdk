@@ -12,7 +12,6 @@ from singer_sdk.helpers._state import (
     get_state_partitions_list,
     get_writeable_state_dict,
     increment_state,
-    reset_state_progress_markers,
     write_replication_key_signpost,
     write_starting_replication_value,
 )
@@ -222,40 +221,6 @@ class StreamStateManager:
         """
         finalize_state_progress_markers(state)  # type: ignore[arg-type]
         self.is_flushed = False
-
-    def reset_progress_markers(
-        self,
-        state: dict | None = None,
-        partitions: list[dict] | None = None,
-    ) -> None:
-        """Reset progress markers.
-
-        If state is None or contains partitions, all partition contexts will be reset.
-
-        Args:
-            state: State object to reset progress markers with.
-            partitions: List of partition contexts to reset if state is None or contains
-                partitions.
-        """
-        if state is None or state == {}:
-            # Reset all partition states
-            partition_list = partitions or [{}]
-            for partition_context in partition_list:
-                partition_state = self.get_context_state(partition_context or None)
-                reset_state_progress_markers(partition_state)
-            return
-
-        # If state has partitions and partition list is provided, reset partition states
-        if "partitions" in state and partitions:
-            for partition_context in partitions:
-                partition_state = self.get_context_state(partition_context or None)
-                reset_state_progress_markers(partition_state)
-            # Also reset stream-level progress markers if any
-            reset_state_progress_markers(state)
-            return
-
-        # Reset progress markers on the provided state (stream or partition level)
-        reset_state_progress_markers(state)
 
     def finalize_progress_markers(
         self,
