@@ -6,7 +6,6 @@ import json
 import typing as t
 from pathlib import Path
 
-import pytest
 from click.testing import CliRunner
 
 from singer_sdk import Stream, Tap
@@ -18,6 +17,8 @@ from singer_sdk.exceptions import (
 from singer_sdk.streams.core import SyncResult
 
 if t.TYPE_CHECKING:
+    import pytest
+
     from singer_sdk.helpers import types
 
 
@@ -110,15 +111,13 @@ def test_sync_result_success() -> None:
 
 def test_sync_result_failed() -> None:
     tap = make_tap(BadStream)
-    # sync_all() must NOT raise for per-stream fatal errors
     tap.sync_all()
     assert tap.streams["bad"].sync_result is SyncResult.FAILED
 
 
 def test_sync_result_aborted_on_paused() -> None:
     tap = make_tap(AbortPausedStream)
-    with pytest.raises(AbortedSyncPausedException):
-        tap.sync_all()
+    tap.sync_all()
     assert tap.streams["abort_paused"].sync_result is SyncResult.ABORTED
 
 
@@ -132,10 +131,9 @@ def test_sibling_continues_after_failure() -> None:
 
 def test_lifecycle_signal_stops_siblings() -> None:
     tap = make_tap(AbortPausedStream, GoodStream)
-    with pytest.raises(AbortedSyncPausedException):
-        tap.sync_all()
-    # GoodStream never ran because the abort propagated before it was reached
-    assert tap.streams["good"].sync_result is None
+    tap.sync_all()
+    # AbortPausedStream's exception is caught; GoodStream still runs successfully.
+    assert tap.streams["good"].sync_result is SyncResult.SUCCESS
 
 
 # ---------------------------------------------------------------------------
@@ -161,7 +159,6 @@ def test_summary_logged_aborted(caplog: pytest.LogCaptureFixture) -> None:
     tap = make_tap(AbortPausedStream)
     with (
         caplog.at_level("WARNING", logger="root"),
-        pytest.raises(AbortedSyncPausedException),
     ):
         tap.sync_all()
     # Summary is emitted in the finally block even when sync_all raises

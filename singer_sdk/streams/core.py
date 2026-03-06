@@ -1369,28 +1369,46 @@ class Stream(abc.ABC):  # noqa: PLR0904
             self._write_activate_version_message(self._stream_version)
 
         try:
+            self._run_sync(context)
+        except AbortedSyncFailedException:
+            self.sync_result = SyncResult.FAILED
+            raise
+        except AbortedSyncPausedException:
+            self.sync_result = SyncResult.ABORTED
+            raise
+        else:
+            self.sync_result = SyncResult.SUCCESS
+
+    def _run_sync(self, context: types.Context | None) -> None:
+        """Execute the sync body, converting any non-lifecycle exception to one.
+
+        Either completes normally or raises a lifecycle exception
+        (:class:`~singer_sdk.exceptions.AbortedSyncFailedException` or
+        :class:`~singer_sdk.exceptions.AbortedSyncPausedException`).
+
+        Args:
+            context: Stream partition or context dictionary.
+
+        Raises:
+            AbortedSyncFailedException: If the sync could not reach a resumable state.
+            AbortedSyncPausedException: If the sync paused at a resumable checkpoint.
+        """
+        try:
             batch_config = self.get_batch_config(self.config)
             if batch_config:
                 self._sync_batches(batch_config, context=context)
             else:
-                # Sync the records themselves:
                 for _ in self._sync_records(context=context):
                     pass
         except (AbortedSyncFailedException, AbortedSyncPausedException):
-            # Lifecycle abort — must not be swallowed. Mark ABORTED and re-raise
-            # so sync_all() can propagate to invoke() for proper exit-code handling.
-            self.sync_result = SyncResult.ABORTED
             raise
-        except Exception:
+        except Exception as exc:  # noqa: BLE001
             self.log(
                 "An unhandled error occurred while syncing '%s'",
                 self.name,
                 level=logging.ERROR,
             )
-            self.sync_result = SyncResult.FAILED
-            raise
-        else:
-            self.sync_result = SyncResult.SUCCESS
+            self._abort_sync(exc)  # always raises
 
     def _sync_children(self, child_context: types.Context | None) -> None:
         if child_context is None:

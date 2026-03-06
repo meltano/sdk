@@ -502,16 +502,16 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
     def sync_all(self) -> None:
         """Sync all streams.
 
-        A stream that raises a fatal (non-lifecycle) exception is logged and
-        skipped; syncing continues with remaining streams.
+        A stream that raises any exception is logged and skipped; syncing
+        continues with remaining streams.
 
-        :class:`~singer_sdk.exceptions.AbortedSyncFailedException` and
-        :class:`~singer_sdk.exceptions.AbortedSyncPausedException` are *not*
-        caught here — they abort the entire run and propagate to :meth:`invoke`.
-
-        Raises:
-            AbortedSyncFailedException: If a lifecycle abort (non-resumable) occurs.
-            AbortedSyncPausedException: If a lifecycle pause (resumable) occurs.
+        After all streams finish, streams whose :attr:`~singer_sdk.Stream.sync_result`
+        is :attr:`~singer_sdk.streams.core.SyncResult.FAILED` cause :meth:`invoke`
+        to exit with code 1.  A
+        :class:`~singer_sdk.exceptions.AbortedSyncPausedException` is treated as
+        a graceful pause (exit 0); an
+        :class:`~singer_sdk.exceptions.AbortedSyncFailedException` is treated as
+        a failure (exit 1).
         """
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
@@ -537,20 +537,13 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
                 try:
                     stream.sync()
-                except AbortedSyncPausedException:
-                    # Graceful pause: sync reached a valid resumable state.
-                    # Finalize partial progress before propagating to invoke().
-                    stream.finalize_state_progress_markers()
-                    raise
-                except AbortedSyncFailedException:
-                    # Non-resumable abort: state is not stable — do NOT finalize.
-                    raise
-                except Exception:
+                except Exception as exc:
                     # stream.sync_result is already FAILED (set inside Stream.sync()).
                     # Log and continue to the next stream.
-                    self.logger.exception(
+                    self.logger.error(  # noqa: TRY400
                         "Stream '%s' failed; continuing with remaining streams.",
                         stream.name,
+                        exc_info=exc.__cause__,
                     )
                 else:
                     # Only reached when stream.sync() did not raise — SUCCESS.
@@ -613,14 +606,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
             parse_env_config=config.parse_env,
             validate_config=True,
         )
-        try:
-            tap.sync_all()
-        except AbortedSyncPausedException:
-            # State already written by _abort_sync(). Sync is resumable → exit 0.
-            sys.exit(0)
-        except AbortedSyncFailedException:
-            # Sync aborted; state is not stable → exit 1.
-            sys.exit(1)
+        tap.sync_all()
 
         # Check for per-stream fatal errors (non-lifecycle).
         failed_streams = [
