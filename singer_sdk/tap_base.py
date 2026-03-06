@@ -520,16 +520,13 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
                 try:
                     stream.sync()
-                except (AbortedSyncFailedException, AbortedSyncPausedException):
+                except (AbortedSyncFailedException, AbortedSyncPausedException) as exc:
                     # sync_result is already set inside Stream.sync().
                     # Summary is logged in the finally block; continue to next stream.
-                    pass
-                except Exception as exc:
-                    # Unexpected non-lifecycle error (safety net).
                     self.logger.error(  # noqa: TRY400
-                        "Stream '%s' failed; continuing with remaining streams.",
+                        "Stream '%s' failed: %s",
                         stream.name,
-                        exc_info=exc,
+                        exc.__cause__,
                     )
                 else:
                     # Only reached when stream.sync() did not raise — SUCCESS.

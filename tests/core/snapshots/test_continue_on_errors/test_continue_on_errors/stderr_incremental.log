@@ -6,6 +6,7 @@ INFO tap.incremental_resumable Starting incremental sync of 'incremental_resumab
 INFO tap.incremental_with_errors Beginning sync of 'incremental_with_errors' in incremental mode
 INFO tap.incremental_with_errors Starting incremental sync of 'incremental_with_errors' with bookmark value: None
 ERROR tap.incremental_with_errors An unhandled error occurred while syncing 'incremental_with_errors'
+ERROR tap Stream 'incremental_with_errors' failed: Something went wrong!
 INFO tap.parent Beginning sync of 'parent' in full_table mode
 INFO tap.child_with_errors Beginning sync of 'child_with_errors' in full_table mode with context: {'parent_id': 1}
 ERROR tap.child_with_errors An unhandled error occurred while syncing 'child_with_errors'
@@ -19,6 +20,7 @@ INFO tap.child_with_errors Beginning sync of 'child_with_errors' in full_table m
 ERROR tap.child_with_errors An unhandled error occurred while syncing 'child_with_errors'
 INFO tap.with_errors Beginning sync of 'with_errors' in full_table mode
 ERROR tap.with_errors An unhandled error occurred while syncing 'with_errors'
+ERROR tap Stream 'with_errors' failed: Something went wrong!
 INFO tap Stream 'all_good' sync result: success
 ERROR tap Stream 'child_with_errors' sync result: failed
 INFO tap Stream 'incremental_all_good' sync result: success

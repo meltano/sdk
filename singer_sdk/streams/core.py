@@ -1412,16 +1412,6 @@ class Stream(abc.ABC):  # noqa: PLR0904
                     # Mark the parent failed too, then continue so remaining
                     # parent records and children are still attempted.
                     self.sync_result = SyncResult.PARTIAL
-                except Exception as exc:  # noqa: BLE001
-                    # Safety net — should not normally occur since _run_sync
-                    # converts all non-lifecycle exceptions before they escape.
-                    child_stream.sync_result = SyncResult.FAILED
-                    self.log(
-                        "Child stream '%s' failed unexpectedly.",
-                        child_stream.name,
-                        level=logging.ERROR,
-                        exc_info=exc,
-                    )
 
     # Overridable Methods
 
