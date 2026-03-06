@@ -18,7 +18,7 @@ from sqlalchemy.sql import ddl
 
 from singer_sdk import typing as th
 from singer_sdk.exceptions import ConfigValidationError
-from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
+from singer_sdk.helpers._compat import SingerSDKPendingDeprecationWarning, deprecated
 from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
 from singer_sdk.singerlib import CatalogEntry, MetadataMapping, Schema
@@ -668,8 +668,7 @@ class SQLConnector:  # noqa: PLR0904
         "If you need to execute something that isn't available "
         "on the connector currently, make a child class and "
         "add your required method on that connector.",
-        category=SingerSDKDeprecationWarning,
-        stacklevel=1,
+        category=SingerSDKPendingDeprecationWarning,
     )
     def create_sqlalchemy_connection(self) -> sa.Connection:
         """(DEPRECATED) Return a new SQLAlchemy connection using the provided config.
@@ -695,8 +694,7 @@ class SQLConnector:  # noqa: PLR0904
     @deprecated(
         "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override "
         "`_engine` or `sqlalchemy_url` instead.",
-        category=SingerSDKDeprecationWarning,
-        stacklevel=1,
+        category=SingerSDKPendingDeprecationWarning,
     )
     def create_sqlalchemy_engine(self) -> sa.Engine:
         """(DEPRECATED) Return a new SQLAlchemy engine using the provided config.
@@ -724,7 +722,7 @@ class SQLConnector:  # noqa: PLR0904
             "`SQLConnector.connection` is deprecated. If you need to execute something "
             "that isn't available on the connector currently, make a child "
             "class and add your required method on that connector.",
-            SingerSDKDeprecationWarning,
+            SingerSDKPendingDeprecationWarning,
             stacklevel=2,
         )
         return self.create_sqlalchemy_connection()  # ty: ignore[deprecated]
@@ -800,7 +798,7 @@ class SQLConnector:  # noqa: PLR0904
             warnings.warn(
                 "Passing string types to `to_jsonschema_type` is deprecated. "
                 "Please pass a SQLAlchemy type object instead.",
-                SingerSDKDeprecationWarning,
+                SingerSDKPendingDeprecationWarning,
                 stacklevel=2,
             )
             return th.to_jsonschema_type(sql_type)  # ty: ignore[deprecated]
@@ -809,7 +807,7 @@ class SQLConnector:  # noqa: PLR0904
             warnings.warn(
                 "Passing type classes to `to_jsonschema_type` is deprecated. "
                 "Please pass a SQLAlchemy type object instead.",
-                SingerSDKDeprecationWarning,
+                SingerSDKPendingDeprecationWarning,
                 stacklevel=2,
             )
             if issubclass(sql_type, sqlalchemy.types.TypeEngine):
@@ -924,7 +922,7 @@ class SQLConnector:  # noqa: PLR0904
 
     @deprecated(
         "This method is deprecated. Use or override `FullyQualifiedName` instead.",
-        category=SingerSDKDeprecationWarning,
+        category=SingerSDKPendingDeprecationWarning,
     )
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting, using '.' as a name-part delimiter.
@@ -972,8 +970,7 @@ class SQLConnector:  # noqa: PLR0904
 
     @deprecated(
         "This method is deprecated.",
-        category=SingerSDKDeprecationWarning,
-        stacklevel=1,
+        category=SingerSDKPendingDeprecationWarning,
     )
     def get_object_names(  # pragma: no cover
         self,

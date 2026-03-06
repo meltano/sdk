@@ -205,6 +205,7 @@ filterwarnings = [
     # Our own warnings
     'once::singer_sdk.helpers._compat.SingerSDKDeprecationWarning',
     'once::singer_sdk.helpers._compat.SingerSDKPythonEOLWarning',
+    'once::singer_sdk.helpers._compat.SingerSDKPendingDeprecationWarning',
 ]
 log_cli_level = "INFO"
 log_format = "%(levelname)s %(name)s %(message)s"
