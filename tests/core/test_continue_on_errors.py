@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+import io
+import json
+import logging
 import sys
 import typing as t
+from contextlib import redirect_stdout
 from datetime import datetime, timedelta, timezone
+
+import pytest
+import time_machine
 
 from singer_sdk import Stream, Tap
 
@@ -13,7 +20,11 @@ else:
 
 
 if t.TYPE_CHECKING:
+    from pytest_snapshot.plugin import Snapshot
+
     from singer_sdk.helpers.types import Context, Record
+
+DATETIME = datetime(2025, 1, 1, tzinfo=timezone.utc)
 
 
 class _BaseStream(Stream):
@@ -53,6 +64,7 @@ class _IncrementalBaseStream(_BaseStream):
     def get_records(self, context: Context | None):
         first_datetime = datetime(2024, 1, 1, tzinfo=timezone.utc)
         start_date = self.get_starting_timestamp(context)
+        count = 0
         for i in range(1, self.max_records + 1):
             rk = first_datetime + timedelta(minutes=i)
             if start_date and rk <= start_date:
@@ -63,8 +75,9 @@ class _IncrementalBaseStream(_BaseStream):
                 "name": f"All Good ({i=})",
                 "updated_at": rk.isoformat(),
             }
+            count += 1
 
-            if i >= self.fail_after:
+            if count >= self.fail_after:
                 msg = "Something went wrong!"
                 raise RuntimeError(msg)
 
@@ -142,6 +155,52 @@ class ContinueOnErrorsTap(Tap):
             ParentStream(self),
             ChildStreamWithErrors(self),
         ]
+
+
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_continue_on_errors(
+    caplog: pytest.LogCaptureFixture,
+    snapshot: Snapshot,
+) -> None:
+    tap = ContinueOnErrorsTap()
+    buf = io.StringIO()
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap.name)),
+    ):
+        tap.sync_all()
+
+    buf.seek(0)
+    output = buf.read()
+
+    snapshot.assert_match(output, "singer.jsonl")
+    snapshot.assert_match(caplog.text, "stderr.log")
+
+    last_line = output.strip().splitlines()[-1]
+    state_message = json.loads(last_line)
+    state = state_message["value"]
+    bookmarks = state["bookmarks"]
+
+    assert "replication_key_value" in bookmarks["incremental_resumable"]
+    assert "repllication_key_value" not in bookmarks["incremental_with_errors"]
+
+    tap = ContinueOnErrorsTap(state=state)
+    buf = io.StringIO()
+    caplog.clear()
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap.name)),
+    ):
+        tap.sync_all()
+
+    buf.seek(0)
+    output = buf.read()
+
+    snapshot.assert_match(output, "singer_incrememtal.jsonl")
+    snapshot.assert_match(caplog.text, "stderr_incremental.log")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,57 @@
+{"type":"SCHEMA","stream":"all_good","schema":{"properties":{"id":{"type":"integer"},"name":{"type":"string"}},"type":"object"},"key_properties":[]}
+{"type":"RECORD","stream":"all_good","record":{"id":1,"name":"All Good (i=1)"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"all_good","record":{"id":2,"name":"All Good (i=2)"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"all_good","record":{"id":3,"name":"All Good (i=3)"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"all_good","record":{"id":4,"name":"All Good (i=4)"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"all_good","record":{"id":5,"name":"All Good (i=5)"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"all_good":{}}}}
+{"type":"SCHEMA","stream":"incremental_all_good","schema":{"properties":{"id":{"type":"integer"},"name":{"type":"string"},"updated_at":{"format":"date-time","type":"string"}},"type":"object"},"key_properties":[],"bookmark_properties":["updated_at"]}
+{"type":"RECORD","stream":"incremental_all_good","record":{"id":1,"name":"All Good (i=1)","updated_at":"2024-01-01T00:01:00+00:00"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"incremental_all_good","record":{"id":2,"name":"All Good (i=2)","updated_at":"2024-01-01T00:02:00+00:00"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"incremental_all_good","record":{"id":3,"name":"All Good (i=3)","updated_at":"2024-01-01T00:03:00+00:00"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"incremental_all_good","record":{"id":4,"name":"All Good (i=4)","updated_at":"2024-01-01T00:04:00+00:00"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"incremental_all_good","record":{"id":5,"name":"All Good (i=5)","updated_at":"2024-01-01T00:05:00+00:00"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"all_good":{},"incremental_all_good":{"replication_key":"updated_at","replication_key_value":"2024-01-01T00:05:00+00:00"}}}}
+{"type":"SCHEMA","stream":"incremental_resumable","schema":{"properties":{"id":{"type":"integer"},"name":{"type":"string"},"updated_at":{"format":"date-time","type":"string"}},"type":"object"},"key_properties":[],"bookmark_properties":["updated_at"]}
+{"type":"RECORD","stream":"incremental_resumable","record":{"id":1,"name":"All Good (i=1)","updated_at":"2024-01-01T00:01:00+00:00"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"incremental_resumable","record":{"id":2,"name":"All Good (i=2)","updated_at":"2024-01-01T00:02:00+00:00"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"incremental_resumable","record":{"id":3,"name":"All Good (i=3)","updated_at":"2024-01-01T00:03:00+00:00"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"all_good":{},"incremental_all_good":{"replication_key":"updated_at","replication_key_value":"2024-01-01T00:05:00+00:00"},"incremental_resumable":{"replication_key_signpost":"2025-01-01T00:00:00.000000+00:00","starting_replication_value":null,"replication_key":"updated_at","replication_key_value":"2024-01-01T00:03:00+00:00"}}}}
+{"type":"SCHEMA","stream":"incremental_with_errors","schema":{"properties":{"id":{"type":"integer"},"name":{"type":"string"},"updated_at":{"format":"date-time","type":"string"}},"type":"object"},"key_properties":[],"bookmark_properties":["updated_at"]}
+{"type":"RECORD","stream":"incremental_with_errors","record":{"id":1,"name":"All Good (i=1)","updated_at":"2024-01-01T00:01:00+00:00"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"incremental_with_errors","record":{"id":2,"name":"All Good (i=2)","updated_at":"2024-01-01T00:02:00+00:00"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"incremental_with_errors","record":{"id":3,"name":"All Good (i=3)","updated_at":"2024-01-01T00:03:00+00:00"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"all_good":{},"incremental_all_good":{"replication_key":"updated_at","replication_key_value":"2024-01-01T00:05:00+00:00"},"incremental_resumable":{"replication_key_signpost":"2025-01-01T00:00:00.000000+00:00","starting_replication_value":null,"replication_key":"updated_at","replication_key_value":"2024-01-01T00:03:00+00:00"},"incremental_with_errors":{"replication_key_signpost":"2025-01-01T00:00:00.000000+00:00","starting_replication_value":null,"progress_markers":{"Note":"Progress is not resumable if interrupted.","replication_key":"updated_at","replication_key_value":"2024-01-01T00:03:00+00:00"}}}}}
+{"type":"SCHEMA","stream":"parent","schema":{"properties":{"id":{"type":"integer"},"name":{"type":"string"}},"type":"object"},"key_properties":[]}
+{"type":"SCHEMA","stream":"child_with_errors","schema":{"properties":{"parent_id":{"type":"integer"},"id":{"type":"integer"},"name":{"type":"string"}},"type":"object"},"key_properties":[]}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":1,"name":"All Good (i=1)","parent_id":1},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":2,"name":"All Good (i=2)","parent_id":1},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":3,"name":"All Good (i=3)","parent_id":1},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"all_good":{},"incremental_all_good":{"replication_key":"updated_at","replication_key_value":"2024-01-01T00:05:00+00:00"},"incremental_resumable":{"replication_key_signpost":"2025-01-01T00:00:00.000000+00:00","starting_replication_value":null,"replication_key":"updated_at","replication_key_value":"2024-01-01T00:03:00+00:00"},"incremental_with_errors":{"replication_key_signpost":"2025-01-01T00:00:00.000000+00:00","starting_replication_value":null,"progress_markers":{"Note":"Progress is not resumable if interrupted.","replication_key":"updated_at","replication_key_value":"2024-01-01T00:03:00+00:00"}},"child_with_errors":{}}}}
+{"type":"RECORD","stream":"parent","record":{"id":1,"name":"All Good (i=1)"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"SCHEMA","stream":"child_with_errors","schema":{"properties":{"parent_id":{"type":"integer"},"id":{"type":"integer"},"name":{"type":"string"}},"type":"object"},"key_properties":[]}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":1,"name":"All Good (i=1)","parent_id":2},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":2,"name":"All Good (i=2)","parent_id":2},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":3,"name":"All Good (i=3)","parent_id":2},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"parent","record":{"id":2,"name":"All Good (i=2)"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"SCHEMA","stream":"child_with_errors","schema":{"properties":{"parent_id":{"type":"integer"},"id":{"type":"integer"},"name":{"type":"string"}},"type":"object"},"key_properties":[]}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":1,"name":"All Good (i=1)","parent_id":3},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":2,"name":"All Good (i=2)","parent_id":3},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":3,"name":"All Good (i=3)","parent_id":3},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"parent","record":{"id":3,"name":"All Good (i=3)"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"SCHEMA","stream":"child_with_errors","schema":{"properties":{"parent_id":{"type":"integer"},"id":{"type":"integer"},"name":{"type":"string"}},"type":"object"},"key_properties":[]}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":1,"name":"All Good (i=1)","parent_id":4},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":2,"name":"All Good (i=2)","parent_id":4},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":3,"name":"All Good (i=3)","parent_id":4},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"parent","record":{"id":4,"name":"All Good (i=4)"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"SCHEMA","stream":"child_with_errors","schema":{"properties":{"parent_id":{"type":"integer"},"id":{"type":"integer"},"name":{"type":"string"}},"type":"object"},"key_properties":[]}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":1,"name":"All Good (i=1)","parent_id":5},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":2,"name":"All Good (i=2)","parent_id":5},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"child_with_errors","record":{"id":3,"name":"All Good (i=3)","parent_id":5},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"parent","record":{"id":5,"name":"All Good (i=5)"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"all_good":{},"incremental_all_good":{"replication_key":"updated_at","replication_key_value":"2024-01-01T00:05:00+00:00"},"incremental_resumable":{"replication_key_signpost":"2025-01-01T00:00:00.000000+00:00","starting_replication_value":null,"replication_key":"updated_at","replication_key_value":"2024-01-01T00:03:00+00:00"},"incremental_with_errors":{"replication_key_signpost":"2025-01-01T00:00:00.000000+00:00","starting_replication_value":null,"progress_markers":{"Note":"Progress is not resumable if interrupted.","replication_key":"updated_at","replication_key_value":"2024-01-01T00:03:00+00:00"}},"child_with_errors":{},"parent":{}}}}
+{"type":"SCHEMA","stream":"with_errors","schema":{"properties":{"id":{"type":"integer"},"name":{"type":"string"}},"type":"object"},"key_properties":[]}
+{"type":"RECORD","stream":"with_errors","record":{"id":1,"name":"All Good (i=1)"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"with_errors","record":{"id":2,"name":"All Good (i=2)"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"with_errors","record":{"id":3,"name":"All Good (i=3)"},"time_extracted":"2025-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"all_good":{},"incremental_all_good":{"replication_key":"updated_at","replication_key_value":"2024-01-01T00:05:00+00:00"},"incremental_resumable":{"replication_key_signpost":"2025-01-01T00:00:00.000000+00:00","starting_replication_value":null,"replication_key":"updated_at","replication_key_value":"2024-01-01T00:03:00+00:00"},"incremental_with_errors":{"replication_key_signpost":"2025-01-01T00:00:00.000000+00:00","starting_replication_value":null,"progress_markers":{"Note":"Progress is not resumable if interrupted.","replication_key":"updated_at","replication_key_value":"2024-01-01T00:03:00+00:00"}},"child_with_errors":{},"parent":{},"with_errors":{}}}}

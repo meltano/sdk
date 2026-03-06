@@ -1422,7 +1422,23 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         for child_stream in self.child_streams:
             if child_stream.selected or child_stream.has_selected_descendents:
-                child_stream.sync(context=child_context)
+                try:
+                    child_stream.sync(context=child_context)
+                except (AbortedSyncFailedException, AbortedSyncPausedException):
+                    # sync_result already set inside child_stream.sync().
+                    # Continue syncing remaining children and let the parent
+                    # record be written normally.
+                    pass
+                except Exception as exc:  # noqa: BLE001
+                    # Safety net — should not normally occur since _run_sync
+                    # converts all non-lifecycle exceptions before they escape.
+                    child_stream.sync_result = SyncResult.FAILED
+                    self.log(
+                        "Child stream '%s' failed unexpectedly.",
+                        child_stream.name,
+                        level=logging.ERROR,
+                        exc_info=exc,
+                    )
 
     # Overridable Methods
 

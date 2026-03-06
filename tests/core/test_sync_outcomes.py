@@ -167,14 +167,15 @@ def test_summary_logged_aborted(caplog: pytest.LogCaptureFixture) -> None:
 
 def test_summary_not_logged_for_never_synced(
     caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """A stream that is skipped (deselected) must not produce a sync result line."""
     tap = make_tap(GoodStream)
     stream = tap.streams["good"]
-    # Patch selected / has_selected_descendents so sync_all skips this stream
-    type(stream).selected = property(lambda _: False)  # type: ignore[assignment]
-    type(stream).has_selected_descendents = property(  # type: ignore[assignment]
-        lambda _: False
+    stream_type = type(stream)
+    monkeypatch.setattr(stream_type, "selected", property(lambda _: False))
+    monkeypatch.setattr(
+        stream_type, "has_selected_descendents", property(lambda _: False)
     )
     with caplog.at_level("INFO", logger="root"):
         tap.sync_all()
