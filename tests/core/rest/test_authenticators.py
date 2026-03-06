@@ -384,7 +384,7 @@ def assert_stream_param_deprecation_warning(warning: warnings.WarningMessage):
     assert isinstance(warning.message, SingerSDKDeprecationWarning)
     message = warning.message.args[0]
     assert isinstance(message, str)
-    assert message.startswith("The `stream` parameter is deprecated")
+    assert "The `stream` parameter will be removed" in message
     assert warning.filename.endswith(f"{os.path.sep}authenticators.py")
 
 
@@ -392,7 +392,7 @@ def assert_create_for_stream_deprecation_warning(warning: warnings.WarningMessag
     assert isinstance(warning.message, SingerSDKDeprecationWarning)
     message = warning.message.args[0]
     assert isinstance(message, str)
-    assert message.startswith("The `create_for_stream` method is deprecated")
+    assert "The `create_for_stream` method will be removed" in message
     assert warning.filename.endswith(f"{os.path.sep}test_authenticators.py")
 
 
@@ -400,7 +400,7 @@ def assert_config_property_deprecation_warning(warning: warnings.WarningMessage)
     assert isinstance(warning.message, SingerSDKDeprecationWarning)
     message = warning.message.args[0]
     assert isinstance(message, str)
-    assert message.startswith("The `config` property is deprecated")
+    assert "The `config` property will be removed" in message
     assert warning.filename.endswith(f"{os.path.sep}authenticators.py")
 
 
