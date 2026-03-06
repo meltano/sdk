@@ -10,7 +10,10 @@ from urllib.parse import ParseResult, parse_qs, urlparse
 import pytest
 from requests import Response
 
-from singer_sdk.helpers._compat import SingerSDKPendingDeprecationWarning
+from singer_sdk.helpers._compat import (
+    SingerSDKDeprecationWarning,
+    SingerSDKPendingDeprecationWarning,
+)
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
     BaseAPIPaginator,
