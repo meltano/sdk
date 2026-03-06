@@ -1357,10 +1357,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             raise
         else:
             # Only mark SUCCESS if no child failure already degraded the result.
-            self.sync_result = SyncResult.combine(
-                self.sync_result,
-                SyncResult.SUCCESS,
-            )
+            self.sync_result = SyncResult.SUCCESS.combine(self.sync_result)
 
     def _run_sync(self, context: types.Context | None) -> None:
         """Execute the sync body, converting any non-lifecycle exception to one.

@@ -13,43 +13,31 @@ def test_sync_result_combine(subtests: pytest.Subtests) -> None:
     """Test SyncResult.combine with all combinations of SyncResult values."""
     result_none = None
     with subtests.test("None returns the other result"):
-        assert all(
-            SyncResult.combine(result_none, other_result) is other_result
-            for other_result in SyncResult
-        )
+        assert all(result.combine(result_none) is result for result in SyncResult)
 
     with subtests.test("FAILED beats all"):
-        result = SyncResult.FAILED
-        assert all(
-            SyncResult.combine(result, other) is SyncResult.FAILED
-            for other in SyncResult
-        )
-        assert all(
-            SyncResult.combine(other, result) is SyncResult.FAILED
-            for other in SyncResult
-        )
+        failed = SyncResult.FAILED
+        assert all(result.combine(failed) is SyncResult.FAILED for result in SyncResult)
+        assert all(failed.combine(result) is SyncResult.FAILED for result in SyncResult)
 
     with subtests.test("ABORTED beats SUCCESS and PARTIAL"):
-        result = SyncResult.ABORTED
+        aborted = SyncResult.ABORTED
         assert all(
-            SyncResult.combine(result, other) is SyncResult.ABORTED
-            for other in [SyncResult.SUCCESS, SyncResult.PARTIAL]
+            result.combine(aborted) is SyncResult.ABORTED
+            for result in [SyncResult.SUCCESS, SyncResult.PARTIAL]
         )
         assert all(
-            SyncResult.combine(other, result) is SyncResult.ABORTED
-            for other in [SyncResult.SUCCESS, SyncResult.PARTIAL]
+            aborted.combine(result) is SyncResult.ABORTED
+            for result in [SyncResult.SUCCESS, SyncResult.PARTIAL]
         )
 
     with subtests.test("PARTIAL beats SUCCESS"):
-        result = SyncResult.PARTIAL
-        assert SyncResult.combine(result, SyncResult.SUCCESS) is SyncResult.PARTIAL
-        assert SyncResult.combine(SyncResult.SUCCESS, result) is SyncResult.PARTIAL
+        partial = SyncResult.PARTIAL
+        assert SyncResult.SUCCESS.combine(partial) is SyncResult.PARTIAL
+        assert partial.combine(SyncResult.SUCCESS) is SyncResult.PARTIAL
 
     with subtests.test("Idempotent combinations"):
-        assert all(
-            SyncResult.combine(any_result, any_result) is any_result
-            for any_result in SyncResult
-        )
+        assert all(result.combine(result) is result for result in SyncResult)
 
 
 def test_none_result_does_not_call_logger(caplog: pytest.LogCaptureFixture) -> None:

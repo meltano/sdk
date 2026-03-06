@@ -26,32 +26,30 @@ class SyncResult(enum.Enum):
     ABORTED = "aborted"
     PARTIAL = "partial"
 
-    @classmethod
-    def combine(cls, result1: SyncResult | None, result2: SyncResult) -> SyncResult:
+    def combine(self, other: SyncResult | None) -> SyncResult:
         """Merge two results; None means 'no prior result'.
 
         Priority order: FAILED > ABORTED > PARTIAL > SUCCESS.
 
         Args:
-            result1: The first SyncResult, or None to treat as no prior result.
-            result2: The second SyncResult.
+            other: The first SyncResult, or None to treat as no prior result.
 
         Returns:
             The combined SyncResult.
         """
-        if result1 is None:
-            return result2
+        if other is None:
+            return self
 
-        if result1 is cls.FAILED or result2 is cls.FAILED:
-            return cls.FAILED
+        if self is SyncResult.FAILED or other is SyncResult.FAILED:
+            return SyncResult.FAILED
 
-        if result1 is cls.ABORTED or result2 is cls.ABORTED:
-            return cls.ABORTED
+        if self is SyncResult.ABORTED or other is SyncResult.ABORTED:
+            return SyncResult.ABORTED
 
-        if result1 is cls.PARTIAL or result2 is cls.PARTIAL:
-            return cls.PARTIAL
+        if self is SyncResult.PARTIAL or other is SyncResult.PARTIAL:
+            return SyncResult.PARTIAL
 
-        return cls.SUCCESS
+        return SyncResult.SUCCESS
 
 
 _LEVEL_MAP: dict[SyncResult, int] = {
