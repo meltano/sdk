@@ -5,7 +5,6 @@ from __future__ import annotations
 import abc
 import collections.abc
 import contextlib
-import sys
 import typing as t
 import warnings
 from enum import Enum
@@ -30,7 +29,7 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import BaseSingerWriter, PluginBase, _ConfigInput
 from singer_sdk.singerlib import Catalog
-from singer_sdk.streams._result import SyncResult, log_sync_result
+from singer_sdk.streams._result import log_sync_result
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -579,20 +578,6 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
             validate_config=True,
         )
         tap.sync_all()
-
-        # Check for per-stream fatal errors (non-lifecycle).
-        failed_streams = [
-            name
-            for name, stream in tap.streams.items()
-            if stream.sync_result is SyncResult.FAILED
-        ]
-        if failed_streams:
-            tap.logger.error(
-                "Sync completed with %d failed stream(s): %s",
-                len(failed_streams),
-                ", ".join(failed_streams),
-            )
-            sys.exit(1)
 
     @classmethod
     def cb_discover(
