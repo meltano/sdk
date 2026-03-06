@@ -154,7 +154,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         self._logger: logging.Logger = tap.logger.getChild(self.name)
         self.metrics_logger = tap.metrics_logger
         self.tap_name: str = tap.name
-        self.context: types.Context | None = None
+        self.context: MappingProxyType | None = None
 
         self._config: dict = dict(tap.config)
         self._tap = tap
