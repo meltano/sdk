@@ -5,7 +5,6 @@ from __future__ import annotations
 import abc
 import copy
 import datetime
-import enum
 import json
 import logging
 import typing as t
@@ -44,6 +43,7 @@ from singer_sdk.singerlib.catalog import (
     REPLICATION_INCREMENTAL,
     REPLICATION_LOG_BASED,  # noqa: F401
 )
+from singer_sdk.streams._result import SyncResult
 from singer_sdk.streams._state import StreamStateManager
 
 if t.TYPE_CHECKING:
@@ -53,58 +53,6 @@ if t.TYPE_CHECKING:
     from singer_sdk.mapper import StreamMap
     from singer_sdk.singerlib.catalog import StreamMetadata
     from singer_sdk.tap_base import Tap
-
-
-class SyncResult(enum.Enum):
-    """Outcome of a single stream's sync operation.
-
-    Set on :attr:`~singer_sdk.Stream.sync_result` after
-    :meth:`~singer_sdk.Stream.sync` completes or fails.
-
-    Attributes:
-        SUCCESS: Completed without error.
-        FAILED: Raised a fatal (non-lifecycle) exception.
-        ABORTED: Raised a lifecycle abort exception
-            (:class:`~singer_sdk.exceptions.AbortedSyncFailedException` or
-            :class:`~singer_sdk.exceptions.AbortedSyncPausedException`).
-        PARTIAL: Reserved — ignorable errors with skipped records (requires PR 3).
-    """
-
-    SUCCESS = "success"
-    FAILED = "failed"
-    ABORTED = "aborted"
-    PARTIAL = "partial"
-
-
-def _combine_sync_results(
-    result1: SyncResult | None,
-    result2: SyncResult,
-) -> SyncResult:
-    """Combine two SyncResults, treating None as SUCCESS.
-
-    This is a helper function for combining a stream's existing sync_result with a new
-    result, treating None (the default state) as SUCCESS for combination purposes.
-
-    Args:
-        result1: The first SyncResult, or None to treat as SUCCESS.
-        result2: The second SyncResult.
-
-    Returns:
-        The combined SyncResult.
-    """
-    if result1 is None:
-        return result2
-
-    if result1 is SyncResult.FAILED or result2 is SyncResult.FAILED:
-        return SyncResult.FAILED
-
-    if result1 is SyncResult.ABORTED or result2 is SyncResult.ABORTED:
-        return SyncResult.ABORTED
-
-    if result1 is SyncResult.PARTIAL or result2 is SyncResult.PARTIAL:
-        return SyncResult.PARTIAL
-
-    return SyncResult.SUCCESS
 
 
 class Stream(abc.ABC):  # noqa: PLR0904
@@ -1409,7 +1357,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             raise
         else:
             # Only mark SUCCESS if no child failure already degraded the result.
-            self.sync_result = _combine_sync_results(
+            self.sync_result = SyncResult.combine(
                 self.sync_result,
                 SyncResult.SUCCESS,
             )

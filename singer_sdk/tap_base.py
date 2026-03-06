@@ -5,7 +5,6 @@ from __future__ import annotations
 import abc
 import collections.abc
 import contextlib
-import logging
 import sys
 import typing as t
 import warnings
@@ -31,7 +30,7 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import BaseSingerWriter, PluginBase, _ConfigInput
 from singer_sdk.singerlib import Catalog
-from singer_sdk.streams.core import SyncResult
+from singer_sdk.streams._result import SyncResult, log_sync_result
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -480,23 +479,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         Args:
             stream: The stream whose result to log.
         """
-        result = stream.sync_result
-        if result is None:
-            # Stream was never directly synced (deselected or child stream).
-            return
-
-        level_map = {
-            SyncResult.SUCCESS: logging.INFO,
-            SyncResult.FAILED: logging.ERROR,
-            SyncResult.ABORTED: logging.WARNING,
-            SyncResult.PARTIAL: logging.WARNING,
-        }
-        self.logger.log(
-            level_map.get(result, logging.INFO),
-            "Stream '%s' sync result: %s",
-            stream.name,
-            result.value,
-        )
+        log_sync_result(self.logger, stream.name, stream.sync_result)
 
     @t.final
     def sync_all(self) -> None:
