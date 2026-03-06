@@ -36,6 +36,10 @@ class SingerSDKDeprecationWarning(DeprecationWarning):
     """Custom deprecation warning for the Singer SDK."""
 
 
+class SingerSDKPendingDeprecationWarning(PendingDeprecationWarning):
+    """Warning for deprecated features without a committed removal timeline."""
+
+
 class SingerSDKPythonEOLWarning(FutureWarning):
     """Warning issued when the running Python is near or past its end of life."""
 
@@ -91,6 +95,7 @@ def warn_python_eol(
 
 __all__ = [
     "SingerSDKDeprecationWarning",
+    "SingerSDKPendingDeprecationWarning",
     "SingerSDKPythonEOLWarning",
     "Traversable",
     "date_fromisoformat",
