@@ -218,7 +218,7 @@ class BaseHATEOASPaginator(BaseAPIPaginator[ParseResult | None], ABC):
     - query
     - fragment
 
-    That means you can access and parse the query params in your stream like this:
+    That means you can access the URL for the next page:
 
     .. code-block:: python
 
@@ -231,10 +231,11 @@ class BaseHATEOASPaginator(BaseAPIPaginator[ParseResult | None], ABC):
            def get_new_paginator(self):
                return MyHATEOASPaginator()
 
-           def get_url_params(self, next_page_token) -> dict:
-               if next_page_token:
-                   return dict(parse_qsl(next_page_token.query))
-               return {}
+           def get_http_request(self, *, context):
+               request = super().get_http_request(context=context)
+               if context.page.current_value:
+                   request.url = context.page.current_value.geturl()
+               return request
     """
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
