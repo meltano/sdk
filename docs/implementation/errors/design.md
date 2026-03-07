@@ -144,9 +144,12 @@ SingerError                    ← root for all Singer protocol exceptions
     └── InvalidInputLine       ← an input line is not a valid Singer message
 ```
 
-`InvalidInputLine` was deliberately **not** migrated into `singer_sdk/exceptions.py`
-in Phase 2. It lives at the Singer protocol level and is raised deep in the message
-parsing stack before the SDK's sync machinery takes over.
+`InvalidInputLine` was deliberately **not** migrated into the `SingerSDKError`
+hierarchy in Phase 2. It lives at the Singer protocol level and is raised deep in the
+message parsing stack before the SDK's sync machinery takes over. It is, however,
+**re-exported** from `singer_sdk/exceptions.py` (listed in `__all__` under
+`# Re-exports`) as a convenience so that callers can reach it via a single import
+without it becoming part of the SDK error hierarchy.
 
 ### 3.3 Phase 3+ migration candidates
 
@@ -326,8 +329,10 @@ ______________________________________________________________________
 - Moved `SchemaNotFoundError` and `SchemaNotValidError` (already `DiscoveryError`
   subclasses in `schema/source.py`) into `singer_sdk/exceptions.py`
 - Re-exports remain in original files for one release cycle (`# noqa: F401`)
-- **`InvalidInputLine` intentionally not migrated**: kept in `singerlib/exceptions.py`
-  under its own Singer-protocol hierarchy (`SingerError → SingerReadError → InvalidInputLine`); see §3.2
+- **`InvalidInputLine` intentionally not migrated into `SingerSDKError` hierarchy**:
+  kept in `singerlib/exceptions.py` under its own Singer-protocol hierarchy
+  (`SingerError → SingerReadError → InvalidInputLine`); re-exported from
+  `singer_sdk/exceptions.py` in `__all__` for convenience (see §3.2)
 - `singerlib/exceptions.py` expanded with `SingerError` and `SingerReadError` root
   classes to make the protocol layer hierarchy explicit
 - Added `TestPhase2Migrations` and `TestSingerlibHierarchy` in
