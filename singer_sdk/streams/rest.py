@@ -87,13 +87,13 @@ class HTTPRequest:
     url: str
 
     #: The method of the request.
-    method: str
+    method: str = "GET"
+
+    #: The URL query parameters of the request.
+    params: _ParamsDict = field(default_factory=dict)
 
     #: The headers of the request.
-    headers: dict[str, str]
-
-    #: The URL queryparameters of the request.
-    params: _ParamsDict | str = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
 
     #: The data of the request.
     data: JSONPayload = None
@@ -118,7 +118,16 @@ class HTTPRequest:
         Returns:
             A string of encoded parameters.
         """
-        if isinstance(self.params, str):
+        if isinstance(self.params, str):  # type: ignore[unreachable]
+            warn(  # type: ignore[unreachable]
+                (
+                    "Set `safe_query_chars` on the `HTTPRequest` object "
+                    "or override the `encode_params` instead of passing a query "
+                    "parameters string"
+                ),
+                DeprecationWarning,
+                stacklevel=1,
+            )
             return self.params
 
         return urlencode(
@@ -527,7 +536,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             url=self.get_url(context.stream_context),
             method=self.http_method,
             headers=self.http_headers,
-            params=self.get_url_params(
+            params=self.get_url_params(  # type: ignore[arg-type]
                 context.stream_context,
                 context.page.current_value,
             ),

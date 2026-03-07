@@ -1,6 +1,23 @@
 from __future__ import annotations
 
+import pytest
+
 from singer_sdk.streams.rest import HTTPRequest
+
+
+def test_set_params():
+    request = HTTPRequest(url="https://example.com/api")
+    request.params["foo"] = "bar"
+    assert request.params == {"foo": "bar"}
+
+
+def test_set_params_on_string_error():
+    request = HTTPRequest(url="https://example.com/api", params="foo=bar")  # ty: ignore[invalid-argument-type]
+    with pytest.raises(
+        TypeError,
+        match="'str' object does not support item assignment",
+    ):
+        request.params["foo"] = "bar"
 
 
 def test_custom_safe_chars():
@@ -41,7 +58,8 @@ def test_string_params_passthrough():
         method="GET",
         url="https://example.com/api",
         headers={"Authorization": "Bearer token"},
-        params="thisismyquerystring",
+        params="thisismyquerystring",  # ty: ignore[invalid-argument-type]
     )
 
-    assert request.encode_params() == "thisismyquerystring"
+    with pytest.deprecated_call():
+        assert request.encode_params() == "thisismyquerystring"
