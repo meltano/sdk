@@ -19,7 +19,7 @@ import requests.exceptions
 
 from singer_sdk import metrics
 from singer_sdk.authenticators import SimpleAuthenticator
-from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
+from singer_sdk.exceptions import FatalAPIError, IgnorableSyncError, RetriableAPIError
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._packaging import get_sdk_version
 from singer_sdk.helpers.jsonpath import extract_jsonpath
@@ -236,7 +236,9 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         Raises:
             FatalAPIError: If the request is not retriable.
             RetriableAPIError: If the request is retriable.
-        """
+            IgnorableAPIError: If the request is to be skipped after a failure
+                without raising an error to the caller (the skip is still logged).
+        """  # noqa: DOC502
         if (
             response.status_code in self.extra_retry_statuses
             or response.status_code >= HTTPStatus.INTERNAL_SERVER_ERROR
@@ -476,7 +478,13 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
                     context,
                     next_page_token=paginator.current_value,
                 )
-                resp = decorated_request(prepared_request, context)
+                try:
+                    resp = decorated_request(prepared_request, context)
+                except IgnorableSyncError as e:
+                    self.logger.warning(
+                        "Skipping request due to ignorable error: %s", e
+                    )
+                    break
                 request_counter.increment()
                 self.update_sync_costs(prepared_request, resp, context)
                 records = iter(self.parse_response(resp))

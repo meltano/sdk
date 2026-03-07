@@ -1,17 +1,20 @@
 from __future__ import annotations
 
 import json
+import logging
 import typing as t
 from contextlib import nullcontext
 
 import pytest
 import requests
 
-from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
+from singer_sdk.exceptions import FatalAPIError, IgnorableAPIError, RetriableAPIError
 from singer_sdk.streams.rest import RESTStream
 
 if t.TYPE_CHECKING:
     from contextlib import AbstractContextManager
+
+    import requests_mock as requests_mock_module
 
 
 class CustomResponseValidationStream(RESTStream):
@@ -228,3 +231,52 @@ def test_rate_limiting_status_override(
 
     with expectation:
         basic_rest_stream.validate_response(fake_response)
+
+
+class IgnorableStream(RESTStream):
+    """Stream that raises IgnorableAPIError on 404 responses."""
+
+    url_base = "https://example.com"
+    name = "ignorable_stream"
+    schema: t.ClassVar[dict] = {"type": "object", "properties": {}}
+    path = "/dummy"
+
+    def validate_response(self, response: requests.Response) -> None:
+        if response.status_code == 404:
+            msg = f"404 Not Found: {response.url}"
+            raise IgnorableAPIError(msg)
+        super().validate_response(response)
+
+
+def test_ignorable_api_error_propagates_from_validate_response(rest_tap):
+    """IgnorableAPIError is not swallowed at the validation layer."""
+    stream = IgnorableStream(rest_tap)
+    fake_response = requests.Response()
+    fake_response.status_code = 404
+    fake_response.url = "https://example.com/dummy"
+
+    with pytest.raises(IgnorableAPIError):
+        stream.validate_response(fake_response)
+
+
+def test_request_records_skips_on_ignorable_error(
+    requests_mock: requests_mock_module.Mocker,
+    rest_tap,
+    caplog: pytest.LogCaptureFixture,
+):
+    """request_records yields nothing and logs a warning on IgnorableAPIError.
+
+    No exception should propagate; the stream is silently skipped.
+    """
+    requests_mock.get("https://example.com/dummy", status_code=404, reason="Not Found")
+
+    stream = IgnorableStream(rest_tap)
+
+    with caplog.at_level(logging.WARNING, logger=stream.logger.name):
+        records = list(stream.request_records(None))
+
+    assert records == []
+    assert any(
+        "Skipping request due to ignorable error" in record.message
+        for record in caplog.records
+    )
