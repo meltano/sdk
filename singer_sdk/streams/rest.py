@@ -73,6 +73,8 @@ _TToken = TypeVar("_TToken", default=t.Any)
 _TNum = t.TypeVar("_TNum", int, float)
 _TPag = TypeVar("_TPag", bound="BaseAPIPaginator")
 
+_ParamsDict: t.TypeAlias = dict[str, t.Any | list[t.Any] | None]
+
 
 @dataclass(slots=True)
 class HTTPRequest:
@@ -91,7 +93,7 @@ class HTTPRequest:
     headers: dict[str, str]
 
     #: The URL queryparameters of the request.
-    params: dict[str, t.Any | list[t.Any] | None] = field(default_factory=dict)
+    params: _ParamsDict | str = field(default_factory=dict)
 
     #: The data of the request.
     data: JSONPayload = None
@@ -99,14 +101,10 @@ class HTTPRequest:
     #: ASCII characters that should not be quoted when encoding URL parameters.
     safe_query_chars: str = ""
 
-    def _get_url_params(self) -> list[tuple[str, t.Any]]:
-        """Encode parameters as a list of tuples.
-
-        Returns:
-            A list of tuples of encoded parameters.
-        """
+    @staticmethod
+    def _encode_params_dict(params: _ParamsDict) -> list[tuple[str, t.Any]]:
         result: list[tuple[str, t.Any]] = []
-        for k, v in self.params.items():
+        for k, v in params.items():
             values = [v] if not isinstance(v, (list, tuple)) else v
             result.extend((k, v) for v in values if v is not None)
         return result
@@ -120,7 +118,14 @@ class HTTPRequest:
         Returns:
             A string of encoded parameters.
         """
-        return urlencode(self._get_url_params(), safe=self.safe_query_chars, doseq=True)
+        if isinstance(self.params, str):
+            return self.params
+
+        return urlencode(
+            self._encode_params_dict(self.params),
+            safe=self.safe_query_chars,
+            doseq=True,
+        )
 
 
 @dataclass(slots=True)

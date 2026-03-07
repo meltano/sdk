@@ -34,3 +34,14 @@ def test_encode_non_string_params():
         request.encode_params()
         == "number=123&bool=True&list=1&list=2&list=3&tuple=a&tuple=b&tuple=c"
     )
+
+
+def test_string_params_passthrough():
+    request = HTTPRequest(
+        method="GET",
+        url="https://example.com/api",
+        headers={"Authorization": "Bearer token"},
+        params="thisismyquerystring",
+    )
+
+    assert request.encode_params() == "thisismyquerystring"
