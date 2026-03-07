@@ -269,19 +269,22 @@ def finalize_state_progress_markers(stream_or_partition_state: dict) -> dict | N
     """
     signpost_value = stream_or_partition_state.pop(SIGNPOST_MARKER, None)
     stream_or_partition_state.pop(STARTING_MARKER, None)
-    if (
-        is_state_non_resumable(stream_or_partition_state)
-        and "replication_key" in stream_or_partition_state[PROGRESS_MARKERS]
-    ):
+    markers = stream_or_partition_state.get(PROGRESS_MARKERS)
+    if markers is not None and "replication_key" in markers:
         # Replication keys valid (only) after sync is complete
-        markers = stream_or_partition_state[PROGRESS_MARKERS]
         stream_or_partition_state["replication_key"] = markers.pop("replication_key")
         new_rk_value = markers.pop("replication_key_value")
         if signpost_value and _greater_than_signpost(signpost_value, new_rk_value):
             new_rk_value = signpost_value
         stream_or_partition_state["replication_key_value"] = new_rk_value
     # Wipe and return any markers that have not been promoted
-    return reset_state_progress_markers(stream_or_partition_state)
+    progress_markers = stream_or_partition_state.pop(PROGRESS_MARKERS, None)
+    if not progress_markers:
+        return None
+    # Remove auto-generated human-readable note:
+    progress_markers.pop(PROGRESS_MARKER_NOTE, None)
+    # Return remaining 'progress_markers' if any:
+    return progress_markers or None
 
 
 def log_sort_error(
