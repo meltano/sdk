@@ -431,17 +431,32 @@ def test_parent_records_emitted_when_child_hits_record_limit():
         }
         parent_stream_type = ParentStream
 
-        def get_records(self, context: dict | None):
+        def get_records(self, context: dict | None):  # noqa: ARG002
             # More records than the dry-run limit (3 > 2)
-            yield {"id": 1, "pid": context["pid"]}
-            yield {"id": 2, "pid": context["pid"]}
-            yield {"id": 3, "pid": context["pid"]}
+            yield {"id": 1}
+            yield {"id": 2}
+            yield {"id": 3}
+
+    class SiblingStream(Stream):
+        name = "subling"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "pid": {"type": "integer"},
+            },
+        }
+        parent_stream_type = ParentStream
+
+        def get_records(self, context: dict | None):  # noqa: ARG002
+            for i in range(10):
+                yield {"id": i + 1}
 
     class TapLimited(Tap):
         name = "tap-limited"
 
         def discover_streams(self):
-            return [ParentStream(self), ChildStream(self)]
+            return [ParentStream(self), ChildStream(self), SiblingStream(self)]
 
     tap = TapLimited()
     buf = io.StringIO()
@@ -462,3 +477,6 @@ def test_parent_records_emitted_when_child_hits_record_limit():
 
     msg = "Only 2 (for each parent) child records should be emitted"
     assert tally["child_limited"] == 4, msg
+
+    msg = "Sibling records should also be emitted"
+    assert tally["subling"] == 4, msg
