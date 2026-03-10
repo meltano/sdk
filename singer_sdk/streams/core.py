@@ -1372,10 +1372,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
                 try:
                     child_stream.sync(context=child_context)
                 except (AbortedSyncFailedException, AbortedSyncPausedException):
-                    # Child stream reached its record limit (ABORT_AT_RECORD_COUNT).
-                    # Continue with remaining child streams so each one can
-                    # independently emit up to max_records_limit records, and allow
-                    # the parent stream to continue processing its own records.
+                    # Child stream was interrupted, continue with remaining children
                     continue
 
     # Overridable Methods
