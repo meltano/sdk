@@ -1369,7 +1369,13 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         for child_stream in self.child_streams:
             if child_stream.selected or child_stream.has_selected_descendents:
-                child_stream.sync(context=child_context)
+                try:
+                    child_stream.sync(context=child_context)
+                except (AbortedSyncFailedException, AbortedSyncPausedException):
+                    # Child stream reached its record limit (ABORT_AT_RECORD_COUNT).
+                    # Stop syncing remaining children for this context but allow the
+                    # parent stream to continue processing its own records.
+                    break
 
     # Overridable Methods
 
