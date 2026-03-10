@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import io
+import json
 import logging
 import typing as t
 from contextlib import redirect_stdout
@@ -394,3 +395,66 @@ def test_preprocess_context_removes_large_payload(
 
     snapshot.assert_match(output, "singer.jsonl")
     snapshot.assert_match(caplog.text, "stderr.log")
+
+
+def test_parent_records_emitted_when_child_hits_record_limit():
+    """Parent records are written before child sync so they appear even if a child
+    stream aborts after reaching max_records_limit (dry-run record cap)."""
+
+    class ParentStream(Stream):
+        name = "parent_limited"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
+
+        def get_child_context(
+            self,
+            record: dict,
+            context: dict | None,  # noqa: ARG002
+        ) -> dict | None:
+            return {"pid": record["id"]}
+
+        def get_records(self, context: dict | None):  # noqa: ARG002
+            yield {"id": 1}
+            yield {"id": 2}
+
+    class ChildStream(Stream):
+        name = "child_limited"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "pid": {"type": "integer"},
+            },
+        }
+        parent_stream_type = ParentStream
+
+        def get_records(self, context: dict | None):  # noqa: ARG002
+            # More records than the dry-run limit (3 > 2)
+            yield {"id": 1}
+            yield {"id": 2}
+            yield {"id": 3}
+
+    class TapLimited(Tap):
+        name = "tap-limited"
+
+        def discover_streams(self):
+            return [ParentStream(self), ChildStream(self)]
+
+    tap = TapLimited()
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        # Limit child to 2 records; the 3rd would trigger AbortedSyncPausedException
+        tap.run_sync_dry_run(dry_run_record_limit=2)
+
+    buf.seek(0)
+    messages = [json.loads(line) for line in buf.read().splitlines() if line]
+
+    parent_records = [
+        m for m in messages if m["type"] == "RECORD" and m["stream"] == "parent_limited"
+    ]
+    assert len(parent_records) >= 1, (
+        "At least one parent record must be emitted even when the child stream "
+        "hits its dry-run record limit."
+    )
