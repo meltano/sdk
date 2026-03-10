@@ -5,6 +5,7 @@ import io
 import json
 import logging
 import typing as t
+from collections import defaultdict
 from contextlib import redirect_stdout
 
 import pytest
@@ -430,11 +431,11 @@ def test_parent_records_emitted_when_child_hits_record_limit():
         }
         parent_stream_type = ParentStream
 
-        def get_records(self, context: dict | None):  # noqa: ARG002
+        def get_records(self, context: dict | None):
             # More records than the dry-run limit (3 > 2)
-            yield {"id": 1}
-            yield {"id": 2}
-            yield {"id": 3}
+            yield {"id": 1, "pid": context["pid"]}
+            yield {"id": 2, "pid": context["pid"]}
+            yield {"id": 3, "pid": context["pid"]}
 
     class TapLimited(Tap):
         name = "tap-limited"
@@ -451,10 +452,13 @@ def test_parent_records_emitted_when_child_hits_record_limit():
     buf.seek(0)
     messages = [json.loads(line) for line in buf.read().splitlines() if line]
 
-    parent_records = [
-        m for m in messages if m["type"] == "RECORD" and m["stream"] == "parent_limited"
-    ]
-    assert len(parent_records) >= 1, (
-        "At least one parent record must be emitted even when the child stream "
-        "hits its dry-run record limit."
-    )
+    tally: dict[str, int] = defaultdict(int)
+    for m in messages:
+        if m["type"] == "RECORD":
+            tally[m["stream"]] += 1
+
+    msg = "At least one parent record must be emitted even when the child stream hits its dry-run record limit."  # noqa: E501
+    assert tally["parent_limited"] >= 1, msg
+
+    msg = "Only 2 (for each parent) child records should be emitted"
+    assert tally["child_limited"] == 4, msg
