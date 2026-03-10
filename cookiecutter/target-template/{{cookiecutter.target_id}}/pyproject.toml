@@ -11,7 +11,7 @@ name = "{{cookiecutter.variant}}-{{cookiecutter.target_id}}"
 {%- else %}
 name = "{{cookiecutter.target_id}}"
 {%- endif %}
-version = "0.0.1"
+dynamic = ["version"]
 description = "Singer target for {{cookiecutter.destination_name}}, built with the Meltano Singer SDK."
 readme = "README.md"
 authors = [{ name = "{{ cookiecutter.admin_name }}", email = "{{ cookiecutter.admin_email }}" }]
