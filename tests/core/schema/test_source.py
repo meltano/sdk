@@ -749,95 +749,118 @@ class TestOpenAPISchemaNormalization:
                         "type": "integer",
                         "enum": [1, 2, 3, 4, 5],
                     },
+                    "ImageUrl": {
+                        "type": "string",
+                        "maxLength": 699052,
+                        "minLength": 0,
+                        # Java named-capture group: valid PCRE, invalid ECMA 262
+                        "pattern": r"data:(?<mime>image\/(.+?));base64,(?<data>.*)",
+                    },
+                    "Slug": {
+                        "type": "string",
+                        "pattern": "^[a-z0-9-]+$",
+                    },
                 }
             },
         }
 
-    def test_normalize(
-        self,
-        tmp_path: Path,
-        openapi: dict[str, t.Any],
-        subtests: pytest.Subtests,
-    ):
-        """Test that nullable attributes are converted to type arrays."""
+    @pytest.fixture
+    def source(self, tmp_path: Path, openapi: dict[str, t.Any]) -> OpenAPISchema:
+        """OpenAPI source backed by the openapi fixture."""
         openapi_file = tmp_path / "openapi.json"
         openapi_file.write_text(json.dumps(openapi))
+        return OpenAPISchema(openapi_file)
 
-        source = OpenAPISchema(openapi_file)
+    def test_normalize_nullable(self, source: OpenAPISchema):
+        """Test that nullable attributes are converted to type arrays."""
         schema = source.get_schema("User")
-
-        # Apply normalization without key properties
         normalized = source.preprocess_schema(schema)
 
-        with subtests.test("nullable is handled"):
-            # Check that nullable properties have type arrays
-            assert normalized["properties"]["name"]["type"] == ["string", "null"]
-            assert normalized["properties"]["email"]["type"] == ["string", "null"]
-            assert normalized["properties"]["age"]["type"] == ["integer", "null"]
+        assert normalized["properties"]["name"]["type"] == ["string", "null"]
+        assert normalized["properties"]["email"]["type"] == ["string", "null"]
+        assert normalized["properties"]["age"]["type"] == ["integer", "null"]
+        assert "nullable" not in normalized["properties"]["name"]
 
-            # nullable attribute is removed
-            assert "nullable" not in normalized["properties"]["name"]
+    def test_normalize_one_of(self, source: OpenAPISchema):
+        """Test that single-element oneOf constructs are unwrapped."""
+        schema = source.get_schema("SimpleOneOf")
+        normalized = source.preprocess_schema(schema)
+        assert normalized == {"type": "string"}
+        assert "oneOf" not in normalized
 
-        with subtests.test("oneOf is handled"):
-            # Test simple oneOf
-            schema = source.get_schema("SimpleOneOf")
-            normalized = source.preprocess_schema(schema)
-            assert normalized == {"type": "string"}
-            assert "oneOf" not in normalized
+        schema = source.get_schema("NestedOneOf")
+        normalized = source.preprocess_schema(schema)
+        assert "oneOf" not in normalized["properties"]["value"]
+        assert normalized["properties"]["value"]["type"] == ["integer", "null"]
 
-            # Test nested oneOf with nullable
-            schema = source.get_schema("NestedOneOf")
-            normalized = source.preprocess_schema(schema)
-            assert "oneOf" not in normalized["properties"]["value"]
-            assert normalized["properties"]["value"]["type"] == ["integer", "null"]
+    def test_normalize_all_of_no_elements(self, source: OpenAPISchema):
+        """Test that an empty allOf is normalized to an empty schema."""
+        schema = source.get_schema("AllOfNoElements")
+        normalized = source.preprocess_schema(schema)
+        assert normalized == {}
+        assert "allOf" not in normalized
 
-        with subtests.test("allOf with no elements"):
-            schema = source.get_schema("AllOfNoElements")
-            normalized = source.preprocess_schema(schema)
-            assert normalized == {}
-            assert "allOf" not in normalized
+    def test_normalize_all_of_single_element(self, source: OpenAPISchema):
+        """Test that a single-element allOf is flattened."""
+        schema = source.get_schema("AllOfSingleElement")
+        normalized = source.preprocess_schema(schema)
+        assert normalized == {"type": "string"}
+        assert "allOf" not in normalized
 
-        with subtests.test("allOf with a single element"):
-            schema = source.get_schema("AllOfSingleElement")
-            normalized = source.preprocess_schema(schema)
-            assert normalized == {"type": "string"}
-            assert "allOf" not in normalized
-
-        with subtests.test("simple allOf is handled my merging schemas"):
-            schema = source.get_schema("AllOfSchemas")
-            normalized = source.preprocess_schema(schema)
-            assert normalized == {
-                "type": ["object", "null"],
-                "properties": {
-                    "references": {
-                        "type": ["object", "null"],
-                        "additionalProperties": {"type": "string"},
-                    },
-                    "created": {"type": ["string", "null"]},
-                    "name": {"type": ["string", "null"]},
+    def test_normalize_all_of_merge(self, source: OpenAPISchema):
+        """Test that allOf subschemas are merged into a single object schema."""
+        schema = source.get_schema("AllOfSchemas")
+        normalized = source.preprocess_schema(schema)
+        assert normalized == {
+            "type": ["object", "null"],
+            "properties": {
+                "references": {
+                    "type": ["object", "null"],
+                    "additionalProperties": {"type": "string"},
                 },
-            }
-            assert "allOf" not in normalized
+                "created": {"type": ["string", "null"]},
+                "name": {"type": ["string", "null"]},
+            },
+        }
+        assert "allOf" not in normalized
 
-        with subtests.test("enum is handled"):
-            # Test string enum
-            schema = source.get_schema("Status")
-            normalized = source.preprocess_schema(schema)
-            assert "enum" not in normalized
-            assert normalized["type"] == "string"
+    def test_normalize_enum(self, source: OpenAPISchema):
+        """Test that enum keywords are stripped from schemas."""
+        schema = source.get_schema("Status")
+        normalized = source.preprocess_schema(schema)
+        assert "enum" not in normalized
+        assert normalized["type"] == "string"
 
-            # Test integer enum
-            schema = source.get_schema("Priority")
-            normalized = source.preprocess_schema(schema)
-            assert "enum" not in normalized
-            assert normalized["type"] == "integer"
+        schema = source.get_schema("Priority")
+        normalized = source.preprocess_schema(schema)
+        assert "enum" not in normalized
+        assert normalized["type"] == "integer"
 
-        with subtests.test("arrays are handled"):
-            schema = source.get_schema("Product")
-            normalized = source.preprocess_schema(schema)
+    def test_normalize_pattern(self, source: OpenAPISchema):
+        """Test that pattern keywords are stripped from schemas.
 
-            # Check that the array itself can be nullable
-            assert normalized["properties"]["tags"]["type"] == ["array", "null"]
+        Patterns are validation-only constraints; keeping them in Singer schemas
+        causes false-negative failures when the regex dialect differs from Python re
+        (e.g. Java named-capture groups are valid PCRE but invalid ECMA 262).
+        """
+        # Java-style named-capture group — invalid ECMA 262 / Python re
+        schema = source.get_schema("ImageUrl")
+        normalized = source.preprocess_schema(schema)
+        assert "pattern" not in normalized
+        assert normalized["type"] == "string"
+        assert normalized["maxLength"] == 699052
+
+        # Valid Python regex — still removed
+        schema = source.get_schema("Slug")
+        normalized = source.preprocess_schema(schema)
+        assert "pattern" not in normalized
+        assert normalized["type"] == "string"
+
+    def test_normalize_arrays(self, source: OpenAPISchema):
+        """Test that array schemas and their nullable flag are handled."""
+        schema = source.get_schema("Product")
+        normalized = source.preprocess_schema(schema)
+        assert normalized["properties"]["tags"]["type"] == ["array", "null"]
 
     def test_normalize_properties_with_no_type(self, tmp_path: Path):
         """Test that properties with no type are handled."""
