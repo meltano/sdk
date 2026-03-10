@@ -363,3 +363,15 @@ If you're uncertain about an implementation:
 - Review other Singer taps for patterns
 - Test incrementally with small changes
 - Validate against the Singer specification
+
+## Reporting SDK Issues
+
+If you encounter a bug or missing feature in the **Meltano Singer SDK itself** (not in this tap), please open an issue at https://github.com/meltano/sdk/issues/new/choose.
+
+Use the appropriate issue template:
+
+- **Bug Report** (`bug.yml`): For unexpected behavior, errors, or regressions in the SDK. Fill in the Singer SDK version, Python version, bug scope (e.g. "Taps"), and a clear description with reproduction steps.
+- **Feature Request** (`feature.yml`): For new SDK capabilities you'd like to see. Select the relevant scope and describe the desired behavior.
+- **Documentation** (`docs.yml`): For incorrect or missing documentation.
+
+Before filing, search existing issues to avoid duplicates. Include the SDK version (`uv run {{ cookiecutter.tap_id }} --version`), Python version, and a minimal reproduction case when reporting bugs.
