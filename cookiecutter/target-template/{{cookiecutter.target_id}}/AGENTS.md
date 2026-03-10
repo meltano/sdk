@@ -461,3 +461,48 @@ If you're uncertain about an implementation:
 - Test incrementally with sample data
 - Validate against the Singer specification
 - Consider data consistency and idempotency
+
+## Bumping the Singer SDK Version
+
+When upgrading the `singer-sdk` dependency in `pyproject.toml`, follow these steps to avoid breaking changes:
+
+1. **Check the deprecation guide** before upgrading:
+   https://sdk.meltano.com/en/latest/deprecation.html
+
+   The deprecation page lists APIs scheduled for removal in each release, along with migration instructions. Review the entries for every version between your current version and the target version.
+
+1. **Update the dependency** in `pyproject.toml`:
+
+   ```toml
+   [project]
+   dependencies = [
+       "singer-sdk~=X.Y",  # Bump to the new version
+   ]
+   ```
+
+1. **Re-sync your environment** and run the full test suite:
+
+   ```bash
+   uv sync
+   uv run pytest
+   ```
+
+1. **Address deprecation warnings**: Run with warnings enabled to catch anything that will become an error in a future release:
+
+   ```bash
+   uv run pytest -W error::DeprecationWarning
+   ```
+
+1. **Check the changelog** for any behavioral changes that affect your target, even if not surfaced by warnings (e.g. batching, sink processing, schema handling).
+
+## Reporting SDK Issues
+
+If you encounter a bug or missing feature in the **Meltano Singer SDK itself** (not in this target), please open an issue at https://github.com/meltano/sdk/issues/new/choose.
+
+Use the appropriate issue template:
+
+- **Bug Report** (`bug.yml`): For unexpected behavior, errors, or regressions in the SDK. Fill in the Singer SDK version, Python version, bug scope (e.g. "Targets"), and a clear description with reproduction steps.
+- **Feature Request** (`feature.yml`): For new SDK capabilities you'd like to see. Select the relevant scope and describe the desired behavior.
+- **Documentation** (`docs.yml`): For incorrect or missing documentation.
+
+Before filing, search existing issues to avoid duplicates. Include the SDK version (`uv run {{ cookiecutter.target_id }} --version`), Python version, and a minimal reproduction case when reporting bugs.
