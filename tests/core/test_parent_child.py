@@ -438,7 +438,7 @@ def test_parent_records_emitted_when_child_hits_record_limit():
             yield {"id": 3}
 
     class SiblingStream(Stream):
-        name = "subling"
+        name = "sibling"
         schema: t.ClassVar[dict] = {
             "type": "object",
             "properties": {
@@ -479,4 +479,4 @@ def test_parent_records_emitted_when_child_hits_record_limit():
     assert tally["child_limited"] == 4, msg
 
     msg = "Sibling records should also be emitted"
-    assert tally["subling"] == 4, msg
+    assert tally["sibling"] == 4, msg
