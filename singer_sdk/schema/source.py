@@ -246,7 +246,8 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
     - Converts `nullable: true` to type arrays with "null"
     - Unwraps single-element `oneOf` constructs
     - Merges `allOf` constructs into a single object schema
-    - Removes `enum` keywords
+    - Removes `enum` keywords (validation-only, not used in Singer data exchange)
+    - Removes `pattern` keywords (validation-only, not used in Singer data exchange)
     - Recursively processes nested object properties and array items
     """
 
@@ -289,9 +290,27 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
             schema: A JSON schema.
 
         Returns:
-            The schema with `enum` handled.
+            The schema with ``enum`` removed.
         """
         schema.pop("enum", None)
+        return schema
+
+    def handle_pattern(self, schema: Schema) -> Schema:  # noqa: PLR6301
+        """Handle pattern values in a JSON schema.
+
+        Singer taps and targets do not use the ``pattern`` keyword for data exchange;
+        it is a string-validation constraint that is only meaningful in an OpenAPI
+        context. Removing it avoids false-negative validation failures, particularly
+        for patterns written in regex dialects (e.g. Java named-capture groups) that
+        are not valid ECMA 262 or Python ``re``.
+
+        Args:
+            schema: A JSON schema.
+
+        Returns:
+            The schema with ``pattern`` removed.
+        """
+        schema.pop("pattern", None)
         return schema
 
     def handle_all_of(self, subschemas: list[Schema]) -> Schema:  # noqa: PLR6301
@@ -364,9 +383,13 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         if result.pop("nullable", False) and types and "null" not in types:
             result["type"] = [*types, "null"]
 
-        # Remove 'enum' keyword
+        # Remove 'enum' keyword (validation-only, not used in Singer data exchange)
         if "enum" in result:
             result = self.handle_enum(result)
+
+        # Remove 'pattern' keyword (validation-only, not used in Singer data exchange)
+        if "pattern" in result:
+            result = self.handle_pattern(result)
 
         return result
 

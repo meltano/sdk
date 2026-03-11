@@ -1406,10 +1406,12 @@ class Stream(abc.ABC):  # noqa: PLR0904
                 try:
                     child_stream.sync(context=child_context)
                 except (AbortedSyncFailedException, AbortedSyncPausedException):
+                    # Child stream was interrupted, continue with remaining children
                     # sync_result already set inside child_stream.sync().
                     # Mark the parent failed too, then continue so remaining
                     # parent records and children are still attempted.
                     self.sync_result = SyncResult.PARTIAL
+                    continue
 
     # Overridable Methods
 
