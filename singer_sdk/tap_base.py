@@ -281,9 +281,10 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
             streams = self.streams.values()
 
         for stream in streams:
-            if not stream.child_streams:  # pragma: no branch
-                # Initialize streams' record limits before beginning the sync test.
-                stream.ABORT_AT_RECORD_COUNT = dry_run_record_limit
+            # Apply the record limit to every stream so that both parent and child
+            # streams are capped.  Child-stream aborts are caught in _sync_children
+            # so they do not prevent the parent from emitting its own records.
+            stream.ABORT_AT_RECORD_COUNT = dry_run_record_limit
 
             # Force selection of streams.
             stream.selected = True
