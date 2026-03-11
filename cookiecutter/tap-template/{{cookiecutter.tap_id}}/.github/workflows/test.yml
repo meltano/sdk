@@ -52,12 +52,10 @@ jobs:
         python-version: {{ '${{ fromJson(needs.build-package.outputs.supported-python-versions) }}' }}
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Set up Python {{ '${{ matrix.python-version }}' }}
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-      with:
-        python-version: {{ '${{ matrix.python-version }}' }}
     - name: Setup uv
       uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098 # v7.3.1
+      with:
+        python-version: {{ '${{ matrix.python-version }}' }}
     - name: Run Tox
       run: |
         uvx --with=tox-uv tox -e {{ '${{ matrix.python-version }}' }}
@@ -67,12 +65,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Set up Python
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-      with:
-        python-version: 3.x
     - name: Setup uv
       uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098 # v7.3.1
     - name: Run Tox
-      run: |
-        uvx --with=tox-uv tox -e typing
+      run: >
+        uvx
+        --managed-python
+        --with=tox-uv
+        tox -e typing
