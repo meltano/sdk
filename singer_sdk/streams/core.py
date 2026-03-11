@@ -1369,7 +1369,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         for child_stream in self.child_streams:
             if child_stream.selected or child_stream.has_selected_descendents:
-                child_stream.sync(context=child_context)
+                try:
+                    child_stream.sync(context=child_context)
+                except (AbortedSyncFailedException, AbortedSyncPausedException):
+                    # Child stream was interrupted, continue with remaining children
+                    continue
 
     # Overridable Methods
 
