@@ -232,7 +232,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
            :class:`singer_sdk.exceptions.RetriableAPIError` is raised. By default this
            applies to 5xx error codes, along with values set in:
            :attr:`~singer_sdk.RESTStream.extra_retry_statuses`
-        4. The request is ignorable. A :class:`singer_sdk.exceptions.IgnorableAPIError`
+        4. The request is ignorable. A :class:`singer_sdk.exceptions.SkippableAPIError`
            is raised. By default this applies to values found in:
            :attr:`~singer_sdk.RESTStream.ignorable_statuses`
 

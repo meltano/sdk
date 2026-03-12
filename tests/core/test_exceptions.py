@@ -248,7 +248,7 @@ class TestRetriableSync:
 # ---------------------------------------------------------------------------
 
 
-class TestIgnorableSync:
+class TestSkippableSync:
     def test_ignorable_sync_error_chain(self) -> None:
         assert_hierarchy(
             Exception, exc.SingerSDKError, exc.SyncError, exc.SkippableSyncError
