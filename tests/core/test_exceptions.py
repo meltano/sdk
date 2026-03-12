@@ -251,7 +251,7 @@ class TestRetriableSync:
 class TestIgnorableSync:
     def test_ignorable_sync_error_chain(self) -> None:
         assert_hierarchy(
-            Exception, exc.SingerSDKError, exc.SyncError, exc.IgnorableSyncError
+            Exception, exc.SingerSDKError, exc.SyncError, exc.SkippableSyncError
         )
 
     def test_ignorable_api_error_chain(self) -> None:
@@ -259,8 +259,8 @@ class TestIgnorableSync:
             Exception,
             exc.SingerSDKError,
             exc.SyncError,
-            exc.IgnorableSyncError,
-            exc.IgnorableAPIError,
+            exc.SkippableSyncError,
+            exc.SkippableAPIError,
         )
 
     def test_invalid_record_chain(self) -> None:
@@ -268,7 +268,7 @@ class TestIgnorableSync:
             Exception,
             exc.SingerSDKError,
             exc.SyncError,
-            exc.IgnorableSyncError,
+            exc.SkippableSyncError,
             exc.InvalidRecord,
         )
 

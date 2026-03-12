@@ -8,7 +8,7 @@ from contextlib import nullcontext
 import pytest
 import requests
 
-from singer_sdk.exceptions import FatalAPIError, IgnorableAPIError, RetriableAPIError
+from singer_sdk.exceptions import FatalAPIError, RetriableAPIError, SkippableAPIError
 from singer_sdk.streams.rest import RESTStream
 
 if t.TYPE_CHECKING:
@@ -233,29 +233,62 @@ def test_rate_limiting_status_override(
         basic_rest_stream.validate_response(fake_response)
 
 
-class IgnorableStream(RESTStream):
-    """Stream that raises IgnorableAPIError on 404 responses."""
+@pytest.mark.parametrize(
+    "skip_codes,response_status,expectation",
+    [
+        (
+            CustomResponseValidationStream.skip_statuses,
+            404,
+            pytest.raises(FatalAPIError),
+        ),
+        (
+            [404, 403],
+            404,
+            pytest.raises(SkippableAPIError),
+        ),
+    ],
+    ids=[
+        "default",
+        "override",
+    ],
+)
+def test_skip_status_override(
+    basic_rest_stream: RESTStream,
+    skip_codes: list[int],
+    response_status: int,
+    expectation: AbstractContextManager,
+):
+    fake_response = requests.Response()
+    fake_response.status_code = response_status
+    basic_rest_stream.skip_statuses = skip_codes
+
+    with expectation:
+        basic_rest_stream.validate_response(fake_response)
+
+
+class SkippableStream(RESTStream):
+    """Stream that raises SkippableAPIError on 404 responses."""
 
     url_base = "https://example.com"
-    name = "ignorable_stream"
+    name = "skippable_stream"
     schema: t.ClassVar[dict] = {"type": "object", "properties": {}}
     path = "/dummy"
 
     def validate_response(self, response: requests.Response) -> None:
         if response.status_code == 404:
             msg = f"404 Not Found: {response.url}"
-            raise IgnorableAPIError(msg)
+            raise SkippableAPIError(msg)
         super().validate_response(response)
 
 
-def test_ignorable_api_error_propagates_from_validate_response(rest_tap):
-    """IgnorableAPIError is not swallowed at the validation layer."""
-    stream = IgnorableStream(rest_tap)
+def test_skippable_api_error_propagates_from_validate_response(rest_tap):
+    """SkippableAPIError is not swallowed at the validation layer."""
+    stream = SkippableStream(rest_tap)
     fake_response = requests.Response()
     fake_response.status_code = 404
     fake_response.url = "https://example.com/dummy"
 
-    with pytest.raises(IgnorableAPIError):
+    with pytest.raises(SkippableAPIError):
         stream.validate_response(fake_response)
 
 
@@ -264,19 +297,19 @@ def test_request_records_skips_on_ignorable_error(
     rest_tap,
     caplog: pytest.LogCaptureFixture,
 ):
-    """request_records yields nothing and logs a warning on IgnorableAPIError.
+    """request_records yields nothing and logs a warning on SkippableAPIError.
 
     No exception should propagate; the stream is silently skipped.
     """
     requests_mock.get("https://example.com/dummy", status_code=404, reason="Not Found")
 
-    stream = IgnorableStream(rest_tap)
+    stream = SkippableStream(rest_tap)
 
     with caplog.at_level(logging.WARNING, logger=stream.logger.name):
         records = list(stream.request_records(None))
 
     assert records == []
     assert any(
-        "Skipping request due to ignorable error" in record.message
+        "Skipping request due to tolerated error" in record.message
         for record in caplog.records
     )
