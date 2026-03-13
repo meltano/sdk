@@ -5,6 +5,8 @@ from __future__ import annotations
 import sys
 import typing as t
 from abc import ABC, abstractmethod
+from dataclasses import KW_ONLY, dataclass
+from datetime import timedelta
 from urllib.parse import ParseResult, urlparse
 
 from singer_sdk.helpers._compat import SingerSDKPendingDeprecationWarning, deprecated
@@ -16,6 +18,8 @@ else:
     from typing_extensions import override
 
 if t.TYPE_CHECKING:
+    from datetime import date
+
     import requests
 
 T = t.TypeVar("T")
@@ -477,3 +481,51 @@ class LegacyStreamPaginator(BaseAPIPaginator[TPageToken | None], t.Generic[TPage
                 the end of pagination.
         """
         return self.stream.get_next_page_token(response, self.current_value)
+
+
+@dataclass(slots=True, eq=True)
+class DateWindow:
+    """A closed date interval [start, end] representing one paginator window."""
+
+    _: KW_ONLY
+
+    start: date
+    end: date
+
+    def __repr__(self) -> str:
+        """Return a string representation of the date window."""
+        return f"DateWindow({self.start} → {self.end})"
+
+
+class DateRangePaginator(BaseAPIPaginator[DateWindow]):
+    """Paginator that advances through consecutive fixed-size date windows.
+
+    Each page token is a :class:`singer_sdk.pagination.DateWindow` carrying both the
+    start and end of the window, so ``Stream`` methods can consume them directly without
+    needing to know the window size or the global end date ceiling.
+    """
+
+    @override
+    def __init__(self, start_date: date, end_date: date, window_size: int = 30) -> None:
+        """Initialize the paginator."""
+        self._end_date = end_date
+        self._window_size = window_size
+        first = DateWindow(
+            start=start_date,
+            end=min(start_date + timedelta(days=window_size - 1), end_date),
+        )
+        super().__init__(start_value=first)
+        if start_date > end_date:
+            # Nothing to fetch - mark done before any request is made.
+            self._finished = True
+
+    @override
+    def get_next(self, response: requests.Response) -> DateWindow | None:
+        next_start = self._value.end + timedelta(days=1)
+        if next_start > self._end_date:
+            return None
+        next_end = min(
+            next_start + timedelta(days=self._window_size - 1),
+            self._end_date,
+        )
+        return DateWindow(start=next_start, end=next_end)
