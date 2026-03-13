@@ -7,11 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.53.6 (2026-03-13)
 
-## v0.53.6 (2026-03-13)
-
 ### 🐛 Fixes
 
-- [#3562](https://github.com/meltano/sdk/issues/3562) Constrain `simpleeval` dependency to prevent issues with using `json` in stream maps expressions
+- [#3562](https://github.com/meltano/sdk/issues/3562) Constrain `simpleeval` dependency to prevent issues when using `json` in stream maps expressions
 
 ## v0.53.5 (2026-01-06)
 
