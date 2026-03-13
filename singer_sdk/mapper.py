@@ -33,6 +33,8 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers._flattening import FlatteningOptions
     from singer_sdk.singerlib.catalog import Catalog
 
+FunctionsDict: t.TypeAlias = dict[str, t.Callable | simpleeval.ModuleWrapper]
+
 
 MAPPER_ELSE_OPTION = "__else__"
 MAPPER_FILTER_OPTION = "__filter__"
@@ -310,18 +312,18 @@ class CustomStreamMap(StreamMap):
         return self._filter_fn(record)
 
     @property
-    def functions(self) -> dict[str, t.Callable]:
+    def functions(self) -> dict:
         """Get available transformation functions.
 
         Returns:
             Functions which should be available for expression evaluation.
         """
-        funcs: dict[str, t.Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
+        funcs = t.cast("FunctionsDict", simpleeval.DEFAULT_FUNCTIONS.copy())
         funcs["md5"] = md5
         funcs["sha256"] = sha256
-        funcs["datetime"] = datetime
         funcs["bool"] = bool
-        funcs["json"] = json
+        funcs["datetime"] = simpleeval.ModuleWrapper(datetime)
+        funcs["json"] = simpleeval.ModuleWrapper(json)
         return funcs
 
     def _eval(

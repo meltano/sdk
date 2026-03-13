@@ -940,7 +940,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -2699,11 +2699,11 @@ wheels = [
 
 [[package]]
 name = "simpleeval"
-version = "1.0.4"
+version = "1.0.6"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/fd/d6/c25276f8aafd69172852a0f3564cf71b4339bae88d2609ee0843fb1eb6f7/simpleeval-1.0.4.tar.gz", hash = "sha256:32df6dfd5ca09212a7d8b45625b7a2b6aba697ad061a7b0f30938d7d158227fe", size = 37046, upload-time = "2026-03-11T07:40:38.666Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/db/4f/6247534503a9dd0e72e4ed68ba6f9d35ff878d635dddbada1206ab00cec0/simpleeval-1.0.6.tar.gz", hash = "sha256:3a5a743a4f17c53854648144ae41f73eb4f573438d039a59f42cc3172b336141", size = 41004, upload-time = "2026-03-13T16:51:21.389Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3a/bf/3b1df358e83606ab12fae5861e759ae18084599cfaa9c828b6f8c7cbef03/simpleeval-1.0.4-py3-none-any.whl", hash = "sha256:380318357214f4abb98a0527bd598417707e5416ea13d4b67debf3f67c506c22", size = 17249, upload-time = "2026-03-11T07:40:36.543Z" },
+    { url = "https://files.pythonhosted.org/packages/51/3d/f95b256ba280d0d5e46a5103cab17769aa8d07401293ed41439ec13049a4/simpleeval-1.0.6-py3-none-any.whl", hash = "sha256:cbbf6427157c881bd790d7fcc6449dc2c1766f7bc7af2deb582e1d475b653eba", size = 18661, upload-time = "2026-03-13T16:51:19.491Z" },
 ]
 
 [[package]]
@@ -2983,7 +2983,7 @@ requires-dist = [
     { name = "referencing", specifier = ">=0.30.0" },
     { name = "requests", specifier = ">=2.25.1" },
     { name = "s3fs", marker = "extra == 's3'", specifier = ">=2024.9.0" },
-    { name = "simpleeval", specifier = ">=0.9.13,!=1.0.1,<1.0.5" },
+    { name = "simpleeval", specifier = ">=1.0.5" },
     { name = "simplejson", specifier = ">=3.17.6" },
     { name = "sqlalchemy", specifier = ">=2" },
     { name = "sqlalchemy", marker = "extra == 'sql'", specifier = ">=2" },
