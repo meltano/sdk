@@ -45,7 +45,7 @@ dependencies = [
     "PyYAML>=6.0",
     "referencing>=0.30.0",
     "requests>=2.25.1",
-    "simpleeval>=0.9.13,!=1.0.1",
+    "simpleeval>=0.9.13,!=1.0.1,<1.0.5",
     "simplejson>=3.17.6",
     "sqlalchemy>=2",
     "typing-extensions>=4.5.0; python_version < '3.13'",
