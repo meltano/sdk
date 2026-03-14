@@ -1306,7 +1306,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
     # Public methods ("final", not recommended to be overridden)
 
     @t.final
-    def sync(self, context: types.Context | None = None) -> None:
+    def sync(self, context: types.Context | None = None) -> SyncResult:
         """Sync this stream.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -1314,9 +1314,8 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Args:
             context: Stream partition or context dictionary.
 
-        Raises:
-            AbortedSyncFailedException: If the sync was aborted non-resumably.
-            AbortedSyncPausedException: If the sync was paused at a resumable point.
+        Returns:
+            The SyncResult for this stream.
         """
         # Preprocess context before it's frozen
         context = self.preprocess_context(context) if context else None
@@ -1351,13 +1350,12 @@ class Stream(abc.ABC):  # noqa: PLR0904
             self._run_sync(context)
         except AbortedSyncFailedException:
             self.sync_result = SyncResult.FAILED
-            raise
         except AbortedSyncPausedException:
             self.sync_result = SyncResult.ABORTED
-            raise
         else:
             # Only mark SUCCESS if no child failure already degraded the result.
             self.sync_result = SyncResult.SUCCESS.combine(self.sync_result)
+        return self.sync_result
 
     def _run_sync(self, context: types.Context | None) -> None:
         """Execute the sync body, converting any non-lifecycle exception to one.
@@ -1403,15 +1401,9 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         for child_stream in self.child_streams:
             if child_stream.selected or child_stream.has_selected_descendents:
-                try:
-                    child_stream.sync(context=child_context)
-                except (AbortedSyncFailedException, AbortedSyncPausedException):
-                    # Child stream was interrupted, continue with remaining children
-                    # sync_result already set inside child_stream.sync().
-                    # Mark the parent failed too, then continue so remaining
-                    # parent records and children are still attempted.
+                child_result = child_stream.sync(context=child_context)
+                if child_result != SyncResult.SUCCESS:
                     self.sync_result = SyncResult.PARTIAL
-                    continue
 
     # Overridable Methods
 

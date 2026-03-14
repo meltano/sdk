@@ -505,21 +505,10 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
                 )
                 continue
 
-            try:
-                stream.sync()
-            except (AbortedSyncFailedException, AbortedSyncPausedException) as exc:
-                # sync_result is already set inside Stream.sync().
-                # Result is logged below after the loop; continue to next stream.
-                self.logger.error(  # noqa: TRY400
-                    "Stream '%s' failed: %s",
-                    stream.name,
-                    exc.__cause__,
-                )
-            else:
-                # Only reached when stream.sync() did not raise — SUCCESS.
+            stream_result = stream.sync()
+            if stream_result == SyncResult.SUCCESS:
                 stream.finalize_state_progress_markers()
-
-            result = result.combine(stream.sync_result)
+            result = result.combine(stream_result)
 
         # Always log results and costs — runs even when an abort exception
         # propagates out of the per-stream loop.
