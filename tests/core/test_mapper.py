@@ -184,7 +184,7 @@ def transform_stream_maps():
             "email_hash": "md5(config['hash_seed'] + owner_email)",
             "description": "'[masked]'",
             "description2": "str('[masked]')",
-            "create_year": "int(datetime.date.fromisoformat(create_date).year)",
+            "create_year": "int(datetime_date.fromisoformat(create_date).year)",
             "int_test": "int('0')",
             "__else__": None,
         },
@@ -964,9 +964,9 @@ class MappedTap(Tap):
         pytest.param(
             {
                 "mystream": {
-                    "joined_date": "datetime.datetime.fromisoformat(joined_at).date()",
-                    "joined_timestamp": "float(datetime.datetime.fromisoformat(joined_at).timestamp())",  # noqa: E501
-                    "some_datetime": "datetime.datetime.fromisoformat(config['some_date_string'])",  # noqa: E501
+                    "joined_date": "datetime_datetime.fromisoformat(joined_at).date()",
+                    "joined_timestamp": "float(datetime_datetime.fromisoformat(joined_at).timestamp())",  # noqa: E501
+                    "some_datetime": "datetime_datetime.fromisoformat(config['some_date_string'])",  # noqa: E501
                 },
             },
             {
@@ -980,7 +980,7 @@ class MappedTap(Tap):
         pytest.param(
             {
                 "mystream": {
-                    "user": "json.dumps(user, default=str)",
+                    "user": "json_dumps(user, default=str)",
                 },
             },
             {"flattening_enabled": False, "flattening_max_depth": 0},

@@ -322,8 +322,14 @@ class CustomStreamMap(StreamMap):
         funcs["md5"] = md5
         funcs["sha256"] = sha256
         funcs["bool"] = bool
-        funcs["datetime"] = simpleeval.ModuleWrapper(datetime)
-        funcs["json"] = simpleeval.ModuleWrapper(json)
+        funcs["datetime_datetime"] = datetime.datetime
+        funcs["datetime_date"] = datetime.date
+        funcs["json_dumps"] = json.dumps
+        funcs["json_loads"] = json.loads
+
+        # Deprecated
+        # funcs["datetime"] = simpleeval.ModuleWrapper(datetime)  # noqa: ERA001
+        # funcs["json"] = simpleeval.ModuleWrapper(json)  # noqa: ERA001
         return funcs
 
     def _eval(
@@ -415,15 +421,23 @@ class CustomStreamMap(StreamMap):
         if expr.startswith("bool("):
             return th.BooleanType()
 
-        if expr.startswith("json.dumps("):
+        if expr.startswith(("json.dumps(", "json_dumps(")):
             return th.StringType()
 
-        if expr.startswith(("datetime.date.", "datetime.date(")) or expr.endswith(
-            ".date()"
-        ):
+        if expr.startswith((
+            "datetime.date.",
+            "datetime.date(",
+            "datetime_date.",
+            "datetime_date(",
+        )) or expr.endswith(".date()"):
             return th.DateType()
 
-        if expr.startswith(("datetime.datetime.", "datetime.datetime(")):
+        if expr.startswith((
+            "datetime.datetime.",
+            "datetime.datetime(",
+            "datetime_datetime.",
+            "datetime.datetime(",
+        )):
             return th.DateTimeType()
 
         return th.StringType() if expr[0] == "'" and expr[-1] == "'" else default
