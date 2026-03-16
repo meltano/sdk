@@ -9,7 +9,6 @@ on:
       - "tests/**"
       - "noxfile.py"
       - "pyproject.toml"
-      - "uv.lock"
       - ".github/workflows/test.yml"
       - ".github/workflows/resources/requirements.txt"
   push:
@@ -23,7 +22,6 @@ on:
       - "tests/**"
       - "noxfile.py"
       - "pyproject.toml"
-      - "uv.lock"
       - ".github/workflows/test.yml"
       - ".github/workflows/resources/requirements.txt"
   merge_group:

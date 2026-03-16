@@ -3,6 +3,8 @@ ci:
   autofix_commit_msg: "style: pre-commit fixes"
   autoupdate_schedule: monthly
   autoupdate_commit_msg: 'chore: pre-commit autoupdate'
+  skip:
+  - pip-compile
 
 default_language_version:
   python: python3.14
@@ -68,8 +70,30 @@ repos:
 - repo: https://github.com/astral-sh/uv-pre-commit
   rev: 0.10.9
   hooks:
-  - id: uv-lock
   - id: uv-sync
+  - id: pip-compile
+    files: |
+      (?x)^(
+        pyproject.toml|
+        requirements/requirements.docs.txt
+      )$
+    args:
+      - pyproject.toml
+      - "--group=docs"
+      - "--python-version=3.14"
+      - "--output-file=requirements/requirements.docs.txt"
+  - id: pip-compile
+    files: |
+      (?x)^(
+        pyproject.toml|
+        requirements/requirements.codspeed.txt
+      )$
+    args:
+      - pyproject.toml
+      - "--all-extras"
+      - "--group=benchmark"
+      - "--python-version=3.14"
+      - "--output-file=requirements/requirements.codspeed.txt"
 
 - repo: https://github.com/codespell-project/codespell
   rev: v2.4.2

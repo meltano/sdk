@@ -1,7 +1,7 @@
 version: 2
 enable-beta-ecosystems: true
 updates:
-  - package-ecosystem: uv
+  - package-ecosystem: pip
     directory: "/"
     schedule:
       interval: weekly
@@ -11,7 +11,7 @@ updates:
         dependency-type: development
       runtime-dependencies:
         dependency-type: production
-    versioning-strategy: lockfile-only
+    versioning-strategy: increase-if-necessary
     cooldown:
       default-days: 7
     allow:

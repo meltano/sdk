@@ -35,12 +35,7 @@ extend-ignore = [
 
 COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
 PYPROJECT = nox.project.load_toml()
-UV_SYNC_COMMAND = (
-    "uv",
-    "sync",
-    "--locked",
-    "--no-dev",
-)
+EXTRAS = list(PYPROJECT["project"]["optional-dependencies"])
 
 package = "singer_sdk"
 main_python = Path(".python-version").read_text(encoding="utf-8").rstrip()
@@ -75,11 +70,10 @@ def mypy(session: nox.Session) -> None:
         "singer_sdk",
     ]
     args = session.posargs or default_locations
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        f".[{','.join(EXTRAS)}]",
         "--group=packages",
         "--group=typing",
-        "--all-extras",
         env=_install_env(session),
     )
     python = session.python if isinstance(session.python, str) else main_python
@@ -97,11 +91,10 @@ def ty(session: nox.Session) -> None:
         "singer_sdk",
     ]
     args = session.posargs or default_locations
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        f".[{','.join(EXTRAS)}]",
         "--group=packages",
         "--group=typing",
-        "--all-extras",
         env=_install_env(session),
     )
     python = session.python if isinstance(session.python, str) else main_python
@@ -136,12 +129,9 @@ def tests(session: nox.Session) -> None:
     if session.python not in python_versions:
         env["PYO3_USE_ABI3_FORWARD_COMPATIBILITY"] = "1"
 
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        ".[faker,jwt,s3]",
         "--group=testing",
-        "--extra=faker",
-        "--extra=jwt",
-        "--extra=s3",
         env=env,
     )
 
@@ -160,11 +150,10 @@ def tests(session: nox.Session) -> None:
 @nox.session(name="test-external", python=main_python, tags=["test"], default=False)
 def test_external(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        f".[{','.join(EXTRAS)}]",
         "--group=packages",
         "--group=testing",
-        "--all-extras",
         env=_install_env(session),
     )
 
@@ -185,10 +174,9 @@ def test_external(session: nox.Session) -> None:
 )
 def test_contrib(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        f".[{','.join(EXTRAS)}]",
         "--group=testing",
-        "--all-extras",
         env=_install_env(session),
     )
 
@@ -213,11 +201,10 @@ def test_contrib(session: nox.Session) -> None:
 )
 def test_packages(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        f".[{','.join(EXTRAS)}]",
         "--group=packages",
         "--group=testing",
-        "--all-extras",
         env=_install_env(session),
     )
 
@@ -244,10 +231,9 @@ def test_lowest_requirements(session: nox.Session) -> None:
     """Test the package with the lowest dependency versions."""
     install_env = _install_env(session)
 
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        f".[{','.join(EXTRAS)}]",
         "--group=testing",
-        "--all-extras",
         env=install_env,
     )
     tmpdir = Path(session.create_tmp())
@@ -285,10 +271,10 @@ def test_lowest_requirements(session: nox.Session) -> None:
 @nox.session(tags=["test"], default=False)
 def benches(session: nox.Session) -> None:
     """Run benchmarks."""
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        f".[{','.join(EXTRAS)}]",
         "--group=testing",
-        "--all-extras",
+        "-c=requirements/requirements.codspeed.txt",
         env=_install_env(session),
     )
     _run_pytest(
@@ -308,8 +294,8 @@ def coverage(session: nox.Session) -> None:
     """Generate coverage report."""
     args = session.posargs or ["report", "-m"]
 
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        ".",
         "--group=testing",
         env=_install_env(session),
     )
@@ -323,21 +309,10 @@ def coverage(session: nox.Session) -> None:
 @nox.session(name="deps")
 def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
-    extras = [
-        "faker",
-        "jwt",
-        "msgspec",
-        "parquet",
-        "s3",
-        "ssh",
-        "testing",
-    ]
-
     session.install("deptry")
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        f".[{','.join(EXTRAS)}]",
         "--inexact",
-        *(f"--extra={extra}" for extra in extras),
         env=_install_env(session),
     )
     session.install("deptry")
@@ -347,11 +322,10 @@ def dependencies(session: nox.Session) -> None:
 @nox.session(name="snap", default=False)
 def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        f".[{','.join(EXTRAS)}]",
         "--group=testing",
         "--group=packages",
-        "--all-extras",
         env=_install_env(session),
     )
     _run_pytest(
@@ -374,8 +348,8 @@ def doctest(session: nox.Session) -> None:
         if "FORCE_COLOR" in os.environ:
             args.append("--xdoctest-colored=1")
 
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        ".",
         "--group=testing",
         env=_install_env(session),
     )
@@ -389,8 +363,8 @@ def docs(session: nox.Session) -> None:
     if not session.posargs and "FORCE_COLOR" in os.environ:
         args.insert(0, "--color")
 
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        ".",
         "--group=docs",
         env=_install_env(session),
     )
@@ -415,8 +389,8 @@ def docs_serve(session: nox.Session) -> None:
         "build",
         "-W",
     ]
-    session.run_install(
-        *UV_SYNC_COMMAND,
+    session.install(
+        ".",
         "--inexact",
         "--group=docs",
         env=_install_env(session),

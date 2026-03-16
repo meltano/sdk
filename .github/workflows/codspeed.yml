@@ -10,7 +10,7 @@ on:
       - "tests/**"
       - "noxfile.py"
       - "pyproject.toml"
-      - "uv.lock"
+      - "requirements/requirements.docs.text"
       - ".github/workflows/codspeed.yml"
   pull_request:
     paths:
@@ -18,7 +18,7 @@ on:
       - "tests/**"
       - "noxfile.py"
       - "pyproject.toml"
-      - "uv.lock"
+      - "requirements/requirements.docs.text"
       - ".github/workflows/codspeed.yml"
   # `workflow_dispatch` allows CodSpeed to trigger backtest
   # performance analysis in order to generate initial data.
@@ -56,8 +56,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        uv export --all-packages --no-editable --frozen --no-hashes --no-dev --all-extras --group benchmark --output-file requirements.codspeed.txt
-        uv pip install --system -r requirements.codspeed.txt
+        uv pip install . --group benchmark --system -c requirements/requirements.codspeed.txt
 
     - uses: CodSpeedHQ/action@281164b0f014a4e7badd2c02cecad9b595b70537 # v4.11.1
       with:
