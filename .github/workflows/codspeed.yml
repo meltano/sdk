@@ -30,7 +30,7 @@ concurrency:
 
 env:
   FORCE_COLOR: "1"
-  UV_VERSION: ">=0.9,<0.10"
+  UV_VERSION: ">=0.10"
 
 permissions: {}
 
