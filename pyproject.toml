@@ -494,6 +494,7 @@ meltano-tap-sqlite = { workspace = true }
 meltano-target-csv = { workspace = true }
 meltano-target-parquet = { workspace = true }
 meltano-target-sqlite = { workspace = true }
+simpleeval = { git = "https://github.com/meltano/simpleeval.git", rev = "1.0.5-perf" }
 
 [tool.uv.workspace]
 members = [

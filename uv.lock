@@ -2700,11 +2700,7 @@ wheels = [
 [[package]]
 name = "simpleeval"
 version = "1.0.6"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/db/4f/6247534503a9dd0e72e4ed68ba6f9d35ff878d635dddbada1206ab00cec0/simpleeval-1.0.6.tar.gz", hash = "sha256:3a5a743a4f17c53854648144ae41f73eb4f573438d039a59f42cc3172b336141", size = 41004, upload-time = "2026-03-13T16:51:21.389Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/51/3d/f95b256ba280d0d5e46a5103cab17769aa8d07401293ed41439ec13049a4/simpleeval-1.0.6-py3-none-any.whl", hash = "sha256:cbbf6427157c881bd790d7fcc6449dc2c1766f7bc7af2deb582e1d475b653eba", size = 18661, upload-time = "2026-03-13T16:51:19.491Z" },
-]
+source = { git = "https://github.com/meltano/simpleeval.git?rev=1.0.5-perf#52a0aff1cfc9b78f6f46a71d7bbf73396e672b73" }
 
 [[package]]
 name = "simplejson"
@@ -2983,7 +2979,7 @@ requires-dist = [
     { name = "referencing", specifier = ">=0.30.0" },
     { name = "requests", specifier = ">=2.25.1" },
     { name = "s3fs", marker = "extra == 's3'", specifier = ">=2024.9.0" },
-    { name = "simpleeval", specifier = ">=1.0.5" },
+    { name = "simpleeval", git = "https://github.com/meltano/simpleeval.git?rev=1.0.5-perf" },
     { name = "simplejson", specifier = ">=3.17.6" },
     { name = "sqlalchemy", specifier = ">=2" },
     { name = "sqlalchemy", marker = "extra == 'sql'", specifier = ">=2" },
