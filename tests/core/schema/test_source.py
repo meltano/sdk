@@ -808,7 +808,7 @@ class TestOpenAPISchemaNormalization:
         assert normalized["properties"]["value"]["type"] == ["integer", "null"]
 
     def test_normalize_one_of_recursive(self, source: OpenAPISchema):
-        """Test that single-element oneOf constructs are unwrapped."""
+        """Test that oneOf are recursively normalized to nullable object members."""
         schema = source.fetch_schema("MultipleOneOf")
         assert all(elem["type"] == "object" for elem in schema["oneOf"])
 
@@ -816,7 +816,7 @@ class TestOpenAPISchemaNormalization:
         assert all(elem["type"] == ["object", "null"] for elem in normalized["oneOf"])
 
     def test_normalize_any_of_recursive(self, source: OpenAPISchema):
-        """Test that anyOf constructs are recursively normalized to nullable object members."""
+        """Test that anyOf are recursively normalized to nullable object members."""
         schema = source.fetch_schema("MultipleAnyOf")
         assert all(elem["type"] == "object" for elem in schema["anyOf"])
 
