@@ -312,7 +312,7 @@ class CustomStreamMap(StreamMap):
         return self._filter_fn(record)
 
     @property
-    def functions(self) -> dict:
+    def functions(self) -> FunctionsDict:
         """Get available transformation functions.
 
         Returns:
