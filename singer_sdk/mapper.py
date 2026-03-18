@@ -14,9 +14,15 @@ import hashlib
 import importlib.util
 import json
 import logging
+import sys
 import typing as t
 
 import simpleeval  # type: ignore[import-untyped]
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 import singer_sdk.typing as th
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
@@ -33,7 +39,7 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers._flattening import FlatteningOptions
     from singer_sdk.singerlib.catalog import Catalog
 
-FunctionsDict: t.TypeAlias = dict[str, t.Callable | simpleeval.ModuleWrapper]
+FunctionsDict: t.TypeAlias = dict[str, t.Callable]
 
 
 MAPPER_ELSE_OPTION = "__else__"
@@ -68,6 +74,18 @@ def sha256(string: str) -> str:
         A string digested into SHA256.
     """
     return hashlib.sha256(string.encode("utf-8")).hexdigest()
+
+
+class CustomEvalWithCompoundTypes(simpleeval.EvalWithCompoundTypes):
+    """Custom EvalWithCompoundTypes class."""
+
+    @override
+    def _check_disallowed_items(self, item: t.Any) -> None:
+        # assume the functions/modules we explicitly register are safe
+        if item in self.functions.values():
+            return
+
+        super()._check_disallowed_items(item)
 
 
 StreamMapsDict: t.TypeAlias = dict[str, str | dict | None]
@@ -285,7 +303,7 @@ class CustomStreamMap(StreamMap):
             self._transform_fn,
             self.transformed_schema,
         ) = self._init_functions_and_schema(stream_map=map_transform)
-        self.expr_evaluator = simpleeval.EvalWithCompoundTypes(functions=self.functions)
+        self.expr_evaluator = CustomEvalWithCompoundTypes(functions=self.functions)
         self.fake = self._init_faker_instance()
 
     def transform(self, record: dict) -> dict | None:
@@ -321,9 +339,9 @@ class CustomStreamMap(StreamMap):
         funcs = t.cast("FunctionsDict", simpleeval.DEFAULT_FUNCTIONS.copy())
         funcs["md5"] = md5
         funcs["sha256"] = sha256
-        funcs["datetime"] = simpleeval.ModuleWrapper(datetime)
+        funcs["datetime"] = datetime
         funcs["bool"] = bool
-        funcs["json"] = simpleeval.ModuleWrapper(json)
+        funcs["json"] = json
         return funcs
 
     def _eval(
@@ -867,7 +885,7 @@ class PluginMapper:
         result: str
 
         try:
-            expr_evaluator = simpleeval.EvalWithCompoundTypes(names=names)
+            expr_evaluator = CustomEvalWithCompoundTypes(names=names)
             result = expr_evaluator.eval(expr)
         except simpleeval.NameNotDefined:
             logger.debug(
