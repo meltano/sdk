@@ -374,10 +374,13 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         if "allOf" in result:
             result = self.normalize_schema(self.handle_all_of(result["allOf"]))
 
-        if "oneOf" in result and len(result["oneOf"]) == 1:
-            (inner,) = result.pop("oneOf")
-            result.update(self.normalize_schema(inner))
-            schema_type = result.get("type", [])
+        if "oneOf" in result:
+            if len(result["oneOf"]) == 1:
+                (inner,) = result.pop("oneOf")
+                result.update(self.normalize_schema(inner))
+                schema_type = result.get("type", [])
+            else:
+                result["oneOf"] = [self.normalize_schema(s) for s in result["oneOf"]]
 
         types = [schema_type] if isinstance(schema_type, str) else schema_type
         if result.pop("nullable", False) and types and "null" not in types:
