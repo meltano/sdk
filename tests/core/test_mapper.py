@@ -42,6 +42,7 @@ else:
 if t.TYPE_CHECKING:
     from pathlib import Path
 
+    from pytest_benchmark.plugin import BenchmarkFixture
     from pytest_snapshot.plugin import Snapshot
 
     from singer_sdk.helpers._batch import BatchConfig
@@ -537,8 +538,8 @@ def test_wildcard_transforms(
 
 def _run_transform(
     *,
-    stream_maps,
-    stream_map_config,
+    stream_maps: dict,
+    stream_map_config: dict,
     sample_stream,
     sample_catalog_obj,
 ):
@@ -1037,11 +1038,11 @@ def test_mapped_stream(
 
 
 def test_bench_simple_map_transforms(
-    benchmark,
-    sample_stream,
-    sample_catalog_dict,
-    transform_stream_maps,
-    stream_map_config,
+    benchmark: BenchmarkFixture,
+    sample_stream: dict[str, list[dict[str, t.Any]]],
+    sample_catalog_dict: dict,
+    transform_stream_maps: dict,
+    stream_map_config: dict,
 ):
     """Run benchmark tests using the "repositories" stream."""
     stream_size_scale = 1000
