@@ -714,6 +714,13 @@ class TestOpenAPISchemaNormalization:
                             },
                         },
                     },
+                    "MultipleOneOf": {
+                        "oneOf": [
+                            {"type": "object", "properties": {"x": {"type": "string"}}},
+                            {"type": "object", "properties": {"y": {"type": "string"}}},
+                            {"type": "object", "properties": {"z": {"type": "string"}}},
+                        ],
+                    },
                     "AllOfNoElements": {
                         "allOf": [],
                     },
@@ -792,6 +799,14 @@ class TestOpenAPISchemaNormalization:
         normalized = source.preprocess_schema(schema)
         assert "oneOf" not in normalized["properties"]["value"]
         assert normalized["properties"]["value"]["type"] == ["integer", "null"]
+
+    def test_normalize_one_recursive(self, source: OpenAPISchema):
+        """Test that single-element oneOf constructs are unwrapped."""
+        schema = source.fetch_schema("MultipleOneOf")
+        assert all(elem["type"] == "object" for elem in schema["oneOf"])
+
+        normalized = source.preprocess_schema(schema)
+        assert all(elem["type"] == ["object", "null"] for elem in normalized["oneOf"])
 
     def test_normalize_all_of_no_elements(self, source: OpenAPISchema):
         """Test that an empty allOf is normalized to an empty schema."""
