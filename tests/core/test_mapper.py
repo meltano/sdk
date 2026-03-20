@@ -7,12 +7,14 @@ import datetime
 import io
 import json
 import logging
+import sys
 import typing as t
 from contextlib import redirect_stdout
 from decimal import Decimal
 
 import pytest
 import time_machine
+from typing_extensions import override
 
 from singer_sdk.exceptions import MapExpressionError
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
@@ -32,10 +34,18 @@ from singer_sdk.typing import (
     StringType,
 )
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 if t.TYPE_CHECKING:
     from pathlib import Path
 
     from pytest_snapshot.plugin import Snapshot
+
+    from singer_sdk.helpers._batch import BatchConfig
+    from singer_sdk.helpers.types import Context
 
 
 @pytest.fixture
@@ -662,7 +672,8 @@ class MappedStream(Stream):
             "joined_at": "2022-01-01T00:00:00Z",
         }
 
-    def get_batches(self, batch_config, context):  # noqa: ARG002
+    @override
+    def get_batches(self, batch_config: BatchConfig, context: Context | None = None):
         yield batch_config.encoding, ["file:///tmp/stream.json.gz"]
 
 

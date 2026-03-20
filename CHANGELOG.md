@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.53.6 (2026-03-13)
+
+### 🐛 Fixes
+
+- [#3562](https://github.com/meltano/sdk/issues/3562) Constrain `simpleeval` dependency to prevent issues when using `json` in stream maps expressions
+
 ## v0.53.5 (2026-01-06)
 
 ### 🐛 Fixes

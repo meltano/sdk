@@ -44,8 +44,8 @@ __all__ = [  # noqa: RUF022
     "RetriableSyncError",
     "RetriableAPIError",
     # Sync — ignorable
-    "IgnorableSyncError",
-    "IgnorableAPIError",
+    "SkippableSyncError",
+    "SkippableAPIError",
     "InvalidRecord",
     # Sync — data quality
     "DataError",
@@ -245,15 +245,15 @@ class RetriableAPIError(RetriableSyncError):
 # ---------------------------------------------------------------------------
 
 
-class IgnorableSyncError(SyncError):
+class SkippableSyncError(SyncError):
     """Raised when an error can be logged, skipped, and the sync continued."""
 
 
-class IgnorableAPIError(IgnorableSyncError):
+class SkippableAPIError(SkippableSyncError):
     """Raised when a failed API request can be safely ignored and the sync continued."""
 
 
-class InvalidRecord(IgnorableSyncError):
+class InvalidRecord(SkippableSyncError):
     """Raised when a stream record is invalid according to its declared schema."""
 
     def __init__(self, error_message: str, record: dict) -> None:

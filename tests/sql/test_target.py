@@ -5,7 +5,7 @@ import typing as t
 import pytest
 
 from singer_sdk.helpers.capabilities import TargetCapabilities
-from singer_sdk.target_base import SQLTarget
+from singer_sdk.sql import SQLTarget
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
