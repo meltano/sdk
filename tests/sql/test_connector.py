@@ -15,13 +15,13 @@ import sqlalchemy.types
 from sqlalchemy.dialects import registry, sqlite
 from sqlalchemy.engine.default import DefaultDialect
 
-from singer_sdk.connectors import SQLConnector
-from singer_sdk.connectors.sql import (
+from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.sql import SQLConnector
+from singer_sdk.sql.connector import (
     FullyQualifiedName,
     JSONSchemaToSQL,
     SQLToJSONSchema,
 )
-from singer_sdk.exceptions import ConfigValidationError
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003

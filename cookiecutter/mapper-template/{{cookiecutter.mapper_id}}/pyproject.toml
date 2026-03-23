@@ -11,7 +11,7 @@ name = "{{cookiecutter.variant}}-{{cookiecutter.mapper_id}}"
 {%- else %}
 name = "{{cookiecutter.mapper_id}}"
 {%- endif %}
-version = "0.0.1"
+dynamic = ["version"]
 description = "Singer mapper {{cookiecutter.name}}, built with the Meltano Singer SDK."
 readme = "README.md"
 authors = [{ name = "{{ cookiecutter.admin_name }}", email = "{{ cookiecutter.admin_email }}" }]
@@ -36,9 +36,9 @@ license-files = [ "LICENSE" ]
 requires-python = ">=3.10"
 dependencies = [
     {%- if cookiecutter.faker_extra %}
-    "singer-sdk[faker]~=0.53.5",
+    "singer-sdk[faker]~=0.53.6",
     {%- else %}
-    "singer-sdk~=0.53.5",
+    "singer-sdk~=0.53.6",
     {%- endif %}
     "typing-extensions>=4.5.0; python_version < '3.13'",
 ]

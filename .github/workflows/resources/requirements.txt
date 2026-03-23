@@ -1,4 +1,4 @@
 griffe~=2.0
 nox==2026.2.9
-prek==0.3.4
+prek==0.3.6
 twine==6.2.0
