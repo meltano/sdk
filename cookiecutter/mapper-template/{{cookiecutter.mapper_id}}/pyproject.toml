@@ -83,19 +83,17 @@ source = "vcs"
 addopts = [
     "--durations=10",
     "-ra",
-    "--strict-config",
-    "--strict-markers",
 ]
 filterwarnings = [
     "error",
     "once:No records were available to test:UserWarning",
 ]
 log_level = "INFO"
-minversion = "9.0"
+minversion = "9"
 testpaths = [
     "tests",
 ]
-xfail_strict = true
+strict = true
 
 [tool.mypy]
 enable_error_code = [
