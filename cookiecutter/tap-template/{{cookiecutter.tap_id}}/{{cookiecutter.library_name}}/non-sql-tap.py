@@ -23,14 +23,56 @@ class Tap{{ cookiecutter.source_name }}(Tap):
 
     # TODO: Update this section with the actual config values you expect:
     config_jsonschema = th.PropertiesList(
+    {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
+        th.Property(
+            "client_id",
+            th.StringType(nullable=False),
+            required=True,
+            secret=True,  # Flag config as protected.
+            title="Client ID",
+            description="OAuth client ID for the {{ cookiecutter.source_name }} OAuth app",
+        ),
+        th.Property(
+            "client_secret",
+            th.StringType(nullable=False),
+            required=True,
+            secret=True,  # Flag config as protected.
+            title="Client Secret",
+            description="OAuth client secret for the {{ cookiecutter.source_name }} OAuth app",
+        ),
+        th.Property(
+            "refresh_token",
+            th.StringType(),
+            secret=True,  # Flag config as protected.
+            title="Refresh Token",
+            description="OAuth refresh token for the {{ cookiecutter.source_name }} OAuth app",
+        ),
+    {%- elif cookiecutter.auth_method == "Basic Auth" %}
+        th.Property(
+            "username",
+            th.StringType(nullable=False),
+            required=True,
+            title="Username",
+            description="The {{ cookiecutter.source_name }} username",
+        ),
+        th.Property(
+            "password",
+            th.StringType(nullable=False),
+            required=True,
+            secret=True,  # Flag config as protected.
+            title="Password",
+            description="The {{ cookiecutter.source_name }} password",
+        ),
+    {%- else %}
         th.Property(
             "auth_token",
             th.StringType(nullable=False),
             required=True,
             secret=True,  # Flag config as protected.
             title="Auth Token",
-            description="The token to authenticate against the API service",
+            description="The token to authenticate against {{ cookiecutter.source_name }}",
         ),
+    {%- endif %}
         th.Property(
             "project_ids",
             th.ArrayType(th.StringType(nullable=False), nullable=False),

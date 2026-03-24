@@ -19,15 +19,39 @@ plugins:
 
     # TODO: Declare settings and their types here:
     settings:
+    {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
+    - name: client_id
+      label: Client ID
+      description: OAuth client ID for the {{ cookiecutter.source_name }} OAuth app
+      sensitive: true
+
+    - name: client_secret
+      label: Password
+      description: OAuth client secret for the {{ cookiecutter.source_name }} OAuth app
+      sensitive: true
+
+    - name: refresh_token
+      label: Refresh Token
+      description: OAuth refresh token for the {{ cookiecutter.source_name }} OAuth app
+      sensitive: true
+
+    {%- elif cookiecutter.auth_method == "Basic Auth" %}
     - name: username
       label: Username
-      description: The username to use for authentication
+      description: The {{ cookiecutter.source_name }} username
 
     - name: password
-      kind: password
       label: Password
-      description: The password to use for authentication
+      description: The {{ cookiecutter.source_name }} password
       sensitive: true
+
+    {%- else %}
+    - name: auth_token
+      label: Auth Token
+      description: The token to authenticate against {{ cookiecutter.source_name }}
+      sensitive: true
+
+    {%- endif %}
 
     - name: start_date
       kind: date_iso8601
@@ -36,7 +60,13 @@ plugins:
 
     # TODO: Declare required settings here:
     settings_group_validation:
+    {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
+    - [client_id, client_secret]
+    {%- elif cookiecutter.auth_method == "Basic Auth" %}
     - [username, password]
+    {%- else %}
+    - [auth_token]
+    {%- endif %}
 
     # TODO: Declare default configuration values here:
     config:
