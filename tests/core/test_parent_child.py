@@ -83,6 +83,7 @@ class MyTap(Tap):
 
     name = "my-tap"
 
+    @override
     def discover_streams(self):
         """Discover streams."""
         return [
@@ -243,7 +244,7 @@ def test_one_parent_many_children(
             self,
             record: Record,
             context: Context | None,
-        ) -> t.Iterable[Context | None]:
+        ) -> t.Iterable[dict | None]:
             for child_id in record["children"]:
                 yield {"child_id": child_id, "pid": record["id"]}
 
@@ -363,7 +364,7 @@ def test_preprocess_context_removes_large_payload(
         @override
         def preprocess_context(self, context: Context) -> Context:
             """Remove large payload from parent context."""
-            self.set_numbers(context.pop("large_payload", []))
+            self.set_numbers(context.pop("large_payload", []))  # ty:ignore[unresolved-attribute]
             return context
 
         @override
@@ -427,14 +428,16 @@ def test_parent_records_emitted_when_child_hits_record_limit():
             "properties": {"id": {"type": "integer"}},
         }
 
+        @override
         def get_child_context(
             self,
-            record: dict,
-            context: dict | None,  # noqa: ARG002
-        ) -> dict | None:
+            record: Record,
+            context: Context | None,
+        ) -> Context | None:
             return {"pid": record["id"]}
 
-        def get_records(self, context: dict | None):  # noqa: ARG002
+        @override
+        def get_records(self, context: Context | None):
             yield {"id": 1}
             yield {"id": 2}
 
@@ -449,7 +452,8 @@ def test_parent_records_emitted_when_child_hits_record_limit():
         }
         parent_stream_type = ParentStream
 
-        def get_records(self, context: dict | None):  # noqa: ARG002
+        @override
+        def get_records(self, context: Context | None):
             # More records than the dry-run limit (3 > 2)
             yield {"id": 1}
             yield {"id": 2}
@@ -466,7 +470,8 @@ def test_parent_records_emitted_when_child_hits_record_limit():
         }
         parent_stream_type = ParentStream
 
-        def get_records(self, context: dict | None):  # noqa: ARG002
+        @override
+        def get_records(self, context: Context | None):
             for i in range(10):
                 yield {"id": i + 1}
 

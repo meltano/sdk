@@ -9,8 +9,6 @@ The Singer SDK provides an extensible API for loading schemas from various sourc
 ## Basic Usage
 
 ```python
-from typing import ClassVar
-
 from singer_sdk import RESTStream, SchemaDirectory, StreamSchema
 
 from myproject import schemas
@@ -30,14 +28,12 @@ class ProjectsStream(RESTStream):
     name = "projects"
 
     # Loads from projects.json
-    schema: ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
+    schema = StreamSchema(SCHEMAS_DIR)
 ```
 
 ## OpenAPI Integration
 
 ```python
-from typing import ClassVar
-
 from singer_sdk import OpenAPISchema, StreamSchema
 
 # Load from OpenAPI spec
@@ -48,7 +44,7 @@ class UsersStream(RESTStream):
     name = "users"
 
     # Load "User" component
-    schema: ClassVar[StreamSchema] = StreamSchema(openapi_source, key="User")
+    schema = StreamSchema(openapi_source, key="User")
 ```
 
 ## Migrating from File-Path Based Schemas
@@ -74,7 +70,6 @@ class ProjectsStream(RESTStream):
 ### After: Using `StreamSchema` with `SchemaDirectory`
 
 ```python
-from typing import ClassVar
 from singer_sdk import RESTStream, SchemaDirectory, StreamSchema
 from myproject import schemas  # Your schemas module/package
 
@@ -85,7 +80,7 @@ class ProjectsStream(RESTStream):
     """Projects stream with schema source."""
 
     name = "projects"
-    schema: ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)  # New approach
+    schema = StreamSchema(SCHEMAS_DIR)  # New approach
 ```
 
 ### Migration Steps
@@ -129,7 +124,7 @@ class ProjectsStream(RESTStream):
 
    # After
    class MyStream(RESTStream):
-       schema: ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
+       schema = StreamSchema(SCHEMAS_DIR)
    ```
 
 1. **Handle custom schema keys** (if needed):
@@ -140,7 +135,7 @@ class ProjectsStream(RESTStream):
        name = "project_details"
 
        # Uses ProjectDetail.json
-       schema: ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR, key="ProjectDetail")
+       schema = StreamSchema(SCHEMAS_DIR, key="ProjectDetail")
    ```
 
 ### Benefits of Migration

@@ -39,7 +39,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: hynek/build-and-inspect-python-package@efb823f52190ad02594531168b7a2d5790e66516 # v2.14.0
+      - uses: hynek/build-and-inspect-python-package@f3d069d0f9a3c9169d1a483318bb0e09876a6fd6 # v2.15.0
         id: baipp
 
   pytest:
@@ -57,7 +57,7 @@ jobs:
       with:
         python-version: {{ '${{ matrix.python-version }}' }}
     - name: Setup uv
-      uses: astral-sh/setup-uv@6ee6290f1cbc4156c0bdd66691b2c144ef8df19a # v7.4.0
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
     - name: Run Tox
       run: |
         uvx --with=tox-uv tox -e {{ '${{ matrix.python-version }}' }}
@@ -72,7 +72,7 @@ jobs:
       with:
         python-version: 3.x
     - name: Setup uv
-      uses: astral-sh/setup-uv@6ee6290f1cbc4156c0bdd66691b2c144ef8df19a # v7.4.0
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
     - name: Run Tox
       run: |
         uvx --with=tox-uv tox -e typing
