@@ -63,7 +63,7 @@ dev = [
 test = [
     "pytest>=9",
     {%- if cookiecutter.include_ci_files == "GitHub" %}
-    "pytest-github-actions-annotate-failures>=0.3",
+    "pytest-github-actions-annotate-failures>=0.4",
     {%- endif %}
     "singer-sdk[testing]",
 ]
@@ -88,22 +88,6 @@ packages = [
 fallback-version = "0.1.0.dev0"
 source = "vcs"
 
-[tool.pytest]
-addopts = [
-    "--durations=10",
-    "-ra",
-]
-filterwarnings = [
-    "error",
-    "once:No records were available to test:UserWarning",
-]
-log_level = "INFO"
-minversion = "9"
-testpaths = [
-    "tests",
-]
-strict = true
-
 [tool.mypy]
 enable_error_code = [
     "ignore-without-code",
@@ -117,6 +101,20 @@ warn_unused_ignores = true
 
 [tool.ty.rules]
 unused-type-ignore-comment = "ignore"
+
+[tool.pytest]
+addopts = [
+    "-ra",
+]
+filterwarnings = [
+    "error",
+]
+log_level = "INFO"
+minversion = "9"
+strict = true
+testpaths = [
+    "tests",
+]
 
 [tool.ruff]
 line-length = 100
@@ -137,7 +135,6 @@ convention = "google"
 
 # This configuration can be used to customize tox environments
 [tool.tox]
-min_version = "4.43"
 requires = [
     "tox>=4.43",
     "tox-uv",
@@ -150,6 +147,7 @@ env_list = [
 ]
 
 [tool.tox.env_run_base]
+description = "run tests on Python {env_name}"
 runner = "uv-venv-lock-runner"
 pass_env = [
     {%- if cookiecutter.include_ci_files == "GitHub" %}
@@ -161,6 +159,7 @@ dependency_groups = [ "test" ]
 commands = [ [ "pytest", { replace = "posargs", default = [ "tests" ], extend = true } ] ]
 
 [tool.tox.env.typing]
+description = "type checks"
 dependency_groups = [ "test", "typing" ]
 commands = [
     [ "mypy", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ],
