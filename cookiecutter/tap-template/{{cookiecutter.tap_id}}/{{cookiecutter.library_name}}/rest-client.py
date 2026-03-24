@@ -122,7 +122,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """
         return APIKeyAuthenticator(
             key="x-api-key",
-            value=self.config.get("auth_token", ""),
+            value=self.config["auth_token"],
             location="header",
         )
 
@@ -136,7 +136,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         Returns:
             An authenticator instance.
         """
-        return BearerTokenAuthenticator(token=self.config.get("auth_token", ""))
+        return BearerTokenAuthenticator(token=self.config["auth_token"])
 
 {%- elif cookiecutter.auth_method == "Basic Auth" %}
 
@@ -149,8 +149,8 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
             An authenticator instance.
         """
         return HTTPBasicAuth(
-            username=self.config.get("username", ""),
-            password=self.config.get("password", ""),
+            username=self.config["username"],
+            password=self.config["password"],
         )
 
 {%- endif %}
