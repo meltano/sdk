@@ -192,8 +192,6 @@ addopts = [
     "-m",
     "not contrib and not external and not packages",
     "-ra",
-    "--strict-config",
-    "--strict-markers",
 ]
 filterwarnings = [
     'error',
@@ -222,7 +220,7 @@ markers = [
 minversion = "9"
 testpaths = ["tests"]
 norecursedirs = ["cookiecutter"]
-xfail_strict = false
+strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
