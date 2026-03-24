@@ -12,8 +12,7 @@ env:
   FORCE_COLOR: 1
 
 permissions:
-  contents: write  # Needed to upload artifacts to the release
-  id-token: write  # Needed for OIDC PyPI publishing
+  contents: read  # read repository contents
 
 jobs:
   build:
@@ -26,6 +25,7 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         fetch-depth: 0
+        persist-credentials: false
     - uses: hynek/build-and-inspect-python-package@f3d069d0f9a3c9169d1a483318bb0e09876a6fd6 # v2.15.0
       id: baipp
 
@@ -33,6 +33,8 @@ jobs:
     name: Publish to PyPI
     runs-on: ubuntu-latest
     needs: [build]
+    permissions:
+      id-token: write  # Needed for OIDC PyPI publishing
     ## TODO: optionally provide the name of the environment for the trusted
     ## publisher on PyPI
     ## https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment
