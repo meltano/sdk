@@ -33,7 +33,7 @@ extend-ignore = [
 ]
 """
 
-COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
+COOKIECUTTER_REPLAY_FILES = sorted(Path("./e2e-tests/cookiecutters").glob("*.json"))
 PYPROJECT = nox.project.load_toml()
 UV_SYNC_COMMAND = (
     "uv",
