@@ -28,7 +28,8 @@ repos:
             cookiecutter/.*/.pre-commit-config.yaml|
             cookiecutter/.*/dependabot.yml|
             cookiecutter/.*/build.yml|
-            cookiecutter/.*/test.yml
+            cookiecutter/.*/test.yml|
+            cookiecutter/.*/run-zizmor.yml
         )$
   - id: end-of-file-fixer
     exclude: |
