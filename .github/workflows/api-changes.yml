@@ -5,7 +5,9 @@ on:
     paths:
     - singer_sdk/**
     - .github/workflows/api-changes.yml
+    - .github/workflows/resources/requirements.txt
     - CHANGELOG.md
+    - noxfile.py
   workflow_dispatch:
 
 concurrency:
