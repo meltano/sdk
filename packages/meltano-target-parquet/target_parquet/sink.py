@@ -42,7 +42,9 @@ def _json_schema_to_arrow_fields(
         field = pa.field(name, _json_type_to_arrow_field(property_schema))
         fields.append(field)
 
-    return fields or [pa.field("dummy", pa.string())]
+    if not fields:
+        return [pa.field("dummy", pa.string())]
+    return fields
 
 
 def _json_type_to_arrow_field(  # noqa: PLR0911

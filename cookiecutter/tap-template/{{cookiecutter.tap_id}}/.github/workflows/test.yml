@@ -28,6 +28,9 @@ concurrency:
 env:
   FORCE_COLOR: 1
 
+permissions:
+  contents: read  # read repository contents
+
 jobs:
   build-package:
     name: Build & verify package
@@ -43,21 +46,22 @@ jobs:
         id: baipp
 
   pytest:
-    name: Integration
+    name: Test
     needs: [build-package]
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         python-version: {{ '${{ fromJson(needs.build-package.outputs.supported-python-versions) }}' }}
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
     - name: Setup uv
       uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
       with:
         python-version: {{ '${{ matrix.python-version }}' }}
     - name: Run Tox
-      run: |
+      run: | # zizmor: ignore[template-injection]
         uvx --with=tox-uv tox -e {{ '${{ matrix.python-version }}' }}
 
   typing:
@@ -65,6 +69,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
     - name: Setup uv
       uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
     - name: Run Tox
