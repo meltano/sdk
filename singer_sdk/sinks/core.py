@@ -28,10 +28,10 @@ from singer_sdk.helpers._compat import (
     time_fromisoformat,
 )
 from singer_sdk.helpers._typing import (
-    DatetimeErrorTreatmentEnum,
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
 )
+from singer_sdk.helpers.conform import DatetimeErrorTreatmentEnum
 from singer_sdk.singerlib.json import deserialize_json
 from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
