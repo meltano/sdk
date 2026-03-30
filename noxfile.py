@@ -33,7 +33,7 @@ extend-ignore = [
 ]
 """
 
-COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
+COOKIECUTTER_REPLAY_FILES = sorted(Path("./e2e-tests/cookiecutters").glob("*.json"))
 PYPROJECT = nox.project.load_toml()
 UV_SYNC_COMMAND = (
     "uv",
@@ -498,7 +498,6 @@ def api_changes(session: nox.Session) -> None:
     """Check for API changes."""
     args = [
         "check",
-        "--no-color",
         "singer_sdk",
     ]
 
@@ -508,7 +507,7 @@ def api_changes(session: nox.Session) -> None:
     if "GITHUB_ACTIONS" in os.environ:
         args.append("-f=github")
 
-    session.run("uvx", "griffe", *args, external=True)
+    session.run("uvx", "griffecli", *args, external=True)
 
 
 if __name__ == "__main__":
