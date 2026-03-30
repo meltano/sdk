@@ -6,41 +6,26 @@ on:
   pull_request:
     branches: ["**"]
 
-env:
-  FORCE_COLOR: 1
-  UV_VERSION: ">=0.10"
-
 concurrency:
   group: {{ '${{ github.workflow }}-${{ github.head_ref || github.run_id }}' }}
   cancel-in-progress: true
 
-permissions:
-  contents: read  # read repository contents
+env:
+  FORCE_COLOR: "1"
+
+permissions: {}
 
 jobs:
   zizmor:
     name: Run zizmor 🌈
     runs-on: ubuntu-latest
     permissions:
-      security-events: write # for zizmor
+      security-events: write # for GitHub's Advanced Security via zizmor
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
-        with:
-          version: {{ '${{ env.UV_VERSION }}' }}
-
       - name: Run zizmor 🌈
-        env:
-          GH_TOKEN: {{ '${{ secrets.GITHUB_TOKEN }}' }}
-        run: uvx zizmor --format sarif . > results.sarif
-
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
-        with:
-          sarif_file: results.sarif
-          category: zizmor
+        uses: zizmorcore/zizmor-action@71321a20a9ded102f6e9ce5718a2fcec2c4f70d8 # v0.5.2
