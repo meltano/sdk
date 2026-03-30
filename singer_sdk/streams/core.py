@@ -40,6 +40,7 @@ from singer_sdk.singerlib.catalog import (
     REPLICATION_INCREMENTAL,
     REPLICATION_LOG_BASED,  # noqa: F401
 )
+from singer_sdk.streams._result import SyncResult
 from singer_sdk.streams._state import StreamStateManager
 
 if t.TYPE_CHECKING:
@@ -152,6 +153,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         self._schema: dict | None = None
         self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
+        self.sync_result: SyncResult | None = None
 
         # Initialize state manager
         self._state_manager = StreamStateManager(
@@ -1301,13 +1303,16 @@ class Stream(abc.ABC):  # noqa: PLR0904
     # Public methods ("final", not recommended to be overridden)
 
     @t.final
-    def sync(self, context: types.Context | None = None) -> None:
+    def sync(self, context: types.Context | None = None) -> SyncResult:
         """Sync this stream.
 
         This method is internal to the SDK and should not need to be overridden.
 
         Args:
             context: Stream partition or context dictionary.
+
+        Returns:
+            The SyncResult for this stream.
         """
         # Preprocess context before it's frozen
         context = self.preprocess_context(context) if context else None
@@ -1339,20 +1344,47 @@ class Stream(abc.ABC):  # noqa: PLR0904
             self._write_activate_version_message(self._stream_version)
 
         try:
+            self._run_sync(context)
+        except AbortedSyncFailedException:
+            self.sync_result = SyncResult.FAILED
+        except AbortedSyncPausedException:
+            self.sync_result = SyncResult.ABORTED
+        else:
+            # Only mark SUCCESS if no child failure already degraded the result.
+            self.sync_result = SyncResult.SUCCESS.combine(self.sync_result)
+        return self.sync_result
+
+    def _run_sync(self, context: types.Context | None) -> None:
+        """Execute the sync body, converting any non-lifecycle exception to one.
+
+        Either completes normally or raises a lifecycle exception
+        (:class:`~singer_sdk.exceptions.AbortedSyncFailedException` or
+        :class:`~singer_sdk.exceptions.AbortedSyncPausedException`).
+
+        Args:
+            context: Stream partition or context dictionary.
+
+        Raises:
+            AbortedSyncFailedException: If the sync could not reach a resumable state.
+            AbortedSyncPausedException: If the sync paused at a resumable checkpoint.
+        """
+        try:
             batch_config = self.get_batch_config(self.config)
             if batch_config:
                 self._sync_batches(batch_config, context=context)
             else:
-                # Sync the records themselves:
                 for _ in self._sync_records(context=context):
                     pass
-        except Exception:
+        except (AbortedSyncFailedException, AbortedSyncPausedException):
+            raise
+        except Exception as exc:  # noqa: BLE001
             self.log(
-                "An unhandled error occurred while syncing '%s'",
+                "An error occurred while syncing '%s': %s",
                 self.name,
+                str(exc),
                 level=logging.ERROR,
             )
-            raise
+            self._abort_sync(exc)  # always raises
 
     def _sync_children(self, child_context: types.Context | None) -> None:
         if child_context is None:
@@ -1366,11 +1398,9 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         for child_stream in self.child_streams:
             if child_stream.selected or child_stream.has_selected_descendents:
-                try:
-                    child_stream.sync(context=child_context)
-                except (AbortedSyncFailedException, AbortedSyncPausedException):
-                    # Child stream was interrupted, continue with remaining children
-                    continue
+                child_result = child_stream.sync(context=child_context)
+                if child_result != SyncResult.SUCCESS:
+                    self.sync_result = SyncResult.PARTIAL
 
     # Overridable Methods
 
