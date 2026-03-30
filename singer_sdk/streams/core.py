@@ -31,12 +31,9 @@ from singer_sdk.helpers._compat import (
     datetime_fromisoformat,
 )
 from singer_sdk.helpers._flattening import get_flattening_options
-from singer_sdk.helpers._typing import (
-    TypeConformanceLevel,
-    conform_record_data_types,
-    is_datetime_type,
-)
+from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type
 from singer_sdk.helpers._util import utc_now
+from singer_sdk.helpers.conform import TypeConformanceLevel
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform
 from singer_sdk.singerlib.catalog import (
     REPLICATION_FULL_TABLE,
