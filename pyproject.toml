@@ -152,7 +152,7 @@ typing = [
     {"include-group" = "testing"},
     "backports-datetime-fromisoformat",
     "importlib-metadata",
-    "mypy>=1.17",
+    "mypy~=1.20.0",
     "pyarrow-stubs>=19.1",
     "ty==0.0.21",
     "types-jsonschema>=4.17.0.6",
@@ -303,6 +303,7 @@ enable_error_code = [
     "truthy-bool",
 ]
 files = "singer_sdk"
+follow_untyped_imports = true
 local_partial_types = true
 strict = false
 warn_redundant_casts = true
@@ -318,8 +319,6 @@ module = [
     "joblib.*",       # https://github.com/joblib/joblib/issues/1516
     "fsspec.*",       # https://github.com/fsspec/filesystem_spec/issues/625
     "jsonpath_ng.*",  # https://github.com/h2non/jsonpath-ng/issues/152
-    "pyarrow.*",      # https://github.com/apache/arrow/issues/32609
-    "toolz.*",        # https://github.com/pytoolz/toolz/issues/496
 ]
 
 [build-system]
