@@ -7,6 +7,8 @@ import logging
 import typing as t
 from dataclasses import dataclass, fields
 
+from typing_extensions import Self
+
 from singer_sdk.singerlib.schema import Schema
 
 if t.TYPE_CHECKING:
@@ -243,10 +245,63 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         Returns:
             Selection mask.
         """
-        return SelectionMask(
-            (breadcrumb, self._breadcrumb_is_selected(breadcrumb))
-            for breadcrumb in self
-        )
+        cache: dict[Breadcrumb, bool] = {}
+
+        def compute(breadcrumb: Breadcrumb) -> bool:
+            if breadcrumb in cache:
+                return cache[breadcrumb]
+
+            md_entry = self.get(breadcrumb)
+            parent_value: bool | None = None
+
+            if len(breadcrumb) > 0:
+                parent_breadcrumb = breadcrumb[:-2]
+                parent_value = compute(parent_breadcrumb)
+
+            if parent_value is False:
+                cache[breadcrumb] = parent_value
+                return parent_value
+
+            inclusion = md_entry.inclusion if md_entry is not None else None
+
+            if inclusion == Metadata.InclusionType.UNSUPPORTED:
+                if md_entry is not None and md_entry.selected is True:
+                    logger.debug(
+                        "Property '%s' was selected but is not supported. "
+                        "Ignoring selected==True input.",
+                        ":".join(breadcrumb),
+                    )
+                cache[breadcrumb] = False
+                return False
+
+            if inclusion == Metadata.InclusionType.AUTOMATIC:
+                if md_entry is not None and md_entry.selected is False:
+                    logger.debug(
+                        "Property '%s' was deselected while also set "
+                        "for automatic inclusion. Ignoring selected==False input.",
+                        ":".join(breadcrumb),
+                    )
+                cache[breadcrumb] = True
+                return True
+
+            if md_entry is not None and md_entry.selected is not None:
+                cache[breadcrumb] = md_entry.selected
+                return md_entry.selected
+
+            if md_entry is not None and md_entry.selected_by_default is not None:
+                cache[breadcrumb] = md_entry.selected_by_default
+                return md_entry.selected_by_default
+
+            logger.debug(
+                "Selection metadata omitted for '%s'. Using parent value of selected=%s.",
+                breadcrumb,
+                parent_value,
+            )
+            result = parent_value or False
+            cache[breadcrumb] = result
+            return result
+
+        return SelectionMask((breadcrumb, compute(breadcrumb)) for breadcrumb in self)
 
     def _breadcrumb_is_selected(self, breadcrumb: Breadcrumb) -> bool:  # noqa: PLR0911
         """Determine if a property breadcrumb is selected based on existing metadata.
@@ -440,3 +495,37 @@ class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
             The stream entry if found, otherwise None.
         """
         return self.get(stream_id)
+
+
+@classmethod
+def from_dict(cls, value: dict[str, t.Any]) -> Self:
+    """Parse metadata dictionary.
+
+    Args:
+        value: Metadata dictionary.
+
+    Returns:
+        Metadata object.
+    """
+    return cls(
+        **{
+            object_field.name: value.get(object_field.name.replace("_", "-"))
+            for object_field in fields(cls)
+        },
+    )
+
+
+def to_dict(self) -> dict[str, t.Any]:
+    """Convert metadata to a JSON-encodable dictionary.
+
+    Returns:
+        Metadata object.
+    """
+    result = {}
+
+    for object_field in fields(self):
+        value = getattr(self, object_field.name)
+        if value is not None:
+            result[object_field.name.replace("_", "-")] = value
+
+    return result
