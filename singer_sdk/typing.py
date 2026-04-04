@@ -1292,6 +1292,10 @@ class PropertiesList(ObjectType):
             additional_properties: Additional properties to allow.
             **kwargs: Keyword arguments to pass to the parent class.
         """
+        # Cache for the items() view to avoid reallocating an ItemsView on every call.
+        # The cached ItemsView references self.wrapped, so it will reflect mutations
+        # to the underlying dict while avoiding repeated view object construction.
+        self._items_cache: t.ItemsView[str, Property] | None = None
         super().__init__(*args, additional_properties=additional_properties, **kwargs)
 
     def items(self) -> t.ItemsView[str, Property]:
@@ -1300,7 +1304,11 @@ class PropertiesList(ObjectType):
         Returns:
             List of (name, property) tuples.
         """
-        return self.wrapped.items()
+        cache = self._items_cache
+        if cache is None:
+            cache = self.wrapped.items()
+            self._items_cache = cache
+        return cache
 
     def append(self, property: Property) -> None:  # noqa: A002
         """Append a property to the property list.
