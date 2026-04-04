@@ -19,7 +19,12 @@ import requests.exceptions
 
 from singer_sdk import metrics
 from singer_sdk.authenticators import SimpleAuthenticator
-from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
+from singer_sdk.exceptions import (
+    FatalAPIError,
+    RetriableAPIError,
+    SkippableAPIError,
+    SkippableSyncError,
+)
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._packaging import get_sdk_version
 from singer_sdk.helpers.jsonpath import extract_jsonpath
@@ -62,6 +67,9 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
 
     #: Response code reference for rate limit retries
     extra_retry_statuses: t.Sequence[int] = [HTTPStatus.TOO_MANY_REQUESTS]
+
+    #: This status codes are considered ignorable. By default none are.
+    skip_statuses: t.Sequence[int] = []
 
     #: Optional flag to disable HTTP redirects. Defaults to False.
     allow_redirects: bool = True
@@ -214,15 +222,19 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
 
         Checks for error status codes and whether they are fatal or retriable.
 
-        In case an error is deemed transient and can be safely retried, then this
-        method should raise an :class:`singer_sdk.exceptions.RetriableAPIError`.
-        By default this applies to 5xx error codes, along with values set in:
-        :attr:`~singer_sdk.RESTStream.extra_retry_statuses`
+        There are four possible outcomes for this method:
 
-        In case an error is unrecoverable raises a
-        :class:`singer_sdk.exceptions.FatalAPIError`. By default, this applies to
-        4xx errors, excluding values found in:
-        :attr:`~singer_sdk.RESTStream.extra_retry_statuses`
+        1. The request is successful. No exception is raised.
+        2. The request is not retriable. A :class:`singer_sdk.exceptions.FatalAPIError`
+           is raised. By default this applies to 4xx errors, excluding values found in:
+           :attr:`~singer_sdk.RESTStream.extra_retry_statuses`
+        3. The request is retriable (5xx). A
+           :class:`singer_sdk.exceptions.RetriableAPIError` is raised. By default this
+           applies to 5xx error codes, along with values set in:
+           :attr:`~singer_sdk.RESTStream.extra_retry_statuses`
+        4. The request is ignorable. A :class:`singer_sdk.exceptions.SkippableAPIError`
+           is raised. By default this applies to values found in:
+           :attr:`~singer_sdk.RESTStream.ignorable_statuses`
 
         Tap developers are encouraged to override this method if their APIs use HTTP
         status codes in non-conventional ways, or if they communicate errors
@@ -236,7 +248,13 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         Raises:
             FatalAPIError: If the request is not retriable.
             RetriableAPIError: If the request is retriable.
+            SkippableAPIError: If the request is to be skipped after a failure
+                without raising an error to the caller (the skip is still logged).
         """
+        if response.status_code in self.skip_statuses:
+            msg = self.response_error_message(response)
+            raise SkippableAPIError(msg)
+
         if (
             response.status_code in self.extra_retry_statuses
             or response.status_code >= HTTPStatus.INTERNAL_SERVER_ERROR
@@ -476,7 +494,14 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
                     context,
                     next_page_token=paginator.current_value,
                 )
-                resp = decorated_request(prepared_request, context)
+                try:
+                    resp = decorated_request(prepared_request, context)
+                except SkippableSyncError as e:
+                    self.logger.warning(
+                        "Skipping request due to tolerated error: %s",
+                        e,
+                    )
+                    break
                 request_counter.increment()
                 self.update_sync_costs(prepared_request, resp, context)
                 records = iter(self.parse_response(resp))

@@ -31,8 +31,8 @@ SingerSDKError
 │   │   └── TooManyRecordsException
 │   ├── RetriableSyncError
 │   │   └── RetriableAPIError
-│   ├── IgnorableSyncError
-│   │   ├── IgnorableAPIError
+│   ├── SkippableSyncError
+│   │   ├── SkippableAPIError
 │   │   └── InvalidRecord
 │   └── DataError
 │       └── InvalidJSONSchema
@@ -161,26 +161,26 @@ def validate_response(self, response: requests.Response) -> None:
     super().validate_response(response)
 ```
 
-#### Ignorable (`IgnorableSyncError`)
+#### Skip (`SkippableSyncError`)
 
 The SDK should **log a warning, skip the current record or page, and continue**.
 The sync completes normally (exit code 0).
 
 | Class | When raised |
 |---|---|
-| `IgnorableAPIError` | An HTTP/API error for an expected non-fatal response (e.g. 404 on a per-record enrichment endpoint). No retry is attempted. |
+| `SkippableAPIError` | An HTTP/API error for an expected non-fatal response (e.g. 404 on a per-record enrichment endpoint). No retry is attempted. |
 | `InvalidRecord` | A record fails schema validation. Carries `.error_message` and `.record`. |
 
 **Raising in tap code:**
 
 ```python
-from singer_sdk.exceptions import IgnorableAPIError
+from singer_sdk.exceptions import SkippableAPIError
 
 
 def validate_response(self, response: requests.Response) -> None:
     if response.status_code == 404:
         msg = f"Resource not found: {response.url}"
-        raise IgnorableAPIError(msg)
+        raise SkippableAPIError(msg)
     super().validate_response(response)
 ```
 
@@ -218,12 +218,12 @@ from singer_sdk.exceptions import (
     SingerSDKError,
     FatalSyncError,
     RetriableSyncError,
-    IgnorableSyncError,
+    SkippableSyncError,
 )
 
 try:
     stream.sync()
-except IgnorableSyncError as e:
+except SkippableSyncError as e:
     logger.warning("Skipping: %s", e)
 except RetriableSyncError as e:
     # handled automatically by the SDK's backoff decorator
@@ -243,7 +243,7 @@ ______________________________________________________________________
 |---|---|
 | HTTP error, must abort | `FatalAPIError` |
 | HTTP error, safe to retry | `RetriableAPIError` |
-| HTTP error, expected / skip silently | `IgnorableAPIError` |
+| HTTP error, expected / skip silently | `SkippableAPIError` |
 | Config value is wrong | `ConfigValidationError` |
 | Replication key not in schema | `InvalidReplicationKeyException` |
 | Map expression fails at runtime | `MapExpressionError` |
