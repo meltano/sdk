@@ -10,7 +10,10 @@ from urllib.parse import ParseResult, parse_qs, urlparse
 import pytest
 from requests import Response
 
-from singer_sdk.helpers._compat import SingerSDKPendingDeprecationWarning
+from singer_sdk.helpers._compat import (
+    SingerSDKDeprecationWarning,
+    SingerSDKPendingDeprecationWarning,
+)
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
     BaseAPIPaginator,
@@ -36,6 +39,7 @@ if t.TYPE_CHECKING:
     from requests import PreparedRequest
 
     from singer_sdk.helpers.types import Context
+    from singer_sdk.streams.rest import HTTPRequest, HTTPRequestContext
     from singer_sdk.tap_base import Tap
 
 
@@ -388,22 +392,24 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
         url_base = "https://my.api.test"
         path = "/path/to/resource"
         records_jsonpath = "$.data[*]"
-        schema = {"type": "object", "properties": {"id": {"type": "integer"}}}  # noqa: RUF012
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
 
         @override
         def get_new_paginator(self) -> PageNumberPaginator:
             return PageNumberPaginator(1)
 
         @override
-        def get_url_params(
+        def get_http_request(
             self,
-            context: Context | None,
-            next_page_token: int | None,
-        ) -> dict[str, t.Any] | str:  # ty:ignore[invalid-method-override]
-            params = {}
-            if next_page_token:
-                params["page"] = next_page_token
-            return params
+            *,
+            context: HTTPRequestContext[BasePageNumberPaginator],
+        ) -> HTTPRequest:
+            request = super().get_http_request(context=context)
+            request.params["page"] = context.page.current_value
+            return request
 
         @override
         def _request(
@@ -464,22 +470,24 @@ def test_continue_if_empty(tap: Tap):
         url_base = "https://my.api.test"
         path = "/path/to/resource"
         records_jsonpath = "$.data[*]"
-        schema = {"type": "object", "properties": {"id": {"type": "integer"}}}  # noqa: RUF012
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
 
         @override
         def get_new_paginator(self) -> _TestPaginator:
             return _TestPaginator(1)
 
         @override
-        def get_url_params(
+        def get_http_request(
             self,
-            context: Context | None,
-            next_page_token: int | None,
-        ) -> dict[str, t.Any] | str:  # ty:ignore[invalid-method-override]
-            params = {}
-            if next_page_token:
-                params["page"] = next_page_token
-            return params
+            *,
+            context: HTTPRequestContext[BasePageNumberPaginator],
+        ) -> HTTPRequest:
+            request = super().get_http_request(context=context)
+            request.params["page"] = context.page.current_value
+            return request
 
         @override
         def _request(
@@ -531,22 +539,22 @@ def test_no_paginator(tap: Tap):
         url_base = "https://my.api.test"
         path = "/path/to/resource"
         records_jsonpath = "$.data[*]"
-        schema = {"type": "object", "properties": {"id": {"type": "integer"}}}  # noqa: RUF012
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
 
         @override
         def get_new_paginator(self) -> None:
             return None
 
         @override
-        def get_url_params(
-            self,
-            context: Context | None,
-            next_page_token: None,
-        ) -> dict[str, t.Any] | str:  # ty:ignore[invalid-method-override]
-            params = {}
-            if next_page_token:
-                params["page"] = next_page_token
-            return params
+        def get_http_request(
+            self, *, context: HTTPRequestContext[SinglePagePaginator]
+        ) -> HTTPRequest:
+            request = super().get_http_request(context=context)
+            assert context.page.current_value is None
+            return request
 
         @override
         def _request(
@@ -568,3 +576,90 @@ def test_no_paginator(tap: Tap):
 
     with pytest.raises(StopIteration):
         next(records_iter)
+
+
+def test_prepare_request_override_emits_deprecation(tap: Tap):
+    """Validate that overriding prepare_request emits a deprecation warning."""
+
+    class MyAPIStream(RESTStream):
+        name = "my-api-stream"
+        url_base = "https://my.api.test"
+        path = "/path/to/resource"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
+
+        @override
+        def prepare_request(
+            self,
+            context: Context | None,
+            next_page_token: t.Any,
+        ) -> PreparedRequest:
+            return super().prepare_request(context, next_page_token)
+
+        @override
+        def _request(
+            self,
+            prepared_request: PreparedRequest,
+            context: Context | None,
+        ) -> Response:
+            r = Response()
+            r.status_code = 200
+            r._content = json.dumps({"data": [{"id": 1}]}).encode()
+            return r
+
+    stream = MyAPIStream(tap=tap)
+    with pytest.warns(SingerSDKDeprecationWarning, match="prepare_request"):
+        list(stream.request_records(context=None))
+
+
+def test_prepare_request_override_in_intermediate_class_emits_deprecation(tap: Tap):
+    """Validate that a prepare_request override in an intermediate class is detected.
+
+    Regression test for the case where the override is on a base tap stream class
+    (e.g. TapGitlabStream) and the concrete stream (e.g. IssuesStream) does not
+    itself define prepare_request — self.__class__.__dict__ would miss this.
+    """
+
+    class TapGitlabStream(RESTStream):
+        """Intermediate base class that overrides prepare_request."""
+
+        name = "gitlab-base"
+        url_base = "https://my.api.test"
+        path = "/path/to/resource"
+        records_jsonpath = "$.data[*]"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
+
+        @override
+        def prepare_request(
+            self,
+            context: Context | None,
+            next_page_token: t.Any,
+        ) -> PreparedRequest:
+            return super().prepare_request(context, next_page_token)
+
+    class IssuesStream(TapGitlabStream):
+        """Concrete stream — does NOT itself override prepare_request."""
+
+        name = "issues"
+
+        @override
+        def _request(
+            self,
+            prepared_request: PreparedRequest,
+            context: Context | None,
+        ) -> Response:
+            r = Response()
+            r.status_code = 200
+            r._content = json.dumps({"data": [{"id": 42}]}).encode()
+            return r
+
+    stream = IssuesStream(tap=tap)
+    with pytest.warns(SingerSDKDeprecationWarning, match="prepare_request"):
+        records = list(stream.request_records(context=None))
+
+    assert records == [{"id": 42}]

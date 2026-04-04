@@ -21,18 +21,16 @@ class CommentsStream(RESTStream):
         ),
     ).to_dict()
 
-    def get_url_params(self, context, next_page_token):
-        params = {}
+    def get_http_request(self, *, context: HTTPRequestContext) -> HTTPRequest:
+        request = super().get_http_request(context=context)
 
-        starting_date = self.get_starting_timestamp(context)
-        if starting_date:
-            params["after"] = starting_date.isoformat()
+        if starting_date := self.get_starting_timestamp(context.stream_context):
+            request.params["after"] = starting_date.isoformat()
 
-        if next_page_token is not None:
-            params["page"] = next_page_token
+        request.params["page"] = context.page.current_value
 
-        self.logger.info("QUERY PARAMS: %s", params)
-        return params
+        self.logger.info("QUERY PARAMS: %s", request.params)
+        return request
 ```
 
 1. First we inform the SDK of the `replication_key`, which automatically triggers incremental import mode.
