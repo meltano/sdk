@@ -31,7 +31,7 @@ class SQLTargetMock(SQLTarget):
         pytest.param([], set(), id="no capabilities"),
         pytest.param(
             [TargetCapabilities.TARGET_SCHEMA],
-            {"default_target_schema"},
+            {"default_target_schema", "schema"},
             id="default schema",
         ),
         pytest.param(
