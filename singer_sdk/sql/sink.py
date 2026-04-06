@@ -305,7 +305,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
             *[
                 sa.Column(
                     name, sa.String
-                )  # Assuming all columns are of type String for simplicity  # noqa: E501
+                )  # Assuming all columns are of type String for simplicity
                 for name in property_names
             ],
             schema=schema_name,
