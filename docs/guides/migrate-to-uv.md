@@ -22,7 +22,7 @@ build-backend = "hatchling.build"
 requires = ["hatchling>=1,<2"]
 ```
 
-3. Update your CI/CD to use `uv` commands instead of `poetry` commands. For example, replace `poetry install` with `uv sync`. You may also want to use the [official `setup-uv`](https://github.com/astral-sh/setup-uv/) GitHub Action to install `uv` in your CI/CD workflow.
+3. Update your CI/CD to use `uv` commands instead of `poetry` commands. For example, replace `poetry sync` with `uv sync`. You may also want to use the [official `setup-uv`](https://github.com/astral-sh/setup-uv/) GitHub Action to install `uv` in your CI/CD workflow.
 
 ## Example
 
