@@ -20,7 +20,7 @@ StandardTargetTests = get_target_test_class(
 )
 
 
-class TestTarget{{ cookiecutter.destination_name }}(StandardTargetTests):  # type: ignore[misc, valid-type]
+class TestTarget{{ cookiecutter.destination_name }}(StandardTargetTests):  # type: ignore[misc, valid-type] # ty: ignore[unsupported-base]
     """Standard Target Tests."""
 
     @pytest.fixture(scope="class")
