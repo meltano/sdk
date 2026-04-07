@@ -85,7 +85,6 @@ repos:
   rev: 1.0.0
   hooks:
   - id: mdformat
-    exclude: tests/snapshots/about_format/markdown\.snap\.md
     args: [--strict-front-matter]
     additional_dependencies:
     - mdformat-front-matters
