@@ -5,34 +5,18 @@
 Poetry allows you to test command line invocation direction in the virtualenv using the
 prefix `poetry run`.
 
-- Note: CLI mapping is performed in `pyproject.toml` and shims are recreated during `poetry install`:
+- Note: CLI mapping is performed in `pyproject.toml` and shims are recreated during `uv sync`/`poetry sync`:
 
-  ````{tab} Poetry
-  ```toml
-  ...
-  [tool.poetry.scripts]
-  tap-mysource = 'singer_sdk.tests.sample_tap_parquet.parquet_tap:cli'
-  ```
-  ````
-
-  ````{tab} uv
   ```toml
   ...
   [project.scripts]
+  # N.B. Using the [project] section in pyproject.toml with Poetry requires Poetry 2.0+
   tap-mysource = 'singer_sdk.tests.sample_tap_parquet.parquet_tap:cli'
   ```
-  ````
 
 The CLI commands defined here will be configured automatically when the python library is installed by a user.
 
 ## For example, to run `--help`
-
-````{tab} Poetry
-```bash
-poetry install && \
-poetry run tap-mysource --help
-```
-````
 
 ````{tab} uv
 ```bash
@@ -41,34 +25,32 @@ uv run tap-mysource --help
 ```
 ````
 
-## Run in sync mode with auto-discovery
-
 ````{tab} Poetry
 ```bash
-poetry install && \
-poetry run tap-mysource \
-   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
+poetry sync && \
+poetry run tap-mysource --help
 ```
 ````
+
+## Run in sync mode with auto-discovery
 
 ````{tab} uv
 ```bash
 uv sync && \
 uv run tap-mysource \
    --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
+````
+
+````{tab} Poetry
+```bash
+poetry sync && \
+poetry run tap-mysource \
+   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
+```
 ````
 
 ## Run in sync mode with a catalog file input
 
-````{tab} Poetry
-```bash
-poetry install && \
-poetry run tap-mysource \
-   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
-   --catalog singer_sdk/samples/sample_tap_parquet/parquet-catalog.sample.json
-```
-````
-
 ````{tab} uv
 ```bash
 uv sync && \
@@ -77,21 +59,30 @@ uv run tap-mysource \
    --catalog singer_sdk/samples/sample_tap_parquet/parquet-catalog.sample.json
 ````
 
-## Run in discovery mode
-
 ````{tab} Poetry
 ```bash
-poetry install && \
-poetry run tap-mysource --discover \
+poetry sync && \
+poetry run tap-mysource \
    --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
+   --catalog singer_sdk/samples/sample_tap_parquet/parquet-catalog.sample.json
 ```
 ````
+
+## Run in discovery mode
 
 ````{tab} uv
 ```bash
 uv sync && \
 uv run tap-mysource --discover \
    --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
+````
+
+````{tab} Poetry
+```bash
+poetry sync && \
+poetry run tap-mysource --discover \
+   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
+```
 ````
 
 ## Run in discovery mode with a passed catalog file
@@ -101,15 +92,6 @@ This pattern may not be supported by all connectors. By default and in general, 
 `--catalog` option is not used during discovery mode.
 ```
 
-````{tab} Poetry
-```bash
-poetry install && \
-poetry run tap-mysource --discover \
-   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json \
-   --catalog singer_sdk/samples/sample_tap_parquet/parquet-catalog.sample.json
-```
-````
-
 ````{tab} uv
 ```bash
 uv sync && \
@@ -118,17 +100,18 @@ uv run tap-mysource --discover \
    --catalog singer_sdk/samples/sample_tap_parquet/parquet-catalog.sample.json
 ````
 
+````{tab} Poetry
+```bash
+poetry sync && \
+poetry run tap-mysource --discover \
+   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json \
+   --catalog singer_sdk/samples/sample_tap_parquet/parquet-catalog.sample.json
+```
+````
+
 ## Test connectivity
 
 The `--test` option allows the user to validate configuration and assess connectivity.
-
-````{tab} Poetry
-```bash
-poetry install && \
-poetry run tap-mysource --test \
-   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
-```
-````
 
 ````{tab} uv
 ```bash
@@ -137,46 +120,17 @@ uv run tap-mysource --test \
    --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
 ````
 
+````{tab} Poetry
+```bash
+poetry sync && \
+poetry run tap-mysource --test \
+   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
+```
+````
+
 ## Package Information
 
 The `--about` option displays metadata about the package.
-
-````{tab} Poetry
-```console
-$ poetry run sdk-tap-countries-sample --about
-Name: sample-tap-countries
-Description: Sample tap for Countries GraphQL API.
-Version: [could not be detected]
-SDK Version: 0.44.2
-Capabilities:
-  - catalog
-  - state
-  - discover
-  - about
-  - stream-maps
-  - schema-flattening
-  - batch
-Settings:
-  - Name: stream_maps
-    Type: ['object', 'null']
-    Environment Variable: SAMPLE_TAP_COUNTRIES_STREAM_MAPS
-  - Name: stream_map_config
-    Type: ['object', 'null']
-    Environment Variable: SAMPLE_TAP_COUNTRIES_STREAM_MAP_CONFIG
-  - Name: faker_config
-    Type: ['object', 'null']
-    Environment Variable: SAMPLE_TAP_COUNTRIES_FAKER_CONFIG
-  - Name: flattening_enabled
-    Type: ['boolean', 'null']
-    Environment Variable: SAMPLE_TAP_COUNTRIES_FLATTENING_ENABLED
-  - Name: flattening_max_depth
-    Type: ['integer', 'null']
-    Environment Variable: SAMPLE_TAP_COUNTRIES_FLATTENING_MAX_DEPTH
-  - Name: batch_config
-    Type: ['object', 'null']
-    Environment Variable: SAMPLE_TAP_COUNTRIES_BATCH_CONFIG
-```
-````
 
 ````{tab} uv
 ```console
@@ -215,11 +169,48 @@ Settings:
 ```
 ````
 
-This information can also be printed in JSON format for consumption by other applications
-
 ````{tab} Poetry
 ```console
-$ poetry run sdk-tap-countries-sample --about --format json
+$ poetry run sdk-tap-countries-sample --about
+Name: sample-tap-countries
+Description: Sample tap for Countries GraphQL API.
+Version: [could not be detected]
+SDK Version: 0.44.2
+Capabilities:
+  - catalog
+  - state
+  - discover
+  - about
+  - stream-maps
+  - schema-flattening
+  - batch
+Settings:
+  - Name: stream_maps
+    Type: ['object', 'null']
+    Environment Variable: SAMPLE_TAP_COUNTRIES_STREAM_MAPS
+  - Name: stream_map_config
+    Type: ['object', 'null']
+    Environment Variable: SAMPLE_TAP_COUNTRIES_STREAM_MAP_CONFIG
+  - Name: faker_config
+    Type: ['object', 'null']
+    Environment Variable: SAMPLE_TAP_COUNTRIES_FAKER_CONFIG
+  - Name: flattening_enabled
+    Type: ['boolean', 'null']
+    Environment Variable: SAMPLE_TAP_COUNTRIES_FLATTENING_ENABLED
+  - Name: flattening_max_depth
+    Type: ['integer', 'null']
+    Environment Variable: SAMPLE_TAP_COUNTRIES_FLATTENING_MAX_DEPTH
+  - Name: batch_config
+    Type: ['object', 'null']
+    Environment Variable: SAMPLE_TAP_COUNTRIES_BATCH_CONFIG
+```
+````
+
+This information can also be printed in JSON format for consumption by other applications
+
+````{tab} uv
+```console
+$ uv run sdk-tap-countries-sample --about --format json
 {
   "name": "sample-tap-countries",
   "description": "Sample tap for Countries GraphQL API.",
@@ -239,9 +230,9 @@ $ poetry run sdk-tap-countries-sample --about --format json
 ```
 ````
 
-````{tab} uv
+````{tab} Poetry
 ```console
-$ uv run sdk-tap-countries-sample --about --format json
+$ poetry run sdk-tap-countries-sample --about --format json
 {
   "name": "sample-tap-countries",
   "description": "Sample tap for Countries GraphQL API.",
