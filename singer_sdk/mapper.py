@@ -14,7 +14,6 @@ import hashlib
 import importlib.util
 import json
 import logging
-import sys
 import typing as t
 
 import simpleeval
@@ -27,11 +26,6 @@ from singer_sdk.helpers._flattening import (
     flatten_schema,
     get_flattening_options,
 )
-
-if sys.version_info >= (3, 12):
-    from typing import override  # noqa: ICN003
-else:
-    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from faker import Faker
@@ -244,72 +238,6 @@ class SameRecordTransform(DefaultStreamMap):
         return True
 
 
-class _MapperEval(simpleeval.EvalWithCompoundTypes):
-    """Evaluator for stream map expressions.
-
-    Overrides ``_check_disallowed_items`` to skip the per-AST-node safety check
-    added in simpleeval 1.0.5 (CVE-2026-32640).  Safety is preserved by:
-
-    - all module objects in ``functions`` being wrapped in
-      ``simpleeval.ModuleWrapper`` before being passed here;
-    - ``_eval_attribute`` still raising ``FeatureNotAvailable`` when a bare
-      ``types.ModuleType`` leaks through an attribute chain; and
-    - ``_eval_call`` still rejecting ``DISALLOW_FUNCTIONS`` callables.
-
-    Singer records are JSON-serializable and cannot carry raw module objects
-    through the ``names`` dict, so the redundant container scan is safe to elide.
-    """
-
-    @override
-    def _check_disallowed_items(self, item: t.Any) -> None:
-        return
-
-    @override
-    def _eval(self, node: ast.AST) -> t.Any:
-        try:
-            handler = self.nodes[type(node)]  # ty:ignore[invalid-argument-type, not-subscriptable]
-        except KeyError:
-            msg = f"Sorry, {type(node).__name__} is not available in this evaluator"
-            raise simpleeval.FeatureNotAvailable(msg) from None
-
-        return handler(node)
-
-    @override
-    def _eval_name(self, node: ast.Name) -> t.Any:
-        try:
-            # This happens at least for slicing
-            # This is a safe thing to do because it is impossible
-            # that there is a true expression assigning to none
-            # (the compiler rejects it, so you can't even
-            # pass that to ast.parse)
-            val = self.names[node.id]
-            self._check_disallowed_items(val)
-        except (TypeError, KeyError):
-            pass
-        else:
-            return val
-
-        if callable(self.names):
-            try:
-                val = self.names(node)  # ty:ignore[call-top-callable]
-                self._check_disallowed_items(val)
-            except simpleeval.NameNotDefined:
-                pass
-            else:
-                return val
-
-        elif not hasattr(self.names, "__getitem__"):
-            msg = f'Trying to use name (variable) "{node.id}" when no "names" defined for evaluator'  # noqa: E501
-            raise simpleeval.InvalidExpression(msg)
-
-        if node.id in self.functions:
-            val = self.functions[node.id]
-            self._check_disallowed_items(val)
-            return val
-
-        raise simpleeval.NameNotDefined(node.id, self.expr)
-
-
 class CustomStreamMap(StreamMap):
     """Defines transformation logic for a singer stream map."""
 
@@ -355,9 +283,7 @@ class CustomStreamMap(StreamMap):
             self._transform_fn,
             self.transformed_schema,
         ) = self._init_functions_and_schema(stream_map=map_transform)
-        self.expr_evaluator: simpleeval.EvalWithCompoundTypes = _MapperEval(
-            functions=self.functions,
-        )
+        self.expr_evaluator = simpleeval.EvalWithCompoundTypes(functions=self.functions)
         self.fake = self._init_faker_instance()
 
     def transform(self, record: dict) -> dict | None:
@@ -939,7 +865,7 @@ class PluginMapper:
         result: str
 
         try:
-            expr_evaluator = _MapperEval(names=names)
+            expr_evaluator = simpleeval.EvalWithCompoundTypes(names=names)
             result = expr_evaluator.eval(expr)
         except simpleeval.NameNotDefined:
             logger.debug(

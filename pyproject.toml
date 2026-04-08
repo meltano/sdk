@@ -491,6 +491,7 @@ meltano-tap-sqlite = { workspace = true }
 meltano-target-csv = { workspace = true }
 meltano-target-parquet = { workspace = true }
 meltano-target-sqlite = { workspace = true }
+simpleeval = { git = "https://github.com/meltano/simpleeval.git", rev = "fix/check-at-names-boundary" }
 
 [tool.uv.workspace]
 members = [
