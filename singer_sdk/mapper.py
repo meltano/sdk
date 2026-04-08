@@ -272,9 +272,7 @@ class _MapperEval(simpleeval.EvalWithCompoundTypes):
             msg = f"Sorry, {type(node).__name__} is not available in this evaluator"
             raise simpleeval.FeatureNotAvailable(msg) from None
 
-        result = handler(node)
-        self._check_disallowed_items(result)
-        return result
+        return handler(node)
 
     @override
     def _eval_name(self, node: ast.Name) -> t.Any:
