@@ -189,23 +189,23 @@ def test_flatten_record_with_typeless_property_values():
 
     # Flatten the record using the flattened schema
     flattened_record = flatten_record(
-        record, flattened_schema=flattened_schema, max_level=1
+        record,
+        flattened_schema=flattened_schema,
+        max_level=1,
     )
 
     # Verify the flattened record structure
     assert flattened_record["id"] == "123"
     assert flattened_record["changes__field"] == "status"
 
-    # Typeless properties with complex values should be JSON-serialized
+    # Typeless properties should be JSON-serialized
     assert "changes__OldValue" in flattened_record
     assert (
         flattened_record["changes__OldValue"]
         == '{"nested":"object","with":["array","values"]}'
     )
-
-    # Typeless properties with simple values should be preserved
     assert "changes__NewValue" in flattened_record
-    assert flattened_record["changes__NewValue"] == "simple string"
+    assert flattened_record["changes__NewValue"] == '"simple string"'
 
 
 def test_flatten_combined_schemas():
@@ -272,28 +272,217 @@ def test_flatten_combined_schemas():
     assert flattened == {
         "type": "object",
         "properties": {
-            "name": {"type": ["null", "string"]},
+            "name": {
+                "type": ["null", "string"],
+                "x-json-serialize": True,
+            },
             "address": {
-                "type": ["null", "object"],
-                "properties": {
-                    "street": {"type": "string"},
-                    "city": {"type": "string"},
-                    "state": {"type": "string"},
-                    "zip": {"type": "string"},
-                },
+                "type": ["null", "string"],
+                "x-json-serialize": True,
             },
             "phones": {
-                "type": ["null", "array"],
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "type": {"type": "string"},
-                        "number": {"type": "string"},
+                "type": ["null", "string"],
+                "x-json-serialize": True,
+            },
+            "id": {
+                "type": ["null", "string"],
+                "x-json-serialize": True,
+            },
+        },
+    }
+
+
+def test_flatten_combined_schemas_coerced_to_string():
+    """Test that all combined schemas are coerced to string type.
+
+    This reflects the design decision that combinators (oneOf/anyOf/allOf)
+    are treated as incompatible types and always flattened to JSON strings.
+    """
+    schema = {
+        "type": "object",
+        "properties": {
+            "id": {
+                "oneOf": [
+                    {"type": "integer"},
+                    {"type": "string", "format": "uuid"},
+                ],
+            },
+            "count": {
+                "anyOf": [
+                    {"type": "integer"},
+                    {"type": "null"},
+                ],
+            },
+            "active": {
+                "allOf": [
+                    {"type": "boolean"},
+                ],
+            },
+        },
+    }
+
+    flattened = flatten_schema(schema, max_level=1)
+
+    # All combinators should be coerced to string
+    assert flattened["properties"]["id"] == {
+        "type": ["null", "string"],
+        "x-json-serialize": True,
+    }
+    assert flattened["properties"]["count"] == {
+        "type": ["null", "string"],
+        "x-json-serialize": True,
+    }
+    assert flattened["properties"]["active"] == {
+        "type": ["null", "string"],
+        "x-json-serialize": True,
+    }
+
+
+def test_flatten_record_with_combinator_values():
+    """Test that records with combinator fields are JSON-encoded correctly.
+
+    When combinators are flattened to string type, all non-string values
+    should be JSON-encoded to maintain schema consistency.
+    """
+    # Schema after flattening combinators
+    flattened_schema = {
+        "type": "object",
+        "properties": {
+            "id": {  # Was oneOf[integer, string]
+                "type": ["null", "string"],
+                "x-json-serialize": True,
+            },
+            "active": {  # Was oneOf[boolean, string]
+                "type": ["null", "string"],
+                "x-json-serialize": True,
+            },
+            "count": {  # Was anyOf[integer, null]
+                "type": ["null", "string"],
+                "x-json-serialize": True,
+            },
+            "score": {  # Was allOf[number]
+                "type": ["null", "string"],
+                "x-json-serialize": True,
+            },
+            "name": {  # Actually is string
+                "type": ["null", "string"],
+                "x-json-serialize": True,
+            },
+        },
+    }
+
+    # Record with various primitive types
+    record = {
+        "id": 123,
+        "active": True,
+        "count": 42,
+        "score": 98.5,
+        "name": "test",
+    }
+
+    flattened_record = flatten_record(
+        record,
+        flattened_schema=flattened_schema,
+        max_level=1,
+    )
+
+    # Non-string primitives should be JSON-encoded
+    assert flattened_record["id"] == "123"
+    assert flattened_record["active"] == "true"
+    assert flattened_record["count"] == "42"
+    assert flattened_record["score"] == "98.5"
+
+    # String values remain as-is (no double-encoding)
+    assert flattened_record["name"] == '"test"'
+
+
+def test_flatten_combined_schemas_end_to_end():
+    """End-to-end test for combined schemas with nested structures."""
+    schema = {
+        "type": "object",
+        "properties": {
+            "user_id": {
+                "oneOf": [
+                    {"type": "integer"},
+                    {"type": "string"},
+                ],
+            },
+            "metadata": {
+                "type": "object",
+                "properties": {
+                    "is_active": {
+                        "anyOf": [
+                            {"type": "boolean"},
+                            {"type": "null"},
+                        ],
                     },
                 },
             },
         },
     }
+
+    # Flatten schema
+    flattened_schema = flatten_schema(schema, max_level=1)
+
+    # Combinators should be strings
+    assert flattened_schema["properties"]["user_id"]["type"] == ["null", "string"]
+    assert flattened_schema["properties"]["metadata__is_active"]["type"] == [
+        "null",
+        "string",
+    ]
+
+    # Test with integer value
+    record1 = {
+        "user_id": 123,
+        "metadata": {"is_active": True},
+    }
+
+    flattened1 = flatten_record(record1, flattened_schema, max_level=1)
+    assert flattened1["user_id"] == "123"
+    assert flattened1["metadata__is_active"] == "true"
+
+    # Test with string value
+    record2 = {
+        "user_id": "user_abc",
+        "metadata": {"is_active": False},
+    }
+
+    flattened2 = flatten_record(record2, flattened_schema, max_level=1)
+    assert flattened2["user_id"] == '"user_abc"'  # double-encoding
+    assert flattened2["metadata__is_active"] == "false"
+
+
+def test_flatten_combined_schemas_edge_cases():
+    """Test edge cases in combined schema flattening."""
+    # Empty combinator
+    schema1 = {"type": "object", "properties": {"empty": {"oneOf": []}}}
+    flattened1 = flatten_schema(schema1, max_level=1)
+    assert flattened1["properties"]["empty"] == {
+        "type": ["null", "string"],
+        "x-json-serialize": True,
+    }
+
+    # Combinator with missing type
+    schema2 = {"type": "object", "properties": {"no_type": {"anyOf": [{}]}}}
+    flattened2 = flatten_schema(schema2, max_level=1)
+    assert flattened2["properties"]["no_type"] == {
+        "type": ["null", "string"],
+        "x-json-serialize": True,
+    }
+
+    # Null value with combinator schema
+    flattened_schema = {
+        "type": "object",
+        "properties": {
+            "nullable": {
+                "type": ["null", "string"],
+                "x-json-serialize": True,
+            },
+        },
+    }
+    record = {"nullable": None}
+    flattened = flatten_record(record, flattened_schema, max_level=1)
+    assert flattened["nullable"] == "null"
 
 
 def test_flatten_key_with_long_names(subtests: pytest.Subtests):
