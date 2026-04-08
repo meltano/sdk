@@ -265,6 +265,18 @@ class _MapperEval(simpleeval.EvalWithCompoundTypes):
         return
 
     @override
+    def _eval(self, node: ast.AST) -> t.Any:
+        try:
+            handler = self.nodes[type(node)]  # ty:ignore[invalid-argument-type, not-subscriptable]
+        except KeyError:
+            msg = f"Sorry, {type(node).__name__} is not available in this evaluator"
+            raise simpleeval.FeatureNotAvailable(msg) from None
+
+        result = handler(node)
+        self._check_disallowed_items(result)
+        return result
+
+    @override
     def _eval_name(self, node: ast.Name) -> t.Any:
         try:
             # This happens at least for slicing
