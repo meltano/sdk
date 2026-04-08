@@ -264,6 +264,41 @@ class _MapperEval(simpleeval.EvalWithCompoundTypes):
     def _check_disallowed_items(self, item: t.Any) -> None:
         return
 
+    @override
+    def _eval_name(self, node: ast.Name) -> t.Any:
+        try:
+            # This happens at least for slicing
+            # This is a safe thing to do because it is impossible
+            # that there is a true expression assigning to none
+            # (the compiler rejects it, so you can't even
+            # pass that to ast.parse)
+            val = self.names[node.id]
+            self._check_disallowed_items(val)
+        except (TypeError, KeyError):
+            pass
+        else:
+            return val
+
+        if callable(self.names):
+            try:
+                val = self.names(node)  # ty:ignore[call-top-callable]
+                self._check_disallowed_items(val)
+            except simpleeval.NameNotDefined:
+                pass
+            else:
+                return val
+
+        elif not hasattr(self.names, "__getitem__"):
+            msg = f'Trying to use name (variable) "{node.id}" when no "names" defined for evaluator'  # noqa: E501
+            raise simpleeval.InvalidExpression(msg)
+
+        if node.id in self.functions:
+            val = self.functions[node.id]
+            self._check_disallowed_items(val)
+            return val
+
+        raise simpleeval.NameNotDefined(node.id, self.expr)
+
 
 class CustomStreamMap(StreamMap):
     """Defines transformation logic for a singer stream map."""
