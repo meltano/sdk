@@ -157,7 +157,7 @@ def tests(session: nox.Session) -> None:
     )
 
 
-@nox.session(name="test-external", python=main_python, tags=["test"], default=False)
+@nox.session(name="test-external", python=main_python, tags=["test"])
 def test_external(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
     session.run_install(
@@ -181,7 +181,6 @@ def test_external(session: nox.Session) -> None:
     name="test-contrib",
     python=[python_versions[0], main_python],
     tags=["test"],
-    default=False,
 )
 def test_contrib(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
@@ -209,7 +208,6 @@ def test_contrib(session: nox.Session) -> None:
     name="test-packages",
     python=[python_versions[0], main_python],
     tags=["test"],
-    default=False,
 )
 def test_packages(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
@@ -238,7 +236,6 @@ def test_packages(session: nox.Session) -> None:
     name="test-lowest",
     python=python_versions[0],
     tags=["test"],
-    default=False,
 )
 def test_lowest_requirements(session: nox.Session) -> None:
     """Test the package with the lowest dependency versions."""
@@ -344,7 +341,7 @@ def dependencies(session: nox.Session) -> None:
     session.run("deptry", "singer_sdk", *session.posargs)
 
 
-@nox.session(name="snap", default=False)
+@nox.session(name="snap")
 def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
     session.run_install(
