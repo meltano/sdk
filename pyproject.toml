@@ -218,9 +218,9 @@ markers = [
     "snapshot: Tests that use pytest-snapshot",
 ]
 minversion = "9"
-testpaths = ["tests"]
 norecursedirs = ["cookiecutter"]
-strict = false
+strict = true
+testpaths = ["tests"]
 
 [tool.commitizen]
 name = "cz_version_bump"
