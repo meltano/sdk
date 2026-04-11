@@ -16,7 +16,7 @@ import json
 import logging
 import typing as t
 
-import simpleeval  # type: ignore[import-untyped]
+import simpleeval
 
 import singer_sdk.typing as th
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
@@ -316,7 +316,7 @@ class CustomStreamMap(StreamMap):
         Returns:
             Functions which should be available for expression evaluation.
         """
-        funcs: dict[str, t.Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
+        funcs: dict[str, t.Any] = dict(simpleeval.DEFAULT_FUNCTIONS)
         funcs["md5"] = md5
         funcs["sha256"] = sha256
         funcs["datetime"] = datetime

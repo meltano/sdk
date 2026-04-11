@@ -592,7 +592,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         cls: type[Tap],
         ctx: click.Context,
         param: click.Option,  # noqa: ARG003
-        value: bool,  # noqa: FBT001
+        value: str,
     ) -> None:
         """CLI callback to run the tap in test mode.
 

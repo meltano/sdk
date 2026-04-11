@@ -4,6 +4,7 @@ import datetime
 import io
 import json
 import logging
+import sys
 import typing as t
 from collections import defaultdict
 from contextlib import redirect_stdout
@@ -13,8 +14,15 @@ import time_machine
 
 from singer_sdk import Stream, Tap
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 if t.TYPE_CHECKING:
     from pytest_snapshot.plugin import Snapshot
+
+    from singer_sdk.helpers.types import Context, Record
 
 DATETIME = datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc)
 
@@ -30,17 +38,19 @@ class Parent(Stream):
         },
     }
 
+    @override
     def get_child_context(
         self,
-        record: dict,
-        context: dict | None,  # noqa: ARG002
-    ) -> dict | None:
+        record: Record,
+        context: Context | None,
+    ) -> Context | None:
         """Create context for children streams."""
         return {
             "pid": record["id"],
         }
 
-    def get_records(self, context: dict | None):  # noqa: ARG002
+    @override
+    def get_records(self, context: Context | None):
         """Get dummy records."""
         yield {"id": 1}
         yield {"id": 2}
@@ -60,7 +70,8 @@ class Child(Stream):
     }
     parent_stream_type = Parent
 
-    def get_records(self, context: dict | None):  # noqa: ARG002
+    @override
+    def get_records(self, context: Context | None):
         """Get dummy records."""
         yield {"id": 1}
         yield {"id": 2}
@@ -72,6 +83,7 @@ class MyTap(Tap):
 
     name = "my-tap"
 
+    @override
     def discover_streams(self):
         """Discover streams."""
         return [
@@ -220,16 +232,18 @@ def test_one_parent_many_children(
             },
         }
 
+        @override
         def get_records(
             self,
-            context: dict | None,  # noqa: ARG002
+            context: Context | None,
         ) -> t.Iterable[dict | tuple[dict, dict | None]]:
             yield {"id": "1", "children": [1, 2, 3]}
 
+        @override
         def generate_child_contexts(
             self,
-            record: dict,
-            context: dict | None,  # noqa: ARG002
+            record: Record,
+            context: Context | None,
         ) -> t.Iterable[dict | None]:
             for child_id in record["children"]:
                 yield {"child_id": child_id, "pid": record["id"]}
@@ -247,7 +261,8 @@ def test_one_parent_many_children(
         }
         parent_stream_type = ParentMany
 
-        def get_records(self, context: dict | None):
+        @override
+        def get_records(self, context: Context | None):
             """Get dummy records."""
             assert context is not None
 
@@ -304,10 +319,11 @@ def test_preprocess_context_removes_large_payload(
             },
         }
 
+        @override
         def get_child_context(
             self,
-            record: dict,
-            context: dict | None,  # noqa: ARG002
+            record: Record,
+            context: Context | None,
         ) -> dict | None:
             """Create context with large payload for child streams."""
             return {
@@ -317,7 +333,8 @@ def test_preprocess_context_removes_large_payload(
                 "large_payload": list(range(1, 1001)),
             }
 
-        def get_records(self, context: dict | None):  # noqa: ARG002
+        @override
+        def get_records(self, context: Context | None):
             """Get dummy records."""
             yield {"id": 1, "name": "Parent A"}
             yield {"id": 2, "name": "Parent B"}
@@ -344,12 +361,14 @@ def test_preprocess_context_removes_large_payload(
         def set_numbers(self, numbers: list[int]) -> None:
             self._numbers = numbers
 
-        def preprocess_context(self, context: dict) -> dict:
+        @override
+        def preprocess_context(self, context: Context) -> Context:
             """Remove large payload from parent context."""
-            self.set_numbers(context.pop("large_payload", []))
+            self.set_numbers(context.pop("large_payload", []))  # ty:ignore[unresolved-attribute]
             return context
 
-        def get_records(self, context: dict | None):
+        @override
+        def get_records(self, context: Context | None):
             """Get dummy records."""
             # Verify that large_payload was removed
             assert context is not None
@@ -409,14 +428,16 @@ def test_parent_records_emitted_when_child_hits_record_limit():
             "properties": {"id": {"type": "integer"}},
         }
 
+        @override
         def get_child_context(
             self,
-            record: dict,
-            context: dict | None,  # noqa: ARG002
-        ) -> dict | None:
+            record: Record,
+            context: Context | None,
+        ) -> Context | None:
             return {"pid": record["id"]}
 
-        def get_records(self, context: dict | None):  # noqa: ARG002
+        @override
+        def get_records(self, context: Context | None):
             yield {"id": 1}
             yield {"id": 2}
 
@@ -431,7 +452,8 @@ def test_parent_records_emitted_when_child_hits_record_limit():
         }
         parent_stream_type = ParentStream
 
-        def get_records(self, context: dict | None):  # noqa: ARG002
+        @override
+        def get_records(self, context: Context | None):
             # More records than the dry-run limit (3 > 2)
             yield {"id": 1}
             yield {"id": 2}
@@ -448,7 +470,8 @@ def test_parent_records_emitted_when_child_hits_record_limit():
         }
         parent_stream_type = ParentStream
 
-        def get_records(self, context: dict | None):  # noqa: ARG002
+        @override
+        def get_records(self, context: Context | None):
             for i in range(10):
                 yield {"id": i + 1}
 

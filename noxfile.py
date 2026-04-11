@@ -33,7 +33,7 @@ extend-ignore = [
 ]
 """
 
-COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
+COOKIECUTTER_REPLAY_FILES = sorted(Path("./e2e-tests/cookiecutters").glob("*.json"))
 PYPROJECT = nox.project.load_toml()
 UV_SYNC_COMMAND = (
     "uv",
@@ -157,7 +157,7 @@ def tests(session: nox.Session) -> None:
     )
 
 
-@nox.session(name="test-external", python=main_python, tags=["test"], default=False)
+@nox.session(name="test-external", python=main_python, tags=["test"])
 def test_external(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
     session.run_install(
@@ -181,7 +181,6 @@ def test_external(session: nox.Session) -> None:
     name="test-contrib",
     python=[python_versions[0], main_python],
     tags=["test"],
-    default=False,
 )
 def test_contrib(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
@@ -209,7 +208,6 @@ def test_contrib(session: nox.Session) -> None:
     name="test-packages",
     python=[python_versions[0], main_python],
     tags=["test"],
-    default=False,
 )
 def test_packages(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
@@ -238,7 +236,6 @@ def test_packages(session: nox.Session) -> None:
     name="test-lowest",
     python=python_versions[0],
     tags=["test"],
-    default=False,
 )
 def test_lowest_requirements(session: nox.Session) -> None:
     """Test the package with the lowest dependency versions."""
@@ -344,7 +341,7 @@ def dependencies(session: nox.Session) -> None:
     session.run("deptry", "singer_sdk", *session.posargs)
 
 
-@nox.session(name="snap", default=False)
+@nox.session(name="snap")
 def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
     session.run_install(
@@ -498,7 +495,6 @@ def api_changes(session: nox.Session) -> None:
     """Check for API changes."""
     args = [
         "check",
-        "--no-color",
         "singer_sdk",
     ]
 
@@ -508,7 +504,7 @@ def api_changes(session: nox.Session) -> None:
     if "GITHUB_ACTIONS" in os.environ:
         args.append("-f=github")
 
-    session.run("uvx", "griffe", *args, external=True)
+    session.run("uvx", "griffecli", *args, external=True)
 
 
 if __name__ == "__main__":
