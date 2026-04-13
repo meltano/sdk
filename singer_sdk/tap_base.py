@@ -123,7 +123,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         if isinstance(catalog, Catalog):
             self._input_catalog = catalog
         elif isinstance(catalog, collections.abc.MutableMapping):
-            self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type]
+            self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type]  # ty:ignore[invalid-argument-type]
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
             warnings.warn(
@@ -531,7 +531,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         config: _ConfigInput | None = None,
         state: t.IO[str] | None = None,
         catalog: t.IO[str] | None = None,
-    ) -> None:
+    ) -> None:  # ty:ignore[invalid-method-override]
         """Invoke the tap's command line interface.
 
         Args:

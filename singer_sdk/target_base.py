@@ -560,7 +560,7 @@ class Target(BaseSingerReader, abc.ABC):
         about_format: str | None = None,
         config: _ConfigInput | None = None,
         file_input: t.IO[str] | None = None,
-    ) -> None:
+    ) -> None:  # ty:ignore[invalid-method-override]
         """Invoke the target.
 
         Args:
