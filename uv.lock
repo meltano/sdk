@@ -3014,7 +3014,7 @@ requires-dist = [
     { name = "referencing", specifier = ">=0.30.0" },
     { name = "requests", specifier = ">=2.25.1" },
     { name = "s3fs", marker = "extra == 's3'", specifier = ">=2024.9.0" },
-    { name = "simpleeval", specifier = ">=1.0.5" },
+    { name = "simpleeval", specifier = "==1.0.7" },
     { name = "simplejson", specifier = ">=3.17.6" },
     { name = "sqlalchemy", specifier = ">=2" },
     { name = "sqlalchemy", marker = "extra == 'sql'", specifier = ">=2" },
