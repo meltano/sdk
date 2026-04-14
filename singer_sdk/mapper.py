@@ -355,7 +355,9 @@ class CustomStreamMap(StreamMap):
             self._transform_fn,
             self.transformed_schema,
         ) = self._init_functions_and_schema(stream_map=map_transform)
-        self.expr_evaluator = _MapperEval(functions=self.functions)
+        self.expr_evaluator: simpleeval.EvalWithCompoundTypes = _MapperEval(
+            functions=self.functions,
+        )
         self.fake = self._init_faker_instance()
 
     def transform(self, record: dict) -> dict | None:
