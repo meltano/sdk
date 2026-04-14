@@ -355,8 +355,12 @@ class CustomStreamMap(StreamMap):
             self._transform_fn,
             self.transformed_schema,
         ) = self._init_functions_and_schema(stream_map=map_transform)
-        self.expr_evaluator = _MapperEval(functions=self.functions)
         self.fake = self._init_faker_instance()
+
+    @property
+    def expr_evaluator(self) -> simpleeval.EvalWithCompoundTypes:
+        """The expression evaluator used by this stream map instance."""
+        return _MapperEval(functions=self.functions)
 
     def transform(self, record: dict) -> dict | None:
         """Return a transformed record.
@@ -937,7 +941,7 @@ class PluginMapper:
         result: str
 
         try:
-            expr_evaluator = _MapperEval(names=names)
+            expr_evaluator: simpleeval.EvalWithCompoundTypes = _MapperEval(names=names)
             result = expr_evaluator.eval(expr)
         except simpleeval.NameNotDefined:
             logger.debug(
