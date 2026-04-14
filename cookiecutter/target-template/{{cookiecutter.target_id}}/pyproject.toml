@@ -150,6 +150,7 @@ env_list = [
 description = "run tests on Python {env_name}"
 runner = "uv-venv-lock-runner"
 pass_env = [
+    "CI",
     {%- if cookiecutter.include_ci_files == "GitHub" %}
     "GITHUB_*",
     {%- endif %}
