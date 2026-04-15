@@ -146,9 +146,9 @@ testing = [
 ]
 typing = [
     {"include-group" = "testing"},
-    "mypy>=1.17",
+    "mypy~=1.19.1",
     "pyarrow-stubs>=19.1",
-    "ty>=0.0.4",
+    "ty==0.0.20",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-requests>=2.28.11",
@@ -335,7 +335,7 @@ extend-exclude = [
     "cookiecutter/*",
 ]
 line-length = 88
-required-version = ">=0.13"
+required-version = "~=0.14.10"
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -495,3 +495,6 @@ explicit = true
 [tool.codespell]
 skip = "*.csv,samples/aapl/*.json,packages/*/schemas/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"
 ignore-words-list = "fo,intoto"
+
+[tool.ty.rules]
+unused-type-ignore-comment = "ignore"
