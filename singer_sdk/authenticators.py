@@ -777,7 +777,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
                 password=passphrase,
                 backend=default_backend(),
             )
-        private_key_string: str | t.Any = private_key.decode("UTF-8")  # ty: ignore[possibly-missing-attribute]
+        private_key_string: str | t.Any = private_key.decode("UTF-8")  # ty:ignore[unresolved-attribute]
         return {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": jwt.encode(

@@ -11,6 +11,8 @@ from referencing.jsonschema import DRAFT202012
 if t.TYPE_CHECKING:
     from referencing._core import Resolver
 
+_SchemaDict: t.TypeAlias = dict[str, t.Any]
+
 META_KEYS = [
     "id",
     "schema",
@@ -222,7 +224,7 @@ class _SchemaKey:
 
 def resolve_schema_references(
     schema: dict[str, t.Any],
-    refs: dict[str, str] | None = None,
+    refs: dict[str, _SchemaDict] | None = None,
 ) -> dict:
     """Resolves and replaces json-schema $refs with the appropriate dict.
 
