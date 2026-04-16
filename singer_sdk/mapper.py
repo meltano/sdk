@@ -862,7 +862,7 @@ class PluginMapper:
                 elif MAPPER_ALIAS_OPTION in stream_def:
                     # <source>: __alias__: <alias>
                     stream_alias = stream_def.pop(MAPPER_ALIAS_OPTION)
-                    stream_alias = PluginMapper._eval_stream(stream_alias, stream_name)
+                    stream_alias = self._eval_stream(stream_alias, stream_name)
 
             if stream_name == source_stream:
                 # Exact match
@@ -917,8 +917,7 @@ class PluginMapper:
                 # Additional mappers for aliasing and multi-projection:
                 self.stream_maps[source_stream].append(mapper)
 
-    @staticmethod
-    def _eval_stream(expr: str, stream_name: str) -> str:
+    def _eval_stream(self, expr: str, stream_name: str) -> str:
         """Solve an alias expression.
 
         Args:
@@ -931,19 +930,27 @@ class PluginMapper:
         Raises:
             MapExpressionError: If the mapping expression failed to evaluate.
         """
-        # Allow stream name access within alias transform
-        names = {"__stream_name__": stream_name}
+        names = {
+            "__stream_name__": stream_name,
+            "config": self.map_config,
+        }
 
         result: str
 
         try:
-            expr_evaluator = _MapperEval(names=names)
+            funcs: dict[str, t.Any] = dict(simpleeval.DEFAULT_FUNCTIONS)
+            funcs["md5"] = md5
+            funcs["sha256"] = sha256
+            funcs["datetime"] = simpleeval.ModuleWrapper(datetime)
+            funcs["bool"] = bool
+            funcs["json"] = simpleeval.ModuleWrapper(json)
+            expr_evaluator = _MapperEval(names=names, functions=funcs)
             result = expr_evaluator.eval(expr)
         except simpleeval.NameNotDefined:
             logger.debug(
-                "Failed to evaluate simpleeval expression %(expr) - "
+                "Failed to evaluate simpleeval expression %s - "
                 "falling back to original expression",
-                extra={"expr": expr},
+                expr,
             )
             result = expr
         except (simpleeval.InvalidExpression, SyntaxError) as ex:
@@ -952,4 +959,4 @@ class PluginMapper:
 
         logger.debug("Stream eval result: %s = %s", expr, result)
 
-        return result
+        return str(result)
