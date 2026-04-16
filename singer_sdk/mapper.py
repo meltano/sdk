@@ -39,6 +39,8 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers._flattening import FlatteningOptions
     from singer_sdk.singerlib.catalog import Catalog
 
+FunctionsDict: t.TypeAlias = dict[str, t.Callable | simpleeval.ModuleWrapper]
+
 
 MAPPER_ELSE_OPTION = "__else__"
 MAPPER_FILTER_OPTION = "__filter__"
@@ -348,6 +350,20 @@ class CustomStreamMap(StreamMap):
         self.faker_config = faker_config
         self.stream_name = stream_name
 
+        self.expr_evaluator = _MapperEval(functions=self.functions)
+        self.fake = self._init_faker_instance()
+
+        # Pre-build the static portion of the names dict (entries that never change
+        # across records).  Record-specific entries (_/record/self) are merged in at
+        # eval time.
+        self._static_eval_names: dict[str, t.Any] = {
+            "config": self.map_config,
+            "__stream_name__": self.stream_alias,
+            "__original_stream_name__": self.stream_name,
+        }
+        if self.fake:
+            self._static_eval_names["fake"] = self.fake
+
         self._transform_fn: t.Callable[[dict], dict | None]
         self._filter_fn: t.Callable[[dict], bool]
         (
@@ -355,9 +371,6 @@ class CustomStreamMap(StreamMap):
             self._transform_fn,
             self.transformed_schema,
         ) = self._init_functions_and_schema(stream_map=map_transform)
-        self.expr_evaluator: simpleeval.EvalWithCompoundTypes = _MapperEval(
-            functions=self.functions,
-        )
         self.fake = self._init_faker_instance()
 
     def transform(self, record: dict) -> dict | None:
@@ -384,7 +397,7 @@ class CustomStreamMap(StreamMap):
         return self._filter_fn(record)
 
     @property
-    def functions(self) -> dict[str, t.Callable]:
+    def functions(self) -> FunctionsDict:
         """Get available transformation functions.
 
         Returns:
@@ -398,12 +411,33 @@ class CustomStreamMap(StreamMap):
         funcs["json"] = simpleeval.ModuleWrapper(json)
         return funcs
 
+    def _build_eval_names(self, record: dict) -> dict:
+        """Build the simpleeval names dict for a single record.
+
+        Merges the pre-built static names (config, stream name, faker) with the
+        record fields.  Callers can then set ``names["self"]`` for per-property
+        access before each ``_eval`` call.
+
+        Args:
+            record: The current stream record.
+
+        Returns:
+            Names dict ready to pass to the expression evaluator.
+        """
+        names = dict(self._static_eval_names)
+        names.update(record)
+        names["_"] = record
+        names["record"] = record
+        return names
+
     def _eval(
         self,
         expr: str,
         expr_parsed: ast.Expr,
         record: dict,
         property_name: str | None,
+        *,
+        names: dict | None = None,
     ) -> str | int | float:
         """Solve an expression.
 
@@ -412,6 +446,10 @@ class CustomStreamMap(StreamMap):
             expr_parsed: Parsed expression abstract syntax tree.
             record: Individual stream record.
             property_name: Name of property to transform in the record.
+            names: Pre-built names dict.  When provided the caller is responsible for
+                having already populated all record-level entries; only the ``self``
+                key is updated here.  When omitted, a fresh dict is built from the
+                record (useful for one-off calls such as filter expressions).
 
         Returns:
             Evaluated expression.
@@ -419,21 +457,14 @@ class CustomStreamMap(StreamMap):
         Raises:
             MapExpressionError: If the mapping expression failed to evaluate.
         """
-        names = record.copy()  # Start with names from record properties
-        names["_"] = record  # Add a shorthand alias in case of reserved words in names
-        names["record"] = record  # ...and a longhand alias
-        names["config"] = self.map_config  # Allow map config access within transform
-        names["__stream_name__"] = self.stream_alias  # Access stream name in transform
-
-        # Stream name (prior to aliasing, if applicable)
-        names["__original_stream_name__"] = self.stream_name
-
-        if self.fake:
-            names["fake"] = self.fake
+        if names is None:
+            names = self._build_eval_names(record)
 
         if property_name and property_name in record:
             # Allow access to original property value if applicable
             names["self"] = record[property_name]
+        elif "self" in names:
+            del names["self"]
         try:
             self.expr_evaluator.names = names
             result: str | int | float = self.expr_evaluator.eval(
@@ -688,6 +719,9 @@ class CustomStreamMap(StreamMap):
                     if key_property in record:
                         result[key_property] = record[key_property]
 
+            # Build the names dict once per record; _eval only patches "self" per field.
+            names = self._build_eval_names(record)
+
             for prop_key, prop_def, prop_def_parsed in stream_map_parsed:
                 if prop_def in {None, NULL_STRING}:
                     # Remove property from result
@@ -701,6 +735,7 @@ class CustomStreamMap(StreamMap):
                         expr_parsed=prop_def_parsed,
                         record=record,
                         property_name=prop_key,
+                        names=names,
                     )
                     continue
 
