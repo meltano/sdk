@@ -444,8 +444,6 @@ class CustomStreamMap(StreamMap):
             msg = f"Failed to evaluate simpleeval expressions {expr}."
             raise MapExpressionError(msg) from ex
 
-        logger.debug("Eval result: %s = %s", expr, result)
-
         return result
 
     def _eval_type(  # noqa: PLR0911
