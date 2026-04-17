@@ -47,8 +47,8 @@ class BaseAPIPaginator(ABC, t.Generic[TPageToken]):
             start_value: Initial value.
         """
         self._value: TPageToken = start_value
-        self._page_count = 0
-        self._finished = False
+        self._page_count: int = 0
+        self._finished: bool = False
         self._last_seen_record: dict | None = None
 
     @property

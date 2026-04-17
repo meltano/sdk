@@ -859,7 +859,7 @@ class SQLConnector:  # noqa: PLR0904
            A ``FullyQualifiedName`` object is now returned.
         """
         return FullyQualifiedName(
-            table=table_name,  # type: ignore[arg-type]
+            table=table_name,  # type: ignore[arg-type]  # ty:ignore[invalid-argument-type]
             schema=schema_name,
             database=db_name,
             delimiter=delimiter,
@@ -1043,7 +1043,7 @@ class SQLConnector:  # noqa: PLR0904
         possible_primary_keys.extend(
             index_def["column_names"]  # type: ignore[misc]
             for index_def in reflected_indices
-            if index_def.get("unique", False)
+            if index_def.get("unique", False)  # ty:ignore[invalid-argument-type]
         )
 
         key_properties = next(iter(possible_primary_keys), [])
