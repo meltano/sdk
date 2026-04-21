@@ -211,13 +211,9 @@ class StreamStateManager:
         # This also creates a state entry if one does not yet exist:
         state_dict = self.get_context_state(context)
 
-        treat_as_sorted = self._is_sorted
-
-        # TODO: This logic is a bit awkward. It essentially sets treat_as_sorted to
-        # False when it is already False
-        if not treat_as_sorted and self.state_partitioning_keys is not None:
-            # Streams with custom state partitioning are not resumable.
-            treat_as_sorted = False
+        # Treat as sorted only when the stream is sorted and there is no custom
+        # state partitioning configured (in which case the stream is not resumable)
+        treat_as_sorted = self._is_sorted and self.state_partitioning_keys is None
 
         # Advance state bookmark values
         increment_state(
