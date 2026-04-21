@@ -279,6 +279,22 @@ def test_increment_not_required(tap_state: types.TapState) -> None:
     )
 
 
+def test_increment_with_partitioning_keys(tap_state: types.TapState) -> None:
+    """Test that partitioning keys make streams non-resumable."""
+    state_manager = StreamStateManager(
+        stream_name="test_stream",
+        tap_state=tap_state,
+        is_sorted=True,
+        state_partitioning_keys=["tenant_id"],
+    )
+    state_manager.increment_state(
+        {"updated_at": "2021-05-17T20:41:16Z"},
+        replication_key="updated_at",
+    )
+    stream_state = tap_state["bookmarks"]["test_stream"]
+    assert "progress_markers" in stream_state
+
+
 def test_increment_invalid_sort(tap_state: types.TapState) -> None:
     """Test that increment_state does not compare when no old value."""
     state_manager = StreamStateManager(
