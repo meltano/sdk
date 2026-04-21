@@ -38,9 +38,11 @@ class StreamStateManager:
     def __init__(
         self,
         *,
-        tap_name: str,
         stream_name: str,
         tap_state: types.TapState,
+        is_sorted: bool = False,
+        check_sorted: bool = True,
+        tap_name: str | None = None,
         state_partitioning_keys: t.Sequence[str] | None = None,
     ) -> None:
         """Initialize the StreamStateManager.
@@ -50,12 +52,16 @@ class StreamStateManager:
             stream_name: Name of the stream.
             tap_state: Shared tap-level state dictionary.
             state_partitioning_keys: Keys used for state partitioning.
+            is_sorted: Whether the stream is expected to be sorted.
+            check_sorted: Whether to check for sort violations.
         """
         self.tap_name = tap_name
         self.stream_name = stream_name
         self.tap_state = tap_state
         self.state_partitioning_keys = state_partitioning_keys
         self.is_flushed = True
+        self._is_sorted = is_sorted
+        self._check_sorted = check_sorted
         self._logger = logging.getLogger(tap_name).getChild(stream_name)
 
     @property
@@ -186,8 +192,6 @@ class StreamStateManager:
         *,
         context: types.Context | None = None,
         replication_key: str,
-        is_sorted: bool,
-        check_sorted: bool,
     ) -> None:
         """Update state of stream or partition with data from the provided record.
 
@@ -198,19 +202,25 @@ class StreamStateManager:
             latest_record: The latest record to update state with.
             context: Stream partition or context dictionary.
             replication_key: The replication key field name.
-            is_sorted: Whether the stream is expected to be sorted.
-            check_sorted: Whether to check for sort violations.
         """
         # This also creates a state entry if one does not yet exist:
         state_dict = self.get_context_state(context)
+
+        treat_as_sorted = self._is_sorted
+
+        # TODO: This logic is a bit awkward. It essentially sets treat_as_sorted to
+        # False when it is already False
+        if not treat_as_sorted and self.state_partitioning_keys is not None:
+            # Streams with custom state partitioning are not resumable.
+            treat_as_sorted = False
 
         # Advance state bookmark values
         increment_state(
             state_dict,
             replication_key=replication_key,
             latest_record=latest_record,
-            is_sorted=is_sorted,
-            check_sorted=check_sorted,
+            is_sorted=treat_as_sorted,
+            check_sorted=self._check_sorted,
         )
 
     def finalize_state(self, state: dict | None = None) -> None:
