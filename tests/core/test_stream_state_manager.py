@@ -6,6 +6,7 @@ import typing as t
 
 import pytest
 
+from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.singerlib.catalog import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL
 from singer_sdk.streams._state import StreamStateManager
 
@@ -22,11 +23,7 @@ def tap_state() -> types.TapState:
 @pytest.fixture
 def state_manager(tap_state: types.TapState) -> StreamStateManager:
     """Return a StreamStateManager instance."""
-    return StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    return StreamStateManager(stream_name="test_stream", tap_state=tap_state)
 
 
 # Tests for StreamStateManager initialization
@@ -35,12 +32,10 @@ def state_manager(tap_state: types.TapState) -> StreamStateManager:
 def test_init_sets_attributes(tap_state: types.TapState) -> None:
     """Test that init sets all attributes correctly."""
     manager = StreamStateManager(
-        tap_name="my-tap",
         stream_name="my_stream",
         tap_state=tap_state,
         state_partitioning_keys=["tenant_id"],
     )
-    assert manager.tap_name == "my-tap"
     assert manager.stream_name == "my_stream"
     assert manager.tap_state is tap_state
     assert manager.state_partitioning_keys == ["tenant_id"]
@@ -49,11 +44,7 @@ def test_init_sets_attributes(tap_state: types.TapState) -> None:
 
 def test_init_default_partitioning_keys(tap_state: types.TapState) -> None:
     """Test that state_partitioning_keys defaults to None."""
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
     assert manager.state_partitioning_keys is None
 
 
@@ -73,11 +64,7 @@ def test_stream_state_creates_bookmark(
 def test_stream_state_returns_existing(tap_state: types.TapState) -> None:
     """Test that stream_state returns existing bookmark."""
     tap_state["bookmarks"] = {"test_stream": {"replication_key_value": "2021-01-01"}}
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
     state = manager.stream_state
     assert state == {"replication_key_value": "2021-01-01"}
 
@@ -122,11 +109,7 @@ def test_get_context_state_returns_existing_partition(
             ]
         }
     }
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
     context = {"tenant_id": "abc123"}
     state = manager.get_context_state(context)
     assert state["replication_key_value"] == "2021-01-01"
@@ -149,7 +132,6 @@ def test_get_context_state_with_state_partitioning_keys(
         },
     }
     manager = StreamStateManager(
-        tap_name="test-tap",
         stream_name="test_stream",
         tap_state=tap_state,
         state_partitioning_keys=["tenant_id"],
@@ -185,7 +167,6 @@ def test_get_state_partition_context_filters_by_keys(
 ) -> None:
     """Test that context is filtered by partitioning keys."""
     manager = StreamStateManager(
-        tap_name="test-tap",
         stream_name="test_stream",
         tap_state=tap_state,
         state_partitioning_keys=["tenant_id"],
@@ -214,16 +195,17 @@ def test_is_flushed_after_finalize_state(
 # Tests for increment_state method
 
 
-def test_increment_state_updates_bookmark(
-    state_manager: StreamStateManager,
-    tap_state: types.TapState,
-) -> None:
+def test_increment_state_updates_bookmark(tap_state: types.TapState) -> None:
     """Test that increment_state updates replication key value."""
+    state_manager = StreamStateManager(
+        stream_name="test_stream",
+        tap_state=tap_state,
+        is_sorted=True,
+        check_sorted=False,
+    )
     state_manager.increment_state(
         {"updated_at": "2021-05-17T20:41:16Z"},
         replication_key="updated_at",
-        is_sorted=True,
-        check_sorted=False,
     )
     stream_state = tap_state["bookmarks"]["test_stream"]
     assert stream_state["replication_key"] == "updated_at"
@@ -233,17 +215,16 @@ def test_increment_state_updates_bookmark(
 def test_increment_state_with_context(tap_state: types.TapState) -> None:
     """Test increment_state with partition context."""
     manager = StreamStateManager(
-        tap_name="test-tap",
         stream_name="test_stream",
         tap_state=tap_state,
+        is_sorted=True,
+        check_sorted=False,
     )
     context = {"tenant_id": "abc123"}
     manager.increment_state(
         {"updated_at": "2021-05-17T20:41:16Z"},
         context=context,
         replication_key="updated_at",
-        is_sorted=True,
-        check_sorted=False,
     )
     partitions = tap_state["bookmarks"]["test_stream"]["partitions"]
     assert len(partitions) == 1
@@ -252,19 +233,72 @@ def test_increment_state_with_context(tap_state: types.TapState) -> None:
 
 
 def test_increment_state_unsorted_creates_progress_markers(
-    state_manager: StreamStateManager,
     tap_state: types.TapState,
 ) -> None:
     """Test that unsorted streams create progress markers."""
+    state_manager = StreamStateManager(
+        stream_name="test_stream",
+        tap_state=tap_state,
+        is_sorted=False,
+        check_sorted=False,
+    )
     state_manager.increment_state(
         {"updated_at": "2021-05-17T20:41:16Z"},
         replication_key="updated_at",
-        is_sorted=False,
-        check_sorted=False,
     )
     stream_state = tap_state["bookmarks"]["test_stream"]
     assert "progress_markers" in stream_state
     assert stream_state["progress_markers"]["replication_key"] == "updated_at"
+
+
+def test_increment_not_required(tap_state: types.TapState) -> None:
+    """Test that increment_state does not compare when no old value."""
+    state_manager = StreamStateManager(
+        stream_name="test_stream",
+        tap_state=tap_state,
+        is_sorted=False,
+    )
+    state_manager.increment_state(
+        {"updated_at": "2021-05-17T20:41:16Z"},
+        replication_key="updated_at",
+    )
+    stream_state = tap_state["bookmarks"]["test_stream"]
+    assert (
+        stream_state["progress_markers"]["replication_key_value"]
+        == "2021-05-17T20:41:16Z"
+    )
+
+    state_manager.increment_state(
+        {"updated_at": "2021-05-05T20:41:16Z"},
+        replication_key="updated_at",
+    )
+    stream_state = tap_state["bookmarks"]["test_stream"]
+    assert (
+        stream_state["progress_markers"]["replication_key_value"]
+        == "2021-05-17T20:41:16Z"
+    )
+
+
+def test_increment_invalid_sort(tap_state: types.TapState) -> None:
+    """Test that increment_state does not compare when no old value."""
+    state_manager = StreamStateManager(
+        stream_name="test_stream",
+        tap_state=tap_state,
+        is_sorted=True,
+    )
+    state_manager.increment_state(
+        {"updated_at": "2021-05-17T20:41:16Z"},
+        replication_key="updated_at",
+    )
+
+    with pytest.raises(
+        InvalidStreamSortException,
+        match="Unsorted data detected in stream",
+    ):
+        state_manager.increment_state(
+            {"updated_at": "2021-05-05T20:41:16Z"},
+            replication_key="updated_at",
+        )
 
 
 # Tests for finalize_state method
@@ -282,11 +316,7 @@ def test_finalize_state_promotes_progress_markers(
             }
         }
     }
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
     state = manager.stream_state
     manager.finalize_state(state)
 
@@ -311,11 +341,7 @@ def test_finalize_progress_markers_no_state_uses_stream_state(
 
 def test_finalize_progress_markers_with_partitions(tap_state: types.TapState) -> None:
     """Test finalize_progress_markers with partitions."""
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
     partitions = [{"tenant_id": "a"}, {"tenant_id": "b"}]
     manager.finalize_progress_markers(partitions=partitions)
 
@@ -349,15 +375,14 @@ def test_finalize_progress_markers_beyond_signpost() -> None:
 
     tap_state: types.TapState = {}
     manager = StreamStateManager(
-        tap_name="test-tap",
         stream_name="test_stream",
         tap_state=tap_state,
+        is_sorted=False,
+        check_sorted=False,
     )
     manager.increment_state(
         latest_record={"updated_at": replication_key_value},
         replication_key="updated_at",
-        is_sorted=False,
-        check_sorted=False,
     )
     manager.write_replication_key_signpost(signpost_value)
     manager.finalize_progress_markers()
@@ -392,11 +417,7 @@ def test_get_state_partitions_returns_existing(tap_state: types.TapState) -> Non
             ]
         }
     }
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
     partitions = manager.get_state_partitions()
     assert partitions is not None
     assert len(partitions) == 2
@@ -410,11 +431,7 @@ def test_get_starting_replication_value_full_table_returns_none(
 ) -> None:
     """Test that FULL_TABLE replication returns None."""
     tap_state["bookmarks"] = {"test_stream": {"replication_key_value": "2021-01-01"}}
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
     result = manager.get_starting_replication_value(None, REPLICATION_FULL_TABLE)
     assert result is None
 
@@ -429,11 +446,7 @@ def test_get_starting_replication_value_incremental_returns_value(
             "starting_replication_value": "2021-05-17T20:41:16Z",
         }
     }
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
     result = manager.get_starting_replication_value(None, REPLICATION_INCREMENTAL)
     assert result == "2021-05-17T20:41:16Z"
 
@@ -467,11 +480,7 @@ def test_get_starting_replication_value_multiple_partitions(
             ]
         }
     }
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
 
     result = manager.get_starting_replication_value(
         {"tenant_id": "a"},
@@ -514,11 +523,7 @@ def test_is_state_non_resumable_with_progress_markers(
             }
         }
     }
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
     assert manager.is_state_non_resumable() is True
 
 
@@ -550,11 +555,7 @@ def test_write_starting_replication_value_incremental_writes_value(
             "replication_key_value": "2021-05-17T20:41:16Z",
         }
     }
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
     manager.write_starting_replication_value(
         context=None,
         replication_method=REPLICATION_INCREMENTAL,
@@ -589,11 +590,7 @@ def test_write_starting_replication_value_compare_fn_used(
             "replication_key_value": "2021-05-17",
         }
     }
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
 
     # This function always returns the second argument
     def compare_fn(a: str, b: str) -> str:  # noqa: ARG001
@@ -621,11 +618,7 @@ def test_write_starting_replication_value_no_compare_fn(
             "replication_key_value": "2021-05-17",
         }
     }
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
 
     manager.write_starting_replication_value(
         context=None,
@@ -661,11 +654,7 @@ def test_write_starting_replication_value_replication_key_changed() -> None:
             }
         }
     }
-    manager = StreamStateManager(
-        tap_name="test-tap",
-        stream_name="test_stream",
-        tap_state=tap_state,
-    )
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
     manager.write_starting_replication_value(
         context=None,
         replication_method=REPLICATION_INCREMENTAL,
