@@ -69,6 +69,7 @@ class FullyQualifiedName(UserString):
         schema: str | None = None,
         database: str | None = None,
         delimiter: str = ".",
+        dialect: Dialect | None = None,
     ) -> None:
         """Initialize the fully qualified table name.
 
@@ -77,6 +78,7 @@ class FullyQualifiedName(UserString):
             schema: The name of the schema. Defaults to None.
             database: The name of the database. Defaults to None.
             delimiter: The delimiter to use between parts. Defaults to '.'.
+            dialect: Optional SQLAlchemy Dialect for dialect-specific formatting.
 
         Raises:
             ValueError: If the fully qualified name could not be generated.
@@ -85,6 +87,7 @@ class FullyQualifiedName(UserString):
         self.schema = schema
         self.database = database
         self.delimiter = delimiter
+        self.dialect = dialect
 
         parts = []
         if self.database:
@@ -108,7 +111,7 @@ class FullyQualifiedName(UserString):
 
         super().__init__(self.delimiter.join(parts))
 
-    def prepare_part(self, part: str) -> str:  # noqa: PLR6301
+    def prepare_part(self, part: str) -> str:
         """Prepare a part of the fully qualified name.
 
         Args:
@@ -117,7 +120,7 @@ class FullyQualifiedName(UserString):
         Returns:
             The prepared part.
         """
-        return part
+        return self.dialect.identifier_preparer.quote(part) if self.dialect else part
 
 
 class SQLToJSONSchema:
@@ -837,9 +840,9 @@ class SQLConnector:  # noqa: PLR0904
         """
         return self.jsonschema_to_sql.to_sql_type(jsonschema_type)
 
-    @staticmethod
     def get_fully_qualified_name(
-        table_name: str | None = None,
+        self,
+        table_name: str = "",
         schema_name: str | None = None,
         db_name: str | None = None,
         delimiter: str = ".",
@@ -859,10 +862,11 @@ class SQLConnector:  # noqa: PLR0904
            A ``FullyQualifiedName`` object is now returned.
         """
         return FullyQualifiedName(
-            table=table_name,  # type: ignore[arg-type]  # ty:ignore[invalid-argument-type]
+            table=table_name,
             schema=schema_name,
             database=db_name,
             delimiter=delimiter,
+            dialect=self._dialect,
         )
 
     @property
