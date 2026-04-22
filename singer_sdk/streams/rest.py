@@ -590,10 +590,13 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         self,
         *,
         context: Context | None,
-        page: _TPag,
+        page: BaseAPIPaginator,
     ) -> requests.PreparedRequest:
         http_request = self.get_http_request(
-            context=HTTPRequestContext(stream_context=context, page=page)
+            context=HTTPRequestContext(
+                stream_context=context,
+                page=page,
+            )
         )
 
         prepare_kwargs: dict[str, t.Any] = {
