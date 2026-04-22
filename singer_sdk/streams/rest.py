@@ -539,7 +539,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             params=self.get_url_params(  # type: ignore[arg-type]
                 context.stream_context,
                 context.page.current_value,
-            ),
+            ),  # ty:ignore[invalid-argument-type]
             data=self.prepare_request_payload(
                 context.stream_context,
                 context.page.current_value,
@@ -1013,15 +1013,7 @@ class RESTStream(_HTTPStream, abc.ABC, t.Generic[_TToken]):
             input=response.json(parse_float=decimal.Decimal),
         )
 
-    def get_new_paginator(
-        self,
-    ) -> (
-        BaseAPIPaginator[_TToken]
-        | LegacyStreamPaginator[_TToken]
-        | JSONPathPaginator
-        | SimpleHeaderPaginator
-        | None
-    ):
+    def get_new_paginator(self) -> BaseAPIPaginator | None:
         """Get a fresh paginator for this API endpoint.
 
         Returns:
