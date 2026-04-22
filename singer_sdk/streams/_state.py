@@ -16,11 +16,13 @@ from singer_sdk.helpers._state import (
     write_starting_replication_value,
 )
 from singer_sdk.singerlib.catalog import REPLICATION_FULL_TABLE
+from singer_sdk.state_comparators import AscendingComparator
 
 if t.TYPE_CHECKING:
     import datetime
 
     from singer_sdk.helpers import types
+    from singer_sdk.state_comparators import StateComparator
 
 
 class StreamStateManager:
@@ -38,9 +40,12 @@ class StreamStateManager:
     def __init__(
         self,
         *,
-        tap_name: str,
         stream_name: str,
         tap_state: types.TapState,
+        is_sorted: bool = False,
+        check_sorted: bool = True,
+        tap_name: str | None = None,
+        comparator: StateComparator = AscendingComparator(),  # noqa: B008
         state_partitioning_keys: t.Sequence[str] | None = None,
     ) -> None:
         """Initialize the StreamStateManager.
@@ -49,13 +54,19 @@ class StreamStateManager:
             tap_name: Name of the tap.
             stream_name: Name of the stream.
             tap_state: Shared tap-level state dictionary.
+            comparator: Comparator that determines replication key advancement.
             state_partitioning_keys: Keys used for state partitioning.
+            is_sorted: Whether the stream is expected to be sorted.
+            check_sorted: Whether to check for sort violations.
         """
         self.tap_name = tap_name
         self.stream_name = stream_name
         self.tap_state = tap_state
         self.state_partitioning_keys = state_partitioning_keys
         self.is_flushed = True
+        self._is_sorted = is_sorted
+        self._check_sorted = check_sorted
+        self._comparator = comparator
         self._logger = logging.getLogger(tap_name).getChild(stream_name)
 
     @property
@@ -186,8 +197,6 @@ class StreamStateManager:
         *,
         context: types.Context | None = None,
         replication_key: str,
-        is_sorted: bool,
-        check_sorted: bool,
     ) -> None:
         """Update state of stream or partition with data from the provided record.
 
@@ -198,19 +207,22 @@ class StreamStateManager:
             latest_record: The latest record to update state with.
             context: Stream partition or context dictionary.
             replication_key: The replication key field name.
-            is_sorted: Whether the stream is expected to be sorted.
-            check_sorted: Whether to check for sort violations.
         """
         # This also creates a state entry if one does not yet exist:
         state_dict = self.get_context_state(context)
+
+        # Treat as sorted only when the stream is sorted and there is no custom
+        # state partitioning configured (in which case the stream is not resumable)
+        treat_as_sorted = self._is_sorted and self.state_partitioning_keys is None
 
         # Advance state bookmark values
         increment_state(
             state_dict,
             replication_key=replication_key,
             latest_record=latest_record,
-            is_sorted=is_sorted,
-            check_sorted=check_sorted,
+            is_sorted=treat_as_sorted,
+            check_sorted=self._check_sorted,
+            comparator=self._comparator,
         )
 
     def finalize_state(self, state: dict | None = None) -> None:
