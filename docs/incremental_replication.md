@@ -47,50 +47,6 @@ class CommentsStream(RESTStream):
 - In incremental replication, it is OK and usually recommended to resend rows where the replication key is equal to previous highest key. Targets are expected to update rows that are re-synced.
 ```
 
-## Customizing state comparison
-
-By default the SDK uses `>=` when deciding whether to advance the state bookmark — a record whose replication key equals the current bookmark is re-emitted on the next sync run. This is the Singer-recommended default ("at-least-once" semantics) because it avoids silently skipping records that arrive with a timestamp equal to the bookmark.
-
-If your use case requires stricter semantics, set the `state_comparator` class attribute on your stream:
-
-```python
-from singer_sdk import RESTStream, StrictAscendingComparator
-
-
-class MyStream(RESTStream):
-    replication_key = "id"
-    state_comparator = StrictAscendingComparator()
-```
-
-{py:class}`StrictAscendingComparator <singer_sdk.StrictAscendingComparator>` uses `>` instead of `>=`, so a record whose replication key equals the bookmark is **not** re-emitted. This is suitable when:
-
-- The target cannot tolerate duplicate records (e.g. reverse-ETL destinations that post to external services).
-- The replication key is guaranteed unique (e.g. an auto-incrementing integer primary key).
-
-```{warning}
-With `StrictAscendingComparator`, if multiple records share the same replication key value and a sync is interrupted mid-batch, those records may be silently skipped on resume. Only use it when you are certain ties cannot occur, or when missing a duplicate is preferable to sending one.
-```
-
-For fully custom ordering or pre-processing logic, subclass {py:class}`StateComparator <singer_sdk.StateComparator>`:
-
-```python
-from singer_sdk import RESTStream, StateComparator
-
-
-class MyComparator(StateComparator):
-    def preprocess(self, value):
-        # Convert to a comparable form before is_advance is called
-        return parse_my_custom_format(value)
-
-    def is_advance(self, new_value, old_value):
-        return new_value >= old_value
-
-
-class MyStream(RESTStream):
-    replication_key = "cursor"
-    state_comparator = MyComparator()
-```
-
 ## Manually testing incremental import during development
 
 To test the tap in standalone mode, manually create a state file and run the tap:

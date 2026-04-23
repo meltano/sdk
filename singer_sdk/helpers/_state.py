@@ -9,14 +9,12 @@ import typing as t
 from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.helpers._typing import to_json_compatible
 from singer_sdk.singerlib.encoding.simple import StateMessage
-from singer_sdk.state_comparators import AscendingComparator
 
 if t.TYPE_CHECKING:
     import datetime
 
     from singer_sdk.helpers import types
     from singer_sdk.singerlib.encoding.base import GenericSingerWriter
-    from singer_sdk.state_comparators import StateComparator
 
     _T = t.TypeVar("_T", datetime.datetime, str, int, float)
 
@@ -204,7 +202,6 @@ def increment_state(
     replication_key: str,
     is_sorted: bool,
     check_sorted: bool,
-    comparator: StateComparator = AscendingComparator(),  # noqa: B008
 ) -> None:
     """Update the state using data from the latest record.
 
@@ -223,20 +220,20 @@ def increment_state(
                 extra={"replication_key": replication_key},
             )
         progress_dict = stream_or_partition_state[PROGRESS_MARKERS]
-    old_rk_value = progress_dict.get("replication_key_value")
-    new_rk_value = latest_record[replication_key]
+    # TODO: Instead of forcing all values to be JSON-compatible strings and hope
+    # we catch all cases, we should allow the stream to define how to
+    # the values from the state and the record should be pre-processed.
+    # https://github.com/meltano/sdk/issues/2753
+    old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
+    new_rk_value = to_json_compatible(latest_record[replication_key])
 
     if new_rk_value is None:
         logger.warning("New replication value is null")
         return
 
-    if (
-        old_rk_value is None
-        or not check_sorted
-        or comparator(new_rk_value, old_rk_value)
-    ):
+    if old_rk_value is None or not check_sorted or new_rk_value >= old_rk_value:
         progress_dict["replication_key"] = replication_key
-        progress_dict["replication_key_value"] = to_json_compatible(new_rk_value)
+        progress_dict["replication_key_value"] = new_rk_value
         return
 
     if is_sorted:
