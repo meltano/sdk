@@ -37,8 +37,9 @@ if sys.version_info >= (3, 13):
 else:
     from typing_extensions import TypeVar
 
+from collections.abc import Iterable, Mapping
+
 if t.TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping
     from datetime import datetime
 
     from backoff.types import Details
@@ -48,20 +49,20 @@ if t.TYPE_CHECKING:
     from singer_sdk.singerlib import Schema
     from singer_sdk.tap_base import Tap
 
-    JSONPayload = (
-        Iterable[bytes]
-        | str
-        | bytes
-        | list[tuple[t.Any, t.Any]]
-        | tuple[tuple[t.Any, t.Any]]
-        | Mapping[str, t.Any]
-        | None
-    )
+JSONPayload: t.TypeAlias = (
+    Iterable[bytes]
+    | str
+    | bytes
+    | list[tuple[t.Any, t.Any]]
+    | tuple[tuple[t.Any, t.Any]]
+    | Mapping[str, t.Any]
+    | None
+)
 
 
 __all__ = [
     "HTTPRequest",
-    "HTTPRequestContext",
+    "PageContext",
     "RESTStream",
 ]
 
@@ -71,7 +72,6 @@ DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = TypeVar("_TToken", default=t.Any)
 _TNum = t.TypeVar("_TNum", int, float)
-_TPag = TypeVar("_TPag", bound="BaseAPIPaginator")
 
 _ParamsDict: t.TypeAlias = dict[str, t.Any | list[t.Any] | None]
 
@@ -101,14 +101,6 @@ class HTTPRequest:
     #: ASCII characters that should not be quoted when encoding URL parameters.
     safe_query_chars: str = ""
 
-    @staticmethod
-    def _encode_params_dict(params: _ParamsDict) -> list[tuple[str, t.Any]]:
-        result: list[tuple[str, t.Any]] = []
-        for k, v in params.items():
-            values = [v] if not isinstance(v, (list, tuple)) else v
-            result.extend((k, v) for v in values if v is not None)
-        return result
-
     def encode_params(self) -> str:
         """Encode parameters as a string.
 
@@ -122,24 +114,29 @@ class HTTPRequest:
             warn(  # type: ignore[unreachable]
                 (
                     "Set `safe_query_chars` on the `HTTPRequest` object "
-                    "or override the `encode_params` instead of passing a query "
+                    "or override `encode_params` instead of passing a query "
                     "parameters string"
                 ),
-                DeprecationWarning,
-                stacklevel=1,
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
             )
             return self.params
 
-        return urlencode(
-            self._encode_params_dict(self.params),
-            safe=self.safe_query_chars,
-            doseq=True,
-        )
+        pairs: list[tuple[str, t.Any]] = []
+        for k, v in self.params.items():
+            values = [v] if not isinstance(v, (list, tuple)) else v
+            pairs.extend((k, item) for item in values if item is not None)
+
+        return urlencode(pairs, safe=self.safe_query_chars)
 
 
 @dataclass(slots=True)
-class HTTPRequestContext(t.Generic[_TPag]):
-    """Context for an HTTP request.
+class PageContext(t.Generic[_TToken]):
+    """Per-page context passed to :meth:`~RESTStream.get_http_request`.
+
+    Bundles the stream partition context and the current pagination token so
+    that :meth:`~RESTStream.get_http_request` has everything it needs to build
+    one HTTP request without accessing the paginator directly.
 
     .. versionadded:: NEXT_VERSION
     """
@@ -147,8 +144,8 @@ class HTTPRequestContext(t.Generic[_TPag]):
     #: The stream partition or context dictionary.
     stream_context: Context | None
 
-    #: The active paginator instance, if applicable.
-    page: _TPag
+    #: The next page token, if applicable.
+    next_page_token: _TToken | None
 
 
 class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
@@ -500,7 +497,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         self.requests_session.auth = self.authenticator
         return self.requests_session.prepare_request(request)
 
-    def get_http_request(self, *, context: HTTPRequestContext) -> HTTPRequest:
+    def get_http_request(self, *, context: PageContext) -> HTTPRequest:
         """Get an HTTP request for this stream.
 
         Override to customize the URL, headers, parameters or body of the request based
@@ -520,7 +517,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
            class MyStream(RESTStream):
                def get_http_request(self, *, context):
                    request = super().get_http_request(context=context)
-                   request.params["page"] = context.page.current_value
+                   request.params["page"] = context.next_page_token
                    return request
 
         Args:
@@ -538,11 +535,11 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             headers=self.http_headers,
             params=self.get_url_params(  # type: ignore[arg-type]
                 context.stream_context,
-                context.page.current_value,
+                context.next_page_token,
             ),  # ty:ignore[invalid-argument-type]
             data=self.prepare_request_payload(
                 context.stream_context,
-                context.page.current_value,
+                context.next_page_token,
             ),
         )
 
@@ -593,9 +590,9 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         page: BaseAPIPaginator,
     ) -> requests.PreparedRequest:
         http_request = self.get_http_request(
-            context=HTTPRequestContext(
+            context=PageContext(
                 stream_context=context,
-                page=page,
+                next_page_token=page.current_value,
             )
         )
 

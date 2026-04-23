@@ -12,7 +12,7 @@ from singer_sdk.streams import RESTStream
 from .auth import DummyJSONAuthenticator
 
 if TYPE_CHECKING:
-    from singer_sdk.streams.rest import HTTPRequest, HTTPRequestContext
+    from singer_sdk.streams.rest import HTTPRequest, PageContext
 
 if sys.version_info >= (3, 12):
     from typing import override
@@ -62,11 +62,11 @@ class DummyJSONStream(RESTStream):
     def get_http_request(
         self,
         *,
-        context: HTTPRequestContext[OffsetPaginator],
+        context: PageContext[int],
     ) -> HTTPRequest:
         request = super().get_http_request(context=context)
         request.params.update({
-            "skip": context.page.current_value,
-            "limit": context.page.page_size,
+            "skip": context.next_page_token,
+            "limit": PAGE_SIZE,
         })
         return request

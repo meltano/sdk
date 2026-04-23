@@ -29,7 +29,7 @@ else:
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Context
-    from singer_sdk.streams.rest import HTTPRequest, HTTPRequestContext
+    from singer_sdk.streams.rest import HTTPRequest, PageContext
 
 
 SCHEMAS_DIR = SchemaDirectory(schemas)
@@ -71,12 +71,12 @@ class GitlabStream(RESTStream[str]):
     def get_http_request(
         self,
         *,
-        context: HTTPRequestContext[SimpleHeaderPaginator],
+        context: PageContext[str | None],
     ) -> HTTPRequest:
         """Get the HTTP request for the given context."""
         request = super().get_http_request(context=context)
-        if context.page.current_value:
-            request.params["page"] = context.page.current_value
+        if context.next_page_token:
+            request.params["page"] = context.next_page_token
         if self.replication_key:
             request.params["sort"] = "asc"
             request.params["order_by"] = self.replication_key
@@ -232,7 +232,7 @@ class EpicIssuesStream(GitlabStream):
     def get_http_request(
         self,
         *,
-        context: HTTPRequestContext[SimpleHeaderPaginator],
+        context: PageContext[str | None],
     ) -> HTTPRequest:
         """Get the HTTP request for the given context."""
         request = super().get_http_request(context=context)

@@ -69,7 +69,7 @@ if TYPE_CHECKING:
     {%- else %}
     from singer_sdk.helpers.types import Context
     {%- endif %}
-    from singer_sdk.streams.rest import HTTPRequest, HTTPRequestContext
+    from singer_sdk.streams.rest import HTTPRequest, PageContext
 
 
 # TODO: Delete this is if not using json files for schema definition
@@ -188,7 +188,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return super().get_new_paginator()
 
     @override
-    def get_http_request(self, *, context: HTTPRequestContext[Any]) -> HTTPRequest:
+    def get_http_request(self, *, context: PageContext[Any]) -> HTTPRequest:
         """Return a request object for this stream.
 
         Args:
@@ -199,7 +199,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
             An HTTP request for this stream.
         """
         request = super().get_http_request(context=context)
-        request.params["page"] = context.page.current_value
+        request.params["page"] = context.next_page_token
 
         if self.replication_key:
             request.params["sort"] = "asc"

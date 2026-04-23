@@ -17,8 +17,7 @@ else:
 if t.TYPE_CHECKING:
     import requests_mock
 
-    from singer_sdk.pagination import SinglePagePaginator
-    from singer_sdk.streams.rest import HTTPRequest, HTTPRequestContext
+    from singer_sdk.streams.rest import HTTPRequest, PageContext
     from singer_sdk.tap_base import Tap
 
 
@@ -35,7 +34,7 @@ class _BaseTestStream(RESTStream):
     def get_http_request(
         self,
         *,
-        context: HTTPRequestContext[SinglePagePaginator],
+        context: PageContext[None],
     ) -> HTTPRequest:
         request = super().get_http_request(context=context)
         request.params["user_id"] = 1

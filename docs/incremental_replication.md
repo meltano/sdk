@@ -21,13 +21,13 @@ class CommentsStream(RESTStream):
         ),
     ).to_dict()
 
-    def get_http_request(self, *, context: HTTPRequestContext) -> HTTPRequest:
+    def get_http_request(self, *, context: PageContext) -> HTTPRequest:
         request = super().get_http_request(context=context)
 
         if starting_date := self.get_starting_timestamp(context.stream_context):
             request.params["after"] = starting_date.isoformat()
 
-        request.params["page"] = context.page.current_value
+        request.params["page"] = context.next_page_token
 
         self.logger.info("QUERY PARAMS: %s", request.params)
         return request

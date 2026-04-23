@@ -39,7 +39,7 @@ if t.TYPE_CHECKING:
     from requests import PreparedRequest
 
     from singer_sdk.helpers.types import Context
-    from singer_sdk.streams.rest import HTTPRequest, HTTPRequestContext
+    from singer_sdk.streams.rest import HTTPRequest, PageContext
     from singer_sdk.tap_base import Tap
 
 
@@ -405,10 +405,10 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
         def get_http_request(
             self,
             *,
-            context: HTTPRequestContext[BasePageNumberPaginator],
+            context: PageContext[int],
         ) -> HTTPRequest:
             request = super().get_http_request(context=context)
-            request.params["page"] = context.page.current_value
+            request.params["page"] = context.next_page_token
             return request
 
         @override
@@ -483,10 +483,10 @@ def test_continue_if_empty(tap: Tap):
         def get_http_request(
             self,
             *,
-            context: HTTPRequestContext[BasePageNumberPaginator],
+            context: PageContext[int],
         ) -> HTTPRequest:
             request = super().get_http_request(context=context)
-            request.params["page"] = context.page.current_value
+            request.params["page"] = context.next_page_token
             return request
 
         @override
@@ -549,11 +549,9 @@ def test_no_paginator(tap: Tap):
             return None
 
         @override
-        def get_http_request(
-            self, *, context: HTTPRequestContext[SinglePagePaginator]
-        ) -> HTTPRequest:
+        def get_http_request(self, *, context: PageContext[None]) -> HTTPRequest:
             request = super().get_http_request(context=context)
-            assert context.page.current_value is None
+            assert context.next_page_token is None
             return request
 
         @override
