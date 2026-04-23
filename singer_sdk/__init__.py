@@ -9,6 +9,11 @@ from singer_sdk import streams
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.mapper_base import InlineMapper
 from singer_sdk.plugin_base import PluginBase
+from singer_sdk.replication import (
+    FullTableReplication,
+    IncrementalReplication,
+    LogBasedReplication,
+)
 from singer_sdk.schema.source import (
     OpenAPISchema,
     SchemaDirectory,
@@ -16,6 +21,11 @@ from singer_sdk.schema.source import (
     StreamSchema,
 )
 from singer_sdk.sinks import BatchSink, RecordSink, Sink
+from singer_sdk.state_comparators import (
+    AscendingComparator,
+    StateComparator,
+    StrictAscendingComparator,
+)
 from singer_sdk.streams import GraphQLStream, RESTStream, Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
@@ -30,9 +40,13 @@ if t.TYPE_CHECKING:
     )
 
 __all__ = [
+    "AscendingComparator",
     "BatchSink",
+    "FullTableReplication",
     "GraphQLStream",
+    "IncrementalReplication",
     "InlineMapper",
+    "LogBasedReplication",
     "OpenAPISchema",
     "PluginBase",
     "RESTStream",
@@ -40,8 +54,10 @@ __all__ = [
     "SchemaDirectory",
     "SchemaSource",
     "Sink",
+    "StateComparator",
     "Stream",
     "StreamSchema",
+    "StrictAscendingComparator",
     "Tap",
     "Target",
     "streams",

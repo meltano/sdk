@@ -14,8 +14,7 @@ class Products(DummyJSONStream):
     records_jsonpath = "$.products[*]"
 
     primary_keys = ["id"]
-
-    replication_key = None
+    replication_config = None
 
     schema = th.PropertiesList(
         th.Property("id", th.IntegerType),

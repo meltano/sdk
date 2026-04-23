@@ -10,6 +10,7 @@ from requests_cache import CachedSession
 from singer_sdk import RESTStream, SchemaDirectory, StreamSchema
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.pagination import SimpleHeaderPaginator
+from singer_sdk.replication import IncrementalReplication
 from singer_sdk.typing import (
     ArrayType,
     DateTimeType,
@@ -76,9 +77,9 @@ class GitlabStream(RESTStream[str]):
         params: dict = {}
         if next_page_token:
             params["page"] = next_page_token
-        if self.replication_key:
+        if isinstance(self.replication, IncrementalReplication):
             params["sort"] = "asc"
-            params["order_by"] = self.replication_key
+            params["order_by"] = self.replication.key
         return params
 
     @override
@@ -127,8 +128,7 @@ class ProjectsStream(ProjectBasedStream):
     name = "projects"
     path = "/projects/{project_id}?statistics=1"
     primary_keys = ("id",)
-    replication_key = "last_activity_at"
-    is_sorted = True
+    replication = IncrementalReplication("last_activity_at", is_sorted=True)
 
 
 class ReleasesStream(ProjectBasedStream):
@@ -137,7 +137,6 @@ class ReleasesStream(ProjectBasedStream):
     name = "releases"
     path = "/projects/{project_id}/releases"
     primary_keys = ("project_id", "tag_name")
-    replication_key = None
 
 
 class IssuesStream(ProjectBasedStream):
@@ -146,8 +145,7 @@ class IssuesStream(ProjectBasedStream):
     name = "issues"
     path = "/projects/{project_id}/issues?scope=all&updated_after={start_date}"
     primary_keys = ("id",)
-    replication_key = "updated_at"
-    is_sorted = False
+    replication = IncrementalReplication("updated_at", is_sorted=False)
 
 
 class CommitsStream(ProjectBasedStream):
@@ -158,8 +156,7 @@ class CommitsStream(ProjectBasedStream):
         "/projects/{project_id}/repository/commits?since={start_date}&with_stats=true"
     )
     primary_keys = ("id",)
-    replication_key = "created_at"
-    is_sorted = False
+    replication = IncrementalReplication("created_at", is_sorted=False)
 
 
 class EpicsStream(ProjectBasedStream):
@@ -172,8 +169,7 @@ class EpicsStream(ProjectBasedStream):
     name = "epics"
     path = "/groups/{group_id}/epics?updated_after={start_date}"
     primary_keys = ("id",)
-    replication_key = "updated_at"
-    is_sorted = True
+    replication = IncrementalReplication("updated_at", is_sorted=True)
     schema = PropertiesList(
         Property("id", IntegerType, required=True),
         Property("iid", IntegerType, required=True),
@@ -224,7 +220,6 @@ class EpicIssuesStream(GitlabStream):
     name = "epic_issues"
     path = "/groups/{group_id}/epics/{epic_iid}/issues"
     primary_keys = ("id",)
-    replication_key = None
     parent_stream_type = EpicsStream  # Stream should wait for parents to complete.
 
     @override

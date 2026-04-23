@@ -45,7 +45,6 @@ class GraphQLCurrentUserStream(GitlabGraphQLStream):
 
     name = "currentuser"
     primary_keys = ("id",)
-    replication_key = None
     query = """
         currentUser {
             name
@@ -58,7 +57,6 @@ class GraphQLProjectsStream(GitlabGraphQLStream):
 
     name = "projects"
     primary_keys = ("id",)
-    replication_key = None
 
     @property
     @override

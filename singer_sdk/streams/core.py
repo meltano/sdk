@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import abc
 import copy
+import dataclasses
 import datetime
 import json
 import logging
@@ -35,11 +36,17 @@ from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_ty
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.helpers.conform import TypeConformanceLevel
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform
+from singer_sdk.replication import (
+    FullTableReplication,
+    IncrementalReplication,
+    LogBasedReplication,
+)
 from singer_sdk.singerlib.catalog import (
     REPLICATION_FULL_TABLE,
     REPLICATION_INCREMENTAL,
-    REPLICATION_LOG_BASED,  # noqa: F401
+    REPLICATION_LOG_BASED,
 )
+from singer_sdk.state_comparators import AscendingComparator
 from singer_sdk.streams._state import StreamStateManager
 
 if t.TYPE_CHECKING:
@@ -47,6 +54,7 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers._batch import BaseBatchFileEncoding
     from singer_sdk.helpers._compat import Traversable
     from singer_sdk.mapper import StreamMap
+    from singer_sdk.replication import ReplicationConfig
     from singer_sdk.singerlib.catalog import StreamMetadata
     from singer_sdk.tap_base import Tap
 
@@ -101,6 +109,35 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     selected_by_default: bool = True
     """Whether this stream is selected by default in the catalog."""
+
+    replication: ReplicationConfig | None = None
+    """Encapsulated replication configuration for this stream.
+
+    When set, this attribute takes precedence over the individual
+    :attr:`replication_key`, :attr:`is_sorted`, and :attr:`check_sorted`
+    class attributes, and removes any ambiguity about which options are
+    meaningful for the chosen replication method.
+
+    Example — full-table stream (``is_sorted`` etc. don't apply)::
+
+        from singer_sdk.replication import FullTableReplication
+
+        class MyStream(RESTStream):
+            replication = FullTableReplication()
+
+    Example — incremental stream with resume-on-interrupt::
+
+        from singer_sdk.replication import IncrementalReplication
+
+        class MyStream(RESTStream):
+            replication = IncrementalReplication(
+                key="updated_at",
+                is_sorted=True,
+            )
+
+    The individual flat attributes (``replication_key``, ``is_sorted``, …)
+    continue to work unchanged — this is purely additive.
+    """
 
     def __init__(
         self,
@@ -193,6 +230,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
     def state_manager(self) -> StreamStateManager:
         """Get stream state manager."""
         if self._state_manager is None:
+            comparator = (
+                self.replication.state_comparator
+                if isinstance(self.replication, IncrementalReplication)
+                else AscendingComparator()
+            )
             self._state_manager = StreamStateManager(
                 tap_name=self.tap_name,
                 stream_name=self.name,
@@ -200,6 +242,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
                 state_partitioning_keys=self._state_partitioning_keys,
                 is_sorted=self.is_sorted,
                 check_sorted=self.check_sorted,
+                comparator=comparator,
             )
         return self._state_manager
 
@@ -578,7 +621,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Returns:
             Replication key for the stream.
         """
-        return self._replication_key or None
+        if self._replication_key:
+            return self._replication_key
+        if isinstance(self.replication, IncrementalReplication):
+            return self.replication.key
+        return None
 
     @replication_key.setter
     def replication_key(self, new_value: str | None) -> None:
@@ -599,6 +646,8 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Returns:
             `True` if stream is sorted. Defaults to `False`.
         """
+        if isinstance(self.replication, IncrementalReplication):
+            return self.replication.is_sorted
         return False
 
     @property
@@ -611,6 +660,8 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Returns:
             `True` if sorting is checked. Defaults to `True`.
         """
+        if isinstance(self.replication, IncrementalReplication):
+            return self.replication.check_sorted
         return True
 
     @property
@@ -712,6 +763,12 @@ class Stream(abc.ABC):  # noqa: PLR0904
         """
         if self.forced_replication_method:
             return str(self.forced_replication_method)
+        if isinstance(self.replication, FullTableReplication):
+            return REPLICATION_FULL_TABLE
+        if isinstance(self.replication, IncrementalReplication):
+            return REPLICATION_INCREMENTAL
+        if isinstance(self.replication, LogBasedReplication):
+            return REPLICATION_LOG_BASED
         if self.replication_key:
             return REPLICATION_INCREMENTAL
         return REPLICATION_FULL_TABLE
@@ -1376,6 +1433,40 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     # Overridable Methods
 
+    def _apply_catalog_replication_config(
+        self,
+        key: str | None,
+        method: str | None,
+    ) -> None:
+        """Update ``replication_config`` from catalog overrides.
+
+        Preserves class-level settings (``is_sorted``, ``check_sorted``,
+        ``state_comparator``) when only the key or method is being overridden.
+
+        Args:
+            key: Replication key from the catalog, if any.
+            method: Replication method from the catalog, if any.
+        """
+        if method == REPLICATION_FULL_TABLE:
+            self.replication = FullTableReplication()
+        elif method == REPLICATION_LOG_BASED:
+            self.replication = LogBasedReplication()
+        elif method == REPLICATION_INCREMENTAL:
+            key = key or (
+                self.replication.key
+                if isinstance(self.replication, IncrementalReplication)
+                else None
+            )
+            if key and isinstance(self.replication, IncrementalReplication):
+                self.replication = dataclasses.replace(self.replication, key=key)
+            elif key:
+                self.replication = IncrementalReplication(key=key)
+        elif key and isinstance(
+            self.replication,
+            IncrementalReplication,
+        ):
+            self.replication = dataclasses.replace(self.replication, key=key)
+
     def apply_catalog(self, catalog: singer.Catalog) -> None:
         """Apply a catalog dict, updating any settings overridden within the catalog.
 
@@ -1401,11 +1492,23 @@ class Stream(abc.ABC):  # noqa: PLR0904
                 table_replication_method = None
 
             self.primary_keys = entry.key_properties or table_key_properties or ()
-            self.replication_key = entry.replication_key or table_replication_key
 
+            replication_key = entry.replication_key or table_replication_key
             replication_method = entry.replication_method or table_replication_method
-            if replication_method:
-                self.forced_replication_method = replication_method
+
+            if self.replication is not None:
+                # New-style: update replication_config directly so that
+                # is_sorted / check_sorted / state_comparator from the
+                # class-level config are preserved across catalog overrides.
+                self._apply_catalog_replication_config(
+                    replication_key,
+                    replication_method,
+                )
+            else:
+                # Old-style: set runtime overrides directly
+                self.replication_key = replication_key
+                if replication_method:
+                    self.forced_replication_method = replication_method
 
             self._input_schema = entry.schema.to_dict()
 

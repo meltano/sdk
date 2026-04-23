@@ -9,6 +9,7 @@ from functools import cached_property
 import sqlalchemy as sa
 
 import singer_sdk.helpers._catalog as catalog
+from singer_sdk.replication import IncrementalReplication
 from singer_sdk.singerlib import CatalogEntry
 from singer_sdk.sql.connector import SQLConnector
 from singer_sdk.streams.core import REPLICATION_INCREMENTAL, Stream
@@ -289,7 +290,14 @@ class SQLStream(Stream, abc.ABC):
         When `True`, incremental streams will attempt to resume if unexpectedly
         interrupted.
 
+        SQL streams always return results ordered by the replication key, so this
+        defaults to ``True`` for incremental replication. An explicit
+        :class:`~singer_sdk.replication.IncrementalReplication` config overrides
+        that default.
+
         Returns:
-            `True` if stream is sorted. Defaults to `False`.
+            `True` if stream is sorted.
         """
+        if isinstance(self.replication, IncrementalReplication):
+            return self.replication.is_sorted
         return self.replication_method == REPLICATION_INCREMENTAL
