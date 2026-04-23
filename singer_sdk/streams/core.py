@@ -40,7 +40,6 @@ from singer_sdk.singerlib.catalog import (
     REPLICATION_INCREMENTAL,
     REPLICATION_LOG_BASED,  # noqa: F401
 )
-from singer_sdk.state_comparators import AscendingComparator
 from singer_sdk.streams._state import StreamStateManager
 
 if t.TYPE_CHECKING:
@@ -49,7 +48,6 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
     from singer_sdk.mapper import StreamMap
     from singer_sdk.singerlib.catalog import StreamMetadata
-    from singer_sdk.state_comparators import StateComparator
     from singer_sdk.tap_base import Tap
 
 
@@ -103,21 +101,6 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     selected_by_default: bool = True
     """Whether this stream is selected by default in the catalog."""
-
-    state_comparator: StateComparator = AscendingComparator()
-    """Comparator used to determine replication key state advancement.
-
-    Defaults to :class:`~singer_sdk.AscendingComparator` (``>=``), which implements
-    *at-least-once* semantics: records whose replication key equals the current bookmark
-    are re-emitted on the next sync run.
-
-    Override at the class level to change ordering semantics::
-
-        from singer_sdk import RESTStream, StrictAscendingComparator
-
-        class MyStream(RESTStream):
-            state_comparator = StrictAscendingComparator()
-    """
 
     def __init__(
         self,
@@ -217,7 +200,6 @@ class Stream(abc.ABC):  # noqa: PLR0904
                 state_partitioning_keys=self._state_partitioning_keys,
                 is_sorted=self.is_sorted,
                 check_sorted=self.check_sorted,
-                comparator=self.state_comparator,
             )
         return self._state_manager
 

@@ -16,11 +16,6 @@ from singer_sdk.schema.source import (
     StreamSchema,
 )
 from singer_sdk.sinks import BatchSink, RecordSink, Sink
-from singer_sdk.state_comparators import (
-    AscendingComparator,
-    StateComparator,
-    StrictAscendingComparator,
-)
 from singer_sdk.streams import GraphQLStream, RESTStream, Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
@@ -35,7 +30,6 @@ if t.TYPE_CHECKING:
     )
 
 __all__ = [
-    "AscendingComparator",
     "BatchSink",
     "GraphQLStream",
     "InlineMapper",
@@ -46,10 +40,8 @@ __all__ = [
     "SchemaDirectory",
     "SchemaSource",
     "Sink",
-    "StateComparator",
     "Stream",
     "StreamSchema",
-    "StrictAscendingComparator",
     "Tap",
     "Target",
     "streams",

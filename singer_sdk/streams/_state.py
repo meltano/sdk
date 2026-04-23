@@ -16,13 +16,11 @@ from singer_sdk.helpers._state import (
     write_starting_replication_value,
 )
 from singer_sdk.singerlib.catalog import REPLICATION_FULL_TABLE
-from singer_sdk.state_comparators import AscendingComparator
 
 if t.TYPE_CHECKING:
     import datetime
 
     from singer_sdk.helpers import types
-    from singer_sdk.state_comparators import StateComparator
 
 
 class StreamStateManager:
@@ -45,7 +43,6 @@ class StreamStateManager:
         is_sorted: bool = False,
         check_sorted: bool = True,
         tap_name: str | None = None,
-        comparator: StateComparator = AscendingComparator(),  # noqa: B008
         state_partitioning_keys: t.Sequence[str] | None = None,
     ) -> None:
         """Initialize the StreamStateManager.
@@ -54,7 +51,6 @@ class StreamStateManager:
             tap_name: Name of the tap.
             stream_name: Name of the stream.
             tap_state: Shared tap-level state dictionary.
-            comparator: Comparator that determines replication key advancement.
             state_partitioning_keys: Keys used for state partitioning.
             is_sorted: Whether the stream is expected to be sorted.
             check_sorted: Whether to check for sort violations.
@@ -66,7 +62,6 @@ class StreamStateManager:
         self.is_flushed = True
         self._is_sorted = is_sorted
         self._check_sorted = check_sorted
-        self._comparator = comparator
         self._logger = logging.getLogger(tap_name).getChild(stream_name)
 
     @property
@@ -222,7 +217,6 @@ class StreamStateManager:
             latest_record=latest_record,
             is_sorted=treat_as_sorted,
             check_sorted=self._check_sorted,
-            comparator=self._comparator,
         )
 
     def finalize_state(self, state: dict | None = None) -> None:

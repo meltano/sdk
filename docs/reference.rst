@@ -147,17 +147,6 @@ Batch
     batch.BaseBatcher
     batch.JSONLinesBatcher
 
-State Comparators
------------------
-
-.. autosummary::
-    :toctree: classes
-    :template: class.rst
-
-    StateComparator
-    AscendingComparator
-    StrictAscendingComparator
-
 Other
 -----
 
