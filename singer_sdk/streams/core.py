@@ -29,15 +29,11 @@ from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import (
     SingerSDKDeprecationWarning,
     datetime_fromisoformat,
-    deprecated,
 )
 from singer_sdk.helpers._flattening import get_flattening_options
-from singer_sdk.helpers._typing import (
-    TypeConformanceLevel,
-    conform_record_data_types,
-    is_datetime_type,
-)
+from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type
 from singer_sdk.helpers._util import utc_now
+from singer_sdk.helpers.conform import TypeConformanceLevel
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform
 from singer_sdk.singerlib.catalog import (
     REPLICATION_FULL_TABLE,
@@ -155,15 +151,8 @@ class Stream(abc.ABC):  # noqa: PLR0904
         self._mask: singer.SelectionMask | None = None
         self._schema: dict | None = None
         self._sync_costs: dict[str, int] = {}
+        self._state_manager: StreamStateManager | None = None
         self.child_streams: list[Stream] = []
-
-        # Initialize state manager
-        self._state_manager = StreamStateManager(
-            tap_name=tap.name,
-            stream_name=self.name,
-            tap_state=self._tap_state,
-            state_partitioning_keys=self._state_partitioning_keys,
-        )
 
         if schema:
             if isinstance(schema, (PathLike, str)):
@@ -199,6 +188,20 @@ class Stream(abc.ABC):  # noqa: PLR0904
     def logger(self) -> logging.Logger:
         """Get stream logger."""
         return self._logger
+
+    @property
+    def state_manager(self) -> StreamStateManager:
+        """Get stream state manager."""
+        if self._state_manager is None:
+            self._state_manager = StreamStateManager(
+                tap_name=self.tap_name,
+                stream_name=self.name,
+                tap_state=self._tap_state,
+                state_partitioning_keys=self._state_partitioning_keys,
+                is_sorted=self.is_sorted,
+                check_sorted=self.check_sorted,
+            )
+        return self._state_manager
 
     def log(
         self,
@@ -300,7 +303,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
            This method requires :attr:`~singer_sdk.Stream.replication_key` to be set
            to a non-null value, indicating the stream should be synced incrementally.
         """
-        return self._state_manager.get_starting_replication_value(
+        return self.state_manager.get_starting_replication_value(
             context,
             self.replication_method,
         )
@@ -416,7 +419,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             context: Stream partition or context dictionary.
             value: TODO
         """
-        self._state_manager.write_replication_key_signpost(value, context=context)
+        self.state_manager.write_replication_key_signpost(value, context=context)
 
     def _parse_datetime(self, value: str) -> datetime.datetime:  # noqa: PLR6301
         """Parse a datetime string.
@@ -464,7 +467,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Args:
             context: Stream partition or context dictionary.
         """
-        self._state_manager.write_starting_replication_value(
+        self.state_manager.write_starting_replication_value(
             context=context,
             replication_method=self.replication_method,
             replication_key=self.replication_key,
@@ -763,7 +766,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             A partitioned context state if applicable; else returns stream state.
             A blank state will be created in none exists.
         """
-        return self._state_manager.get_context_state(context)
+        return self.state_manager.get_context_state(context)
 
     @property
     def stream_state(self) -> dict:
@@ -782,7 +785,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Returns:
             A writable state dict for this stream.
         """
-        return self._state_manager.stream_state
+        return self.state_manager.stream_state
 
     # Partitions
 
@@ -800,7 +803,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         """
         result: list[dict] = [
             partition_state["context"]
-            for partition_state in (self._state_manager.get_state_partitions() or [])
+            for partition_state in (self.state_manager.get_state_partitions() or [])
         ]
         return result or None
 
@@ -835,27 +838,22 @@ class Stream(abc.ABC):  # noqa: PLR0904
                     f"stream(replication method={self.replication_method})"
                 )
                 raise ValueError(msg)
-            treat_as_sorted = self.is_sorted
-            if not treat_as_sorted and self.state_partitioning_keys is not None:
-                # Streams with custom state partitioning are not resumable.
-                treat_as_sorted = False
-            self._state_manager.increment_state(
+
+            self.state_manager.increment_state(
                 latest_record,
                 context=context,
                 replication_key=self.replication_key,
-                is_sorted=treat_as_sorted,
-                check_sorted=self.check_sorted,
             )
 
     # Private message authoring methods:
 
     def _write_state_message(self) -> None:
         """Write out a STATE message with the latest state."""
-        if not self._state_manager.is_flushed:
+        if not self.state_manager.is_flushed:
             # Ensure stream state entry exists before writing
             _ = self.stream_state
             self._tap.state_writer.write_state(self.tap_state)
-            self._state_manager.is_flushed = True
+            self.state_manager.is_flushed = True
 
     def _write_activate_version_message(self, full_table_version: int) -> None:
         """Write out an ACTIVATE_VERSION message."""
@@ -966,7 +964,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         for record_message in self._generate_record_messages(record):
             self._tap.write_message(record_message)
 
-        self._state_manager.is_flushed = False
+        self.state_manager.is_flushed = False
 
     def _write_batch_message(
         self,
@@ -982,7 +980,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         for batch_message in self._generate_batch_messages(encoding, manifest):
             self._tap.write_message(batch_message)
 
-        self._state_manager.is_flushed = False
+        self.state_manager.is_flushed = False
 
     def _log_metric(self, point: metrics.Point) -> None:
         """Log a single measurement.
@@ -1103,7 +1101,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             msg = "Sync operation aborted for stream in 'FULL_TABLE' replication mode."
             raise AbortedSyncFailedException(msg) from abort_reason
 
-        if self._state_manager.is_state_non_resumable():
+        if self.state_manager.is_state_non_resumable():
             msg = "Sync operation aborted and state is not in a resumable state."
             raise AbortedSyncFailedException(msg) from abort_reason
 
@@ -1111,35 +1109,13 @@ class Stream(abc.ABC):  # noqa: PLR0904
         raise AbortedSyncPausedException from abort_reason
 
     # Handle interim stream state
-
-    @deprecated(
-        "This method is currently unused and will be removed by March 2026",
-        category=SingerSDKDeprecationWarning,
-        stacklevel=2,
-    )
-    def reset_state_progress_markers(  # pragma: no cover
-        self,
-        state: dict | None = None,
-    ) -> None:
-        """Reset progress markers. If all=True, all state contexts will be set.
-
-        This method is internal to the SDK and should not need to be overridden.
-
-        Args:
-            state: State object to promote progress markers with.
-        """
-        self._state_manager.reset_progress_markers(
-            state=state,
-            partitions=self.partitions,
-        )
-
     def _finalize_state(self, state: dict | None = None) -> None:
         """Reset progress markers and state flushed flag to ensure state is written.
 
         Args:
             state: State object to promote progress markers with.
         """
-        self._state_manager.finalize_state(state)
+        self.state_manager.finalize_state(state)
 
     def finalize_state_progress_markers(self, state: dict | None = None) -> None:
         """Reset progress markers and emit state message if necessary.
@@ -1157,7 +1133,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             if not self.selected:
                 return
 
-            self._state_manager.finalize_progress_markers(
+            self.state_manager.finalize_progress_markers(
                 state=state,
                 partitions=self.partitions,
             )
@@ -1207,12 +1183,12 @@ class Stream(abc.ABC):  # noqa: PLR0904
             context: Stream partition or context dictionary.
             write_messages: Whether to write Singer messages to stdout.
 
+        Yields:
+            Each record from the source.
+
         Raises:
             InvalidStreamSortException: Raised if sorting errors are found while
                 syncing the records.
-
-        Yields:
-            Each record from the source.
         """
         # Type definitions
         context_element: types.Context | None
@@ -1270,7 +1246,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
                             partition_context=state_partition_context,
                         )
                     except InvalidStreamSortException as ex:  # pragma: no cover
-                        self._state_manager.log_sort_error(
+                        self.state_manager.log_sort_error(
                             ex=ex,
                             record_count=record_index + 1,
                             partition_record_count=idx + 1,
@@ -1392,7 +1368,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         for child_stream in self.child_streams:
             if child_stream.selected or child_stream.has_selected_descendents:
-                child_stream.sync(context=child_context)
+                try:
+                    child_stream.sync(context=child_context)
+                except (AbortedSyncFailedException, AbortedSyncPausedException):
+                    # Child stream was interrupted, continue with remaining children
+                    continue
 
     # Overridable Methods
 
@@ -1411,7 +1391,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         if entry := catalog.get_stream(self.name):
             stream_metadata: StreamMetadata | None
-            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment]
+            if stream_metadata := entry.metadata.get(()):  # type: ignore[assignment]  # ty:ignore[invalid-assignment]
                 table_key_properties = stream_metadata.table_key_properties
                 table_replication_key = stream_metadata.replication_key
                 table_replication_method = stream_metadata.forced_replication_method
@@ -1441,7 +1421,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Returns:
             TODO
         """
-        return self._state_manager.get_state_partition_context(context)
+        return self.state_manager.get_state_partition_context(context)
 
     def get_child_context(
         self,

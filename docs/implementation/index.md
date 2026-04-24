@@ -13,6 +13,7 @@ metrics
 logging
 state
 at_least_once
+errors/index
 ```
 
 ## How to use the implementation reference material

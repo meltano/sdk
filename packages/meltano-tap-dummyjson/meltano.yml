@@ -1,22 +1,21 @@
-version: 1
 send_anonymous_usage_stats: true
 project_id: "tap-dummyjson"
 default_environment: test
+requires_meltano: ">=4.0"
 environments:
 - name: test
 plugins:
   extractors:
   - name: "tap-dummyjson"
     namespace: "tap_dummyjson"
-
     pip_url: -e .
-
     capabilities:
     - state
     - catalog
     - discover
     - about
     - stream-maps
+    - structured-logging
 
     settings:
     - name: username
@@ -35,7 +34,7 @@ plugins:
     - [username, password]
 
     config:
-      start_date: '2024-01-01T00:00:00Z'
+      start_date: 6 months ago
       username: emilys
       password: emilyspass
 

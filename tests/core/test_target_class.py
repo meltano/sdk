@@ -6,9 +6,9 @@ from contextlib import nullcontext
 import pytest
 from click.testing import CliRunner
 
-from singer_sdk import SQLTarget
 from singer_sdk import typing as th
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.sql import SQLTarget
 
 
 class DummyTarget(SQLTarget):

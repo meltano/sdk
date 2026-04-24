@@ -5,14 +5,17 @@ from __future__ import annotations
 import logging
 import typing as t
 from datetime import datetime
+from functools import partial
 
 import pytest
 
 from singer_sdk.helpers._compat import datetime_fromisoformat as parse
 from singer_sdk.helpers._typing import (
+    DatetimeErrorTreatmentEnum,
     TypeConformanceLevel,
     conform_record_data_types,
     get_datelike_property_type,
+    handle_invalid_timestamp_in_record,
     to_json_compatible,
 )
 
@@ -139,3 +142,63 @@ def test_to_json_compatible(datetime_val, expected):
 def test_get_datelike_property_type(schema, expected):
     actual = get_datelike_property_type(schema)
     assert actual == expected
+
+
+def test_handle_invalid_timestamp_in_record(
+    caplog: pytest.LogCaptureFixture,
+    subtests: pytest.Subtests,
+):
+    value = "2021-08-25T20:05:28.000000+00:00"
+    record = {"created_at": value}
+    key_breadcrumb = ["created_at"]
+    datelike_typename = "datetime"
+    ex = ValueError("invalid timestamp")
+    logger = logging.getLogger("test-logger")
+
+    handle_val = partial(
+        handle_invalid_timestamp_in_record,
+        record=record,
+        key_breadcrumb=key_breadcrumb,
+        invalid_value=value,
+        datelike_typename=datelike_typename,
+        ex=ex,
+        logger=logger,
+    )
+
+    with (
+        subtests.test("default treatment"),
+        pytest.raises(ValueError, match=r"Could not parse value.*"),
+    ):
+        handle_val(treatment=None)
+
+    with (
+        subtests.test("error"),
+        pytest.raises(ValueError, match=r"Could not parse value.*"),
+    ):
+        handle_val(treatment=DatetimeErrorTreatmentEnum.ERROR)
+
+    with (
+        subtests.test("max (datetime)"),
+        caplog.at_level(logging.INFO, logger=logger.name),
+    ):
+        assert isinstance(handle_val(treatment=DatetimeErrorTreatmentEnum.MAX), str)
+
+    with (
+        subtests.test("max (time)"),
+        caplog.at_level(logging.INFO, logger=logger.name),
+    ):
+        assert isinstance(
+            handle_val(
+                treatment=DatetimeErrorTreatmentEnum.MAX,
+                datelike_typename="time",
+            ),
+            str,
+        )
+        assert "Replacing with MAX value." in caplog.text
+
+    with (
+        subtests.test("null"),
+        caplog.at_level(logging.INFO, logger=logger.name),
+    ):
+        assert handle_val(treatment=DatetimeErrorTreatmentEnum.NULL) is None
+        assert "Replacing with NULL." in caplog.text

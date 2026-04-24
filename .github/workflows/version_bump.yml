@@ -55,7 +55,7 @@ jobs:
 
     - name: Bump version
       id: cz-bump
-      uses: commitizen-tools/commitizen-action@2e8226b3e7e141ae28de9942957f267eb5d68fb6 # 0.27.0
+      uses: commitizen-tools/commitizen-action@338bbd841b75aaee6bf5340e1fa12f6ab58ff9ff # 0.27.1
       with:
         increment: ${{ github.event.inputs.bump != 'auto' && github.event.inputs.bump || '' }}
         prerelease: ${{ github.event.inputs.prerelease != 'none' && github.event.inputs.prerelease || '' }}
@@ -73,7 +73,7 @@ jobs:
     - name: Draft Release
       if: ${{ github.event.inputs.dry_run == 'false' }}
       id: draft-release
-      uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+      uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
       with:
         draft: true
         body_path: _changelog_fragment.md
@@ -87,7 +87,7 @@ jobs:
 
     - name: Create Pull Request
       if: ${{ github.event.inputs.dry_run == 'false' }}
-      uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
+      uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
       id: create-pull-request
       with:
         token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}

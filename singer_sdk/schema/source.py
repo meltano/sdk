@@ -15,7 +15,13 @@ from urllib.parse import urlparse
 
 import requests
 
-from singer_sdk.exceptions import DiscoveryError
+from singer_sdk.exceptions import (  # noqa: F401
+    DiscoveryError,
+    SchemaNotFoundError,
+    SchemaNotValidError,
+    UnsupportedOpenAPISpec,
+    UnsupportedSchemaFormatError,
+)
 from singer_sdk.singerlib.schema import resolve_schema_references
 
 if sys.version_info >= (3, 11):
@@ -41,18 +47,6 @@ if t.TYPE_CHECKING:
 
 
 Schema: t.TypeAlias = dict[str, t.Any]
-
-
-class SchemaNotFoundError(DiscoveryError):
-    """Raised when a schema is not found."""
-
-
-class SchemaNotValidError(DiscoveryError):
-    """Raised when a schema is not valid."""
-
-
-class UnsupportedOpenAPISpec(Exception):
-    """Raised when the OpenAPI specification is not supported."""
 
 
 _TKey = TypeVar("_TKey", bound=t.Hashable, default=str)
@@ -234,7 +228,7 @@ class StreamSchema(t.Generic[_TKey]):
             A JSON schema dictionary.
         """
         return self.schema_source.get_schema(
-            self.key or stream.name,  # type: ignore[arg-type]
+            self.key or stream.name,  # type: ignore[arg-type]  # ty:ignore[invalid-argument-type]
             key_properties=stream.primary_keys,
         )
 
@@ -252,7 +246,8 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
     - Converts `nullable: true` to type arrays with "null"
     - Unwraps single-element `oneOf` constructs
     - Merges `allOf` constructs into a single object schema
-    - Removes `enum` keywords
+    - Removes `enum` keywords (validation-only, not used in Singer data exchange)
+    - Removes `pattern` keywords (validation-only, not used in Singer data exchange)
     - Recursively processes nested object properties and array items
     """
 
@@ -295,10 +290,60 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
             schema: A JSON schema.
 
         Returns:
-            The schema with `enum` handled.
+            The schema with ``enum`` removed.
         """
         schema.pop("enum", None)
         return schema
+
+    def handle_pattern(self, schema: Schema) -> Schema:  # noqa: PLR6301
+        """Handle pattern values in a JSON schema.
+
+        Singer taps and targets do not use the ``pattern`` keyword for data exchange;
+        it is a string-validation constraint that is only meaningful in an OpenAPI
+        context. Removing it avoids false-negative validation failures, particularly
+        for patterns written in regex dialects (e.g. Java named-capture groups) that
+        are not valid ECMA 262 or Python ``re``.
+
+        Args:
+            schema: A JSON schema.
+
+        Returns:
+            The schema with ``pattern`` removed.
+        """
+        schema.pop("pattern", None)
+        return schema
+
+    def handle_one_of(self, schema: Schema) -> Schema:
+        """Handle oneOf constructs in a JSON schema.
+
+        - Single element: unwrap.
+        - Two elements where one is ``{"type": "null"}``: extract the non-null schema,
+          normalize it, and add ``"null"`` to its type (nullable shorthand pattern).
+        - Otherwise: normalize each subschema in place.
+
+        Args:
+            schema: A JSON schema containing a ``oneOf`` keyword.
+
+        Returns:
+            The processed schema.
+        """
+        subschemas = schema["oneOf"]
+        rest = {k: v for k, v in schema.items() if k != "oneOf"}
+
+        if len(subschemas) == 1:
+            (inner,) = subschemas
+            return rest | self.normalize_schema(inner)
+
+        if len(subschemas) == 2 and {"type": "null"} in subschemas:  # noqa: PLR2004
+            non_null = next(s for s in subschemas if s != {"type": "null"})
+            inner = self.normalize_schema(non_null)
+            types_raw = inner.get("type", [])
+            types = [types_raw] if isinstance(types_raw, str) else list(types_raw)
+            if "null" not in types:
+                inner["type"] = [*types, "null"]
+            return rest | inner
+
+        return {**rest, "oneOf": [self.normalize_schema(s) for s in subschemas]}
 
     def handle_all_of(self, subschemas: list[Schema]) -> Schema:  # noqa: PLR6301
         """Handle allOf constructs in a JSON schema.
@@ -354,25 +399,28 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
 
         if "object" in schema_type:
             result = self.handle_object(result, key_properties=key_properties)
-
         elif "array" in schema_type and (items := result.get("items")):
             result["items"] = self.handle_array_items(items)
 
         if "allOf" in result:
             result = self.normalize_schema(self.handle_all_of(result["allOf"]))
+        if "oneOf" in result:
+            result = self.handle_one_of(result)
+        if "anyOf" in result:
+            result["anyOf"] = [self.normalize_schema(s) for s in result["anyOf"]]
 
-        if "oneOf" in result and len(result["oneOf"]) == 1:
-            (inner,) = result.pop("oneOf")
-            result.update(self.normalize_schema(inner))
-            schema_type = result.get("type", [])
-
-        types = [schema_type] if isinstance(schema_type, str) else schema_type
+        types_raw = result.get("type", [])
+        types = [types_raw] if isinstance(types_raw, str) else types_raw
         if result.pop("nullable", False) and types and "null" not in types:
             result["type"] = [*types, "null"]
 
-        # Remove 'enum' keyword
+        # Remove 'enum' keyword (validation-only, not used in Singer data exchange)
         if "enum" in result:
             result = self.handle_enum(result)
+
+        # Remove 'pattern' keyword (validation-only, not used in Singer data exchange)
+        if "pattern" in result:
+            result = self.handle_pattern(result)
 
         return result
 

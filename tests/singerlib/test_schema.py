@@ -457,6 +457,46 @@ def test_schema_from_dict(pydict, expected):
             },
             id="resolve_schema_multiple_properties_with_same_reference",
         ),
+        pytest.param(
+            {
+                "type": "object",
+                "properties": {
+                    "_links": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "$ref": "components#/schemas/Link",
+                        },
+                    },
+                },
+            },
+            {
+                "components": {
+                    "schemas": {
+                        "Link": {
+                            "type": "object",
+                            "properties": {
+                                "href": {"type": "string"},
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "_links": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                                "href": {"type": "string"},
+                            },
+                        },
+                    },
+                },
+            },
+            id="resolve_schema_references_with_additional_properties",
+        ),
     ],
 )
 def test_resolve_schema_references(schema, refs, expected):

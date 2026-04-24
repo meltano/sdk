@@ -124,11 +124,11 @@ class SQLTarget(Target):
         Args:
             stream_name: Name of the stream.
 
-        Raises:
-            ValueError: If no :class:`singer_sdk.sinks.Sink` class is defined.
-
         Returns:
             The sink class to be used with the stream.
+
+        Raises:
+            ValueError: If no :class:`singer_sdk.sinks.Sink` class is defined.
         """
         if self.default_sink_class:
             return self.default_sink_class

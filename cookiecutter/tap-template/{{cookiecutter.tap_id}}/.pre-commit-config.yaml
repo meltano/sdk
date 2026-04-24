@@ -18,21 +18,31 @@ repos:
   - id: end-of-file-fixer
   - id: trailing-whitespace
 
+- repo: https://github.com/zizmorcore/zizmor-pre-commit
+  rev: v1.24.1
+  hooks:
+  - id: zizmor
+
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.36.1
+  rev: 0.37.1
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
   - id: check-meltano
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.15.0
+  rev: v0.15.10
   hooks:
   - id: ruff-check
   - id: ruff-format
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.10.0
+  rev: 0.11.6
   hooks:
   - id: uv-lock
   - id: uv-sync
+
+- repo: https://github.com/hukkin/mdformat
+  rev: 1.0.0
+  hooks:
+  - id: mdformat

@@ -31,22 +31,11 @@ class ShortcutTap(Tap):
         return update
 ```
 
-````{tab} Poetry
-```toml
-# pyproject.toml
-
-[tool.poetry.scripts]
-tap-shortcut = "tap_shortcut.tap:ShortcutTap.cli"
-tap-shortcut-update-schema = "tap_shortcut.tap:ShortcutTap.update_schema"
-```
-````
-
-````{tab} uv
 ```toml
 # pyproject.toml
 
 [project.scripts]
+# N.B. Using the [project] section in pyproject.toml with Poetry requires Poetry 2.0+
 tap-shortcut = "tap_shortcut.tap:ShortcutTap.cli"
 tap-shortcut-update-schema = "tap_shortcut.tap:ShortcutTap.update_schema"
 ```
-````

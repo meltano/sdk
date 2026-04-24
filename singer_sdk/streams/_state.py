@@ -12,7 +12,6 @@ from singer_sdk.helpers._state import (
     get_state_partitions_list,
     get_writeable_state_dict,
     increment_state,
-    reset_state_progress_markers,
     write_replication_key_signpost,
     write_starting_replication_value,
 )
@@ -39,9 +38,11 @@ class StreamStateManager:
     def __init__(
         self,
         *,
-        tap_name: str,
         stream_name: str,
         tap_state: types.TapState,
+        is_sorted: bool = False,
+        check_sorted: bool = True,
+        tap_name: str | None = None,
         state_partitioning_keys: t.Sequence[str] | None = None,
     ) -> None:
         """Initialize the StreamStateManager.
@@ -51,12 +52,16 @@ class StreamStateManager:
             stream_name: Name of the stream.
             tap_state: Shared tap-level state dictionary.
             state_partitioning_keys: Keys used for state partitioning.
+            is_sorted: Whether the stream is expected to be sorted.
+            check_sorted: Whether to check for sort violations.
         """
         self.tap_name = tap_name
         self.stream_name = stream_name
         self.tap_state = tap_state
         self.state_partitioning_keys = state_partitioning_keys
         self.is_flushed = True
+        self._is_sorted = is_sorted
+        self._check_sorted = check_sorted
         self._logger = logging.getLogger(tap_name).getChild(stream_name)
 
     @property
@@ -187,8 +192,6 @@ class StreamStateManager:
         *,
         context: types.Context | None = None,
         replication_key: str,
-        is_sorted: bool,
-        check_sorted: bool,
     ) -> None:
         """Update state of stream or partition with data from the provided record.
 
@@ -199,19 +202,21 @@ class StreamStateManager:
             latest_record: The latest record to update state with.
             context: Stream partition or context dictionary.
             replication_key: The replication key field name.
-            is_sorted: Whether the stream is expected to be sorted.
-            check_sorted: Whether to check for sort violations.
         """
         # This also creates a state entry if one does not yet exist:
         state_dict = self.get_context_state(context)
+
+        # Treat as sorted only when the stream is sorted and there is no custom
+        # state partitioning configured (in which case the stream is not resumable)
+        treat_as_sorted = self._is_sorted and self.state_partitioning_keys is None
 
         # Advance state bookmark values
         increment_state(
             state_dict,
             replication_key=replication_key,
             latest_record=latest_record,
-            is_sorted=is_sorted,
-            check_sorted=check_sorted,
+            is_sorted=treat_as_sorted,
+            check_sorted=self._check_sorted,
         )
 
     def finalize_state(self, state: dict | None = None) -> None:
@@ -220,42 +225,8 @@ class StreamStateManager:
         Args:
             state: State object to promote progress markers with.
         """
-        finalize_state_progress_markers(state)  # type: ignore[arg-type]
+        finalize_state_progress_markers(state)  # type: ignore[arg-type]  # ty:ignore[invalid-argument-type]
         self.is_flushed = False
-
-    def reset_progress_markers(
-        self,
-        state: dict | None = None,
-        partitions: list[dict] | None = None,
-    ) -> None:
-        """Reset progress markers.
-
-        If state is None or contains partitions, all partition contexts will be reset.
-
-        Args:
-            state: State object to reset progress markers with.
-            partitions: List of partition contexts to reset if state is None or contains
-                partitions.
-        """
-        if state is None or state == {}:
-            # Reset all partition states
-            partition_list = partitions or [{}]
-            for partition_context in partition_list:
-                partition_state = self.get_context_state(partition_context or None)
-                reset_state_progress_markers(partition_state)
-            return
-
-        # If state has partitions and partition list is provided, reset partition states
-        if "partitions" in state and partitions:
-            for partition_context in partitions:
-                partition_state = self.get_context_state(partition_context or None)
-                reset_state_progress_markers(partition_state)
-            # Also reset stream-level progress markers if any
-            reset_state_progress_markers(state)
-            return
-
-        # Reset progress markers on the provided state (stream or partition level)
-        reset_state_progress_markers(state)
 
     def finalize_progress_markers(
         self,

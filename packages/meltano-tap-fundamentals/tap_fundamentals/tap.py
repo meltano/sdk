@@ -36,9 +36,7 @@ class AAPL(Stream):
     ) -> t.Iterator[dict[str, t.Any]]:
         """Generate a single record."""
         with PROJECT_DIR.joinpath("AAPL.json").open() as f:
-            record = json.load(f)
-
-        yield record
+            yield json.load(f)
 
 
 class Fundamentals(Tap):

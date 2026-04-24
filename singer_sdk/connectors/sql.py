@@ -1,6 +1,6 @@
 """Deprecated SQL connector module.
 
-.. deprecated:: Next Release
+.. deprecated:: v0.49
     Import from singer_sdk.sql instead.
 """
 
@@ -35,7 +35,7 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
     """
     msg_template = (
         "Importing {name} from singer_sdk.connectors.sql is deprecated and will be "  # noqa: RUF027
-        "removed in the next release. Please import from singer_sdk.sql instead."
+        "removed in v0.57. Please import from singer_sdk.sql instead."
     )
     if name == "FullyQualifiedName":
         msg = msg_template.format(name=name)

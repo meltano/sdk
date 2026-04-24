@@ -28,7 +28,8 @@ repos:
             cookiecutter/.*/.pre-commit-config.yaml|
             cookiecutter/.*/dependabot.yml|
             cookiecutter/.*/build.yml|
-            cookiecutter/.*/test.yml
+            cookiecutter/.*/test.yml|
+            cookiecutter/.*/run-zizmor.yml
         )$
   - id: end-of-file-fixer
     exclude: |
@@ -40,7 +41,7 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.36.2
+  rev: 0.37.1
   hooks:
   - id: check-codecov
   - id: check-dependabot
@@ -50,7 +51,7 @@ repos:
   - id: check-readthedocs
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.15.2
+  rev: v0.15.10
   hooks:
   - id: ruff-check
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]
@@ -66,13 +67,13 @@ repos:
     types_or: [python, markdown]
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.10.4
+  rev: 0.11.6
   hooks:
   - id: uv-lock
   - id: uv-sync
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.4.1
+  rev: v2.4.2
   hooks:
   - id: codespell
     exclude: |
@@ -84,7 +85,6 @@ repos:
   rev: 1.0.0
   hooks:
   - id: mdformat
-    exclude: tests/snapshots/about_format/markdown\.snap\.md
     args: [--strict-front-matter]
     additional_dependencies:
     - mdformat-front-matters

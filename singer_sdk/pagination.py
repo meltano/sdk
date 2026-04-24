@@ -7,7 +7,7 @@ import typing as t
 from abc import ABC, abstractmethod
 from urllib.parse import ParseResult, urlparse
 
-from singer_sdk.helpers._compat import singer_sdk_deprecated
+from singer_sdk.helpers._compat import SingerSDKPendingDeprecationWarning, deprecated
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 
 if sys.version_info >= (3, 12):
@@ -47,8 +47,8 @@ class BaseAPIPaginator(ABC, t.Generic[TPageToken]):
             start_value: Initial value.
         """
         self._value: TPageToken = start_value
-        self._page_count = 0
-        self._finished = False
+        self._page_count: int = 0
+        self._finished: bool = False
         self._last_seen_record: dict | None = None
 
     @property
@@ -218,7 +218,7 @@ class BaseHATEOASPaginator(BaseAPIPaginator[ParseResult | None], ABC):
     - query
     - fragment
 
-    That means you can access and parse the query params in your stream like this:
+    That means you can access the URL for the next page:
 
     .. code-block:: python
 
@@ -231,10 +231,11 @@ class BaseHATEOASPaginator(BaseAPIPaginator[ParseResult | None], ABC):
            def get_new_paginator(self):
                return MyHATEOASPaginator()
 
-           def get_url_params(self, next_page_token) -> dict:
-               if next_page_token:
-                   return dict(parse_qsl(next_page_token.query))
-               return {}
+           def get_http_request(self, *, context):
+               request = super().get_http_request(context=context)
+               if context.next_page_token:
+                   request.url = context.next_page_token.geturl()
+               return request
     """
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
@@ -372,9 +373,9 @@ class PageNumberPaginator(BaseAPIPaginator[int]):
         return self._value + 1
 
 
-@singer_sdk_deprecated(
-    "BasePageNumberPaginator is deprecated and will be removed in a future version. "
-    "Use PageNumberPaginator instead."
+@deprecated(
+    "Use PageNumberPaginator instead",
+    category=SingerSDKPendingDeprecationWarning,
 )
 class BasePageNumberPaginator(PageNumberPaginator):
     """DEPRECATED.
@@ -422,10 +423,7 @@ class OffsetPaginator(BaseAPIPaginator[int], ABC):
         return self._value + self._page_size
 
 
-@singer_sdk_deprecated(
-    "BaseOffsetPaginator is deprecated and will be removed in a future version. "
-    "Use OffsetPaginator instead."
-)
+@deprecated("Use OffsetPaginator instead", category=SingerSDKPendingDeprecationWarning)
 class BaseOffsetPaginator(OffsetPaginator):
     """DEPRECATED.
 

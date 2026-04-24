@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import typing as t
 
-from singer_sdk import SQLConnector, SQLStream, SQLTap
 from singer_sdk import typing as th
 from singer_sdk.contrib.msgspec import MsgSpecWriter
+from singer_sdk.sql import SQLConnector, SQLStream, SQLTap
 
 DB_PATH_CONFIG = "path_to_db"
 

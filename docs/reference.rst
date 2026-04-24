@@ -54,7 +54,7 @@ Authenticator Classes
 
 .. autosummary::
     :toctree: classes
-    :template: class.rst
+    :template: authenticator.rst
 
     authenticators.APIAuthenticatorBase
     authenticators.APIKeyAuthenticator
@@ -107,6 +107,7 @@ JSON Schema builder classes
     typing.JSONPointerType
     typing.ObjectType
     typing.OneOf
+    typing.NumberType
     typing.Property
     typing.RegexType
     typing.RelativeJSONPointerType
@@ -155,3 +156,5 @@ Other
 
     sql.connector.SQLToJSONSchema
     sql.connector.JSONSchemaToSQL
+    streams.rest.HTTPRequest
+    streams.rest.PageContext

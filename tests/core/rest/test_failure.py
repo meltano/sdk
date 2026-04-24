@@ -132,8 +132,8 @@ def custom_validation_stream(rest_tap):
     ],
     ids=[
         "client-error",
-        "server-error",
-        "server-error",
+        "server-error-503",
+        "server-error-521",
         "rate-limited",
         "forbidden-with-content",
         "forbidden-empty-content",

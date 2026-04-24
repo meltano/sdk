@@ -8,20 +8,19 @@ from unittest import mock
 
 import pytest
 import sqlalchemy
-import sqlalchemy.engine
 import sqlalchemy.exc
 import sqlalchemy.schema
 import sqlalchemy.types
 from sqlalchemy.dialects import registry, sqlite
 from sqlalchemy.engine.default import DefaultDialect
 
-from singer_sdk.connectors import SQLConnector
-from singer_sdk.connectors.sql import (
+from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.sql import SQLConnector
+from singer_sdk.sql.connector import (
     FullyQualifiedName,
     JSONSchemaToSQL,
     SQLToJSONSchema,
 )
-from singer_sdk.exceptions import ConfigValidationError
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
@@ -51,7 +50,7 @@ class DummySQLConnector(SQLConnector):
     @override
     @staticmethod
     def get_column_alter_ddl(
-        table_name: str,
+        table_name: str | FullyQualifiedName,
         column_name: str,
         column_type: sqlalchemy.types.TypeEngine,
     ) -> sqlalchemy.DDL:
@@ -641,18 +640,14 @@ def test_fully_qualified_name():
 
 
 def test_fully_qualified_name_with_quoting():
-    class QuotedFullyQualifiedName(FullyQualifiedName):
-        def __init__(self, *, dialect: sqlalchemy.engine.Dialect, **kwargs: t.Any):
-            self.dialect = dialect
-            super().__init__(**kwargs)
-
-        def prepare_part(self, part: str) -> str:
-            return self.dialect.identifier_preparer.quote(part)
-
     dialect = DefaultDialect()
-
-    fqn = QuotedFullyQualifiedName(table="order", schema="public", dialect=dialect)
+    fqn = FullyQualifiedName(table="order", schema="public", dialect=dialect)
     assert fqn == 'public."order"'
+
+
+def test_fully_qualified_name_without_quoting():
+    fqn = FullyQualifiedName(table="order", schema="public", dialect=None)
+    assert fqn == "public.order"
 
 
 def test_fully_qualified_name_empty_error():
@@ -943,7 +938,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         class CustomJSONSchemaToSQL(JSONSchemaToSQL):
             def handle_multiple_types(
                 self,
-                types: list[str],
+                types: t.Sequence[str],
             ) -> sqlalchemy.types.TypeEngine:
                 if "object" in types or "array" in types:
                     return sqlalchemy.JSON()

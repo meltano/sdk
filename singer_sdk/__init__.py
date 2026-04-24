@@ -62,8 +62,8 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
     """
     if name == "SQLConnector":
         warnings.warn(
-            f"Importing {name} from singer_sdk is deprecated. "
-            f"Please import from singer_sdk.sql instead: "
+            f"Importing {name} from singer_sdk is deprecated and will be removed "
+            f"in v0.57. Please import from singer_sdk.sql instead: "
             f"from singer_sdk.sql import {name}",
             SingerSDKDeprecationWarning,
             stacklevel=2,
@@ -73,8 +73,8 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
         return SQLConnector
     if name == "SQLSink":
         warnings.warn(
-            f"Importing {name} from singer_sdk is deprecated. "
-            f"Please import from singer_sdk.sql instead: "
+            f"Importing {name} from singer_sdk is deprecated and will be removed "
+            f"in v0.57. Please import from singer_sdk.sql instead: "
             f"from singer_sdk.sql import {name}",
             SingerSDKDeprecationWarning,
             stacklevel=2,
@@ -84,8 +84,8 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
         return SQLSink
     if name == "SQLStream":
         warnings.warn(
-            f"Importing {name} from singer_sdk is deprecated. "
-            f"Please import from singer_sdk.sql instead: "
+            f"Importing {name} from singer_sdk is deprecated and will be removed "
+            f"in v0.57. Please import from singer_sdk.sql instead: "
             f"from singer_sdk.sql import {name}",
             SingerSDKDeprecationWarning,
             stacklevel=2,
@@ -95,8 +95,8 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
         return SQLStream
     if name == "SQLTap":
         warnings.warn(
-            f"Importing {name} from singer_sdk is deprecated. "
-            f"Please import from singer_sdk.sql instead: "
+            f"Importing {name} from singer_sdk is deprecated and will be removed "
+            f"in v0.57. Please import from singer_sdk.sql instead: "
             f"from singer_sdk.sql import {name}",
             SingerSDKDeprecationWarning,
             stacklevel=2,
@@ -106,8 +106,8 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
         return SQLTap
     if name == "SQLTarget":
         warnings.warn(
-            f"Importing {name} from singer_sdk is deprecated. "
-            f"Please import from singer_sdk.sql instead: "
+            f"Importing {name} from singer_sdk is deprecated and will be removed "
+            f"in v0.57. Please import from singer_sdk.sql instead: "
             f"from singer_sdk.sql import {name}",
             SingerSDKDeprecationWarning,
             stacklevel=2,

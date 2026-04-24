@@ -1,10 +1,17 @@
+[build-system]
+requires = [
+    "hatchling>=1,<2",
+    "hatch-vcs>=0.5",
+]
+build-backend = "hatchling.build"
+
 [project]
 {%- if cookiecutter.variant != "None (Skip)" %}
 name = "{{cookiecutter.variant}}-{{cookiecutter.target_id}}"
 {%- else %}
 name = "{{cookiecutter.target_id}}"
 {%- endif %}
-version = "0.0.1"
+dynamic = ["version"]
 description = "Singer target for {{cookiecutter.destination_name}}, built with the Meltano Singer SDK."
 readme = "README.md"
 authors = [{ name = "{{ cookiecutter.admin_name }}", email = "{{ cookiecutter.admin_email }}" }]
@@ -28,15 +35,15 @@ license-files = [ "LICENSE" ]
 requires-python = ">=3.10"
 dependencies = [
     {%- if cookiecutter.faker_extra %}
-    "singer-sdk[faker]~=0.53.5",
+    "singer-sdk[faker]~=0.53.7",
     {%- else %}
-    "singer-sdk~=0.53.5",
+    "singer-sdk~=0.53.7",
     {%- endif %}
     {%- if cookiecutter.serialization_method == "SQL" %}
     "sqlalchemy~=2.0",
     "typing-extensions>=4.5.0; python_version < '3.13'",
     {%- else %}
-    "requests~=2.32.3",
+    "requests~=2.33.0",
     {%- endif %}
 ]
 
@@ -56,13 +63,13 @@ dev = [
 test = [
     "pytest>=9",
     {%- if cookiecutter.include_ci_files == "GitHub" %}
-    "pytest-github-actions-annotate-failures>=0.3",
+    "pytest-github-actions-annotate-failures>=0.4",
     {%- endif %}
     "singer-sdk[testing]",
 ]
 typing = [
-    "mypy>=1.16.0",
-    "ty>=0.0.15",
+    "mypy>=1.19.1",
+    "ty>=0.0.18",
     {%- if cookiecutter.serialization_method == "SQL" %}
     "sqlalchemy-stubs",
     {%- else %}
@@ -77,23 +84,9 @@ packages = [
 ]
 {%- endif %}
 
-[tool.pytest]
-addopts = [
-    "--durations=10",
-    "-ra",
-    "--strict-config",
-    "--strict-markers",
-]
-filterwarnings = [
-    "error",
-    "once:No records were available to test:UserWarning",
-]
-log_level = "INFO"
-minversion = "9.0"
-testpaths = [
-    "tests",
-]
-xfail_strict = true
+[tool.hatch.version]
+fallback-version = "0.1.0.dev0"
+source = "vcs"
 
 [tool.mypy]
 enable_error_code = [
@@ -109,6 +102,20 @@ warn_unused_ignores = true
 [tool.ty.rules]
 unused-type-ignore-comment = "ignore"
 
+[tool.pytest]
+addopts = [
+    "-ra",
+]
+filterwarnings = [
+    "error",
+]
+log_level = "INFO"
+minversion = "9"
+strict = true
+testpaths = [
+    "tests",
+]
+
 [tool.ruff]
 line-length = 100
 required-version = ">=0.15"
@@ -123,34 +130,32 @@ select = ["ALL"]
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+  "S101",  # assert is used by pytest
+]
+
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[build-system]
-requires = [
-    "hatchling>=1,<2",
-]
-build-backend = "hatchling.build"
-
 # This configuration can be used to customize tox environments
 [tool.tox]
-min_version = "4.32"
 requires = [
-    "tox>=4.32",
+    "tox>=4.43",
     "tox-uv",
 ]
 env_list = [
     "typing",
-    "py314",
-    "py313",
-    "py312",
-    "py311",
-    "py310",
+    { product = [
+        { prefix = "3.", start = 10 },
+    ] },
 ]
 
 [tool.tox.env_run_base]
+description = "run tests on Python {env_name}"
 runner = "uv-venv-lock-runner"
 pass_env = [
+    "CI",
     {%- if cookiecutter.include_ci_files == "GitHub" %}
     "GITHUB_*",
     {%- endif %}
@@ -160,6 +165,7 @@ dependency_groups = [ "test" ]
 commands = [ [ "pytest", { replace = "posargs", default = [ "tests" ], extend = true } ] ]
 
 [tool.tox.env.typing]
+description = "type checks"
 dependency_groups = [ "test", "typing" ]
 commands = [
     [ "mypy", { replace = "posargs", default = [ "{{cookiecutter.library_name}}", "tests" ], extend = true } ],

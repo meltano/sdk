@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import datetime
 import io
+import json
 import logging
+import sys
 import typing as t
+from collections import defaultdict
 from contextlib import redirect_stdout
 
 import pytest
@@ -11,8 +14,15 @@ import time_machine
 
 from singer_sdk import Stream, Tap
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 if t.TYPE_CHECKING:
     from pytest_snapshot.plugin import Snapshot
+
+    from singer_sdk.helpers.types import Context, Record
 
 DATETIME = datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc)
 
@@ -28,17 +38,19 @@ class Parent(Stream):
         },
     }
 
+    @override
     def get_child_context(
         self,
-        record: dict,
-        context: dict | None,  # noqa: ARG002
-    ) -> dict | None:
+        record: Record,
+        context: Context | None,
+    ) -> Context | None:
         """Create context for children streams."""
         return {
             "pid": record["id"],
         }
 
-    def get_records(self, context: dict | None):  # noqa: ARG002
+    @override
+    def get_records(self, context: Context | None):
         """Get dummy records."""
         yield {"id": 1}
         yield {"id": 2}
@@ -58,7 +70,8 @@ class Child(Stream):
     }
     parent_stream_type = Parent
 
-    def get_records(self, context: dict | None):  # noqa: ARG002
+    @override
+    def get_records(self, context: Context | None):
         """Get dummy records."""
         yield {"id": 1}
         yield {"id": 2}
@@ -70,6 +83,7 @@ class MyTap(Tap):
 
     name = "my-tap"
 
+    @override
     def discover_streams(self):
         """Discover streams."""
         return [
@@ -218,16 +232,18 @@ def test_one_parent_many_children(
             },
         }
 
+        @override
         def get_records(
             self,
-            context: dict | None,  # noqa: ARG002
+            context: Context | None,
         ) -> t.Iterable[dict | tuple[dict, dict | None]]:
             yield {"id": "1", "children": [1, 2, 3]}
 
+        @override
         def generate_child_contexts(
             self,
-            record: dict,
-            context: dict | None,  # noqa: ARG002
+            record: Record,
+            context: Context | None,
         ) -> t.Iterable[dict | None]:
             for child_id in record["children"]:
                 yield {"child_id": child_id, "pid": record["id"]}
@@ -245,7 +261,8 @@ def test_one_parent_many_children(
         }
         parent_stream_type = ParentMany
 
-        def get_records(self, context: dict | None):
+        @override
+        def get_records(self, context: Context | None):
             """Get dummy records."""
             assert context is not None
 
@@ -302,10 +319,11 @@ def test_preprocess_context_removes_large_payload(
             },
         }
 
+        @override
         def get_child_context(
             self,
-            record: dict,
-            context: dict | None,  # noqa: ARG002
+            record: Record,
+            context: Context | None,
         ) -> dict | None:
             """Create context with large payload for child streams."""
             return {
@@ -315,7 +333,8 @@ def test_preprocess_context_removes_large_payload(
                 "large_payload": list(range(1, 1001)),
             }
 
-        def get_records(self, context: dict | None):  # noqa: ARG002
+        @override
+        def get_records(self, context: Context | None):
             """Get dummy records."""
             yield {"id": 1, "name": "Parent A"}
             yield {"id": 2, "name": "Parent B"}
@@ -342,12 +361,14 @@ def test_preprocess_context_removes_large_payload(
         def set_numbers(self, numbers: list[int]) -> None:
             self._numbers = numbers
 
-        def preprocess_context(self, context: dict) -> dict:
+        @override
+        def preprocess_context(self, context: Context) -> Context:
             """Remove large payload from parent context."""
-            self.set_numbers(context.pop("large_payload", []))
+            self.set_numbers(context.pop("large_payload", []))  # ty:ignore[unresolved-attribute]
             return context
 
-        def get_records(self, context: dict | None):
+        @override
+        def get_records(self, context: Context | None):
             """Get dummy records."""
             # Verify that large_payload was removed
             assert context is not None
@@ -394,3 +415,91 @@ def test_preprocess_context_removes_large_payload(
 
     snapshot.assert_match(output, "singer.jsonl")
     snapshot.assert_match(caplog.text, "stderr.log")
+
+
+def test_parent_records_emitted_when_child_hits_record_limit():
+    """Parent records are written before child sync so they appear even if a child
+    stream aborts after reaching max_records_limit (dry-run record cap)."""
+
+    class ParentStream(Stream):
+        name = "parent_limited"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
+
+        @override
+        def get_child_context(
+            self,
+            record: Record,
+            context: Context | None,
+        ) -> Context | None:
+            return {"pid": record["id"]}
+
+        @override
+        def get_records(self, context: Context | None):
+            yield {"id": 1}
+            yield {"id": 2}
+
+    class ChildStream(Stream):
+        name = "child_limited"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "pid": {"type": "integer"},
+            },
+        }
+        parent_stream_type = ParentStream
+
+        @override
+        def get_records(self, context: Context | None):
+            # More records than the dry-run limit (3 > 2)
+            yield {"id": 1}
+            yield {"id": 2}
+            yield {"id": 3}
+
+    class SiblingStream(Stream):
+        name = "sibling"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "pid": {"type": "integer"},
+            },
+        }
+        parent_stream_type = ParentStream
+
+        @override
+        def get_records(self, context: Context | None):
+            for i in range(10):
+                yield {"id": i + 1}
+
+    class TapLimited(Tap):
+        name = "tap-limited"
+
+        def discover_streams(self):
+            return [ParentStream(self), ChildStream(self), SiblingStream(self)]
+
+    tap = TapLimited()
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        # Limit child to 2 records; the 3rd would trigger AbortedSyncPausedException
+        tap.run_sync_dry_run(dry_run_record_limit=2)
+
+    buf.seek(0)
+    messages = [json.loads(line) for line in buf.read().splitlines() if line]
+
+    tally: dict[str, int] = defaultdict(int)
+    for m in messages:
+        if m["type"] == "RECORD":
+            tally[m["stream"]] += 1
+
+    msg = "At least one parent record must be emitted even when the child stream hits its dry-run record limit."  # noqa: E501
+    assert tally["parent_limited"] >= 1, msg
+
+    msg = "Only 2 (for each parent) child records should be emitted"
+    assert tally["child_limited"] == 4, msg
+
+    msg = "Sibling records should also be emitted"
+    assert tally["sibling"] == 4, msg

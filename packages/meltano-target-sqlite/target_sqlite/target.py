@@ -8,9 +8,9 @@ import json
 import sqlite3
 import typing as t
 
-from singer_sdk import SQLConnector, SQLSink, SQLTarget
 from singer_sdk import typing as th
 from singer_sdk.contrib.msgspec import MsgSpecReader
+from singer_sdk.sql import SQLConnector, SQLSink, SQLTarget
 
 DB_PATH_CONFIG = "path_to_db"
 
