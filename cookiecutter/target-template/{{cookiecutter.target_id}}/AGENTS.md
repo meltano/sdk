@@ -35,7 +35,7 @@ Before making changes, ensure you understand these concepts:
 
 This target uses **{{ cookiecutter.serialization_method }}** serialization:
 
-{% if cookiecutter.serialization_method == 'Per record' %}
+{%- if cookiecutter.serialization_method == 'Per record' %}
 
 #### Per Record Serialization
 
@@ -55,7 +55,7 @@ def process_record(self, record: dict, context: dict) -> None:
     # Handle errors
 ```
 
-{% elif cookiecutter.serialization_method == 'Per batch' %}
+{%- elif cookiecutter.serialization_method == 'Per batch' %}
 
 #### Per Batch Serialization
 
@@ -108,7 +108,7 @@ default_sink_class = SQLSink
 sqlalchemy_url = self.config["sqlalchemy_url"]
 ```
 
-{% endif -%}
+{%- endif %}
 
 ### Common Tasks
 
@@ -141,7 +141,7 @@ Configuration best practices:
 
 #### Connection Management
 
-{% if cookiecutter.serialization_method == 'SQL' %}
+{% if cookiecutter.serialization_method == 'SQL' -%}
 For SQL targets:
 
 ```python
@@ -164,7 +164,7 @@ self.session.headers.update({"Authorization": f"Bearer {api_key}"})
 ```
 
 Implement retry logic for transient failures.
-{% endif -%}
+{%- endif %}
 
 #### Error Handling
 

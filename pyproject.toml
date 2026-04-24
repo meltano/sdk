@@ -45,7 +45,7 @@ dependencies = [
     "PyYAML>=6.0",
     "referencing>=0.30.0",
     "requests>=2.25.1",
-    "simpleeval>=0.9.13,!=1.0.1,<1.0.5",
+    "simpleeval==1.0.7",
     "simplejson>=3.17.6",
     "sqlalchemy>=2",
     "typing-extensions>=4.5.0 ; python_full_version < '3.13'",
@@ -152,9 +152,9 @@ typing = [
     {"include-group" = "testing"},
     "backports-datetime-fromisoformat",
     "importlib-metadata",
-    "mypy>=1.17",
+    "mypy~=1.20.0",
     "pyarrow-stubs>=19.1",
-    "ty==0.0.21",
+    "ty==0.0.29",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-requests>=2.28.11",
@@ -198,6 +198,8 @@ filterwarnings = [
     'once:No records were available to test:UserWarning',
     # https://github.com/meltano/sdk/issues/1354
     'ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning',
+    # url-normalize needs to be patched
+    'once:Transitional processing has been removed from UTS #46:DeprecationWarning',
     # TODO: Address this SQLite warning in Python 3.13+
     'ignore::ResourceWarning',
     # Our own warnings
@@ -218,13 +220,13 @@ markers = [
     "snapshot: Tests that use pytest-snapshot",
 ]
 minversion = "9"
-testpaths = ["tests"]
 norecursedirs = ["cookiecutter"]
-strict = false
+strict = true
+testpaths = ["tests"]
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.53.6"
+version = "0.53.7"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -303,6 +305,7 @@ enable_error_code = [
     "truthy-bool",
 ]
 files = "singer_sdk"
+follow_untyped_imports = true
 local_partial_types = true
 strict = false
 warn_redundant_casts = true
@@ -318,8 +321,6 @@ module = [
     "joblib.*",       # https://github.com/joblib/joblib/issues/1516
     "fsspec.*",       # https://github.com/fsspec/filesystem_spec/issues/625
     "jsonpath_ng.*",  # https://github.com/h2non/jsonpath-ng/issues/152
-    "pyarrow.*",      # https://github.com/apache/arrow/issues/32609
-    "toolz.*",        # https://github.com/pytoolz/toolz/issues/496
 ]
 
 [build-system]
