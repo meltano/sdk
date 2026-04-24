@@ -156,6 +156,14 @@ class Stream(abc.ABC):  # noqa: PLR0904
         self.child_streams: list[Stream] = []
         self.sync_result: SyncResult | None = None
 
+        # Initialize state manager
+        self._state_manager = StreamStateManager(
+            tap_name=tap.name,
+            stream_name=self.name,
+            tap_state=self._tap_state,
+            state_partitioning_keys=self._state_partitioning_keys,
+        )
+
         if schema:
             if isinstance(schema, (PathLike, str)):
                 if not Path(schema).is_file():  # ty: ignore[invalid-argument-type]
