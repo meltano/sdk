@@ -478,6 +478,35 @@ def test_clone_and_alias_transforms(
     )
 
 
+@pytest.mark.parametrize(
+    "alias_expr,map_config,expected_alias",
+    [
+        pytest.param(
+            "config['prefix'] + __stream_name__",
+            {"prefix": "test_"},
+            "test_repositories",
+            id="alias_config_access",
+        ),
+        pytest.param(
+            "md5(__stream_name__)",
+            {},
+            md5("repositories"),
+            id="alias_md5_function",
+        ),
+    ],
+)
+def test_alias_expression(alias_expr, map_config, expected_alias):
+    logger = logging.getLogger()
+    mapper = PluginMapper(
+        plugin_config={
+            "stream_maps": {"repositories": {"__alias__": alias_expr}},
+            "stream_map_config": map_config,
+        },
+        logger=logger,
+    )
+    assert mapper._eval_stream(alias_expr, "repositories") == expected_alias
+
+
 def test_filter_transforms(
     sample_stream,
     sample_catalog_obj,
