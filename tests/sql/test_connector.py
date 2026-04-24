@@ -8,7 +8,6 @@ from unittest import mock
 
 import pytest
 import sqlalchemy
-import sqlalchemy.engine
 import sqlalchemy.exc
 import sqlalchemy.schema
 import sqlalchemy.types
@@ -641,18 +640,14 @@ def test_fully_qualified_name():
 
 
 def test_fully_qualified_name_with_quoting():
-    class QuotedFullyQualifiedName(FullyQualifiedName):
-        def __init__(self, *, dialect: sqlalchemy.engine.Dialect, **kwargs: t.Any):
-            self.dialect = dialect
-            super().__init__(**kwargs)
-
-        def prepare_part(self, part: str) -> str:
-            return self.dialect.identifier_preparer.quote(part)
-
     dialect = DefaultDialect()
-
-    fqn = QuotedFullyQualifiedName(table="order", schema="public", dialect=dialect)
+    fqn = FullyQualifiedName(table="order", schema="public", dialect=dialect)
     assert fqn == 'public."order"'
+
+
+def test_fully_qualified_name_without_quoting():
+    fqn = FullyQualifiedName(table="order", schema="public", dialect=None)
+    assert fqn == "public.order"
 
 
 def test_fully_qualified_name_empty_error():

@@ -39,9 +39,9 @@ license-files = [ "LICENSE" ]
 requires-python = ">=3.10"
 dependencies = [
     {%- if extras %}
-    "singer-sdk[{{ extras|join(',') }}]~=0.53.6",
+    "singer-sdk[{{ extras|join(',') }}]~=0.53.7",
     {%- else %}
-    "singer-sdk~=0.53.6",
+    "singer-sdk~=0.53.7",
     {%- endif %}
     {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
     "requests~=2.33.0",
@@ -137,6 +137,11 @@ select = ["ALL"]
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+  "S101",  # assert is used by pytest
+]
+
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
@@ -157,6 +162,7 @@ env_list = [
 description = "run tests on Python {env_name}"
 runner = "uv-venv-lock-runner"
 pass_env = [
+    "CI",
     {%- if cookiecutter.include_ci_files == "GitHub" %}
     "GITHUB_*",
     {%- endif %}

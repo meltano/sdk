@@ -12,15 +12,15 @@ Starting from version `0.45.0`, the Meltano Singer SDK supports different messag
 
 For example, to use a message writer or reader based on the [msgspec](https://github.com/jcrist/msgspec/) serialization library, first specify the `msgspec` extra for the `singer-sdk` dependency:
 
-````{tab} Poetry
-```console
-$ poetry add singer-sdk --extras msgspec
-```
-````
-
 ````{tab} uv
 ```console
 $ uv add singer-sdk --extra msgspec
+```
+````
+
+````{tab} Poetry
+```console
+$ poetry add singer-sdk --extras msgspec
 ```
 ````
 
@@ -50,26 +50,19 @@ We've had success using [`viztracer`](https://github.com/gaogaotiantian/viztrace
 
 You can start doing the same in your package. Start by installing `viztracer`.
 
-````{tab} Poetry
-```console
-$ poetry add --group dev viztracer
-```
-````
-
 ````{tab} uv
 ```console
 $ uv add --group dev viztracer
 ```
 ````
 
-Then simply run your package's CLI as normal, preceded by the `viztracer` command
-
 ````{tab} Poetry
 ```console
-$ poetry run viztracer my-tap
-$ poetry run viztracer -- my-target --config=config.json --input=messages.json
+$ poetry add --group dev viztracer
 ```
 ````
+
+Then simply run your package's CLI as normal, preceded by the `viztracer` command
 
 ````{tab} uv
 ```console
@@ -78,17 +71,24 @@ $ uv run viztracer -- my-target --config=config.json --input=messages.json
 ```
 ````
 
-That command will produce a `result.json` file which you can explore with the `vizviewer` tool.
-
 ````{tab} Poetry
 ```console
-$ poetry run vizviewer result.json
+$ poetry run viztracer my-tap
+$ poetry run viztracer -- my-target --config=config.json --input=messages.json
 ```
 ````
+
+That command will produce a `result.json` file which you can explore with the `vizviewer` tool.
 
 ````{tab} uv
 ```console
 $ uv run vizviewer result.json
+```
+````
+
+````{tab} Poetry
+```console
+$ poetry run vizviewer result.json
 ```
 ````
 

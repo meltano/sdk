@@ -714,6 +714,27 @@ class TestOpenAPISchemaNormalization:
                             },
                         },
                     },
+                    "NullableOneOf": {
+                        "oneOf": [
+                            {"type": "string", "format": "date-time"},
+                            {"type": "null"},
+                        ],
+                    },
+                    "NullableOneOfNullFirst": {
+                        "oneOf": [
+                            {"type": "null"},
+                            {"type": "integer"},
+                        ],
+                    },
+                    "NullableOneOfObject": {
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "properties": {"id": {"type": "string"}},
+                            },
+                            {"type": "null"},
+                        ],
+                    },
                     "MultipleOneOf": {
                         "oneOf": [
                             {"type": "object", "properties": {"x": {"type": "string"}}},
@@ -806,6 +827,41 @@ class TestOpenAPISchemaNormalization:
         normalized = source.preprocess_schema(schema)
         assert "oneOf" not in normalized["properties"]["value"]
         assert normalized["properties"]["value"]["type"] == ["integer", "null"]
+
+    @pytest.mark.parametrize(
+        "schema_name, expected",
+        [
+            pytest.param(
+                "NullableOneOf",
+                {"type": ["string", "null"], "format": "date-time"},
+                id="rich-schema-then-null",
+            ),
+            pytest.param(
+                "NullableOneOfNullFirst",
+                {"type": ["integer", "null"]},
+                id="null-then-rich-schema",
+            ),
+            pytest.param(
+                "NullableOneOfObject",
+                {
+                    "type": ["object", "null"],
+                    "properties": {"id": {"type": ["string", "null"]}},
+                },
+                id="object-schema-then-null",
+            ),
+        ],
+    )
+    def test_normalize_two_element_one_of_with_null(
+        self,
+        source: OpenAPISchema,
+        schema_name: str,
+        expected: dict[str, t.Any],
+    ):
+        """Test that oneOf [<schema>, {"type": "null"}] is unwrapped and made nullable."""  # noqa: E501
+        schema = source.get_schema(schema_name)
+        normalized = source.preprocess_schema(schema)
+        assert "oneOf" not in normalized
+        assert normalized == expected
 
     def test_normalize_one_of_recursive(self, source: OpenAPISchema):
         """Test that oneOf are recursively normalized to nullable object members."""
