@@ -67,7 +67,6 @@ from singer_sdk.helpers._typing import (
 )
 
 if t.TYPE_CHECKING:
-    import sqlalchemy.types
     from jsonschema import ValidationError
     from jsonschema.protocols import Validator
 
