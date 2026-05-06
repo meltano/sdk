@@ -29,6 +29,11 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import assert_never
 
+if sys.version_info >= (3, 11):
+    from typing import Self  # noqa: ICN003
+else:
+    from typing_extensions import Self
+
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
 else:
@@ -74,6 +79,7 @@ class SchemaPreprocessor(t.Protocol):
         Returns:
             The preprocessed schema.
         """
+        ...
 
 
 class SchemaSource(ABC, t.Generic[_TKey]):
@@ -186,7 +192,7 @@ class StreamSchema(t.Generic[_TKey]):
 
     def __init__(
         self,
-        schema_source: SchemaSource[_TKey],
+        schema_source: SchemaSource[_TKey] | None = None,
         *,
         key: _TKey | None = None,
     ) -> None:
@@ -200,18 +206,37 @@ class StreamSchema(t.Generic[_TKey]):
         self.schema_source = schema_source
         self.key = key
 
+    @t.overload
+    def __get__(self, obj: None, objtype: type[Stream] | None = ...) -> Self: ...
+    @t.overload
+    def __get__(self, obj: Stream, objtype: type[Stream] | None = ...) -> Schema: ...
     @t.final
-    def __get__(self, obj: Stream, objtype: type[Stream]) -> Schema:
+    def __get__(
+        self,
+        obj: Stream | None,
+        objtype: type[Stream] | None = None,
+    ) -> Schema | Self:
         """Get the schema from the schema source.
 
         Args:
-            obj: The object to get the schema from.
-            objtype: The type of the object to get the schema from.
+            obj: The stream instance, or ``None`` when accessed from the class.
+            objtype: The stream class.
 
         Returns:
-            A JSON schema dictionary.
+            A JSON schema dictionary, or the descriptor itself for class-level access.
         """
-        return self.get_stream_schema(obj, objtype)
+        if obj is None:
+            return self
+        return self.get_stream_schema(obj, objtype or type(obj))
+
+    def __set__(self, obj: Stream, _value: object) -> None:
+        """Raise AttributeError; schema is read-only on instances.
+
+        Raises:
+            AttributeError: Always.
+        """
+        msg = f"'schema' is read-only on {type(obj).__name__}"
+        raise AttributeError(msg)
 
     def get_stream_schema(
         self,
@@ -226,11 +251,58 @@ class StreamSchema(t.Generic[_TKey]):
 
         Returns:
             A JSON schema dictionary.
+
+        Raises:
+            DiscoveryError: If no schema source is configured and this method is not
+                overridden.
         """
+        if self.schema_source is None:
+            msg = (
+                f"No schema source configured for {type(self).__name__!r}; "
+                "either pass a schema_source or override get_stream_schema()."
+            )
+            raise DiscoveryError(msg)
         return self.schema_source.get_schema(
             self.key or stream.name,  # type: ignore[arg-type]  # ty:ignore[invalid-argument-type]
             key_properties=stream.primary_keys,
         )
+
+
+class _InstanceSchemaDescriptor(StreamSchema[str]):
+    """Fallback descriptor placed on the base ``Stream`` class.
+
+    When no class-level ``schema`` is declared on a stream subclass, this
+    descriptor is found in the MRO and forwards the attribute access to the
+    instance's ``_schema`` attribute (set by ``Stream.__init__`` or by the
+    catalog-loading path).
+    """
+
+    def __init__(self) -> None:
+        """Initialize with no schema source."""
+        super().__init__()
+
+    @override
+    def get_stream_schema(
+        self,
+        stream: _TStream,
+        stream_class: type[_TStream],
+    ) -> Schema:
+        """Return the schema stored on the stream instance.
+
+        Args:
+            stream: The stream instance.
+            stream_class: The stream class (unused).
+
+        Returns:
+            The JSON schema dictionary.
+
+        Raises:
+            DiscoveryError: If no schema has been set on the instance.
+        """
+        if stream._schema is None:  # noqa: SLF001
+            msg = f"The schema for stream '{stream.name}' was not provided"
+            raise DiscoveryError(msg)
+        return stream._schema  # noqa: SLF001
 
 
 def _load_yaml(content: bytes) -> dict[str, t.Any]:

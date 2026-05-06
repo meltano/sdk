@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import abc
 import typing as t
-from functools import cached_property
 
 import sqlalchemy as sa
 
@@ -28,8 +27,6 @@ class SQLStream(Stream, abc.ABC):
     """Base class for SQLAlchemy-based streams."""
 
     connector_class = SQLConnector
-    _cached_schema: dict | None = None
-
     supports_nulls_first: bool = False
     """Whether the database supports the NULLS FIRST/LAST syntax."""
 
@@ -53,7 +50,7 @@ class SQLStream(Stream, abc.ABC):
         self.catalog_entry = catalog_entry
         super().__init__(
             tap=tap,
-            schema=self.schema,
+            schema=CatalogEntry.from_dict(catalog_entry).schema,
             name=self.tap_stream_id,
         )
 
@@ -85,17 +82,6 @@ class SQLStream(Stream, abc.ABC):
             Metadata object as specified in the Singer spec.
         """
         return self._singer_catalog_entry.metadata
-
-    @cached_property
-    def schema(self) -> dict:
-        """Return metadata object (dict) as specified in the Singer spec.
-
-        Metadata from an input catalog will override standard metadata.
-
-        Returns:
-            The schema object.
-        """
-        return self._singer_catalog_entry.schema.to_dict()
 
     @property
     def tap_stream_id(self) -> str:
