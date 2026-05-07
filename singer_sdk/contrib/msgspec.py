@@ -48,7 +48,7 @@ decoder = msgspec.json.Decoder(dec_hook=dec_hook, float_hook=decimal.Decimal)
 _jsonl_msg_buffer = bytearray(64)
 
 
-def serialize_jsonl(obj: object, **kwargs: t.Any) -> bytes:  # noqa: ARG001
+def serialize_jsonl(obj: object, **kwargs: t.Any) -> bytearray:  # noqa: ARG001
     """Serialize a dictionary into a line of jsonl.
 
     Args:
@@ -60,7 +60,7 @@ def serialize_jsonl(obj: object, **kwargs: t.Any) -> bytes:  # noqa: ARG001
     """
     encoder.encode_into(obj, _jsonl_msg_buffer)
     _jsonl_msg_buffer.extend(b"\n")
-    return _jsonl_msg_buffer  # ty: ignore[invalid-return-type]
+    return _jsonl_msg_buffer
 
 
 class MsgSpecReader(GenericSingerReader[str]):
@@ -88,10 +88,10 @@ class MsgSpecReader(GenericSingerReader[str]):
             raise InvalidInputLine(msg) from exc
 
 
-class MsgSpecWriter(GenericSingerWriter[bytes, Message]):
+class MsgSpecWriter(GenericSingerWriter[bytearray, Message]):
     """Interface for all plugins writing Singer messages to stdout."""
 
-    def serialize_message(self, message: Message) -> bytes:  # noqa: PLR6301
+    def serialize_message(self, message: Message) -> bytearray:  # noqa: PLR6301
         """Serialize a dictionary into a line of json.
 
         Args:
