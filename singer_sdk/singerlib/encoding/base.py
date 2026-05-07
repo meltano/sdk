@@ -21,7 +21,9 @@ logger = logging.getLogger(__name__)
 
 # TODO: Use to default to 'str' here
 # https://peps.python.org/pep-0696/
-T = t.TypeVar("T", str, bytes)
+_WT = t.TypeVar("_WT", str, bytes, bytearray)
+# IO[T] requires AnyStr (str | bytes); bytearray is only valid for writers
+_RT = t.TypeVar("_RT", str, bytes)
 M = t.TypeVar("M")
 
 
@@ -35,17 +37,17 @@ class SingerMessageType(str, enum.Enum):
     BATCH = "BATCH"
 
 
-class GenericSingerReader(abc.ABC, t.Generic[T]):
+class GenericSingerReader(abc.ABC, t.Generic[_RT]):
     """Interface for all plugins reading Singer messages as strings or bytes."""
 
     def __init__(self) -> None:
         """Initialize the reader."""
         super().__init__()
-        self._current_message: T | None = None
+        self._current_message: _RT | None = None
 
     def process_lines(
         self,
-        file_input: t.IO[T] | None,
+        file_input: t.IO[_RT] | None,
         callbacks: dict[str, t.Callable[[dict], None]],
     ) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
@@ -77,7 +79,7 @@ class GenericSingerReader(abc.ABC, t.Generic[T]):
 
     @property
     @abc.abstractmethod
-    def default_input(self) -> t.IO[T]:
+    def default_input(self) -> t.IO[_RT]:
         """Default input stream for the reader."""
 
     @staticmethod
@@ -97,7 +99,7 @@ class GenericSingerReader(abc.ABC, t.Generic[T]):
             raise exceptions.InvalidInputLine(msg)
 
     @abc.abstractmethod
-    def deserialize_json(self, line: T) -> dict:
+    def deserialize_json(self, line: _RT) -> dict:
         """Deserialize a line of json."""
 
     def _process_unknown_message(self, message_dict: dict) -> None:  # noqa: PLR6301
@@ -114,10 +116,10 @@ class GenericSingerReader(abc.ABC, t.Generic[T]):
         raise ValueError(msg)
 
 
-class GenericSingerWriter(abc.ABC, t.Generic[T, M]):
+class GenericSingerWriter(abc.ABC, t.Generic[_WT, M]):
     """Interface for all plugins writing Singer messages as strings or bytes."""
 
-    def format_message(self, message: M) -> T:
+    def format_message(self, message: M) -> _WT:
         """Format a message as a JSON string.
 
         Args:
@@ -129,7 +131,7 @@ class GenericSingerWriter(abc.ABC, t.Generic[T, M]):
         return self.serialize_message(message)
 
     @abc.abstractmethod
-    def serialize_message(self, message: M) -> T:
+    def serialize_message(self, message: M) -> _WT:
         """Serialize a message into a line of json."""
 
     @abc.abstractmethod
