@@ -14,7 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#3612](https://github.com/meltano/sdk/issues/3612) Automatically quote fully-qualified table names based on the corresponding database dialect
 - [#3607](https://github.com/meltano/sdk/issues/3607) Allow customization of replication value comparisons for advancing state bookmark beyond the default "greater than or equal" check
 - [#3594](https://github.com/meltano/sdk/issues/3594) Use `mdformat` in tap, target and mapper templates to format markdown files
-- Run zizmor with the default persona (non-pedantic)
 - [#3582](https://github.com/meltano/sdk/issues/3582) Run zizmor to harden GitHub Action workflows in tap, target and mapper templates
 - [#3569](https://github.com/meltano/sdk/issues/3569) Normalize individual members in `anyOf` members in OpenAPI specs
 - [#3568](https://github.com/meltano/sdk/issues/3568) Normalize individual members in `oneOf` members in OpenAPI specs
@@ -32,9 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#3611](https://github.com/meltano/sdk/issues/3611) Force streams with custom state partitioning keys to be non-resumable
 - [#3605](https://github.com/meltano/sdk/issues/3605) Remove extremely noisy debug logging from expression evaluation
-- Ignore Ruff `assert` (`S101`) rule in tests
 - [#3595](https://github.com/meltano/sdk/issues/3595) Support `simpleeval` 1.0.5+ by subclassing `simpleeval.EvalWithCompoundTypes`
-- Update template dependencies
 - [#3580](https://github.com/meltano/sdk/issues/3580) Use `requests~=2.33.0` in tap and target templates
 - [#3578](https://github.com/meltano/sdk/issues/3578) Align tap, target and mapper pyproject configurations
 - [#3577](https://github.com/meltano/sdk/issues/3577) Make tap, target and mapper GitHub workflows consistent
@@ -48,7 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#3535](https://github.com/meltano/sdk/issues/3535) Emit a warning when running on a (near) EOL Python
 - [#3534](https://github.com/meltano/sdk/issues/3534) Update SQL tap and target templates to reflect module reorganization
 - [#3530](https://github.com/meltano/sdk/issues/3530) The `BasicAuthenticator` class is no longer deprecated
-- Update internal `meltano.yml` files
 - [#3515](https://github.com/meltano/sdk/issues/3515) Remove `.secrets` directory and instead ignore any `config.json` file at the root
 - [#3514](https://github.com/meltano/sdk/issues/3514) Remove references to legacy `user_agent` setting
 - [#3504](https://github.com/meltano/sdk/issues/3504) Update templates
