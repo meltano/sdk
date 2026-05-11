@@ -673,7 +673,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         limit = 1000
         snippet = f"{content[:limit]}..." if len(content) > limit else content
         self.logger.error(
-            "Failed OAuth login with status code %d, response was '%s'",
+            "Failed OAuth login with status code %s, response was '%s'",
             status_code or "Unknown",
             snippet,
         )
