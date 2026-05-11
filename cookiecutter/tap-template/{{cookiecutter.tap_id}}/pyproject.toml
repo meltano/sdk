@@ -39,9 +39,9 @@ license-files = [ "LICENSE" ]
 requires-python = ">=3.10"
 dependencies = [
     {%- if extras %}
-    "singer-sdk[{{ extras|join(',') }}]~=0.53.7",
+    "singer-sdk[{{ extras|join(',') }}]~=0.54.0",
     {%- else %}
-    "singer-sdk~=0.53.7",
+    "singer-sdk~=0.54.0",
     {%- endif %}
     {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
     "requests~=2.33.0",

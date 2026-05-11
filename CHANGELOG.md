@@ -5,6 +5,114 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.54.0 (2026-05-11)
+
+### ✨ New
+
+- [#3618](https://github.com/meltano/sdk/issues/3618) New `RESTStream.get_http_request` method to construct the HTTP request for a stream
+- [#3613](https://github.com/meltano/sdk/issues/3613) Normalize two-element `oneOf` schema members where one of them is the null type, into a single nullable schema
+- [#3612](https://github.com/meltano/sdk/issues/3612) Automatically quote fully-qualified table names based on the corresponding database dialect
+- [#3607](https://github.com/meltano/sdk/issues/3607) Allow customization of replication value comparisons for advancing state bookmark beyond the default "greater than or equal" check
+- [#3594](https://github.com/meltano/sdk/issues/3594) Use `mdformat` in tap, target and mapper templates to format markdown files
+- Run zizmor with the default persona (non pedantic)
+- [#3582](https://github.com/meltano/sdk/issues/3582) Run zizmor to harden GitHub Action workflows in tap, target and mapper templates
+- [#3569](https://github.com/meltano/sdk/issues/3569) Normalize individual members in `anyOf` members in OpenAPI specs
+- [#3568](https://github.com/meltano/sdk/issues/3568) Normalize individual members in `oneOf` members in OpenAPI specs
+- [#3555](https://github.com/meltano/sdk/issues/3555) OpenAPI schema normalization now drops `pattern` keys to avoid issues in downstream consumers where they might not be able to parse the regex pattern
+- [#3513](https://github.com/meltano/sdk/issues/3513) Use dynamic versioning in tap, target and mapper templates
+- [#3510](https://github.com/meltano/sdk/issues/3510) Deprecate `BasePageNumberPaginator` and `BaseOffsetPaginator` in favor of `PageNumberPaginator` and `OffsetPaginator`, respectively
+- [#3500](https://github.com/meltano/sdk/issues/3500) Use `singer-sdk/<version>` as the default User-Agent header
+- [#3373](https://github.com/meltano/sdk/issues/3373) Support arbitrary properties for `x-sql-datatype` in `x-sql-datatype-properties`
+- [#3435](https://github.com/meltano/sdk/issues/3435) Automatic retries of OAuth token requests
+- [#3407](https://github.com/meltano/sdk/issues/3407) Set `Stream.replication_key` in metadata as the default replication key
+- [#3415](https://github.com/meltano/sdk/issues/3415) Add `flattening_separator` as an additional flattening config -- _**Thanks @iamlorax!**_
+- [#3399](https://github.com/meltano/sdk/issues/3399) Add AGENTS.md/CLAUDE.md to templates
+
+### 🐛 Fixes
+
+- [#3611](https://github.com/meltano/sdk/issues/3611) Force streams with custom state partitioning keys to be non-resumable
+- [#3605](https://github.com/meltano/sdk/issues/3605) Remove extremely noisy debug logging from expression evaluation
+- Ignore Ruff `assert` (`S101`) rule in tests
+- [#3595](https://github.com/meltano/sdk/issues/3595) Support `simpleeval` 1.0.5+ by subclassing `simpleeval.EvalWithCompoundTypes`
+- Update template dependencies
+- [#3580](https://github.com/meltano/sdk/issues/3580) Use `requests~=2.33.0` in tap and target templates
+- [#3578](https://github.com/meltano/sdk/issues/3578) Align tap, target and mapper pyproject configurations
+- [#3577](https://github.com/meltano/sdk/issues/3577) Make tap, target and mapper GitHub workflows consistent
+- [#3576](https://github.com/meltano/sdk/issues/3576) Match default settings to selected authentication method
+- [#3573](https://github.com/meltano/sdk/issues/3573) Use `strict = true` in pytest config
+- [#3560](https://github.com/meltano/sdk/issues/3560) Stream maps expressions referencing modules broken
+- [#3558](https://github.com/meltano/sdk/issues/3558) Use only `astral-sh/setup-uv` in GitHub workflows
+- [#3556](https://github.com/meltano/sdk/issues/3556) Ensure parent stream records are emitted in auto-generated tap tests
+- [#3557](https://github.com/meltano/sdk/issues/3557) Configure package version in templates to be dynamic
+- [#3553](https://github.com/meltano/sdk/issues/3553) Resolve `$ref`s in `additionalProperties`
+- [#3535](https://github.com/meltano/sdk/issues/3535) Emit a warning when running on a (near) EOL Python
+- [#3534](https://github.com/meltano/sdk/issues/3534) Update SQL tap and target templates to reflect module reorganization
+- [#3530](https://github.com/meltano/sdk/issues/3530) The `BasicAuthenticator` class is no longer deprecated
+- Update internal `meltano.yml` files
+- [#3515](https://github.com/meltano/sdk/issues/3515) Remove `.secrets` directory and instead ignore any `config.json` file at the root
+- [#3514](https://github.com/meltano/sdk/issues/3514) Remove references to legacy `user_agent` setting
+- [#3504](https://github.com/meltano/sdk/issues/3504) Update templates
+- [#3512](https://github.com/meltano/sdk/issues/3512) Remove legacy license classifier from project metadata (made redundant by PEP 639 metadata)
+- [#3508](https://github.com/meltano/sdk/issues/3508) Correctly load private key with passphrase in JWT-based authenticator
+- [#3503](https://github.com/meltano/sdk/issues/3503) Remove `# noqa: ERA001` comments from templates
+- [#3480](https://github.com/meltano/sdk/issues/3480) Update templates
+- [#3474](https://github.com/meltano/sdk/issues/3474) Update templates
+- [#3465](https://github.com/meltano/sdk/issues/3465) Treat `sqlalchemy.types.Float` and `sqlalchemy.types.Numeric` as distinct types when mapping them to JSON schema in preparation for SQLAlchemy 2.1
+- [#3462](https://github.com/meltano/sdk/issues/3462) Uncap optional `s3fs` dependency to prevent it from going stale
+- [#3461](https://github.com/meltano/sdk/issues/3461) Require Tox 4.32+ in templates
+- [#3460](https://github.com/meltano/sdk/issues/3460) Add agent instruction to keep project settings in sync with `meltano.yml`
+- [#3424](https://github.com/meltano/sdk/issues/3424) Make the `context` parameter of `Stream.get_replication_key_signpost()` optional and default to `None`
+- [#3443](https://github.com/meltano/sdk/issues/3443) Use a more strict configuration for pytest and mypy in templates
+
+### ⚙️ Under the Hood
+
+- [#3624](https://github.com/meltano/sdk/issues/3624) Update types to match new inline type annotations in Requests
+- [#3622](https://github.com/meltano/sdk/issues/3622) Split type parameters for Singer reader and writer protocols
+- [#3610](https://github.com/meltano/sdk/issues/3610) Handle state increment logic for state partitioning keys in state manager helper
+- [#3589](https://github.com/meltano/sdk/issues/3589) Import `DatetimeErrorTreatmentEnum` from `singer_sdk.helpers.conform`
+- [#3587](https://github.com/meltano/sdk/issues/3587) Import `TypeConformanceLevel` from `singer_sdk.helpers.conform`
+- [#3581](https://github.com/meltano/sdk/issues/3581) Use `dict(...)` to copy the default functions supported in stream maps
+- [#3575](https://github.com/meltano/sdk/issues/3575) Rename `IgnorableSyncError` -> `SkippableSyncError`
+- [#3541](https://github.com/meltano/sdk/issues/3541) Documented removals slated for v0.57
+- [#3540](https://github.com/meltano/sdk/issues/3540) Remove unused `Stream.reset_state_progress_markers` method
+- [#3539](https://github.com/meltano/sdk/issues/3539) Use the `@warnings.deprecated` decorator directly
+- [#3538](https://github.com/meltano/sdk/issues/3538) Use only up to the month part of the EOL dates
+- [#3536](https://github.com/meltano/sdk/issues/3536) Documented removals slated for v0.56 and updated warning messages
+- [#3529](https://github.com/meltano/sdk/issues/3529) Removed the `PluginBase.config_from_cli_args` method, which has not been used for a while
+- [#3528](https://github.com/meltano/sdk/issues/3528) Moved `DatetimeErrorTreatmentEnum` and `TypeConformanceLevel` from private `singer_sdk.helpers._typing` to a public `singer_sdk.helpers.conforming` module
+- [#3527](https://github.com/meltano/sdk/issues/3527) Avoid redundant instance `datetime.datetime` check
+- [#3518](https://github.com/meltano/sdk/issues/3518) Consolidate exception definitions into the `singer_sdk.exceptions` module
+- [#3516](https://github.com/meltano/sdk/issues/3516) Formalize our exception hierarchy
+- [#3507](https://github.com/meltano/sdk/issues/3507) Updated type annotation for `Stream.state_partitioning_keys` to allow a tuple of strings
+- [#3502](https://github.com/meltano/sdk/issues/3502) Update `RESTStream.get_url_params` return type annotation to only support dictionaries
+- [#3498](https://github.com/meltano/sdk/issues/3498) Set default `User-Agent` even if user overrides `http_headers`
+- [#3497](https://github.com/meltano/sdk/issues/3497) Fixed the type annotation for the `refs` attribute of the `singer_sdk.singerlib.resolve_schema_references` function
+- [#3467](https://github.com/meltano/sdk/issues/3467) Added default type of `Any` to `RESTStream` type parameter
+- [#3377](https://github.com/meltano/sdk/issues/3377) Move stream state manipulation into a state management class
+- [#3429](https://github.com/meltano/sdk/issues/3429) Enable Ruff `FURB` rules
+- [#3441](https://github.com/meltano/sdk/issues/3441) Move `plugin_cli` implementation to private module `singer_sdk.cli._decorator`
+
+### 📚 Documentation Improvements
+
+- [#3593](https://github.com/meltano/sdk/issues/3593) When both uv and Poetry commands or configs are displayed in tabs, make the uv version the default
+- [#3572](https://github.com/meltano/sdk/issues/3572) Remove redundant usage of `typing.ClassVar` in examples
+- [#3544](https://github.com/meltano/sdk/issues/3544) Documented removals slated for v0.58
+- [#3543](https://github.com/meltano/sdk/issues/3543) Documented pending deprecations
+- [#3537](https://github.com/meltano/sdk/issues/3537) Documented removals slated for v0.54
+- [#3533](https://github.com/meltano/sdk/issues/3533) Added `NumberType` to reference index page
+- [#3531](https://github.com/meltano/sdk/issues/3531) Avoid documenting deprecated authenticator method `create_for_stream`
+- [#3525](https://github.com/meltano/sdk/issues/3525) Sort `Returns`, `Yields` and `Raises` sections in docstrings in a consistent way
+- [#3501](https://github.com/meltano/sdk/issues/3501) Fix links from porting and parent-child guide to API reference
+- [#3482](https://github.com/meltano/sdk/issues/3482) Format Python code blocks in Markdown files with native Ruff support
+- [#3457](https://github.com/meltano/sdk/issues/3457) Align function names in SQL target example
+- [#3452](https://github.com/meltano/sdk/issues/3452) Use Sphinx 9.1 to build docs
+- [#3451](https://github.com/meltano/sdk/issues/3451) Configure docs to build with Python 3.14 explicitly
+- [#3448](https://github.com/meltano/sdk/issues/3448) Fix typos in parent-child streams -- _**Thanks @ralichkov!**_
+
+### 📦 Packaging changes
+
+- [#3463](https://github.com/meltano/sdk/issues/3463) Uncap `hatchling` build dependency
+
 ## v0.53.7 (2026-04-15)
 
 ### 🐛 Fixes
