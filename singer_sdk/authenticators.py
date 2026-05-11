@@ -637,11 +637,16 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         try:
             token_response.raise_for_status()
         except requests.HTTPError as ex:
-            self.handle_error(
-                content=ex.response.text,
-                status_code=ex.response.status_code,
+            text, status_code = (
+                (ex.response.text, ex.response.status_code)
+                if ex.response is not None
+                else ("Error", None)
             )
-            msg = f"Failed to update access token (status={ex.response.status_code})"
+            self.handle_error(
+                content=text,
+                status_code=status_code,
+            )
+            msg = f"Failed to update access token (status={status_code or 'Unknown'})"
             raise RuntimeError(msg) from ex
 
         self.logger.debug("OAuth authorization attempt was successful")
@@ -658,7 +663,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             )
         self.last_refreshed = request_time
 
-    def handle_error(self, *, content: str, status_code: int) -> None:
+    def handle_error(self, *, content: str, status_code: int | None) -> None:
         """Handle an OAuth error.
 
         Args:
@@ -668,8 +673,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         limit = 1000
         snippet = f"{content[:limit]}..." if len(content) > limit else content
         self.logger.error(
-            "Failed OAuth login with status code %d, response was '%s'",
-            status_code,
+            "Failed OAuth login with status code %s, response was '%s'",
+            status_code or "Unknown",
             snippet,
         )
 
