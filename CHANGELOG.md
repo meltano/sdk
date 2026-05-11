@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#3612](https://github.com/meltano/sdk/issues/3612) Automatically quote fully-qualified table names based on the corresponding database dialect
 - [#3607](https://github.com/meltano/sdk/issues/3607) Allow customization of replication value comparisons for advancing state bookmark beyond the default "greater than or equal" check
 - [#3594](https://github.com/meltano/sdk/issues/3594) Use `mdformat` in tap, target and mapper templates to format markdown files
-- Run zizmor with the default persona (non pedantic)
+- Run zizmor with the default persona (non-pedantic)
 - [#3582](https://github.com/meltano/sdk/issues/3582) Run zizmor to harden GitHub Action workflows in tap, target and mapper templates
 - [#3569](https://github.com/meltano/sdk/issues/3569) Normalize individual members in `anyOf` members in OpenAPI specs
 - [#3568](https://github.com/meltano/sdk/issues/3568) Normalize individual members in `oneOf` members in OpenAPI specs
