@@ -62,11 +62,11 @@ class DummyJSONStream(RESTStream):
     def get_http_request(
         self,
         *,
-        context: PageContext[int],
+        page: PageContext[int],
     ) -> HTTPRequest:
-        request = super().get_http_request(context=context)
+        request = super().get_http_request(page=page)
         request.params.update({
-            "skip": context.next_page_token,
+            "skip": page.next_page_token,
             "limit": PAGE_SIZE,
         })
         return request

@@ -188,18 +188,18 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return super().get_new_paginator()
 
     @override
-    def get_http_request(self, *, context: PageContext[Any]) -> HTTPRequest:
+    def get_http_request(self, *, page: PageContext[Any]) -> HTTPRequest:
         """Return a request object for this stream.
 
         Args:
-            context: An object containing the stream partition or context dictionary,
+            page: An object containing the stream partition or context dictionary,
                 and the next page token if applicable.
 
         Returns:
             An HTTP request for this stream.
         """
-        request = super().get_http_request(context=context)
-        request.params["page"] = context.next_page_token
+        request = super().get_http_request(page=page)
+        request.params["page"] = page.next_page_token
 
         if self.replication_key:
             request.params["sort"] = "asc"

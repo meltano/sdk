@@ -71,12 +71,12 @@ class GitlabStream(RESTStream[str]):
     def get_http_request(
         self,
         *,
-        context: PageContext[str | None],
+        page: PageContext[str | None],
     ) -> HTTPRequest:
         """Get the HTTP request for the given context."""
-        request = super().get_http_request(context=context)
-        if context.next_page_token:
-            request.params["page"] = context.next_page_token
+        request = super().get_http_request(page=page)
+        if page.next_page_token:
+            request.params["page"] = page.next_page_token
         if self.replication_key:
             request.params["sort"] = "asc"
             request.params["order_by"] = self.replication_key
@@ -232,11 +232,11 @@ class EpicIssuesStream(GitlabStream):
     def get_http_request(
         self,
         *,
-        context: PageContext[str | None],
+        page: PageContext[str | None],
     ) -> HTTPRequest:
         """Get the HTTP request for the given context."""
-        request = super().get_http_request(context=context)
-        if not context.stream_context or "epic_id" not in context.stream_context:
+        request = super().get_http_request(page=page)
+        if not page.stream_context or "epic_id" not in page.stream_context:
             msg = "Cannot sync epic issues without already known epic IDs."
             raise ValueError(msg)
         return request

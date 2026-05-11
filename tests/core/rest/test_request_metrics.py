@@ -34,9 +34,9 @@ class _BaseTestStream(RESTStream):
     def get_http_request(
         self,
         *,
-        context: PageContext[None],
+        page: PageContext[None],
     ) -> HTTPRequest:
-        request = super().get_http_request(context=context)
+        request = super().get_http_request(page=page)
         request.params["user_id"] = 1
         return request
 

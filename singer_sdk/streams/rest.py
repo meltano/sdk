@@ -80,7 +80,7 @@ _ParamsDict: t.TypeAlias = dict[str, t.Any | list[t.Any] | None]
 class HTTPRequest:
     """HTTP request for a stream.
 
-    .. versionadded:: NEXT_VERSION
+    .. versionadded:: 0.54.0
     """
 
     #: The URL of the request.
@@ -138,7 +138,7 @@ class PageContext(t.Generic[_TToken]):
     that :meth:`~RESTStream.get_http_request` has everything it needs to build
     one HTTP request without accessing the paginator directly.
 
-    .. versionadded:: NEXT_VERSION
+    .. versionadded:: 0.54.0
     """
 
     #: The stream partition or context dictionary.
@@ -497,7 +497,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         self.requests_session.auth = self.authenticator
         return self.requests_session.prepare_request(request)
 
-    def get_http_request(self, *, context: PageContext) -> HTTPRequest:
+    def get_http_request(self, *, page: PageContext) -> HTTPRequest:
         """Get an HTTP request for this stream.
 
         Override to customize the URL, headers, parameters or body of the request based
@@ -515,31 +515,31 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         .. code-block:: python
 
            class MyStream(RESTStream):
-               def get_http_request(self, *, context):
-                   request = super().get_http_request(context=context)
-                   request.params["page"] = context.next_page_token
+               def get_http_request(self, *, page):
+                   request = super().get_http_request(page=page)
+                   request.params["page_num"] = page.next_page_token
                    return request
 
         Args:
-            context: An object containing the stream partition or context dictionary,
+            page: An object containing the stream partition or context dictionary,
                 and the next page token if applicable.
 
         Returns:
             An HTTP request for this stream.
 
-        .. versionadded:: NEXT_VERSION
+        .. versionadded:: 0.54.0
         """
         return HTTPRequest(
-            url=self.get_url(context.stream_context),
+            url=self.get_url(page.stream_context),
             method=self.http_method,
             headers=self.http_headers,
             params=self.get_url_params(  # type: ignore[arg-type]
-                context.stream_context,
-                context.next_page_token,
+                page.stream_context,
+                page.next_page_token,
             ),  # ty:ignore[invalid-argument-type]
             data=self.prepare_request_payload(
-                context.stream_context,
-                context.next_page_token,
+                page.stream_context,
+                page.next_page_token,
             ),
         )
 
@@ -590,7 +590,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         page: BaseAPIPaginator,
     ) -> requests.PreparedRequest:
         http_request = self.get_http_request(
-            context=PageContext(
+            page=PageContext(
                 stream_context=context,
                 next_page_token=page.current_value,
             )

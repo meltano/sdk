@@ -405,10 +405,10 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
         def get_http_request(
             self,
             *,
-            context: PageContext[int],
+            page: PageContext[int],
         ) -> HTTPRequest:
-            request = super().get_http_request(context=context)
-            request.params["page"] = context.next_page_token
+            request = super().get_http_request(page=page)
+            request.params["page"] = page.next_page_token
             return request
 
         @override
@@ -483,10 +483,10 @@ def test_continue_if_empty(tap: Tap):
         def get_http_request(
             self,
             *,
-            context: PageContext[int],
+            page: PageContext[int],
         ) -> HTTPRequest:
-            request = super().get_http_request(context=context)
-            request.params["page"] = context.next_page_token
+            request = super().get_http_request(page=page)
+            request.params["page"] = page.next_page_token
             return request
 
         @override
@@ -549,9 +549,9 @@ def test_no_paginator(tap: Tap):
             return None
 
         @override
-        def get_http_request(self, *, context: PageContext[None]) -> HTTPRequest:
-            request = super().get_http_request(context=context)
-            assert context.next_page_token is None
+        def get_http_request(self, *, page: PageContext[None]) -> HTTPRequest:
+            request = super().get_http_request(page=page)
+            assert page.next_page_token is None
             return request
 
         @override
