@@ -131,6 +131,7 @@ jobs:
 
       - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
+          cache-suffix: typing
           python-version: ${{ matrix.python-version }}
           version: ${{ env.UV_VERSION }}
 
@@ -162,6 +163,7 @@ jobs:
 
     - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
       with:
+        cache-suffix: external
         version: ${{ env.UV_VERSION }}
 
     - name: Install Nox
@@ -201,6 +203,7 @@ jobs:
 
     - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
       with:
+        cache-suffix: coverage
         version: ${{ env.UV_VERSION }}
 
     - name: Install Nox
