@@ -44,7 +44,7 @@ dependencies = [
     "singer-sdk~=0.53.7",
     {%- endif %}
     {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
-    "requests~=2.33.0",
+    "requests~=2.34.0",
     {%- endif %}
     {%- if cookiecutter.stream_type == "SQL" %}
     "sqlalchemy~=2.0.36",
@@ -77,8 +77,6 @@ typing = [
     "ty>=0.0.18",
     {%- if cookiecutter.stream_type == "SQL" %}
     "sqlalchemy-stubs",
-    {%- else %}
-    "types-requests",
     {%- endif %}
 ]
 
