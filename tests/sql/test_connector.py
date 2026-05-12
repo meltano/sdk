@@ -640,6 +640,41 @@ class TestDummySQLConnector:
             # One batch fetch for all columns — not one per column.
             assert mock_get_cols.call_count == 1
 
+    def test_prepare_column_creates_when_missing(self, connector: DummySQLConnector):
+        engine = connector._engine
+        meta = sqlalchemy.MetaData()
+        _ = sqlalchemy.Table(
+            "test_table", meta, sqlalchemy.Column("id", sqlalchemy.Integer)
+        )
+        meta.create_all(engine)
+
+        with mock.patch.object(connector, "_create_empty_column") as mock_create:
+            connector.prepare_column("test_table", "new_col", sqlalchemy.String())
+            mock_create.assert_called_once_with(
+                full_table_name="test_table",
+                column_name="new_col",
+                sql_type=mock.ANY,
+            )
+
+    def test_prepare_column_adapts_when_exists(self, connector: DummySQLConnector):
+        engine = connector._engine
+        meta = sqlalchemy.MetaData()
+        _ = sqlalchemy.Table(
+            "test_table",
+            meta,
+            sqlalchemy.Column("id", sqlalchemy.Integer),
+            sqlalchemy.Column("name", sqlalchemy.Integer),
+        )
+        meta.create_all(engine)
+
+        with (
+            mock.patch.object(connector, "_adapt_column_type") as mock_adapt,
+            mock.patch.object(connector, "_create_empty_column") as mock_create,
+        ):
+            connector.prepare_column("test_table", "name", sqlalchemy.String())
+            mock_adapt.assert_called_once()
+            mock_create.assert_not_called()
+
     @pytest.mark.parametrize(
         "exclude_schemas,expected_streams",
         [
