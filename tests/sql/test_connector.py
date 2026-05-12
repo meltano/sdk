@@ -583,6 +583,63 @@ class TestDummySQLConnector:
                 == "ALTER TABLE test_table ALTER COLUMN name TYPE VARCHAR"
             )
 
+    def test_adapt_column_type_skips_lookup_when_current_type_provided(
+        self, connector: DummySQLConnector
+    ):
+        engine = connector._engine
+        meta = sqlalchemy.MetaData()
+        _ = sqlalchemy.Table(
+            "test_table",
+            meta,
+            sqlalchemy.Column("name", sqlalchemy.Integer),
+        )
+        meta.create_all(engine)
+
+        with (
+            mock.patch.object(connector, "_get_column_type") as mock_get_type,
+            mock.patch.object(connector, "_connect"),
+        ):
+            connector._adapt_column_type(
+                "test_table",
+                "name",
+                sqlalchemy.String(),
+                current_type=sqlalchemy.Integer(),
+            )
+            mock_get_type.assert_not_called()
+
+    def test_prepare_table_fetches_columns_once(self):
+        connector = DummySQLConnector(
+            config={"sqlalchemy_url": "sqlite:///", "load_method": "append"},
+        )
+        engine = connector._engine
+        meta = sqlalchemy.MetaData()
+        _ = sqlalchemy.Table(
+            "test_table",
+            meta,
+            sqlalchemy.Column("id", sqlalchemy.Integer),
+            sqlalchemy.Column("name", sqlalchemy.String),
+        )
+        meta.create_all(engine)
+
+        schema = {
+            "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string"},
+                "new_col": {"type": "string"},
+            }
+        }
+
+        with mock.patch.object(
+            connector, "get_table_columns", wraps=connector.get_table_columns
+        ) as mock_get_cols:
+            connector.prepare_table(
+                "test_table",
+                schema=schema,
+                primary_keys=["id"],
+            )
+            # One batch fetch for all columns — not one per column.
+            assert mock_get_cols.call_count == 1
+
     @pytest.mark.parametrize(
         "exclude_schemas,expected_streams",
         [
