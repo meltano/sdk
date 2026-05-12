@@ -39,6 +39,8 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers._flattening import FlatteningOptions
     from singer_sdk.singerlib.catalog import Catalog
 
+FunctionsDict: t.TypeAlias = dict[str, t.Callable | simpleeval.ModuleWrapper]
+
 
 MAPPER_ELSE_OPTION = "__else__"
 MAPPER_FILTER_OPTION = "__filter__"
@@ -46,6 +48,8 @@ MAPPER_SOURCE_OPTION = "__source__"
 MAPPER_ALIAS_OPTION = "__alias__"
 MAPPER_KEY_PROPERTIES_OPTION = "__key_properties__"
 NULL_STRING = "__NULL__"
+
+_UNSET = object()
 
 logger = logging.getLogger(__name__)
 
@@ -348,6 +352,20 @@ class CustomStreamMap(StreamMap):
         self.faker_config = faker_config
         self.stream_name = stream_name
 
+        self.expr_evaluator = _MapperEval(functions=self.functions)
+        self.fake = self._init_faker_instance()
+
+        # Pre-build the static portion of the names dict (entries that never change
+        # across records).  Record-specific entries (_/record/self) are merged in at
+        # eval time.
+        self._static_eval_names: dict[str, t.Any] = {
+            "config": self.map_config,
+            "__stream_name__": self.stream_alias,
+            "__original_stream_name__": self.stream_name,
+        }
+        if self.fake:
+            self._static_eval_names["fake"] = self.fake
+
         self._transform_fn: t.Callable[[dict], dict | None]
         self._filter_fn: t.Callable[[dict], bool]
         (
@@ -355,9 +373,6 @@ class CustomStreamMap(StreamMap):
             self._transform_fn,
             self.transformed_schema,
         ) = self._init_functions_and_schema(stream_map=map_transform)
-        self.expr_evaluator: simpleeval.EvalWithCompoundTypes = _MapperEval(
-            functions=self.functions,
-        )
         self.fake = self._init_faker_instance()
 
     def transform(self, record: dict) -> dict | None:
@@ -384,7 +399,7 @@ class CustomStreamMap(StreamMap):
         return self._filter_fn(record)
 
     @property
-    def functions(self) -> dict[str, t.Callable]:
+    def functions(self) -> FunctionsDict:
         """Get available transformation functions.
 
         Returns:
@@ -398,12 +413,53 @@ class CustomStreamMap(StreamMap):
         funcs["json"] = simpleeval.ModuleWrapper(json)
         return funcs
 
+    def _build_eval_names(self, record: dict) -> dict:
+        """Build the simpleeval names dict for a single record.
+
+        Merges the pre-built static names (config, stream name, faker) with the
+        record fields.  Callers can then set ``names["self"]`` for per-property
+        access before each ``_eval`` call.
+
+        Args:
+            record: The current stream record.
+
+        Returns:
+            Names dict ready to pass to the expression evaluator.
+        """
+        names = dict(self._static_eval_names)
+        names.update(record)
+        names["_"] = record
+        names["record"] = record
+        return names
+
+    def _is_constant_expression(self, parsed_expr: ast.Expr) -> bool:
+        """Return True if the expression does not reference any record variables.
+
+        Expressions that only reference function names (from ``self.functions``) and
+        literal constants can be pre-evaluated once at init time and reused for every
+        record, avoiding repeated simpleeval overhead.
+
+        Args:
+            parsed_expr: Parsed AST node of the expression to check.
+
+        Returns:
+            True if the expression is a compile-time constant.
+        """
+        function_names = self.expr_evaluator.functions.keys()
+        return all(
+            node.id in function_names
+            for node in ast.walk(parsed_expr)
+            if isinstance(node, ast.Name)
+        )
+
     def _eval(
         self,
         expr: str,
         expr_parsed: ast.Expr,
         record: dict,
         property_name: str | None,
+        *,
+        names: dict | None = None,
     ) -> str | int | float:
         """Solve an expression.
 
@@ -412,6 +468,10 @@ class CustomStreamMap(StreamMap):
             expr_parsed: Parsed expression abstract syntax tree.
             record: Individual stream record.
             property_name: Name of property to transform in the record.
+            names: Pre-built names dict.  When provided the caller is responsible for
+                having already populated all record-level entries; only the ``self``
+                key is updated here.  When omitted, a fresh dict is built from the
+                record (useful for one-off calls such as filter expressions).
 
         Returns:
             Evaluated expression.
@@ -419,21 +479,14 @@ class CustomStreamMap(StreamMap):
         Raises:
             MapExpressionError: If the mapping expression failed to evaluate.
         """
-        names = record.copy()  # Start with names from record properties
-        names["_"] = record  # Add a shorthand alias in case of reserved words in names
-        names["record"] = record  # ...and a longhand alias
-        names["config"] = self.map_config  # Allow map config access within transform
-        names["__stream_name__"] = self.stream_alias  # Access stream name in transform
-
-        # Stream name (prior to aliasing, if applicable)
-        names["__original_stream_name__"] = self.stream_name
-
-        if self.fake:
-            names["fake"] = self.fake
+        if names is None:
+            names = self._build_eval_names(record)
 
         if property_name and property_name in record:
             # Allow access to original property value if applicable
             names["self"] = record[property_name]
+        elif "self" in names:
+            del names["self"]
         try:
             self.expr_evaluator.names = names
             result: str | int | float = self.expr_evaluator.eval(
@@ -568,7 +621,10 @@ class CustomStreamMap(StreamMap):
         if "properties" not in transformed_schema:
             transformed_schema["properties"] = {}
 
-        stream_map_parsed: list[tuple[str, str | None, ast.Expr | None]] = []
+        # Each entry: (prop_key, prop_def, parsed_def, cached_value).
+        # cached_value is _UNSET for dynamic expressions, or the pre-computed result
+        # for expressions that don't reference any record variables.
+        stream_map_parsed: list[tuple[str, str | None, ast.Expr | None, t.Any]] = []
         for prop_key, prop_def in list(stream_map.items()):
             if prop_def in {None, NULL_STRING}:
                 if prop_key in (self.transformed_key_properties or []):
@@ -587,7 +643,7 @@ class CustomStreamMap(StreamMap):
                         for item in transformed_schema["required"]
                         if item != prop_key
                     ]
-                stream_map_parsed.append((prop_key, prop_def, None))
+                stream_map_parsed.append((prop_key, prop_def, None, _UNSET))
             elif isinstance(prop_def, str):
                 default_type: th.JSONTypeHelper = th.StringType()  # Fallback to string
                 existing_schema: dict = (
@@ -608,10 +664,20 @@ class CustomStreamMap(StreamMap):
                 )
                 try:
                     parsed_def: ast.Expr = ast.parse(prop_def).body[0]  # type: ignore[assignment]
-                    stream_map_parsed.append((prop_key, prop_def, parsed_def))
                 except (SyntaxError, IndexError) as ex:
                     msg = f"Failed to parse expression {prop_def}."
                     raise MapExpressionError(msg) from ex
+
+                # Pre-evaluate expressions whose result doesn't depend on the record.
+                cached: t.Any = _UNSET
+                if self._is_constant_expression(parsed_def):
+                    self.expr_evaluator.names = {}
+                    cached = self.expr_evaluator.eval(
+                        prop_def,
+                        previously_parsed=parsed_def,
+                    )
+
+                stream_map_parsed.append((prop_key, prop_def, parsed_def, cached))
 
             else:
                 msg = (
@@ -688,10 +754,18 @@ class CustomStreamMap(StreamMap):
                     if key_property in record:
                         result[key_property] = record[key_property]
 
-            for prop_key, prop_def, prop_def_parsed in stream_map_parsed:
+            # Build the names dict once per record; _eval only patches "self" per field.
+            names = self._build_eval_names(record)
+
+            for prop_key, prop_def, prop_def_parsed, cached_value in stream_map_parsed:
                 if prop_def in {None, NULL_STRING}:
                     # Remove property from result
                     result.pop(prop_key, None)
+                    continue
+
+                if cached_value is not _UNSET:
+                    # Constant expression: use the pre-evaluated value directly.
+                    result[prop_key] = cached_value
                     continue
 
                 if isinstance(prop_def_parsed, ast.Expr):
@@ -701,6 +775,7 @@ class CustomStreamMap(StreamMap):
                         expr_parsed=prop_def_parsed,
                         record=record,
                         property_name=prop_key,
+                        names=names,
                     )
                     continue
 
