@@ -32,6 +32,8 @@ __all__ = [
 ]
 
 if t.TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from sqlalchemy.engine.interfaces import (
         Dialect,
         ReflectedColumn,
@@ -1475,8 +1477,7 @@ class SQLConnector:  # noqa: PLR0904
         full_table_name: str | FullyQualifiedName,
         column_name: str,
         sql_type: sqlalchemy.types.TypeEngine,
-        *,
-        existing_columns: dict[str, sa.Column] | None = None,
+        existing_columns: Mapping[str, sa.Column] | None = None,
     ) -> None:
         """Adapt target table to provided schema if possible.
 
