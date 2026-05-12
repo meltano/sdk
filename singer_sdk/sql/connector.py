@@ -1490,21 +1490,10 @@ class SQLConnector:  # noqa: PLR0904
                 across multiple ``prepare_column`` calls.
         """
         if existing_columns is None:
-            if not self.column_exists(full_table_name, column_name):
-                self._create_empty_column(
-                    full_table_name=full_table_name,
-                    column_name=column_name,
-                    sql_type=sql_type,
-                )
-                return
-            self._adapt_column_type(
-                full_table_name,
-                column_name=column_name,
-                sql_type=sql_type,
-            )
-            return
+            existing_columns = self.get_table_columns(full_table_name)
 
-        if column_name not in existing_columns:
+        existing_column = existing_columns.get(column_name)
+        if existing_column is None:
             self._create_empty_column(
                 full_table_name=full_table_name,
                 column_name=column_name,
@@ -1516,7 +1505,7 @@ class SQLConnector:  # noqa: PLR0904
             full_table_name,
             column_name=column_name,
             sql_type=sql_type,
-            current_type=existing_columns[column_name].type,
+            current_type=existing_column.type,
         )
 
     def rename_column(
