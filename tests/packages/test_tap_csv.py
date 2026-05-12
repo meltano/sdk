@@ -42,7 +42,7 @@ class TestCSVOneStreamPerFile(_TestCSVOneStreamPerFile):
     pass
 
 
-# Three days into the future.
+# Three days into the future for state testing
 FUTURE = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(days=3)
 
 STATE = {
