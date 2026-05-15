@@ -1317,8 +1317,8 @@ class Stream(abc.ABC):  # noqa: PLR0904
         log_msg = "Beginning sync of '%s' in %s mode"
         log_args: list[t.Any] = [self.name, self.replication_method.lower()]
         if context:
-            log_msg += " with context: %s"
-            log_args.append(context)
+            log_msg += " with context keys: %s"
+            log_args.append(tuple(sorted(context.keys())))
 
         self.log(log_msg, *log_args)
 
