@@ -11,10 +11,10 @@ import typing as t
 import pytest
 
 from singer_sdk.helpers._typing import (
-    TypeConformanceLevel,
     _conform_primitive_property,
     conform_record_data_types,
 )
+from singer_sdk.helpers.conform import TypeConformanceLevel
 from singer_sdk.typing import (
     ArrayType,
     BooleanType,

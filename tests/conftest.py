@@ -10,8 +10,8 @@ import typing as t
 import pytest
 
 from singer_sdk import typing as th
-from singer_sdk.helpers._typing import DatetimeErrorTreatmentEnum
 from singer_sdk.helpers.capabilities import PluginCapabilities
+from singer_sdk.helpers.conform import DatetimeErrorTreatmentEnum
 from singer_sdk.sinks import BatchSink
 from singer_sdk.sql import SQLConnector, SQLSink, SQLTarget
 from singer_sdk.target_base import Target

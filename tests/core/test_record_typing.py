@@ -11,13 +11,12 @@ import pytest
 
 from singer_sdk.helpers._compat import datetime_fromisoformat as parse
 from singer_sdk.helpers._typing import (
-    DatetimeErrorTreatmentEnum,
-    TypeConformanceLevel,
     conform_record_data_types,
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
     to_json_compatible,
 )
+from singer_sdk.helpers.conform import DatetimeErrorTreatmentEnum, TypeConformanceLevel
 
 
 @pytest.mark.parametrize(
