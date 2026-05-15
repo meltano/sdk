@@ -118,8 +118,8 @@ SingerSDKError                             ← base for everything SDK-specific
 │   │   └── TooManyRecordsException        ← query exceeded max_records limit
 │   ├── RetriableSyncError                 ← retry with exponential backoff
 │   │   └── RetriableAPIError              ← retriable HTTP/API error
-│   ├── IgnorableSyncError                 ← log + skip current record/page, continue
-│   │   ├── IgnorableAPIError              ← expected non-fatal API response
+│   ├── SkippableSyncError                 ← log + skip current record/page, continue
+│   │   ├── SkippableAPIError              ← expected non-fatal API response
 │   │   └── InvalidRecord                  ← record fails schema validation
 │   └── DataError                          ← data quality / schema violations
 │       └── InvalidJSONSchema              ← malformed JSON Schema
@@ -164,7 +164,7 @@ ______________________________________________________________________
 |---|---|---|
 | `FatalSyncError` | Log error, abort sync, exit non-zero | 1 |
 | `RetriableSyncError` | Exponential backoff + retry; abort after max retries | 1 (if exhausted) |
-| `IgnorableSyncError` | Log at WARNING, skip current record/page, continue sync | 0 |
+| `SkippableSyncError` | Log at WARNING, skip current record/page, continue sync | 0 |
 | `DataError` | Log at WARNING, continue (severity configurable) | 0 |
 | `AbortedSyncFailedException` | Exit non-zero | 1 |
 | `AbortedSyncPausedException` | Emit STATE, exit zero | 0 |
@@ -173,7 +173,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## 5. `IgnorableAPIError` Specification (closes #1689)
+## 5. `SkippableAPIError` Specification (closes #1689)
 
 ### 5.1 Motivation
 
@@ -185,7 +185,7 @@ themselves. Issue #1689 requests a first-class SDK exception for this pattern.
 ### 5.2 Class definition
 
 ```python
-class IgnorableAPIError(IgnorableSyncError):
+class SkippableAPIError(SkippableSyncError):
     """Raised when a failed API request should be silently skipped.
 
     Raise this in ``validate_response()`` to indicate that the current HTTP
@@ -203,14 +203,14 @@ class IgnorableAPIError(IgnorableSyncError):
         def validate_response(self, response: requests.Response) -> None:
             if response.status_code == 404:
                 msg = f"Resource not found: {response.url}"
-                raise IgnorableAPIError(msg)
+                raise SkippableAPIError(msg)
             super().validate_response(response)
     """
 ```
 
 ### 5.3 Catch site
 
-`IgnorableAPIError` is caught in `RESTStream._request_with_backoff()` (or the
+`SkippableAPIError` is caught in `RESTStream._request_with_backoff()` (or the
 outermost request loop), at the same level as `RetriableAPIError`. The catch block:
 
 1. Calls `self.logger.warning("Ignoring API error: %s", exc)`
@@ -220,9 +220,9 @@ outermost request loop), at the same level as `RetriableAPIError`. The catch blo
 
 ### 5.4 Interaction with backoff
 
-`IgnorableAPIError` must **not** trigger the backoff decorator. It is raised *after*
+`SkippableAPIError` must **not** trigger the backoff decorator. It is raised *after*
 backoff has already decided to give up (or from `validate_response()` before backoff
-is invoked). The backoff decorator is configured to re-raise on `IgnorableSyncError`
+is invoked). The backoff decorator is configured to re-raise on `SkippableSyncError`
 and its subclasses, not to swallow them.
 
 ______________________________________________________________________
@@ -262,10 +262,10 @@ class FatalSyncError(SyncError): ...  # new
 class RetriableSyncError(SyncError): ...  # new
 
 
-class IgnorableSyncError(SyncError): ...  # new
+class SkippableSyncError(SyncError): ...  # new
 
 
-class IgnorableAPIError(IgnorableSyncError): ...  # new (closes #1689)
+class SkippableAPIError(SkippableSyncError): ...  # new (closes #1689)
 
 
 class ConfigurationError(SingerSDKError): ...  # new
@@ -293,7 +293,7 @@ class ConfigValidationError(
 | `except ConfigValidationError` | Yes — same concrete type |
 | `except SingerSDKError` | New — catches any SDK exception |
 | `except FatalSyncError` | New — catches all fatal sync errors |
-| `except IgnorableSyncError` | New — catches `IgnorableAPIError`, `InvalidRecord` |
+| `except SkippableSyncError` | New — catches `SkippableAPIError`, `InvalidRecord` |
 | `raise FatalAPIError(...)` | Yes — unchanged |
 
 Zero breaking changes are introduced by the hierarchy-only insertion.
@@ -308,10 +308,10 @@ ______________________________________________________________________
 
 - Added `SingerSDKError` as the new root
 - Added intermediate classes: `ConfigurationError`, `MappingError`, `DiscoveryError`,
-  `SyncError`, `FatalSyncError`, `RetriableSyncError`, `IgnorableSyncError`, `DataError`,
+  `SyncError`, `FatalSyncError`, `RetriableSyncError`, `SkippableSyncError`, `DataError`,
   `SyncLifecycleSignal`
 - Re-wired all existing exceptions to new bases (additive only — no renames)
-- Added `IgnorableAPIError(IgnorableSyncError)` (closes #1689)
+- Added `SkippableAPIError(SkippableSyncError)` (closes #1689)
 - Added `__all__` to `exceptions.py`
 - Added `tests/core/test_exceptions.py` with 80 hierarchy assertions
 - No behavior changes; all existing tests pass unchanged
@@ -338,13 +338,13 @@ ______________________________________________________________________
 - Added `TestPhase2Migrations` and `TestSingerlibHierarchy` in
   `tests/core/test_exceptions.py` (89 assertions total)
 
-### PR 3 — `IgnorableAPIError` handling in REST stream
+### PR 3 — `SkippableAPIError` handling in REST stream
 
 **Files:** `singer_sdk/streams/rest.py`
 
-- Catch `IgnorableSyncError` in the request loop / `_request_with_backoff()`
+- Catch `SkippableSyncError` in the request loop / `_request_with_backoff()`
 - Log at WARNING, return empty page, continue
-- Add unit tests for `IgnorableAPIError` in `validate_response()`
+- Add unit tests for `SkippableAPIError` in `validate_response()`
 
 ### PR 4 — Wire lifecycle signals, fatal handlers, and per-stream outcomes
 
@@ -361,7 +361,7 @@ ______________________________________________________________________
 
 - Add deprecation warnings on `Exception`-suffix names if aliases are introduced
 - Update API reference
-- Add changelog entry for `IgnorableAPIError`
+- Add changelog entry for `SkippableAPIError`
 
 ______________________________________________________________________
 
@@ -384,7 +384,7 @@ class SyncResult(enum.Enum):
     """The outcome of a single stream's sync run."""
 
     SUCCESS = "success"  # completed with no errors
-    PARTIAL = "partial"  # completed; some records skipped via IgnorableSyncError
+    PARTIAL = "partial"  # completed; some records skipped via SkippableSyncError
     FAILED = "failed"  # aborted due to FatalSyncError or exhausted RetriableSyncError
     ABORTED = (
         "aborted"  # stopped by SyncLifecycleSignal (e.g. MaxRecordsLimitException)
@@ -400,7 +400,7 @@ Each `Stream` instance holds a `sync_result: SyncResult` attribute, initialised 
 
 | Event | Outcome set |
 |---|---|
-| `IgnorableSyncError` caught; record skipped | `PARTIAL` (if current < `PARTIAL`) |
+| `SkippableSyncError` caught; record skipped | `PARTIAL` (if current < `PARTIAL`) |
 | `SyncLifecycleSignal` caught; sync stopped | `ABORTED` (if current < `ABORTED`) |
 | `FatalSyncError` caught at top-level | `FAILED` |
 | `RetriableAPIError` retries exhausted | `FAILED` |
@@ -458,7 +458,7 @@ tooling.
 ```
 Exception raised              →  caught by            →  outcome written
 ─────────────────────────────────────────────────────────────────────────
-IgnorableSyncError            →  request loop         →  PARTIAL
+SkippableSyncError            →  request loop         →  PARTIAL
 SyncLifecycleSignal           →  stream.sync()        →  ABORTED
 FatalSyncError                →  tap top-level        →  FAILED
 RetriableAPIError (exhausted) →  backoff decorator    →  FAILED

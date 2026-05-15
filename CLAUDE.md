@@ -50,7 +50,7 @@ Choose the right base class by recovery strategy:
 |---|---|
 | HTTP/API error, must abort sync | `FatalAPIError` |
 | HTTP/API error, safe to retry | `RetriableAPIError` |
-| HTTP/API error, expected / skip silently | `IgnorableAPIError` |
+| HTTP/API error, expected / skip silently | `SkippableAPIError` |
 | Config value is wrong | `ConfigValidationError` |
 | Discovery / catalog problem | `DiscoveryError` (or a subclass) |
 | Stream map config or expression fails | `MappingError` (or a subclass) |
@@ -59,7 +59,7 @@ When adding a new exception:
 
 1. Place it in `singer_sdk/exceptions.py` — never define public exceptions in other files.
 1. Inherit from the appropriate intermediate base (`FatalSyncError`, `RetriableSyncError`,
-   `IgnorableSyncError`, `DataError`, `ConfigurationError`, `MappingError`, etc.) rather
+   `SkippableSyncError`, `DataError`, `ConfigurationError`, `MappingError`, etc.) rather
    than from `Exception` or `SingerSDKError` directly.
 1. Add it to `__all__` in that file.
 1. Add `issubclass` assertions to `tests/core/test_exceptions.py`.

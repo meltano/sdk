@@ -5,3 +5,5 @@ INFO my-tap-many.child_many Beginning sync of 'child_many' in full_table mode wi
 WARNING my-tap-many.child_many Properties ('composite_id', 'child_id') were present in the 'child_many' stream but not found in catalog schema. Ignoring.
 INFO my-tap-many.child_many Beginning sync of 'child_many' in full_table mode with context: {'child_id': 2, 'pid': '1'}
 INFO my-tap-many.child_many Beginning sync of 'child_many' in full_table mode with context: {'child_id': 3, 'pid': '1'}
+INFO my-tap-many Stream 'child_many' sync result: success
+INFO my-tap-many Stream 'parent_many' sync result: success
