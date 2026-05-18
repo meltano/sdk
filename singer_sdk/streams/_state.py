@@ -98,6 +98,12 @@ class StreamStateManager:
             )
         return self.stream_state
 
+    @t.overload
+    def get_state_partition_context(self, context: None) -> None: ...
+
+    @t.overload
+    def get_state_partition_context(self, context: types.Context) -> types.Context: ...
+
     def get_state_partition_context(
         self,
         context: types.Context | None,

@@ -776,3 +776,64 @@ def test_post_process_transforms_record(tap: Tap):
     stream = TransformsRecord(tap)
     records = stream._sync_records(None, write_messages=False)
     assert all(record["extra"] == "transformed" for record in records)
+
+
+@pytest.mark.parametrize(
+    "keys,expected_context",
+    [
+        pytest.param(
+            ["parent_id"],
+            {"parent_id": 123},
+            id="single_key",
+        ),
+        pytest.param(
+            ["parent_id", "other_key"],
+            {"parent_id": 123, "other_key": "abc"},
+            id="multiple_keys",
+        ),
+        pytest.param(
+            ["parent_id", "missing_key"],
+            {"parent_id": 123},
+            id="missing_keys",
+        ),
+        pytest.param(
+            (),
+            {},
+            id="empty_tuple",
+        ),
+        pytest.param(
+            [],
+            {},
+            id="empty_list",
+        ),
+        pytest.param(
+            None,
+            {"parent_id": 123, "other_key": "abc"},
+            id="none",
+        ),
+    ],
+)
+def test_state_partitioning_keys_class_variable(
+    tap: Tap,
+    keys: t.Sequence[str] | None,
+    expected_context: Context | None,
+):
+    """Regression test: class-level state_partitioning_keys=[] is respected.
+
+    When a stream sets state_partitioning_keys=... as a class variable, the
+    state_manager must receive the right value (not the default None,
+    None). Bug: state_manager was initialised with self._state_partitioning_keys
+    (always None from __init__) rather than self.state_partitioning_keys (which
+    resolves the class attribute). See https://github.com/meltano/sdk/issues/3631.
+    """
+
+    class NoPartitionStream(SimpleTestStream):
+        name = "no_partition"
+        state_partitioning_keys = keys
+
+    stream = NoPartitionStream(tap)
+    original_context = {"parent_id": 123, "other_key": "abc"}
+    assert (
+        stream.state_manager.get_state_partition_context(original_context)
+        == expected_context
+    )
