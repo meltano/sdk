@@ -19,12 +19,12 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/zizmorcore/zizmor-pre-commit
-  rev: v1.24.1
+  rev: v1.25.2
   hooks:
   - id: zizmor
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.37.1
+  rev: 0.37.2
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
