@@ -792,6 +792,11 @@ def test_post_process_transforms_record(tap: Tap):
             id="multiple_keys",
         ),
         pytest.param(
+            ["parent_id", "missing_key"],
+            {"parent_id": 123},
+            id="missing_keys",
+        ),
+        pytest.param(
             (),
             {},
             id="empty_tuple",
