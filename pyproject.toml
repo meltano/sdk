@@ -154,7 +154,7 @@ typing = [
     "importlib-metadata",
     "mypy~=1.20.0",
     "pyarrow-stubs>=19.1",
-    "ty==0.0.35",
+    "ty==0.0.37",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-simplejson>=3.18.0",
