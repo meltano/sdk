@@ -401,7 +401,7 @@ class CustomStreamMap(StreamMap):
     def _eval(
         self,
         expr: str,
-        expr_parsed: ast.Expr,
+        expr_parsed: ast.stmt,
         record: dict,
         property_name: str | None,
     ) -> str | int | float:
@@ -521,7 +521,7 @@ class CustomStreamMap(StreamMap):
         include_by_default = True
         if filter_rule is not None:
             try:
-                filter_rule_parsed: ast.Expr = ast.parse(filter_rule).body[0]  # type: ignore[assignment]
+                filter_rule_parsed: ast.stmt = ast.parse(filter_rule).body[0]
             except (SyntaxError, IndexError) as ex:
                 msg = f"Failed to parse expression {filter_rule}."
                 raise MapExpressionError(msg) from ex
@@ -636,7 +636,7 @@ class CustomStreamMap(StreamMap):
 
         def eval_filter(
             filter_rule: str,
-            filter_rule_parsed: ast.Expr,
+            filter_rule_parsed: ast.stmt,
         ) -> t.Callable[[dict], bool]:
             def _inner(record: dict) -> bool:
                 filter_result = self._eval(
