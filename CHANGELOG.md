@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.54.2 (2026-05-18)
+
+### 🐛 Fixes
+
+- [#3632](https://github.com/meltano/sdk/issues/3632) Honor `state_partitioning_keys` declared as class attributes
+
 ## v0.54.1 (2026-05-15)
 
 ### 🐛 Fixes
