@@ -523,11 +523,15 @@ class Sink(abc.ABC):  # noqa: PLR0904
         ):
             properties_dict.pop(col, None)
 
-    def _remove_sdc_metadata_from_record(self, record: dict) -> None:  # noqa: PLR6301
+    def _remove_sdc_metadata_from_record(self, record: dict) -> None:
         """Remove metadata _sdc columns from incoming record message.
 
         Record metadata specs documented at:
         https://sdk.meltano.com/en/latest/implementation/record_metadata.html
+
+        Note:
+            When ``hard_delete=True``, the ``_sdc_deleted_at`` field is preserved
+            to support LOG_BASED replication hard deletes.
 
         Args:
             record: Individual record in the stream.
@@ -535,7 +539,9 @@ class Sink(abc.ABC):  # noqa: PLR0904
         record.pop("_sdc_extracted_at", None)
         record.pop("_sdc_received_at", None)
         record.pop("_sdc_batched_at", None)
-        record.pop("_sdc_deleted_at", None)
+        # Preserve _sdc_deleted_at when hard_delete is enabled for LOG_BASED deletes
+        if not self.config.get("hard_delete", False):
+            record.pop("_sdc_deleted_at", None)
         record.pop("_sdc_sequence", None)
         record.pop("_sdc_table_version", None)
         record.pop("_sdc_sync_started_at", None)
