@@ -689,7 +689,7 @@ class CustomStreamMap(StreamMap):
                         result[key_property] = record[key_property]
 
             for prop_key, prop_def, prop_def_parsed in stream_map_parsed:
-                if prop_def in {None, NULL_STRING}:
+                if prop_def is None or prop_def == NULL_STRING:
                     # Remove property from result
                     result.pop(prop_key, None)
                     continue
@@ -697,7 +697,7 @@ class CustomStreamMap(StreamMap):
                 if isinstance(prop_def_parsed, ast.Expr):
                     # Apply property transform
                     result[prop_key] = self._eval(
-                        expr=prop_def,  # type: ignore[arg-type]
+                        expr=prop_def,
                         expr_parsed=prop_def_parsed,
                         record=record,
                         property_name=prop_key,
