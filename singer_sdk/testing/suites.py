@@ -74,7 +74,7 @@ class SingerTestSuite(t.Generic[T]):
         "tap_stream_attribute",
         "target",
     ]
-    tests: list[type[T]]
+    tests: t.Sequence[type[T]]
 
 
 # Tap Test Suites
