@@ -247,7 +247,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
                     stream_alias=self.name,
                     raw_schema=self.schema,
                     key_properties=self.primary_keys,
-                    flattening_options=get_flattening_options(self.config),  # ty: ignore[invalid-argument-type]
+                    flattening_options=get_flattening_options(self.config),
                 ),
             ]
         return self._stream_maps
