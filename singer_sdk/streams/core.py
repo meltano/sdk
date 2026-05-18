@@ -197,7 +197,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
                 tap_name=self.tap_name,
                 stream_name=self.name,
                 tap_state=self._tap_state,
-                state_partitioning_keys=self._state_partitioning_keys,
+                state_partitioning_keys=self.state_partitioning_keys,
                 is_sorted=self.is_sorted,
                 check_sorted=self.check_sorted,
             )
