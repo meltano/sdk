@@ -1,4 +1,4 @@
 griffecli~=2.0
 nox==2026.4.10
-prek==0.3.13
+prek==0.4.1
 twine==6.2.0
