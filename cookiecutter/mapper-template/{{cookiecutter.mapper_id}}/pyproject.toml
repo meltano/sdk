@@ -132,14 +132,12 @@ convention = "google"
 # This configuration can be used to customize tox environments
 [tool.tox]
 requires = [
-    "tox>=4.43",
-    "tox-uv",
+    "tox>=4.53",
+    "tox-uv>=1.35",
 ]
 env_list = [
     "typing",
-    { product = [
-        { prefix = "3.", start = 10 },
-    ] },
+    { prefix = "3.", start = 10 },
 ]
 
 [tool.tox.env_run_base]
