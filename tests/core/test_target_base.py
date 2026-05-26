@@ -146,6 +146,59 @@ def test_add_sqlsink_and_get_sink():
         )
 
 
+def test_create_sink_override():
+    """Target.create_sink() can be overridden to inject extra constructor args."""
+    injected = {}
+
+    class CustomSink(BatchSinkMock):
+        def __init__(self, *args, extra=None, **kwargs):
+            super().__init__(*args, **kwargs)
+            injected["extra"] = extra
+
+    class CustomTarget(TargetMock):
+        def create_sink(self, *, stream_name, schema, key_properties=None):
+            return CustomSink(
+                target=self,
+                stream_name=stream_name,
+                schema=schema,
+                key_properties=key_properties,
+                extra="injected_value",
+            )
+
+    schema = {"properties": {"id": {"type": ["integer"]}}}
+    target = CustomTarget()
+    sink = target.add_sink("test_stream", schema, [])
+    assert isinstance(sink, CustomSink)
+    assert injected["extra"] == "injected_value"
+
+
+def test_sql_create_sink_override():
+    """SQLTarget.create_sink() can be overridden to inject extra constructor args."""
+    injected = {}
+
+    class CustomSQLSink(SQLSinkMock):
+        def __init__(self, *args, extra=None, **kwargs):
+            super().__init__(*args, **kwargs)
+            injected["extra"] = extra
+
+    class CustomSQLTarget(SQLTargetMock):
+        def create_sink(self, *, stream_name, schema, key_properties=None):
+            return CustomSQLSink(
+                target=self,
+                stream_name=stream_name,
+                schema=schema,
+                key_properties=key_properties,
+                connector=self.target_connector,
+                extra="sql_injected",
+            )
+
+    schema = {"properties": {"id": {"type": ["integer"]}}}
+    target = CustomSQLTarget(config={"sqlalchemy_url": "sqlite:///"})
+    sink = target.add_sqlsink("test_stream", schema, [])
+    assert isinstance(sink, CustomSQLSink)
+    assert injected["extra"] == "sql_injected"
+
+
 def test_batch_size_rows_and_max_size():
     input_schema_1 = {
         "properties": {

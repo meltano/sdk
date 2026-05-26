@@ -228,6 +228,36 @@ class Target(BaseSingerReader, abc.ABC):
         """
         return stream_name in self._sinks_active
 
+    def create_sink(
+        self,
+        *,
+        stream_name: str,
+        schema: dict,
+        key_properties: t.Sequence[str] | None = None,
+    ) -> Sink:
+        """Instantiate a new sink object for the given stream.
+
+        Override this method to customize how sinks are constructed — for example,
+        to inject a shared resource (a database connection, an auth token, a thread
+        pool) at construction time without requiring sinks to reach back into the
+        target at runtime.
+
+        Args:
+            stream_name: Name of the stream.
+            schema: Schema of the stream.
+            key_properties: Primary key of the stream.
+
+        Returns:
+            A new sink instance for the stream.
+        """
+        sink_class = self.get_sink_class(stream_name=stream_name)
+        return sink_class(
+            target=self,
+            stream_name=stream_name,
+            schema=schema,
+            key_properties=key_properties,
+        )
+
     @t.final
     def add_sink(
         self,
@@ -248,9 +278,7 @@ class Target(BaseSingerReader, abc.ABC):
             A new sink for the stream.
         """
         self.logger.debug("Initializing target sink '%s'...", self.name)
-        sink_class = self.get_sink_class(stream_name=stream_name)
-        sink = sink_class(
-            target=self,
+        sink = self.create_sink(
             stream_name=stream_name,
             schema=schema,
             key_properties=key_properties,

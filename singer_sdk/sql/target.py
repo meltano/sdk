@@ -82,6 +82,35 @@ class SQLTarget(Target):
 
         super().append_builtin_config(config_jsonschema)
 
+    def create_sink(
+        self,
+        *,
+        stream_name: str,
+        schema: dict,
+        key_properties: t.Sequence[str] | None = None,
+    ) -> Sink:
+        """Instantiate a new SQL sink for the given stream.
+
+        Injects ``self.target_connector`` so all sinks share a single connection.
+        Override to pass additional constructor arguments.
+
+        Args:
+            stream_name: Name of the stream.
+            schema: Schema of the stream.
+            key_properties: Primary key of the stream.
+
+        Returns:
+            A new sink instance for the stream.
+        """
+        sink_class = self.get_sink_class(stream_name=stream_name)
+        return sink_class(
+            target=self,
+            stream_name=stream_name,
+            schema=schema,
+            key_properties=key_properties,
+            connector=self.target_connector,
+        )
+
     @t.final
     def add_sqlsink(
         self,
@@ -102,13 +131,10 @@ class SQLTarget(Target):
             A new sink for the stream.
         """
         self.logger.debug("Initializing target sink '%s'...", self.name)
-        sink_class = self.get_sink_class(stream_name=stream_name)
-        sink = sink_class(
-            target=self,
+        sink = self.create_sink(
             stream_name=stream_name,
             schema=schema,
             key_properties=key_properties,
-            connector=self.target_connector,
         )
         sink.setup()
         self._sinks_active[stream_name] = sink
