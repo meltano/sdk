@@ -204,16 +204,10 @@ def test_status_message_api(
             403,
             pytest.raises(RetriableAPIError),
         ),
-        (
-            [],
-            429,
-            pytest.raises(FatalAPIError),
-        ),
     ],
     ids=[
         "default",
         "changed",
-        "missing",
     ],
 )
 def test_rate_limiting_status_override(

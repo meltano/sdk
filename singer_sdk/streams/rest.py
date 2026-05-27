@@ -155,7 +155,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
     _requests_session: requests.Session | None
 
     #: Response code reference for rate limit retries
-    extra_retry_statuses: t.Sequence[int] = [HTTPStatus.TOO_MANY_REQUESTS]
+    extra_retry_statuses: t.Sequence[int] = []
 
     #: Optional flag to disable HTTP redirects. Defaults to False.
     allow_redirects: bool = True
@@ -333,15 +333,16 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         """
         if (
             response.status_code in self.extra_retry_statuses
-            or response.status_code >= HTTPStatus.INTERNAL_SERVER_ERROR
+            or response.status_code == HTTPStatus.TOO_MANY_REQUESTS  # 429
+            or response.status_code >= HTTPStatus.INTERNAL_SERVER_ERROR  # 500+
         ):
             msg = self.response_error_message(response)
             raise RetriableAPIError(msg, response)
 
         if (
-            HTTPStatus.BAD_REQUEST
+            HTTPStatus.BAD_REQUEST  # 400
             <= response.status_code
-            < HTTPStatus.INTERNAL_SERVER_ERROR
+            < HTTPStatus.INTERNAL_SERVER_ERROR  # 500
         ):
             msg = self.response_error_message(response)
             raise FatalAPIError(msg)
@@ -360,9 +361,9 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         full_path = urlparse(response.url).path or self.path
         error_type = (
             "Client"
-            if HTTPStatus.BAD_REQUEST
+            if HTTPStatus.BAD_REQUEST  # 400
             <= response.status_code
-            < HTTPStatus.INTERNAL_SERVER_ERROR
+            < HTTPStatus.INTERNAL_SERVER_ERROR  # 500
             else "Server"
         )
 
@@ -701,7 +702,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
                 metrics.Tag.HTTP_STATUS_CODE: response.status_code,
                 metrics.Tag.STATUS: (
                     metrics.Status.SUCCEEDED
-                    if response.status_code < HTTPStatus.BAD_REQUEST
+                    if response.status_code < HTTPStatus.BAD_REQUEST  # 400
                     else metrics.Status.FAILED
                 ),
             },
