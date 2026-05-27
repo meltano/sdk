@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
-- [#3650](https://github.com/meltano/sdk/issues/3650) Ensure stream name is include in log message when ACTIVATE_VERSION forces \_sdc metadata columns
+- [#3650](https://github.com/meltano/sdk/issues/3650) Ensure stream name is included in log message when ACTIVATE_VERSION forces \_sdc metadata columns.
 
 ## v0.54.2 (2026-05-18)
 
