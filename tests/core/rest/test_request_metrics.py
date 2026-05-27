@@ -70,7 +70,7 @@ def test_metrics_logging(
     assert isinstance(point_1, metrics.Point)
     assert point_1.metric == "http_request_duration"
     assert point_1.tags["endpoint"] == "/test"
-    assert point_1.tags.get("context") == context
+    assert "context" not in point_1.tags
     assert (
         (log_urls and point_1.tags.get("url") == "/test?user_id=1")  # Log URLs
         or (not log_urls and "url" not in point_1.tags)  # Don't log URLs
