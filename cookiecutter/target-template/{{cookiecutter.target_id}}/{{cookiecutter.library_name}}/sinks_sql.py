@@ -13,7 +13,7 @@ else:
     from typing_extensions import override
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Mapping
 
     from singer_sdk.sql.connector import FullyQualifiedName
 
@@ -32,7 +32,7 @@ class {{ cookiecutter.destination_name }}Connector(SQLConnector):
     allow_temp_tables: bool = True  # Whether temp tables are supported.
 
     @override
-    def get_sqlalchemy_url(self, config: dict) -> str:
+    def get_sqlalchemy_url(self, config: Mapping) -> str:
         """Generates a SQLAlchemy URL for {{ cookiecutter.destination_name }}.
 
         Args:
