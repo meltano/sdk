@@ -414,12 +414,14 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
     def _request(
         self,
         prepared_request: requests.PreparedRequest,
-        context: Context | None,
+        context: Context | None = None,  # noqa: ARG002
     ) -> requests.Response:
-        """TODO.
+        """Make an HTTP request.
+
+        TODO(maintainers): Remove unused function parameters.
 
         Args:
-            prepared_request: TODO
+            prepared_request: The HTTP request object.
             context: Stream partition or context dictionary.
 
         Returns:
@@ -434,7 +436,6 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         self._write_request_duration_log(
             endpoint=self.path,
             response=response,
-            context=context,
             extra_tags={"url": authenticated_request.path_url}
             if self._LOG_REQUEST_METRIC_URLS
             else None,
@@ -680,10 +681,12 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         self,
         endpoint: str,
         response: requests.Response,
-        context: Context | None,
-        extra_tags: dict | None,
+        context: Context | None = None,  # noqa: ARG002
+        extra_tags: dict | None = None,
     ) -> None:
-        """TODO.
+        """Log the HTTP duration metric.
+
+        TODO(maintainers): Remove unused function parameters.
 
         Args:
             endpoint: The endpoint of the request.
@@ -695,8 +698,6 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             return
 
         extra_tags = extra_tags or {}
-        if context:
-            extra_tags[metrics.Tag.CONTEXT] = context
 
         point = metrics.Point(
             "timer",
