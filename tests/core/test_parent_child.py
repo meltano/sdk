@@ -503,3 +503,275 @@ def test_parent_records_emitted_when_child_hits_record_limit():
 
     msg = "Sibling records should also be emitted"
     assert tally["sibling"] == 4, msg
+
+
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_child_state_partitioning_keys_empty(
+    caplog: pytest.LogCaptureFixture,
+    snapshot: Snapshot,
+):
+    """Regression test for GH-3631: class-level state_partitioning_keys=[] is honored.
+
+    When a child stream declares state_partitioning_keys=[] as a class attribute,
+    the STATE messages must use a single flat bookmark shared across all parent
+    contexts rather than one partition entry per parent record.
+    """
+
+    class ParentStream(Stream):
+        name = "parent_3631"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
+
+        @override
+        def get_child_context(
+            self,
+            record: Record,
+            context: Context | None,
+        ) -> Context | None:
+            return {"pid": record["id"]}
+
+        @override
+        def get_records(self, context: Context | None):
+            yield {"id": 1}
+            yield {"id": 2}
+            yield {"id": 3}
+
+    class ChildStream(Stream):
+        name = "child_3631"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "pid": {"type": "integer"},
+            },
+        }
+        parent_stream_type = ParentStream
+        # Collapse all parent-context partitions into a single shared bookmark.
+        state_partitioning_keys: t.ClassVar[list[str]] = []
+
+        @override
+        def get_records(self, context: Context | None):
+            assert context is not None
+            yield {"id": context["pid"]}
+
+    class MyTap3631(Tap):
+        name = "my-tap-3631"
+
+        @override
+        def discover_streams(self):
+            return [ParentStream(self), ChildStream(self)]
+
+    tap = MyTap3631()
+    buf = io.StringIO()
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap.name)),
+    ):
+        tap.sync_all()
+
+    buf.seek(0)
+    snapshot.assert_match(buf.read(), "singer.jsonl")
+    snapshot.assert_match(caplog.text, "stderr.log")
+
+
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_emit_activate_version_messages(
+    caplog: pytest.LogCaptureFixture,
+    snapshot: Snapshot,
+):
+    """Full-table stream emits ACTIVATE_VERSION.
+
+    The message must appear after SCHEMA and before the first RECORD, and the version
+    number must be derived from the tap's initialization timestamp.
+    """
+
+    class VersionedStream(Stream):
+        name = "versioned"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
+
+        @override
+        def get_records(self, context: Context | None):
+            yield {"id": 1}
+            yield {"id": 2}
+
+    class VersionedTap(Tap):
+        name = "my-tap-versioned"
+
+        @override
+        def discover_streams(self):
+            return [VersionedStream(self)]
+
+    tap = VersionedTap(config={"emit_activate_version_messages": True})
+    buf = io.StringIO()
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap.name)),
+    ):
+        tap.sync_all()
+
+    buf.seek(0)
+    snapshot.assert_match(buf.read(), "singer.jsonl")
+    snapshot.assert_match(caplog.text, "stderr.log")
+
+
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_incremental_child_stream(
+    caplog: pytest.LogCaptureFixture,
+    snapshot: Snapshot,
+):
+    """Child stream with replication_key produces per-partition incremental bookmarks.
+
+    The STATE messages must contain partitioned bookmarks that include
+    replication_key and replication_key_value entries — distinct from the
+    empty-context bookmarks produced by full-table children.
+    """
+
+    class ParentStream(Stream):
+        name = "parent_incr"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        }
+
+        @override
+        def get_child_context(
+            self,
+            record: Record,
+            context: Context | None,
+        ) -> Context | None:
+            return {"pid": record["id"]}
+
+        @override
+        def get_records(self, context: Context | None):
+            yield {"id": 1}
+            yield {"id": 2}
+
+    class ChildStream(Stream):
+        name = "child_incr"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "pid": {"type": "integer"},
+                "updated_at": {"type": "string", "format": "date-time"},
+            },
+        }
+        parent_stream_type = ParentStream
+        replication_key = "updated_at"
+
+        @override
+        def get_records(self, context: Context | None):
+            assert context is not None
+            pid = context["pid"]
+            yield {
+                "id": pid * 10,
+                "pid": pid,
+                # Dates before DATETIME so replication_key_value reflects the
+                # record value, not the signpost cap.
+                "updated_at": f"2021-0{pid}-01T00:00:00+00:00",
+            }
+
+    class IncrementalChildTap(Tap):
+        name = "my-tap-incr-child"
+
+        @override
+        def discover_streams(self):
+            return [ParentStream(self), ChildStream(self)]
+
+    tap = IncrementalChildTap()
+    buf = io.StringIO()
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("INFO"),
+        caplog.filtering(logging.Filter(tap.name)),
+    ):
+        tap.sync_all()
+
+    buf.seek(0)
+    snapshot.assert_match(buf.read(), "singer.jsonl")
+    snapshot.assert_match(caplog.text, "stderr.log")
+
+
+@time_machine.travel(DATETIME, tick=False)
+@pytest.mark.snapshot
+def test_ignore_parent_replication_key(
+    caplog: pytest.LogCaptureFixture,
+    snapshot: Snapshot,
+):
+    """Child with ignore_parent_replication_key=True forces its parent to FULL_TABLE.
+
+    When a selected child stream sets this flag, _set_compatible_replication_methods
+    must clear the parent's replication_key and force FULL_TABLE mode, emitting a
+    warning. The parent's Singer output must reflect full_table replication.
+    """
+
+    class IncrementalParent(Stream):
+        name = "parent_irpk"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "updated_at": {"type": "string", "format": "date-time"},
+            },
+        }
+        replication_key = "updated_at"
+
+        @override
+        def get_child_context(
+            self,
+            record: Record,
+            context: Context | None,
+        ) -> Context | None:
+            return {"pid": record["id"]}
+
+        @override
+        def get_records(self, context: Context | None):
+            yield {"id": 1, "updated_at": "2022-01-01T00:00:00+00:00"}
+            yield {"id": 2, "updated_at": "2022-01-02T00:00:00+00:00"}
+
+    class ChildStream(Stream):
+        name = "child_irpk"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "pid": {"type": "integer"},
+            },
+        }
+        parent_stream_type = IncrementalParent
+        ignore_parent_replication_key = True
+
+        @override
+        def get_records(self, context: Context | None):
+            assert context is not None
+            yield {"id": context["pid"]}
+
+    class IrpkTap(Tap):
+        name = "my-tap-irpk"
+
+        @override
+        def discover_streams(self):
+            return [IncrementalParent(self), ChildStream(self)]
+
+    tap = IrpkTap()
+    buf = io.StringIO()
+    with (
+        redirect_stdout(buf),
+        caplog.at_level("WARNING"),
+        caplog.filtering(logging.Filter(tap.name)),
+    ):
+        tap.sync_all()
+
+    buf.seek(0)
+    snapshot.assert_match(buf.read(), "singer.jsonl")
+    snapshot.assert_match(caplog.text, "stderr.log")

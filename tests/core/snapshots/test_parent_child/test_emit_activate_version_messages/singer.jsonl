@@ -1,0 +1,5 @@
+{"type":"SCHEMA","stream":"versioned","schema":{"properties":{"id":{"type":"integer"}},"type":"object"},"key_properties":[]}
+{"type":"ACTIVATE_VERSION","stream":"versioned","version":1640995200}
+{"type":"RECORD","stream":"versioned","record":{"id":1},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"versioned","record":{"id":2},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"versioned":{}}}}
