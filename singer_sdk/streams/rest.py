@@ -433,13 +433,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             timeout=self.timeout,
             allow_redirects=self.allow_redirects,
         )
-        self._write_request_duration_log(
-            endpoint=self.path,
-            response=response,
-            extra_tags={"url": authenticated_request.path_url}
-            if self._LOG_REQUEST_METRIC_URLS
-            else None,
-        )
+        self._write_request_duration_log(endpoint=self.path, response=response)
         self.validate_response(response)
         return response
 
@@ -682,7 +676,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         endpoint: str,
         response: requests.Response,
         context: Context | None = None,  # noqa: ARG002
-        extra_tags: dict | None = None,
+        extra_tags: dict | None = None,  # noqa: ARG002
     ) -> None:
         """Log the HTTP duration metric.
 
@@ -697,8 +691,6 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         if not self._LOG_REQUEST_METRICS:
             return
 
-        extra_tags = extra_tags or {}
-
         point = metrics.Point(
             "timer",
             metric=metrics.Metric.HTTP_REQUEST_DURATION,
@@ -712,7 +704,6 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
                     if response.status_code < HTTPStatus.BAD_REQUEST
                     else metrics.Status.FAILED
                 ),
-                **extra_tags,
             },
         )
         self._log_metric(point)
