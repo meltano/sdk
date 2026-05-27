@@ -19,7 +19,7 @@ else:
     from typing_extensions import override
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Mapping
 
     import sqlalchemy
     from singer_sdk.helpers.types import Context, Record
@@ -52,7 +52,7 @@ class {{ cookiecutter.source_name }}SQLToJSONSchema(SQLToJSONSchema):
 
     @override
     @classmethod
-    def from_config(cls, config: dict) -> {{ cookiecutter.source_name }}SQLToJSONSchema:
+    def from_config(cls, config: Mapping) -> {{ cookiecutter.source_name }}SQLToJSONSchema:
         """Instantiate the SQL to JSON Schema converter from a config dictionary.
 
         Developers should override this method to pass custom configuration options
@@ -110,7 +110,7 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
     sql_to_jsonschema_converter = {{ cookiecutter.source_name }}SQLToJSONSchema
 
     @override
-    def get_sqlalchemy_url(self, config: dict) -> str:
+    def get_sqlalchemy_url(self, config: Mapping) -> str:
         """Concatenate a SQLAlchemy URL for use in connecting to the source.
 
         Developers must implement this method to return a valid SQLAlchemy
