@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import copy
+import io
+import json
 
 import pytest
 
@@ -234,3 +236,45 @@ def test_batch_size_rows_and_max_size():
     assert sink_set._batch_size_rows == 100000
     assert sink_set.batch_size_rows == 100000
     assert sink_set.max_size == 100000
+
+
+def _make_singer_input(n_records: int) -> io.StringIO:
+    messages = [
+        {
+            "type": "SCHEMA",
+            "stream": "test",
+            "schema": {"properties": {"id": {"type": "integer"}}},
+            "key_properties": ["id"],
+        },
+        *[
+            {"type": "RECORD", "stream": "test", "record": {"id": i}}
+            for i in range(1, n_records + 1)
+        ],
+    ]
+    return io.StringIO("\n".join(json.dumps(m) for m in messages))
+
+
+@pytest.mark.parametrize(
+    "batch_size_rows, n_records",
+    [
+        (1, 5),
+        (2, 5),
+        (3, 10),
+        (5, 5),
+        (5, 7),
+        (10, 5),
+    ],
+)
+def test_all_records_written_with_batch_size_rows(
+    batch_size_rows: int,
+    n_records: int,
+) -> None:
+    """Regression test: no records are lost when batch_size_rows < total records."""
+    target = TargetMock(config={"batch_size_rows": batch_size_rows})
+    target.listen(_make_singer_input(n_records))
+
+    expected_batches = -(-n_records // batch_size_rows)  # ceiling division
+    assert target.num_records_processed == n_records
+    assert len(target.records_written) == n_records
+    assert target.num_batches_processed == expected_batches
+    assert [r["id"] for r in target.records_written] == list(range(1, n_records + 1))

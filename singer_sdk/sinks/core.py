@@ -719,6 +719,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
                 self._batch_records_read - self._batch_dupe_records_merged,
             )
         self._batch_records_read = 0
+        self._batch_dupe_records_merged = 0
 
     def activate_version(self, new_version: int) -> None:
         """Bump the active version of the target table.
