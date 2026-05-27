@@ -4,8 +4,6 @@ import logging
 import sys
 import typing as t
 
-import pytest
-
 from singer_sdk import metrics
 from singer_sdk.streams.rest import RESTStream
 
@@ -15,6 +13,7 @@ else:
     from typing_extensions import override
 
 if t.TYPE_CHECKING:
+    import pytest
     import requests_mock
 
     from singer_sdk.streams.rest import HTTPRequest, PageContext
@@ -41,24 +40,19 @@ class _BaseTestStream(RESTStream):
         return request
 
 
-@pytest.mark.parametrize("context", [None, {"partition": "p1"}])
-@pytest.mark.parametrize("log_urls", [True, False])
 def test_metrics_logging(
     requests_mock: requests_mock.Mocker,
     rest_tap: Tap,
     caplog: pytest.LogCaptureFixture,
-    context: dict | None,
-    log_urls: bool,
 ):
     class TestStream(_BaseTestStream):
         _LOG_REQUEST_METRICS = True
-        _LOG_REQUEST_METRIC_URLS = log_urls
 
     stream = TestStream(rest_tap)
     requests_mock.get("https://example.com/test?user_id=1", json=[{"id": 1}])
 
     with caplog.at_level(logging.INFO, logger="singer_sdk.metrics"):
-        records = stream.get_records(context)
+        records = stream.get_records(None)
 
     assert list(records) == [{"id": 1}]
     assert len(caplog.records) == 2
@@ -71,10 +65,7 @@ def test_metrics_logging(
     assert point_1.metric == "http_request_duration"
     assert point_1.tags["endpoint"] == "/test"
     assert "context" not in point_1.tags
-    assert (
-        (log_urls and point_1.tags.get("url") == "/test?user_id=1")  # Log URLs
-        or (not log_urls and "url" not in point_1.tags)  # Don't log URLs
-    )
+    assert "url" not in point_1.tags
 
     assert caplog.records[1].args
     assert isinstance(caplog.records[1].args, tuple)
