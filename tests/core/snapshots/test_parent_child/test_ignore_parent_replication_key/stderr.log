@@ -1,0 +1,3 @@
+INFO my-tap-irpk Skipping parse of env var settings...
+INFO my-tap-irpk Added 'child_irpk' as child stream to 'parent_irpk'
+WARNING my-tap-irpk Stream descendent 'child_irpk' is selected and its parent 'parent_irpk' does not use inclusive replication keys. Forcing full table replication for 'parent_irpk'.

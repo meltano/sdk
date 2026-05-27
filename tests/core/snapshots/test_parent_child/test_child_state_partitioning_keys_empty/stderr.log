@@ -1,0 +1,6 @@
+INFO my-tap-3631 Skipping parse of env var settings...
+INFO my-tap-3631 Added 'child_3631' as child stream to 'parent_3631'
+INFO my-tap-3631.parent_3631 Beginning sync of 'parent_3631' in full_table mode
+INFO my-tap-3631.child_3631 Beginning sync of 'child_3631' in full_table mode with context keys: ('pid',)
+INFO my-tap-3631.child_3631 Beginning sync of 'child_3631' in full_table mode with context keys: ('pid',)
+INFO my-tap-3631.child_3631 Beginning sync of 'child_3631' in full_table mode with context keys: ('pid',)

@@ -1,0 +1,7 @@
+INFO my-tap-incr-child Skipping parse of env var settings...
+INFO my-tap-incr-child Added 'child_incr' as child stream to 'parent_incr'
+INFO my-tap-incr-child.parent_incr Beginning sync of 'parent_incr' in full_table mode
+INFO my-tap-incr-child.child_incr Beginning sync of 'child_incr' in incremental mode with context keys: ('pid',)
+INFO my-tap-incr-child.child_incr Starting incremental sync of 'child_incr' with bookmark value: None
+INFO my-tap-incr-child.child_incr Beginning sync of 'child_incr' in incremental mode with context keys: ('pid',)
+INFO my-tap-incr-child.child_incr Starting incremental sync of 'child_incr' with bookmark value: None
