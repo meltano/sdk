@@ -32,6 +32,8 @@ __all__ = [
 ]
 
 if t.TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from sqlalchemy.engine.interfaces import (
         Dialect,
         ReflectedColumn,
@@ -146,7 +148,7 @@ class SQLToJSONSchema:
         self.use_singer_decimal = use_singer_decimal
 
     @classmethod
-    def from_config(cls: type[SQLToJSONSchema], config: dict) -> SQLToJSONSchema:
+    def from_config(cls: type[SQLToJSONSchema], config: Mapping) -> SQLToJSONSchema:
         """Create a new instance from a configuration dictionary.
 
         Override this to instantiate this converter with values from the tap's
@@ -320,7 +322,7 @@ class JSONSchemaToSQL:
     @classmethod
     def from_config(
         cls: type[JSONSchemaToSQL],
-        config: dict,  # noqa: ARG003
+        config: Mapping,  # noqa: ARG003
         *,
         max_varchar_length: int | None,
     ) -> JSONSchemaToSQL:
@@ -607,7 +609,7 @@ class SQLConnector:  # noqa: PLR0904
 
     def __init__(
         self,
-        config: dict | None = None,
+        config: Mapping[str, t.Any] | None = None,
         sqlalchemy_url: str | None = None,
     ) -> None:
         """Initialize the SQL connector.
@@ -616,12 +618,12 @@ class SQLConnector:  # noqa: PLR0904
             config: The parent tap or target object's config.
             sqlalchemy_url: Optional URL for the connection.
         """
-        self._config: dict[str, t.Any] = config or {}
+        self._config = config or {}
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
         self._tables_prepared: dict[str, bool] = {}
 
     @property
-    def config(self) -> dict:
+    def config(self) -> Mapping[str, t.Any]:
         """If set, provides access to the tap or target config.
 
         Returns:
@@ -742,7 +744,7 @@ class SQLConnector:  # noqa: PLR0904
 
         return self._sqlalchemy_url
 
-    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:  # noqa: PLR6301
+    def get_sqlalchemy_url(self, config: Mapping[str, t.Any]) -> str:  # noqa: PLR6301
         """Return the SQLAlchemy URL string.
 
         Developers can generally override just one of the following:

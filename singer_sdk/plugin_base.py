@@ -442,7 +442,7 @@ class PluginBase(abc.ABC):
         Returns:
             A frozen (read-only) config dictionary map.
         """
-        return t.cast("dict", MappingProxyType(self._config))
+        return MappingProxyType(self._config)
 
     def _validate_config(self, *, raise_errors: bool = True) -> list[str]:
         """Validate configuration input against the plugin configuration JSON schema.
