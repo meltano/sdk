@@ -36,9 +36,9 @@ license-files = [ "LICENSE" ]
 requires-python = ">=3.10"
 dependencies = [
     {%- if cookiecutter.faker_extra %}
-    "singer-sdk[faker]~=0.54.2",
+    "singer-sdk[faker]~=0.54.3",
     {%- else %}
-    "singer-sdk~=0.54.2",
+    "singer-sdk~=0.54.3",
     {%- endif %}
     "typing-extensions>=4.5.0; python_version < '3.13'",
 ]

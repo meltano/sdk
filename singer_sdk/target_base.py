@@ -471,6 +471,7 @@ class Target(BaseSingerReader, abc.ABC):
                     "`_sdc_deleted_at` metadata properties so they will be added to "
                     "the schema for '%s' even though `add_record_metadata` is "
                     "disabled.",
+                    sink.stream_name,
                 )
             sink.activate_version(message_dict["version"])
 
