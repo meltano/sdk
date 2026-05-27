@@ -8,6 +8,9 @@ from singer_sdk import typing as th
 from singer_sdk.contrib.msgspec import MsgSpecWriter
 from singer_sdk.sql import SQLConnector, SQLStream, SQLTap
 
+if t.TYPE_CHECKING:
+    from collections.abc import Mapping
+
 DB_PATH_CONFIG = "path_to_db"
 
 
@@ -17,7 +20,7 @@ class SQLiteConnector(SQLConnector):
     This class handles all DDL and type conversions.
     """
 
-    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:  # noqa: PLR6301
+    def get_sqlalchemy_url(self, config: Mapping[str, t.Any]) -> str:  # noqa: PLR6301
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
 

@@ -2,14 +2,19 @@
 
 from __future__ import annotations
 
+import typing as t
+
 from singer_sdk import SQLConnector, SQLStream, SQLTap
 from singer_sdk import typing as th  # JSON schema typing helpers
+
+if t.TYPE_CHECKING:
+    from collections.abc import Mapping
 
 
 class BigQueryConnector(SQLConnector):
     """Connects to the BigQuery SQL source."""
 
-    def get_sqlalchemy_url(self, config: dict) -> str:  # noqa: PLR6301
+    def get_sqlalchemy_url(self, config: Mapping) -> str:  # noqa: PLR6301
         """Concatenate a SQLAlchemy URL for use in connecting to the source."""
         return f"bigquery://{config['project_id']}"
 
