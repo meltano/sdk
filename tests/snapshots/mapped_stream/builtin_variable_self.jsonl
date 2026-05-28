@@ -1,5 +1,6 @@
 {"type":"SCHEMA","stream":"mystream","schema":{"type":"object","properties":{"email":{"type":["string","null"]}},"$schema":"https://json-schema.org/draft/2020-12/schema"},"key_properties":[]}
-{"type":"RECORD","stream":"mystream","record":{"email":"ALICE@EXAMPLE.COM"},"time_extracted":"2022-01-01T00:00:00+00:00"}
-{"type":"RECORD","stream":"mystream","record":{"email":"BOB@EXAMPLE.COM"},"time_extracted":"2022-01-01T00:00:00+00:00"}
-{"type":"RECORD","stream":"mystream","record":{"email":"CHARLIE@EXAMPLE.COM"},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"ACTIVATE_VERSION","stream":"mystream","version":1640995200}
+{"type":"RECORD","stream":"mystream","record":{"email":"ALICE@EXAMPLE.COM"},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"mystream","record":{"email":"BOB@EXAMPLE.COM"},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"mystream","record":{"email":"CHARLIE@EXAMPLE.COM"},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
 {"type":"STATE","value":{"bookmarks":{"mystream":{}}}}

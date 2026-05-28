@@ -1028,7 +1028,14 @@ def test_mapped_stream(
 ):
     snapshot.snapshot_dir = snapshot_dir.joinpath("mapped_stream")
 
-    tap = MappedTap(config={"stream_maps": stream_maps, **config}, validate_config=True)
+    tap = MappedTap(
+        config={
+            "emit_activate_version_messages": True,
+            "stream_maps": stream_maps,
+            **config,
+        },
+        validate_config=True,
+    )
     buf = io.StringIO()
     with redirect_stdout(buf):
         tap.sync_all()
