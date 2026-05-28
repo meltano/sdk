@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
-- [#3654](https://github.com/meltano/sdk/issues/3654) Emitted `ACTIVATE_VERSION` now honor the stream aliases configured with stream maps
+- [#3654](https://github.com/meltano/sdk/issues/3654) Emitted `ACTIVATE_VERSION` messages now honor the stream aliases configured with stream maps
 
 ## v0.54.3 (2026-05-27)
 
