@@ -491,9 +491,6 @@ class TapCapabilities(CapabilitiesEnum):
     #: Deprecated. Please use :attr:`~TapCapabilities.CATALOG` instead.
     PROPERTIES = "properties", "Please use CATALOG instead."
 
-    #: Support for ``ACTIVATE_VERSION`` messages.
-    ACTIVATE_VERSION = "activate-version"
-
 
 class TargetCapabilities(CapabilitiesEnum):
     """Target-specific capabilities."""
