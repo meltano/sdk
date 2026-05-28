@@ -226,6 +226,7 @@ def test_tap_config_default_injection():
         "username": "foo",
         "password": "bar",
         "batch_size": -1,
+        "emit_activate_version_messages": False,
     }
 
     assert dict(tap.config) == expected_tap_config
