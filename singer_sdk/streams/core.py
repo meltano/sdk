@@ -857,12 +857,16 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     def _write_activate_version_message(self, full_table_version: int) -> None:
         """Write out an ACTIVATE_VERSION message."""
-        singer.write_message(
-            singer.ActivateVersionMessage(
-                stream=self.name,
-                version=full_table_version,
+        for stream_map in self.stream_maps:
+            if isinstance(stream_map, RemoveRecordTransform):
+                continue
+
+            self._tap.write_message(
+                singer.ActivateVersionMessage(
+                    stream=stream_map.stream_alias,
+                    version=full_table_version,
+                )
             )
-        )
 
     def _generate_schema_messages(
         self,

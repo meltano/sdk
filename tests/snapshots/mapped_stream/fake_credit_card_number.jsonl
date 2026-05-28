@@ -1,5 +1,6 @@
 {"type":"SCHEMA","stream":"mystream","schema":{"type":"object","properties":{"cc":{"type":["string","null"]}},"$schema":"https://json-schema.org/draft/2020-12/schema"},"key_properties":[]}
-{"type":"RECORD","stream":"mystream","record":{"cc":"4201040137208265027"},"time_extracted":"2022-01-01T00:00:00+00:00"}
-{"type":"RECORD","stream":"mystream","record":{"cc":"675987782884"},"time_extracted":"2022-01-01T00:00:00+00:00"}
-{"type":"RECORD","stream":"mystream","record":{"cc":"502011811259"},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"ACTIVATE_VERSION","stream":"mystream","version":1640995200}
+{"type":"RECORD","stream":"mystream","record":{"cc":"4201040137208265027"},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"mystream","record":{"cc":"675987782884"},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"mystream","record":{"cc":"502011811259"},"version":1640995200,"time_extracted":"2022-01-01T00:00:00+00:00"}
 {"type":"STATE","value":{"bookmarks":{"mystream":{}}}}
