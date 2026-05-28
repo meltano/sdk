@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.54.4 (2026-05-28)
+
+### 🐛 Fixes
+
+- [#3654](https://github.com/meltano/sdk/issues/3654) Emitted `ACTIVATE_VERSION` now honor the stream aliases configured with stream maps
+
 ## v0.54.3 (2026-05-27)
 
 ### 🐛 Fixes
