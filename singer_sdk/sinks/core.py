@@ -122,9 +122,14 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
                 record with multiple problems reports them all at once instead
                 of stopping at the first failure.
         """
-        errors = sorted(self.validator.iter_errors(record), key=str)
+        errors = sorted(
+            self.validator.iter_errors(record),
+            key=lambda error: (list(error.path), error.message),
+        )
         if errors:
-            error_message = "; ".join(error.message for error in errors)
+            error_message = "; ".join(
+                f"{error.json_path}: {error.message}" for error in errors
+            )
             raise InvalidRecord(error_message, record) from errors[0]
 
 

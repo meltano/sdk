@@ -99,11 +99,13 @@ def test_jsonschema_validator_reports_all_errors():
     with pytest.raises(InvalidRecord) as exc_info:
         validator.validate(record)
 
-    message = exc_info.value.error_message
-    # Every field violation is surfaced, not just the first one.
-    assert "'not-an-int' is not of type 'integer'" in message
-    assert "123 is not of type 'string'" in message
-    assert "'old' is not of type 'integer'" in message
+    # Every field violation is surfaced, not just the first one, each prefixed
+    # with its location and emitted in a deterministic (path, message) order.
+    assert exc_info.value.error_message == (
+        "$.age: 'old' is not of type 'integer'; "
+        "$.id: 'not-an-int' is not of type 'integer'; "
+        "$.name: 123 is not of type 'string'"
+    )
     assert exc_info.value.record == record
 
 
