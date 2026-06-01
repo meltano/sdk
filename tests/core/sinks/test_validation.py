@@ -84,6 +84,29 @@ def test_jsonschema_validator():
         validator.validate({"id": 1, "created_at": "not-a-date"})
 
 
+def test_jsonschema_validator_reports_all_errors():
+    schema = {
+        "type": "object",
+        "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "age": {"type": "integer"},
+        },
+    }
+    validator = JSONSchemaValidator(schema=schema, validate_formats=False)
+
+    record = {"id": "not-an-int", "name": 123, "age": "old"}
+    with pytest.raises(InvalidRecord) as exc_info:
+        validator.validate(record)
+
+    message = exc_info.value.error_message
+    # Every field violation is surfaced, not just the first one.
+    assert "'not-an-int' is not of type 'integer'" in message
+    assert "123 is not of type 'string'" in message
+    assert "'old' is not of type 'integer'" in message
+    assert exc_info.value.record == record
+
+
 def test_validate_record():
     target = TargetMock()
     sink = BatchSinkMock(

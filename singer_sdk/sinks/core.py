@@ -117,12 +117,15 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
             record: Record message to validate.
 
         Raises:
-            InvalidRecord: If the record is invalid.
+            InvalidRecord: If the record is invalid. The exception message
+                aggregates every schema violation found in the record, so a
+                record with multiple problems reports them all at once instead
+                of stopping at the first failure.
         """
-        try:
-            self.validator.validate(record)
-        except jsonschema.ValidationError as e:
-            raise InvalidRecord(e.message, record) from e
+        errors = sorted(self.validator.iter_errors(record), key=str)
+        if errors:
+            error_message = "; ".join(error.message for error in errors)
+            raise InvalidRecord(error_message, record) from errors[0]
 
 
 class Sink(abc.ABC):  # noqa: PLR0904
