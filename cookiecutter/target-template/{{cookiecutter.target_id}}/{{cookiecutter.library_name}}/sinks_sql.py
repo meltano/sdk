@@ -46,6 +46,7 @@ class {{ cookiecutter.destination_name }}Sink(SQLSink):
 
     connector_class = {{ cookiecutter.destination_name }}Connector
 
+    @override
     def setup(self) -> None:
         """Set up Sink.
 
