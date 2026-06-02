@@ -5,6 +5,7 @@ from __future__ import annotations
 import enum
 import functools
 import logging
+import sys
 import typing as t
 from pathlib import Path
 
@@ -16,6 +17,11 @@ from singer_sdk import Tap
 from singer_sdk.contrib.filesystem import config as filesystem_config
 from singer_sdk.contrib.filesystem.stream import FileStream
 from singer_sdk.exceptions import ConfigValidationError
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 logger = logging.getLogger(__name__)
 
@@ -109,6 +115,7 @@ class FolderTap(Tap, t.Generic[_T]):
     config_jsonschema: t.ClassVar[dict] = {"properties": {}}
 
     @classmethod
+    @override
     def append_builtin_config(cls, config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
@@ -172,6 +179,7 @@ class FolderTap(Tap, t.Generic[_T]):
             target_options=self.config.get(protocol),
         )
 
+    @override
     def discover_streams(self) -> list:
         """Return a list of discovered streams.
 
