@@ -180,8 +180,10 @@ class StorageTarget:
         fs = self._root_path.fs
         fs.start_transaction()
         self._root_path.mkdir(parents=True, exist_ok=True)
-        yield fs
-        fs.end_transaction()
+        try:
+            yield fs
+        finally:
+            fs.end_transaction()
 
     @contextmanager
     def open(
