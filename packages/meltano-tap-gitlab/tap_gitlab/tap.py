@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 from singer_sdk import Tap
@@ -20,6 +21,12 @@ from tap_gitlab.streams import (
     ProjectsStream,
     ReleasesStream,
 )
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 
 if t.TYPE_CHECKING:
     from singer_sdk import Stream
@@ -77,6 +84,7 @@ class TapGitlab(Tap):
         ),
     ).to_dict()
 
+    @override
     def discover_streams(self) -> list[Stream]:
         """Return a list of discovered streams."""
         return [stream_class(tap=self) for stream_class in STREAM_TYPES]

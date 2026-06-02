@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 from sqlalchemy.engine.default import DefaultDialect
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from types import ModuleType
@@ -16,6 +22,7 @@ class CustomSQLDialect(DefaultDialect):
     name = "myrdbms"
 
     @classmethod
+    @override
     def import_dbapi(cls):
         """Import the sqlite3 DBAPI."""
         import sqlite3  # noqa: PLC0415
@@ -23,6 +30,7 @@ class CustomSQLDialect(DefaultDialect):
         return sqlite3
 
     @classmethod
+    @override
     def dbapi(cls) -> ModuleType:  # type: ignore[override]
         """Return the DBAPI module.
 

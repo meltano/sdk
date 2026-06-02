@@ -2,9 +2,16 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 from singer_sdk.sinks import BatchSink
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 
 try:
     import pyarrow as pa
@@ -98,6 +105,7 @@ class ParquetSink(BatchSink):
 
     max_size = 100000  # Max records to write in any batch
 
+    @override
     def process_batch(self, context: dict) -> None:
         """Write any prepped records out and return only once fully written."""
         records_to_drain = context["records"]
