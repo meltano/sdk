@@ -53,6 +53,7 @@ Note:
 from __future__ import annotations
 
 import json
+import sys
 import typing as t
 
 from jsonschema import validators
@@ -64,6 +65,11 @@ from singer_sdk.helpers._typing import (
     append_type,
     get_datelike_property_type,
 )
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     import sqlalchemy.types
@@ -112,6 +118,7 @@ DEFAULT_JSONSCHEMA_VALIDATOR = validators.Draft202012Validator
 
 T = t.TypeVar("T", bound=_JsonValue)
 P = t.TypeVar("P")
+V = t.TypeVar("V")
 
 
 def extend_validator_with_defaults(validator_class: type[DEFAULT_JSONSCHEMA_VALIDATOR]):  # noqa: ANN201
@@ -152,7 +159,7 @@ def extend_validator_with_defaults(validator_class: type[DEFAULT_JSONSCHEMA_VALI
     )
 
 
-class DefaultInstanceProperty:
+class DefaultInstanceProperty(t.Generic[P, V]):
     """Property of default instance.
 
     Descriptor similar to ``property`` that decorates an instance method to retrieve
@@ -160,7 +167,7 @@ class DefaultInstanceProperty:
     the class.
     """
 
-    def __init__(self, fget: t.Callable) -> None:
+    def __init__(self, fget: t.Callable[[P], V]) -> None:
         """Initialize the decorator.
 
         Args:
@@ -168,7 +175,7 @@ class DefaultInstanceProperty:
         """
         self.fget = fget
 
-    def __get__(self, instance: P, owner: type[P]) -> t.Any:  # noqa: ANN401
+    def __get__(self, instance: P | None, owner: type[P]) -> V:
         """Get the property value.
 
         Args:
@@ -235,7 +242,7 @@ class JSONTypeHelper(t.Generic[T]):
         Returns:
             A JSON Schema dictionary describing the object.
         """
-        return self.type_dict  # type: ignore[no-any-return]
+        return self.type_dict
 
     def to_json(self, **kwargs: t.Any) -> str:
         """Convert to JSON.
@@ -618,6 +625,7 @@ class ArrayType(JSONTypeHelper[list], t.Generic[W]):
         super().__init__(**kwargs)
 
     @property
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -713,6 +721,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         self.kwargs = kwargs
 
     @property
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -725,15 +734,16 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         wrapped = self.wrapped
 
         if isinstance(wrapped, type) and not isinstance(wrapped.type_dict, t.Mapping):
-            msg = (
+            msg = (  # type: ignore[unreachable]
                 f"Type dict for {wrapped} is not defined. Try instantiating it with a "
                 f"nested type such as {wrapped.__name__}(StringType)."
             )
             # TODO: this should be a TypeError, but it's a breaking change.
             raise ValueError(msg)  # noqa: TRY004
 
-        return t.cast("dict", wrapped.type_dict)
+        return wrapped.type_dict
 
+    @override
     def to_dict(self) -> dict:
         """Return a dict mapping the property name to its definition.
 
@@ -875,6 +885,7 @@ class ObjectType(JSONTypeHelper):
         super().__init__(**kwargs)
 
     @property
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -952,6 +963,7 @@ class AnyOf(JSONTypeHelper):
         self.wrapped = types
 
     @property
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -994,6 +1006,7 @@ class OneOf(JSONTypeHelper):
         self.wrapped = types
 
     @property
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -1053,6 +1066,7 @@ class AllOf(JSONTypeHelper):
         self.wrapped = types
 
     @property
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -1084,6 +1098,7 @@ class Constant(JSONTypeHelper):
         self.value = value
 
     @property
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -1178,6 +1193,7 @@ class NullType(JSONTypeHelper[None]):
     """
 
     @property
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -1199,6 +1215,7 @@ class CustomType(JSONTypeHelper):
         self._jsonschema_type_dict = jsonschema_type_dict
 
     @property
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -1311,6 +1328,7 @@ class PropertiesList(ObjectType):
         self.wrapped[property.name] = property
 
     @property
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
