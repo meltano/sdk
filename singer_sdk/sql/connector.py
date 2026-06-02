@@ -621,6 +621,7 @@ class SQLConnector:  # noqa: PLR0904
         self._config = config or {}
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
         self._tables_prepared: dict[str, bool] = {}
+        self._cached_inspector: reflection.Inspector | None = None
 
     @property
     def config(self) -> Mapping[str, t.Any]:
@@ -893,6 +894,25 @@ class SQLConnector:  # noqa: PLR0904
         if not self._cached_engine:
             self._cached_engine = self.create_engine()
         return self._cached_engine
+
+    @property
+    def _inspector(self) -> reflection.Inspector:
+        """Return the cached SQLAlchemy inspector for this connector."""
+        if self._cached_inspector is None:
+            self._cached_inspector = sa.inspect(self._engine)
+        return self._cached_inspector
+
+    def clear_reflection_cache(self) -> None:
+        """Clear cached SQLAlchemy reflection state, if an inspector exists."""
+        if self._cached_inspector is None:
+            return
+
+        clear_cache = getattr(self._cached_inspector, "clear_cache", None)
+        if clear_cache:
+            clear_cache()
+            return
+
+        self._cached_inspector.info_cache.clear()
 
     def create_engine(self) -> sa.Engine:
         """Creates and returns a new engine. Do not call outside of _engine.
@@ -1206,7 +1226,7 @@ class SQLConnector:  # noqa: PLR0904
         """
         _, schema_name, table_name = self.parse_full_table_name(full_table_name)
 
-        return sa.inspect(self._engine).has_table(table_name, schema_name)
+        return self._inspector.has_table(table_name, schema_name)
 
     def schema_exists(self, schema_name: str) -> bool:
         """Determine if the target database schema already exists.
@@ -1217,7 +1237,7 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             True if the database schema exists, False if not.
         """
-        schemas = set(sa.inspect(self._engine).get_schema_names())
+        schemas = set(self._inspector.get_schema_names())
         return schema_name in schemas
 
     def get_table_columns(
@@ -1235,8 +1255,7 @@ class SQLConnector:  # noqa: PLR0904
             An ordered list of column objects.
         """
         _, schema_name, table_name = self.parse_full_table_name(full_table_name)
-        inspector = sa.inspect(self._engine)
-        columns = inspector.get_columns(table_name, schema_name)
+        columns = self._inspector.get_columns(table_name, schema_name)
 
         columns_dict: dict[str, sa.Column] = {
             col_meta["name"]: sa.Column(
@@ -1300,6 +1319,7 @@ class SQLConnector:  # noqa: PLR0904
         """
         with self._connect() as conn, conn.begin():
             conn.execute(ddl.CreateSchema(schema_name))
+        self.clear_reflection_cache()
 
     def create_empty_table(
         self,
@@ -1354,6 +1374,7 @@ class SQLConnector:  # noqa: PLR0904
 
         _ = sa.Table(table_name, meta, *columns, *table_args)
         meta.create_all(self._engine)
+        self.clear_reflection_cache()
 
     def _create_empty_column(
         self,
@@ -1382,6 +1403,7 @@ class SQLConnector:  # noqa: PLR0904
         )
         with self._connect() as conn, conn.begin():
             conn.execute(column_add_ddl)
+        self.clear_reflection_cache()
 
     def prepare_schema(self, schema_name: str) -> None:
         """Create the target database schema.
@@ -1426,6 +1448,7 @@ class SQLConnector:  # noqa: PLR0904
             meta = sa.MetaData()
             table = sa.Table(table_name, meta, schema=schema_name)
             table.drop(self._engine, checkfirst=True)
+            self.clear_reflection_cache()
             self.logger.info("Creating empty table %s", full_table_name)
             self.create_empty_table(
                 full_table_name=full_table_name,
@@ -1521,6 +1544,7 @@ class SQLConnector:  # noqa: PLR0904
         )
         with self._connect() as conn, conn.begin():
             conn.execute(column_rename_ddl)
+        self.clear_reflection_cache()
 
     def merge_sql_types(
         self,
@@ -1828,6 +1852,7 @@ class SQLConnector:  # noqa: PLR0904
         )
         with self._connect() as conn, conn.begin():
             conn.execute(alter_column_ddl)
+        self.clear_reflection_cache()
 
     def serialize_json(self, obj: object) -> str:  # noqa: PLR6301
         """Serialize an object to a JSON string.
