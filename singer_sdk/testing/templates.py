@@ -4,12 +4,18 @@ from __future__ import annotations
 
 import contextlib
 import importlib.resources
+import sys
 import typing as t
 import warnings
 from functools import cached_property
 
 from singer_sdk.testing import target_test_streams
 from singer_sdk.testing.runners import SingerTestRunner, TargetTestRunner
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
@@ -132,6 +138,7 @@ class TapTestTemplate(TestTemplate):
     """Base Tap test template."""
 
     @property
+    @override
     def id(self) -> str:
         """Test ID.
 
@@ -140,6 +147,7 @@ class TapTestTemplate(TestTemplate):
         """
         return f"tap__{self.name}"
 
+    @override
     def run(
         self,
         config: SuiteConfig,
@@ -163,6 +171,7 @@ class StreamTestTemplate(TestTemplate):
     required_kwargs: t.ClassVar[list[str]] = ["stream"]
 
     @property
+    @override
     def id(self) -> str:
         """Test ID.
 
@@ -179,6 +188,7 @@ class StreamTestTemplate(TestTemplate):
             or self.stream.name in self.config.ignore_no_records_for_streams
         )
 
+    @override
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
@@ -203,6 +213,7 @@ class AttributeTestTemplate(StreamTestTemplate):
     """Base Tap Stream Attribute template."""
 
     @property
+    @override
     def id(self) -> str:
         """Test ID.
 
@@ -211,6 +222,7 @@ class AttributeTestTemplate(StreamTestTemplate):
         """
         return f"{self.stream.name}__{self.attribute_name}__{self.name}"
 
+    @override
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
@@ -279,6 +291,7 @@ class AttributeTestTemplate(StreamTestTemplate):
 class TargetTestTemplate(TestTemplate[TargetTestRunner]):
     """Base Target test template."""
 
+    @override
     def run(
         self,
         config: SuiteConfig,
@@ -296,6 +309,7 @@ class TargetTestTemplate(TestTemplate[TargetTestRunner]):
         super().run(config, resource, runner)
 
     @property
+    @override
     def id(self) -> str:
         """Test ID.
 
@@ -311,6 +325,7 @@ class TargetFileTestTemplate(TargetTestTemplate):
     Use this when sourcing Target test input from a .singer file.
     """
 
+    @override
     def run(
         self,
         config: SuiteConfig,

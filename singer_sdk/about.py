@@ -5,11 +5,17 @@ from __future__ import annotations
 import abc
 import dataclasses
 import json
+import sys
 import typing as t
 from textwrap import dedent
 
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from collections.abc import Sequence
@@ -155,7 +161,8 @@ class AboutFormatter(abc.ABC):
 class TextFormatter(AboutFormatter, format_name="text"):
     """About formatter for text output."""
 
-    def format_about(self, about_info: AboutInfo) -> str:  # noqa: PLR6301
+    @override
+    def format_about(self, about_info: AboutInfo) -> str:
         """Render about information.
 
         Args:
@@ -200,6 +207,7 @@ class JSONFormatter(AboutFormatter, format_name="json"):
         self.indent = 2
         self.default = str
 
+    @override
     def format_about(self, about_info: AboutInfo) -> str:
         """Render about information.
 
@@ -278,6 +286,7 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
                 parent_name=parent_name,
             )
 
+    @override
     def format_about(self, about_info: AboutInfo) -> str:
         """Render about information.
 

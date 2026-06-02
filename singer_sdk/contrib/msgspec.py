@@ -15,6 +15,11 @@ from singer_sdk.singerlib.encoding.base import GenericSingerReader, GenericSinge
 from singer_sdk.singerlib.encoding.simple import Message
 from singer_sdk.singerlib.exceptions import InvalidInputLine
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 logger = logging.getLogger(__name__)
 
 
@@ -68,7 +73,8 @@ class MsgSpecReader(GenericSingerReader[str]):
 
     default_input = sys.stdin
 
-    def deserialize_json(self, line: str) -> dict:  # noqa: PLR6301
+    @override
+    def deserialize_json(self, line: str) -> dict:
         """Deserialize a line of json.
 
         Args:
@@ -91,7 +97,8 @@ class MsgSpecReader(GenericSingerReader[str]):
 class MsgSpecWriter(GenericSingerWriter[bytearray, Message]):
     """Interface for all plugins writing Singer messages to stdout."""
 
-    def serialize_message(self, message: Message) -> bytearray:  # noqa: PLR6301
+    @override
+    def serialize_message(self, message: Message) -> bytearray:
         """Serialize a dictionary into a line of json.
 
         Args:
@@ -102,6 +109,7 @@ class MsgSpecWriter(GenericSingerWriter[bytearray, Message]):
         """
         return serialize_jsonl(message.to_dict())
 
+    @override
     def write_message(self, message: Message) -> None:
         """Write a message to stdout.
 

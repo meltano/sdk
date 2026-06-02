@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 import singer_sdk.singerlib as singer
@@ -9,6 +10,12 @@ import singer_sdk.typing as th
 from singer_sdk.helpers._util import utc_now  # noqa: PLC2701
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform
 from singer_sdk.mapper_base import InlineMapper
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -71,6 +78,7 @@ class StreamTransform(InlineMapper):
 
         self.mapper = PluginMapper(plugin_config=dict(self.config), logger=self.logger)
 
+    @override
     def map_schema_message(
         self,
         message_dict: dict,
@@ -102,6 +110,7 @@ class StreamTransform(InlineMapper):
                 message_dict.get("bookmark_keys", []),
             )
 
+    @override
     def map_record_message(
         self,
         message_dict: dict,
@@ -127,7 +136,8 @@ class StreamTransform(InlineMapper):
                     time_extracted=utc_now(),
                 )
 
-    def map_state_message(self, message_dict: dict) -> list[singer.Message]:  # noqa: PLR6301
+    @override
+    def map_state_message(self, message_dict: dict) -> list[singer.Message]:
         """Do nothing to the message.
 
         Args:
@@ -138,6 +148,7 @@ class StreamTransform(InlineMapper):
         """
         return [singer.StateMessage(value=message_dict["value"])]
 
+    @override
     def map_activate_version_message(
         self,
         message_dict: dict,

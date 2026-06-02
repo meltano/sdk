@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 import warnings
 
@@ -14,6 +15,12 @@ from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
+
 if t.TYPE_CHECKING:
     from singer_sdk import Tap
     from singer_sdk.streams.core import Stream
@@ -24,6 +31,7 @@ class TapCLIPrintsTest(TapTestTemplate):
 
     name = "cli_prints"
 
+    @override
     def test(self) -> None:
         """Run test."""
         self.tap.print_version()
@@ -36,6 +44,7 @@ class TapDiscoveryTest(TapTestTemplate):
 
     name = "discovery"
 
+    @override
     def test(self) -> None:
         """Run test."""
         tap1 = self.tap
@@ -56,6 +65,7 @@ class TapStreamConnectionTest(TapTestTemplate):
 
     name = "stream_connections"
 
+    @override
     def test(self) -> None:
         """Run test."""
         self.tap.run_connection_test()
@@ -67,6 +77,7 @@ class TapValidFinalStateTest(TapTestTemplate):
     name = "valid_final_state"
     message = "Final state has in-progress markers."
 
+    @override
     def test(self) -> None:
         """Run test."""
         final_state = self.runner.state_messages[-1]
@@ -78,6 +89,7 @@ class StreamSchemaIsValidTest(StreamTestTemplate):
 
     name = "schema_is_valid"
 
+    @override
     def test(self) -> None:
         """Run test.
 
@@ -99,6 +111,7 @@ class StreamReturnsRecordTest(StreamTestTemplate):
 
     name = "returns_record"
 
+    @override
     def test(self) -> None:
         """Run test."""
         if self.ignore_no_records:
@@ -116,6 +129,7 @@ class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
 
     name = "transformed_catalog_schema_matches_record"
 
+    @override
     def test(self) -> None:
         """Run test."""
         if not self.stream_records:
@@ -142,6 +156,7 @@ class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):
 
     name = "record_schema_matches_transformed_catalog"
 
+    @override
     def test(self) -> None:
         """Run test."""
         stream_transformed_keys = set(
@@ -157,6 +172,7 @@ class StreamRecordMatchesStreamSchema(StreamTestTemplate):
 
     name = "record_matches_stream_schema"
 
+    @override
     def test(self) -> None:
         """Run test."""
         schema = self.stream.schema
@@ -182,6 +198,7 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
 
     name = "primary_keys"
 
+    @override
     def test(self) -> None:
         """Run test.
 
@@ -212,6 +229,7 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
 
     name = "is_datetime"
 
+    @override
     def test(self) -> None:
         """Run test.
 
@@ -226,10 +244,11 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
             raise AssertionError(error_message) from e
 
     @classmethod
+    @override
     def evaluate(
         cls,
-        stream: Stream,  # noqa: ARG003
-        property_name: str,  # noqa: ARG003
+        stream: Stream,
+        property_name: str,
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -250,6 +269,7 @@ class AttributeIsBooleanTest(AttributeTestTemplate):
 
     name = "is_boolean"
 
+    @override
     def test(self) -> None:
         """Run test."""
         for v in self.non_null_attribute_values:
@@ -259,10 +279,11 @@ class AttributeIsBooleanTest(AttributeTestTemplate):
             }, f"Unable to cast value ('{v}') to boolean type."
 
     @classmethod
+    @override
     def evaluate(
         cls,
-        stream: Stream,  # noqa: ARG003
-        property_name: str,  # noqa: ARG003
+        stream: Stream,
+        property_name: str,
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -283,16 +304,18 @@ class AttributeIsObjectTest(AttributeTestTemplate):
 
     name = "is_object"
 
+    @override
     def test(self) -> None:
         """Run test."""
         for v in self.non_null_attribute_values:
             assert isinstance(v, dict), f"Unable to cast value ('{v}') to dict type."
 
     @classmethod
+    @override
     def evaluate(
         cls,
-        stream: Stream,  # noqa: ARG003
-        property_name: str,  # noqa: ARG003
+        stream: Stream,
+        property_name: str,
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -313,6 +336,7 @@ class AttributeIsIntegerTest(AttributeTestTemplate):
 
     name = "is_integer"
 
+    @override
     def test(self) -> None:
         """Run test."""
         for v in self.non_null_attribute_values:
@@ -322,10 +346,11 @@ class AttributeIsIntegerTest(AttributeTestTemplate):
             ), f"Unable to cast value ('{v}') to int type."
 
     @classmethod
+    @override
     def evaluate(
         cls,
-        stream: Stream,  # noqa: ARG003
-        property_name: str,  # noqa: ARG003
+        stream: Stream,
+        property_name: str,
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -346,6 +371,7 @@ class AttributeIsNumberTest(AttributeTestTemplate):
 
     name = "is_numeric"
 
+    @override
     def test(self) -> None:
         """Run test.
 
@@ -358,10 +384,11 @@ class AttributeIsNumberTest(AttributeTestTemplate):
                 raise AssertionError(error_message)  # noqa: TRY004
 
     @classmethod
+    @override
     def evaluate(
         cls,
-        stream: Stream,  # noqa: ARG003
-        property_name: str,  # noqa: ARG003
+        stream: Stream,
+        property_name: str,
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -382,6 +409,7 @@ class AttributeNotNullTest(AttributeTestTemplate):
 
     name = "not_null"
 
+    @override
     def test(self) -> None:
         """Run test."""
         for r in self.stream_records:
@@ -390,10 +418,11 @@ class AttributeNotNullTest(AttributeTestTemplate):
             )
 
     @classmethod
+    @override
     def evaluate(
         cls,
-        stream: Stream,  # noqa: ARG003
-        property_name: str,  # noqa: ARG003
+        stream: Stream,
+        property_name: str,
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.

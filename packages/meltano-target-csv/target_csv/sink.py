@@ -3,9 +3,15 @@
 from __future__ import annotations
 
 import csv
+import sys
 from pathlib import Path
 
 from singer_sdk.sinks import BatchSink
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 class CSVSink(BatchSink):
@@ -23,6 +29,7 @@ class CSVSink(BatchSink):
         """Return target filepath."""
         return self.target_folder / f"{self.stream_name}.csv"
 
+    @override
     def process_batch(self, context: dict) -> None:
         """Write `records_to_drain` out to file."""
         records_to_drain = context["records"]
