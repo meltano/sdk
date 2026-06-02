@@ -180,7 +180,7 @@ class TestStructuredFormatter:
         logger.addHandler(handler)
 
         # Create a chained exception
-        try:
+        try:  # noqa: PLW0717
             try:
                 msg = "Original error"
                 raise ValueError(msg)  # noqa: TRY301
@@ -224,7 +224,7 @@ class TestStructuredFormatter:
         logger.addHandler(handler)
 
         # Create a context exception
-        try:
+        try:  # noqa: PLW0717
             try:
                 msg = "Original error"
                 raise ValueError(msg)  # noqa: TRY301

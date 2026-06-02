@@ -52,12 +52,14 @@ class SimpleTestStream(Stream):
         yield {"id": 3, "value": "India", "updatedAt": "2021-01-01T00:00:02Z"}
 
     @contextmanager
-    def with_replication_method(self, method: str | None) -> t.Iterator[None]:
+    def with_replication_method(self, method: str | None) -> t.Generator[None]:
         """Context manager to temporarily override the replication method."""
         original_method = self.forced_replication_method
         self.forced_replication_method = method
-        yield
-        self.forced_replication_method = original_method
+        try:
+            yield
+        finally:
+            self.forced_replication_method = original_method
 
 
 class UnixTimestampIncrementalStream(SimpleTestStream):
