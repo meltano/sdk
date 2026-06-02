@@ -78,6 +78,7 @@ class BaseAPIPaginator(ABC, t.Generic[TPageToken]):
         """
         return self._page_count
 
+    @override
     def __str__(self) -> str:
         """Stringify this object.
 
@@ -86,6 +87,7 @@ class BaseAPIPaginator(ABC, t.Generic[TPageToken]):
         """
         return f"{self.__class__.__name__}<{self.current_value}>"
 
+    @override
     def __repr__(self) -> str:
         """Stringify this object.
 
