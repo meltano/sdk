@@ -621,7 +621,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
 
             if datelike_type := get_datelike_property_type(schema["properties"][key]):
                 date_val = value
-                try:
+                try:  # noqa: PLW0717
                     if value is not None:
                         if datelike_type == "time":
                             date_val = time_fromisoformat(date_val)

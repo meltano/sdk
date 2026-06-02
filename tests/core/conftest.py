@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import sys
 import typing as t
-from contextlib import contextmanager
 
 import pytest
 
@@ -51,8 +50,7 @@ class SimpleTestStream(Stream):
         yield {"id": 2, "value": "Germany", "updatedAt": "2021-01-01T00:00:01Z"}
         yield {"id": 3, "value": "India", "updatedAt": "2021-01-01T00:00:02Z"}
 
-    @contextmanager
-    def with_replication_method(self, method: str | None) -> t.Iterator[None]:
+    def with_replication_method(self, method: str | None) -> t.Generator[None]:
         """Context manager to temporarily override the replication method."""
         original_method = self.forced_replication_method
         self.forced_replication_method = method
