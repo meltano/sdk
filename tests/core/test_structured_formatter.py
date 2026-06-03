@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import sys
 from io import StringIO
 
 import pytest
@@ -252,6 +253,45 @@ class TestStructuredFormatter:
         assert log_data["exception"]["context"]["type"] == "ValueError"
         assert log_data["exception"]["context"]["module"] == "builtins"
         assert log_data["exception"]["context"]["message"] == "Original error"
+
+        # Clean up
+        logger.removeHandler(handler)
+
+    @pytest.mark.skipif(
+        sys.version_info < (3, 11),
+        reason="Exception notes are Python 3.11+",
+    )
+    def test_structured_formatter_with_exception_notes(self):
+        """Test that StructuredFormatter handles exception notes properly."""
+        logger = logging.getLogger("test_logger_exception_notes")
+        logger.setLevel(logging.ERROR)
+
+        log_stream = StringIO()
+        handler = logging.StreamHandler(log_stream)
+        formatter = StructuredFormatter()
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
+        # Create an exception with notes
+        try:
+            msg = "Test exception"
+            exc = ValueError(msg)
+            exc.add_note("Info")
+            exc.add_note("Moar info")
+            raise exc
+        except ValueError:
+            logger.exception("Error occurred")
+
+        # Get the logged output
+        log_output = log_stream.getvalue().strip()
+        log_data = json.loads(log_output)
+
+        # Verify exception info and extra fields
+        assert log_data["message"] == "Error occurred"
+        assert log_data["exception"]["notes"] == ["Info", "Moar info"]
+
+        # Clean up
+        logger.removeHandler(handler)
 
     def test_structured_formatter_json_serialization_fallback(self):
         """Test that StructuredFormatter handles non-serializable objects."""
