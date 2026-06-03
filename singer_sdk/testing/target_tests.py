@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sys
+
 import pytest
 
 from singer_sdk.exceptions import (
@@ -10,6 +12,11 @@ from singer_sdk.exceptions import (
 )
 
 from .templates import TargetFileTestTemplate, TargetTestTemplate
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 class TargetArrayData(TargetFileTestTemplate):
@@ -35,6 +42,7 @@ class TargetCliPrintsTest(TargetTestTemplate):
 
     name = "cli_prints"
 
+    @override
     def test(self) -> None:
         """Run test."""
         self.target.print_version()
@@ -59,6 +67,7 @@ class TargetInvalidSchemaTest(TargetFileTestTemplate):
 
     name = "invalid_schema"
 
+    @override
     def test(self) -> None:
         """Run test."""
         # TODO: the SDK should raise a better error than Exception in this case
@@ -72,6 +81,7 @@ class TargetMultipleStateMessages(TargetFileTestTemplate):
 
     name = "multiple_state_messages"
 
+    @override
     def test(self) -> None:
         """Run test."""
         self.runner.sync_all()
@@ -100,6 +110,7 @@ class TargetRecordBeforeSchemaTest(TargetFileTestTemplate):
 
     name = "record_before_schema"
 
+    @override
     def test(self) -> None:
         """Run test."""
         with pytest.raises(RecordsWithoutSchemaException):
@@ -111,6 +122,7 @@ class TargetRecordMissingKeyProperty(TargetFileTestTemplate):
 
     name = "record_missing_key_property"
 
+    @override
     def test(self) -> None:
         """Run test."""
         with pytest.raises(MissingKeyPropertiesError):

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import re
+import sys
 import typing as t
 import warnings
 from collections import defaultdict
@@ -18,6 +19,11 @@ from singer_sdk.helpers._conformers import replace_leading_digit
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.sinks.batch import BatchSink
 from singer_sdk.sql.connector import SQLConnector
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from sqlalchemy.sql import Executable
@@ -237,6 +243,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         self._check_conformed_names_not_duplicated(conformed_property_names)
         return {conformed_property_names[key]: value for key, value in record.items()}
 
+    @override
     def setup(self) -> None:
         """Set up Sink.
 
@@ -253,6 +260,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         )
 
     @property
+    @override
     def key_properties(self) -> t.Sequence[str]:
         """Return key properties, conformed to target system naming requirements.
 
@@ -261,6 +269,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         """
         return [self.conform_name(key, "column") for key in super().key_properties]
 
+    @override
     def process_batch(self, context: dict) -> None:
         """Process a batch with the given batch context.
 
@@ -386,6 +395,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         """
         raise NotImplementedError
 
+    @override
     def activate_version(self, new_version: int) -> None:
         """Bump the active version of the target table.
 

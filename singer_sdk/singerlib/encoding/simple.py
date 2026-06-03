@@ -15,6 +15,11 @@ from singer_sdk.singerlib.json import deserialize_json, serialize_json
 
 from .base import GenericSingerReader, GenericSingerWriter, SingerMessageType
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 logger = logging.getLogger(__name__)
 
 
@@ -79,6 +84,7 @@ class RecordMessage(Message):
     """The time the record was extracted."""
 
     @classmethod
+    @override
     def from_dict(cls: type[RecordMessage], data: dict[str, t.Any]) -> RecordMessage:
         """Create a record message from a dictionary.
 
@@ -101,6 +107,7 @@ class RecordMessage(Message):
             else None,
         )
 
+    @override
     def to_dict(self) -> dict[str, t.Any]:
         """Return a dictionary representation of the message.
 
@@ -202,7 +209,8 @@ class SimpleSingerReader(GenericSingerReader[str]):
 
     default_input = sys.stdin
 
-    def deserialize_json(self, line: str) -> dict:  # noqa: PLR6301
+    @override
+    def deserialize_json(self, line: str) -> dict:
         """Deserialize a line of json.
 
         Args:
@@ -225,7 +233,8 @@ class SimpleSingerReader(GenericSingerReader[str]):
 class SimpleSingerWriter(GenericSingerWriter[str, Message]):
     """Interface for all plugins writing Singer messages to stdout."""
 
-    def serialize_message(self, message: Message) -> str:  # noqa: PLR6301
+    @override
+    def serialize_message(self, message: Message) -> str:
         """Serialize a dictionary into a line of json.
 
         Args:
@@ -236,6 +245,7 @@ class SimpleSingerWriter(GenericSingerWriter[str, Message]):
         """
         return serialize_json(message.to_dict())
 
+    @override
     def write_message(self, message: Message) -> None:
         """Write a message to stdout.
 

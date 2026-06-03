@@ -4,15 +4,22 @@ from __future__ import annotations
 
 import abc
 import datetime
+import sys
 import uuid
 
 from singer_sdk.sinks.core import Sink
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 class BatchSink(Sink):
     """Base class for batched record writers."""
 
-    def _get_context(self, record: dict) -> dict:  # noqa: ARG002
+    @override
+    def _get_context(self, record: dict) -> dict:
         """Return a batch context. If no batch is active, return a new batch context.
 
         The SDK-generated context will contain `batch_id` (GUID string) and
@@ -50,7 +57,8 @@ class BatchSink(Sink):
             context: Stream partition or context dictionary.
         """
 
-    def process_record(self, record: dict, context: dict) -> None:  # noqa: PLR6301
+    @override
+    def process_record(self, record: dict, context: dict) -> None:
         """Load the latest record from the stream.
 
         Developers may either load to the `context` dict for staging (the
@@ -72,6 +80,7 @@ class BatchSink(Sink):
 
         context["records"].append(record)
 
+    @override
     @abc.abstractmethod
     def process_batch(self, context: dict) -> None:
         """Process a batch with the given batch context.

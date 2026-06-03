@@ -16,6 +16,11 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Required
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 
 class _FrameData(t.TypedDict):
     """Frame data."""
@@ -134,6 +139,7 @@ class StructuredFormatter(logging.Formatter):
 
         return exception_data
 
+    @override
     def format(self, record: logging.LogRecord) -> str:
         """Format the log record as structured JSON.
 

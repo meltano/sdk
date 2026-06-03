@@ -179,6 +179,7 @@ def test_sync_timer(caplog: pytest.LogCaptureFixture):
     assert record.msg.startswith("METRIC")
 
     assert record.args
+    assert isinstance(record.args, tuple)
     assert isinstance(record.args[0], metrics.Point)
 
     point = record.args[0].to_dict()
@@ -234,6 +235,7 @@ def test_metric_filter_exclude_metrics(
     assert filtered[0].msg == "Hey there"
     assert filtered[1].msg == "METRIC: %s"
     assert filtered[1].args
+    assert isinstance(filtered[1].args, tuple)
     assert isinstance(filtered[1].args[0], metrics.Point)
     assert filtered[1].args[0].metric.value == "sync_duration"
 
@@ -247,6 +249,7 @@ def test_metric_filter_exclude_metric_types(
     assert filtered[0].msg == "Hey there"
     assert filtered[1].msg == "METRIC: %s"
     assert filtered[1].args
+    assert isinstance(filtered[1].args, tuple)
     assert isinstance(filtered[1].args[0], metrics.Point)
     assert filtered[1].args[0].metric.value == "record_count"
 
@@ -263,6 +266,7 @@ def test_metric_filter_exclude_tags(
     assert len(filtered) == 2
     assert filtered[0].msg == "Hey there"
     assert filtered[1].args
+    assert isinstance(filtered[1].args, tuple)
     assert isinstance(filtered[1].args[0], metrics.Point)
     assert filtered[1].args[0].tags[metrics.Tag.STREAM] == "teams"
 
@@ -304,6 +308,7 @@ def test_metric_filter_exclude_name_and_type(
     assert filtered[0].msg == "Hey there"
     assert filtered[1].msg == "METRIC: %s"
     assert filtered[1].args
+    assert isinstance(filtered[1].args, tuple)
     assert isinstance(filtered[1].args[0], metrics.Point)
     assert filtered[1].args[0].metric.value == "sync_duration"
 

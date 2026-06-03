@@ -73,8 +73,8 @@ test = [
     "singer-sdk[testing]",
 ]
 typing = [
-    "mypy>=1.19.1",
-    "ty>=0.0.18",
+    "mypy>=2.1",
+    "ty>=0.0.41",
     {%- if cookiecutter.stream_type == "SQL" %}
     "sqlalchemy-stubs",
     {%- endif %}
@@ -103,6 +103,7 @@ warn_unused_configs = true
 warn_unused_ignores = true
 
 [tool.ty.rules]
+missing-override-decorator = "error"
 unused-type-ignore-comment = "ignore"
 
 [tool.pytest]

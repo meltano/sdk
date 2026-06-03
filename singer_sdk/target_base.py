@@ -29,6 +29,11 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import BaseSingerReader, _ConfigInput
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 if t.TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import PurePath
@@ -323,10 +328,12 @@ class Target(BaseSingerReader, abc.ABC):
             )
             self.drain_all()
 
+    @override
     def process_endofpipe(self) -> None:
         """Called after all input lines have been read."""
         self.drain_all(is_endofpipe=True)
 
+    @override
     def _process_record_message(self, message_dict: dict) -> None:
         """Process a RECORD message.
 
@@ -377,6 +384,7 @@ class Target(BaseSingerReader, abc.ABC):
 
         self._handle_max_record_age()
 
+    @override
     def _process_schema_message(self, message_dict: dict) -> None:
         """Process a SCHEMA messages.
 
@@ -435,6 +443,7 @@ class Target(BaseSingerReader, abc.ABC):
     def _reset_max_record_age(self) -> None:
         self._last_full_drain_at = time.time()
 
+    @override
     def _process_state_message(self, message_dict: dict) -> None:
         """Process a state message. drain sinks if needed.
 
@@ -449,6 +458,7 @@ class Target(BaseSingerReader, abc.ABC):
             return
         self._latest_state = state
 
+    @override
     def _process_activate_version_message(self, message_dict: dict) -> None:
         """Handle the optional ACTIVATE_VERSION message extension.
 
@@ -475,6 +485,7 @@ class Target(BaseSingerReader, abc.ABC):
                 )
             sink.activate_version(message_dict["version"])
 
+    @override
     def _process_batch_message(self, message_dict: dict) -> None:
         """Handle the optional BATCH message extension.
 
@@ -561,6 +572,7 @@ class Target(BaseSingerReader, abc.ABC):
 
     # CLI handler
 
+    @override
     def _handle_termination(  # pragma: no cover
         self,
         signum: int,
@@ -582,6 +594,7 @@ class Target(BaseSingerReader, abc.ABC):
             super()._handle_termination(signum, frame)
 
     @classmethod
+    @override
     def invoke(  # type: ignore[override]
         cls,
         *,
@@ -611,6 +624,7 @@ class Target(BaseSingerReader, abc.ABC):
         target.listen(file_input)
 
     @classmethod
+    @override
     def get_singer_command(cls) -> click.Command:
         """Execute standard CLI handler for taps.
 
@@ -632,6 +646,7 @@ class Target(BaseSingerReader, abc.ABC):
         return command
 
     @classmethod
+    @override
     def append_builtin_config(cls, config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 

@@ -6,6 +6,7 @@ import base64
 import datetime
 import logging
 import math
+import sys
 import typing as t
 import warnings
 from types import MappingProxyType
@@ -17,6 +18,11 @@ import urllib3
 
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.helpers._util import utc_now
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from singer_sdk.streams.rest import _HTTPStream
@@ -62,7 +68,8 @@ class SingletonMeta(type):
         cls.__single_instance = None
         super().__init__(name, bases, dic)
 
-    def __call__(cls, *args: t.Any, **kwargs: t.Any) -> t.Any:  # noqa: ANN401
+    @override
+    def __call__(cls, *args: t.Any, **kwargs: t.Any) -> t.Any:
         """Create or reuse the singleton.
 
         Args:
@@ -511,6 +518,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             ),
         )
 
+    @override
     def authenticate_request(
         self,
         request: requests.PreparedRequest,
@@ -725,6 +733,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         return self._private_key_passphrase
 
     @property
+    @override
     def oauth_request_body(self) -> dict:
         """Return request body for OAuth request.
 
@@ -741,6 +750,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         }
 
     @property
+    @override
     def oauth_request_payload(self) -> dict:
         """Return request payload for OAuth request.
 

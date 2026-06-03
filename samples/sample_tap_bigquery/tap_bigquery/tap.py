@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 from singer_sdk import SQLConnector, SQLStream, SQLTap
 from singer_sdk import typing as th  # JSON schema typing helpers
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from collections.abc import Mapping
@@ -14,7 +20,8 @@ if t.TYPE_CHECKING:
 class BigQueryConnector(SQLConnector):
     """Connects to the BigQuery SQL source."""
 
-    def get_sqlalchemy_url(self, config: Mapping) -> str:  # noqa: PLR6301
+    @override
+    def get_sqlalchemy_url(self, config: Mapping) -> str:
         """Concatenate a SQLAlchemy URL for use in connecting to the source."""
         return f"bigquery://{config['project_id']}"
 

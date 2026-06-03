@@ -154,7 +154,7 @@ typing = [
     "importlib-metadata",
     "mypy~=2.1.0",
     "pyarrow-stubs>=19.1",
-    "ty==0.0.37",
+    "ty==0.0.42",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-simplejson>=3.18.0",
@@ -343,7 +343,7 @@ extend-include = [
 ]
 line-length = 88
 preview = true
-required-version = ">=0.15"
+required-version = ">=0.15.14"
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -506,4 +506,5 @@ skip = "*.csv,samples/aapl/*.json,packages/*/schemas/*.json,samples/*/schemas/*.
 ignore-words-list = "fo,intoto"
 
 [tool.ty.rules]
+missing-override-decorator = "error"
 unused-type-ignore-comment = "ignore"

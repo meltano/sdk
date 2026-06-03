@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 from uuid import uuid4
 
 from singer_sdk.batch import BaseBatcher, lazy_chunked_generator
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Record
@@ -16,6 +22,7 @@ __all__ = ["ParquetBatcher"]
 class ParquetBatcher(BaseBatcher):
     """Parquet Record Batcher."""
 
+    @override
     def get_batches(
         self,
         records: t.Iterable[Record],

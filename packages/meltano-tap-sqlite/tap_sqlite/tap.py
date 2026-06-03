@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 from singer_sdk import typing as th
 from singer_sdk.contrib.msgspec import MsgSpecWriter
 from singer_sdk.sql import SQLConnector, SQLStream, SQLTap
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from collections.abc import Mapping
@@ -20,7 +26,8 @@ class SQLiteConnector(SQLConnector):
     This class handles all DDL and type conversions.
     """
 
-    def get_sqlalchemy_url(self, config: Mapping[str, t.Any]) -> str:  # noqa: PLR6301
+    @override
+    def get_sqlalchemy_url(self, config: Mapping[str, t.Any]) -> str:
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
 

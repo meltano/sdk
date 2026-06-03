@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 import gzip
+import sys
 import typing as t
 from uuid import uuid4
 
 from singer_sdk.batch import BaseBatcher, lazy_chunked_generator
 from singer_sdk.singerlib.json import serialize_json
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 __all__ = ["JSONLinesBatcher"]
 
@@ -19,6 +25,7 @@ class JSONLinesBatcher(BaseBatcher):
     The batch files contain only the record data, not Singer protocol messages.
     """
 
+    @override
     def get_batches(
         self,
         records: t.Iterator[dict],
