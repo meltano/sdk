@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 import itertools
+import sys
 import typing as t
 import warnings
 from abc import ABC, abstractmethod
 
 from singer_sdk.helpers._compat import entry_points
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._batch import BatchConfig
@@ -91,6 +97,7 @@ class BaseBatcher(ABC):
 class Batcher(BaseBatcher):
     """Determines batch type and then serializes batches to that format."""
 
+    @override
     def get_batches(self, records: t.Iterator[dict]) -> t.Iterator[list[str]]:
         """Manifest of batches.
 

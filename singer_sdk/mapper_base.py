@@ -3,12 +3,18 @@
 from __future__ import annotations
 
 import abc
+import sys
 import typing as t
 
 import click
 
 from singer_sdk.helpers.capabilities import PluginCapabilities
 from singer_sdk.plugin_base import BaseSingerReader, BaseSingerWriter, _ConfigInput
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -54,18 +60,23 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, abc.ABC):
         for message in messages:
             self.write_message(message)
 
+    @override
     def _process_schema_message(self, message_dict: dict) -> None:
         self._write_messages(self.map_schema_message(message_dict))
 
+    @override
     def _process_record_message(self, message_dict: dict) -> None:
         self._write_messages(self.map_record_message(message_dict))
 
+    @override
     def _process_state_message(self, message_dict: dict) -> None:
         self._write_messages(self.map_state_message(message_dict))
 
+    @override
     def _process_activate_version_message(self, message_dict: dict) -> None:
         self._write_messages(self.map_activate_version_message(message_dict))
 
+    @override
     def _process_batch_message(self, message_dict: dict) -> None:
         self._write_messages(self.map_batch_message(message_dict))
 
@@ -126,6 +137,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, abc.ABC):
     # CLI handler
 
     @classmethod
+    @override
     def invoke(  # type: ignore[override]
         cls,
         *,
@@ -155,6 +167,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, abc.ABC):
         mapper.listen(file_input)
 
     @classmethod
+    @override
     def get_singer_command(cls) -> click.Command:
         """Execute standard CLI handler for inline mappers.
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 from singer_sdk.helpers.capabilities import (
@@ -11,6 +12,11 @@ from singer_sdk.helpers.capabilities import (
     TargetCapabilities,
 )
 from singer_sdk.target_base import Target
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
@@ -50,6 +56,7 @@ class SQLTarget(Target):
         return self._target_connector
 
     @classmethod
+    @override
     def append_builtin_config(cls, config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
@@ -82,6 +89,7 @@ class SQLTarget(Target):
 
         super().append_builtin_config(config_jsonschema)
 
+    @override
     def create_sink(
         self,
         *,
@@ -141,6 +149,7 @@ class SQLTarget(Target):
 
         return sink
 
+    @override
     def get_sink_class(self, stream_name: str) -> type[SQLSink]:
         """Get sink for a stream.
 
@@ -165,6 +174,7 @@ class SQLTarget(Target):
         )
         raise ValueError(msg)
 
+    @override
     def get_sink(
         self,
         stream_name: str,

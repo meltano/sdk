@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.helpers.capabilities import SQL_TAP_USE_SINGER_DECIMAL
 from singer_sdk.tap_base import Tap
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from singer_sdk.sql.connector import SQLConnector
@@ -50,6 +56,7 @@ class SQLTap(Tap):
         super().__init__(*args, **kwargs)
 
     @classmethod
+    @override
     def append_builtin_config(cls, config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
@@ -73,6 +80,7 @@ class SQLTap(Tap):
         return self._tap_connector
 
     @property
+    @override
     def catalog_dict(self) -> dict:
         """Get catalog dictionary.
 
@@ -94,6 +102,7 @@ class SQLTap(Tap):
         }
         return self._catalog_dict
 
+    @override
     def discover_streams(self) -> t.Sequence[Stream]:
         """Initialize all available streams and return them as a sequence.
 

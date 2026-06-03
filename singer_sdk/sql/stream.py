@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import sys
 import typing as t
 from functools import cached_property
 
@@ -12,6 +13,11 @@ import singer_sdk.helpers._catalog as catalog
 from singer_sdk.singerlib import CatalogEntry
 from singer_sdk.sql.connector import SQLConnector
 from singer_sdk.streams.core import REPLICATION_INCREMENTAL, Stream
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from sqlalchemy.sql import selectable
@@ -58,6 +64,7 @@ class SQLStream(Stream, abc.ABC):
         )
 
     @property
+    @override
     def _singer_catalog_entry(self) -> CatalogEntry:
         """Return catalog entry as specified by the Singer catalog spec.
 
@@ -76,6 +83,7 @@ class SQLStream(Stream, abc.ABC):
         return self._connector
 
     @property
+    @override
     def metadata(self) -> MetadataMapping:
         """Return the Singer metadata.
 
@@ -98,6 +106,7 @@ class SQLStream(Stream, abc.ABC):
         return self._singer_catalog_entry.schema.to_dict()
 
     @property
+    @override
     def tap_stream_id(self) -> str:
         """Return the unique ID used by the tap to identify this stream.
 
@@ -112,6 +121,7 @@ class SQLStream(Stream, abc.ABC):
         return self._singer_catalog_entry.tap_stream_id
 
     @property
+    @override
     def primary_keys(self) -> t.Sequence[str]:
         """Get primary keys from the catalog entry definition.
 
@@ -164,6 +174,7 @@ class SQLStream(Stream, abc.ABC):
         )
 
     @property
+    @override
     def effective_schema(self) -> dict:
         """Return the effective schema for the stream.
 
@@ -255,6 +266,7 @@ class SQLStream(Stream, abc.ABC):
         return self.apply_query_limit(query)
 
     # Get records from stream
+    @override
     def get_records(self, context: Context | None) -> t.Iterable[Record]:
         """Return a generator of record-type dictionary objects.
 
@@ -283,6 +295,7 @@ class SQLStream(Stream, abc.ABC):
                 yield dict(row)
 
     @property
+    @override
     def is_sorted(self) -> bool:
         """Expect stream to be sorted.
 

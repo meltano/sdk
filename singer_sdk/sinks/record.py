@@ -3,9 +3,15 @@
 from __future__ import annotations
 
 import abc
+import sys
 import typing as t
 
 from singer_sdk.sinks.core import Sink
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 class RecordSink(Sink):
@@ -13,7 +19,8 @@ class RecordSink(Sink):
 
     current_size = 0  # Records are always written directly
 
-    def _after_process_record(self, context: dict) -> None:  # noqa: ARG002
+    @override
+    def _after_process_record(self, context: dict) -> None:
         """Perform post-processing and record keeping. Internal hook.
 
         The RecordSink class uses this method to tally each record written.
@@ -24,6 +31,7 @@ class RecordSink(Sink):
         self.tally_record_written()
 
     @t.final
+    @override
     def process_batch(self, context: dict) -> None:
         """Do nothing and return immediately.
 
@@ -47,6 +55,7 @@ class RecordSink(Sink):
             context: Stream partition or context dictionary.
         """
 
+    @override
     @abc.abstractmethod
     def process_record(self, record: dict, context: dict) -> None:
         """Load the latest record from the stream.
