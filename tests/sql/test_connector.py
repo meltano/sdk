@@ -252,6 +252,21 @@ class TestConnectorSQL:  # noqa: PLR0904
         assert inspector.info_cache == {}
         assert connector._cached_inspector is inspector
 
+    def test_clear_reflection_cache_falls_back_to_info_cache(
+        self,
+        connector: SQLConnector,
+    ):
+        class FakeInspector:
+            def __init__(self) -> None:
+                self.info_cache = {"tables": "cached"}
+
+        fake_inspector = FakeInspector()
+        connector._cached_inspector = fake_inspector
+
+        connector.clear_reflection_cache()
+
+        assert fake_inspector.info_cache == {}
+
     def test_deprecated_functions_warn(self, connector: SQLConnector):
         with pytest.deprecated_call():
             connector.create_sqlalchemy_engine()
