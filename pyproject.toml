@@ -506,5 +506,5 @@ skip = "*.csv,samples/aapl/*.json,packages/*/schemas/*.json,samples/*/schemas/*.
 ignore-words-list = "fo,intoto"
 
 [tool.ty.rules]
-missing-override-decorator = "warn"
+missing-override-decorator = "error"
 unused-type-ignore-comment = "ignore"
