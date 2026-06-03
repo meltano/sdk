@@ -124,7 +124,7 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
         """
         errors = sorted(
             self.validator.iter_errors(record),
-            key=lambda error: (list(error.path), error.message),
+            key=lambda error: (error.json_path, error.message),
         )
         if errors:
             error_message = "; ".join(
