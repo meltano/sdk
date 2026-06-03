@@ -121,16 +121,26 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
                 aggregates every schema violation found in the record, so a
                 record with multiple problems reports them all at once instead
                 of stopping at the first failure.
-        """
+        """  # noqa: DOC502
         errors = sorted(
             self.validator.iter_errors(record),
             key=lambda error: (error.json_path, error.message),
         )
         if errors:
-            error_message = "; ".join(
-                f"{error.json_path}: {error.message}" for error in errors
-            )
-            raise InvalidRecord(error_message, record) from errors[0]
+            if sys.version_info >= (3, 11):
+                exc = InvalidRecord(
+                    f"{len(errors)} schema validation error(s)",
+                    record,
+                )
+                for error in errors:
+                    exc.add_note(f"{error.json_path}: {error.message}")
+            else:
+                details = "\n".join(f"{e.json_path}: {e.message}" for e in errors)
+                exc = InvalidRecord(
+                    f"{len(errors)} schema validation error(s)\n{details}",
+                    record,
+                )
+            raise exc from errors[0]
 
 
 class Sink(abc.ABC):  # noqa: PLR0904
