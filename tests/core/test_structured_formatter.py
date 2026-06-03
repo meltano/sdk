@@ -157,6 +157,7 @@ class TestStructuredFormatter:
         assert log_data["exception"]["module"] == "builtins"
         assert log_data["exception"]["message"] == "Test exception"
         assert "traceback" in log_data["exception"]
+        assert "notes" not in log_data["exception"]
         assert isinstance(log_data["exception"]["traceback"], list)
         assert len(log_data["exception"]["traceback"]) > 0
         # Verify traceback frame structure
