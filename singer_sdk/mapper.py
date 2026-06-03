@@ -198,7 +198,8 @@ class DefaultStreamMap(StreamMap):
 class RemoveRecordTransform(DefaultStreamMap):
     """Default mapper which simply excludes any records."""
 
-    def transform(self, record: dict) -> None:  # noqa: PLR6301
+    @override
+    def transform(self, record: dict) -> None:
         """Return None (always exclude).
 
         Args:
@@ -206,7 +207,8 @@ class RemoveRecordTransform(DefaultStreamMap):
         """
         _ = record  # Drop the record
 
-    def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002, PLR6301
+    @override
+    def get_filter_result(self, record: dict) -> bool:
         """Exclude all records.
 
         Args:
@@ -221,6 +223,7 @@ class RemoveRecordTransform(DefaultStreamMap):
 class SameRecordTransform(DefaultStreamMap):
     """Default mapper which simply returns the original records."""
 
+    @override
     def transform(self, record: dict) -> dict | None:
         """Return original record unchanged.
 
@@ -232,7 +235,8 @@ class SameRecordTransform(DefaultStreamMap):
         """
         return super().transform(record)
 
-    def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002, PLR6301
+    @override
+    def get_filter_result(self, record: dict) -> bool:
         """Return True (always include).
 
         Args:
@@ -360,6 +364,7 @@ class CustomStreamMap(StreamMap):
         )
         self.fake = self._init_faker_instance()
 
+    @override
     def transform(self, record: dict) -> dict | None:
         """Return a transformed record.
 
@@ -372,6 +377,7 @@ class CustomStreamMap(StreamMap):
         transformed_record = self._transform_fn(record)
         return super().transform(transformed_record) if transformed_record else None
 
+    @override
     def get_filter_result(self, record: dict) -> bool:
         """Return True to include or False to exclude.
 

@@ -176,7 +176,7 @@ class SQLToJSONSchema:
 
     @functools.singledispatchmethod
     def to_jsonschema(self, column_type: sqlalchemy.types.TypeEngine) -> dict:  # noqa: ARG002, D102, PLR6301
-        return th.StringType.type_dict  # type: ignore[no-any-return]
+        return th.StringType.type_dict
 
     @to_jsonschema.register
     def datetime_to_jsonschema(self, column_type: sqlalchemy.types.DateTime) -> dict:  # noqa: ARG002, PLR6301
@@ -185,7 +185,7 @@ class SQLToJSONSchema:
         Args:
             column_type (:column_type:`DateTime`): The column type.
         """
-        return th.DateTimeType.type_dict  # type: ignore[no-any-return]
+        return th.DateTimeType.type_dict
 
     @to_jsonschema.register
     def date_to_jsonschema(self, column_type: sqlalchemy.types.Date) -> dict:  # noqa: ARG002, PLR6301
@@ -194,7 +194,7 @@ class SQLToJSONSchema:
         Args:
             column_type (:column_type:`Date`): The column type.
         """
-        return th.DateType.type_dict  # type: ignore[no-any-return]
+        return th.DateType.type_dict
 
     @to_jsonschema.register
     def time_to_jsonschema(self, column_type: sqlalchemy.types.Time) -> dict:  # noqa: ARG002, PLR6301
@@ -203,7 +203,7 @@ class SQLToJSONSchema:
         Args:
             column_type (:column_type:`Time`): The column type.
         """
-        return th.TimeType.type_dict  # type: ignore[no-any-return]
+        return th.TimeType.type_dict
 
     @to_jsonschema.register
     def integer_to_jsonschema(self, column_type: sqlalchemy.types.Integer) -> dict:  # noqa: ARG002, PLR6301
@@ -212,7 +212,7 @@ class SQLToJSONSchema:
         Args:
             column_type (:column_type:`Integer`): The column type.
         """
-        return th.IntegerType.type_dict  # type: ignore[no-any-return]
+        return th.IntegerType.type_dict
 
     @to_jsonschema.register
     def float_to_jsonschema(self, column_type: sqlalchemy.types.Float) -> dict:  # noqa: ARG002
@@ -222,8 +222,8 @@ class SQLToJSONSchema:
             column_type (:column_type:`Float`): The column type.
         """
         if self.use_singer_decimal:
-            return th.SingerDecimalType.type_dict  # type: ignore[no-any-return]
-        return th.DecimalType.type_dict  # type: ignore[no-any-return]
+            return th.SingerDecimalType.type_dict
+        return th.DecimalType.type_dict
 
     @to_jsonschema.register
     def numeric_to_jsonschema(self, column_type: sqlalchemy.types.Numeric) -> dict:  # noqa: ARG002
@@ -233,8 +233,8 @@ class SQLToJSONSchema:
             column_type (:column_type:`Numeric`): The column type.
         """
         if self.use_singer_decimal:
-            return th.SingerDecimalType.type_dict  # type: ignore[no-any-return]
-        return th.DecimalType.type_dict  # type: ignore[no-any-return]
+            return th.SingerDecimalType.type_dict
+        return th.DecimalType.type_dict
 
     @to_jsonschema.register
     def string_to_jsonschema(self, column_type: sqlalchemy.types.String) -> dict:  # noqa: PLR6301
@@ -248,8 +248,8 @@ class SQLToJSONSchema:
            determine the maximum length of the string type.
         """
         if column_type.length:
-            return th.StringType(max_length=column_type.length).type_dict  # type: ignore[no-any-return]
-        return th.StringType.type_dict  # type: ignore[no-any-return]
+            return th.StringType(max_length=column_type.length).type_dict
+        return th.StringType.type_dict
 
     @to_jsonschema.register
     def boolean_to_jsonschema(self, column_type: sqlalchemy.types.Boolean) -> dict:  # noqa: ARG002, PLR6301
@@ -258,7 +258,7 @@ class SQLToJSONSchema:
         Args:
             column_type (:column_type:`Boolean`): The column type.
         """
-        return th.BooleanType.type_dict  # type: ignore[no-any-return]
+        return th.BooleanType.type_dict
 
 
 JSONtoSQLHandler: t.TypeAlias = (

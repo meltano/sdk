@@ -32,6 +32,11 @@ from singer_sdk.pagination import (
 )
 from singer_sdk.streams.core import Stream
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 if sys.version_info >= (3, 13):
     from typing import TypeVar  # noqa: ICN003
 else:
@@ -797,6 +802,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
 
     # Records iterator
 
+    @override
     def get_records(self, context: Context | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
 
@@ -992,6 +998,7 @@ class RESTStream(_HTTPStream, abc.ABC, t.Generic[_TToken]):
         """JSONPath expression to extract records from the API response."""
         return "$[*]"
 
+    @override
     def parse_response(self, response: requests.Response) -> t.Iterable[dict]:
         """Parse the response and return an iterator of result records.
 
@@ -1006,6 +1013,7 @@ class RESTStream(_HTTPStream, abc.ABC, t.Generic[_TToken]):
             input=response.json(parse_float=decimal.Decimal),
         )
 
+    @override
     def get_new_paginator(self) -> BaseAPIPaginator | None:
         """Get a fresh paginator for this API endpoint.
 

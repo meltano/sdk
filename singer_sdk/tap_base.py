@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import collections.abc
 import contextlib
+import sys
 import typing as t
 import warnings
 from enum import Enum
@@ -30,6 +31,11 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import BaseSingerWriter, PluginBase, _ConfigInput
 from singer_sdk.singerlib import Catalog
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -175,6 +181,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         return self._streams
 
     @property
+    @override
     def state(self) -> types.TapState:
         """Get tap state.
 
@@ -219,12 +226,14 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
         return self._catalog
 
+    @override
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
         super().setup_mapper()
         self.mapper.register_raw_streams_from_catalog(self.catalog)
 
     @classmethod
+    @override
     def append_builtin_config(cls: type[PluginBase], config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
@@ -511,6 +520,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
     # Command Line Execution
 
+    @override
     def _handle_termination(  # pragma: no cover
         self,
         signum: int,
@@ -530,6 +540,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
             super()._handle_termination(signum, frame)
 
     @classmethod
+    @override
     def invoke(  # type: ignore[override]
         cls,
         *,
@@ -626,6 +637,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         ctx.exit()
 
     @classmethod
+    @override
     def get_singer_command(cls) -> click.Command:
         """Execute standard CLI handler for taps.
 

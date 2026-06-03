@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 from enum import Enum, EnumMeta
 from warnings import warn
@@ -22,6 +23,12 @@ from singer_sdk.typing import (
 )
 
 _EnumMemberT = t.TypeVar("_EnumMemberT")
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 
 # Default JSON Schema to support config for built-in capabilities:
 
@@ -379,7 +386,8 @@ class DeprecatedEnum(Enum):
 class DeprecatedEnumMeta(EnumMeta):
     """Metaclass for enumeration with deprecation support."""
 
-    def __getitem__(cls, name: str) -> t.Any:  # noqa: ANN401
+    @override
+    def __getitem__(cls, name: str) -> t.Any:
         """Retrieve mapping item.
 
         Args:
@@ -393,7 +401,8 @@ class DeprecatedEnumMeta(EnumMeta):
             obj.emit_warning()
         return obj
 
-    def __getattribute__(cls, name: str) -> t.Any:  # noqa: ANN401
+    @override
+    def __getattribute__(cls, name: str) -> t.Any:
         """Retrieve enum attribute.
 
         Args:
@@ -407,7 +416,8 @@ class DeprecatedEnumMeta(EnumMeta):
             obj.emit_warning()
         return obj
 
-    def __call__(cls, *args: t.Any, **kwargs: t.Any) -> t.Any:  # noqa: ANN401
+    @override
+    def __call__(cls, *args: t.Any, **kwargs: t.Any) -> t.Any:
         """Call enum member.
 
         Args:
@@ -426,6 +436,7 @@ class DeprecatedEnumMeta(EnumMeta):
 class CapabilitiesEnum(DeprecatedEnum, metaclass=DeprecatedEnumMeta):
     """Base capabilities enumeration."""
 
+    @override
     def __str__(self) -> str:
         """String representation.
 
@@ -434,6 +445,7 @@ class CapabilitiesEnum(DeprecatedEnum, metaclass=DeprecatedEnumMeta):
         """
         return str(self.value)
 
+    @override
     def __repr__(self) -> str:
         """String representation.
 

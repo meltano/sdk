@@ -7,12 +7,17 @@ import enum
 import json
 import logging
 import os
+import sys
 import typing as t
 from dataclasses import dataclass, field
 from time import time
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 if t.TYPE_CHECKING:
-    import sys
     from collections.abc import Sequence
     from types import TracebackType
 
@@ -82,6 +87,7 @@ class Point(t.Generic[_TVal]):
             "tags": self.tags,
         }
 
+    @override
     def __str__(self) -> str:
         """Convert this measure to a string.
 
@@ -141,6 +147,7 @@ class MetricExclusionFilter(logging.Filter):
             or any(point.tags.get(tag) == value for tag, value in self.tags.items())
         )
 
+    @override
     def filter(self, record: logging.LogRecord) -> bool:
         """Filter a log record.
 
@@ -260,6 +267,7 @@ class Counter(Meter):
         """Exit the counter context."""
         self._pop()
 
+    @override
     def __enter__(self) -> Self:
         """Enter the counter context.
 
@@ -269,6 +277,7 @@ class Counter(Meter):
         self.last_log_time = time()
         return self
 
+    @override
     def __exit__(
         self,
         exc_type: type[BaseException] | None,
@@ -322,6 +331,7 @@ class Timer(Meter):
         super().__init__(metric, tags)
         self.start_time = time()
 
+    @override
     def __enter__(self) -> Self:
         """Enter the timer context.
 
@@ -331,6 +341,7 @@ class Timer(Meter):
         self.start_time = time()
         return self
 
+    @override
     def __exit__(
         self,
         exc_type: type[BaseException] | None,

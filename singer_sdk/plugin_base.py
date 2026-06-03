@@ -42,6 +42,11 @@ from singer_sdk.typing import (
     extend_validator_with_defaults,
 )
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 if t.TYPE_CHECKING:
     from types import FrameType, TracebackType
 
@@ -126,7 +131,8 @@ class SingerCommand(click.Command):
             exc_info=(exc_type, exc_value, exc_traceback),
         )
 
-    def invoke(self, ctx: click.Context) -> t.Any:  # noqa: ANN401
+    @override
+    def invoke(self, ctx: click.Context) -> t.Any:
         """Invoke the command, capturing warnings and logging them.
 
         Args:
