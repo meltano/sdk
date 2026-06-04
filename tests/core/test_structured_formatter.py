@@ -62,10 +62,7 @@ class TestStructuredFormatter:
             logger.removeHandler(handler)
             stream.close()
 
-    def test_structured_formatter_includes_extra_fields(
-        self,
-        make_logger: LoggerFactory,
-    ):
+    def test_includes_extra_fields(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter includes extra fields in output."""
         logger, log_stream = make_logger("test_logger")
 
@@ -87,7 +84,7 @@ class TestStructuredFormatter:
             "custom_field": "test_value",
         }
 
-    def test_structured_formatter_with_defaults(self, make_logger: LoggerFactory):
+    def test_with_defaults(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter includes default fields."""
         defaults = {"version": "1.0.0"}
         logger, log_stream = make_logger(
@@ -104,10 +101,7 @@ class TestStructuredFormatter:
         assert log_data["message"] == "Test message"
         assert log_data["extra"] == {"version": "1.0.0"}
 
-    def test_structured_formatter_without_extra_fields(
-        self,
-        make_logger: LoggerFactory,
-    ):
+    def test_without_extra_fields(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter works without extra fields."""
         logger, log_stream = make_logger("test_logger_no_extras")
 
@@ -120,7 +114,7 @@ class TestStructuredFormatter:
         assert "logger_name" in log_data
         assert "ts" in log_data
 
-    def test_structured_formatter_with_exception(self, make_logger: LoggerFactory):
+    def test_with_exception(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter handles exceptions properly."""
         logger, log_stream = make_logger("test_logger_exception", level=logging.ERROR)
 
@@ -149,10 +143,7 @@ class TestStructuredFormatter:
         assert "lineno" in frame
         assert "raise ValueError(msg)" in frame["line"]
 
-    def test_structured_formatter_with_chained_exception(
-        self,
-        make_logger: LoggerFactory,
-    ):
+    def test_with_chained_exception(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter handles exception chaining properly."""
         logger, log_stream = make_logger(
             "test_logger_chained_exception",
@@ -184,10 +175,7 @@ class TestStructuredFormatter:
         assert log_data["exception"]["cause"]["module"] == "builtins"
         assert log_data["exception"]["cause"]["message"] == "Original error"
 
-    def test_structured_formatter_with_context_exception(
-        self,
-        make_logger: LoggerFactory,
-    ):
+    def test_with_context_exception(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter handles context exception properly."""
         logger, log_stream = make_logger(
             "test_logger_context_exception",
@@ -219,10 +207,7 @@ class TestStructuredFormatter:
         assert log_data["exception"]["context"]["module"] == "builtins"
         assert log_data["exception"]["context"]["message"] == "Original error"
 
-    def test_structured_formatter_without_exception_notes(
-        self,
-        make_logger: LoggerFactory,
-    ):
+    def test_without_exception_notes(self, make_logger: LoggerFactory):
         """Test that exceptions without notes omit the `notes` key."""
         logger, log_stream = make_logger(
             "test_logger_no_exception_notes",
@@ -245,10 +230,7 @@ class TestStructuredFormatter:
         sys.version_info < (3, 11),
         reason="Exception notes are Python 3.11+",
     )
-    def test_structured_formatter_with_exception_notes(
-        self,
-        make_logger: LoggerFactory,
-    ):
+    def test_with_exception_notes(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter handles exception notes properly."""
         logger, log_stream = make_logger(
             "test_logger_exception_notes",
@@ -269,10 +251,7 @@ class TestStructuredFormatter:
         assert log_data["message"] == "Error occurred"
         assert log_data["exception"]["notes"] == ["Info", "Moar info"]
 
-    def test_structured_formatter_json_serialization_fallback(
-        self,
-        make_logger: LoggerFactory,
-    ):
+    def test_json_serialization_fallback(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter handles non-serializable objects."""
         logger, log_stream = make_logger("test_logger_fallback")
 
@@ -291,7 +270,7 @@ class TestStructuredFormatter:
         assert log_output["message"] == "Test message"
         assert log_output["extra"] == {"object": "test"}
 
-    def test_structured_formatter_with_args(self, make_logger: LoggerFactory):
+    def test_with_args(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter handles args properly."""
         logger, log_stream = make_logger("test_logger_args")
 
@@ -301,9 +280,7 @@ class TestStructuredFormatter:
 
         assert log_data["message"] == "Test message with arg1 and arg2"
 
-    def test_structured_formatter_with_metric_logs(
-        self, make_logger, point: metrics.Point
-    ):
+    def test_with_metric_logs(self, make_logger, point: metrics.Point):
         """Test that StructuredFormatter handles METRIC logs correctly."""
         logger, log_stream = make_logger("test_logger_metrics")
 
@@ -320,7 +297,7 @@ class TestStructuredFormatter:
             "tags": {"stream": "users", "tap": "tap-postgres"},
         }
 
-    def test_structured_formatter_vs_console_formatter_metric_handling(
+    def test_vs_console_formatter_metric_handling(
         self,
         make_logger,
         point: metrics.Point,
@@ -351,7 +328,7 @@ class TestStructuredFormatter:
         assert "record_count" in console_output
         assert "150" in console_output
 
-    def test_structured_formatter_format_method_with_metric_record(
+    def test_format_method_with_metric_record(
         self,
         point: metrics.Point,
     ):
@@ -388,7 +365,7 @@ class TestStructuredFormatter:
             },
         }
 
-    def test_structured_formatter_getmessage_exception_fallback(self):
+    def test_getmessage_exception_fallback(self):
         """Test that StructuredFormatter handles getMessage() exceptions properly."""
         formatter = StructuredFormatter()
 
@@ -411,7 +388,7 @@ class TestStructuredFormatter:
         assert log_data["logger_name"] == "test_logger"
         assert log_data["level"] == "info"
 
-    def test_structured_formatter_getmessage_value_error_fallback(self):
+    def test_getmessage_value_error_fallback(self):
         """Test that StructuredFormatter handles getMessage() ValueError properly."""
         formatter = StructuredFormatter()
 
