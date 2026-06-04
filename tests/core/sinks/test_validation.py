@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import itertools
+import sys
 import typing as t
 
 import fastjsonschema
@@ -82,6 +83,39 @@ def test_jsonschema_validator():
     validator.validate({"id": 1, "created_at": "2021-01-01"})
     with pytest.raises(InvalidRecord, match="'not-a-date' is not a 'date-time'"):
         validator.validate({"id": 1, "created_at": "not-a-date"})
+
+
+def test_jsonschema_validator_reports_all_errors():
+    schema = {
+        "type": "object",
+        "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "age": {"type": "integer"},
+        },
+    }
+    validator = JSONSchemaValidator(schema=schema, validate_formats=False)
+
+    record = {"id": "not-an-int", "name": 123, "age": "old"}
+    with pytest.raises(InvalidRecord) as exc_info:
+        validator.validate(record)
+
+    exc = exc_info.value
+    expected_violations = [
+        "$.age: 'old' is not of type 'integer'",
+        "$.id: 'not-an-int' is not of type 'integer'",
+        "$.name: 123 is not of type 'string'",
+    ]
+
+    # Every field violation is surfaced, not just the first one, each prefixed
+    # with its location and emitted in a deterministic (json_path, message) order.
+    assert exc.error_message.startswith("3 schema validation error(s)")
+    if sys.version_info >= (3, 11):
+        assert exc.__notes__ == expected_violations
+    else:
+        for violation in expected_violations:
+            assert violation in exc.error_message
+    assert exc.record == record
 
 
 def test_validate_record():
