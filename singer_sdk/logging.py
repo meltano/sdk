@@ -29,6 +29,7 @@ class _FrameData(t.TypedDict):
     function: str
     lineno: int
     line: str
+    lines: list[str]
 
 
 class _ExceptionData(t.TypedDict, total=False):
@@ -108,16 +109,16 @@ class StructuredFormatter(logging.Formatter):
             frames: list[_FrameData] = []
             tb = exc_traceback
             while tb is not None:
+                lineno = tb.tb_lineno
+                filename = tb.tb_frame.f_code.co_filename
                 frame_info: _FrameData = {
                     "filename": tb.tb_frame.f_code.co_filename,
                     "function": tb.tb_frame.f_code.co_name,
                     "lineno": tb.tb_lineno,
                     # TODO: Ensure newlines are stripped?
                     # TODO: Include one line above and one line below for context?
-                    "line": linecache.getline(
-                        tb.tb_frame.f_code.co_filename,
-                        tb.tb_lineno,
-                    ),
+                    "line": linecache.getline(filename, lineno),
+                    "lines": linecache.getlines(filename)[lineno - 2 : lineno + 1],
                 }
                 frames.append(frame_info)
                 tb = tb.tb_next

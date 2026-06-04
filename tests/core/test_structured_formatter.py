@@ -164,6 +164,9 @@ class TestStructuredFormatter:
         assert "function" in frame
         assert "lineno" in frame
         assert "raise ValueError(msg)" in frame["line"]
+        assert 'msg = "Test exception"' in frame["lines"][0]
+        assert "raise ValueError(msg)" in frame["lines"][1]
+        assert "except ValueError:" in frame["lines"][2]
 
         # Clean up
         logger.removeHandler(handler)
