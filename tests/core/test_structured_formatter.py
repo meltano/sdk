@@ -280,7 +280,7 @@ class TestStructuredFormatter:
 
         assert log_data["message"] == "Test message with arg1 and arg2"
 
-    def test_with_metric_logs(self, make_logger, point: metrics.Point):
+    def test_with_metric_logs(self, make_logger: LoggerFactory, point: metrics.Point):
         """Test that StructuredFormatter handles METRIC logs correctly."""
         logger, log_stream = make_logger("test_logger_metrics")
 
@@ -299,7 +299,7 @@ class TestStructuredFormatter:
 
     def test_vs_console_formatter_metric_handling(
         self,
-        make_logger,
+        make_logger: LoggerFactory,
         point: metrics.Point,
     ):
         """Compare how StructuredFormatter and ConsoleFormatter handle METRIC logs."""
