@@ -471,7 +471,10 @@ class PluginBase(abc.ABC):
                 "Validating config using jsonschema: %s",
                 config_jsonschema,
             )
-            validator = JSONSchemaValidator(config_jsonschema)
+            validator = JSONSchemaValidator(
+                config_jsonschema,
+                format_checker=JSONSchemaValidator.FORMAT_CHECKER,
+            )
             errors = [
                 _format_validation_error(e) for e in validator.iter_errors(self._config)
             ]
