@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+import inspect
 import sys
 import typing as t
 
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
-from singer_sdk.helpers.capabilities import SQL_TAP_USE_SINGER_DECIMAL
+from singer_sdk.helpers.capabilities import (
+    SQL_TAP_DISCOVER_MATERIALIZED_VIEWS_DEFAULT,
+    SQL_TAP_DISCOVER_VIEWS_DEFAULT,
+    SQL_TAP_DISCOVERY_CONFIG,
+    SQL_TAP_USE_SINGER_DECIMAL,
+)
 from singer_sdk.tap_base import Tap
 
 if sys.version_info >= (3, 12):
@@ -20,6 +26,29 @@ if t.TYPE_CHECKING:
     from singer_sdk.streams.core import Stream
 
 __all__ = ["SQLTap"]
+
+
+def _filter_discovery_kwargs(
+    connector: SQLConnector,
+    discovery_kwargs: dict[str, t.Any],
+) -> dict[str, t.Any]:
+    """Filter discovery kwargs for custom connector method compatibility.
+
+    Returns:
+        Discovery kwargs accepted by the connector method signature.
+    """
+    signature = inspect.signature(connector.discover_catalog_entries)
+    if any(
+        param.kind is inspect.Parameter.VAR_KEYWORD
+        for param in signature.parameters.values()
+    ):
+        return discovery_kwargs
+
+    return {
+        name: value
+        for name, value in discovery_kwargs.items()
+        if name in signature.parameters
+    }
 
 
 class SQLTap(Tap):
@@ -63,6 +92,7 @@ class SQLTap(Tap):
         Args:
             config_jsonschema: [description]
         """
+        merge_missing_config_jsonschema(SQL_TAP_DISCOVERY_CONFIG, config_jsonschema)
         merge_missing_config_jsonschema(SQL_TAP_USE_SINGER_DECIMAL, config_jsonschema)
         super().append_builtin_config(config_jsonschema)
 
@@ -95,9 +125,20 @@ class SQLTap(Tap):
 
         connector = self.tap_connector
 
+        discovery_kwargs = {
+            "exclude_schemas": self.exclude_schemas,
+            "discover_views": self.config.get(
+                "discover_views",
+                SQL_TAP_DISCOVER_VIEWS_DEFAULT,
+            ),
+            "discover_materialized_views": self.config.get(
+                "discover_materialized_views",
+                SQL_TAP_DISCOVER_MATERIALIZED_VIEWS_DEFAULT,
+            ),
+        }
         self._catalog_dict = {
             "streams": connector.discover_catalog_entries(
-                exclude_schemas=self.exclude_schemas
+                **_filter_discovery_kwargs(connector, discovery_kwargs),
             )
         }
         return self._catalog_dict
