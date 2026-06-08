@@ -9,6 +9,8 @@ import logging
 import sys
 import typing as t
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from functools import cached_property
 from http import HTTPStatus
 from urllib.parse import urlencode, urlparse
@@ -45,8 +47,6 @@ else:
 from collections.abc import Iterable, Mapping
 
 if t.TYPE_CHECKING:
-    from datetime import datetime
-
     from backoff.types import Details
 
     from singer_sdk.helpers.types import Auth, Context, RequestFunc
@@ -852,18 +852,105 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
         """
         return SimpleAuthenticator()
 
-    def backoff_wait_generator(self) -> t.Generator[float, None, None]:  # noqa: PLR6301
+    def backoff_wait_generator(self) -> t.Generator[float, None, None]:
         """The wait generator used by the backoff decorator on request failure.
+
+        By default this respects the rate-limit headers on the response (see
+        :meth:`~singer_sdk.RESTStream.get_wait_time_from_response`) and falls back
+        to exponential backoff (:func:`backoff.expo`) when the response has no usable
+        header, or when the error carries no response at all (e.g. connection resets
+        and timeouts).
 
         See for options:
         https://github.com/litl/backoff/blob/master/backoff/_wait_gen.py
 
         And see for examples: `Code Samples <../code_samples.html#custom-backoff>`_
 
-        Returns:
-            The wait generator
+        Yields:
+            The number of seconds to wait before the next retry.
         """
-        return backoff.expo(factor=2)
+        exponential = backoff.expo(factor=2)
+        exponential.send(None)  # Prime the exponential fallback generator.
+
+        # ``backoff`` primes this generator with an empty send, then sends the thrown
+        # exception before each retry. The exception is not always a
+        # ``RetriableAPIError`` with a response (e.g. connection errors and timeouts),
+        # so guard against a missing response before reading rate-limit headers.
+        exception = yield  # type: ignore[misc]  # ty:ignore[invalid-yield]
+        while True:
+            response = getattr(exception, "response", None)
+            wait = (
+                self.get_wait_time_from_response(response)
+                if response is not None
+                else None
+            )
+            if wait is None:
+                wait = exponential.send(None)
+            exception = yield wait
+
+    def get_wait_time_from_response(self, response: requests.Response) -> float | None:
+        """Determine how long to wait before retrying, based on the response.
+
+        By default this reads standard rate-limit headers, in order of precedence:
+
+        - ``Retry-After`` (:rfc:`9110#section-10.2.3`), either a number of seconds or
+          an HTTP date.
+        - ``X-RateLimit-Reset`` from the `RateLimit header fields draft
+          <https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/>`_,
+          interpreted as the number of seconds until the rate limit resets.
+
+        Returns ``None`` when no usable header is present, in which case
+        :meth:`~singer_sdk.RESTStream.backoff_wait_generator` falls back to
+        exponential backoff. Override this method to support an API's non-standard
+        rate-limit headers.
+
+        Args:
+            response: The HTTP response that triggered the retry.
+
+        Returns:
+            The number of seconds to wait, or ``None`` to fall back to exponential
+            backoff.
+
+        .. versionadded:: 0.55.0
+        """
+        retry_after = response.headers.get("Retry-After")
+        if retry_after is not None:
+            return self._parse_retry_after(retry_after)
+
+        reset = response.headers.get("X-RateLimit-Reset")
+        if reset is not None:
+            try:
+                return max(0.0, float(reset))
+            except ValueError:
+                return None
+
+        return None
+
+    @staticmethod
+    def _parse_retry_after(value: str) -> float | None:
+        """Parse a ``Retry-After`` header value.
+
+        Args:
+            value: The header value, either a number of seconds or an HTTP date.
+
+        Returns:
+            The number of seconds to wait, or ``None`` if it cannot be parsed.
+        """
+        value = value.strip()
+        try:
+            return max(0.0, float(value))
+        except ValueError:
+            pass
+
+        try:
+            reset_at = parsedate_to_datetime(value)
+        except (TypeError, ValueError):
+            return None
+
+        if reset_at.tzinfo is None:
+            reset_at = reset_at.replace(tzinfo=timezone.utc)
+
+        return max(0.0, (reset_at - datetime.now(tz=timezone.utc)).total_seconds())
 
     def backoff_max_tries(self) -> int:  # noqa: PLR6301
         """The number of attempts before giving up when retrying requests.
