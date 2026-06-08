@@ -233,6 +233,11 @@ def test_rate_limiting_status_override(
         ({"X-RateLimit-Reset": "45"}, 45.0),
         # Retry-After takes precedence over X-RateLimit-Reset.
         ({"Retry-After": "30", "X-RateLimit-Reset": "999"}, 30.0),
+        # Zero and negative waits are clamped to 0.0.
+        ({"Retry-After": "0"}, 0.0),
+        ({"Retry-After": "-5"}, 0.0),
+        ({"X-RateLimit-Reset": "0"}, 0.0),
+        ({"X-RateLimit-Reset": "-10"}, 0.0),
         # Unparsable / missing headers fall back to exponential backoff (None).
         ({"Retry-After": "not-a-number"}, None),
         ({"X-RateLimit-Reset": "not-a-number"}, None),
@@ -242,6 +247,10 @@ def test_rate_limiting_status_override(
         "retry-after-seconds",
         "ratelimit-reset-seconds",
         "retry-after-precedence",
+        "retry-after-zero",
+        "retry-after-negative-clamped",
+        "ratelimit-reset-zero",
+        "ratelimit-reset-negative-clamped",
         "retry-after-unparsable",
         "ratelimit-reset-unparsable",
         "no-headers",
@@ -291,8 +300,11 @@ def test_backoff_wait_generator_respects_headers_and_falls_back(
     # 429 with a rate-limit header -> respect the header's wait time.
     assert gen.send(_retriable({"Retry-After": "30"})) == 30
 
+    # 429 with an unparsable header -> exponential fallback.
+    assert gen.send(_retriable({"Retry-After": "not-a-number"})) == 2
+
     # Connection-level error has no response -> exponential fallback, no crash.
-    assert gen.send(requests.exceptions.ConnectionError()) == 2
+    assert gen.send(requests.exceptions.ConnectionError()) == 4
 
     # 429 without rate-limit headers -> exponential backoff continues.
-    assert gen.send(_retriable(None)) == 4
+    assert gen.send(_retriable(None)) == 8
