@@ -282,6 +282,23 @@ def test_get_wait_time_from_response_http_date(basic_rest_stream: RESTStream):
     assert 110 <= wait <= 120
 
 
+def test_get_wait_time_from_response_naive_http_date(basic_rest_stream: RESTStream):
+    """A ``Retry-After`` date without timezone info is interpreted as UTC."""
+    reset_at = datetime.now(tz=timezone.utc) + timedelta(seconds=120)
+    # ``format_datetime`` on a naive datetime emits a ``-0000`` designator, which
+    # ``parsedate_to_datetime`` parses back to a naive datetime.
+    naive_http_date = format_datetime(reset_at.replace(tzinfo=None))
+    response = requests.Response()
+    response.status_code = 429
+    response.headers.update({"Retry-After": naive_http_date})
+
+    wait = basic_rest_stream.get_wait_time_from_response(response)
+
+    assert wait is not None
+    # Allow a small window for clock drift / test execution time.
+    assert 110 <= wait <= 120
+
+
 def _retriable(headers: dict[str, str] | None) -> RetriableAPIError:
     response = requests.Response()
     response.status_code = 429
