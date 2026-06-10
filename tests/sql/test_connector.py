@@ -198,6 +198,75 @@ class TestConnectorSQL:  # noqa: PLR0904
         engine2 = connector._cached_engine
         assert engine1 is engine2
 
+    def test_reflection_methods_reuse_cached_inspector(
+        self,
+        connector: SQLConnector,
+    ):
+        engine = connector._engine
+        inspector = mock.Mock()
+        inspector.has_table.return_value = True
+        inspector.get_schema_names.return_value = ["main"]
+        inspector.get_columns.return_value = [
+            {"name": "id", "type": sqlalchemy.Integer(), "nullable": False},
+        ]
+
+        with mock.patch(
+            "singer_sdk.sql.connector.sa.inspect",
+            return_value=inspector,
+        ) as mock_inspect:
+            assert connector.table_exists("main.test_table")
+            assert connector.schema_exists("main")
+            columns = connector.get_table_columns("main.test_table")
+            assert connector.table_exists("main.test_table")
+
+        mock_inspect.assert_called_once_with(engine)
+        assert connector._cached_inspector is inspector
+        assert list(columns) == ["id"]
+        inspector.has_table.assert_has_calls(
+            [
+                mock.call("test_table", "main"),
+                mock.call("test_table", "main"),
+            ],
+        )
+        inspector.get_schema_names.assert_called_once_with()
+        inspector.get_columns.assert_called_once_with("test_table", "main")
+
+    def test_clear_reflection_cache_does_not_create_inspector(
+        self,
+        connector: SQLConnector,
+    ):
+        with mock.patch("singer_sdk.sql.connector.sa.inspect") as mock_inspect:
+            connector.clear_reflection_cache()
+
+        mock_inspect.assert_not_called()
+
+    def test_clear_reflection_cache_clears_cached_inspector(
+        self,
+        connector: SQLConnector,
+    ):
+        inspector = connector._inspector
+        inspector.info_cache["sentinel"] = object()
+
+        connector.clear_reflection_cache()
+
+        assert inspector.info_cache == {}
+        assert connector._cached_inspector is inspector
+
+    def test_clear_reflection_cache_falls_back_to_info_cache(
+        self,
+        connector: SQLConnector,
+    ):
+        class FakeInspector:
+            def __init__(self) -> None:
+                self.info_cache = {"tables": "cached"}
+
+        fake_inspector = FakeInspector()
+        connector._cached_inspector = fake_inspector
+
+        connector.clear_reflection_cache()
+
+        assert fake_inspector.info_cache == {}
+
     def test_deprecated_functions_warn(self, connector: SQLConnector):
         with pytest.deprecated_call():
             connector.create_sqlalchemy_engine()
@@ -374,6 +443,34 @@ class TestConnectorSQL:  # noqa: PLR0904
         with connector._engine.connect() as conn, conn.begin():
             conn.execute(sqlalchemy.text(f"DROP TABLE {table_name}"))
 
+    def test_create_empty_table_clears_cached_negative_reflection(
+        self,
+        connector: SQLConnector,
+    ):
+        table_name = "test_reflection_cache"
+        schema = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+            },
+        }
+
+        assert not connector.table_exists(table_name)
+        inspector = connector._cached_inspector
+        assert inspector is not None
+
+        connector.create_empty_table(
+            full_table_name=table_name,
+            schema=schema,
+            primary_keys=[],
+        )
+
+        assert connector._cached_inspector is inspector
+        assert connector.table_exists(table_name)
+
+        with connector._engine.connect() as conn, conn.begin():
+            conn.execute(sqlalchemy.text(f"DROP TABLE {table_name}"))
+
     def test_create_empty_table_partial_primary_keys(self, connector: SQLConnector):
         """Test that only existing columns are included in primary key constraint."""
         schema = {
@@ -529,6 +626,10 @@ class TestDummySQLConnector:
         # CREATE SCHEMA is not supported by SQLite, so we mock
         with (
             mock.patch.object(connector, "_connect") as mock_connect,
+            mock.patch.object(
+                connector,
+                "clear_reflection_cache",
+            ) as mock_clear_reflection_cache,
             mock.patch.object(mock_connect, "begin"),
             mock.patch.object(mock_connect, "execute"),
         ):
@@ -536,6 +637,7 @@ class TestDummySQLConnector:
             mock_connect.assert_called_once()
             mock_connect.return_value.__enter__.return_value.begin.assert_called_once()
             mock_connect.return_value.__enter__.return_value.execute.assert_called_once()
+            mock_clear_reflection_cache.assert_called_once_with()
 
     def test_column_rename(self, connector: DummySQLConnector):
         engine = connector._engine
@@ -548,11 +650,38 @@ class TestDummySQLConnector:
         )
         meta.create_all(engine)
 
+        assert list(connector.get_table_columns("test_table")) == ["id", "old_name"]
+
         connector.rename_column("test_table", "old_name", "new_name")
+
+        assert list(connector.get_table_columns("test_table")) == ["id", "new_name"]
 
         with engine.connect() as conn:
             result = conn.execute(sqlalchemy.text("SELECT * FROM test_table"))
             assert result.keys() == ["id", "new_name"]
+
+    def test_create_empty_column_clears_reflection_cache(
+        self,
+        connector: DummySQLConnector,
+    ):
+        engine = connector._engine
+        meta = sqlalchemy.MetaData()
+        _ = sqlalchemy.Table(
+            "test_table",
+            meta,
+            sqlalchemy.Column("id", sqlalchemy.Integer),
+        )
+        meta.create_all(engine)
+
+        assert list(connector.get_table_columns("test_table")) == ["id"]
+
+        connector._create_empty_column(
+            "test_table",
+            "name",
+            sqlalchemy.String(),
+        )
+
+        assert list(connector.get_table_columns("test_table")) == ["id", "name"]
 
     def test_adapt_column_type(self, connector: DummySQLConnector):
         engine = connector._engine
@@ -568,6 +697,10 @@ class TestDummySQLConnector:
         # Changing the column type is not supported by SQLite, so we mock
         with (
             mock.patch.object(connector, "_connect") as mock_connect,
+            mock.patch.object(
+                connector,
+                "clear_reflection_cache",
+            ) as mock_clear_reflection_cache,
             mock.patch.object(mock_connect, "begin"),
             mock.patch.object(mock_connect, "execute"),
         ):
@@ -582,6 +715,7 @@ class TestDummySQLConnector:
                 str(ddl.compile())
                 == "ALTER TABLE test_table ALTER COLUMN name TYPE VARCHAR"
             )
+            mock_clear_reflection_cache.assert_called_once_with()
 
     @pytest.mark.parametrize(
         "exclude_schemas,expected_streams",
