@@ -131,6 +131,7 @@ class SQLStream(Stream, abc.ABC):
         return self._singer_catalog_entry.metadata.root.table_key_properties or []
 
     @primary_keys.setter
+    @override
     def primary_keys(self, new_value: t.Sequence[str]) -> None:
         """Set or reset the primary key(s) in the stream's catalog entry.
 
