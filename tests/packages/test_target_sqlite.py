@@ -39,12 +39,22 @@ if t.TYPE_CHECKING:
 
 _TestTargetSQLite = get_target_test_class(
     target_class=SQLiteTarget,
-    config={"path_to_db": ":memory:"},
+    config=None,  # Config will be provided via plugin_config fixture
 )
 
 
 class TestTargetSQLite(_TestTargetSQLite):
     """Test Target SQLite."""
+
+    @pytest.fixture
+    def plugin_config(self, tmp_path: Path) -> dict:
+        """Generate target config using a temporary database file.
+
+        This demonstrates using the plugin_config fixture to generate
+        config dynamically from other pytest fixtures (tmp_path).
+        """
+        db_path = tmp_path / "target_test_sqlite.db"
+        return {"path_to_db": str(db_path)}
 
     @pytest.mark.xfail(
         reason="Our sample target SQLite does not support duplicate records.",

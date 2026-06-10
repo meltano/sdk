@@ -32,14 +32,12 @@ from tests.conftest import TargetMock
 if t.TYPE_CHECKING:
     from pytest_snapshot.plugin import Snapshot
 
-TEST_OUTPUT_DIR = Path(f".output/test_{uuid.uuid4()}/")
-SAMPLE_CONFIG = {"target_folder": f"{TEST_OUTPUT_DIR}/"}
 DATETIME = datetime.datetime(2025, 6, 1, tzinfo=datetime.timezone.utc)
 
 
 StandardTests = get_target_test_class(
     target_class=TargetCSV,
-    config=SAMPLE_CONFIG,
+    config=None,  # Config will be provided via plugin_config fixture
 )
 
 
@@ -48,13 +46,25 @@ class TestSampleTargetCSV(StandardTests):
 
     @pytest.fixture(scope="class")
     def test_output_dir(self):
-        return TEST_OUTPUT_DIR
+        """Create a unique output directory for this test class."""
+        output_dir = Path(f".output/test_{uuid.uuid4()}/")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        yield output_dir
+        shutil.rmtree(output_dir)
+
+    @pytest.fixture
+    def plugin_config(self, test_output_dir: Path) -> dict:
+        """Generate target config using the test output directory fixture.
+
+        This demonstrates composing plugin_config from another fixture
+        (test_output_dir) for dynamic directory creation.
+        """
+        return {"target_folder": str(test_output_dir)}
 
     @pytest.fixture(scope="class")
     def resource(self, test_output_dir):
-        test_output_dir.mkdir(parents=True, exist_ok=True)
-        yield test_output_dir
-        shutil.rmtree(test_output_dir)
+        """Provide the output directory as a resource."""
+        return test_output_dir
 
 
 SAMPLE_TAP_CONFIG: dict[str, t.Any] = {}
