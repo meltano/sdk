@@ -141,6 +141,10 @@ def test_bench_write_record_messages_msgspec(
     class _DevNullStdout:
         buffer = devnull_b
 
+        def write(self, data: str) -> int:
+            """Mimic TextIOBase.write, discarding data like /dev/null."""
+            return len(data)
+
         def flush(self) -> None:
             devnull_b.flush()
 
