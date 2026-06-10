@@ -1439,11 +1439,13 @@ class SQLConnector:  # noqa: PLR0904
 
         # For non-OVERWRITE modes or subsequent schema changes, add columns
         # incrementally
+        existing_columns = self.get_table_columns(full_table_name)
         for property_name, property_def in schema["properties"].items():
             self.prepare_column(
                 full_table_name,
                 property_name,
                 self.to_sql_type(property_def),
+                existing_columns=existing_columns,
             )
 
         self.prepare_primary_key(
@@ -1475,6 +1477,7 @@ class SQLConnector:  # noqa: PLR0904
         full_table_name: str | FullyQualifiedName,
         column_name: str,
         sql_type: sqlalchemy.types.TypeEngine,
+        existing_columns: Mapping[str, sa.Column] | None = None,
     ) -> None:
         """Adapt target table to provided schema if possible.
 
@@ -1482,8 +1485,16 @@ class SQLConnector:  # noqa: PLR0904
             full_table_name: the target table name.
             column_name: the target column name.
             sql_type: the SQLAlchemy type.
+            existing_columns: pre-fetched mapping of column name to column object.
+                When provided, avoids an extra database round-trip to check column
+                existence. Pass the result of :meth:`get_table_columns` to reuse it
+                across multiple ``prepare_column`` calls.
         """
-        if not self.column_exists(full_table_name, column_name):
+        if existing_columns is None:
+            existing_columns = self.get_table_columns(full_table_name)
+
+        existing_column = existing_columns.get(column_name)
+        if existing_column is None:
             self._create_empty_column(
                 full_table_name=full_table_name,
                 column_name=column_name,
@@ -1495,6 +1506,7 @@ class SQLConnector:  # noqa: PLR0904
             full_table_name,
             column_name=column_name,
             sql_type=sql_type,
+            current_type=existing_column.type,
         )
 
     def rename_column(
@@ -1776,6 +1788,8 @@ class SQLConnector:  # noqa: PLR0904
         full_table_name: str | FullyQualifiedName,
         column_name: str,
         sql_type: sqlalchemy.types.TypeEngine,
+        *,
+        current_type: sqlalchemy.types.TypeEngine | None = None,
     ) -> None:
         """Adapt table column type to support the new JSON schema type.
 
@@ -1783,14 +1797,14 @@ class SQLConnector:  # noqa: PLR0904
             full_table_name: The target table name.
             column_name: The target column name.
             sql_type: The new SQLAlchemy type.
+            current_type: The existing column type. When provided, avoids an extra
+                database round-trip to look up the current type.
 
         Raises:
             NotImplementedError: if altering columns is not supported.
         """
-        current_type: sqlalchemy.types.TypeEngine = self._get_column_type(
-            full_table_name,
-            column_name,
-        )
+        if current_type is None:
+            current_type = self._get_column_type(full_table_name, column_name)
 
         # remove collation if present and save it
         current_type_collation = self.remove_collation(current_type)
