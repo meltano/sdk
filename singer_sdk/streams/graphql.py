@@ -6,6 +6,7 @@ import abc
 import sys
 import typing as t
 
+from singer_sdk.exceptions import FatalAPIError
 from singer_sdk.streams.rest import RESTStream
 
 if sys.version_info >= (3, 12):
@@ -14,6 +15,8 @@ else:
     from typing_extensions import override
 
 if t.TYPE_CHECKING:
+    import requests
+
     from singer_sdk.helpers.types import Context
 
 _TToken = t.TypeVar("_TToken")
@@ -30,6 +33,41 @@ class GraphQLStream(RESTStream, abc.ABC, t.Generic[_TToken]):
 
     path = ""
     http_method = "POST"
+
+    @override
+    def validate_response(self, response: requests.Response) -> None:
+        """Validate HTTP response and GraphQL response errors.
+
+        Raises:
+            FatalAPIError: If the GraphQL response contains errors.
+        """
+        super().validate_response(response)
+
+        try:
+            data = response.json()
+        except ValueError:
+            return
+
+        if not isinstance(data, dict):
+            return
+
+        errors = data.get("errors")
+        if not errors:
+            return
+
+        if isinstance(errors, list):
+            error_messages = [
+                str(error.get("message", error))
+                if isinstance(error, dict)
+                else str(error)
+                for error in errors
+            ]
+            error_message = "; ".join(error_messages)
+        else:
+            error_message = str(errors)
+
+        msg = f"GraphQL API error: {error_message}"
+        raise FatalAPIError(msg)
 
     @property
     @override
