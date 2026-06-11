@@ -253,4 +253,5 @@ class SimpleSingerWriter(GenericSingerWriter[str, Message]):
             message: The message to write.
         """
         sys.stdout.write(self.format_message(message) + "\n")
-        sys.stdout.flush()
+        if not isinstance(message, RecordMessage):
+            sys.stdout.flush()
