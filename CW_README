@@ -18,51 +18,95 @@
 https://github.com/Rasaec5/Meltano_sdk/tree/main
 
 ## Implementation Plan
-# Solution Plan — meltano/sdk Issue #2766
+### Solution Plan — meltano/sdk Issue #2766 (UMPIRE)
 
-**Goal:** Let SDK SQL targets honor a `schema` setting as an alias for `default_target_schema`,
-without breaking existing stream-derived behavior.
+Issue: https://github.com/meltano/sdk/issues/2766
+Component: `singer_sdk.sinks.sql.SQLSink`
 
-#### Resolution order (target)
-`default_target_schema` → `schema` → stream-derived (`<schema>-<table>`) → `None`.
-Putting `default_target_schema` first keeps current behavior a no-op change for existing users.
+#### Understand
 
-#### Code change
-In `singer_sdk/sinks/sql.py`, update `SQLSink.schema_name`:
+SDK-based SQL targets pick their destination schema in `SQLSink.schema_name`. Today the order
+is: use `default_target_schema` if set, otherwise derive the schema from the incoming stream ID
+when it looks like `<schema>-<table>` (splits on `-` into 2 or 3 parts), otherwise `None`.
+
+**What's broken:** Many SQL targets (e.g. MeltanoLabs `target-snowflake`) expose their own
+`schema` setting. If a user sets `schema` but not `default_target_schema`, the SDK ignores
+`schema` and instead derives the schema from the stream prefix. A record with stream
+`TAP_SCHEMA-users` lands in schema `tap_schema`, and if the connecting role has no rights there,
+schema/table/file-format creation fails with a permission error.
+
+**What should happen:** An explicitly configured `schema` should be honored as an alias for
+`default_target_schema`. To avoid breaking existing setups, `default_target_schema` keeps
+precedence when both are present.
+
+#### Match
+
+The existing `default_target_schema` branch in the same property is the pattern to mirror — it
+reads a config key and returns it verbatim (no `conform_name`) before falling back to the
+stream-derived value:
 
 ```python
-@property
-def schema_name(self) -> str | None:
-    default_target_schema = self.config.get("default_target_schema")
-    schema = self.config.get("schema")
-    parts = self.stream_name.split("-")
-    if default_target_schema:
-        return default_target_schema
-    if schema:
-        return schema
-    return self.conform_name(parts[-2], "schema") if len(parts) in {2, 3} else None
+# singer_sdk/sinks/sql.py  (current)
+default_target_schema = self.config.get("default_target_schema", None)
+parts = self.stream_name.split("-")
+if default_target_schema:
+    return default_target_schema
+return self.conform_name(parts[-2], "schema") if len(parts) in {2, 3} else None
 ```
 
-#### Supporting changes
-1. **Decide on `schema` precedence vs stream-derived.** As above, an explicit `schema` setting
-   should win over the implicit stream prefix — that is the user's intent in the bug report.
-2. **Builtin setting (optional).** Consider registering `schema` (and/or treating it as an alias
-   of `default_target_schema`) in `SQLTarget`'s base config schema so all SQL targets get it
-   consistently, rather than relying on each target to define it.
-3. **Conform or not?** `default_target_schema` is returned verbatim; for consistency, return
-   `schema` verbatim too (don't pass through `conform_name`), matching user expectations.
+The new `schema` handling should follow the identical shape: read the key, return it verbatim,
+placed between `default_target_schema` and the stream-derived fallback.
 
-#### Tests
-- Unit test `schema_name` for the matrix: only `schema`; only `default_target_schema`; both
-  (latter wins); neither + `TAP_SCHEMA-users` (stream-derived); neither + single-part stream
-  (`None`).
-- Regression test: existing behavior unchanged when only `default_target_schema` is set.
+#### Plan
 
-#### Validation
-- Run the §3 SDK-only repro from the reproduction guide and confirm `('TARGET_SCHEMA', 'users')`
-  when only `schema` is set.
-- Optionally run the target-postgres end-to-end repro.
+1. **Modify** `SQLSink.schema_name` in `singer_sdk/sinks/sql.py` to add a `schema` fallback,
+   giving precedence `default_target_schema` → `schema` → stream-derived → `None`:
 
-#### Docs & release
-- Document the new `schema`/`default_target_schema` relationship and precedence.
-- Add a changelog entry; ship as a minor (behavior-additive) release.
+```python
+   @property
+   def schema_name(self) -> str | None:
+       default_target_schema = self.config.get("default_target_schema")
+       schema = self.config.get("schema")
+       parts = self.stream_name.split("-")
+       if default_target_schema:
+           return default_target_schema
+       if schema:
+           return schema
+       return self.conform_name(parts[-2], "schema") if len(parts) in {2, 3} else None
+```
+
+2. **(Optional) Add** `schema` to `SQLTarget`'s base `config_jsonschema` so every SQL target
+   recognizes it consistently, rather than relying on each target to define it. Decide whether
+   to formally document it as an alias of `default_target_schema`.
+
+3. **Keep** the docstring updated (Google style) to describe the new precedence, since public
+   modules are docstring- and type-checked in CI.
+
+#### Implement
+
+Branch: _<placeholder — link your branch/PR here in Phase III>_
+
+## Review
+
+Self-review against the SDK's `CONTRIBUTING.md` (docs/CONTRIBUTING.md):
+
+- **Conventional / semantic PR title** (enforced by the semantic-prs app): use
+  `fix(targets): honor `schema` setting as alias for `default_target_schema``. Valid types
+  include `fix`, `feat`, etc.; valid scopes include `targets`.
+- **Formatting & linting:** run `pre-commit run --all` — Ruff, Black, flake8, mypy; max line
+  length 88.
+- **Type hints** on all public methods and **Google-style docstrings** (description of every
+  arg and the return value) are required and checked in CI.
+- Install hooks first with `pre-commit install`; dependencies via `uv sync --all-groups --all-extras`.
+
+#### Evaluate
+
+- **Unit tests** (no external credentials) added for `schema_name` covering the matrix:
+  only `schema` → returns `schema`; only `default_target_schema` → unchanged; both →
+  `default_target_schema` wins; neither + `TAP_SCHEMA-users` → stream-derived (`tap_schema`);
+  neither + single-part stream → `None`.
+- **Regression:** confirm behavior is unchanged when only `default_target_schema` is set.
+- **Run the suite** with `nox -s tests` (core tests, no credentials) and type checks with
+  `nox -t typing`. `test-external` requires external credentials and isn't needed for this fix.
+- Manually validate with the SDK-only reproduction (only `schema` set should now resolve to the
+  configured schema, not `tap_schema`).
