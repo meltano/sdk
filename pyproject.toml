@@ -63,7 +63,7 @@ parquet = [
 ]
 
 testing = [
-    "pytest>=9",
+    "pytest>=9.1",
 ]
 
 faker = [
@@ -199,8 +199,6 @@ filterwarnings = [
     'ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning',
     # TODO: Address this SQLite warning in Python 3.13+
     'ignore::ResourceWarning',
-    # pytest warnings
-    'once:Class-scoped fixture defined as instance method is deprecated:pytest.PytestRemovedIn10Warning',
     # Our own warnings
     'once::singer_sdk.helpers._compat.SingerSDKDeprecationWarning',
     'once::singer_sdk.helpers._compat.SingerSDKPythonEOLWarning',
