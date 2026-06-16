@@ -12,7 +12,7 @@ import msgspec
 import msgspec.json
 
 from singer_sdk.singerlib.encoding.base import GenericSingerReader, GenericSingerWriter
-from singer_sdk.singerlib.encoding.simple import Message
+from singer_sdk.singerlib.encoding.simple import Message, RecordMessage
 from singer_sdk.singerlib.exceptions import InvalidInputLine
 
 if sys.version_info >= (3, 12):
@@ -117,4 +117,5 @@ class MsgSpecWriter(GenericSingerWriter[bytearray, Message]):
             message: The message to write.
         """
         sys.stdout.buffer.write(self.format_message(message))
-        sys.stdout.flush()
+        if not isinstance(message, RecordMessage):
+            sys.stdout.flush()
