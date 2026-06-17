@@ -745,7 +745,7 @@ class PluginMapper:
     def __init__(
         self,
         plugin_config: dict[str, StreamMapsDict],
-        logger: logging.Logger,
+        logger: logging.Logger | logging.LoggerAdapter,
     ) -> None:
         """Initialize mapper.
 

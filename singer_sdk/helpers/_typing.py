@@ -399,7 +399,7 @@ def conform_record_data_types(
     record: dict[str, t.Any],
     schema: dict,
     level: conform.TypeConformanceLevel,
-    logger: logging.Logger,
+    logger: logging.Logger | logging.LoggerAdapter,
 ) -> dict[str, t.Any]:
     """Translate values in record dictionary to singer-compatible data types.
 

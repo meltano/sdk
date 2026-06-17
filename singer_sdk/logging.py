@@ -191,8 +191,9 @@ class StructuredFormatter(logging.Formatter):
             "ts": record.created,
             "thread_name": record.threadName,
             "app_name": data.pop("app_name", "singer-sdk"),
-            "stream_name": data.pop("stream_name", None),
         }
+        if stream_name := data.pop("stream_name", None):
+            log_data["stream_name"] = stream_name
 
         # Handle exception information
         if record.exc_info and (exc_info := self._format_exception(record.exc_info)):
