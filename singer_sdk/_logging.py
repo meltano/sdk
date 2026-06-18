@@ -15,7 +15,7 @@ if t.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN401 # pragma: no cover
+def _load_yaml_logging_config(path: Traversable | Path) -> dict:  # pragma: no cover
     """Load the logging config from the YAML file.
 
     Args:
@@ -27,7 +27,40 @@ def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN40
     import yaml  # noqa: PLC0415
 
     with path.open() as f:
-        return yaml.safe_load(f)
+        config = yaml.safe_load(f)
+
+    if not isinstance(config, dict):
+        raise ValueError("Logging config must be a dictionary.")
+
+    allowed_keys = {"version", "formatters", "handlers", "loggers", "root"}
+    if any(key not in allowed_keys for key in config):
+        raise ValueError(
+            f"Logging config contains invalid keys: "
+            f"{[key for key in config if key not in allowed_keys]!r}"
+        )
+
+    allowed_handler_types = {
+        "logging.StreamHandler",
+        "logging.FileHandler",
+        "logging.handlers.RotatingFileHandler",
+        "logging.handlers.TimedRotatingFileHandler",
+        "logging.NullHandler",
+    }
+    handlers = config.get("handlers", {})
+    if not isinstance(handlers, dict):
+        raise ValueError("Logging config 'handlers' must be a dictionary.")
+
+    for handler_name, handler_config in handlers.items():
+        if not isinstance(handler_config, dict):
+            raise ValueError(f"Handler config for {handler_name!r} must be a dictionary.")
+        handler_class = handler_config.get("class")
+        if handler_class not in allowed_handler_types:
+            raise ValueError(
+                f"Handler class {handler_class!r} for handler {handler_name!r} is not allowed. "
+                f"Allowed handler classes are: {', '.join(sorted(allowed_handler_types))}"
+            )
+
+    return config
 
 
 def _setup_console_logging(*, log_level: str | int | None = None) -> None:
