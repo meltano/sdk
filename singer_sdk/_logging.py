@@ -52,7 +52,9 @@ def _load_yaml_logging_config(path: Traversable | Path) -> dict:  # pragma: no c
 
     for handler_name, handler_config in handlers.items():
         if not isinstance(handler_config, dict):
-            raise ValueError(f"Handler config for {handler_name!r} must be a dictionary.")
+            raise ValueError(
+                f"Handler config for {handler_name!r} must be a dictionary."
+            )
         handler_class = handler_config.get("class")
         if handler_class not in allowed_handler_types:
             raise ValueError(
