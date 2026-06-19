@@ -212,13 +212,13 @@ class PluginBase(abc.ABC):
     _config: dict
 
     @classproperty
-    def logger(cls) -> logging.Logger:  # noqa: N805
+    def logger(cls) -> logging.LoggerAdapter:  # noqa: N805
         """Get logger.
 
         Returns:
             Plugin logger.
         """
-        return logging.getLogger(cls.name)
+        return logging.LoggerAdapter(logging.getLogger(cls.name))
 
     # Constructor
 

@@ -126,7 +126,10 @@ class Stream(abc.ABC):  # noqa: PLR0904
             msg = "Missing argument or class variable 'name'."
             raise ValueError(msg)
 
-        self._logger: logging.Logger = tap.logger.getChild(self.name)
+        self._logger = logging.LoggerAdapter(
+            tap.logger.logger.getChild(self.name),
+            extra={"stream_name": self.name},
+        )
         self.metrics_logger = tap.metrics_logger
         self.tap_name: str = tap.name
         self.context: types.Context | None = None
@@ -185,7 +188,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             self._schema = json.loads(self.schema_filepath.read_text())
 
     @property
-    def logger(self) -> logging.Logger:
+    def logger(self) -> logging.LoggerAdapter:
         """Get stream logger."""
         return self._logger
 
