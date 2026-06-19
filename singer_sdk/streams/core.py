@@ -19,7 +19,6 @@ from singer_sdk.batch import Batcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
-    DiscoveryError,
     InvalidReplicationKeyException,
     InvalidStreamSortException,
     MaxRecordsLimitException,
@@ -35,6 +34,7 @@ from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_ty
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.helpers.conform import TypeConformanceLevel
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform
+from singer_sdk.schema.source import _InstanceSchemaDescriptor
 from singer_sdk.singerlib.catalog import (
     REPLICATION_FULL_TABLE,
     REPLICATION_INCREMENTAL,
@@ -47,6 +47,7 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers._batch import BaseBatchFileEncoding
     from singer_sdk.helpers._compat import Traversable
     from singer_sdk.mapper import StreamMap
+    from singer_sdk.schema.source import StreamSchema
     from singer_sdk.singerlib.catalog import StreamMetadata
     from singer_sdk.tap_base import Tap
 
@@ -101,6 +102,15 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     selected_by_default: bool = True
     """Whether this stream is selected by default in the catalog."""
+
+    schema: t.ClassVar[StreamSchema[t.Any]] = _InstanceSchemaDescriptor()
+    """JSON schema for this stream.
+
+    Can be set at the class level to a :class:`~singer_sdk.StreamSchema` descriptor
+    (e.g. ``StreamSchema(SchemaDirectory("schemas"))``) or to a plain
+    ``dict[str, Any]`` JSON Schema object.  When neither is provided the schema
+    must be supplied via the *schema* constructor argument.
+    """
 
     def __init__(
         self,
@@ -513,21 +523,6 @@ class Stream(abc.ABC):  # noqa: PLR0904
             Path to a schema file for the stream or `None` if n/a.
         """
         return self._schema_filepath
-
-    @property
-    def schema(self) -> dict:
-        """Get schema.
-
-        Returns:
-            JSON Schema dictionary for this stream.
-
-        Raises:
-            DiscoveryError: If the schema was not provided.
-        """
-        if self._schema is None:
-            msg = f"The schema for stream '{self.name}' was not provided"
-            raise DiscoveryError(msg)
-        return self._schema
 
     @property
     def primary_keys(self) -> t.Sequence[str]:

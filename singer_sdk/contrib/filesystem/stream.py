@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import abc
-import functools
 import sys
 import typing as t
 
@@ -66,6 +65,7 @@ class FileStream(Stream, abc.ABC):
         self.filesystem = filesystem
 
         super().__init__(tap, schema=None, name=name)
+        self._schema = self._get_full_schema()
 
         # TODO(edgarrmondragon): Make this None if the filesystem does not support it.
         self.replication_key = SDC_META_MODIFIED_AT
@@ -88,12 +88,6 @@ class FileStream(Stream, abc.ABC):
         schema = self.get_schema(path)
         schema["properties"].update(self.SDC_PROPERTIES)
         return schema
-
-    @functools.cached_property
-    @override
-    def schema(self) -> dict[str, t.Any]:
-        """Return the schema for the stream."""
-        return self._get_full_schema()
 
     @override
     def get_records(
