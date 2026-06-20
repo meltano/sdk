@@ -146,9 +146,11 @@ class TestStructuredFormatter:
 
         assert dedent("".join(frame["lines"])) == dedent(
             """\
+            try:
                 msg = "Test exception"
                 raise ValueError(msg)  # noqa: TRY301
             except ValueError:
+                logger.exception("Error occurred", extra={"error_code": 500})
             """
         )
 

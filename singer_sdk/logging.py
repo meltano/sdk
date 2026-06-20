@@ -111,6 +111,7 @@ class StructuredFormatter(logging.Formatter):
             tb = exc_traceback
             while tb is not None:
                 lineno = tb.tb_lineno
+                start = max(0, lineno - 3)
                 filename = tb.tb_frame.f_code.co_filename
                 frame_info: _FrameData = {
                     "filename": tb.tb_frame.f_code.co_filename,
@@ -119,7 +120,7 @@ class StructuredFormatter(logging.Formatter):
                     # TODO: Ensure newlines are stripped?
                     # TODO: Include one line above and one line below for context?
                     "line": linecache.getline(filename, lineno),
-                    "lines": linecache.getlines(filename)[lineno - 2 : lineno + 1],
+                    "lines": linecache.getlines(filename)[start : lineno + 2],
                 }
                 frames.append(frame_info)
                 tb = tb.tb_next
