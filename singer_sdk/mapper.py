@@ -391,11 +391,7 @@ class CustomStreamMap(StreamMap):
 
     @property
     def functions(self) -> dict[str, t.Callable]:
-        """Get available transformation functions.
-
-        Returns:
-            Functions which should be available for expression evaluation.
-        """
+        """Available transformation functions."""
         funcs: dict[str, t.Any] = dict(simpleeval.DEFAULT_FUNCTIONS)
         funcs["md5"] = md5
         funcs["sha256"] = sha256

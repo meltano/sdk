@@ -367,11 +367,7 @@ class DeprecatedEnum(Enum):
 
     @property
     def deprecation_message(self) -> str | None:
-        """Get deprecation message.
-
-        Returns:
-            Deprecation message.
-        """
+        """Deprecation message."""
         return self.deprecation
 
     def emit_warning(self) -> None:

@@ -704,7 +704,7 @@ def test_oauth_authenticator_refreshes_token_on_retry(
 
         @property
         def oauth_request_body(self) -> dict:
-            """Return minimal OAuth request body."""
+            """Minimal OAuth request body."""
             return {"grant_type": "client_credentials"}
 
         def update_access_token(self) -> None:

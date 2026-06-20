@@ -249,13 +249,10 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
 
     @property
     def http_headers(self) -> dict:
-        """Return headers dict to be used for HTTP requests.
+        """Dictionary of HTTP headers to use as a base for every request.
 
         If an authenticator is also specified, the authenticator's headers will be
         combined with `http_headers` when making HTTP requests.
-
-        Returns:
-            Dictionary of HTTP headers to use as a base for every request.
         """
         return {
             **self._http_headers,
@@ -288,21 +285,14 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
 
     @property
     def requests_session(self) -> requests.Session:
-        """Get requests session.
-
-        Returns:
-            The :class:`requests.Session` object for HTTP requests.
-        """
+        """The :class:`requests.Session` object for HTTP requests."""
         if not self._requests_session:
             self._requests_session = requests.Session()
         return self._requests_session
 
     @cached_property
     def user_agent(self) -> str:
-        """Get the user agent string for the stream.
-
-        Returns:
-            The user agent string.
+        """User-Agent string for the stream.
 
         .. versionadded:: 0.40.0
         """
@@ -791,12 +781,9 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
 
     @property
     def timeout(self) -> int:
-        """Return the request timeout limit in seconds.
+        """Request timeout limit in seconds.
 
         The default timeout is 300 seconds, or as defined by DEFAULT_REQUEST_TIMEOUT.
-
-        Returns:
-            The request timeout limit as number of seconds.
         """
         return DEFAULT_REQUEST_TIMEOUT
 
@@ -841,14 +828,10 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
 
     @property
     def authenticator(self) -> Auth:
-        """Return or set the authenticator for managing HTTP auth headers.
+        """Authenticator for all outgoing requests.
 
         If an authenticator is not specified, REST-based taps will simply pass
         `http_headers` as defined in the stream class.
-
-        Returns:
-            Authenticator instance that will be used to authenticate all outgoing
-            requests.
         """
         return SimpleAuthenticator()
 

@@ -40,11 +40,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @override
     @property
     def authenticator(self) -> {{ cookiecutter.source_name }}Authenticator:
-        """Return a new authenticator object.
-
-        Returns:
-            An authenticator instance.
-        """
+        """An authenticator object."""
         return {{ cookiecutter.source_name }}Authenticator()
 
 {%- endif %}
@@ -52,11 +48,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @override
     @property
     def http_headers(self) -> dict:
-        """Return the http headers needed.
-
-        Returns:
-            A dictionary of HTTP headers.
-        """
+        """A dictionary of HTTP headers."""
 {%- if cookiecutter.auth_method not in ("OAuth2", "JWT") %}
         # If not using an authenticator, you may also provide inline auth headers:
         # headers["Private-Token"] = self.config.get("auth_token")
