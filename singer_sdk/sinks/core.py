@@ -403,7 +403,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
 
     @property
     def batch_config(self) -> BatchConfig | None:
-        """Match configuration."""
+        """Batch configuration."""
         raw = self.config.get("batch_config")
         return BatchConfig.from_dict(raw) if raw else None
 

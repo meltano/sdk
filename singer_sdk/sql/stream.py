@@ -85,7 +85,7 @@ class SQLStream(Stream, abc.ABC):
 
     @cached_property
     def schema(self) -> dict:
-        """JSON Schema dictitionary.
+        """JSON Schema dictionary.
 
         Metadata from an input catalog will override standard metadata.
         """
