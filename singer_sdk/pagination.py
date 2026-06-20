@@ -53,20 +53,12 @@ class BaseAPIPaginator(ABC, t.Generic[TPageToken]):
 
     @property
     def current_value(self) -> TPageToken:
-        """Get the current pagination value.
-
-        Returns:
-            Current page value.
-        """
+        """The current pagination value."""
         return self._value
 
     @property
     def finished(self) -> bool:
-        """Get a flag that indicates if the last page of data has been reached.
-
-        Returns:
-            True if there are no more pages.
-        """
+        """A flag that indicates if the last page of data has been reached."""
         return self._finished
 
     @property

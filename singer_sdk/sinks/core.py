@@ -216,20 +216,12 @@ class Sink(abc.ABC):  # noqa: PLR0904
 
     @property
     def record_counter_metric(self) -> metrics.Counter:
-        """Get the record counter for this sink.
-
-        Returns:
-            The Meter instance for the record counter.
-        """
+        """Record counter for this sink."""
         return self._record_counter
 
     @property
     def batch_processing_timer(self) -> metrics.Timer:
-        """Get the batch processing timer for this sink.
-
-        Returns:
-            The Meter instance for the batch processing timer.
-        """
+        """Batch processing timer for this sink."""
         return self._batch_timer
 
     def get_sink_record_counter(self) -> metrics.Counter:
@@ -330,37 +322,27 @@ class Sink(abc.ABC):  # noqa: PLR0904
 
     @property
     def current_size(self) -> int:
-        """Get current batch size.
-
-        Returns:
-            The number of records to drain.
-        """
+        """Current record batch size."""
         return self._batch_records_read
 
     @property
     def is_full(self) -> bool:
-        """Check against the batch size limit.
-
-        Returns:
-            True if the sink needs to be drained.
-        """
+        """True if the sink needs to be drained."""
         return self.current_size >= self.max_size
 
     @property
     def batch_size_rows(self) -> int | None:
         """The maximum number of rows a batch can accumulate before being processed.
 
-        Returns:
-            The max number of rows or None if not set.
+        Or None if not set.
         """
         return self._batch_size_rows
 
     @property
     def max_size(self) -> int:
-        """Get max batch size.
+        """Max record batch size.
 
-        Returns:
-            Max number of records to batch before `is_full=True`
+        The number of records to batch before `is_full=True`
 
         .. versionchanged:: 0.36.0
            This property now takes into account the
@@ -416,59 +398,36 @@ class Sink(abc.ABC):  # noqa: PLR0904
 
     @property
     def config(self) -> t.Mapping[str, t.Any]:
-        """Get plugin configuration.
-
-        Returns:
-            A frozen (read-only) config dictionary map.
-        """
+        """Plugin configuration."""
         return MappingProxyType(self._config)
 
     @property
     def batch_config(self) -> BatchConfig | None:
-        """Get batch configuration.
-
-        Returns:
-            A frozen (read-only) config dictionary map.
-        """
+        """Match configuration."""
         raw = self.config.get("batch_config")
         return BatchConfig.from_dict(raw) if raw else None
 
     @property
     def include_sdc_metadata_properties(self) -> bool:
-        """Check if metadata columns should be added.
-
-        Returns:
-            True if metadata columns should be added.
-        """
+        """True if metadata columns should be added."""
         return self.config.get("add_record_metadata", False)  # type: ignore[no-any-return]
 
     @property
     def process_activate_version_messages(self) -> bool:
-        """Check if activate version messages should be processed.
-
-        Returns:
-            True if activate version messages should be processed.
-        """
+        """True if activate version messages should be processed."""
         return self.config.get("process_activate_version_messages", True)  # type: ignore[no-any-return]
 
     @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
-        """Return a treatment to use for datetime parse errors: ERROR. MAX, or NULL.
-
-        Returns:
-            TODO
-        """
+        """Treatment to use for datetime parse errors: ERROR. MAX, or NULL."""
         return DatetimeErrorTreatmentEnum.ERROR
 
     @property
     def key_properties(self) -> t.Sequence[str]:
-        """Return key properties.
+        """Key properties.
 
         Override this method to return a list of key properties in a format that is
         compatible with the target.
-
-        Returns:
-            A list of stream key properties.
         """
         return self._key_properties
 
