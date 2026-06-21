@@ -186,12 +186,12 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     @property
     def logger(self) -> logging.Logger:
-        """Get stream logger."""
+        """Stream logger."""
         return self._logger
 
     @property
     def state_manager(self) -> StreamStateManager:
-        """Get stream state manager."""
+        """Stream state manager."""
         if self._state_manager is None:
             self._state_manager = StreamStateManager(
                 tap_name=self.tap_name,
@@ -215,12 +215,9 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     @property
     def stream_maps(self) -> list[StreamMap]:
-        """Get stream transformation maps.
+        """A list of one or more map transformations for this stream.
 
         The 0th item is the primary stream map. List should not be empty.
-
-        Returns:
-            A list of one or more map transformations for this stream.
         """
         if self._stream_maps:
             return self._stream_maps
@@ -383,11 +380,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
     @t.final
     @property
     def descendent_streams(self) -> list[Stream]:
-        """Get child streams.
-
-        Returns:
-            A list of all children, recursively.
-        """
+        """List of child streams, added recursively."""
         result: list[Stream] = [*self.child_streams]
         for child in self.child_streams:
             result += child.descendent_streams or []
@@ -507,19 +500,12 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     @property
     def schema_filepath(self) -> Path | Traversable | None:
-        """Get path to schema file.
-
-        Returns:
-            Path to a schema file for the stream or `None` if n/a.
-        """
+        """Path to a schema file for the stream or `None` if n/a."""
         return self._schema_filepath
 
     @property
     def schema(self) -> dict:
-        """Get schema.
-
-        Returns:
-            JSON Schema dictionary for this stream.
+        """JSON Schema dictionary for this stream.
 
         Raises:
             DiscoveryError: If the schema was not provided.
@@ -531,11 +517,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     @property
     def primary_keys(self) -> t.Sequence[str]:
-        """Get primary keys.
-
-        Returns:
-            A list of primary key(s) for the stream.
-        """
+        """Primary keys."""
         return self._primary_keys or []
 
     @primary_keys.setter
@@ -549,13 +531,10 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     @property
     def state_partitioning_keys(self) -> t.Sequence[str] | None:
-        """Get state partition keys.
+        """State partition keys.
 
         If not set, a default partitioning will be inherited from the stream's context.
         If an empty list or tuple is set, state will be held in one bookmark per stream.
-
-        Returns:
-            Partition keys for the stream state bookmarks.
         """
         return self._state_partitioning_keys
 
@@ -573,11 +552,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     @property
     def replication_key(self) -> str | None:
-        """Get replication key.
-
-        Returns:
-            Replication key for the stream.
-        """
+        """Stream replication key."""
         return self._replication_key or None
 
     @replication_key.setter
@@ -615,14 +590,12 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     @property
     def metadata(self) -> singer.MetadataMapping:
-        """Get stream metadata.
+        """A mapping from property breadcrumbs to metadata objects.
 
         Metadata attributes (`inclusion`, `selected`, etc.) are part of the Singer spec.
 
         Metadata from an input catalog will override standard metadata.
 
-        Returns:
-            A mapping from property breadcrumbs to metadata objects.
         """
         if self._metadata is not None:
             return self._metadata
@@ -653,11 +626,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     @property
     def _singer_catalog_entry(self) -> singer.CatalogEntry:
-        """Return catalog entry as specified by the Singer catalog spec.
-
-        Returns:
-            TODO
-        """
+        """Catalog entry as specified by the Singer catalog spec."""
         return singer.CatalogEntry(
             tap_stream_id=self.tap_stream_id,
             stream=self.name,
@@ -684,32 +653,21 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     @property
     def config(self) -> t.Mapping[str, t.Any]:
-        """Get stream configuration.
-
-        Returns:
-            A frozen (read-only) config dictionary map.
-        """
+        """Stream configuration dictionary."""
         return MappingProxyType(self._config)
 
     @property
     def tap_stream_id(self) -> str:
-        """Return a unique stream ID.
+        """A unique stream ID.
 
         Default implementations will return `self.name` but this behavior may be
         overridden if required by the developer.
-
-        Returns:
-            Unique stream ID.
         """
         return self.name
 
     @property
     def replication_method(self) -> str:
-        """Get replication method.
-
-        Returns:
-            Replication method to be used for this stream.
-        """
+        """The stream replication method."""
         if self.forced_replication_method:
             return str(self.forced_replication_method)
         if self.replication_key:
@@ -718,14 +676,14 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     @property
     def emit_activate_version_messages(self) -> bool:
-        """Get whether to emit `ACTIVATE_VERSION` messages."""
+        """Whether to emit `ACTIVATE_VERSION` messages."""
         return self.config.get("emit_activate_version_messages", False)  # type: ignore[no-any-return]
 
     # State properties:
 
     @property
     def tap_state(self) -> types.TapState:
-        """Return a writeable state dict for the entire tap.
+        """A writeable state dict for the entire tap.
 
         Note: This dictionary is shared (and writable) across all streams.
 
@@ -736,9 +694,6 @@ class Stream(abc.ABC):  # noqa: PLR0904
         for timestamp keys, or
         :meth:`~singer_sdk.Stream.get_starting_replication_key_value()` for
         non-timestamp keys.
-
-        Returns:
-            A writeable state dict for the entire tap.
         """
         return self._tap_state
 
@@ -770,7 +725,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     @property
     def stream_state(self) -> dict:
-        """Get writable state.
+        """Writable state dictionary for this stream.
 
         This method is internal to the SDK and should not need to be overridden.
         Developers may access this property but this is not recommended except in
@@ -781,9 +736,6 @@ class Stream(abc.ABC):  # noqa: PLR0904
         non-timestamp keys.
 
         A blank state entry will be created if one doesn't already exist.
-
-        Returns:
-            A writable state dict for this stream.
         """
         return self.state_manager.stream_state
 
@@ -791,15 +743,12 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     @property
     def partitions(self) -> list[dict] | None:
-        """Get stream partitions.
+        """A list of partition key dicts (if applicable), otherwise `None`.
 
         Developers may override this property to provide a default partitions list.
 
         By default, this method returns a list of any partitions which are already
         defined in state, otherwise None.
-
-        Returns:
-            A list of partition key dicts (if applicable), otherwise `None`.
         """
         result: list[dict] = [
             partition_state["context"]
@@ -896,11 +845,10 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
     @property
     def mask(self) -> singer.SelectionMask:
-        """Get a boolean mask for stream and property selection.
+        """A boolean mask for stream and property selection.
 
-        Returns:
-            A mapping of breadcrumbs to boolean values, representing stream and field
-            selection.
+        A mapping of breadcrumbs to boolean values, representing stream and field
+        selection.
         """
         if self._mask is None:
             self._mask = self.metadata.resolve_selection()

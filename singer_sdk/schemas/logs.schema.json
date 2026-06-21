@@ -112,6 +112,13 @@
         "context": {
           "$ref": "#/properties/exception",
           "description": "The exception context (__context__)"
+        },
+        "notes": {
+          "type": "array",
+          "description": "Additional exception information",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": ["type", "module", "message"]

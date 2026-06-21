@@ -475,19 +475,12 @@ class OpenAPISchema(SchemaSource[_TKey]):
 
     @cached_property
     def spec(self) -> dict[str, t.Any]:
-        """Get the loaded OpenAPI specification.
-
-        Returns:
-            The full OpenAPI specification as a dictionary.
-        """
+        """OpenAPI specification."""
         return self._load_spec()
 
     @property
     def spec_version(self) -> t.Literal["v2", "v3"]:
-        """Get the OpenAPI specification version.
-
-        Returns:
-            The OpenAPI specification version.
+        """OpenAPI specification version.
 
         Raises:
             UnsupportedOpenAPISpec: If the OpenAPI specification format is unknown.
