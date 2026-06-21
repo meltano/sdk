@@ -73,3 +73,30 @@ def read_json_file(path: StrPath) -> dict[str, t.Any]:
 def utc_now() -> datetime.datetime:
     """Return current time in UTC."""
     return datetime.datetime.now(datetime.timezone.utc)
+
+
+def get_nested_value(record: dict, dotted_key: str) -> t.Any | None:  # noqa: ANN401
+    """Retrieve a value from a nested dictionary using a dotted key path.
+
+    Args:
+        record: The record dictionary to traverse.
+        dotted_key: A dot-separated key path (e.g. ``"attributes.updated"``).
+
+    Returns:
+        The value at the nested path, or ``None`` if any level is missing.
+
+    Examples:
+        >>> get_nested_value({"a": {"b": 1}}, "a.b")
+        1
+        >>> get_nested_value({"a": 1}, "a.b")
+        None
+    """
+    keys = dotted_key.split(".")
+    current: t.Any = record
+    for key in keys:
+        if not isinstance(current, dict):
+            return None
+        current = current.get(key)
+        if current is None:
+            return None
+    return current
