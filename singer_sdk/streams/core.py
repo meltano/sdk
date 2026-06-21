@@ -253,7 +253,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
     def is_timestamp_replication_key(self) -> bool:
         """Check is replication key is a timestamp.
 
-        Developers can override to `True` in order to force this value, although this
+        Developers can override to ``True`` in order to force this value, although this
         should not be required in most use cases since the type can generally be
         accurately detected from the JSON Schema.
 
@@ -268,10 +268,25 @@ class Stream(abc.ABC):  # noqa: PLR0904
             return False
 
         schema = self.effective_schema
-        type_dict = schema.get("properties", {}).get(self.replication_key)
+        keys = self.replication_key.split(".")
+        type_dict: dict | None = schema.get("properties", {})
+
+        for i, key in enumerate(keys):
+            if not isinstance(type_dict, dict):
+                type_dict = None
+                break
+            if i < len(keys) - 1:
+                # Traverse into nested properties
+                type_dict = type_dict.get(key, {}).get("properties")
+            else:
+                # Final key — get its type definition
+                type_dict = type_dict.get(key)
 
         if type_dict is None:
-            msg = f"Field '{self.replication_key}' is not in schema for stream '{self.name}'"  # noqa: E501
+            msg = (
+                f"Field '{self.replication_key}' is not in schema for "
+                f"stream '{self.name}'"
+            )
             raise InvalidReplicationKeyException(msg)
 
         return is_datetime_type(type_dict)
