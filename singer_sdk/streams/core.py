@@ -50,6 +50,8 @@ if t.TYPE_CHECKING:
     from singer_sdk.singerlib.catalog import StreamMetadata
     from singer_sdk.tap_base import Tap
 
+from singer_sdk.helpers._util import get_nested_value
+
 
 class Stream(abc.ABC):  # noqa: PLR0904
     """Abstract base class for tap streams.
@@ -781,11 +783,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
     ) -> None:
         """Update state of stream or partition with data from the provided record.
 
-        Raises `InvalidStreamSortException` is `self.is_sorted = True` and unsorted data
-        is detected.
+        Raises ``InvalidStreamSortException`` if ``self.is_sorted = True`` and
+        unsorted data is detected.
 
         Note: The default implementation does not advance any bookmarks unless
-        `self.replication_method == 'INCREMENTAL'.
+        ``self.replication_method == 'INCREMENTAL'``.
 
         Args:
             latest_record: TODO
@@ -794,7 +796,6 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Raises:
             ValueError: TODO
         """
-        # Advance state bookmark values if applicable
         if latest_record and self.replication_method == REPLICATION_INCREMENTAL:
             if not self.replication_key:
                 msg = (
@@ -803,8 +804,14 @@ class Stream(abc.ABC):  # noqa: PLR0904
                 )
                 raise ValueError(msg)
 
+            nested_record = latest_record
+            if "." in self.replication_key:
+                value = get_nested_value(latest_record, self.replication_key)
+                # Build a flat record the state manager can use
+                nested_record = {self.replication_key: value}
+
             self.state_manager.increment_state(
-                latest_record,
+                nested_record,
                 context=context,
                 replication_key=self.replication_key,
             )
