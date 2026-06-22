@@ -99,11 +99,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @override
     @cached_property
     def authenticator(self) -> Auth:
-        """Return a new authenticator object.
-
-        Returns:
-            An authenticator instance.
-        """
+        """An authenticator object."""
         return {{ cookiecutter.source_name }}Authenticator(
             client_id=self.config["client_id"],
             client_secret=self.config["client_secret"],
@@ -116,11 +112,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @override
     @property
     def authenticator(self) -> APIKeyAuthenticator:
-        """Return a new authenticator object.
-
-        Returns:
-            An authenticator instance.
-        """
+        """An authenticator object."""
         return APIKeyAuthenticator(
             key="x-api-key",
             value=self.config["auth_token"],
@@ -132,11 +124,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @override
     @property
     def authenticator(self) -> BearerTokenAuthenticator:
-        """Return a new authenticator object.
-
-        Returns:
-            An authenticator instance.
-        """
+        """An authenticator object."""
         return BearerTokenAuthenticator(token=self.config["auth_token"])
 
 {%- elif cookiecutter.auth_method == "Basic Auth" %}
@@ -144,11 +132,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @override
     @property
     def authenticator(self) -> HTTPBasicAuth:
-        """Return a new authenticator object.
-
-        Returns:
-            An authenticator instance.
-        """
+        """An authenticator object."""
         return HTTPBasicAuth(
             username=self.config["username"],
             password=self.config["password"],
@@ -159,11 +143,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @property
     @override
     def http_headers(self) -> dict:
-        """Return the http headers needed.
-
-        Returns:
-            A dictionary of HTTP headers.
-        """
+        """A dictionary of HTTP headers."""
 {%- if cookiecutter.auth_method not in ("OAuth2", "JWT") %}
         # If not using an authenticator, you may also provide inline auth headers:
         # headers["Private-Token"] = self.config.get("auth_token")

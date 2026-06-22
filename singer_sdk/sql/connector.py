@@ -379,11 +379,7 @@ class JSONSchemaToSQL:
 
     @property
     def fallback_type(self) -> type[sqlalchemy.types.TypeEngine]:
-        """Return the fallback type.
-
-        Returns:
-            The fallback type.
-        """
+        """Fallback type."""
         return self._fallback_type
 
     @fallback_type.setter
@@ -633,11 +629,7 @@ class SQLConnector:  # noqa: PLR0904
 
     @property
     def logger(self) -> logging.Logger:
-        """Get logger.
-
-        Returns:
-            Plugin logger.
-        """
+        """Connector logger."""
         return logging.getLogger("sqlconnector")
 
     @functools.cached_property
@@ -734,11 +726,7 @@ class SQLConnector:  # noqa: PLR0904
 
     @property
     def sqlalchemy_url(self) -> str:
-        """Return the SQLAlchemy URL string.
-
-        Returns:
-            The URL as a string.
-        """
+        """SQLAlchemy URL string."""
         if not self._sqlalchemy_url:
             self._sqlalchemy_url = self.get_sqlalchemy_url(self.config)
 
@@ -873,22 +861,15 @@ class SQLConnector:  # noqa: PLR0904
 
     @property
     def _dialect(self) -> Dialect:
-        """Return the dialect object.
-
-        Returns:
-            The dialect object.
-        """
+        """Dialect object."""
         return self._engine.dialect
 
     @property
     def _engine(self) -> sa.Engine:
-        """Return the engine object.
+        """Engine object.
 
         This is the correct way to access the Connector's engine, if needed
         (e.g. to inspect tables).
-
-        Returns:
-            The SQLAlchemy Engine that's attached to this SQLConnector instance.
         """
         if not self._cached_engine:
             self._cached_engine = self.create_engine()

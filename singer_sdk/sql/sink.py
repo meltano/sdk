@@ -66,49 +66,29 @@ class SQLSink(BatchSink, t.Generic[_C]):
 
     @property
     def connector(self) -> _C:
-        """The connector object.
-
-        Returns:
-            The connector object.
-        """
+        """The connector object."""
         return self._connector
 
     @property
     def connection(self) -> sa.Connection:
-        """Get or set the SQLAlchemy connection for this sink.
-
-        Returns:
-            A connection object.
-        """
+        """SQLAlchemy connection object for this sink."""
         return self.connector.connection
 
     @functools.cached_property
     def default_target_schema(self) -> str | None:
-        """Return the default target schema.
-
-        Returns:
-            The default target schema.
-        """
+        """Default target schema."""
         return self.config.get("default_target_schema", None)  # type: ignore[no-any-return]
 
     @property
     def table_name(self) -> str:
-        """Return the table name, with no schema or database part.
-
-        Returns:
-            The target table name.
-        """
+        """Table name, with no schema or database part."""
         parts = self.stream_name.split("-")
         table = self.stream_name if len(parts) == 1 else parts[-1]
         return self.conform_name(table, "table")
 
     @property
     def schema_name(self) -> str | None:
-        """Return the schema name or `None` if using names with no schema part.
-
-        Returns:
-            The target schema name.
-        """
+        """Schema name or `None` if using names with no schema part."""
         # 1) When default_target_scheme is in the configuration use it
         # 2) if the streams are in <schema>-<table> format use the
         #    stream <schema>
@@ -121,16 +101,12 @@ class SQLSink(BatchSink, t.Generic[_C]):
 
     @property
     def database_name(self) -> str | None:
-        """Return the DB name or `None` if using names with no database part."""
+        """Database name or `None` if using names with no database part."""
         # Assumes single-DB target context.
 
     @property
     def full_table_name(self) -> FullyQualifiedName:
-        """Return the fully qualified table name.
-
-        Returns:
-            The fully qualified table name.
-        """
+        """Fully qualified table name."""
         return self.connector.get_fully_qualified_name(
             table_name=self.table_name,
             schema_name=self.schema_name,
@@ -139,11 +115,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
 
     @property
     def full_schema_name(self) -> FullyQualifiedName:
-        """Return the fully qualified schema name.
-
-        Returns:
-            The fully qualified schema name.
-        """
+        """Fully qualified schema name."""
         return self.connector.get_fully_qualified_name(
             schema_name=self.schema_name,
             db_name=self.database_name,
@@ -262,11 +234,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
     @property
     @override
     def key_properties(self) -> t.Sequence[str]:
-        """Return key properties, conformed to target system naming requirements.
-
-        Returns:
-            A list of key properties, conformed with `self.conform_name()`
-        """
+        """Key properties, conformed to target system naming requirements."""
         return [self.conform_name(key, "column") for key in super().key_properties]
 
     @override

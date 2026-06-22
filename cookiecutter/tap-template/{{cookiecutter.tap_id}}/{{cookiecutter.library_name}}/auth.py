@@ -26,11 +26,7 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator, metaclass=
     @override
     @property
     def oauth_request_body(self) -> dict:
-        """Define the OAuth request body for the {{ cookiecutter.source_name }} API.
-
-        Returns:
-            A dict with the request body
-        """
+        """The OAuth request body for the {{ cookiecutter.source_name }} API."""
         # TODO: Define the request body needed for the API.
         return {
             "resource": "https://example.com",

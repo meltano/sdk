@@ -120,12 +120,9 @@ class Target(BaseSingerReader, abc.ABC):
 
     @property
     def max_parallelism(self) -> int:
-        """Get max parallel sinks.
+        """Maximum number of sinks that can be drained in parallel.
 
         The default is 8 if not overridden.
-
-        Returns:
-            Max number of sinks that can be drained in parallel.
         """
         if self._max_parallelism is not None:
             return self._max_parallelism
