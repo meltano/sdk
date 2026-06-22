@@ -448,12 +448,10 @@ def test_graphql_validate_response_raises_for_multiple_errors(tap: Tap):
 @pytest.mark.parametrize(
     "content",
     [
-        b"OK",
-        b'["not", "a", "dict"]',
         b'{"data": {"graphql": []}}',
         b'{"data": null, "errors": []}',
     ],
-    ids=["not-json", "not-dict", "missing-errors", "empty-errors"],
+    ids=["missing-errors", "empty-errors"],
 )
 def test_graphql_validate_response_ignores_payloads_without_errors(
     tap: Tap,
@@ -469,6 +467,46 @@ def test_graphql_validate_response_ignores_payloads_without_errors(
     stream = GraphqlTestStream(tap)
 
     stream.validate_response(fake_response)
+
+
+@pytest.mark.parametrize(
+    "content,match,expect_cause",
+    [
+        (
+            b"OK",
+            "GraphQL API response body is not valid JSON.",
+            True,
+        ),
+        (
+            b'["not", "a", "dict"]',
+            "GraphQL API response body must be a JSON object.",
+            False,
+        ),
+    ],
+    ids=["not-json", "not-dict"],
+)
+def test_graphql_validate_response_raises_for_malformed_payloads(
+    tap: Tap,
+    content: bytes,
+    match: str,
+    expect_cause: bool,
+):
+    """Validate malformed GraphQL response payloads raise response errors."""
+    fake_response = requests.Response()
+    fake_response.status_code = 200
+    fake_response.reason = "OK"
+    fake_response.url = GraphqlTestStream.url_base
+    fake_response._content = content
+
+    stream = GraphqlTestStream(tap)
+
+    with pytest.raises(FatalAPIError, match=match) as exc_info:
+        stream.validate_response(fake_response)
+
+    if expect_cause:
+        assert isinstance(exc_info.value.__cause__, ValueError)
+    else:
+        assert exc_info.value.__cause__ is None
 
 
 @pytest.mark.parametrize(

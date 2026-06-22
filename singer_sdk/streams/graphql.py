@@ -39,17 +39,21 @@ class GraphQLStream(RESTStream, abc.ABC, t.Generic[_TToken]):
         """Validate HTTP response and GraphQL response errors.
 
         Raises:
-            FatalAPIError: If the GraphQL response contains errors.
+            FatalAPIError: If the response body is malformed or contains errors.
+
+        Override this method when GraphQL errors should be retriable.
         """
         super().validate_response(response)
 
         try:
             data = response.json()
-        except ValueError:
-            return
+        except ValueError as e:
+            msg = "GraphQL API response body is not valid JSON."
+            raise FatalAPIError(msg) from e
 
         if not isinstance(data, dict):
-            return
+            msg = "GraphQL API response body must be a JSON object."
+            raise FatalAPIError(msg)
 
         errors = data.get("errors")
         if not errors:
