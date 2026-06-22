@@ -1,6 +1,6 @@
 ## Why I chose this issue:
 
-I Chose Issue: #2766 bug: New setting alias schema for builtin default_target_schema because the issues align with my familiarity with both Python and SQL. The issue is labeled both Good First Issue, and Accepting Pull Requests meaning that it is still an issue that is open to be worked on and a good issue for a first time contributer like me. It also has clearly outlined success criteria and is well defined.
+I Chose Issue: #2766 bug: New setting alias schema for built-in default_target_schema because this issue aligns with my familiarity with both Python and SQL. The issue is labeled both Good First Issue, and Accepting Pull Requests meaning that it is still an issue that is open to be worked on and a good issue for a first-time contributor like me. It also has clearly outlined success criteria and is well defined.
 
 This issue is a good fit for me because:
 
