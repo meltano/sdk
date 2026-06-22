@@ -6,6 +6,7 @@ import abc
 import sys
 import typing as t
 
+from singer_sdk.exceptions import FatalAPIError
 from singer_sdk.streams.rest import RESTStream
 
 if sys.version_info >= (3, 12):
@@ -14,6 +15,8 @@ else:
     from typing_extensions import override
 
 if t.TYPE_CHECKING:
+    import requests
+
     from singer_sdk.helpers.types import Context
 
 _TToken = t.TypeVar("_TToken")
@@ -92,3 +95,40 @@ class GraphQLStream(RESTStream, abc.ABC, t.Generic[_TToken]):
         }
         self.logger.debug("Attempting query:\n%s", query)
         return request_data
+
+    @override
+    def validate_response(self, response: requests.Response) -> None:
+        """Validate the GraphQL response.
+
+        GraphQL APIs typically return HTTP 200 even on failure, reporting errors
+        in the response body under an ``errors`` key. This extends the parent
+        status-code checks to surface those body-level errors.
+
+        Args:
+            response: A :class:`requests.Response` object.
+
+        Raises:
+            FatalAPIError: If the response reports GraphQL errors and no data.
+        """
+        super().validate_response(response)
+
+        json_response = response.json()
+        if not isinstance(json_response, dict):
+            return
+
+        errors = json_response.get("errors")
+        if not errors:
+            return
+
+        messages = ", ".join(
+            e.get("message", "Unknown error") for e in errors if isinstance(e, dict)
+        )
+        msg = f"GraphQL errors in response: {messages}"
+
+        # Partial success: data is present alongside errors. Records can still be
+        # extracted, so warn rather than abort. Taps needing retriable handling
+        # (e.g. RATE_LIMITED in extensions) should override this method.
+        if json_response.get("data"):
+            self.logger.warning(msg)
+        else:
+            raise FatalAPIError(msg)
