@@ -8,7 +8,7 @@ This issue is a good fit for me because:
 1. Python is the coding language that I am the most familiar with
 1. the codebase seems to be clearly documented and easy to navigate
 
-The issue is that when a user sets a schema in the MeltanoLabs variant of target-snowflake the default schema overrides it. I beleive I can contribute a effective solution to the issue. I have left a comment introducing myself and stating that I would like to work on the Issue
+The issue is that when a user sets a schema in the MeltanoLabs variant of target-snowflake the default schema overrides it. I believe I can contribute an effective solution to the issue. I have left a comment introducing myself and stating that I would like to work on the issue
 
 ## Steps to Reproduce
 
