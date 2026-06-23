@@ -432,22 +432,14 @@ class PluginBase(abc.ABC):
 
     @property
     def state(self) -> t.Mapping[str, t.Any]:
-        """Get state.
-
-        Raises:
-            NotImplementedError: If the derived plugin doesn't override this method.
-        """
+        """State."""
         raise NotImplementedError
 
     # Core plugin config:
 
     @property
     def config(self) -> t.Mapping[str, t.Any]:
-        """Get config.
-
-        Returns:
-            A frozen (read-only) config dictionary map.
-        """
+        """Configuration dictionary."""
         return MappingProxyType(self._config)
 
     def _validate_config(self, *, raise_errors: bool = True) -> list[str]:

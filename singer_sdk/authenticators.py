@@ -163,11 +163,7 @@ class APIAuthenticatorBase:
         category=SingerSDKDeprecationWarning,
     )
     def config(self) -> t.Mapping[str, t.Any]:
-        """Get stream or tap config.
-
-        Returns:
-            A frozen (read-only) config dictionary map.
-        """
+        """Stream or tap configuration dictionary."""
         return MappingProxyType(self._config)
 
     def authenticate_request(
@@ -539,10 +535,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     @property
     def auth_endpoint(self) -> str:
-        """Get the authorization endpoint.
-
-        Returns:
-            The API authorization endpoint if it is set.
+        """The API authorization endpoint.
 
         Raises:
             ValueError: If the endpoint is not set.
@@ -554,25 +547,17 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     @property
     def oauth_scopes(self) -> str | None:
-        """Get OAuth scopes.
-
-        Returns:
-            String of OAuth scopes, or None if not set.
-        """
+        """OAuth scopes as a string, or None."""
         return self._oauth_scopes
 
     @property
     def oauth_request_payload(self) -> dict:
-        """Get request body.
-
-        Returns:
-            A plain (OAuth) or encrypted (JWT) request body.
-        """
+        """A plain (OAuth) or encrypted (JWT) request body."""
         return self.oauth_request_body
 
     @property
     def oauth_request_body(self) -> dict:
-        """Get formatted body of the OAuth authorization request.
+        """Formatted body of the OAuth authorization request.
 
         Sample implementation:
 
@@ -598,20 +583,12 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     @property
     def client_id(self) -> str | None:
-        """Get client ID string to be used in authentication.
-
-        Returns:
-            Optional client secret from stream config if it has been set.
-        """
+        """Client ID string to be used in authentication."""
         return self._client_id
 
     @property
     def client_secret(self) -> str | None:
-        """Get client secret to be used in authentication.
-
-        Returns:
-            Optional client secret from stream config if it has been set.
-        """
+        """Client secret to be used in authentication."""
         return self._client_secret
 
     def is_token_valid(self) -> bool:
@@ -716,26 +693,18 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
 
     @property
     def private_key(self) -> str | None:
-        """Return the private key to use in encryption.
-
-        Returns:
-            Private key from stream config.
-        """
+        """The private key to use in encryption."""
         return self._private_key
 
     @property
     def private_key_passphrase(self) -> str | None:
-        """Return the private key passphrase to use in encryption.
-
-        Returns:
-            Passphrase for private key from stream config.
-        """
+        """The private key passphrase to use in encryption."""
         return self._private_key_passphrase
 
     @property
     @override
     def oauth_request_body(self) -> dict:
-        """Return request body for OAuth request.
+        """Request body for the OAuth request.
 
         Returns:
             Request body mapping for OAuth.
@@ -752,10 +721,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
     @property
     @override
     def oauth_request_payload(self) -> dict:
-        """Return request payload for OAuth request.
-
-        Returns:
-            Payload object for OAuth.
+        """Request payload for the OAuth request.
 
         Raises:
             RuntimeError: If the JWT dependencies are not installed.

@@ -76,11 +76,7 @@ class GraphQLStream(RESTStream, abc.ABC, t.Generic[_TToken]):
     @property
     @override
     def records_jsonpath(self) -> str:
-        """Get the JSONPath expression to extract records from an API response.
-
-        Returns:
-            JSONPath expression string.
-        """
+        """JSONPath expression to extract records from an API response."""
         return f"$.data.{self.name}[*]"
 
     @property
