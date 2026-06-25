@@ -311,6 +311,7 @@ class StringType(JSONTypeHelper[str]):
         return {"format": self.string_format} if self.string_format else {}
 
     @DefaultInstanceProperty
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -481,6 +482,7 @@ class BooleanType(JSONTypeHelper[bool]):
     """
 
     @DefaultInstanceProperty
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -531,6 +533,7 @@ class _NumericType(JSONTypeHelper[T]):
         self.multiple_of = multiple_of
 
     @DefaultInstanceProperty
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -646,6 +649,7 @@ class AnyType(JSONTypeHelper):
         super().__init__(*args, **kwargs)
 
     @DefaultInstanceProperty
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
