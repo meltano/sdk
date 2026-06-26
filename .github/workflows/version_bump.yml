@@ -68,7 +68,7 @@ jobs:
 
     - name: Add job summary
       run: |
-        cat _changelog_fragment.md >> $GITHUB_STEP_SUMMARY
+        cat _changelog_fragment.md >> "$GITHUB_STEP_SUMMARY"
 
     - name: Draft Release
       if: ${{ github.event.inputs.dry_run == 'false' }}
@@ -83,7 +83,7 @@ jobs:
 
     - name: Set repo file permissions
       run: |
-        sudo chown -R $USER:$USER .git/objects
+        sudo chown -R "$USER":"$USER" .git/objects
 
     - name: Create Pull Request
       if: ${{ github.event.inputs.dry_run == 'false' }}

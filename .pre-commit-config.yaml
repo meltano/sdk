@@ -91,3 +91,8 @@ repos:
     args: [--strict-front-matter]
     additional_dependencies:
     - mdformat-front-matters
+
+- repo: https://github.com/rhysd/actionlint
+  rev: v1.7.12
+  hooks:
+  - id: actionlint
