@@ -13,6 +13,7 @@ from functools import lru_cache
 
 import sqlalchemy as sa
 import sqlalchemy.types
+from sqlalchemy import event
 from sqlalchemy.engine import reflection
 from sqlalchemy.sql import ddl
 
@@ -893,11 +894,16 @@ class SQLConnector:  # noqa: PLR0904
         """
         if not self._cached_engine:
             self._cached_engine = self.create_engine()
+            event.listen(
+                self._cached_engine,
+                "after_cursor_execute",
+                self._clear_reflection_cache_after_ddl,
+            )
         return self._cached_engine
 
     @property
     def _inspector(self) -> reflection.Inspector:
-        """Return the cached SQLAlchemy inspector for this connector."""
+        """Cached SQLAlchemy inspector for this connector."""
         if self._cached_inspector is None:
             self._cached_inspector = sa.inspect(self._engine)
         return self._cached_inspector
@@ -913,6 +919,20 @@ class SQLConnector:  # noqa: PLR0904
             return
 
         self._cached_inspector.info_cache.clear()
+
+    def _clear_reflection_cache_after_ddl(
+        self,
+        _conn: sa.Connection,
+        _cursor: object,
+        statement: str,
+        _parameters: object,
+        _context: object,
+        _executemany: bool,
+    ) -> None:
+        """Clear cached reflection state after SQLAlchemy DDL executes."""
+        statement_prefix = statement.lstrip().partition(" ")[0].upper()
+        if statement_prefix in {"ALTER", "CREATE", "DROP"}:
+            self.clear_reflection_cache()
 
     def create_engine(self) -> sa.Engine:
         """Creates and returns a new engine. Do not call outside of _engine.
@@ -1319,7 +1339,6 @@ class SQLConnector:  # noqa: PLR0904
         """
         with self._connect() as conn, conn.begin():
             conn.execute(ddl.CreateSchema(schema_name))
-        self.clear_reflection_cache()
 
     def create_empty_table(
         self,
@@ -1374,7 +1393,6 @@ class SQLConnector:  # noqa: PLR0904
 
         _ = sa.Table(table_name, meta, *columns, *table_args)
         meta.create_all(self._engine)
-        self.clear_reflection_cache()
 
     def _create_empty_column(
         self,
@@ -1403,7 +1421,6 @@ class SQLConnector:  # noqa: PLR0904
         )
         with self._connect() as conn, conn.begin():
             conn.execute(column_add_ddl)
-        self.clear_reflection_cache()
 
     def prepare_schema(self, schema_name: str) -> None:
         """Create the target database schema.
@@ -1448,7 +1465,6 @@ class SQLConnector:  # noqa: PLR0904
             meta = sa.MetaData()
             table = sa.Table(table_name, meta, schema=schema_name)
             table.drop(self._engine, checkfirst=True)
-            self.clear_reflection_cache()
             self.logger.info("Creating empty table %s", full_table_name)
             self.create_empty_table(
                 full_table_name=full_table_name,
@@ -1544,7 +1560,6 @@ class SQLConnector:  # noqa: PLR0904
         )
         with self._connect() as conn, conn.begin():
             conn.execute(column_rename_ddl)
-        self.clear_reflection_cache()
 
     def merge_sql_types(
         self,
@@ -1852,7 +1867,6 @@ class SQLConnector:  # noqa: PLR0904
         )
         with self._connect() as conn, conn.begin():
             conn.execute(alter_column_ddl)
-        self.clear_reflection_cache()
 
     def serialize_json(self, obj: object) -> str:  # noqa: PLR6301
         """Serialize an object to a JSON string.

@@ -626,10 +626,6 @@ class TestDummySQLConnector:
         # CREATE SCHEMA is not supported by SQLite, so we mock
         with (
             mock.patch.object(connector, "_connect") as mock_connect,
-            mock.patch.object(
-                connector,
-                "clear_reflection_cache",
-            ) as mock_clear_reflection_cache,
             mock.patch.object(mock_connect, "begin"),
             mock.patch.object(mock_connect, "execute"),
         ):
@@ -637,7 +633,6 @@ class TestDummySQLConnector:
             mock_connect.assert_called_once()
             mock_connect.return_value.__enter__.return_value.begin.assert_called_once()
             mock_connect.return_value.__enter__.return_value.execute.assert_called_once()
-            mock_clear_reflection_cache.assert_called_once_with()
 
     def test_column_rename(self, connector: DummySQLConnector):
         engine = connector._engine
@@ -683,6 +678,43 @@ class TestDummySQLConnector:
 
         assert list(connector.get_table_columns("test_table")) == ["id", "name"]
 
+    def test_sqlalchemy_ddl_clears_reflection_cache_for_overrides(self):
+        class CustomConnector(DummySQLConnector):
+            @override
+            def _create_empty_column(
+                self,
+                full_table_name: str | FullyQualifiedName,
+                column_name: str,
+                sql_type: sqlalchemy.types.TypeEngine,
+            ) -> None:
+                column_add_ddl = self.get_column_add_ddl(
+                    table_name=full_table_name,
+                    column_name=column_name,
+                    column_type=sql_type,
+                )
+                with self._connect() as conn, conn.begin():
+                    conn.execute(column_add_ddl)
+
+        connector = CustomConnector(config={"sqlalchemy_url": "sqlite:///"})
+        engine = connector._engine
+        meta = sqlalchemy.MetaData()
+        _ = sqlalchemy.Table(
+            "test_table",
+            meta,
+            sqlalchemy.Column("id", sqlalchemy.Integer),
+        )
+        meta.create_all(engine)
+
+        assert list(connector.get_table_columns("test_table")) == ["id"]
+
+        connector._create_empty_column(
+            "test_table",
+            "name",
+            sqlalchemy.String(),
+        )
+
+        assert list(connector.get_table_columns("test_table")) == ["id", "name"]
+
     def test_adapt_column_type(self, connector: DummySQLConnector):
         engine = connector._engine
         meta = sqlalchemy.MetaData()
@@ -697,10 +729,6 @@ class TestDummySQLConnector:
         # Changing the column type is not supported by SQLite, so we mock
         with (
             mock.patch.object(connector, "_connect") as mock_connect,
-            mock.patch.object(
-                connector,
-                "clear_reflection_cache",
-            ) as mock_clear_reflection_cache,
             mock.patch.object(mock_connect, "begin"),
             mock.patch.object(mock_connect, "execute"),
         ):
@@ -715,7 +743,6 @@ class TestDummySQLConnector:
                 str(ddl.compile())
                 == "ALTER TABLE test_table ALTER COLUMN name TYPE VARCHAR"
             )
-            mock_clear_reflection_cache.assert_called_once_with()
 
     @pytest.mark.parametrize(
         "exclude_schemas,expected_streams",
