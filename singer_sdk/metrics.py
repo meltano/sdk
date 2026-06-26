@@ -193,11 +193,7 @@ class Meter(abc.ABC):
 
     @property
     def context(self) -> types.Context | None:
-        """Get the context for this meter.
-
-        Returns:
-            A context dictionary.
-        """
+        """The context dictionary for this meter."""
         return self.tags.get(Tag.CONTEXT)
 
     @context.setter

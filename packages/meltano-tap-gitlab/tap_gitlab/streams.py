@@ -44,7 +44,7 @@ class GitlabStream(RESTStream[str]):
     @property
     @override
     def url_base(self) -> str:
-        """Return the base GitLab URL."""
+        """Base GitLab URL."""
         return self.config["url_base"]  # type: ignore[no-any-return]
 
     @property
@@ -61,7 +61,7 @@ class GitlabStream(RESTStream[str]):
     @property
     @override
     def authenticator(self) -> SimpleAuthenticator:
-        """Return an authenticator for REST API requests."""
+        """Authenticator for REST API requests."""
         return SimpleAuthenticator(
             stream=self,
             auth_headers={"Private-Token": self.config["auth_token"]},
@@ -98,7 +98,7 @@ class ProjectBasedStream(GitlabStream):
     @property
     @override
     def partitions(self) -> list[dict]:
-        """Return a list of partition key dicts (if applicable), otherwise None."""
+        """List of partition key dicts (if applicable), otherwise None."""
         if "{project_id}" in self.path:
             return [
                 {"project_id": pid}

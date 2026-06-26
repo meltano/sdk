@@ -271,7 +271,7 @@ class _MapperEval(simpleeval.EvalWithCompoundTypes):
     @override
     def _eval(self, node: ast.AST) -> t.Any:
         try:
-            handler = self.nodes[type(node)]  # ty:ignore[invalid-argument-type, not-subscriptable]
+            handler = self.nodes[type(node)]  # ty:ignore[not-subscriptable]
         except KeyError:
             msg = f"Sorry, {type(node).__name__} is not available in this evaluator"
             raise simpleeval.FeatureNotAvailable(msg) from None
@@ -391,11 +391,7 @@ class CustomStreamMap(StreamMap):
 
     @property
     def functions(self) -> dict[str, t.Callable]:
-        """Get available transformation functions.
-
-        Returns:
-            Functions which should be available for expression evaluation.
-        """
+        """Available transformation functions."""
         funcs: dict[str, t.Any] = dict(simpleeval.DEFAULT_FUNCTIONS)
         funcs["md5"] = md5
         funcs["sha256"] = sha256

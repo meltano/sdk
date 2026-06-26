@@ -4,12 +4,23 @@ from __future__ import annotations
 
 import json
 import logging
+import sys
+import typing as t
 from io import StringIO
 
 import pytest
 
 from singer_sdk import metrics
 from singer_sdk.logging import ConsoleFormatter, StructuredFormatter
+
+
+class LoggerFactory(t.Protocol):
+    def __call__(
+        self,
+        name: str,
+        level: int = logging.INFO,
+        formatter: logging.Formatter | None = None,
+    ) -> tuple[logging.Logger, StringIO]: ...
 
 
 class TestStructuredFormatter:
@@ -24,20 +35,37 @@ class TestStructuredFormatter:
             tags={"stream": "users", "tap": "tap-postgres"},
         )
 
-    def test_structured_formatter_includes_extra_fields(self):
+    @pytest.fixture
+    def make_logger(self):
+        """Factory fixture: creates a configured logger and cleans up after the test."""
+        created: list[tuple[logging.Logger, logging.Handler, StringIO]] = []
+
+        def _factory(
+            name: str,
+            level: int = logging.INFO,
+            formatter: logging.Formatter | None = None,
+        ) -> tuple[logging.Logger, StringIO]:
+            logger = logging.getLogger(name)
+            logger.setLevel(level)
+            stream = StringIO()
+            handler = logging.StreamHandler(stream)
+            handler.setFormatter(
+                formatter if formatter is not None else StructuredFormatter()
+            )
+            logger.addHandler(handler)
+            created.append((logger, handler, stream))
+            return logger, stream
+
+        yield _factory
+
+        for logger, handler, stream in created:
+            logger.removeHandler(handler)
+            stream.close()
+
+    def test_includes_extra_fields(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter includes extra fields in output."""
-        # Create a logger with StructuredFormatter
-        logger = logging.getLogger("test_logger")
-        logger.setLevel(logging.INFO)
+        logger, log_stream = make_logger("test_logger")
 
-        # Create a string stream to capture log output
-        log_stream = StringIO()
-        handler = logging.StreamHandler(log_stream)
-        formatter = StructuredFormatter()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-
-        # Log a message with extra fields
         extra_fields = {
             "app_name": "tap-test",
             "stream_name": "users",
@@ -46,11 +74,8 @@ class TestStructuredFormatter:
         }
         logger.info("Test message with extras", extra=extra_fields)
 
-        # Get the logged output
-        log_output = log_stream.getvalue().strip()
-        log_data = json.loads(log_output)
+        log_data = json.loads(log_stream.getvalue())
 
-        # Verify that the extra fields are included
         assert log_data["app_name"] == "tap-test"
         assert log_data["stream_name"] == "users"
         assert log_data["message"] == "Test message with extras"
@@ -59,127 +84,72 @@ class TestStructuredFormatter:
             "custom_field": "test_value",
         }
 
-        # Clean up
-        logger.removeHandler(handler)
-
-    def test_structured_formatter_with_defaults(self):
+    def test_with_defaults(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter includes default fields."""
-        # Create formatter with defaults
         defaults = {"version": "1.0.0"}
-        formatter = StructuredFormatter(defaults=defaults)
+        logger, log_stream = make_logger(
+            "test_logger_defaults",
+            formatter=StructuredFormatter(defaults=defaults),
+        )
 
-        # Create a logger
-        logger = logging.getLogger("test_logger_defaults")
-        logger.setLevel(logging.INFO)
+        logger.info("Test message", extra={"stream_name": "users"})
 
-        log_stream = StringIO()
-        handler = logging.StreamHandler(log_stream)
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
+        log_data = json.loads(log_stream.getvalue())
 
-        # Log a message with extra fields
-        extra_fields = {"stream_name": "users"}
-        logger.info("Test message", extra=extra_fields)
-
-        # Get the logged output
-        log_output = log_stream.getvalue().strip()
-        log_data = json.loads(log_output)
-
-        # Verify that both defaults and extra fields are included
         assert log_data["app_name"] == "singer-sdk"
         assert log_data["stream_name"] == "users"
         assert log_data["message"] == "Test message"
-        assert log_data["extra"] == {
-            "version": "1.0.0",
-        }
+        assert log_data["extra"] == {"version": "1.0.0"}
 
-        # Clean up
-        logger.removeHandler(handler)
-
-    def test_structured_formatter_without_extra_fields(self):
+    def test_without_extra_fields(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter works without extra fields."""
-        logger = logging.getLogger("test_logger_no_extras")
-        logger.setLevel(logging.INFO)
+        logger, log_stream = make_logger("test_logger_no_extras")
 
-        log_stream = StringIO()
-        handler = logging.StreamHandler(log_stream)
-        formatter = StructuredFormatter()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-
-        # Log a simple message without extras
         logger.info("Simple test message")
 
-        # Get the logged output
-        log_output = log_stream.getvalue().strip()
-        log_data = json.loads(log_output)
+        log_data = json.loads(log_stream.getvalue())
 
-        # Verify basic structure
         assert log_data["message"] == "Simple test message"
         assert log_data["level"] == "info"
         assert "logger_name" in log_data
         assert "ts" in log_data
 
-        # Clean up
-        logger.removeHandler(handler)
-
-    def test_structured_formatter_with_exception(self):
+    def test_with_exception(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter handles exceptions properly."""
-        logger = logging.getLogger("test_logger_exception")
-        logger.setLevel(logging.ERROR)
+        logger, log_stream = make_logger("test_logger_exception", level=logging.ERROR)
 
-        log_stream = StringIO()
-        handler = logging.StreamHandler(log_stream)
-        formatter = StructuredFormatter()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-
-        # Create an exception with proper exc_info
         try:
             msg = "Test exception"
             raise ValueError(msg)  # noqa: TRY301
         except ValueError:
             logger.exception("Error occurred", extra={"error_code": 500})
 
-        # Get the logged output
-        log_output = log_stream.getvalue().strip()
-        log_data = json.loads(log_output)
+        log_data = json.loads(log_stream.getvalue())
 
-        # Verify exception info and extra fields
         assert log_data["message"] == "Error occurred"
-        assert log_data["extra"] == {
-            "error_code": 500,
-        }
+        assert log_data["extra"] == {"error_code": 500}
         assert "exception" in log_data
         assert isinstance(log_data["exception"], dict)
         assert log_data["exception"]["type"] == "ValueError"
         assert log_data["exception"]["module"] == "builtins"
         assert log_data["exception"]["message"] == "Test exception"
         assert "traceback" in log_data["exception"]
+        assert "notes" not in log_data["exception"]
         assert isinstance(log_data["exception"]["traceback"], list)
         assert len(log_data["exception"]["traceback"]) > 0
-        # Verify traceback frame structure
         frame = log_data["exception"]["traceback"][0]
         assert "filename" in frame
         assert "function" in frame
         assert "lineno" in frame
         assert "raise ValueError(msg)" in frame["line"]
 
-        # Clean up
-        logger.removeHandler(handler)
-
-    def test_structured_formatter_with_chained_exception(self):
+    def test_with_chained_exception(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter handles exception chaining properly."""
-        logger = logging.getLogger("test_logger_chained_exception")
-        logger.setLevel(logging.ERROR)
+        logger, log_stream = make_logger(
+            "test_logger_chained_exception",
+            level=logging.ERROR,
+        )
 
-        log_stream = StringIO()
-        handler = logging.StreamHandler(log_stream)
-        formatter = StructuredFormatter()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-
-        # Create a chained exception
         try:  # noqa: PLW0717
             try:
                 msg = "Original error"
@@ -190,11 +160,8 @@ class TestStructuredFormatter:
         except RuntimeError:
             logger.exception("Chained error occurred")
 
-        # Get the logged output
-        log_output = log_stream.getvalue().strip()
-        log_data = json.loads(log_output)
+        log_data = json.loads(log_stream.getvalue())
 
-        # Verify main exception
         assert log_data["message"] == "Chained error occurred"
         assert "exception" in log_data
         assert isinstance(log_data["exception"], dict)
@@ -202,28 +169,19 @@ class TestStructuredFormatter:
         assert log_data["exception"]["module"] == "builtins"
         assert log_data["exception"]["message"] == "Chained error"
 
-        # Verify chained exception (cause)
         assert "cause" in log_data["exception"]
         assert isinstance(log_data["exception"]["cause"], dict)
         assert log_data["exception"]["cause"]["type"] == "ValueError"
         assert log_data["exception"]["cause"]["module"] == "builtins"
         assert log_data["exception"]["cause"]["message"] == "Original error"
 
-        # Clean up
-        logger.removeHandler(handler)
-
-    def test_structured_formatter_with_context_exception(self):
+    def test_with_context_exception(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter handles context exception properly."""
-        logger = logging.getLogger("test_logger_context_exception")
-        logger.setLevel(logging.ERROR)
+        logger, log_stream = make_logger(
+            "test_logger_context_exception",
+            level=logging.ERROR,
+        )
 
-        log_stream = StringIO()
-        handler = logging.StreamHandler(log_stream)
-        formatter = StructuredFormatter()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-
-        # Create a context exception
         try:  # noqa: PLW0717
             try:
                 msg = "Original error"
@@ -234,11 +192,8 @@ class TestStructuredFormatter:
         except RuntimeError:
             logger.exception("Context error occurred")
 
-        # Get the logged output
-        log_output = log_stream.getvalue().strip()
-        log_data = json.loads(log_output)
+        log_data = json.loads(log_stream.getvalue())
 
-        # Verify main exception
         assert log_data["message"] == "Context error occurred"
         assert "exception" in log_data
         assert isinstance(log_data["exception"], dict)
@@ -246,25 +201,60 @@ class TestStructuredFormatter:
         assert log_data["exception"]["module"] == "builtins"
         assert log_data["exception"]["message"] == "Context error"
 
-        # Verify context exception
         assert "context" in log_data["exception"]
         assert isinstance(log_data["exception"]["context"], dict)
         assert log_data["exception"]["context"]["type"] == "ValueError"
         assert log_data["exception"]["context"]["module"] == "builtins"
         assert log_data["exception"]["context"]["message"] == "Original error"
 
-    def test_structured_formatter_json_serialization_fallback(self):
+    def test_without_exception_notes(self, make_logger: LoggerFactory):
+        """Test that exceptions without notes omit the `notes` key."""
+        logger, log_stream = make_logger(
+            "test_logger_no_exception_notes",
+            level=logging.ERROR,
+        )
+
+        try:
+            msg = "Test exception"
+            raise ValueError(msg)  # noqa: TRY301
+        except ValueError:
+            logger.exception("Error occurred")
+
+        log_data = json.loads(log_stream.getvalue())
+
+        assert log_data["message"] == "Error occurred"
+        assert "exception" in log_data
+        assert "notes" not in log_data["exception"]
+
+    @pytest.mark.skipif(
+        sys.version_info < (3, 11),
+        reason="Exception notes are Python 3.11+",
+    )
+    def test_with_exception_notes(self, make_logger: LoggerFactory):
+        """Test that StructuredFormatter handles exception notes properly."""
+        logger, log_stream = make_logger(
+            "test_logger_exception_notes",
+            level=logging.ERROR,
+        )
+
+        try:
+            msg = "Test exception"
+            exc = ValueError(msg)
+            exc.add_note("Info")  # type: ignore[attr-defined]
+            exc.add_note("Moar info")  # type: ignore[attr-defined]
+            raise exc
+        except ValueError:
+            logger.exception("Error occurred")
+
+        log_data = json.loads(log_stream.getvalue())
+
+        assert log_data["message"] == "Error occurred"
+        assert log_data["exception"]["notes"] == ["Info", "Moar info"]
+
+    def test_json_serialization_fallback(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter handles non-serializable objects."""
-        logger = logging.getLogger("test_logger_fallback")
-        logger.setLevel(logging.INFO)
+        logger, log_stream = make_logger("test_logger_fallback")
 
-        log_stream = StringIO()
-        handler = logging.StreamHandler(log_stream)
-        formatter = StructuredFormatter()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-
-        # Create a non-serializable object
         class NonSerializable:
             def __init__(self):
                 self.data = "test"
@@ -272,68 +262,32 @@ class TestStructuredFormatter:
             def __str__(self):
                 return self.data
 
-        non_serializable = NonSerializable()
+        logger.info("Test message", extra={"object": NonSerializable()})
 
-        # Log with a non-serializable extra field
-        logger.info("Test message", extra={"object": non_serializable})
+        log_output = json.loads(log_stream.getvalue())
 
-        # Get the logged output
-        log_output = json.loads(log_stream.getvalue().strip())
-
-        # Should still produce valid output
-        # (either JSON with str conversion or fallback)
         assert isinstance(log_output, dict)
         assert log_output["message"] == "Test message"
-        assert log_output["extra"] == {
-            "object": "test",
-        }
+        assert log_output["extra"] == {"object": "test"}
 
-        # Clean up
-        logger.removeHandler(handler)
-
-    def test_structured_formatter_with_args(self):
+    def test_with_args(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter handles args properly."""
-        logger = logging.getLogger("test_logger_args")
-        logger.setLevel(logging.INFO)
+        logger, log_stream = make_logger("test_logger_args")
 
-        log_stream = StringIO()
-        handler = logging.StreamHandler(log_stream)
-        formatter = StructuredFormatter()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-
-        # Log a message with args
         logger.info("Test message with %s and %s", "arg1", "arg2")
 
-        # Get the logged output
-        log_output = log_stream.getvalue().strip()
-        log_data = json.loads(log_output)
+        log_data = json.loads(log_stream.getvalue())
 
-        # Verify that the args are included
         assert log_data["message"] == "Test message with arg1 and arg2"
 
-        # Clean up
-        logger.removeHandler(handler)
-
-    def test_structured_formatter_with_metric_logs(self, point: metrics.Point):
+    def test_with_metric_logs(self, make_logger: LoggerFactory, point: metrics.Point):
         """Test that StructuredFormatter handles METRIC logs correctly."""
-        logger = logging.getLogger("test_logger_metrics")
-        logger.setLevel(logging.INFO)
+        logger, log_stream = make_logger("test_logger_metrics")
 
-        log_stream = StringIO()
-        handler = logging.StreamHandler(log_stream)
-        formatter = StructuredFormatter()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-
-        # Log a METRIC message with point data (like ConsoleFormatter test)
         metrics.log(logger, point)
 
-        # Get the logged output
-        log_output = log_stream.getvalue().strip()
-        log_data = json.loads(log_output)
+        log_data = json.loads(log_stream.getvalue())
 
-        # Verify that the METRIC log is handled correctly
         assert log_data["message"] == "METRIC"
         assert "metric_info" in log_data
         assert log_data["metric_info"] == {
@@ -343,44 +297,24 @@ class TestStructuredFormatter:
             "tags": {"stream": "users", "tap": "tap-postgres"},
         }
 
-        # Clean up
-        logger.removeHandler(handler)
-
-    def test_structured_formatter_vs_console_formatter_metric_handling(
+    def test_vs_console_formatter_metric_handling(
         self,
+        make_logger: LoggerFactory,
         point: metrics.Point,
     ):
         """Compare how StructuredFormatter and ConsoleFormatter handle METRIC logs."""
-        # Test StructuredFormatter
-        structured_logger = logging.getLogger("test_structured_metrics")
-        structured_logger.setLevel(logging.INFO)
-        structured_stream = StringIO()
-        structured_handler = logging.StreamHandler(structured_stream)
-        structured_formatter = StructuredFormatter()
-        structured_handler.setFormatter(structured_formatter)
-        structured_logger.addHandler(structured_handler)
+        structured_logger, structured_stream = make_logger("test_structured_metrics")
+        console_logger, console_stream = make_logger(
+            "test_console_metrics",
+            formatter=ConsoleFormatter(),
+        )
 
-        # Test ConsoleFormatter
-        console_logger = logging.getLogger("test_console_metrics")
-        console_logger.setLevel(logging.INFO)
-        console_stream = StringIO()
-        console_handler = logging.StreamHandler(console_stream)
-        console_formatter = ConsoleFormatter()
-        console_handler.setFormatter(console_formatter)
-        console_logger.addHandler(console_handler)
-
-        # Log with both formatters
         metrics.log(structured_logger, point)
         metrics.log(console_logger, point)
 
-        # Get outputs
-        structured_output = structured_stream.getvalue().strip()
-        console_output = console_stream.getvalue().strip()
+        structured_data = json.loads(structured_stream.getvalue())
+        console_output = console_stream.getvalue()
 
-        # Parse structured output
-        structured_data = json.loads(structured_output)
-
-        # Verify structured output includes point as separate field
         assert structured_data["message"] == "METRIC"
         assert "metric_info" in structured_data
         assert structured_data["metric_info"] == {
@@ -390,23 +324,17 @@ class TestStructuredFormatter:
             "tags": {"stream": "users", "tap": "tap-postgres"},
         }
 
-        # Verify console output embeds point data in message
         assert "METRIC" in console_output
         assert "record_count" in console_output
         assert "150" in console_output
 
-        # Clean up
-        structured_logger.removeHandler(structured_handler)
-        console_logger.removeHandler(console_handler)
-
-    def test_structured_formatter_format_method_with_metric_record(
+    def test_format_method_with_metric_record(
         self,
         point: metrics.Point,
     ):
         """Test StructuredFormatter.format() method directly with METRIC LogRecord."""
         formatter = StructuredFormatter()
 
-        # Create a LogRecord that simulates what would be created for a METRIC log
         record = logging.LogRecord(
             name="tap_postgres",
             level=logging.INFO,
@@ -416,18 +344,11 @@ class TestStructuredFormatter:
             args=(point,),
             exc_info=None,
         )
-
-        # Add extra fields that would be included in a METRIC log
         record.app_name = "tap-postgres"
         record.stream_name = "users"
 
-        # Format the record directly
-        formatted_output = formatter.format(record)
+        log_data = json.loads(formatter.format(record))
 
-        # Parse and verify the JSON output
-        log_data = json.loads(formatted_output)
-
-        # Verify key fields are present and correct
         assert log_data["message"] == "METRIC"
         assert "metric_info" in log_data
         assert log_data["app_name"] == "tap-postgres"
@@ -444,11 +365,10 @@ class TestStructuredFormatter:
             },
         }
 
-    def test_structured_formatter_getmessage_exception_fallback(self):
+    def test_getmessage_exception_fallback(self):
         """Test that StructuredFormatter handles getMessage() exceptions properly."""
         formatter = StructuredFormatter()
 
-        # Create a LogRecord with args that will cause getMessage() to fail
         record = logging.LogRecord(
             name="test_logger",
             level=logging.INFO,
@@ -462,20 +382,16 @@ class TestStructuredFormatter:
             exc_info=None,
         )
 
-        # Format the record - this should trigger the getMessage() exception handling
-        formatted_output = formatter.format(record)
-        log_data = json.loads(formatted_output)
+        log_data = json.loads(formatter.format(record))
 
-        # Verify that we get the original msg when getMessage() fails
         assert log_data["message"] == "Test message with %s and %d args"
         assert log_data["logger_name"] == "test_logger"
         assert log_data["level"] == "info"
 
-    def test_structured_formatter_getmessage_value_error_fallback(self):
+    def test_getmessage_value_error_fallback(self):
         """Test that StructuredFormatter handles getMessage() ValueError properly."""
         formatter = StructuredFormatter()
 
-        # Create a LogRecord with args that will cause getMessage() to raise ValueError
         record = logging.LogRecord(
             name="test_logger",
             level=logging.INFO,
@@ -486,11 +402,8 @@ class TestStructuredFormatter:
             exc_info=None,
         )
 
-        # Format the record - this should trigger the getMessage() exception handling
-        formatted_output = formatter.format(record)
-        log_data = json.loads(formatted_output)
+        log_data = json.loads(formatter.format(record))
 
-        # Verify that we get the original msg when getMessage() fails
         assert log_data["message"] == "Test message with {invalid_format"
         assert log_data["logger_name"] == "test_logger"
         assert log_data["level"] == "info"

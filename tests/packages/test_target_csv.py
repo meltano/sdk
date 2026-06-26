@@ -47,11 +47,13 @@ class TestSampleTargetCSV(StandardTests):
     """Standard Target Tests."""
 
     @pytest.fixture(scope="class")
-    def test_output_dir(self):
+    @classmethod
+    def test_output_dir(cls) -> Path:
         return TEST_OUTPUT_DIR
 
     @pytest.fixture(scope="class")
-    def resource(self, test_output_dir):
+    @classmethod
+    def resource(cls, test_output_dir: Path):
         test_output_dir.mkdir(parents=True, exist_ok=True)
         yield test_output_dir
         shutil.rmtree(test_output_dir)
@@ -258,9 +260,9 @@ def cli_runner():
 
 
 @pytest.fixture
-def config_file_path(target):
+def config_file_path(target: TargetCSV):
+    path = Path(target.config["target_folder"]) / "./config.json"
     try:
-        path = Path(target.config["target_folder"]) / "./config.json"
         with path.open("w") as f:
             f.write(json.dumps(dict(target.config)))
         yield path
