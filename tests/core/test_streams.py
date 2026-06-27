@@ -942,3 +942,30 @@ def test_none_intermediate_value_returns_none() -> None:
     record = {"properties": None}
     result = get_nested_value(record, "properties.hs_lastmodifieddate")
     assert result is None
+
+
+def test_get_nested_value_integer_intermediate_returns_none() -> None:
+    """Returns None when intermediate value is an integer, not a dict."""
+    record = {"attributes": 42}
+    result = get_nested_value(record, "attributes.updated")
+    assert result is None
+
+
+def test_invalid_nested_replication_key_raises(tap: SimpleTestTap) -> None:
+    """InvalidReplicationKeyException raised when nested key missing from schema."""
+
+    class NestedKeyInvalidStream(SimpleTestStream):
+        """Stream with a nested replication key not present in schema."""
+
+        replication_key = "attributes.nonexistent"
+
+    stream = NestedKeyInvalidStream(tap)
+
+    with pytest.raises(
+        InvalidReplicationKeyException,
+        match=(
+            f"Field '{stream.replication_key}' is not in schema for stream "
+            f"'{stream.name}'"
+        ),
+    ):
+        _ = stream.is_timestamp_replication_key
