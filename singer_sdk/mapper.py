@@ -5,6 +5,26 @@ Mappers allow inline stream transformation, filtering, aliasing, and duplication
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "ast",
+    "copy",
+    "datetime",
+    "faker",
+    "fnmatch",
+    "hashlib",
+    "importlib",
+    "importlib.util",
+    "json",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers",
+    "singer_sdk.helpers._catalog",
+    "singer_sdk.helpers._flattening",
+    "singer_sdk.singerlib",
+    "singer_sdk.singerlib.catalog",
+    "singer_sdk.typing",
+    "typing_extensions",
+}
+
 import abc
 import ast
 import copy

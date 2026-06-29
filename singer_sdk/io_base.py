@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"singer_sdk.singerlib", "singer_sdk.singerlib.encoding"}
+
 from singer_sdk.singerlib.encoding import (
     GenericSingerReader,
     GenericSingerWriter,

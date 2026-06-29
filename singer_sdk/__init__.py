@@ -2,6 +2,21 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "singer_sdk.helpers",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.mapper_base",
+    "singer_sdk.plugin_base",
+    "singer_sdk.schema",
+    "singer_sdk.schema.source",
+    "singer_sdk.sinks",
+    "singer_sdk.sql",
+    "singer_sdk.streams",
+    "singer_sdk.tap_base",
+    "singer_sdk.target_base",
+    "warnings",
+}
+
 import typing as t
 import warnings
 

@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "requests",
+    "singer_sdk.helpers",
+    "singer_sdk.helpers.jsonpath",
+    "typing_extensions",
+}
+
 import sys
 import typing as t
 from abc import ABC, abstractmethod

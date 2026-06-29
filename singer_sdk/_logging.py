@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "logging.config",
+    "pathlib",
+    "singer_sdk.helpers",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.logging",
+}
+
 import logging
 import logging.config
 import os

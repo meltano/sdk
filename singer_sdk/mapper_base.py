@@ -2,6 +2,17 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "click",
+    "pathlib",
+    "singer_sdk.helpers",
+    "singer_sdk.helpers.capabilities",
+    "singer_sdk.singerlib",
+    "singer_sdk.singerlib.encoding",
+    "singer_sdk.singerlib.encoding.base",
+    "typing_extensions",
+}
+
 import abc
 import sys
 import typing as t

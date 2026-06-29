@@ -2,6 +2,35 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "importlib",
+    "jsonschema",
+    "logging",
+    "pathlib",
+    "signal",
+    "singer_sdk._logging",
+    "singer_sdk.cli",
+    "singer_sdk.configuration",
+    "singer_sdk.configuration._dict_config",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers",
+    "singer_sdk.helpers._classproperty",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.helpers._packaging",
+    "singer_sdk.helpers._util",
+    "singer_sdk.helpers.capabilities",
+    "singer_sdk.helpers.types",
+    "singer_sdk.io_base",
+    "singer_sdk.mapper",
+    "singer_sdk.singerlib",
+    "singer_sdk.singerlib.encoding",
+    "singer_sdk.singerlib.encoding.base",
+    "threading",
+    "types",
+    "typing_extensions",
+    "warnings",
+}
+
 import abc
 import dataclasses
 import logging
