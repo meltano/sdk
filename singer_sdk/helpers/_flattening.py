@@ -19,6 +19,7 @@ DEFAULT_FLATTENING_SEPARATOR = "__"
 DEFAULT_MAX_KEY_LENGTH = 255
 
 _LOWERCASE_RE = re.compile(r"[a-z]")
+_NULL_OBJECT_ARRAY_TYPES: frozenset[str] = frozenset({"null", "object", "array"})
 
 _T = t.TypeVar("_T")
 
@@ -541,5 +542,5 @@ def _should_jsondump_value(
         flattened_schema
         and key in flattened_schema
         and "type" in flattened_schema[key]
-        and set(flattened_schema[key]["type"]) == {"null", "object", "array"}
+        and frozenset(flattened_schema[key]["type"]) == _NULL_OBJECT_ARRAY_TYPES
     )
