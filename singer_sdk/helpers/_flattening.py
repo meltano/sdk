@@ -18,6 +18,8 @@ from singer_sdk.singerlib.json import serialize_json
 DEFAULT_FLATTENING_SEPARATOR = "__"
 DEFAULT_MAX_KEY_LENGTH = 255
 
+_LOWERCASE_RE = re.compile(r"[a-z]")
+
 _T = t.TypeVar("_T")
 
 
@@ -108,12 +110,11 @@ def flatten_key(
     full_key = [*parent_keys, key_name]
     inflected_key = full_key.copy()
     reducer_index = 0
-    pattern = re.compile(r"[a-z]")
     while (
         len(separator.join(inflected_key)) >= max_key_length  # Keep the key short
         and reducer_index < len(inflected_key)
     ):
-        reduced_key = pattern.sub(
+        reduced_key = _LOWERCASE_RE.sub(
             "",
             inflection.camelize(inflected_key[reducer_index]),
         )
