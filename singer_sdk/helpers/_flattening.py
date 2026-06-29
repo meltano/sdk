@@ -322,7 +322,7 @@ def flatten_schema(
     new_schema = {k: v for k, v in schema.items() if k != "properties"}
     new_schema["properties"] = _flatten_schema(
         schema_node=schema,
-        parent_keys=[],
+        parent_prefix="",
         max_level=max_level,
         separator=separator,
         max_key_length=max_key_length,
@@ -332,7 +332,7 @@ def flatten_schema(
 
 def _flatten_schema(  # noqa: C901, PLR0912
     schema_node: dict,
-    parent_keys: list[str],
+    parent_prefix: str = "",
     separator: str = "__",
     level: int = 0,
     max_level: int = 0,
@@ -343,8 +343,8 @@ def _flatten_schema(  # noqa: C901, PLR0912
 
     Args:
         schema_node: The schema node to flatten.
-        parent_keys: The parent's key, provided as a list of node names.
-            Mutated in place during recursion (append/pop); caller owns the list.
+        parent_prefix: Already-joined ancestor key string including trailing separator,
+            e.g. ``"foo__bar__"``. Empty string at the root level.
         separator: The string to use when concatenating key names.
         level: The current recursion level (zero-based).
         max_level: The max recursion level (zero-based, exclusive).
@@ -357,31 +357,39 @@ def _flatten_schema(  # noqa: C901, PLR0912
     if "properties" not in schema_node:
         return {}
 
+    sep_len = len(separator)
     for field_name, field_schema in schema_node["properties"].items():
-        new_key = flatten_key(
-            field_name,
-            parent_keys,
-            separator,
-            max_key_length=max_key_length,
-        )
+        new_key = parent_prefix + field_name
+        if len(new_key) >= max_key_length:
+            # Rare slow path: reconstruct the parent key list and apply abbreviation.
+            parent_keys = (
+                parent_prefix[:-sep_len].split(separator) if parent_prefix else []
+            )
+            new_key = flatten_key(
+                field_name,
+                parent_keys,
+                separator,
+                max_key_length=max_key_length,
+            )
         if "type" in field_schema:
             if (
                 "object" in field_schema["type"]
                 and "properties" in field_schema
                 and level < max_level
             ):
-                parent_keys.append(field_name)
+                # Use original field_name (not possibly-abbreviated new_key) so that
+                # deeper levels reconstruct the same parent list as the original code.
+                next_prefix = parent_prefix + field_name + separator
                 items.extend(
                     _flatten_schema(
                         field_schema,
-                        parent_keys,
+                        parent_prefix=next_prefix,
                         separator=separator,
                         level=level + 1,
                         max_level=max_level,
                         max_key_length=max_key_length,
                     ).items(),
                 )
-                parent_keys.pop()
             elif "array" in field_schema["type"] or (
                 "object" in field_schema["type"] and max_level > 0
             ):
@@ -443,7 +451,7 @@ def flatten_record(
     return _flatten_record(
         record_node=record,
         flattened_schema=flattened_schema,
-        parent_key=[],
+        parent_prefix="",
         separator=separator,
         level=0,
         max_level=max_level,
@@ -455,7 +463,7 @@ def _flatten_record(
     record_node: t.MutableMapping[t.Any, t.Any],
     *,
     flattened_schema: dict | None = None,
-    parent_key: list[str],
+    parent_prefix: str = "",
     separator: str = "__",
     level: int = 0,
     max_level: int = 0,
@@ -469,8 +477,8 @@ def _flatten_record(
     Args:
         record_node: The record node to flatten.
         flattened_schema: The already flattened full schema for the record.
-        parent_key: The parent's key, provided as a list of node names.
-            Mutated in place during recursion (append/pop); caller owns the list.
+        parent_prefix: Already-joined ancestor key string including trailing separator,
+            e.g. ``"foo__bar__"``. Empty string at the root level.
         separator: The string to use when concatenating key names.
         level: The current recursion level (zero-based).
         max_level: The max recursion level (zero-based, exclusive).
@@ -480,8 +488,20 @@ def _flatten_record(
         A flattened version of the provided node.
     """
     items: list[tuple[str, t.Any]] = []
+    sep_len = len(separator)
     for k, v in record_node.items():
-        new_key = flatten_key(k, parent_key, separator, max_key_length=max_key_length)
+        new_key = parent_prefix + k
+        if len(new_key) >= max_key_length:
+            # Rare slow path: reconstruct the parent key list and apply abbreviation.
+            parent_keys = (
+                parent_prefix[:-sep_len].split(separator) if parent_prefix else []
+            )
+            new_key = flatten_key(
+                k,
+                parent_keys,
+                separator,
+                max_key_length=max_key_length,
+            )
         # If the value is a dictionary, and the key is not in the schema, and the
         # level is less than the max level, then we should continue to flatten.
         if (
@@ -490,19 +510,19 @@ def _flatten_record(
             and new_key not in flattened_schema.get("properties", {})
             and (level < max_level)
         ):
-            parent_key.append(k)
+            # Use original k (not possibly-abbreviated new_key) so that deeper levels
+            # reconstruct the same parent list as the original code.
             items.extend(
                 _flatten_record(
                     v,
                     flattened_schema=flattened_schema,
-                    parent_key=parent_key,
+                    parent_prefix=parent_prefix + k + separator,
                     separator=separator,
                     level=level + 1,
                     max_level=max_level,
                     max_key_length=max_key_length,
                 ).items(),
             )
-            parent_key.pop()
         else:
             items.append(
                 (
