@@ -3,11 +3,8 @@
 from __future__ import annotations
 
 import collections.abc
-import itertools
-import operator
 import re
 import typing as t
-from copy import deepcopy
 from dataclasses import KW_ONLY, dataclass
 
 import inflection
@@ -17,6 +14,9 @@ from singer_sdk.singerlib.json import serialize_json
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
 DEFAULT_MAX_KEY_LENGTH = 255
+
+_LOWERCASE_RE = re.compile(r"[a-z]")
+_NULL_OBJECT_ARRAY_TYPES: frozenset[str] = frozenset({"null", "object", "array"})
 
 _T = t.TypeVar("_T")
 
@@ -108,12 +108,11 @@ def flatten_key(
     full_key = [*parent_keys, key_name]
     inflected_key = full_key.copy()
     reducer_index = 0
-    pattern = re.compile(r"[a-z]")
     while (
         len(separator.join(inflected_key)) >= max_key_length  # Keep the key short
         and reducer_index < len(inflected_key)
     ):
-        reduced_key = pattern.sub(
+        reduced_key = _LOWERCASE_RE.sub(
             "",
             inflection.camelize(inflected_key[reducer_index]),
         )
@@ -320,9 +319,10 @@ def flatten_schema(
       }
     }
     """
-    new_schema = deepcopy(schema)
+    new_schema = {k: v for k, v in schema.items() if k != "properties"}
     new_schema["properties"] = _flatten_schema(
-        schema_node=new_schema,
+        schema_node=schema,
+        parent_keys=[],
         max_level=max_level,
         separator=separator,
         max_key_length=max_key_length,
@@ -332,7 +332,7 @@ def flatten_schema(
 
 def _flatten_schema(  # noqa: C901, PLR0912
     schema_node: dict,
-    parent_keys: list[str] | None = None,
+    parent_keys: list[str],
     separator: str = "__",
     level: int = 0,
     max_level: int = 0,
@@ -344,6 +344,7 @@ def _flatten_schema(  # noqa: C901, PLR0912
     Args:
         schema_node: The schema node to flatten.
         parent_keys: The parent's key, provided as a list of node names.
+            Mutated in place during recursion (append/pop); caller owns the list.
         separator: The string to use when concatenating key names.
         level: The current recursion level (zero-based).
         max_level: The max recursion level (zero-based, exclusive).
@@ -352,9 +353,6 @@ def _flatten_schema(  # noqa: C901, PLR0912
     Returns:
         A flattened version of the provided node.
     """
-    if parent_keys is None:
-        parent_keys = []
-
     items: list[tuple[str, dict]] = []
     if "properties" not in schema_node:
         return {}
@@ -372,16 +370,18 @@ def _flatten_schema(  # noqa: C901, PLR0912
                 and "properties" in field_schema
                 and level < max_level
             ):
+                parent_keys.append(field_name)
                 items.extend(
                     _flatten_schema(
                         field_schema,
-                        [*parent_keys, field_name],
+                        parent_keys,
                         separator=separator,
                         level=level + 1,
                         max_level=max_level,
                         max_key_length=max_key_length,
                     ).items(),
                 )
+                parent_keys.pop()
             elif "array" in field_schema["type"] or (
                 "object" in field_schema["type"] and max_level > 0
             ):
@@ -399,28 +399,24 @@ def _flatten_schema(  # noqa: C901, PLR0912
             and (first_element := _first(composite))
         ):
             if first_element["type"] == "string":  # ty:ignore[not-subscriptable]
-                first_element["type"] = ["null", "string"]
-                items.append((new_key, first_element))  # ty:ignore[invalid-argument-type]
+                items.append((new_key, {**first_element, "type": ["null", "string"]}))  # ty:ignore[invalid-argument-type]
             elif first_element["type"] == "array":  # ty:ignore[not-subscriptable]
-                first_element["type"] = ["null", "array"]
-                items.append((new_key, first_element))  # ty:ignore[invalid-argument-type]
+                items.append((new_key, {**first_element, "type": ["null", "array"]}))  # ty:ignore[invalid-argument-type]
             elif first_element["type"] == "object":  # ty:ignore[not-subscriptable]
-                first_element["type"] = ["null", "object"]
-                items.append((new_key, first_element))  # ty:ignore[invalid-argument-type]
+                items.append((new_key, {**first_element, "type": ["null", "object"]}))  # ty:ignore[invalid-argument-type]
         else:
             # Handle typeless properties (e.g., "PropertyName": {})
             # Treat them as string type to allow JSON serialization
             items.append((new_key, {"type": ["null", "string"]}))
 
-    # Sort and check for duplicates
-    key_func = operator.itemgetter(0)
-    sorted_items = sorted(items, key=key_func)
-    for field_name, g in itertools.groupby(sorted_items, key=key_func):
-        if len(list(g)) > 1:
-            msg = f"Duplicate column name produced in schema: {field_name}"
+    # Check for duplicates in O(n).
+    seen: set[str] = set()
+    for key, _ in items:
+        if key in seen:
+            msg = f"Duplicate column name produced in schema: {key}"
             raise ValueError(msg)
+        seen.add(key)
 
-    # Return the (unsorted) result as a dict.
     return dict(items)
 
 
@@ -447,7 +443,9 @@ def flatten_record(
     return _flatten_record(
         record_node=record,
         flattened_schema=flattened_schema,
+        parent_key=[],
         separator=separator,
+        level=0,
         max_level=max_level,
         max_key_length=max_key_length,
     )
@@ -457,7 +455,7 @@ def _flatten_record(
     record_node: t.MutableMapping[t.Any, t.Any],
     *,
     flattened_schema: dict | None = None,
-    parent_key: list[str] | None = None,
+    parent_key: list[str],
     separator: str = "__",
     level: int = 0,
     max_level: int = 0,
@@ -472,6 +470,7 @@ def _flatten_record(
         record_node: The record node to flatten.
         flattened_schema: The already flattened full schema for the record.
         parent_key: The parent's key, provided as a list of node names.
+            Mutated in place during recursion (append/pop); caller owns the list.
         separator: The string to use when concatenating key names.
         level: The current recursion level (zero-based).
         max_level: The max recursion level (zero-based, exclusive).
@@ -480,9 +479,6 @@ def _flatten_record(
     Returns:
         A flattened version of the provided node.
     """
-    if parent_key is None:
-        parent_key = []
-
     items: list[tuple[str, t.Any]] = []
     for k, v in record_node.items():
         new_key = flatten_key(k, parent_key, separator, max_key_length=max_key_length)
@@ -494,17 +490,19 @@ def _flatten_record(
             and new_key not in flattened_schema.get("properties", {})
             and (level < max_level)
         ):
+            parent_key.append(k)
             items.extend(
                 _flatten_record(
                     v,
                     flattened_schema=flattened_schema,
-                    parent_key=[*parent_key, k],
+                    parent_key=parent_key,
                     separator=separator,
                     level=level + 1,
                     max_level=max_level,
                     max_key_length=max_key_length,
                 ).items(),
             )
+            parent_key.pop()
         else:
             items.append(
                 (
@@ -540,5 +538,5 @@ def _should_jsondump_value(
         flattened_schema
         and key in flattened_schema
         and "type" in flattened_schema[key]
-        and set(flattened_schema[key]["type"]) == {"null", "object", "array"}
+        and frozenset(flattened_schema[key]["type"]) == _NULL_OBJECT_ARRAY_TYPES
     )
