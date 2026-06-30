@@ -54,7 +54,7 @@ def schema_name(self) -> str | None:
 
 1. **Decide on `schema` precedence vs stream-derived.** As above, an explicit `schema` setting
    should win over the implicit stream prefix — that is the user's intent in the bug report.
-1. **Builtin setting (optional).** Consider registering `schema` (and/or treating it as an alias
+1. **Built-in setting (optional).** Consider registering `schema` (and/or treating it as an alias
    of `default_target_schema`) in `SQLTarget`'s base config schema so all SQL targets get it
    consistently, rather than relying on each target to define it.
 1. **Conform or not?** `default_target_schema` is returned verbatim; for consistency, return
