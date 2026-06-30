@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import decimal
+import json
 import logging
 import typing as t
 import urllib.parse
@@ -391,6 +392,153 @@ def test_jsonpath_graphql_stream_default(tap: Tap):
     records = stream.parse_response(fake_response)
 
     assert list(records) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
+
+
+def test_graphql_validate_response_raises_for_errors(tap: Tap):
+    """Validate GraphQL error payloads are handled as response errors."""
+    fake_response = requests.Response()
+    fake_response.status_code = 200
+    fake_response.reason = "OK"
+    fake_response.url = GraphqlTestStream.url_base
+    fake_response._content = json.dumps(
+        {
+            "errors": [
+                {
+                    "message": 'Cannot query field "nonexistentField" on type "Query".',
+                },
+            ],
+            "data": None,
+        },
+    ).encode()
+
+    stream = GraphqlTestStream(tap)
+
+    with pytest.raises(
+        FatalAPIError,
+        match='GraphQL API error: Cannot query field "nonexistentField"',
+    ):
+        stream.validate_response(fake_response)
+
+
+def test_graphql_validate_response_raises_for_multiple_errors(tap: Tap):
+    """Validate multiple GraphQL errors are included in response errors."""
+    fake_response = requests.Response()
+    fake_response.status_code = 200
+    fake_response.reason = "OK"
+    fake_response.url = GraphqlTestStream.url_base
+    fake_response._content = json.dumps(
+        {
+            "errors": [
+                {"message": "First error."},
+                {"message": "Second error."},
+            ],
+            "data": None,
+        },
+    ).encode()
+
+    stream = GraphqlTestStream(tap)
+
+    with pytest.raises(
+        FatalAPIError,
+        match=r"GraphQL API error: First error\.; Second error\.",
+    ):
+        stream.validate_response(fake_response)
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        b'{"data": {"graphql": []}}',
+        b'{"data": null, "errors": []}',
+    ],
+    ids=["missing-errors", "empty-errors"],
+)
+def test_graphql_validate_response_ignores_payloads_without_errors(
+    tap: Tap,
+    content: bytes,
+):
+    """Validate GraphQL response validation ignores payloads without errors."""
+    fake_response = requests.Response()
+    fake_response.status_code = 200
+    fake_response.reason = "OK"
+    fake_response.url = GraphqlTestStream.url_base
+    fake_response._content = content
+
+    stream = GraphqlTestStream(tap)
+
+    stream.validate_response(fake_response)
+
+
+@pytest.mark.parametrize(
+    "content,match,expect_cause",
+    [
+        (
+            b"OK",
+            "GraphQL API response body is not valid JSON.",
+            True,
+        ),
+        (
+            b'["not", "a", "dict"]',
+            "GraphQL API response body must be a JSON object.",
+            False,
+        ),
+    ],
+    ids=["not-json", "not-dict"],
+)
+def test_graphql_validate_response_raises_for_malformed_payloads(
+    tap: Tap,
+    content: bytes,
+    match: str,
+    expect_cause: bool,
+):
+    """Validate malformed GraphQL response payloads raise response errors."""
+    fake_response = requests.Response()
+    fake_response.status_code = 200
+    fake_response.reason = "OK"
+    fake_response.url = GraphqlTestStream.url_base
+    fake_response._content = content
+
+    stream = GraphqlTestStream(tap)
+
+    with pytest.raises(FatalAPIError, match=match) as exc_info:
+        stream.validate_response(fake_response)
+
+    if expect_cause:
+        assert isinstance(exc_info.value.__cause__, ValueError)
+    else:
+        assert exc_info.value.__cause__ is None
+
+
+@pytest.mark.parametrize(
+    "errors,match",
+    [
+        (
+            ["GraphQL service unavailable"],
+            "GraphQL API error: GraphQL service unavailable",
+        ),
+        (
+            {"message": "Top-level error"},
+            "GraphQL API error: {'message': 'Top-level error'}",
+        ),
+    ],
+    ids=["list-item-without-message", "non-list-errors"],
+)
+def test_graphql_validate_response_raises_for_alternate_error_payloads(
+    tap: Tap,
+    errors: list[str] | dict[str, str],
+    match: str,
+):
+    """Validate GraphQL response validation handles non-standard errors."""
+    fake_response = requests.Response()
+    fake_response.status_code = 200
+    fake_response.reason = "OK"
+    fake_response.url = GraphqlTestStream.url_base
+    fake_response._content = json.dumps({"errors": errors, "data": None}).encode()
+
+    stream = GraphqlTestStream(tap)
+
+    with pytest.raises(FatalAPIError, match=match):
+        stream.validate_response(fake_response)
 
 
 def test_jsonpath_graphql_stream_override(tap: Tap) -> None:
