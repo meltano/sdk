@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sys
 import typing as t
+from pathlib import Path
 
 from singer_sdk import typing as th
 from singer_sdk.contrib.msgspec import MsgSpecWriter
@@ -29,7 +30,8 @@ class SQLiteConnector(SQLConnector):
     @override
     def get_sqlalchemy_url(self, config: Mapping[str, t.Any]) -> str:
         """Generates a SQLAlchemy URL for SQLite."""
-        return f"sqlite:///{config[DB_PATH_CONFIG]}"
+        db_path = Path(config[DB_PATH_CONFIG]).resolve()
+        return f"sqlite:///{db_path}"
 
 
 class SQLiteStream(SQLStream):
