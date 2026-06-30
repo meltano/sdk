@@ -50,6 +50,8 @@ if t.TYPE_CHECKING:
     from singer_sdk.singerlib.catalog import StreamMetadata
     from singer_sdk.tap_base import Tap
 
+from singer_sdk.helpers._util import get_nested_value
+
 
 class Stream(abc.ABC):  # noqa: PLR0904
     """Abstract base class for tap streams.
@@ -253,7 +255,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
     def is_timestamp_replication_key(self) -> bool:
         """Check is replication key is a timestamp.
 
-        Developers can override to `True` in order to force this value, although this
+        Developers can override to ``True`` in order to force this value, although this
         should not be required in most use cases since the type can generally be
         accurately detected from the JSON Schema.
 
@@ -268,10 +270,25 @@ class Stream(abc.ABC):  # noqa: PLR0904
             return False
 
         schema = self.effective_schema
-        type_dict = schema.get("properties", {}).get(self.replication_key)
+        keys = self.replication_key.split(".")
+        type_dict: dict | None = schema.get("properties", {})
+
+        for i, key in enumerate(keys):
+            if not isinstance(type_dict, dict):
+                type_dict = None
+                break
+            if i < len(keys) - 1:
+                # Traverse into nested properties
+                type_dict = type_dict.get(key, {}).get("properties")
+            else:
+                # Final key — get its type definition
+                type_dict = type_dict.get(key)
 
         if type_dict is None:
-            msg = f"Field '{self.replication_key}' is not in schema for stream '{self.name}'"  # noqa: E501
+            msg = (
+                f"Field '{self.replication_key}' is not in schema for "
+                f"stream '{self.name}'"
+            )
             raise InvalidReplicationKeyException(msg)
 
         return is_datetime_type(type_dict)
@@ -766,11 +783,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
     ) -> None:
         """Update state of stream or partition with data from the provided record.
 
-        Raises `InvalidStreamSortException` is `self.is_sorted = True` and unsorted data
-        is detected.
+        Raises ``InvalidStreamSortException`` if ``self.is_sorted = True`` and
+        unsorted data is detected.
 
         Note: The default implementation does not advance any bookmarks unless
-        `self.replication_method == 'INCREMENTAL'.
+        ``self.replication_method == 'INCREMENTAL'``.
 
         Args:
             latest_record: TODO
@@ -779,7 +796,6 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Raises:
             ValueError: TODO
         """
-        # Advance state bookmark values if applicable
         if latest_record and self.replication_method == REPLICATION_INCREMENTAL:
             if not self.replication_key:
                 msg = (
@@ -788,8 +804,14 @@ class Stream(abc.ABC):  # noqa: PLR0904
                 )
                 raise ValueError(msg)
 
+            nested_record = latest_record
+            if "." in self.replication_key:
+                value = get_nested_value(latest_record, self.replication_key)
+                # Build a flat record the state manager can use
+                nested_record = {self.replication_key: value}
+
             self.state_manager.increment_state(
-                latest_record,
+                nested_record,
                 context=context,
                 replication_key=self.replication_key,
             )
