@@ -168,6 +168,51 @@ class TestSQLSink:
         assert sink.table_name == expected_table_name
         assert sink.schema_name == expected_schema_name
 
+    @pytest.mark.parametrize(
+        "stream_name, config, expected_schema_name",
+        [
+            pytest.param(
+                "foo-bar",
+                {"schema": "from_schema"},
+                "from_schema",
+                id="schema-setting-overrides-stream-derived",
+            ),
+            pytest.param(
+                "foo",
+                {"schema": "from_schema"},
+                "from_schema",
+                id="schema-setting-single-part",
+            ),
+            pytest.param(
+                "foo-bar",
+                {"schema": "from_schema", "default_target_schema": "from_default"},
+                "from_default",
+                id="default-target-schema-takes-precedence",
+            ),
+            pytest.param(
+                "foo-bar",
+                {},
+                "foo",
+                id="no-schema-settings-falls-back-to-stream",
+            ),
+        ],
+    )
+    def test_schema_name_schema_setting(
+        self,
+        schema: dict,
+        stream_name: str,
+        config: dict,
+        expected_schema_name: str | None,
+    ):
+        target = DummySQLTarget(config={"sqlalchemy_url": "sqlite:///", **config})
+        sink = DummySQLSink(
+            target,
+            stream_name=stream_name,
+            schema=schema,
+            key_properties=["id"],
+        )
+        assert sink.schema_name == expected_schema_name
+
     def test_schema_change_does_not_drop_table(self):
         """Test that schema changes don't cause table drops in OVERWRITE mode.
 
