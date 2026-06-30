@@ -271,7 +271,7 @@ class _MapperEval(simpleeval.EvalWithCompoundTypes):
     @override
     def _eval(self, node: ast.AST) -> t.Any:
         try:
-            handler = self.nodes[type(node)]  # ty:ignore[invalid-argument-type, not-subscriptable]
+            handler = self.nodes[type(node)]  # ty:ignore[not-subscriptable]
         except KeyError:
             msg = f"Sorry, {type(node).__name__} is not available in this evaluator"
             raise simpleeval.FeatureNotAvailable(msg) from None
