@@ -857,7 +857,7 @@ class _FakeStateManager:
         latest_record: dict,
         *,
         replication_key: str,
-        _context: dict | None = None,
+        **_kwargs: object,  # absorbs context= and any other kwargs silently
     ) -> None:
         """Record the arguments passed to increment_state for test assertions."""
         self.calls.append((latest_record, replication_key))
@@ -997,7 +997,7 @@ def test_increment_stream_state_flat_key(tap: SimpleTestTap) -> None:
 
     record = {"id": 1, "value": "x", "updatedAt": "2024-06-15T14:22:10Z"}
 
-    with patch.object(stream, "state_manager", fake_state_manager):
+    with patch.object(type(stream), "state_manager", new=fake_state_manager):
         stream._increment_stream_state(record, context=None)
 
     assert len(fake_state_manager.calls) == 1
@@ -1019,7 +1019,7 @@ def test_increment_stream_state_nested_key(tap: SimpleTestTap) -> None:
 
     record = {"id": 1, "meta": {"audit": {"last_modified": "2024-04-20T16:00:00Z"}}}
 
-    with patch.object(stream, "state_manager", fake_state_manager):
+    with patch.object(type(stream), "state_manager", new=fake_state_manager):
         stream._increment_stream_state(record, context=None)
 
     assert len(fake_state_manager.calls) == 1
