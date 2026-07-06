@@ -844,6 +844,23 @@ def test_state_partitioning_keys_class_variable(
     )
 
 
+class _FakeStateManager:
+    """Simple state manager stub that records increment_state calls."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[dict, str]] = []
+
+    def increment_state(
+        self,
+        latest_record: dict,
+        *,
+        replication_key: str,
+        _context: dict | None = None,
+    ) -> None:
+        """Record the arguments passed to increment_state for test assertions."""
+        self.calls.append((latest_record, replication_key))
+
+
 """Tests for nested replication key support - Issue #1198."""
 
 SALESFORCE_RECORD = {
@@ -969,3 +986,39 @@ def test_invalid_nested_replication_key_raises(tap: SimpleTestTap) -> None:
         ),
     ):
         _ = stream.is_timestamp_replication_key
+
+
+def test_increment_stream_state_flat_key(tap: SimpleTestTap) -> None:
+    """Flat replication keys pass the original record unchanged to state manager."""
+    stream = tap.streams["test"]
+    fake_state_manager = _FakeStateManager()
+    stream.state_manager = fake_state_manager  # type: ignore[assignment]
+
+    record = {"id": 1, "value": "x", "updatedAt": "2024-06-15T14:22:10Z"}
+    stream._increment_stream_state(record, context=None)
+
+    assert len(fake_state_manager.calls) == 1
+    passed_record, passed_key = fake_state_manager.calls[0]
+    assert passed_record == record
+    assert passed_key == "updatedAt"
+
+
+def test_increment_stream_state_nested_key(tap: SimpleTestTap) -> None:
+    """Nested replication keys pass a flattened record to the state manager."""
+
+    class NestedStream(SimpleTestStream):
+        """Stream with a nested replication key for testing state increment."""
+
+        replication_key = "meta.audit.last_modified"
+
+    stream = NestedStream(tap)
+    fake_state_manager = _FakeStateManager()
+    stream.state_manager = fake_state_manager  # type: ignore[assignment]
+
+    record = {"id": 1, "meta": {"audit": {"last_modified": "2024-04-20T16:00:00Z"}}}
+    stream._increment_stream_state(record, context=None)
+
+    assert len(fake_state_manager.calls) == 1
+    passed_record, passed_key = fake_state_manager.calls[0]
+    assert passed_record == {"meta.audit.last_modified": "2024-04-20T16:00:00Z"}
+    assert passed_key == "meta.audit.last_modified"
