@@ -33,6 +33,8 @@ if t.TYPE_CHECKING:
     from singer_sdk import Stream, Tap
     from singer_sdk.helpers.types import Context, Record
 
+from unittest.mock import patch
+
 from singer_sdk.helpers._util import get_nested_value
 
 CONFIG_START_DATE = "2021-01-01"
@@ -992,10 +994,11 @@ def test_increment_stream_state_flat_key(tap: SimpleTestTap) -> None:
     """Flat replication keys pass the original record unchanged to state manager."""
     stream = tap.streams["test"]
     fake_state_manager = _FakeStateManager()
-    stream.state_manager = fake_state_manager  # type: ignore[assignment]
 
     record = {"id": 1, "value": "x", "updatedAt": "2024-06-15T14:22:10Z"}
-    stream._increment_stream_state(record, context=None)
+
+    with patch.object(stream, "state_manager", fake_state_manager):
+        stream._increment_stream_state(record, context=None)
 
     assert len(fake_state_manager.calls) == 1
     passed_record, passed_key = fake_state_manager.calls[0]
@@ -1013,10 +1016,11 @@ def test_increment_stream_state_nested_key(tap: SimpleTestTap) -> None:
 
     stream = NestedStream(tap)
     fake_state_manager = _FakeStateManager()
-    stream.state_manager = fake_state_manager  # type: ignore[assignment]
 
     record = {"id": 1, "meta": {"audit": {"last_modified": "2024-04-20T16:00:00Z"}}}
-    stream._increment_stream_state(record, context=None)
+
+    with patch.object(stream, "state_manager", fake_state_manager):
+        stream._increment_stream_state(record, context=None)
 
     assert len(fake_state_manager.calls) == 1
     passed_record, passed_key = fake_state_manager.calls[0]
