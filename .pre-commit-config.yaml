@@ -69,7 +69,7 @@ repos:
     types_or: [python, markdown]
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.11.26
+  rev: 0.11.27
   hooks:
   - id: uv-audit
   - id: uv-lock
