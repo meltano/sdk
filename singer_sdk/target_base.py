@@ -515,12 +515,12 @@ class Target(BaseSingerReader, abc.ABC):
         self._drain_all(self._sinks_to_clear, 1)
         if is_endofpipe:
             for sink in self._sinks_to_clear:
-                sink.clean_up()
+                sink._clean_up()  # ruff:ignore[private-member-access]
         self._sinks_to_clear = []
         self._drain_all(self._sinks_active.values(), self.max_parallelism)
         if is_endofpipe:
             for sink in self._sinks_active.values():
-                sink.clean_up()
+                sink._clean_up()  # ruff:ignore[private-member-access]
 
         if self._latest_state:
             self._write_state_message(copy.deepcopy(self._latest_state))

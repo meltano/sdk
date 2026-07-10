@@ -334,7 +334,7 @@ extend-include = [
 ]
 line-length = 88
 preview = true
-required-version = ">=0.15.14"
+required-version = ">=0.15.21"
 
 [tool.ruff.format]
 docstring-code-format = true
