@@ -720,15 +720,21 @@ class Sink(abc.ABC):  # noqa: PLR0904
         """
         self.logger.debug("Setting up %s", self.stream_name)
 
-    def clean_up(self) -> None:
-        """Perform any clean up actions required at end of a stream.
-
-        Implementations should ensure that clean up does not affect resources
-        that may be in use from other instances of the same sink. Stream name alone
-        should not be relied on, it's recommended to use a uuid as well.
-        """
+    @t.final
+    def _clean_up(self) -> None:
+        """Perform any clean up actions required at end of a stream."""
         self.logger.debug("Cleaning up %s", self.stream_name)
         self.record_counter_metric.exit()
+        self.clean_up()
+
+    def clean_up(self) -> None:  # ruff:ignore[no-self-use]
+        """Override this method to perform clean up actions.
+
+        This will be called when a stream is finalized. Implementations should ensure
+        that clean up does not affect resources that may be in use from other instances
+        of the same sink.
+        """
+        return
 
     def process_batch_files(
         self,
