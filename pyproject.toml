@@ -152,9 +152,9 @@ typing = [
     {"include-group" = "testing"},
     "backports-datetime-fromisoformat",
     "importlib-metadata",
-    "mypy~=2.1.0",
+    "mypy~=2.2",
     "pyarrow-stubs>=19.1",
-    "ty==0.0.54",
+    "ty==0.0.58",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-simplejson>=3.18.0",
@@ -334,7 +334,7 @@ extend-include = [
 ]
 line-length = 88
 preview = true
-required-version = ">=0.15.14"
+required-version = ">=0.15.21"
 
 [tool.ruff.format]
 docstring-code-format = true

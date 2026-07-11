@@ -66,8 +66,8 @@ def _install_env(session: nox.Session) -> dict[str, str]:
     return env
 
 
-@nox.session(python=[python_versions[0], main_python], tags=["typing"])
-def mypy(session: nox.Session) -> None:
+@nox.session(python=[python_versions[0], main_python], tags=["lint"])
+def typing(session: nox.Session) -> None:
     """Check types with mypy."""
     default_locations = [
         "packages",
@@ -83,36 +83,30 @@ def mypy(session: nox.Session) -> None:
         env=_install_env(session),
     )
     python = session.python if isinstance(session.python, str) else main_python
+    gha = os.getenv("GITHUB_ACTIONS") == "true"
+    ty_format = "github" if gha else "concise"
+
+    session.run("mypy", "--version")
     session.run("mypy", "--python-version", python, *args)
-    if not session.posargs:
-        session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
 
-
-@nox.session(python=[python_versions[0], main_python], tags=["typing"])
-def ty(session: nox.Session) -> None:
-    """Check types with ty."""
-    default_locations = [
-        "packages",
-        "samples",
-        "singer_sdk",
-    ]
-    args = session.posargs or default_locations
-    session.run_install(
-        *UV_SYNC_COMMAND,
-        "--group=packages",
-        "--group=typing",
-        "--all-extras",
-        env=_install_env(session),
-    )
-    python = session.python if isinstance(session.python, str) else main_python
-    output_format = "github" if os.getenv("GITHUB_ACTIONS") == "true" else "concise"
+    session.run("ty", "--version")
     session.run(
         "ty",
         "check",
-        f"--output-format={output_format}",
+        f"--output-format={ty_format}",
         f"--python-version={python}",
         *args,
     )
+
+    if not session.posargs:
+        session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
+        session.run(
+            "ty",
+            "check",
+            f"--output-format={ty_format}",
+            f"--python={sys.executable}",
+            "noxfile.py",
+        )
 
 
 def _run_pytest(session: nox.Session, *pytest_args: str, coverage: bool = True) -> None:
@@ -317,7 +311,7 @@ def coverage(session: nox.Session) -> None:
     session.run("coverage", *args)
 
 
-@nox.session(name="deps")
+@nox.session(name="deps", tags=["lint"])
 def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
     extras = [
@@ -341,7 +335,7 @@ def dependencies(session: nox.Session) -> None:
     session.run("deptry", "singer_sdk", *session.posargs)
 
 
-@nox.session(name="snap")
+@nox.session(name="snap", tags=["test"])
 def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
     session.run_install(
@@ -361,7 +355,7 @@ def update_snapshots(session: nox.Session) -> None:
     )
 
 
-@nox.session()
+@nox.session(tags=["test"])
 def doctest(session: nox.Session) -> None:
     """Run examples with xdoctest."""
     if session.posargs:

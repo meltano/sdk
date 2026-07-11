@@ -141,7 +141,7 @@ jobs:
 
       - name: Run Nox
         run: |
-          nox --verbose --tags typing
+          nox --verbose --session typing
 
   tests-external:
     name: External Tests
