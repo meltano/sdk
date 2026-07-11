@@ -884,3 +884,295 @@ def test_overwrite_load_method(sqlite_target_test_config: dict):
     cursor.execute(f"SELECT col_a FROM {test_tbl} ;")  # noqa: S608
     records = [res[0] for res in cursor.fetchall()]
     assert records == ["456"]
+
+
+def test_sqlite_hard_delete_log_based(
+    request: pytest.FixtureRequest,
+    sqlite_target_test_config: dict,
+):
+    """Test hard delete of records with _sdc_deleted_at from LOG_BASED replication.
+
+    This tests that when hard_delete=True, records with _sdc_deleted_at set are
+    physically deleted from the target table instead of being inserted.
+    """
+    test_tbl = f"zzz_tmp_{request.node.name}"
+
+    schema_msg = {
+        "type": "SCHEMA",
+        "stream": test_tbl,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string"},
+                "_sdc_deleted_at": {"type": ["null", "string"], "format": "date-time"},
+            },
+        },
+        "key_properties": ["id"],
+    }
+
+    # First, insert some records
+    tap_output_insert = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg,
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"id": 1, "name": "Alice"},
+            },
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"id": 2, "name": "Bob"},
+            },
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"id": 3, "name": "Carol"},
+            },
+        ]
+    )
+
+    target = SQLiteTarget(
+        config={
+            **sqlite_target_test_config,
+            "hard_delete": True,
+            "add_record_metadata": True,
+        },
+    )
+    target_sync_test(target, input=StringIO(tap_output_insert), finalize=True)
+
+    # Verify all records exist
+    db = sqlite3.connect(sqlite_target_test_config["path_to_db"])
+    cursor = db.cursor()
+    cursor.execute(f"SELECT id, name, _sdc_deleted_at FROM {test_tbl} ORDER BY id")  # noqa: S608
+    records = cursor.fetchall()
+    assert records == [(1, "Alice", None), (2, "Bob", None), (3, "Carol", None)]
+
+    # Now send a delete message for id=1 and id=3 (with _sdc_deleted_at set)
+    tap_output_delete = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg,
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {
+                    "id": 1,
+                    "name": "Alice",
+                    "_sdc_deleted_at": "2024-01-01T00:00:00Z",
+                },
+            },
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {
+                    "id": 3,
+                    "name": "Carol",
+                    "_sdc_deleted_at": "2024-01-01T00:00:00Z",
+                },
+            },
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"id": 4, "name": "Dave"},
+            },
+        ]
+    )
+
+    target = SQLiteTarget(
+        config={
+            **sqlite_target_test_config,
+            "hard_delete": True,
+            "add_record_metadata": True,
+        },
+    )
+    target_sync_test(target, input=StringIO(tap_output_delete), finalize=True)
+
+    # Verify only id=2 remains
+    cursor.execute(f"SELECT id, name, _sdc_deleted_at FROM {test_tbl} ORDER BY id")  # noqa: S608
+    records = cursor.fetchall()
+    assert records == [(2, "Bob", None), (4, "Dave", None)]
+
+
+def test_sqlite_soft_delete_log_based(
+    request: pytest.FixtureRequest,
+    sqlite_target_test_config: dict,
+):
+    """Test that without hard_delete, records with _sdc_deleted_at are inserted.
+
+    When hard_delete=False (default), records with _sdc_deleted_at should be
+    inserted normally (not deleted), and the _sdc_deleted_at value is stripped
+    from the record (since include_sdc_metadata_properties defaults to False).
+    """
+    test_tbl = f"zzz_tmp_{request.node.name}"
+
+    schema_msg = {
+        "type": "SCHEMA",
+        "stream": test_tbl,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string"},
+                "_sdc_deleted_at": {"type": ["null", "string"], "format": "date-time"},
+            },
+        },
+        "key_properties": ["id"],
+    }
+
+    # Insert records with _sdc_deleted_at set (simulating LOG_BASED delete events)
+    # When hard_delete=False, these should just be inserted as regular records
+    tap_output = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg,
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"id": 1, "name": "Alice"},
+            },
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {
+                    "id": 2,
+                    "name": "Bob",
+                    "_sdc_deleted_at": "2024-01-01T00:00:00Z",
+                },
+            },
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"id": 3, "name": "Carol"},
+            },
+        ]
+    )
+
+    target = SQLiteTarget(
+        config={
+            **sqlite_target_test_config,
+            "hard_delete": False,
+            "add_record_metadata": True,
+        },
+    )
+    target_sync_test(target, input=StringIO(tap_output), finalize=True)
+
+    # All records should be inserted (soft delete doesn't physically delete)
+    db = sqlite3.connect(sqlite_target_test_config["path_to_db"])
+    cursor = db.cursor()
+    cursor.execute(f"SELECT id, name, _sdc_deleted_at FROM {test_tbl} ORDER BY id")  # noqa: S608
+    records = cursor.fetchall()
+    assert len(records) == 3
+    assert records == [
+        (1, "Alice", None),
+        (2, "Bob", "2024-01-01T00:00:00+00:00"),
+        (3, "Carol", None),
+    ]
+
+
+def test_sqlite_hard_delete_composite_key(
+    request: pytest.FixtureRequest,
+    sqlite_target_test_config: dict,
+):
+    """Test hard delete with composite primary key.
+
+    Ensures deletion works correctly when the table has multiple key properties.
+    """
+    test_tbl = f"zzz_tmp_{request.node.name}"
+
+    schema_msg = {
+        "type": "SCHEMA",
+        "stream": test_tbl,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "org_id": {"type": "integer"},
+                "user_id": {"type": "integer"},
+                "name": {"type": "string"},
+                "_sdc_deleted_at": {"type": ["null", "string"], "format": "date-time"},
+            },
+        },
+        "key_properties": ["org_id", "user_id"],
+    }
+
+    # Insert records with composite key
+    tap_output_insert = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg,
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"org_id": 1, "user_id": 1, "name": "Alice"},
+            },
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"org_id": 1, "user_id": 2, "name": "Bob"},
+            },
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"org_id": 2, "user_id": 1, "name": "Carol"},
+            },
+        ]
+    )
+
+    target = SQLiteTarget(
+        config={
+            **sqlite_target_test_config,
+            "hard_delete": True,
+            "add_record_metadata": True,
+        },
+    )
+    target_sync_test(target, input=StringIO(tap_output_insert), finalize=True)
+
+    db = sqlite3.connect(sqlite_target_test_config["path_to_db"])
+    cursor = db.cursor()
+    cursor.execute(
+        "SELECT org_id, user_id, name, _sdc_deleted_at "  # noqa: S608
+        f"FROM {test_tbl} ORDER BY org_id, user_id"
+    )
+    records = cursor.fetchall()
+    assert records == [
+        (1, 1, "Alice", None),
+        (1, 2, "Bob", None),
+        (2, 1, "Carol", None),
+    ]
+
+    # Delete org_id=1, user_id=2 (Bob)
+    tap_output_delete = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg,
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {
+                    "org_id": 1,
+                    "user_id": 2,
+                    "name": "Bob",
+                    "_sdc_deleted_at": "2024-01-01T00:00:00Z",
+                },
+            },
+        ]
+    )
+
+    target = SQLiteTarget(
+        config={
+            **sqlite_target_test_config,
+            "hard_delete": True,
+            "add_record_metadata": True,
+        },
+    )
+    target_sync_test(target, input=StringIO(tap_output_delete), finalize=True)
+
+    # Verify Bob is deleted but others remain
+    cursor.execute(
+        "SELECT org_id, user_id, name, _sdc_deleted_at "  # noqa: S608
+        f"FROM {test_tbl} ORDER BY org_id, user_id"
+    )
+    records = cursor.fetchall()
+    assert records == [(1, 1, "Alice", None), (2, 1, "Carol", None)]
