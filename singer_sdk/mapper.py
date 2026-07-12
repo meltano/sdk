@@ -793,18 +793,18 @@ class PluginMapper:
             catalog: TODO
         """
         for catalog_entry in catalog.streams:
+            stream_name = catalog_entry.stream or catalog_entry.tap_stream_id
+            schema = catalog_entry.schema.to_dict()
             mask = catalog_entry.metadata.resolve_selection()
-            if not mask[()]:
-                # Skip unselected streams
-                continue
+
+            # Unselected streams keep their full schema so they still have a
+            # mapper if later force-selected (e.g. for a connection test).
+            if mask[()]:
+                schema = get_selected_schema(stream_name, schema, mask)
 
             self.register_raw_stream_schema(
-                catalog_entry.stream or catalog_entry.tap_stream_id,
-                get_selected_schema(
-                    catalog_entry.stream or catalog_entry.tap_stream_id,
-                    catalog_entry.schema.to_dict(),
-                    catalog_entry.metadata.resolve_selection(),
-                ),
+                stream_name,
+                schema,
                 catalog_entry.key_properties,
             )
 
