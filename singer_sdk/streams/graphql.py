@@ -140,7 +140,7 @@ class GraphQLStream(RESTStream, abc.ABC, t.Generic[_TToken]):
         # Partial success: data is present alongside errors. Records can still be
         # extracted, so warn rather than abort. Taps needing retriable handling
         # (e.g. RATE_LIMITED in extensions) should override this method.
-        if json_response.get("data"):
+        if "data" in json_response and json_response["data"] is not None:
             self.logger.warning(msg)
         else:
             raise FatalAPIError(msg)

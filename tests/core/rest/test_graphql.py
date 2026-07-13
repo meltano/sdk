@@ -76,10 +76,29 @@ def _make_raw_response(content: bytes) -> requests.Response:
             ),
         ),
         (
+            # errors present, data key absent -- should raise FatalAPIError
+            {
+                "errors": [{"message": "Bad Request"}],
+            },
+            pytest.raises(
+                FatalAPIError,
+                match="GraphQL errors in response: Bad Request",
+            ),
+        ),
+        (
             # errors present alongside data -- partial success, should NOT raise
             {
                 "errors": [{"message": "deprecated field used"}],
                 "data": {"thestream": [{"id": 1}]},
+            },
+            nullcontext(),
+        ),
+        (
+            # errors present, data is an empty object -- execution completed,
+            # so this is partial success and should NOT raise
+            {
+                "errors": [{"message": "field error"}],
+                "data": {},
             },
             nullcontext(),
         ),
