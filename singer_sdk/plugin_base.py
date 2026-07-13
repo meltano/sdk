@@ -484,7 +484,7 @@ class PluginBase(abc.ABC):
 
     def _handle_termination(  # pragma: no cover
         self,
-        signum: int,  # noqa: ARG002
+        signum: int,
         frame: FrameType | None,  # noqa: ARG002
     ) -> None:
         """Handle termination signal.
