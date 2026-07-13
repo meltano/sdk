@@ -1044,6 +1044,18 @@ def test_mapped_stream(
     snapshot.assert_match(buf.read(), snapshot_name)
 
 
+def test_deselected_stream_with_key_properties_and_map():
+    tap = MappedTap(
+        config={"stream_maps": {"mystream": {"email_hash": "md5(email)"}}},
+        setup_mapper=False,
+    )
+
+    tap.catalog["mystream"].key_properties = ["email"]
+    tap.catalog["mystream"].metadata[()].selected = False
+
+    tap.setup_mapper()
+
+
 def test_bench_simple_map_transforms(
     benchmark: BenchmarkFixture,
     sample_stream: dict[str, list[dict[str, t.Any]]],
