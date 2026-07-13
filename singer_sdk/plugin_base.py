@@ -497,6 +497,10 @@ class PluginBase(abc.ABC):
             # Duplicate signal, e.g. delivered both directly by the OS and
             # forwarded by an orchestrator such as Meltano. Let the in-flight
             # shutdown finish.
+            self.logger.debug(
+                "Termination signal %s received while shutdown already in progress",
+                signum,
+            )
             return
         self._is_terminating = True
         self._terminate()
