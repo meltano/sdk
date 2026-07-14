@@ -43,7 +43,7 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.37.2
+  rev: 0.37.4
   hooks:
   - id: check-codecov
   - id: check-dependabot
@@ -53,7 +53,7 @@ repos:
   - id: check-readthedocs
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.15.15
+  rev: v0.15.21
   hooks:
   - id: ruff-check
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]
@@ -69,7 +69,7 @@ repos:
     types_or: [python, markdown]
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.11.17
+  rev: 0.11.27
   hooks:
   - id: uv-audit
   - id: uv-lock
@@ -91,3 +91,8 @@ repos:
     args: [--strict-front-matter]
     additional_dependencies:
     - mdformat-front-matters
+
+- repo: https://github.com/rhysd/actionlint
+  rev: v1.7.12
+  hooks:
+  - id: actionlint

@@ -117,12 +117,30 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
             record: Record message to validate.
 
         Raises:
-            InvalidRecord: If the record is invalid.
-        """
-        try:
-            self.validator.validate(record)
-        except jsonschema.ValidationError as e:
-            raise InvalidRecord(e.message, record) from e
+            InvalidRecord: If the record is invalid. The exception message
+                aggregates every schema violation found in the record, so a
+                record with multiple problems reports them all at once instead
+                of stopping at the first failure.
+        """  # noqa: DOC502
+        errors = sorted(
+            self.validator.iter_errors(record),
+            key=lambda error: (error.json_path, error.message),
+        )
+        if errors:
+            if sys.version_info >= (3, 11):
+                exc = InvalidRecord(
+                    f"{len(errors)} schema validation error(s)",
+                    record,
+                )
+                for error in errors:
+                    exc.add_note(f"{error.json_path}: {error.message}")
+            else:
+                details = "\n".join(f"{e.json_path}: {e.message}" for e in errors)
+                exc = InvalidRecord(
+                    f"{len(errors)} schema validation error(s)\n{details}",
+                    record,
+                )
+            raise exc from errors[0]
 
 
 class Sink(abc.ABC):  # noqa: PLR0904
@@ -198,20 +216,12 @@ class Sink(abc.ABC):  # noqa: PLR0904
 
     @property
     def record_counter_metric(self) -> metrics.Counter:
-        """Get the record counter for this sink.
-
-        Returns:
-            The Meter instance for the record counter.
-        """
+        """Record counter for this sink."""
         return self._record_counter
 
     @property
     def batch_processing_timer(self) -> metrics.Timer:
-        """Get the batch processing timer for this sink.
-
-        Returns:
-            The Meter instance for the batch processing timer.
-        """
+        """Batch processing timer for this sink."""
         return self._batch_timer
 
     def get_sink_record_counter(self) -> metrics.Counter:
@@ -312,37 +322,27 @@ class Sink(abc.ABC):  # noqa: PLR0904
 
     @property
     def current_size(self) -> int:
-        """Get current batch size.
-
-        Returns:
-            The number of records to drain.
-        """
+        """Current record batch size."""
         return self._batch_records_read
 
     @property
     def is_full(self) -> bool:
-        """Check against the batch size limit.
-
-        Returns:
-            True if the sink needs to be drained.
-        """
+        """True if the sink needs to be drained."""
         return self.current_size >= self.max_size
 
     @property
     def batch_size_rows(self) -> int | None:
         """The maximum number of rows a batch can accumulate before being processed.
 
-        Returns:
-            The max number of rows or None if not set.
+        Or None if not set.
         """
         return self._batch_size_rows
 
     @property
     def max_size(self) -> int:
-        """Get max batch size.
+        """Max record batch size.
 
-        Returns:
-            Max number of records to batch before `is_full=True`
+        The number of records to batch before `is_full=True`
 
         .. versionchanged:: 0.36.0
            This property now takes into account the
@@ -398,59 +398,36 @@ class Sink(abc.ABC):  # noqa: PLR0904
 
     @property
     def config(self) -> t.Mapping[str, t.Any]:
-        """Get plugin configuration.
-
-        Returns:
-            A frozen (read-only) config dictionary map.
-        """
+        """Plugin configuration."""
         return MappingProxyType(self._config)
 
     @property
     def batch_config(self) -> BatchConfig | None:
-        """Get batch configuration.
-
-        Returns:
-            A frozen (read-only) config dictionary map.
-        """
+        """Batch configuration."""
         raw = self.config.get("batch_config")
         return BatchConfig.from_dict(raw) if raw else None
 
     @property
     def include_sdc_metadata_properties(self) -> bool:
-        """Check if metadata columns should be added.
-
-        Returns:
-            True if metadata columns should be added.
-        """
+        """True if metadata columns should be added."""
         return self.config.get("add_record_metadata", False)  # type: ignore[no-any-return]
 
     @property
     def process_activate_version_messages(self) -> bool:
-        """Check if activate version messages should be processed.
-
-        Returns:
-            True if activate version messages should be processed.
-        """
+        """True if activate version messages should be processed."""
         return self.config.get("process_activate_version_messages", True)  # type: ignore[no-any-return]
 
     @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
-        """Return a treatment to use for datetime parse errors: ERROR. MAX, or NULL.
-
-        Returns:
-            TODO
-        """
+        """Treatment to use for datetime parse errors: ERROR. MAX, or NULL."""
         return DatetimeErrorTreatmentEnum.ERROR
 
     @property
     def key_properties(self) -> t.Sequence[str]:
-        """Return key properties.
+        """Key properties.
 
         Override this method to return a list of key properties in a format that is
         compatible with the target.
-
-        Returns:
-            A list of stream key properties.
         """
         return self._key_properties
 
@@ -743,15 +720,21 @@ class Sink(abc.ABC):  # noqa: PLR0904
         """
         self.logger.debug("Setting up %s", self.stream_name)
 
-    def clean_up(self) -> None:
-        """Perform any clean up actions required at end of a stream.
-
-        Implementations should ensure that clean up does not affect resources
-        that may be in use from other instances of the same sink. Stream name alone
-        should not be relied on, it's recommended to use a uuid as well.
-        """
+    @t.final
+    def _clean_up(self) -> None:
+        """Perform any clean up actions required at end of a stream."""
         self.logger.debug("Cleaning up %s", self.stream_name)
         self.record_counter_metric.exit()
+        self.clean_up()
+
+    def clean_up(self) -> None:  # ruff:ignore[no-self-use]
+        """Override this method to perform clean up actions.
+
+        This will be called when a stream is finalized. Implementations should ensure
+        that clean up does not affect resources that may be in use from other instances
+        of the same sink.
+        """
+        return
 
     def process_batch_files(
         self,

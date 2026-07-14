@@ -63,7 +63,7 @@ parquet = [
 ]
 
 testing = [
-    "pytest>=9",
+    "pytest>=9.1",
 ]
 
 faker = [
@@ -152,9 +152,9 @@ typing = [
     {"include-group" = "testing"},
     "backports-datetime-fromisoformat",
     "importlib-metadata",
-    "mypy~=2.1.0",
+    "mypy~=2.2",
     "pyarrow-stubs>=19.1",
-    "ty==0.0.42",
+    "ty==0.0.58",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-simplejson>=3.18.0",
@@ -223,7 +223,7 @@ testpaths = ["tests"]
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.54.4"
+version = "0.54.5"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -311,15 +311,6 @@ warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-[[tool.mypy.overrides]]
-ignore_missing_imports = true
-module = [
-    "backports.datetime_fromisoformat.*",
-    "joblib.*",       # https://github.com/joblib/joblib/issues/1516
-    "fsspec.*",       # https://github.com/fsspec/filesystem_spec/issues/625
-    "jsonpath_ng.*",  # https://github.com/h2non/jsonpath-ng/issues/152
-]
-
 [build-system]
 requires = [
     "hatchling>=1,<2",
@@ -343,7 +334,7 @@ extend-include = [
 ]
 line-length = 88
 preview = true
-required-version = ">=0.15.14"
+required-version = ">=0.15.21"
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -508,3 +499,6 @@ ignore-words-list = "fo,intoto"
 [tool.ty.rules]
 missing-override-decorator = "error"
 unused-type-ignore-comment = "ignore"
+
+[tool.ty.terminal]
+error-on-warning = false

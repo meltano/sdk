@@ -158,11 +158,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
 
     @property
     def root(self) -> StreamMetadata:
-        """Get stream (root) metadata from this mapping.
-
-        Returns:
-            Stream metadata.
-        """
+        """Stream (root) metadata from this mapping."""
         return self[()]  # type: ignore[return-value]  # ty:ignore[invalid-return-type]
 
     @classmethod
@@ -415,11 +411,7 @@ class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
 
     @property
     def streams(self) -> t.Sequence[CatalogEntry]:
-        """Get catalog entries.
-
-        Returns:
-            A list of catalog entries.
-        """
+        """Catalog entries."""
         return list(self.values())
 
     def add_stream(self, entry: CatalogEntry) -> None:

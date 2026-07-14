@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import copy
+import signal
+from unittest import mock
 
 import pytest
 
@@ -234,3 +236,24 @@ def test_batch_size_rows_and_max_size():
     assert sink_set._batch_size_rows == 100000
     assert sink_set.batch_size_rows == 100000
     assert sink_set.max_size == 100000
+
+
+def test_duplicate_termination_signal_does_not_redrain():
+    """A second signal arriving mid-drain is ignored and sinks drain once."""
+    target = TargetMock()
+    drain_calls: list[dict] = []
+
+    def fake_drain_all(**kwargs) -> None:
+        drain_calls.append(kwargs)
+        # simulate the duplicate signal arriving while the drain is in flight,
+        # e.g. delivered by the OS process group and forwarded by Meltano
+        target._handle_termination(signal.SIGINT, None)
+
+    with (
+        mock.patch.object(target, "drain_all", side_effect=fake_drain_all),
+        pytest.raises(SystemExit) as exc_info,
+    ):
+        target._handle_termination(signal.SIGTERM, None)
+
+    assert exc_info.value.code == 0
+    assert len(drain_calls) == 1
