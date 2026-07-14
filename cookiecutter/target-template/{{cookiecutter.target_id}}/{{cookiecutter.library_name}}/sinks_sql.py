@@ -37,6 +37,9 @@ class {{ cookiecutter.destination_name }}Connector(SQLConnector):
 
         Args:
             config: The configuration for the connector.
+
+        Returns:
+            A SQLAlchemy URL string.
         """
         return super().get_sqlalchemy_url(config)
 
@@ -75,6 +78,9 @@ class {{ cookiecutter.destination_name }}Sink(SQLSink):
         The default implementation uses a generic SQLAlchemy bulk insert operation.
         This method may optionally be overridden by developers in order to provide
         faster, native bulk uploads.
+
+        Returns:
+            The number of inserted records.
         """
         return super().bulk_insert_records(
             full_table_name=full_table_name,
