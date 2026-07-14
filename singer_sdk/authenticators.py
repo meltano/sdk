@@ -16,6 +16,7 @@ import requests
 import requests.adapters
 import urllib3
 
+from singer_sdk.exceptions import AuthenticationError
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.helpers._util import utc_now
 
@@ -608,7 +609,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         """Update `access_token` along with: `last_refreshed` and `expires_in`.
 
         Raises:
-            RuntimeError: When OAuth login fails.
+            AuthenticationError: When OAuth login fails.
         """
         self.logger.info("Requesting new access token")
         request_time = utc_now()
@@ -632,7 +633,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
                 status_code=status_code,
             )
             msg = f"Failed to update access token (status={status_code or 'Unknown'})"
-            raise RuntimeError(msg) from ex
+            raise AuthenticationError(msg) from ex
 
         self.logger.debug("OAuth authorization attempt was successful")
 
@@ -724,7 +725,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         """Request payload for the OAuth request.
 
         Raises:
-            RuntimeError: If the JWT dependencies are not installed.
+            AuthenticationError: If the JWT dependencies are not installed.
             ValueError: If the private key is not set.
         """
         try:
@@ -733,7 +734,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             from cryptography.hazmat.primitives import serialization  # noqa: PLC0415
         except ModuleNotFoundError as ex:  # pragma: no cover
             msg = "Install singer-sdk[jwt] to use OAuthJWTAuthenticator."
-            raise RuntimeError(msg) from ex
+            raise AuthenticationError(msg) from ex
 
         if not self.private_key:  # pragma: no cover
             msg = "Missing 'private_key' property for OAuth payload."

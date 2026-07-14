@@ -35,6 +35,7 @@ from singer_sdk.authenticators import (
     OAuthJWTAuthenticator,
     SimpleAuthenticator,
 )
+from singer_sdk.exceptions import AuthenticationError
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.streams.rest import RESTStream
 
@@ -247,7 +248,7 @@ def test_oauth_authenticator_handle_error(
         status_code=401,
     )
     with (
-        pytest.raises(RuntimeError, match="Failed to update access token"),
+        pytest.raises(AuthenticationError, match="Failed to update access token"),
         caplog.at_level(logging.ERROR),
     ):
         authenticator.update_access_token()
@@ -899,8 +900,8 @@ def test_oauth_authenticator_does_not_retry_client_errors(
         auth_endpoint="https://example.com/oauth",
     )
 
-    # Expect RuntimeError to be raised (existing error handling)
-    with pytest.raises(RuntimeError, match="Failed to update access token"):
+    # Expect AuthenticationError to be raised (existing error handling)
+    with pytest.raises(AuthenticationError, match="Failed to update access token"):
         authenticator.update_access_token()
 
     # Verify only 1 request was made (no retries for non-429 4xx)
@@ -930,9 +931,9 @@ def test_oauth_authenticator_fails_after_max_retries(rest_tap: Tap):
         auth_endpoint="https://example.com/oauth",
     )
 
-    # Expect RuntimeError after max retries exhausted
+    # Expect AuthenticationError after max retries exhausted
     with pytest.raises(
-        RuntimeError,
+        AuthenticationError,
         match=r"Failed to update access token \(status=503\)",
     ):
         authenticator.update_access_token()
