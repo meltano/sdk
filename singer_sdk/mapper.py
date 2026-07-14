@@ -271,7 +271,7 @@ class _MapperEval(simpleeval.EvalWithCompoundTypes):
     @override
     def _eval(self, node: ast.AST) -> t.Any:
         try:
-            handler = self.nodes[type(node)]  # ty:ignore[invalid-argument-type, not-subscriptable]
+            handler = self.nodes[type(node)]  # ty:ignore[not-subscriptable]
         except KeyError:
             msg = f"Sorry, {type(node).__name__} is not available in this evaluator"
             raise simpleeval.FeatureNotAvailable(msg) from None
@@ -793,13 +793,18 @@ class PluginMapper:
             catalog: TODO
         """
         for catalog_entry in catalog.streams:
+            stream_name = catalog_entry.stream or catalog_entry.tap_stream_id
+            schema = catalog_entry.schema.to_dict()
+            mask = catalog_entry.metadata.resolve_selection()
+
+            # Unselected streams keep their full schema so they still have a
+            # mapper if later force-selected (e.g. for a connection test).
+            if mask[()]:
+                schema = get_selected_schema(stream_name, schema, mask)
+
             self.register_raw_stream_schema(
-                catalog_entry.stream or catalog_entry.tap_stream_id,
-                get_selected_schema(
-                    catalog_entry.stream or catalog_entry.tap_stream_id,
-                    catalog_entry.schema.to_dict(),
-                    catalog_entry.metadata.resolve_selection(),
-                ),
+                stream_name,
+                schema,
                 catalog_entry.key_properties,
             )
 

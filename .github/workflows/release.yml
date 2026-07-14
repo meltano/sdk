@@ -18,7 +18,7 @@ jobs:
     permissions:
       contents: read
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         fetch-depth: 0
         persist-credentials: false
@@ -40,7 +40,7 @@ jobs:
       with:
         name: Packages
         path: dist
-    - uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+    - uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
       id: attest
       with:
         subject-path: "./dist/singer_sdk*"

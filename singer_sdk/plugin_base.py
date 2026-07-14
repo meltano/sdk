@@ -283,6 +283,7 @@ class PluginBase(abc.ABC):
         self.__initialized_at = int(time.time() * 1000)
 
         # Signal handling
+        self._is_terminating = False
         self._setup_signal_handlers()
 
     def _setup_signal_handlers(self) -> None:  # pragma: no cover
@@ -483,7 +484,7 @@ class PluginBase(abc.ABC):
 
     def _handle_termination(  # pragma: no cover
         self,
-        signum: int,  # noqa: ARG002
+        signum: int,
         frame: FrameType | None,  # noqa: ARG002
     ) -> None:
         """Handle termination signal.
@@ -492,6 +493,20 @@ class PluginBase(abc.ABC):
             signum: Signal number.
             frame: Frame.
         """
+        if self._is_terminating:
+            # Duplicate signal, e.g. delivered both directly by the OS and
+            # forwarded by an orchestrator such as Meltano. Let the in-flight
+            # shutdown finish.
+            self.logger.debug(
+                "Termination signal %s received while shutdown already in progress",
+                signum,
+            )
+            return
+        self._is_terminating = True
+        self._terminate()
+
+    def _terminate(self) -> t.NoReturn:
+        """Exit after a graceful shutdown."""
         self.logger.info("Gracefully shutting down...")
         sys.exit(0)
 

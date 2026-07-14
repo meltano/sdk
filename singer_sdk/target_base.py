@@ -515,12 +515,12 @@ class Target(BaseSingerReader, abc.ABC):
         self._drain_all(self._sinks_to_clear, 1)
         if is_endofpipe:
             for sink in self._sinks_to_clear:
-                sink.clean_up()
+                sink._clean_up()  # ruff:ignore[private-member-access]
         self._sinks_to_clear = []
         self._drain_all(self._sinks_active.values(), self.max_parallelism)
         if is_endofpipe:
             for sink in self._sinks_active.values():
-                sink.clean_up()
+                sink._clean_up()  # ruff:ignore[private-member-access]
 
         if self._latest_state:
             self._write_state_message(copy.deepcopy(self._latest_state))
@@ -581,6 +581,12 @@ class Target(BaseSingerReader, abc.ABC):
             signum: Signal number.
             frame: Frame object.
         """
+        if self._is_terminating:
+            # Duplicate signal, e.g. delivered both directly by the OS and
+            # forwarded by an orchestrator such as Meltano. Let the in-flight
+            # drain finish.
+            return
+        self._is_terminating = True
         self.logger.info(
             "Received termination signal %d, draining all sinks...",
             signum,
@@ -588,7 +594,7 @@ class Target(BaseSingerReader, abc.ABC):
         try:
             self.drain_all(is_endofpipe=True)
         finally:
-            super()._handle_termination(signum, frame)
+            self._terminate()
 
     @classmethod
     @override

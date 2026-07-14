@@ -84,6 +84,7 @@ class SQLStream(Stream, abc.ABC):
         return self._singer_catalog_entry.metadata
 
     @cached_property
+    @override
     def schema(self) -> dict:
         """JSON Schema dictionary.
 

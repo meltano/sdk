@@ -30,12 +30,12 @@ jobs:
       NOXSESSION: api
     steps:
     - name: Check out the repository
-      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         fetch-depth: 0
         persist-credentials: false
 
-    - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+    - uses: astral-sh/setup-uv@f98e06938123ccabd21905ea5d0069192241f9f1 # v8.3.1
       with:
         cache-suffix: api-changes
         version: ${{ env.UV_VERSION }}
@@ -51,11 +51,11 @@ jobs:
       env:
         GIT_REF: ${{ github.event.pull_request.base.sha }}
       run: |
-        echo "ref=${GIT_REF}" >> $GITHUB_OUTPUT
+        echo "ref=${GIT_REF}" >> "$GITHUB_OUTPUT"
 
     # Check API against the latest commit on the base branch
     - name: Run Nox
       run: |
-        nox -- ${STEPS_SET_REF_OUTPUTS_REF}
+        nox -- "${STEPS_SET_REF_OUTPUTS_REF}"
       env:
         STEPS_SET_REF_OUTPUTS_REF: ${{ steps.set-ref.outputs.ref }}
