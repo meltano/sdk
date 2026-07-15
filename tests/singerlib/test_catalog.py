@@ -9,6 +9,7 @@ from singer import (
     CatalogEntry,
     Metadata,
     MetadataMapping,
+    Schema,
     SelectionMask,
     StreamMetadata,
 )
@@ -186,7 +187,6 @@ def test_catalog_parsing():
     assert test_stream is not None
     assert test_stream.tap_stream_id == "test"
     assert catalog["test"].metadata.to_list() == catalog_dict["streams"][0]["metadata"]
-    assert catalog["test"].tap_stream_id == catalog_dict["streams"][0]["tap_stream_id"]
     assert catalog["test"].schema.to_dict() == {"type": "object"}
     assert catalog.to_dict() == catalog_dict
 
@@ -198,6 +198,18 @@ def test_catalog_parsing():
     entry = CatalogEntry.from_dict(new)
     catalog.add_stream(entry)
     assert catalog.get_stream("new") == entry
+
+
+def test_catalog_from_entries():
+    entries = [
+        CatalogEntry(tap_stream_id="a", metadata=MetadataMapping(), schema=Schema()),
+        CatalogEntry(tap_stream_id="b", metadata=MetadataMapping(), schema=Schema()),
+    ]
+    catalog = Catalog.from_entries(entries)
+
+    assert list(catalog) == ["a", "b"]
+    assert catalog["a"] is entries[0]
+    assert catalog["b"] is entries[1]
 
 
 @pytest.mark.parametrize(

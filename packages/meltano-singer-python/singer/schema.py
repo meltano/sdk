@@ -53,7 +53,7 @@ STANDARD_KEYS = [
 ]
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, repr=False)
 class Schema:
     """Object model for JSON Schema.
 

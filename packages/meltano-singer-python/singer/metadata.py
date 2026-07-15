@@ -82,6 +82,8 @@ def write(
 ) -> CompiledMetadata:
     """Set a metadata key for a breadcrumb.
 
+    Creates the breadcrumb entry if it does not already exist.
+
     Args:
         compiled_metadata: A compiled metadata mapping.
         breadcrumb: The breadcrumb tuple.
@@ -97,9 +99,11 @@ def write(
     if val is None:
         msg = "Cannot write a None value"
         raise ValueError(msg)
+
     breadcrumb_metadata = compiled_metadata.get(breadcrumb, {})
     breadcrumb_metadata[k] = val
     compiled_metadata[breadcrumb] = breadcrumb_metadata
+
     return compiled_metadata
 
 

@@ -14,6 +14,7 @@ from singer.json import deserialize_json
 from singer.schema import Schema
 
 if t.TYPE_CHECKING:
+    from collections.abc import Iterable
     from os import PathLike
 
     if sys.version_info >= (3, 11):
@@ -49,7 +50,7 @@ class SelectionMask(dict[Breadcrumb, bool]):  # noqa: FURB189
         return self[breadcrumb[:-2]] if len(breadcrumb) >= 2 else True  # noqa: PLR2004
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, repr=False)
 class Metadata:
     """Base stream or property metadata."""
 
@@ -63,6 +64,8 @@ class Metadata:
     inclusion: InclusionType | None = None
     selected: bool | None = None
     selected_by_default: bool | None = None
+    datatype: str | None = None
+    sql_datatype: str | None = None
 
     @classmethod
     def from_dict(cls, value: dict[str, t.Any]) -> Self:
@@ -106,6 +109,9 @@ class StreamMetadata(Metadata):
     forced_replication_method: str | None = None
     valid_replication_keys: list[str] | None = None
     schema_name: str | None = None
+    database_name: str | None = None
+    row_count: int | None = None
+    is_view: bool | None = None
 
 
 AnyMetadata: t.TypeAlias = Metadata | StreamMetadata
@@ -425,6 +431,21 @@ class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
         instance = cls()
         for stream in data.get("streams", []):
             entry = CatalogEntry.from_dict(stream)
+            instance[entry.tap_stream_id] = entry
+        return instance
+
+    @classmethod
+    def from_entries(cls: type[Self], entries: Iterable[CatalogEntry]) -> Self:
+        """Create a catalog from an iterable of stream entries.
+
+        Args:
+            entries: The catalog entries.
+
+        Returns:
+            A catalog.
+        """
+        instance = cls()
+        for entry in entries:
             instance[entry.tap_stream_id] = entry
         return instance
 
