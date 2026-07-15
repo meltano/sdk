@@ -77,6 +77,7 @@ def test_countries_to_csv(
     target.max_parallelism = 1
 
     caplog.set_level(logging.ERROR, "singer_sdk.metrics")
+    caplog.set_level(logging.ERROR, "singer.metrics")
 
     with caplog.at_level(logging.INFO):
         tap_stdout, _, target_stdout, _ = tap_to_target_sync_test(tap, target)
@@ -111,6 +112,7 @@ def test_countries_to_csv_mapped(
     mapper = StreamTransform(config=COUNTRIES_STREAM_MAPS_CONFIG)
 
     caplog.set_level(logging.ERROR, "singer_sdk.metrics")
+    caplog.set_level(logging.ERROR, "singer.metrics")
 
     tap_io = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
     with redirect_stdout(tap_io), caplog.at_level(logging.INFO):
@@ -152,6 +154,7 @@ def test_fake_people_to_csv(
     target.max_parallelism = 1
 
     caplog.set_level(logging.ERROR, "singer_sdk.metrics")
+    caplog.set_level(logging.ERROR, "singer.metrics")
 
     with caplog.at_level(logging.INFO):
         tap_stdout, _, target_stdout, _ = tap_to_target_sync_test(tap, target)
