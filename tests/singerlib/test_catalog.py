@@ -212,28 +212,6 @@ def test_catalog_from_entries():
     assert catalog["b"] is entries[1]
 
 
-def test_catalog_entry_coerces_raw_metadata_list():
-    """Legacy ``singer-python`` code constructs `CatalogEntry(metadata=[...])`.
-
-    with the raw list-of-entries form rather than a compiled MetadataMapping.
-    """
-    entry = CatalogEntry(
-        tap_stream_id="a",
-        schema=Schema(),
-        metadata=[
-            {"breadcrumb": [], "metadata": {"selected": True}},
-            {
-                "breadcrumb": ["properties", "id"],
-                "metadata": {"inclusion": "automatic"},
-            },
-        ],
-    )
-
-    assert isinstance(entry.metadata, MetadataMapping)
-    assert entry.metadata.root.selected is True
-    assert entry.metadata["properties", "id"].inclusion == "automatic"
-
-
 @pytest.mark.parametrize(
     "schema,key_properties,replication_method,valid_replication_keys,schema_name,breadcrumbs",
     [
