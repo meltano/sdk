@@ -331,6 +331,17 @@ class CatalogEntry:
     stream_alias: str | None = None
     replication_method: str | None = None
 
+    def __post_init__(self) -> None:
+        """Coerce a raw metadata list into a :class:`MetadataMapping`.
+
+        Legacy ``singer-python`` code (and tests written against it)
+        constructs ``CatalogEntry(metadata=[{"breadcrumb": [...], ...}, ...])``
+        directly, passing the raw list-of-entries form rather than a
+        compiled mapping.
+        """
+        if isinstance(self.metadata, list):  # type: ignore[unreachable]
+            self.metadata = MetadataMapping.from_iterable(self.metadata)  # type: ignore[unreachable]
+
     @classmethod
     def from_dict(cls: type[CatalogEntry], stream: dict[str, t.Any]) -> CatalogEntry:
         """Create a catalog entry from a dictionary.
