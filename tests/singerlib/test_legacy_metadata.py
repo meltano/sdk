@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import singer.metadata as metadata_
+from singer.catalog import CatalogEntry, Metadata, MetadataMapping, StreamMetadata
 
 
 def test_to_map_and_to_list_round_trip():
@@ -65,3 +66,61 @@ def test_get_standard_metadata():
 
 def test_get_standard_metadata_no_schema():
     assert metadata_.get_standard_metadata() == []
+
+
+def test_to_map_accepts_metadata_mapping():
+    """`CatalogEntry.metadata` is a `MetadataMapping`, not the raw legacy list.
+
+    Legacy taps that call `metadata.to_map(catalog_entry.metadata)` (as
+    `pipelinewise-singer-python` callers do) must keep working.
+    """
+    mapping = MetadataMapping()
+    mapping[()] = StreamMetadata(
+        table_key_properties=["id"],
+        replication_method="INCREMENTAL",
+    )
+    mapping["properties", "id"] = Metadata(inclusion=Metadata.InclusionType.AUTOMATIC)
+
+    compiled = metadata_.to_map(mapping)
+
+    assert compiled[()]["table-key-properties"] == ["id"]
+    assert compiled[()]["replication-method"] == "INCREMENTAL"
+    assert compiled["properties", "id"]["inclusion"] == "automatic"
+
+
+def test_to_map_is_idempotent_on_already_compiled_map():
+    compiled_once = metadata_.to_map([
+        {"breadcrumb": [], "metadata": {"selected": True}},
+    ])
+    compiled_twice = metadata_.to_map(compiled_once)
+    assert compiled_twice == compiled_once
+
+
+def test_replication_method_and_view_key_properties_round_trip():
+    """These two keys must survive a Catalog.load()-style round trip.
+
+    They previously had no dataclass field on `StreamMetadata`, so
+    `Metadata.from_dict`/`to_dict` silently dropped them.
+    """
+    entry = CatalogEntry.from_dict({
+        "tap_stream_id": "my_stream",
+        "schema": {"type": "object"},
+        "metadata": [
+            {
+                "breadcrumb": [],
+                "metadata": {
+                    "replication-method": "INCREMENTAL",
+                    "view-key-properties": ["id"],
+                },
+            },
+        ],
+    })
+
+    root = entry.metadata.root
+    assert root.replication_method == "INCREMENTAL"
+    assert root.view_key_properties == ["id"]
+
+    round_tripped = entry.metadata.to_list()
+    compiled = metadata_.to_map(round_tripped)
+    assert compiled[()]["replication-method"] == "INCREMENTAL"
+    assert compiled[()]["view-key-properties"] == ["id"]

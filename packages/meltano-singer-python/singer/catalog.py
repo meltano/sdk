@@ -106,12 +106,14 @@ class StreamMetadata(Metadata):
 
     table_key_properties: t.Sequence[str] | None = None
     replication_key: str | None = None
+    replication_method: str | None = None
     forced_replication_method: str | None = None
     valid_replication_keys: list[str] | None = None
     schema_name: str | None = None
     database_name: str | None = None
     row_count: int | None = None
     is_view: bool | None = None
+    view_key_properties: t.Sequence[str] | None = None
 
 
 AnyMetadata: t.TypeAlias = Metadata | StreamMetadata
@@ -446,7 +448,7 @@ class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
         """
         instance = cls()
         for entry in entries:
-            instance[entry.tap_stream_id] = entry
+            instance.add_stream(entry)
         return instance
 
     def to_dict(self) -> dict[str, t.Any]:

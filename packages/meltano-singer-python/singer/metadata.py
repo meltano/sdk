@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import typing as t
 from collections import defaultdict
+from collections.abc import Mapping
 
 __all__ = [
     "delete",
@@ -27,6 +28,10 @@ __all__ = [
 Breadcrumb = tuple[str, ...]
 CompiledMetadata = dict[Breadcrumb, dict[str, t.Any]]
 
+#: Anything with breadcrumb keys and either raw dicts or objects exposing
+#: ``to_dict()`` as values, e.g. a :class:`singer.catalog.MetadataMapping`.
+_CompiledMetadataLike = Mapping[Breadcrumb, t.Any]
+
 
 def new() -> CompiledMetadata:
     """Create a new, empty compiled metadata mapping.
@@ -37,8 +42,16 @@ def new() -> CompiledMetadata:
     return defaultdict(dict)
 
 
-def to_map(raw_metadata: t.Iterable[dict[str, t.Any]]) -> CompiledMetadata:
-    """Compile a list of metadata entries into a map keyed by breadcrumb.
+def to_map(
+    raw_metadata: t.Iterable[dict[str, t.Any]] | _CompiledMetadataLike,
+) -> CompiledMetadata:
+    """Compile metadata entries into a map keyed by breadcrumb.
+
+    Accepts the legacy list-of-entries form (``[{"breadcrumb": [...],
+    "metadata": {...}}, ...]``), as well as anything already keyed by
+    breadcrumb, such as an already-compiled mapping or a
+    :class:`singer.catalog.MetadataMapping` — in the latter case, each value
+    is converted to a raw dictionary via its ``to_dict()`` method.
 
     Args:
         raw_metadata: Metadata entries as found in a catalog.
@@ -46,7 +59,16 @@ def to_map(raw_metadata: t.Iterable[dict[str, t.Any]]) -> CompiledMetadata:
     Returns:
         A compiled metadata mapping.
     """
+    if isinstance(raw_metadata, Mapping):
+        return _compile_mapping(t.cast("_CompiledMetadataLike", raw_metadata))
     return {tuple(md["breadcrumb"]): md["metadata"] for md in raw_metadata}
+
+
+def _compile_mapping(mapping: _CompiledMetadataLike) -> CompiledMetadata:
+    return {
+        breadcrumb: (entry.to_dict() if hasattr(entry, "to_dict") else entry)
+        for breadcrumb, entry in mapping.items()
+    }
 
 
 def to_list(compiled_metadata: CompiledMetadata) -> list[dict[str, t.Any]]:
