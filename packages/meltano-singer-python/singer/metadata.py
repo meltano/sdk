@@ -12,7 +12,6 @@ For an object-oriented interface, see
 from __future__ import annotations
 
 import typing as t
-from collections import defaultdict
 from collections.abc import Mapping
 
 __all__ = [
@@ -39,7 +38,7 @@ def new() -> CompiledMetadata:
     Returns:
         An empty compiled metadata mapping.
     """
-    return defaultdict(dict)
+    return {}
 
 
 def to_map(
@@ -180,9 +179,7 @@ def get_standard_metadata(
         if schema_name:
             mdata = write(mdata, (), "schema-name", schema_name)
         for field_name in schema.get("properties", {}):
-            if (key_properties and field_name in key_properties) or (
-                valid_replication_keys and field_name in valid_replication_keys
-            ):
+            if key_properties and field_name in key_properties:
                 inclusion = "automatic"
             else:
                 inclusion = "available"

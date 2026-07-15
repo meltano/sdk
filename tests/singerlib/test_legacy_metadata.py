@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import singer.metadata as metadata_
 from singer.catalog import CatalogEntry, Metadata, MetadataMapping, StreamMetadata
 
@@ -20,6 +22,20 @@ def test_to_map_and_to_list_round_trip():
 
     round_tripped = metadata_.to_list(compiled)
     assert {tuple(m["breadcrumb"]): m["metadata"] for m in round_tripped} == compiled
+
+
+def test_new_does_not_autovivify():
+    """`new()` matches upstream `{}`, not a defaultdict.
+
+    A defaultdict would silently create entries on access, e.g. via
+    `breadcrumb in compiled` checks or plain indexing, which upstream
+    singer-python's `metadata.new()` never did.
+    """
+    compiled = metadata_.new()
+    assert compiled == {}
+    with pytest.raises(KeyError):
+        compiled[()]
+    assert compiled == {}
 
 
 def test_write_and_get():
@@ -59,8 +75,10 @@ def test_get_standard_metadata():
     assert compiled[()]["inclusion"] == "available"
     assert compiled[()]["schema-name"] == "my_stream"
 
+    # Only key_properties are marked automatic, matching upstream
+    # singer-python -- valid_replication_keys are not.
     assert compiled["properties", "id"]["inclusion"] == "automatic"
-    assert compiled["properties", "updated_at"]["inclusion"] == "automatic"
+    assert compiled["properties", "updated_at"]["inclusion"] == "available"
     assert compiled["properties", "name"]["inclusion"] == "available"
 
 
