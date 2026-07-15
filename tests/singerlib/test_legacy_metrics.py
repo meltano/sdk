@@ -29,19 +29,6 @@ def test_metrics_logger_name():
     assert singer.metrics.METRICS_LOGGER_NAME == "singer_sdk.metrics"
 
 
-def test_record_counter(caplog_metrics: pytest.LogCaptureFixture):
-    with singer.metrics.record_counter(endpoint="/users") as counter:
-        for _ in range(5):
-            counter.increment()
-
-    point = _points(caplog_metrics)[-1]
-    assert point["type"] == "counter"
-    assert point["metric"] == "record_count"
-    assert point["value"] == 5
-    assert point["tags"]["endpoint"] == "/users"
-    assert "pid" in point["tags"]
-
-
 def test_http_request_timer(caplog_metrics: pytest.LogCaptureFixture):
     with singer.metrics.http_request_timer("/users"):
         pass

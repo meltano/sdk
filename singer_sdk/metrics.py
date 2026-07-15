@@ -22,6 +22,7 @@ from singer.metrics import (
     Timer,
     get_metrics_logger,
     log,
+    record_counter,
 )
 
 __all__ = [
@@ -42,35 +43,6 @@ __all__ = [
     "record_counter",
     "sync_timer",
 ]
-
-
-def record_counter(
-    stream: str | None = None,
-    endpoint: str | None = None,
-    log_interval: float = DEFAULT_LOG_INTERVAL,
-    **tags: t.Any,
-) -> Counter:
-    """Use for counting records retrieved from the source.
-
-    with record_counter() as counter:
-         for record in my_records:
-             # Do something with the record
-             counter.increment()
-
-    Args:
-        stream: The stream name.
-        endpoint: The HTTP endpoint.
-        log_interval: The interval at which to log the count.
-        tags: Tags to add to the measurement.
-
-    Returns:
-        A counter for counting records.
-    """
-    if stream:
-        tags[Tag.STREAM] = stream
-    if endpoint:
-        tags[Tag.ENDPOINT] = endpoint
-    return Counter(Metric.RECORD_COUNT, tags, log_interval=log_interval)
 
 
 def batch_counter(stream: str, **tags: t.Any) -> Counter:
