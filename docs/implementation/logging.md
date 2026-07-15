@@ -24,16 +24,16 @@ This produces logs that look like this:
 2022-12-05 19:46:46,744 | INFO     | my_tap               | Tap has custom mapper. Using 1 provided map(s).
 2022-12-05 19:46:46,745 | INFO     | my_tap               | Beginning full_table sync of 'child' with context: {'parent_id': 1}...
 2022-12-05 19:46:46,745 | INFO     | my_tap               | Tap has custom mapper. Using 1 provided map(s).
-2022-12-05 19:46:46,746 | INFO     | singer_sdk.metrics   | INFO METRIC: {"metric_type": "timer", "metric": "sync_duration", "value": 0.0005319118499755859, "tags": {"stream": "child", "context": {"parent_id": 1}, "status": "succeeded"}}
-2022-12-05 19:46:46,747 | INFO     | singer_sdk.metrics   | INFO METRIC: {"metric_type": "counter", "metric": "record_count", "value": 3, "tags": {"stream": "child", "context": {"parent_id": 1}}}
+2022-12-05 19:46:46,746 | INFO     | singer.metrics       | INFO METRIC: {"metric_type": "timer", "metric": "sync_duration", "value": 0.0005319118499755859, "tags": {"stream": "child", "context": {"parent_id": 1}, "status": "succeeded"}}
+2022-12-05 19:46:46,747 | INFO     | singer.metrics       | INFO METRIC: {"metric_type": "counter", "metric": "record_count", "value": 3, "tags": {"stream": "child", "context": {"parent_id": 1}}}
 2022-12-05 19:46:46,747 | INFO     | my_tap               | Beginning full_table sync of 'child' with context: {'parent_id': 2}...
-2022-12-05 19:46:46,748 | INFO     | singer_sdk.metrics   | INFO METRIC: {"metric_type": "timer", "metric": "sync_duration", "value": 0.0004410743713378906, "tags": {"stream": "child", "context": {"parent_id": 2}, "status": "succeeded"}}
-2022-12-05 19:46:46,748 | INFO     | singer_sdk.metrics   | INFO METRIC: {"metric_type": "counter", "metric": "record_count", "value": 3, "tags": {"stream": "child", "context": {"parent_id": 2}}}
+2022-12-05 19:46:46,748 | INFO     | singer.metrics       | INFO METRIC: {"metric_type": "timer", "metric": "sync_duration", "value": 0.0004410743713378906, "tags": {"stream": "child", "context": {"parent_id": 2}, "status": "succeeded"}}
+2022-12-05 19:46:46,748 | INFO     | singer.metrics       | INFO METRIC: {"metric_type": "counter", "metric": "record_count", "value": 3, "tags": {"stream": "child", "context": {"parent_id": 2}}}
 2022-12-05 19:46:46,749 | INFO     | my_tap               | Beginning full_table sync of 'child' with context: {'parent_id': 3}...
-2022-12-05 19:46:46,749 | INFO     | singer_sdk.metrics   | INFO METRIC: {"metric_type": "timer", "metric": "sync_duration", "value": 0.0004508495330810547, "tags": {"stream": "child", "context": {"parent_id": 3}, "status": "succeeded"}}
-2022-12-05 19:46:46,750 | INFO     | singer_sdk.metrics   | INFO METRIC: {"metric_type": "counter", "metric": "record_count", "value": 3, "tags": {"stream": "child", "context": {"parent_id": 3}}}
-2022-12-05 19:46:46,750 | INFO     | singer_sdk.metrics   | INFO METRIC: {"metric_type": "timer", "metric": "sync_duration", "value": 0.0052759647369384766, "tags": {"stream": "my_stream", "context": {}, "status": "succeeded"}}
-2022-12-05 19:46:46,750 | INFO     | singer_sdk.metrics   | INFO METRIC: {"metric_type": "counter", "metric": "record_count", "value": 3, "tags": {"stream": "my_stream", "context": {}}}
+2022-12-05 19:46:46,749 | INFO     | singer.metrics       | INFO METRIC: {"metric_type": "timer", "metric": "sync_duration", "value": 0.0004508495330810547, "tags": {"stream": "child", "context": {"parent_id": 3}, "status": "succeeded"}}
+2022-12-05 19:46:46,750 | INFO     | singer.metrics       | INFO METRIC: {"metric_type": "counter", "metric": "record_count", "value": 3, "tags": {"stream": "child", "context": {"parent_id": 3}}}
+2022-12-05 19:46:46,750 | INFO     | singer.metrics       | INFO METRIC: {"metric_type": "timer", "metric": "sync_duration", "value": 0.0052759647369384766, "tags": {"stream": "my_stream", "context": {}, "status": "succeeded"}}
+2022-12-05 19:46:46,750 | INFO     | singer.metrics       | INFO METRIC: {"metric_type": "counter", "metric": "record_count", "value": 3, "tags": {"stream": "my_stream", "context": {}}}
 ```
 
 To use a different log format, see the [custom logging configuration](#custom-logging-configuration) section below.
@@ -112,7 +112,7 @@ Example structured exception output:
 
 ### Metrics logging
 
-The Singer SDK provides a logger named `singer_sdk.metrics` for logging [Singer metrics](./metrics.md). Metric log records contain an extra field `point` which is a dictionary containing the metric data. The `point` field is formatted as JSON by default.
+The Singer SDK provides a logger named `singer.metrics` for logging [Singer metrics](./metrics.md). Metric log records contain an extra field `point` which is a dictionary containing the metric data. The `point` field is formatted as JSON by default.
 
 To send metrics to a file in JSON format, you could use the following config:
 
@@ -132,11 +132,11 @@ handlers:
 # Optionally, you can exclude metrics
 filters:
   remove_events_stream_metrics:
-    (): singer_sdk.metrics.MetricExclusionFilter
+    (): singer.metrics.MetricExclusionFilter
     tags:
       stream: events
 loggers:
-  singer_sdk.metrics:
+  singer.metrics:
     level: INFO
     handlers: [ metrics ]
     filters: [ remove_events_stream_metrics ]
