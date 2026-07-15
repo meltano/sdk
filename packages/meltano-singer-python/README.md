@@ -29,8 +29,6 @@ Supported legacy API surface:
 - `singer.bookmarks` (also re-exported at the top level): `get_bookmark`,
   `write_bookmark`, `clear_bookmark`, `set_currently_syncing`, `get_currently_syncing`,
   offset helpers
-- `singer.metadata`: `new`, `to_map`, `to_list`, `write`, `get`, `delete`,
-  `get_standard_metadata`
 - `singer.metrics`: `record_counter`, `http_request_timer`, `job_timer`, `Counter`,
   `Timer` (legacy `METRIC: {...}` log lines)
 - `singer.utils`: `now`, `strftime`, `strptime_to_utc`, `load_json`, `check_config`,
@@ -43,6 +41,13 @@ Supported legacy API surface:
 Notable differences from the legacy libraries:
 
 - `singer.transform` / `Transformer` and `parse_message` are **not** provided.
+- The functional `singer.metadata` module (`new`, `to_map`, `to_list`, `write`, `get`,
+  `delete`, `get_standard_metadata`) is **not** provided. `CatalogEntry.metadata` is
+  always a `MetadataMapping`, so read and write metadata through it directly, e.g.
+  `catalog_entry.metadata.root.replication_method` instead of
+  `metadata.to_map(catalog_entry.metadata).get((), {}).get('replication-method')`, and
+  `catalog_entry.metadata['properties', name].inclusion` instead of
+  `metadata.get(md_map, ('properties', name), 'inclusion')`.
 - `utils.parse_args` does not support the deprecated `--properties` flag; use
   `--catalog`.
 - Metric log lines include an additional `pid` tag, and the metrics logger is named
@@ -58,7 +63,7 @@ Logging can be configured through environment variables, in priority order:
    [dictConfig](https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig)
    file. This is the file [Meltano](https://meltano.com) generates for Singer plugins,
    enabling structured JSON logs via `singer.logging.StructuredFormatter`.
-2. `LOGGING_CONF_FILE` — path to an INI
+1. `LOGGING_CONF_FILE` — path to an INI
    [fileConfig](https://docs.python.org/3/library/logging.config.html#logging.config.fileConfig)
    file (pipelinewise-singer-python compatible).
 
