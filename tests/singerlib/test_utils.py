@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 import pytest
 import pytz
 
-from singer_sdk.singerlib import strftime, strptime_to_utc
-from singer_sdk.singerlib.utils import NonUTCDatetimeError
+from singer import strftime, strptime_to_utc
+from singer.utils import NonUTCDatetimeError
 
 
 def test_small_years():

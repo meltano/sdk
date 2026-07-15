@@ -1,31 +1,30 @@
-"""Alias for :mod:`singer.messages`."""
+"""Singer message types and utilities."""
 
 from __future__ import annotations
 
-from singer.messages import (
-    WRITER,
+from .encoding import SimpleSingerWriter as SingerWriter
+from .encoding.base import SingerMessageType
+from .encoding.simple import (
     ActivateVersionMessage,
     Message,
     RecordMessage,
     SchemaMessage,
-    SingerMessageType,
-    SingerWriter,
     StateMessage,
     exclude_null_dict,
-    format_message,
-    write_message,
 )
 
 __all__ = [
-    "WRITER",
     "ActivateVersionMessage",
     "Message",
     "RecordMessage",
     "SchemaMessage",
     "SingerMessageType",
-    "SingerWriter",
     "StateMessage",
     "exclude_null_dict",
     "format_message",
     "write_message",
 ]
+
+WRITER = SingerWriter()
+format_message = WRITER.format_message
+write_message = WRITER.write_message

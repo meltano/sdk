@@ -1,8 +1,4 @@
-"""Low-level Singer components for building taps and targets.
-
-This package is a stable alias for the ``singer`` package from
-``meltano-singer-python``, where the implementation now lives.
-"""
+"""Low-level Singer components for building taps and targets."""
 
 from __future__ import annotations
 

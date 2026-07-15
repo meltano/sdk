@@ -4,7 +4,7 @@ import typing as t
 
 import pytest
 
-from singer_sdk.singerlib import (
+from singer import (
     Catalog,
     CatalogEntry,
     Metadata,
@@ -14,7 +14,7 @@ from singer_sdk.singerlib import (
 )
 
 if t.TYPE_CHECKING:
-    from singer_sdk.singerlib.catalog import Breadcrumb
+    from singer.catalog import Breadcrumb
 
 METADATA_ARRAY = [
     {
