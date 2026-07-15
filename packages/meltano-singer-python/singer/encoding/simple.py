@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 
 from singer.exceptions import InvalidInputLine
 from singer.json import deserialize_json, serialize_json
+from singer.utils import strftime
 
 from .base import GenericSingerReader, GenericSingerWriter, SingerMessageType
 
@@ -49,6 +50,16 @@ class Message:
             A dictionary with the defined message fields.
         """
         return asdict(self, dict_factory=exclude_null_dict)
+
+    def asdict(self) -> dict[str, t.Any]:
+        """Return a dictionary representation of the message.
+
+        This is the legacy ``singer-python`` spelling of :meth:`to_dict`.
+
+        Returns:
+            A dictionary with the defined message fields.
+        """
+        return self.to_dict()
 
     @classmethod
     def from_dict(
@@ -126,6 +137,22 @@ class RecordMessage(Message):
             result["version"] = self.version
         if self.time_extracted is not None:
             result["time_extracted"] = self.time_extracted
+        return result
+
+    @override
+    def asdict(self) -> dict[str, t.Any]:
+        """Return a dictionary representation of the message.
+
+        As in legacy ``singer-python``, ``time_extracted`` is rendered as a
+        string in the Singer canonical UTC format, unlike :meth:`to_dict`,
+        which keeps the :class:`datetime.datetime` object.
+
+        Returns:
+            A dictionary with the defined message fields.
+        """
+        result = self.to_dict()
+        if self.time_extracted is not None:
+            result["time_extracted"] = strftime(self.time_extracted)
         return result
 
     def __post_init__(self) -> None:

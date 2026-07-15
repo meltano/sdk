@@ -9,15 +9,28 @@ import pytest
 import singer
 import singer.messages
 import singer_sdk.singerlib
+import singer_sdk.singerlib.messages
 
 
 @pytest.mark.parametrize(
     "name",
-    sorted(set(singer_sdk.singerlib.__all__) - {"exceptions"}),
+    sorted(
+        set(singer_sdk.singerlib.__all__)
+        # `exceptions` is a distinct alias submodule, not the same object.
+        # `write_message` on `singer` is a delegator to `singer.messages`,
+        # while the shim keeps re-exporting `singer.messages.write_message`
+        # directly, for identity with the underlying writer.
+        - {"exceptions", "write_message"},
+    ),
 )
 def test_top_level_identity(name: str):
     """Every name exported by the shim is the same object as in ``singer``."""
     assert getattr(singer_sdk.singerlib, name) is getattr(singer, name)
+
+
+def test_write_message_delegates():
+    """`singer.write_message` and the shim both reach the same writer."""
+    assert singer_sdk.singerlib.messages.write_message is singer.messages.write_message
 
 
 @pytest.mark.parametrize(

@@ -3,14 +3,18 @@
 from __future__ import annotations
 
 import enum
+import json
 import logging
+import sys
 import typing as t
 from dataclasses import dataclass, fields
+from pathlib import Path
 
+from singer.json import deserialize_json
 from singer.schema import Schema
 
 if t.TYPE_CHECKING:
-    import sys
+    from os import PathLike
 
     if sys.version_info >= (3, 11):
         from typing import Self  # noqa: ICN003
@@ -381,6 +385,29 @@ class CatalogEntry:
 
 class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
     """Singer catalog mapping of stream entries."""
+
+    @classmethod
+    def load(cls: type[Catalog], filename: str | PathLike[str]) -> Catalog:
+        """Load a catalog from a JSON file.
+
+        Numbers are parsed as :class:`decimal.Decimal` to avoid loss of
+        precision.
+
+        Args:
+            filename: Path to the catalog file.
+
+        Returns:
+            A catalog.
+        """
+        return cls.from_dict(deserialize_json(Path(filename).read_text("utf-8")))
+
+    def dump(self, stream: t.IO[str] | None = None) -> None:
+        """Write the catalog to a stream as JSON.
+
+        Args:
+            stream: The stream to write to. Defaults to stdout.
+        """
+        json.dump(self.to_dict(), stream or sys.stdout, indent=2)
 
     @classmethod
     def from_dict(
