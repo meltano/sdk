@@ -2,12 +2,18 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
 import typing as t
 
 import pytest
 import time_machine
 
 from singer_sdk import metrics
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from collections.abc import Callable, Iterable
@@ -18,6 +24,7 @@ class CustomObject:
         self.name = name
         self.value = value
 
+    @override
     def __str__(self) -> str:
         return f"{self.name}={self.value}"
 
@@ -87,9 +94,11 @@ def test_meter():
     pid = os.getpid()
 
     class _MyMeter(metrics.Meter):
+        @override
         def __enter__(self):
             return self
 
+        @override
         def __exit__(self, exc_type, exc_val, exc_tb):
             pass
 
@@ -108,7 +117,35 @@ def test_meter():
     assert metrics.Tag.CONTEXT not in meter.tags
 
 
-def test_record_counter(caplog: pytest.LogCaptureFixture):
+@pytest.mark.parametrize(
+    "stream,endpoint,tags",
+    [
+        pytest.param(
+            None,
+            None,
+            {},
+            id="no_params",
+        ),
+        pytest.param(
+            "test_stream",
+            None,
+            {metrics.Tag.STREAM: "test_stream"},
+            id="with_stream",
+        ),
+        pytest.param(
+            None,
+            "/endpoint",
+            {metrics.Tag.ENDPOINT: "/endpoint"},
+            id="with_endpoint",
+        ),
+    ],
+)
+def test_record_counter(
+    caplog: pytest.LogCaptureFixture,
+    stream: str | None,
+    endpoint: str | None,
+    tags: dict[str, t.Any],
+):
     metrics_logger = logging.getLogger(metrics.METRICS_LOGGER_NAME)
     metrics_logger.propagate = True
 
@@ -117,8 +154,8 @@ def test_record_counter(caplog: pytest.LogCaptureFixture):
     custom_object = CustomObject("test", 1)
 
     with metrics.record_counter(
-        "test_stream",
-        endpoint="test_endpoint",
+        stream=stream,
+        endpoint=endpoint,
         custom_tag="pytest",
         custom_obj=custom_object,
     ) as counter:
@@ -137,18 +174,17 @@ def test_record_counter(caplog: pytest.LogCaptureFixture):
         assert record.levelname == "INFO"
         assert record.msg.startswith("METRIC")
 
-        assert record.args
+        assert isinstance(record.args, tuple)
         assert isinstance(record.args[0], metrics.Point)
 
         point = record.args[0].to_dict()
         assert point["type"] == "counter"
         assert point["metric"] == "record_count"
         assert point["tags"] == {
-            metrics.Tag.STREAM: "test_stream",
-            metrics.Tag.ENDPOINT: "test_endpoint",
             metrics.Tag.PID: pid,
             "custom_tag": "pytest",
             "custom_obj": custom_object,
+            **tags,
         }
 
         total += point["value"]
