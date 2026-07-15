@@ -51,7 +51,7 @@ Notable differences from the legacy libraries:
 - `utils.parse_args` does not support the deprecated `--properties` flag; use
   `--catalog`.
 - Metric log lines include an additional `pid` tag, and the metrics logger is named
-  `singer.metrics`.
+  `singer_sdk.metrics`.
 - Message serialization is Decimal-safe by default (`simplejson`), preserving values
   like `1e-38` exactly.
 

@@ -27,7 +27,7 @@ if t.TYPE_CHECKING:
         from typing_extensions import Self
 
 DEFAULT_LOG_INTERVAL = 60.0
-METRICS_LOGGER_NAME = __name__
+METRICS_LOGGER_NAME = "singer_sdk.metrics"
 
 _TVal = t.TypeVar("_TVal")
 

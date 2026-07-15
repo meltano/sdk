@@ -26,7 +26,7 @@ def _points(caplog: pytest.LogCaptureFixture) -> list[dict]:
 
 
 def test_metrics_logger_name():
-    assert singer.metrics.METRICS_LOGGER_NAME == "singer.metrics"
+    assert singer.metrics.METRICS_LOGGER_NAME == "singer_sdk.metrics"
 
 
 def test_record_counter(caplog_metrics: pytest.LogCaptureFixture):
