@@ -1083,12 +1083,17 @@ class SQLConnector:  # noqa: PLR0904
         self,
         *,
         exclude_schemas: t.Sequence[str] = (),
+        discover_views: bool = True,
+        discover_materialized_views: bool = True,
         reflect_indices: bool = True,
     ) -> list[dict]:
         """Return a list of catalog entries from discovery.
 
         Args:
             exclude_schemas: A list of schema names to exclude from discovery.
+            discover_views: Whether to include database views in discovery.
+            discover_materialized_views: Whether to include database materialized views
+                in discovery.
             reflect_indices: Whether to reflect indices to detect potential primary
                 keys.
 
@@ -1098,10 +1103,12 @@ class SQLConnector:  # noqa: PLR0904
         result: list[dict] = []
         engine = self._engine
         inspected = sa.inspect(engine)
-        object_kinds = (
-            (reflection.ObjectKind.TABLE, False),
-            (reflection.ObjectKind.ANY_VIEW, True),
-        )
+        object_kinds = [(reflection.ObjectKind.TABLE, False)]
+        if discover_views:
+            object_kinds.append((reflection.ObjectKind.VIEW, True))
+        if discover_materialized_views:
+            object_kinds.append((reflection.ObjectKind.MATERIALIZED_VIEW, True))
+
         for schema_name in self.get_schema_names(engine, inspected):
             if schema_name in exclude_schemas:
                 continue
