@@ -84,12 +84,14 @@ def write_schema(
     """
     if isinstance(key_properties, str):
         key_properties = [key_properties]
+    if isinstance(bookmark_properties, str):
+        bookmark_properties = [bookmark_properties]
     write_message(
         SchemaMessage(
             stream=(stream_alias or stream_name),
             schema=schema,
             key_properties=key_properties,
-            bookmark_properties=bookmark_properties,  # type: ignore[arg-type]
+            bookmark_properties=bookmark_properties,
         ),
     )
 
