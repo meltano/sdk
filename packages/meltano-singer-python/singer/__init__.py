@@ -24,6 +24,7 @@ from singer._dropin import (
     write_state,
     write_version,
 )
+from singer.batch import BaseBatchFileEncoding, BatchMessage
 from singer.bookmarks import (
     clear_bookmark,
     clear_offset,
@@ -59,6 +60,8 @@ from singer.utils import strftime, strptime_to_utc
 
 __all__ = [
     "ActivateVersionMessage",
+    "BaseBatchFileEncoding",
+    "BatchMessage",
     "Catalog",
     "CatalogEntry",
     "Message",
