@@ -130,11 +130,7 @@ class RecordMessage(Message):
         if self.version is not None:
             result["version"] = self.version
         if self.time_extracted is not None:
-            dt = self.time_extracted
-            result["time_extracted"] = (
-                f"{dt.year:04d}-{dt.month:02d}-{dt.day:02d}T"
-                f"{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}Z"
-            )
+            result["time_extracted"] = self.time_extracted.isoformat()[:19] + "Z"
         return result
 
     def __post_init__(self) -> None:
