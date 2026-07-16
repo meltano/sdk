@@ -13,6 +13,11 @@ from pathlib import Path
 from singer.json import deserialize_json
 from singer.schema import Schema
 
+if sys.version_info >= (3, 12):
+    from typing import override  # ruff:ignore[banned-import-from]
+else:
+    from typing_extensions import override
+
 if t.TYPE_CHECKING:
     from collections.abc import Iterable
     from os import PathLike
@@ -123,10 +128,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
     """Stream metadata mapping."""
 
     @classmethod
-    def from_iterable(
-        cls: type[MetadataMapping],
-        iterable: t.Iterable[dict[str, t.Any]],
-    ) -> MetadataMapping:
+    def from_iterable(cls: type[Self], iterable: t.Iterable[dict[str, t.Any]]) -> Self:
         """Create a metadata mapping from an iterable of metadata dictionaries.
 
         Args:
@@ -168,14 +170,24 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         self[breadcrumb] = Metadata() if breadcrumb else StreamMetadata()
         return self[breadcrumb]
 
+    @t.overload
+    def __getitem__(self, key: tuple[()], /) -> StreamMetadata: ...
+
+    @t.overload
+    def __getitem__(self, key: Breadcrumb, /) -> Metadata: ...
+
+    @override
+    def __getitem__(self, key: Breadcrumb, /) -> AnyMetadata:
+        return super().__getitem__(key)
+
     @property
     def root(self) -> StreamMetadata:
         """Stream (root) metadata from this mapping."""
-        return self[()]  # type: ignore[return-value]  # ty:ignore[invalid-return-type]
+        return self[()]
 
     @classmethod
     def get_standard_metadata(
-        cls: type[MetadataMapping],
+        cls: type[Self],
         *,
         schema: dict[str, t.Any] | None = None,
         schema_name: str | None = None,
@@ -183,7 +195,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         valid_replication_keys: list[str] | None = None,
         replication_method: str | None = None,
         selected_by_default: bool | None = None,
-    ) -> MetadataMapping:
+    ) -> Self:
         """Get default metadata for a stream.
 
         Args:
@@ -332,7 +344,7 @@ class CatalogEntry:
     replication_method: str | None = None
 
     @classmethod
-    def from_dict(cls: type[CatalogEntry], stream: dict[str, t.Any]) -> CatalogEntry:
+    def from_dict(cls: type[Self], stream: dict[str, t.Any]) -> Self:
         """Create a catalog entry from a dictionary.
 
         Args:
@@ -395,7 +407,7 @@ class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
     """Singer catalog mapping of stream entries."""
 
     @classmethod
-    def load(cls: type[Catalog], filename: str | PathLike[str]) -> Catalog:
+    def load(cls: type[Self], filename: str | PathLike[str]) -> Self:
         """Load a catalog from a JSON file.
 
         Numbers are parsed as :class:`decimal.Decimal` to avoid loss of
@@ -418,10 +430,7 @@ class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
         json.dump(self.to_dict(), stream or sys.stdout, indent=2)
 
     @classmethod
-    def from_dict(
-        cls: type[Catalog],
-        data: dict[str, list[dict[str, t.Any]]],
-    ) -> Catalog:
+    def from_dict(cls: type[Self], data: dict[str, list[dict[str, t.Any]]]) -> Self:
         """Create a catalog from a dictionary.
 
         Args:
