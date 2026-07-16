@@ -30,7 +30,7 @@ def test_metrics_logger_name():
 
 
 def test_http_request_timer(caplog_metrics: pytest.LogCaptureFixture):
-    with singer.metrics.http_request_timer("/users"):
+    with singer.metrics.http_request_timer(endpoint="/users"):
         pass
 
     point = _points(caplog_metrics)[-1]
@@ -42,7 +42,7 @@ def test_http_request_timer(caplog_metrics: pytest.LogCaptureFixture):
 
 def test_job_timer_failed(caplog_metrics: pytest.LogCaptureFixture):
     msg = "boom"
-    with pytest.raises(RuntimeError), singer.metrics.job_timer("export"):
+    with pytest.raises(RuntimeError), singer.metrics.job_timer(job_type="export"):
         raise RuntimeError(msg)
 
     point = _points(caplog_metrics)[-1]
