@@ -4,13 +4,19 @@ from __future__ import annotations
 
 import enum
 import logging
+import sys
 import typing as t
 from dataclasses import dataclass, field, fields
 
 from singer_sdk.singerlib.schema import Schema
 
+if sys.version_info >= (3, 12):
+    from typing import override  # ruff:ignore[banned-import-from]
+else:
+    from typing_extensions import override
+
+
 if t.TYPE_CHECKING:
-    import sys
     from collections.abc import Iterable
 
     if sys.version_info >= (3, 11):
@@ -154,10 +160,20 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         self[breadcrumb] = Metadata() if breadcrumb else StreamMetadata()
         return self[breadcrumb]
 
+    @t.overload
+    def __getitem__(self, breadcrumb: tuple[()]) -> StreamMetadata: ...
+
+    @t.overload
+    def __getitem__(self, breadcrumb: Breadcrumb) -> Metadata: ...
+
+    @override
+    def __getitem__(self, breadcrumb: Breadcrumb) -> AnyMetadata:
+        return super().__getitem__(breadcrumb)
+
     @property
     def root(self) -> StreamMetadata:
         """Stream (root) metadata from this mapping."""
-        return self[()]  # type: ignore[return-value]  # ty:ignore[invalid-return-type]
+        return self[()]
 
     @classmethod
     def get_standard_metadata(
