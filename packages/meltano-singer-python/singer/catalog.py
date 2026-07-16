@@ -368,15 +368,17 @@ class CatalogEntry:
             replication_method=stream.get("replication_method"),
         )
 
-    def to_dict(self) -> dict[str, t.Any]:  # noqa: C901
+    def to_dict(self) -> dict[str, t.Any]:
         """Convert entry to a dictionary.
 
         Returns:
             A dictionary representation of the catalog entry.
         """
         result: dict[str, t.Any] = {}
-        if self.tap_stream_id:
-            result["tap_stream_id"] = self.tap_stream_id
+        result["tap_stream_id"] = self.tap_stream_id
+        result["schema"] = self.schema.to_dict()
+        result["metadata"] = self.metadata.to_list()
+
         if self.database:
             result["database_name"] = self.database
         if self.table:
@@ -387,9 +389,6 @@ class CatalogEntry:
             result["replication_method"] = self.replication_method
         if self.key_properties is not None:
             result["key_properties"] = self.key_properties
-        if self.schema is not None:
-            schema = self.schema.to_dict()  # pylint: disable=no-member
-            result["schema"] = schema
         if self.is_view is not None:
             result["is_view"] = self.is_view
         if self.stream is not None:
@@ -398,8 +397,6 @@ class CatalogEntry:
             result["row_count"] = self.row_count
         if self.stream_alias is not None:
             result["stream_alias"] = self.stream_alias
-        if self.metadata is not None:
-            result["metadata"] = self.metadata.to_list()
         return result
 
 
