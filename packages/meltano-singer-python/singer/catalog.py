@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import enum
-import json
 import logging
 import sys
 import typing as t
@@ -417,14 +416,6 @@ class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
             A catalog.
         """
         return cls.from_dict(deserialize_json(Path(filename).read_text("utf-8")))
-
-    def dump(self, stream: t.IO[str] | None = None) -> None:
-        """Write the catalog to a stream as JSON.
-
-        Args:
-            stream: The stream to write to. Defaults to stdout.
-        """
-        json.dump(self.to_dict(), stream or sys.stdout, indent=2)
 
     @classmethod
     def from_dict(cls: type[Self], data: dict[str, list[dict[str, t.Any]]]) -> Self:
