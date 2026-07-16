@@ -126,6 +126,7 @@ class StreamTransform(InlineMapper):
         self._assert_line_requires(message_dict, requires={"stream", "record"})
 
         stream_id: str = message_dict["stream"]
+        time_extracted = utc_now()
         for stream_map in self.mapper.stream_maps[stream_id]:
             mapped_record = stream_map.transform(message_dict["record"])
             if mapped_record is not None:
@@ -133,7 +134,7 @@ class StreamTransform(InlineMapper):
                     stream=stream_map.stream_alias,
                     record=mapped_record,
                     version=message_dict.get("version"),
-                    time_extracted=utc_now(),
+                    time_extracted=time_extracted,
                 )
 
     @override
