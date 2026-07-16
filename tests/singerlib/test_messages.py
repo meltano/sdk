@@ -8,6 +8,7 @@ import pytest
 from pytz import timezone
 
 import singer_sdk.singerlib as singer
+from singer_sdk.singerlib.json import deserialize_json, serialize_json
 
 UTC = datetime.timezone.utc
 
@@ -106,6 +107,18 @@ def test_record_message_with_version():
         "record": {"id": 1, "name": "test"},
         "version": 1614556800,
     }
+
+
+def test_record_message_serde_roundtrip():
+    record = singer.RecordMessage(
+        stream="test",
+        record={"id": 1, "name": "test"},
+        time_extracted=datetime.datetime(2021, 1, 1, 0, 0, 0, tzinfo=UTC),
+    )
+
+    json_str = serialize_json(record.to_dict())
+    assert "2021-01-01T00:00:00Z" in json_str
+    assert singer.RecordMessage.from_dict(deserialize_json(json_str)) == record
 
 
 def test_schema_message():

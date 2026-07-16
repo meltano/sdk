@@ -20,7 +20,17 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
+if t.TYPE_CHECKING:
+    import builtins
+
+    if sys.version_info >= (3, 11):
+        from typing import Self  # noqa: ICN003
+    else:
+        from typing_extensions import Self
+
 logger = logging.getLogger(__name__)
+
+_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def exclude_null_dict(pairs: list[tuple[str, t.Any]]) -> dict[str, t.Any]:
@@ -51,10 +61,7 @@ class Message:
         return asdict(self, dict_factory=exclude_null_dict)
 
     @classmethod
-    def from_dict(
-        cls: t.Type[Message],  # noqa: UP006
-        data: dict[str, t.Any],
-    ) -> Message:
+    def from_dict(cls: builtins.type[Self], data: dict[str, t.Any]) -> Self:
         """Create an encoding from a dictionary.
 
         Args:
@@ -125,7 +132,7 @@ class RecordMessage(Message):
         if self.version is not None:
             result["version"] = self.version
         if self.time_extracted is not None:
-            result["time_extracted"] = self.time_extracted
+            result["time_extracted"] = self.time_extracted.strftime(_DATETIME_FORMAT)
         return result
 
     def __post_init__(self) -> None:

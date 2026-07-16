@@ -1,10 +1,10 @@
 {"type":"SCHEMA","stream":"parent_incr","schema":{"properties":{"id":{"type":"integer"}},"type":"object"},"key_properties":[]}
 {"type":"SCHEMA","stream":"child_incr","schema":{"properties":{"id":{"type":"integer"},"pid":{"type":"integer"},"updated_at":{"format":"date-time","type":"string"}},"type":"object"},"key_properties":[],"bookmark_properties":["updated_at"]}
-{"type":"RECORD","stream":"child_incr","record":{"id":10,"pid":1,"updated_at":"2021-01-01T00:00:00+00:00"},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"child_incr","record":{"id":10,"pid":1,"updated_at":"2021-01-01T00:00:00+00:00"},"time_extracted":"2022-01-01T00:00:00Z"}
 {"type":"STATE","value":{"bookmarks":{"child_incr":{"partitions":[{"context":{"pid":1},"replication_key":"updated_at","replication_key_value":"2021-01-01T00:00:00+00:00"}]}}}}
-{"type":"RECORD","stream":"parent_incr","record":{"id":1},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"parent_incr","record":{"id":1},"time_extracted":"2022-01-01T00:00:00Z"}
 {"type":"SCHEMA","stream":"child_incr","schema":{"properties":{"id":{"type":"integer"},"pid":{"type":"integer"},"updated_at":{"format":"date-time","type":"string"}},"type":"object"},"key_properties":[],"bookmark_properties":["updated_at"]}
-{"type":"RECORD","stream":"child_incr","record":{"id":20,"pid":2,"updated_at":"2021-02-01T00:00:00+00:00"},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"child_incr","record":{"id":20,"pid":2,"updated_at":"2021-02-01T00:00:00+00:00"},"time_extracted":"2022-01-01T00:00:00Z"}
 {"type":"STATE","value":{"bookmarks":{"child_incr":{"partitions":[{"context":{"pid":1},"replication_key":"updated_at","replication_key_value":"2021-01-01T00:00:00+00:00"},{"context":{"pid":2},"replication_key":"updated_at","replication_key_value":"2021-02-01T00:00:00+00:00"}]}}}}
-{"type":"RECORD","stream":"parent_incr","record":{"id":2},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"parent_incr","record":{"id":2},"time_extracted":"2022-01-01T00:00:00Z"}
 {"type":"STATE","value":{"bookmarks":{"child_incr":{"partitions":[{"context":{"pid":1},"replication_key":"updated_at","replication_key_value":"2021-01-01T00:00:00+00:00"},{"context":{"pid":2},"replication_key":"updated_at","replication_key_value":"2021-02-01T00:00:00+00:00"}]},"parent_incr":{}}}}
