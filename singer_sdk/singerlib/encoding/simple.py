@@ -20,6 +20,14 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
+if t.TYPE_CHECKING:
+    import builtins
+
+    if sys.version_info >= (3, 11):
+        from typing import Self  # noqa: ICN003
+    else:
+        from typing_extensions import Self
+
 logger = logging.getLogger(__name__)
 
 
@@ -51,10 +59,7 @@ class Message:
         return asdict(self, dict_factory=exclude_null_dict)
 
     @classmethod
-    def from_dict(
-        cls: t.Type[Message],  # noqa: UP006
-        data: dict[str, t.Any],
-    ) -> Message:
+    def from_dict(cls: builtins.type[Self], data: dict[str, t.Any]) -> Self:
         """Create an encoding from a dictionary.
 
         Args:
