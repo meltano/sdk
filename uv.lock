@@ -3036,6 +3036,9 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+arrow = [
+    { name = "pyarrow" },
+]
 faker = [
     { name = "faker" },
 ]
@@ -3214,6 +3217,7 @@ requires-dist = [
     { name = "msgspec", marker = "extra == 'msgspec'", specifier = ">=0.19.0" },
     { name = "packaging", specifier = ">=23.1" },
     { name = "paramiko", marker = "extra == 'ssh'", specifier = ">=3.3.0" },
+    { name = "pyarrow", marker = "extra == 'arrow'", specifier = ">=15" },
     { name = "pyarrow", marker = "extra == 'parquet'", specifier = ">=15" },
     { name = "pyjwt", marker = "extra == 'jwt'", specifier = ">=2.4.0" },
     { name = "pytest", marker = "extra == 'testing'", specifier = ">=9.1" },
@@ -3231,7 +3235,7 @@ requires-dist = [
     { name = "universal-pathlib", specifier = ">=0.2.6" },
     { name = "urllib3", specifier = ">=1.26.20" },
 ]
-provides-extras = ["faker", "jwt", "msgspec", "parquet", "s3", "sql", "ssh", "testing"]
+provides-extras = ["arrow", "faker", "jwt", "msgspec", "parquet", "s3", "sql", "ssh", "testing"]
 
 [package.metadata.requires-dev]
 benchmark = [

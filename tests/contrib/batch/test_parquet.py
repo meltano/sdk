@@ -32,6 +32,7 @@ skip_if_no_pyarrow = pytest.mark.skipif(
 )
 
 
+@skip_if_no_pyarrow
 def test_batcher(tmp_path: Path) -> None:
     root = tmp_path.joinpath("batches")
     root.mkdir()

@@ -62,6 +62,10 @@ parquet = [
     "pyarrow>=15",
 ]
 
+arrow = [
+    "pyarrow>=15",
+]
+
 testing = [
     "pytest>=9.1",
 ]
@@ -324,6 +328,7 @@ build-backend = "hatchling.build"
 singer_testing = "singer_sdk.testing.pytest_plugin"
 
 [project.entry-points."singer_sdk.batch_encoders"]
+arrow = "singer_sdk.contrib.batch_encoder_arrow:ArrowBatcher"
 jsonl = "singer_sdk.contrib.batch_encoder_jsonl:JSONLinesBatcher"
 parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
 

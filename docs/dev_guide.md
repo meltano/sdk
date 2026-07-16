@@ -182,8 +182,12 @@ The following [extra features](https://packaging.python.org/en/latest/specificat
 - `faker` - Enables the use of [Faker](https://faker.readthedocs.io/en/master/) in [stream maps](stream_maps.md).
 - `jwt` - Enables the `OAuthJWTAuthenticator` class for JWT (JSON Web Token) authentication.
 - `s3` - Enables AWS S3 as a [BATCH storage](batch.md#the-batch-message).
-- `parquet` - Enables as [BATCH encoding](batch.md#encoding).
 - `testing` - Pytest dependencies required to use the [Tap & Target Testing Framework](testing.md).
+
+### BATCH file format implementations
+
+- `arrow` - Enables Arrow IPC as [BATCH encoding](batch.md#encoding).
+- `parquet` - Enables as [BATCH encoding](batch.md#encoding).
 
 ## Resources
 

@@ -54,7 +54,7 @@ AWS S3
 
 ### `encoding`
 
-The `encoding` field is used to specify the format and compression of the batch files. Currently `jsonl`, `gzip` and `parquet` are supported.
+The `encoding` field is used to specify the format and compression of the batch files. Currently the supported formats are: `jsonl`, `parquet` and `arrow`. GZip (`gzip`) compression is supported for JSONL and Parquet files.
 
 #### JSONL Batch File Format
 
