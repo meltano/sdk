@@ -105,6 +105,7 @@ def test_meter():
     meter = _MyMeter(metrics.Metric.RECORD_COUNT)
 
     assert meter.tags == {metrics.Tag.PID: pid}
+    assert meter.context is None
 
     stream_context = {"parent_id": 1}
     meter.context = stream_context
