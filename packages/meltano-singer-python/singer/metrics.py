@@ -397,37 +397,31 @@ def record_counter(
     return Counter(Metric.RECORD_COUNT, tags, log_interval=log_interval)
 
 
-def http_request_timer(endpoint: str | None) -> Timer:
+def http_request_timer(**tags: t.Any) -> Timer:
     """Use for timing HTTP requests to an endpoint.
 
-    with http_request_timer("/users") as timer:
+    with http_request_timer(endpoint="/users") as timer:
         # Make a request
 
     Args:
-        endpoint: The endpoint name.
+        tags: Tags to add to the measurement.
 
     Returns:
         A timer for timing HTTP requests.
     """
-    tags: dict[str, t.Any] = {}
-    if endpoint:
-        tags[Tag.ENDPOINT] = endpoint
     return Timer(Metric.HTTP_REQUEST_DURATION, tags)
 
 
-def job_timer(job_type: str | None = None) -> Timer:
+def job_timer(**tags: t.Any) -> Timer:
     """Use for timing asynchronous jobs.
 
-    with job_timer("export") as timer:
+    with job_timer(job_type="export") as timer:
         # Do the job
 
     Args:
-        job_type: The job type.
+        tags: Tags to add to the measurement.
 
     Returns:
         A timer for timing jobs.
     """
-    tags: dict[str, t.Any] = {}
-    if job_type:
-        tags[Tag.JOB_TYPE] = job_type
     return Timer(Metric.JOB_DURATION, tags)
