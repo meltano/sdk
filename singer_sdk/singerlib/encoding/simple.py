@@ -30,8 +30,6 @@ if t.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-
 
 def exclude_null_dict(pairs: list[tuple[str, t.Any]]) -> dict[str, t.Any]:
     """Exclude null values from a dictionary.
@@ -132,7 +130,11 @@ class RecordMessage(Message):
         if self.version is not None:
             result["version"] = self.version
         if self.time_extracted is not None:
-            result["time_extracted"] = self.time_extracted.strftime(_DATETIME_FORMAT)
+            dt = self.time_extracted
+            result["time_extracted"] = (
+                f"{dt.year:04d}-{dt.month:02d}-{dt.day:02d}T"
+                f"{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}Z"
+            )
         return result
 
     def __post_init__(self) -> None:
