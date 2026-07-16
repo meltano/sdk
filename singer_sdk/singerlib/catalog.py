@@ -5,12 +5,13 @@ from __future__ import annotations
 import enum
 import logging
 import typing as t
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 
 from singer_sdk.singerlib.schema import Schema
 
 if t.TYPE_CHECKING:
     import sys
+    from collections.abc import Iterable
 
     if sys.version_info >= (3, 11):
         from typing import Self  # noqa: ICN003
@@ -111,10 +112,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
     """Stream metadata mapping."""
 
     @classmethod
-    def from_iterable(
-        cls: type[MetadataMapping],
-        iterable: t.Iterable[dict[str, t.Any]],
-    ) -> MetadataMapping:
+    def from_iterable(cls: type[Self], iterable: t.Iterable[dict[str, t.Any]]) -> Self:
         """Create a metadata mapping from an iterable of metadata dictionaries.
 
         Args:
@@ -163,7 +161,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
 
     @classmethod
     def get_standard_metadata(
-        cls: type[MetadataMapping],
+        cls: type[Self],
         *,
         schema: dict[str, t.Any] | None = None,
         schema_name: str | None = None,
@@ -171,7 +169,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         valid_replication_keys: list[str] | None = None,
         replication_method: str | None = None,
         selected_by_default: bool | None = None,
-    ) -> MetadataMapping:
+    ) -> Self:
         """Get default metadata for a stream.
 
         Args:
@@ -307,8 +305,8 @@ class CatalogEntry:
     """Singer catalog entry."""
 
     tap_stream_id: str
-    metadata: MetadataMapping
-    schema: Schema
+    metadata: MetadataMapping = field(default_factory=MetadataMapping)
+    schema: Schema = field(default_factory=Schema)
     stream: str | None = None
     key_properties: t.Sequence[str] | None = None
     replication_key: str | None = None
@@ -320,7 +318,7 @@ class CatalogEntry:
     replication_method: str | None = None
 
     @classmethod
-    def from_dict(cls: type[CatalogEntry], stream: dict[str, t.Any]) -> CatalogEntry:
+    def from_dict(cls: type[Self], stream: dict[str, t.Any]) -> Self:
         """Create a catalog entry from a dictionary.
 
         Args:
@@ -383,10 +381,7 @@ class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
     """Singer catalog mapping of stream entries."""
 
     @classmethod
-    def from_dict(
-        cls: type[Catalog],
-        data: dict[str, list[dict[str, t.Any]]],
-    ) -> Catalog:
+    def from_dict(cls: type[Self], data: dict[str, list[dict[str, t.Any]]]) -> Self:
         """Create a catalog from a dictionary.
 
         Args:
@@ -397,8 +392,22 @@ class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
         """
         instance = cls()
         for stream in data.get("streams", []):
-            entry = CatalogEntry.from_dict(stream)
-            instance[entry.tap_stream_id] = entry
+            instance.add_stream(CatalogEntry.from_dict(stream))
+        return instance
+
+    @classmethod
+    def from_entries(cls: type[Self], entries: Iterable[CatalogEntry]) -> Self:
+        """Create a catalog from an iterable of stream entries.
+
+        Args:
+            entries: The catalog entries.
+
+        Returns:
+            A catalog.
+        """
+        instance = cls()
+        for entry in entries:
+            instance.add_stream(entry)
         return instance
 
     def to_dict(self) -> dict[str, t.Any]:
