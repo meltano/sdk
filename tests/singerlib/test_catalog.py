@@ -9,7 +9,6 @@ from singer import (
     CatalogEntry,
     Metadata,
     MetadataMapping,
-    Schema,
     SelectionMask,
     StreamMetadata,
 )
@@ -201,10 +200,7 @@ def test_catalog_parsing():
 
 
 def test_catalog_from_entries():
-    entries = [
-        CatalogEntry(tap_stream_id="a", metadata=MetadataMapping(), schema=Schema()),
-        CatalogEntry(tap_stream_id="b", metadata=MetadataMapping(), schema=Schema()),
-    ]
+    entries = [CatalogEntry(tap_stream_id="a"), CatalogEntry(tap_stream_id="b")]
     catalog = Catalog.from_entries(entries)
 
     assert list(catalog) == ["a", "b"]

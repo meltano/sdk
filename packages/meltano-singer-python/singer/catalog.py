@@ -7,7 +7,7 @@ import json
 import logging
 import sys
 import typing as t
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 
 from singer.json import deserialize_json
@@ -319,8 +319,8 @@ class CatalogEntry:
     """Singer catalog entry."""
 
     tap_stream_id: str
-    metadata: MetadataMapping
-    schema: Schema
+    metadata: MetadataMapping = field(default_factory=MetadataMapping)
+    schema: Schema = field(default_factory=Schema)
     stream: str | None = None
     key_properties: t.Sequence[str] | None = None
     replication_key: str | None = None
@@ -432,8 +432,7 @@ class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
         """
         instance = cls()
         for stream in data.get("streams", []):
-            entry = CatalogEntry.from_dict(stream)
-            instance[entry.tap_stream_id] = entry
+            instance.add_stream(CatalogEntry.from_dict(stream))
         return instance
 
     @classmethod
