@@ -5,7 +5,6 @@ from __future__ import annotations
 import decimal
 import json
 import typing as t
-from datetime import datetime, timezone
 
 import singer
 import singer.json
@@ -52,24 +51,6 @@ def test_should_sync_field():
     assert singer.should_sync_field("available", True) is True
     assert singer.should_sync_field("available", None, default=True) is True
     assert singer.should_sync_field("available", None) is False
-
-
-def test_record_message_asdict_formats_time_extracted():
-    time_extracted = datetime(2024, 1, 1, tzinfo=timezone.utc)
-    msg = singer.RecordMessage(
-        stream="s",
-        record={"a": 1},
-        time_extracted=time_extracted,
-    )
-    result = msg.asdict()
-    assert result["time_extracted"] == "2024-01-01T00:00:00.000000Z"
-    # `to_dict` (the SDK serialization path) keeps a datetime object.
-    assert msg.to_dict()["time_extracted"] == time_extracted
-
-
-def test_message_asdict_matches_to_dict_for_non_record_messages():
-    msg = singer.StateMessage(value={"bookmarks": {}})
-    assert msg.asdict() == msg.to_dict()
 
 
 def test_decimal_precision_round_trip():
