@@ -388,7 +388,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         for schema in subschemas:
             if schema.get("nullable"):
                 schema.pop("nullable")
-                result.append({"type": ["null"]}, **schema)
+                result.append({"type": ["null"], **schema})
             else:
                 result.append(self.normalize_schema(schema))
 
