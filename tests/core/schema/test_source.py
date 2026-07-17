@@ -895,7 +895,7 @@ class TestOpenAPISchemaNormalization:
         assert [elem["type"] for elem in normalized["anyOf"]] == [
             ["object", "null"],
             ["object", "null"],
-            ["null"],
+            "null",
         ]
         assert "description" in normalized["anyOf"][-1]
 
