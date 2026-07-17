@@ -48,7 +48,6 @@ if t.TYPE_CHECKING:
 
 Schema: t.TypeAlias = dict[str, t.Any]
 
-
 _TKey = TypeVar("_TKey", bound=t.Hashable, default=str)
 _TStream = TypeVar("_TStream", bound="Stream", default="Stream")
 
@@ -407,7 +406,12 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         if "oneOf" in result:
             result = self.handle_one_of(result)
         if "anyOf" in result:
-            result["anyOf"] = [self.normalize_schema(s) for s in result["anyOf"]]
+            result["anyOf"] = list(
+                filter(
+                    bool,
+                    (self.normalize_schema(member) for member in result["anyOf"]),
+                )
+            )
 
         types_raw = result.get("type", [])
         types = [types_raw] if isinstance(types_raw, str) else types_raw

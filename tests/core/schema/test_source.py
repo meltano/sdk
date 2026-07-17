@@ -749,6 +749,13 @@ class TestOpenAPISchemaNormalization:
                             {"type": "object", "properties": {"z": {"type": "string"}}},
                         ],
                     },
+                    "AnyOfNullable": {
+                        "anyOf": [
+                            {"type": "object", "properties": {"x": {"type": "string"}}},
+                            {"type": "object", "properties": {"y": {"type": "string"}}},
+                            {"nullable": True},
+                        ],
+                    },
                     "AllOfNoElements": {
                         "allOf": [],
                     },
@@ -877,6 +884,15 @@ class TestOpenAPISchemaNormalization:
         assert all(elem["type"] == "object" for elem in schema["anyOf"])
 
         normalized = source.preprocess_schema(schema)
+        assert all(elem["type"] == ["object", "null"] for elem in normalized["anyOf"])
+
+    def test_normalize_any_of_nullable(self, source: OpenAPISchema):
+        """Test that anyOf with nullable variants are correctly normalized."""
+        schema = source.fetch_schema("AnyOfNullable")
+        assert len(schema["anyOf"]) == 3
+
+        normalized = source.preprocess_schema(schema)
+        assert len(normalized["anyOf"]) == 2
         assert all(elem["type"] == ["object", "null"] for elem in normalized["anyOf"])
 
     def test_normalize_all_of_no_elements(self, source: OpenAPISchema):
