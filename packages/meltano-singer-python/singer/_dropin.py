@@ -68,8 +68,8 @@ def write_record(
 def write_schema(
     stream_name: str,
     schema: dict[str, t.Any],
-    key_properties: str | Sequence[str],
-    bookmark_properties: str | list[str] | None = None,
+    key_properties: Sequence[str],
+    bookmark_properties: list[str] | None = None,
     stream_alias: str | None = None,
 ) -> None:
     """Write a SCHEMA message to stdout.
@@ -81,10 +81,6 @@ def write_schema(
         bookmark_properties: The bookmark properties.
         stream_alias: An alias to use in place of the stream name.
     """
-    if isinstance(key_properties, str):
-        key_properties = [key_properties]
-    if isinstance(bookmark_properties, str):
-        bookmark_properties = [bookmark_properties]
     write_message(
         SchemaMessage(
             stream=(stream_alias or stream_name),
