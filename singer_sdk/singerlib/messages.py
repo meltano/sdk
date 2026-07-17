@@ -16,7 +16,7 @@ from .encoding.simple import (
 )
 
 if t.TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Mapping, Sequence
     from datetime import datetime
 
 __all__ = [
@@ -42,7 +42,7 @@ write_message = WRITER.write_message
 
 def write_record(
     stream_name: str,
-    record: dict[str, t.Any],
+    record: Mapping[str, t.Any],
     *,
     version: int | None = None,
     time_extracted: datetime | None = None,
@@ -67,10 +67,10 @@ def write_record(
 
 def write_schema(
     stream_name: str,
-    schema: dict[str, t.Any],
+    schema: Mapping[str, t.Any],
     *,
-    key_properties: list[str] | None = None,
-    bookmark_properties: list[str] | None = None,
+    key_properties: Sequence[str] | None = None,
+    bookmark_properties: Sequence[str] | None = None,
 ) -> None:
     """Write a SCHEMA message to stdout.
 
@@ -84,8 +84,20 @@ def write_schema(
         SchemaMessage(
             stream=stream_name,
             schema=schema,
-            key_properties=key_properties,
-            bookmark_properties=bookmark_properties,
+            key_properties=(
+                None
+                if key_properties is None
+                else [key_properties]
+                if isinstance(key_properties, str)
+                else [*key_properties]
+            ),
+            bookmark_properties=(
+                None
+                if bookmark_properties is None
+                else [bookmark_properties]
+                if isinstance(bookmark_properties, str)
+                else [*bookmark_properties]
+            ),
         ),
     )
 
