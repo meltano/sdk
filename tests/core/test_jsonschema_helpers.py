@@ -8,6 +8,7 @@ from textwrap import dedent
 
 import pytest
 
+from singer_sdk.exceptions import EmptySchemaTypeError
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
     JSONSCHEMA_ANNOTATION_WRITEONLY,
@@ -1177,6 +1178,11 @@ def test_is_datetime_type(schema, expected):
 )
 def test_is_date_or_datetime_type(schema, expected):
     assert is_date_or_datetime_type(schema) == expected
+
+
+def test_is_date_or_datetime_type_empty_schema():
+    with pytest.raises(EmptySchemaTypeError):
+        assert is_date_or_datetime_type({"oneOf": [{}]})
 
 
 def test_is_string_array_type():
