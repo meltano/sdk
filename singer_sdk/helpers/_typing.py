@@ -191,6 +191,9 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
     Raises:
         ValueError: If type is empty or null.
     """
+    if not type_dict:
+        raise EmptySchemaTypeError
+
     if "anyOf" in type_dict:
         return any(is_date_or_datetime_type(option) for option in type_dict["anyOf"])
 
