@@ -189,7 +189,8 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
         True if date or date-time, else False.
 
     Raises:
-        ValueError: If type is empty or null.
+        EmptySchemaTypeError: If type is empty.
+        ValueError: If type is otherwise not valid.
     """
     if not type_dict:
         raise EmptySchemaTypeError
