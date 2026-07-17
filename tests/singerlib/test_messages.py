@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import io
+import json
 from contextlib import redirect_stdout
 
 import pytest
@@ -169,3 +170,18 @@ def test_activate_version_message():
     }
 
     assert singer.ActivateVersionMessage.from_dict(version.to_dict()) == version
+
+
+def test_write_record_write_schema_write_state(capsys: pytest.CaptureFixture):
+    singer.write_schema("s", {"properties": {"a": {"type": "integer"}}})
+    singer.write_version("s", 123)
+    singer.write_record("s", {"a": 1}, version=123)
+    singer.write_state({"bookmarks": {}})
+
+    lines = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
+    assert [line["type"] for line in lines] == [
+        "SCHEMA",
+        "ACTIVATE_VERSION",
+        "RECORD",
+        "STATE",
+    ]
