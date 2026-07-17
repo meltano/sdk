@@ -1182,7 +1182,7 @@ def test_is_date_or_datetime_type(schema, expected):
 
 def test_is_date_or_datetime_type_empty_schema():
     with pytest.raises(EmptySchemaTypeError):
-        assert is_date_or_datetime_type({"oneOf": [{}]})
+        is_date_or_datetime_type({"oneOf": [{}]})
 
 
 def test_is_string_array_type():
