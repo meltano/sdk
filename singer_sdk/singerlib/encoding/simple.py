@@ -6,7 +6,7 @@ import json.decoder
 import logging
 import sys
 import typing as t
-from collections.abc import Mapping  # noqa: TC003
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
@@ -27,6 +27,9 @@ if t.TYPE_CHECKING:
         from typing import Self  # noqa: ICN003
     else:
         from typing_extensions import Self
+
+InputKeys: t.TypeAlias = Sequence[str]
+Schema: t.TypeAlias = Mapping[str, t.Any]
 
 logger = logging.getLogger(__name__)
 
@@ -151,7 +154,7 @@ class RecordMessage(Message):
             self.time_extracted = self.time_extracted.astimezone(timezone.utc)
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, init=False)
 class SchemaMessage(Message):
     """Singer schema message."""
 
@@ -167,9 +170,31 @@ class SchemaMessage(Message):
     bookmark_properties: list[str] | None = None
     """The bookmark properties."""
 
-    def __post_init__(self) -> None:
-        """Post-init processing."""
+    def __init__(
+        self,
+        stream: str,
+        schema: Schema,
+        key_properties: InputKeys | None = None,
+        bookmark_properties: InputKeys | None = None,
+    ) -> None:
+        """Initialize schema object."""
         self.type = SingerMessageType.SCHEMA
+        self.stream = stream
+        self.schema = schema
+        self.key_properties = (
+            None
+            if key_properties is None
+            else [key_properties]
+            if isinstance(key_properties, str)
+            else [*key_properties]
+        )
+        self.bookmark_properties = (
+            None
+            if bookmark_properties is None
+            else [bookmark_properties]
+            if isinstance(bookmark_properties, str)
+            else [*bookmark_properties]
+        )
 
 
 @dataclass(slots=True)

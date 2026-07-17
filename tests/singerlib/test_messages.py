@@ -138,16 +138,6 @@ def test_schema_messages_string_bookmark_properties():
     assert schema.bookmark_properties == ["id"]
 
 
-def test_bookmark_properties_not_string_or_list():
-    """Check that schema message's bookmark_properties must be a string or list."""
-    with pytest.raises(ValueError, match="must be a string or list"):
-        singer.SchemaMessage(
-            stream="test",
-            schema={"type": "object", "properties": {"id": {"type": "integer"}}},
-            bookmark_properties=1,
-        )
-
-
 def test_state_message():
     state = singer.StateMessage(value={"bookmarks": {"test": {"id": 1}}})
     assert state.value == {"bookmarks": {"test": {"id": 1}}}

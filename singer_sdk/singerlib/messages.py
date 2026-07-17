@@ -84,20 +84,8 @@ def write_schema(
         SchemaMessage(
             stream=stream_name,
             schema=schema,
-            key_properties=(
-                None
-                if key_properties is None
-                else [key_properties]
-                if isinstance(key_properties, str)
-                else [*key_properties]
-            ),
-            bookmark_properties=(
-                None
-                if bookmark_properties is None
-                else [bookmark_properties]
-                if isinstance(bookmark_properties, str)
-                else [*bookmark_properties]
-            ),
+            key_properties=key_properties,
+            bookmark_properties=bookmark_properties,
         ),
     )
 
