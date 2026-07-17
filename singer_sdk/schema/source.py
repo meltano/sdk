@@ -375,6 +375,24 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
 
         return result
 
+    def handle_any_of(self, subschemas: list[Schema]) -> list[Schema]:
+        """Handle anyOf constructs in a JSON schema.
+
+        Args:
+            subschemas: A list of JSON schemas.
+
+        Returns:
+            A processed anyOf list of schemas.
+        """
+        result: list[Schema] = []
+        for schema in subschemas:
+            if schema == {"nullable": True}:
+                result.append({"type": ["null"]})
+            else:
+                result.append(self.normalize_schema(schema))
+
+        return result
+
     def normalize_schema(
         self,
         schema: Schema,
@@ -406,12 +424,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         if "oneOf" in result:
             result = self.handle_one_of(result)
         if "anyOf" in result:
-            result["anyOf"] = list(
-                filter(
-                    bool,
-                    (self.normalize_schema(member) for member in result["anyOf"]),
-                )
-            )
+            result["anyOf"] = self.handle_any_of(result["anyOf"])
 
         types_raw = result.get("type", [])
         types = [types_raw] if isinstance(types_raw, str) else types_raw

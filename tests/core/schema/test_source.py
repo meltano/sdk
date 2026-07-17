@@ -892,8 +892,11 @@ class TestOpenAPISchemaNormalization:
         assert len(schema["anyOf"]) == 3
 
         normalized = source.preprocess_schema(schema)
-        assert len(normalized["anyOf"]) == 2
-        assert all(elem["type"] == ["object", "null"] for elem in normalized["anyOf"])
+        assert [elem["type"] for elem in normalized["anyOf"]] == [
+            ["object", "null"],
+            ["object", "null"],
+            ["null"],
+        ]
 
     def test_normalize_all_of_no_elements(self, source: OpenAPISchema):
         """Test that an empty allOf is normalized to an empty schema."""
