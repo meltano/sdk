@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import io
+import json
 from contextlib import redirect_stdout
 
 import pytest
@@ -134,17 +135,7 @@ def test_schema_messages_string_bookmark_properties():
         schema={"type": "object", "properties": {"id": {"type": "integer"}}},
         bookmark_properties="id",
     )
-    assert schema.bookmark_properties == ["id"]
-
-
-def test_bookmark_properties_not_string_or_list():
-    """Check that schema message's bookmark_properties must be a string or list."""
-    with pytest.raises(ValueError, match="must be a string or list"):
-        singer.SchemaMessage(
-            stream="test",
-            schema={"type": "object", "properties": {"id": {"type": "integer"}}},
-            bookmark_properties=1,
-        )
+    assert schema.bookmark_properties == ("id",)
 
 
 def test_state_message():
@@ -169,3 +160,86 @@ def test_activate_version_message():
     }
 
     assert singer.ActivateVersionMessage.from_dict(version.to_dict()) == version
+
+
+def test_write_record_write_schema_write_state(capsys: pytest.CaptureFixture):
+    singer.write_schema("s", {"properties": {"a": {"type": "integer"}}})
+    singer.write_schema(
+        "s",
+        {"properties": {"a": {"type": "integer"}}},
+        key_properties=["a"],
+    )
+    singer.write_schema(
+        "s",
+        {"properties": {"updated_at": {"type": "string", "format": "date-time"}}},
+        bookmark_properties=["updated_at"],
+    )
+
+    singer.write_version("s", 123)
+
+    singer.write_record("s", {"a": 1})
+    singer.write_record("s", {"a": 2}, version=123)
+    singer.write_record(
+        "s",
+        {"a": 3},
+        time_extracted=datetime.datetime(2026, 1, 1, tzinfo=UTC),
+    )
+
+    singer.write_state({"bookmarks": {}})
+
+    lines = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
+
+    assert lines[0:3] == [
+        {
+            "stream": "s",
+            "type": "SCHEMA",
+            "schema": {"properties": {"a": {"type": "integer"}}},
+        },
+        {
+            "stream": "s",
+            "type": "SCHEMA",
+            "schema": {"properties": {"a": {"type": "integer"}}},
+            "key_properties": ["a"],
+        },
+        {
+            "stream": "s",
+            "type": "SCHEMA",
+            "schema": {
+                "properties": {
+                    "updated_at": {"type": "string", "format": "date-time"},
+                }
+            },
+            "bookmark_properties": ["updated_at"],
+        },
+    ]
+
+    assert lines[3] == {
+        "stream": "s",
+        "type": "ACTIVATE_VERSION",
+        "version": 123,
+    }
+
+    assert lines[4:7] == [
+        {
+            "stream": "s",
+            "type": "RECORD",
+            "record": {"a": 1},
+        },
+        {
+            "stream": "s",
+            "type": "RECORD",
+            "record": {"a": 2},
+            "version": 123,
+        },
+        {
+            "stream": "s",
+            "type": "RECORD",
+            "record": {"a": 3},
+            "time_extracted": "2026-01-01T00:00:00+00:00",
+        },
+    ]
+
+    assert lines[-1] == {
+        "type": "STATE",
+        "value": {"bookmarks": {}},
+    }
