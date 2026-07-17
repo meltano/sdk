@@ -135,7 +135,7 @@ def test_schema_messages_string_bookmark_properties():
         schema={"type": "object", "properties": {"id": {"type": "integer"}}},
         bookmark_properties="id",
     )
-    assert schema.bookmark_properties == ["id"]
+    assert schema.bookmark_properties == ("id",)
 
 
 def test_state_message():

@@ -164,10 +164,10 @@ class SchemaMessage(Message):
     schema: Mapping[str, t.Any]
     """The schema definition."""
 
-    key_properties: list[str] | None = None
+    key_properties: tuple[str, ...] | None = None
     """The key properties."""
 
-    bookmark_properties: list[str] | None = None
+    bookmark_properties: tuple[str, ...] | None = None
     """The bookmark properties."""
 
     def __init__(
@@ -184,16 +184,16 @@ class SchemaMessage(Message):
         self.key_properties = (
             None
             if key_properties is None
-            else [key_properties]
+            else (key_properties,)
             if isinstance(key_properties, str)
-            else [*key_properties]
+            else tuple(key_properties)
         )
         self.bookmark_properties = (
             None
             if bookmark_properties is None
-            else [bookmark_properties]
+            else (bookmark_properties,)
             if isinstance(bookmark_properties, str)
-            else [*bookmark_properties]
+            else tuple(bookmark_properties)
         )
 
 
