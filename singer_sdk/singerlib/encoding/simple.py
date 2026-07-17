@@ -28,7 +28,6 @@ if t.TYPE_CHECKING:
     else:
         from typing_extensions import Self
 
-InputKeys: t.TypeAlias = Sequence[str]
 Schema: t.TypeAlias = Mapping[str, t.Any]
 
 logger = logging.getLogger(__name__)
@@ -161,7 +160,7 @@ class SchemaMessage(Message):
     stream: str
     """The stream name."""
 
-    schema: Mapping[str, t.Any]
+    schema: Schema
     """The schema definition."""
 
     key_properties: tuple[str, ...] | None = None
@@ -174,8 +173,8 @@ class SchemaMessage(Message):
         self,
         stream: str,
         schema: Schema,
-        key_properties: InputKeys | None = None,
-        bookmark_properties: InputKeys | None = None,
+        key_properties: Sequence[str] | None = None,
+        bookmark_properties: Sequence[str] | None = None,
     ) -> None:
         """Initialize schema object."""
         self.type = SingerMessageType.SCHEMA
