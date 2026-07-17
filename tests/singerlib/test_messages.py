@@ -179,9 +179,24 @@ def test_write_record_write_schema_write_state(capsys: pytest.CaptureFixture):
     singer.write_state({"bookmarks": {}})
 
     lines = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
-    assert [line["type"] for line in lines] == [
-        "SCHEMA",
-        "ACTIVATE_VERSION",
-        "RECORD",
-        "STATE",
-    ]
+
+    assert lines[0] == {
+        "stream": "s",
+        "type": "SCHEMA",
+        "schema": {"properties": {"a": {"type": "integer"}}},
+    }
+    assert lines[1] == {
+        "stream": "s",
+        "type": "ACTIVATE_VERSION",
+        "version": 123,
+    }
+    assert lines[2] == {
+        "stream": "s",
+        "type": "RECORD",
+        "record": {"a": 1},
+        "version": 123,
+    }
+    assert lines[3] == {
+        "type": "STATE",
+        "value": {"bookmarks": {}},
+    }
