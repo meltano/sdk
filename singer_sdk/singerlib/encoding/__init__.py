@@ -1,9 +1,14 @@
-"""Singer IO reader and writer classes."""
+"""Alias for :mod:`singer.encoding`."""
 
 from __future__ import annotations
 
-from .base import GenericSingerReader, GenericSingerWriter, SingerMessageType
-from .simple import SimpleSingerReader, SimpleSingerWriter
+from singer.encoding import (
+    GenericSingerReader,
+    GenericSingerWriter,
+    SimpleSingerReader,
+    SimpleSingerWriter,
+    SingerMessageType,
+)
 
 __all__ = [
     "GenericSingerReader",

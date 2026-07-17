@@ -254,7 +254,6 @@ def test_lowest_requirements(session: nox.Session) -> None:
         "--group=testing",
         "--all-extras",
         "--universal",
-        "--no-sources",
         "--resolution=lowest-direct",
         f"-o={tmpfile.as_posix()}",
         env=install_env,

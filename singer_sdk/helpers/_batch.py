@@ -11,13 +11,28 @@ from urllib.parse import urlparse
 
 from upath import UPath
 
+from singer.batch import BaseBatchFileEncoding, BatchMessage
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
-from singer_sdk.singerlib.messages import Message, SingerMessageType
 
 if t.TYPE_CHECKING:
     from fsspec import AbstractFileSystem
 
+__all__ = [
+    "DEFAULT_BATCH_SIZE",
+    "BaseBatchFileEncoding",
+    "BatchConfig",
+    "BatchFileFormat",
+    "JSONLinesEncoding",
+    "ParquetEncoding",
+    "SDKBatchMessage",
+    "StorageTarget",
+]
+
 DEFAULT_BATCH_SIZE = 10000
+
+#: Alias of :class:`singer.batch.BatchMessage`, the Meltano Singer SDK
+#: flavor of the Singer BATCH message.
+SDKBatchMessage = BatchMessage
 
 
 class BatchFileFormat(str, enum.Enum):
@@ -28,23 +43,6 @@ class BatchFileFormat(str, enum.Enum):
 
     PARQUET = "parquet"
     """Parquet format."""
-
-
-@dataclass(slots=True)
-class BaseBatchFileEncoding:
-    """Base class for batch file encodings."""
-
-    # Base encoding fields
-    format: str
-    """The format of the batch file."""
-
-    compression: str | None = None
-    """The compression of the batch file."""
-
-    @classmethod
-    def from_dict(cls, data: dict[str, t.Any]) -> BaseBatchFileEncoding:
-        """Create an encoding from a dictionary."""
-        return cls(**data)
 
 
 @deprecated(
@@ -67,29 +65,6 @@ class ParquetEncoding(BaseBatchFileEncoding):
     """Parquet encoding for batch files."""
 
     format: t.Literal["parquet"] = "parquet"
-
-
-@dataclass(slots=True)
-class SDKBatchMessage(Message):
-    """Singer batch message in the Meltano Singer SDK flavor."""
-
-    stream: str
-    """The stream name."""
-
-    encoding: BaseBatchFileEncoding
-    """The file encoding of the batch."""
-
-    manifest: list[str] = field(default_factory=list)
-    """The manifest of files in the batch."""
-
-    version: int | None = None
-    """If syncing in FULL_TABLE mode, the start time as an epoch timestamp int."""
-
-    def __post_init__(self) -> None:
-        if isinstance(self.encoding, dict):  # type: ignore[unreachable]
-            self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)  # type: ignore[unreachable]
-
-        self.type = SingerMessageType.BATCH
 
 
 @dataclass

@@ -1,9 +1,13 @@
-"""Low-level Singer components for building taps and targets."""
+"""Low-level Singer components for building taps and targets.
+
+This package is a stable alias for the ``singer`` package from
+``meltano-singer-python``, where the implementation now lives.
+"""
 
 from __future__ import annotations
 
-from singer_sdk.singerlib import exceptions
-from singer_sdk.singerlib.catalog import (
+from singer import exceptions
+from singer.catalog import (
     Catalog,
     CatalogEntry,
     Metadata,
@@ -11,7 +15,7 @@ from singer_sdk.singerlib.catalog import (
     SelectionMask,
     StreamMetadata,
 )
-from singer_sdk.singerlib.messages import (
+from singer.messages import (
     ActivateVersionMessage,
     Message,
     RecordMessage,
@@ -22,8 +26,8 @@ from singer_sdk.singerlib.messages import (
     format_message,
     write_message,
 )
-from singer_sdk.singerlib.schema import Schema, resolve_schema_references
-from singer_sdk.singerlib.utils import strftime, strptime_to_utc
+from singer.schema import Schema, resolve_schema_references
+from singer.utils import strftime, strptime_to_utc
 
 __all__ = [
     "ActivateVersionMessage",
