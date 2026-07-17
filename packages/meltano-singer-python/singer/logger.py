@@ -77,8 +77,6 @@ def _remap_sdk_factories(config: dict[str, t.Any]) -> dict[str, t.Any]:
 
     for section in ("formatters", "handlers", "filters"):
         for options in config.get(section, {}).values():
-            if not isinstance(options, dict):
-                continue
             for key in ("()", "class"):
                 if (value := options.get(key)) in _SDK_FACTORY_ALIASES:
                     options[key] = _SDK_FACTORY_ALIASES[value]
