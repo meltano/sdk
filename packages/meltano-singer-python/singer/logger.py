@@ -13,13 +13,14 @@ configuring logging from a file passed through environment variables:
 from __future__ import annotations
 
 import importlib.util
-import json
 import logging
 import logging.config
 import os
 import sys
 import typing as t
 from pathlib import Path
+
+import yaml
 
 __all__ = [
     "get_logger",
@@ -48,12 +49,7 @@ def _load_dict_config(path: Path) -> dict[str, t.Any]:
     Returns:
         The configuration dictionary.
     """
-    content = path.read_text(encoding="utf-8")
-    try:
-        import yaml  # noqa: PLC0415
-    except ImportError:
-        return json.loads(content)  # type: ignore[no-any-return]
-    return yaml.safe_load(content)  # type: ignore[no-any-return]
+    return yaml.safe_load(path.read_text(encoding="utf-8"))  # type: ignore[no-any-return]
 
 
 def _sdk_available() -> bool:

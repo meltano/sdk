@@ -32,6 +32,7 @@ requires-python = ">=3.10"
 
 dependencies = [
     'backports-datetime-fromisoformat>=2.0.1; python_version<"3.11"',
+    "pyyaml>=6",
     "referencing>=0.30.0",
     "simplejson>=3.17.6",
     "typing-extensions>=4.5.0; python_version < '3.13'",
@@ -42,6 +43,14 @@ Homepage = "https://sdk.meltano.com/en/latest/"
 Repository = "https://github.com/meltano/sdk"
 Documentation = "https://sdk.meltano.com/en/latest/"
 "Issue Tracker" = "https://github.com/meltano/sdk/issues"
+
+[dependency-groups]
+dev = [
+    { include-group = "typing" }
+]
+typing = [
+    "types-pyyaml",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["singer"]

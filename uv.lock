@@ -1538,18 +1538,32 @@ name = "meltano-singer-python"
 source = { editable = "packages/meltano-singer-python" }
 dependencies = [
     { name = "backports-datetime-fromisoformat", marker = "python_full_version < '3.11'" },
+    { name = "pyyaml" },
     { name = "referencing" },
     { name = "simplejson" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "types-pyyaml" },
+]
+typing = [
+    { name = "types-pyyaml" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "backports-datetime-fromisoformat", marker = "python_full_version < '3.11'", specifier = ">=2.0.1" },
+    { name = "pyyaml", specifier = ">=6" },
     { name = "referencing", specifier = ">=0.30.0" },
     { name = "simplejson", specifier = ">=3.17.6" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'", specifier = ">=4.5.0" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "types-pyyaml" }]
+typing = [{ name = "types-pyyaml" }]
 
 [[package]]
 name = "meltano-tap-countries"
