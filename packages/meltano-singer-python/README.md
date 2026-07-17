@@ -33,7 +33,7 @@ Supported legacy API surface:
   `Timer` (legacy `METRIC: {...}` log lines)
 - `singer.utils`: `now`, `strftime`, `strptime_to_utc`, `load_json`, `check_config`,
   `parse_args`
-- `singer.get_logger`, `singer.should_sync_field`
+- `singer.get_logger`
 - `Catalog`, `CatalogEntry`, `Schema`
 - `BATCH` messages: `BatchMessage` and `BaseBatchFileEncoding` (`jsonl`, `parquet`,
   `arrow`, ...)

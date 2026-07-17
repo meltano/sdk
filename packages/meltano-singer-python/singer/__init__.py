@@ -16,7 +16,6 @@ from singer import (
     utils,
 )
 from singer._dropin import (
-    should_sync_field,
     write_message,
     write_record,
     write_schema,
@@ -91,7 +90,6 @@ __all__ = [
     "schema",
     "set_currently_syncing",
     "set_offset",
-    "should_sync_field",
     "strftime",
     "strptime_to_utc",
     "utils",

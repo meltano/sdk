@@ -45,14 +45,6 @@ def test_write_record_write_schema_write_state(capsys: pytest.CaptureFixture):
     ]
 
 
-def test_should_sync_field():
-    assert singer.should_sync_field("automatic", False) is True
-    assert singer.should_sync_field("unsupported", True) is False
-    assert singer.should_sync_field("available", True) is True
-    assert singer.should_sync_field("available", None, default=True) is True
-    assert singer.should_sync_field("available", None) is False
-
-
 def test_decimal_precision_round_trip():
     value = singer.json.deserialize_json('{"multipleOf": 1e-38}')
     assert value["multipleOf"] == decimal.Decimal("1e-38")

@@ -22,7 +22,6 @@ if t.TYPE_CHECKING:
     from datetime import datetime
 
 __all__ = [
-    "should_sync_field",
     "write_message",
     "write_record",
     "write_schema",
@@ -113,28 +112,3 @@ def write_version(stream_name: str, version: int) -> None:
         version: The version to activate.
     """
     write_message(ActivateVersionMessage(stream=stream_name, version=version))
-
-
-def should_sync_field(
-    inclusion: str | None,
-    selected: bool | None,  # noqa: FBT001
-    default: bool = False,  # noqa: FBT001, FBT002
-) -> bool:
-    """Decide whether a field should be synced based on its metadata.
-
-    Args:
-        inclusion: The field's ``inclusion`` metadata: ``automatic``,
-            ``available`` or ``unsupported``.
-        selected: The field's ``selected`` metadata.
-        default: The value to use if the field has no selection metadata.
-
-    Returns:
-        True if the field should be synced.
-    """
-    if inclusion == "unsupported":
-        return False
-    if inclusion == "automatic":
-        return True
-    if selected is not None:
-        return selected
-    return default
