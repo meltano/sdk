@@ -154,7 +154,7 @@ typing = [
     "importlib-metadata",
     "mypy~=2.2",
     "pyarrow-stubs>=19.1",
-    "ty==0.0.58",
+    "ty==0.0.59",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-simplejson>=3.18.0",
@@ -253,7 +253,9 @@ relative_files = true  # This allows coverage to be measured in Windows
 omit = [
     "tests/*",
     "samples/*",
-    "packages/*",
+    "packages/meltano-mapper-*",
+    "packages/meltano-tap-*",
+    "packages/meltano-target-*",
     "singer_sdk/helpers/_compat.py",
     "singer_sdk/helpers/types.py",
 ]
@@ -425,7 +427,9 @@ unfixable = [
 "singer_sdk/helpers/_*.py" = ["DOC"]
 # Disabled some checks in samples code
 "samples/*" = ["ANN", "DOC"]
-"packages/*" = ["DOC"]
+"packages/meltano-mapper-*" = ["DOC"]
+"packages/meltano-tap-*" = ["DOC"]
+"packages/meltano-target-*" = ["DOC"]
 # Templates support a generic resource of type Any.
 "singer_sdk/testing/*.py" = ["S101"]
 "singer_sdk/testing/templates.py" = ["ANN401"]

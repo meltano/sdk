@@ -897,6 +897,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             level=self.TYPE_CONFORMANCE_LEVEL,
             logger=self.logger,
         )
+        time_extracted = utc_now()
         for stream_map in self.stream_maps:
             mapped_record = stream_map.transform(record)
             # Emit record if not filtered
@@ -905,7 +906,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
                     stream=stream_map.stream_alias,
                     record=mapped_record,
                     version=self._stream_version,
-                    time_extracted=utc_now(),
+                    time_extracted=time_extracted,
                 )
 
     def _generate_batch_messages(
