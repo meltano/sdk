@@ -35,7 +35,7 @@ else:
     from typing_extensions import override
 
 if t.TYPE_CHECKING:
-    from collections.abc import Mapping
+    from singer_sdk.helpers.types import Context
 
 
 @pytest.fixture(scope="session")
@@ -145,7 +145,8 @@ class MockStream(Stream):
 
     name = "test_stream"
 
-    def get_records(self, context: Mapping[str, t.Any] | None):  # noqa: ARG002
+    @override
+    def get_records(self, context: Context | None):
         """Mock method."""
         return []
 
