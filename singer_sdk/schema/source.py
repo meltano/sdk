@@ -393,7 +393,8 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
             else:
                 result.append(self.normalize_schema(subschema))
 
-        return {"anyOf": result}
+        schema["anyOf"] = result
+        return schema
 
     def normalize_schema(
         self,
