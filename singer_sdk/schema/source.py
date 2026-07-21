@@ -312,7 +312,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         schema.pop("pattern", None)
         return schema
 
-    def handle_one_of(self, schema: Schema) -> Schema:
+    def _handle_one_of(self, schema: Schema) -> Schema:
         """Handle oneOf constructs in a JSON schema.
 
         - Single element: unwrap.
@@ -344,21 +344,22 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
 
         return {**rest, "oneOf": [self.normalize_schema(s) for s in subschemas]}
 
-    def handle_all_of(self, subschemas: list[Schema]) -> Schema:  # noqa: PLR6301
+    def _handle_all_of(self, schema: Schema) -> Schema:
         """Handle allOf constructs in a JSON schema.
 
         Args:
-            subschemas: A list of JSON schemas.
+            schema: A JSON schema containing an ``allOf`` keyword.
 
         Returns:
             A merged JSON schema.
         """
+        subschemas = schema["allOf"]
         if not subschemas:
             return {}
 
         # If the allOf array has only one element, just flatten it.
         if len(subschemas) == 1:
-            return subschemas[0]
+            return subschemas[0]  # type: ignore[no-any-return]
 
         # TODO: merge subschemas:
         # - Taking the most restrictive constraints for each property
@@ -373,25 +374,26 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
                 else:
                     result[key] = value
 
-        return result
+        return self.normalize_schema(result)
 
-    def handle_any_of(self, subschemas: list[Schema]) -> list[Schema]:
+    def _handle_any_of(self, schema: Schema) -> Schema:
         """Handle anyOf constructs in a JSON schema.
 
         Args:
-            subschemas: A list of JSON schemas.
+            schema: A JSON schema containing an ``anyOf`` keyword.
 
         Returns:
             A processed anyOf list of schemas.
         """
+        subschemas = schema["anyOf"]
         result: list[Schema] = []
-        for schema in subschemas:
-            if schema.get("nullable") and "type" not in schema:
-                result.append(self.normalize_schema({"type": "null", **schema}))
+        for subschema in subschemas:
+            if subschema.get("nullable") and "type" not in subschema:
+                result.append(self.normalize_schema({"type": "null", **subschema}))
             else:
-                result.append(self.normalize_schema(schema))
+                result.append(self.normalize_schema(subschema))
 
-        return result
+        return {"anyOf": result}
 
     def normalize_schema(
         self,
@@ -420,11 +422,11 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
             result["items"] = self.handle_array_items(items)
 
         if "allOf" in result:
-            result = self.normalize_schema(self.handle_all_of(result["allOf"]))
+            result = self._handle_all_of(result)
         if "oneOf" in result:
-            result = self.handle_one_of(result)
+            result = self._handle_one_of(result)
         if "anyOf" in result:
-            result["anyOf"] = self.handle_any_of(result["anyOf"])
+            result = self._handle_any_of(result)
 
         types_raw = result.get("type", [])
         types = [types_raw] if isinstance(types_raw, str) else types_raw
