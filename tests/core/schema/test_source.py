@@ -756,6 +756,13 @@ class TestOpenAPISchemaNormalization:
                             {"nullable": True, "description": "Makes this nullable"},
                         ],
                     },
+                    "AnyOfNullableWithRef": {
+                        "anyOf": [
+                            {"type": "object", "properties": {"x": {"type": "string"}}},
+                            {"type": "object", "properties": {"y": {"type": "string"}}},
+                            {"nullable": True, "$ref": "#/components/schemas/Status"},
+                        ],
+                    },
                     "AllOfNoElements": {
                         "allOf": [],
                     },
@@ -786,6 +793,7 @@ class TestOpenAPISchemaNormalization:
                     "Status": {
                         "type": "string",
                         "enum": ["active", "inactive", "pending"],
+                        "description": "A status",
                     },
                     "Priority": {
                         "type": "integer",
@@ -900,6 +908,22 @@ class TestOpenAPISchemaNormalization:
         assert normalized["anyOf"][-1] == {
             "type": "null",
             "description": "Makes this nullable",
+        }
+
+    def test_normalize_any_of_nullable_with_ref(self, source: OpenAPISchema):
+        """Test that anyOf with nullable with $ref variants are correctly normalized."""
+        schema = source.fetch_schema("AnyOfNullableWithRef")
+        assert len(schema["anyOf"]) == 3
+
+        normalized = source.preprocess_schema(schema)
+        assert [elem["type"] for elem in normalized["anyOf"]] == [
+            ["object", "null"],
+            ["object", "null"],
+            ["string", "null"],
+        ]
+        assert normalized["anyOf"][-1] == {
+            "type": ["string", "null"],
+            "description": "A status",
         }
 
     def test_normalize_all_of_no_elements(self, source: OpenAPISchema):
