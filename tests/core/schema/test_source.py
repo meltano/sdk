@@ -897,7 +897,10 @@ class TestOpenAPISchemaNormalization:
             ["object", "null"],
             "null",
         ]
-        assert "description" in normalized["anyOf"][-1]
+        assert normalized["anyOf"][-1] == {
+            "type": "null",
+            "description": "Makes this nullable",
+        }
 
     def test_normalize_all_of_no_elements(self, source: OpenAPISchema):
         """Test that an empty allOf is normalized to an empty schema."""
