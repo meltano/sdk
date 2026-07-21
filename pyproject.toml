@@ -336,7 +336,7 @@ extend-include = [
 ]
 line-length = 88
 preview = true
-required-version = ">=0.15.21"
+required-version = ">=0.15.22"
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -345,8 +345,9 @@ docstring-code-format = true
 explicit-preview-rules = false
 future-annotations = true
 ignore = [
-    "N818",    # Exception name should be named with an Error suffix
-    "COM812",  # missing-trailing-comma
+    "error-suffix-on-exception-name",
+    "missing-trailing-comma",
+    "noqa-comments",
 ]
 select = [
     "F",    # Pyflakes
@@ -405,8 +406,8 @@ unfixable = [
 [tool.ruff.lint.per-file-ignores]
 "docs/conf.py" = [
     "D",      # pydocstyle/flake8-docstrings
-    "I002",   # isort: missing-required-import
-    "INP001", # flake8-no-pep420: implicit-namespace-package
+    "missing-required-import",   # isort: missing-required-import
+    "implicit-namespace-package", # flake8-no-pep420: implicit-namespace-package
 ]
 "noxfile.py" = ["ANN"]
 "tests/*" = [
@@ -414,14 +415,14 @@ unfixable = [
     "D1",
     "D2",
     "DOC",
-    "FBT001",
-    "FBT003",
+    "boolean-type-hint-positional-argument",
+    "boolean-positional-value-in-call",
     "INP",      # Allow implicit namespace packages in tests
-    "PLR2004",
-    "S101",
-    "SLF001",   # Allow private method access in tests
-    "PLC2701",  # Allow usage of private members in tests
-    "PLR6301",  # Don't suggest making test methods static, etc.
+    "magic-value-comparison",
+    "assert",
+    "private-member-access",
+    "import-private-name",
+    "no-self-use",
 ]
 # Disabled some checks in helper modules
 "singer_sdk/helpers/_*.py" = ["DOC"]
@@ -431,8 +432,8 @@ unfixable = [
 "packages/meltano-tap-*" = ["DOC"]
 "packages/meltano-target-*" = ["DOC"]
 # Templates support a generic resource of type Any.
-"singer_sdk/testing/*.py" = ["S101"]
-"singer_sdk/testing/templates.py" = ["ANN401"]
+"singer_sdk/testing/*.py" = ["assert"]
+"singer_sdk/testing/templates.py" = ["any-type"]
 
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
