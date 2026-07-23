@@ -448,6 +448,24 @@ class JSONSchemaToSQL:
         """
         return sqlalchemy.types.VARCHAR()
 
+    def is_nullable(self, schema: dict) -> bool:  # noqa: PLR6301
+        """Check whether a JSON Schema allows null values.
+
+        Args:
+            schema: The JSON Schema object.
+
+        Returns:
+            ``True`` if the schema's ``type`` list contains ``"null"``, or if any
+            ``anyOf`` subschema is typed ``"null"``. ``False`` otherwise.
+
+        .. versionadded:: 0.55.0
+        """
+        schema_type = schema.get("type")
+        if isinstance(schema_type, (list, tuple)) and "null" in schema_type:
+            return True
+
+        return any(sub.get("type") == "null" for sub in schema.get("anyOf", []))
+
     def handle_raw_string(self, schema: dict) -> sqlalchemy.types.TypeEngine:
         """Handle a string type generically.
 
@@ -567,6 +585,33 @@ class JSONSchemaToSQL:
 
         # Fallback
         return self.fallback_type()
+
+    def to_sqlalchemy_column(
+        self,
+        name: str,
+        schema: dict,
+        *,
+        required: bool,
+        key_properties: list[str],
+    ) -> sa.Column:
+        """Convert a JSON schema property to SQLAlchemy ``Column`` object.
+
+        Args:
+            name: The column name.
+            schema: The property's JSON schema.
+            required: Whether the property must be present.
+            key_properties: One or more fields that constitute the table's primary key.
+
+        Returns:
+            A column object.
+        """
+        return sa.Column(
+            name,
+            self.to_sql_type(schema),
+            nullable=self.is_nullable(schema)
+            or name not in key_properties
+            or not required,
+        )
 
 
 class SQLConnector:  # noqa: PLR0904
@@ -812,10 +857,9 @@ class SQLConnector:  # noqa: PLR0904
         msg = f"Unexpected type received: '{type(sql_type).__name__}'"
         raise ValueError(msg)
 
+    @deprecated("It's deprecated")
     def to_sql_type(self, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
         """Return a JSON Schema representation of the provided type.
-
-        By default will call `typing.to_sql_type()`.
 
         Developers may override this method to accept additional input argument types,
         to support non-standard types, or to provide custom typing logic.
@@ -1286,7 +1330,7 @@ class SQLConnector:  # noqa: PLR0904
         self,
         full_table_name: str | FullyQualifiedName,
         schema: dict,
-        primary_keys: t.Sequence[str] | None = None,
+        primary_keys: list[str] | None = None,
         partition_keys: list[str] | None = None,
         as_temp_table: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
@@ -1318,12 +1362,16 @@ class SQLConnector:  # noqa: PLR0904
         except KeyError as e:
             msg = f"Schema for '{full_table_name}' does not define properties: {schema}"
             raise RuntimeError(msg) from e
+
+        required = schema.get("required", [])
         for property_name, property_jsonschema in properties.items():
             columns.append(
-                sa.Column(
+                self.jsonschema_to_sql.to_sqlalchemy_column(
                     property_name,
-                    self.to_sql_type(property_jsonschema),
-                ),
+                    property_jsonschema,
+                    required=property_name in required,
+                    key_properties=primary_keys,
+                )
             )
 
         table_args = []
@@ -1377,7 +1425,7 @@ class SQLConnector:  # noqa: PLR0904
         self,
         full_table_name: str | FullyQualifiedName,
         schema: dict,
-        primary_keys: t.Sequence[str],
+        primary_keys: list[str],
         partition_keys: list[str] | None = None,
         as_temp_table: bool = False,  # noqa: FBT002, FBT001
     ) -> None:

@@ -617,6 +617,7 @@ def test_adapter_without_json_serde():
     )
 
     class CustomConnector(SQLConnector):
+        @override
         def create_engine(self) -> Engine:
             return super().create_engine()
 
@@ -709,6 +710,7 @@ def test_sql_to_json_schema_map(
 def test_custom_type_to_jsonschema():
     class MyMap(SQLToJSONSchema):
         @functools.singledispatchmethod
+        @override
         def to_jsonschema(self, column_type: sqlalchemy.types.TypeEngine):
             return super().to_jsonschema(column_type)
 
@@ -936,6 +938,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
 
     def test_multiple_types_custom_handler(self):
         class CustomJSONSchemaToSQL(JSONSchemaToSQL):
+            @override
             def handle_multiple_types(
                 self,
                 types: t.Sequence[str],
@@ -958,6 +961,94 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
         assert isinstance(result, sqlalchemy.VARCHAR)
 
+    @pytest.mark.parametrize(
+        "jsonschema_type,expected",
+        [
+            pytest.param(
+                {"type": ["string", "null"]},
+                True,
+                id="list_with_null",
+            ),
+            pytest.param(
+                {"type": "string"},
+                False,
+                id="plain_string",
+            ),
+            pytest.param(
+                {"type": ["string", "integer"]},
+                False,
+                id="list_no_null",
+            ),
+            pytest.param(
+                {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                True,
+                id="anyof_with_null",
+            ),
+            pytest.param(
+                {"anyOf": [{"type": "string"}, {"type": "integer"}]},
+                False,
+                id="anyof_no_null",
+            ),
+            pytest.param(
+                {"cannot": "compute"},
+                False,
+                id="no_type",
+            ),
+        ],
+    )
+    def test_is_nullable(
+        self,
+        json_schema_to_sql: JSONSchemaToSQL,
+        jsonschema_type: dict,
+        expected: bool,
+    ):
+        assert json_schema_to_sql.is_nullable(jsonschema_type) is expected
+
+    def test_handle_nullable_custom_handler(self):
+        class NullableMarker(sqlalchemy.types.TypeDecorator):
+            impl = sqlalchemy.types.VARCHAR
+            cache_ok = True
+
+        class CustomJSONSchemaToSQL(JSONSchemaToSQL):
+            @override
+            def to_sql_column(
+                self,
+                name,
+                schema: dict,
+                *,
+                required: bool,
+                key_properties: list[str],
+            ) -> sqlalchemy.Column:
+                col = super().to_sql_column(
+                    name,
+                    schema,
+                    required=required,
+                    key_properties=key_properties,
+                )
+                if col.nullable:
+                    col.type = NullableMarker(col.type)
+                return col
+
+        json_schema_to_sql = CustomJSONSchemaToSQL()
+
+        nullable_result = json_schema_to_sql.to_sql_column(
+            "prop",
+            {"type": ["string", "null"]},
+            required=False,
+            key_properties=[],
+        )
+        assert nullable_result.nullable is True
+        assert isinstance(nullable_result.type, NullableMarker)
+
+        non_nullable_result = json_schema_to_sql.to_sql_column(
+            "prop",
+            {"type": "string"},
+            required=True,
+            key_properties=["prop"],
+        )
+        assert non_nullable_result.nullable is False
+        assert not isinstance(non_nullable_result.type, NullableMarker)
+
     def test_unknown_format(self, json_schema_to_sql: JSONSchemaToSQL):
         jsonschema_type = {"type": "string", "format": "unknown"}
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
@@ -972,6 +1063,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
 
     def test_custom_handle_raw_string(self):
         class CustomJSONSchemaToSQL(JSONSchemaToSQL):
+            @override
             def handle_raw_string(self, schema):
                 if schema.get("contentMediaType") == "image/png":
                     return sqlalchemy.LargeBinary()
