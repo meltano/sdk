@@ -13,6 +13,7 @@ from functools import lru_cache
 
 import sqlalchemy as sa
 import sqlalchemy.types
+from sqlalchemy import event
 from sqlalchemy.engine import reflection
 from sqlalchemy.sql import ddl
 
@@ -617,6 +618,7 @@ class SQLConnector:  # noqa: PLR0904
         self._config = config or {}
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
         self._tables_prepared: dict[str, bool] = {}
+        self._cached_inspector: reflection.Inspector | None = None
 
     @property
     def config(self) -> Mapping[str, t.Any]:
@@ -873,7 +875,45 @@ class SQLConnector:  # noqa: PLR0904
         """
         if not self._cached_engine:
             self._cached_engine = self.create_engine()
+            event.listen(
+                self._cached_engine,
+                "after_cursor_execute",
+                self._clear_reflection_cache_after_ddl,
+            )
         return self._cached_engine
+
+    @property
+    def _inspector(self) -> reflection.Inspector:
+        """Cached SQLAlchemy inspector for this connector."""
+        if self._cached_inspector is None:
+            self._cached_inspector = sa.inspect(self._engine)
+        return self._cached_inspector
+
+    def clear_reflection_cache(self) -> None:
+        """Clear cached SQLAlchemy reflection state, if an inspector exists."""
+        if self._cached_inspector is None:
+            return
+
+        clear_cache = getattr(self._cached_inspector, "clear_cache", None)
+        if clear_cache:
+            clear_cache()
+            return
+
+        self._cached_inspector.info_cache.clear()
+
+    def _clear_reflection_cache_after_ddl(
+        self,
+        _conn: sa.Connection,
+        _cursor: object,
+        statement: str,
+        _parameters: object,
+        _context: object,
+        _executemany: bool,
+    ) -> None:
+        """Clear cached reflection state after SQLAlchemy DDL executes."""
+        statement_prefix = statement.lstrip().partition(" ")[0].upper()
+        if statement_prefix in {"ALTER", "CREATE", "DROP"}:
+            self.clear_reflection_cache()
 
     def create_engine(self) -> sa.Engine:
         """Creates and returns a new engine. Do not call outside of _engine.
@@ -1187,7 +1227,7 @@ class SQLConnector:  # noqa: PLR0904
         """
         _, schema_name, table_name = self.parse_full_table_name(full_table_name)
 
-        return sa.inspect(self._engine).has_table(table_name, schema_name)
+        return self._inspector.has_table(table_name, schema_name)
 
     def schema_exists(self, schema_name: str) -> bool:
         """Determine if the target database schema already exists.
@@ -1198,7 +1238,7 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             True if the database schema exists, False if not.
         """
-        schemas = set(sa.inspect(self._engine).get_schema_names())
+        schemas = set(self._inspector.get_schema_names())
         return schema_name in schemas
 
     def get_table_columns(
@@ -1216,8 +1256,7 @@ class SQLConnector:  # noqa: PLR0904
             An ordered list of column objects.
         """
         _, schema_name, table_name = self.parse_full_table_name(full_table_name)
-        inspector = sa.inspect(self._engine)
-        columns = inspector.get_columns(table_name, schema_name)
+        columns = self._inspector.get_columns(table_name, schema_name)
 
         columns_dict: dict[str, sa.Column] = {
             col_meta["name"]: sa.Column(
