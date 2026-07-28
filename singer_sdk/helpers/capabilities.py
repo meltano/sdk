@@ -335,7 +335,7 @@ TARGET_LOAD_METHOD_CONFIG = PropertiesList(
             TargetLoadMethods.APPEND_ONLY,
             TargetLoadMethods.UPSERT,
             TargetLoadMethods.OVERWRITE,
-        ],  # ty:ignore[invalid-argument-type]
+        ],
         default=TargetLoadMethods.APPEND_ONLY,
     ),
 ).to_dict()
