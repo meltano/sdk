@@ -151,7 +151,8 @@ def test_handle_invalid_timestamp_in_record(
     record = {"created_at": value}
     key_breadcrumb = ["created_at"]
     datelike_typename = "datetime"
-    ex = ValueError("invalid timestamp")
+    value_err = ValueError("invalid timestamp")
+    type_err = TypeError("can not convert to timestamp")
     logger = logging.getLogger("test-logger")
 
     handle_val = partial(
@@ -160,7 +161,6 @@ def test_handle_invalid_timestamp_in_record(
         key_breadcrumb=key_breadcrumb,
         invalid_value=value,
         datelike_typename=datelike_typename,
-        ex=ex,
         logger=logger,
     )
 
@@ -168,19 +168,34 @@ def test_handle_invalid_timestamp_in_record(
         subtests.test("default treatment"),
         pytest.raises(ValueError, match=r"Could not parse value.*"),
     ):
-        handle_val(treatment=None)
+        handle_val(treatment=None, ex=value_err)
 
     with (
         subtests.test("error"),
-        pytest.raises(ValueError, match=r"Could not parse value.*"),
+        pytest.raises(ValueError, match=r"Could not parse value.*") as exc_info,
     ):
-        handle_val(treatment=DatetimeErrorTreatmentEnum.ERROR)
+        handle_val(treatment=DatetimeErrorTreatmentEnum.ERROR, ex=value_err)
+
+    assert isinstance(exc_info.value.__cause__, ValueError)
+    assert str(exc_info.value.__cause__) == "invalid timestamp"
+
+    with (
+        subtests.test("error"),
+        pytest.raises(ValueError, match=r"Could not parse value.*") as exc_info,
+    ):
+        handle_val(treatment=DatetimeErrorTreatmentEnum.ERROR, ex=type_err)
+
+    assert isinstance(exc_info.value.__cause__, TypeError)
+    assert str(exc_info.value.__cause__) == "can not convert to timestamp"
 
     with (
         subtests.test("max (datetime)"),
         caplog.at_level(logging.INFO, logger=logger.name),
     ):
-        assert isinstance(handle_val(treatment=DatetimeErrorTreatmentEnum.MAX), str)
+        assert isinstance(
+            handle_val(treatment=DatetimeErrorTreatmentEnum.MAX, ex=value_err),
+            str,
+        )
 
     with (
         subtests.test("max (time)"),
@@ -190,6 +205,7 @@ def test_handle_invalid_timestamp_in_record(
             handle_val(
                 treatment=DatetimeErrorTreatmentEnum.MAX,
                 datelike_typename="time",
+                ex=value_err,
             ),
             str,
         )
@@ -199,5 +215,11 @@ def test_handle_invalid_timestamp_in_record(
         subtests.test("null"),
         caplog.at_level(logging.INFO, logger=logger.name),
     ):
-        assert handle_val(treatment=DatetimeErrorTreatmentEnum.NULL) is None
+        assert (
+            handle_val(
+                treatment=DatetimeErrorTreatmentEnum.NULL,
+                ex=value_err,
+            )
+            is None
+        )
         assert "Replacing with NULL." in caplog.text

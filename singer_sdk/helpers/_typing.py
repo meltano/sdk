@@ -248,18 +248,18 @@ def handle_invalid_timestamp_in_record(
     """Apply treatment or raise an error for invalid time values."""
     treatment = treatment or conform.DatetimeErrorTreatmentEnum.ERROR
     msg = (
-        f"Could not parse value '{invalid_value}' for "
-        f"field '{':'.join(key_breadcrumb)}'."
+        f"Could not parse value '{invalid_value!r}' for "
+        f"field '{'.'.join(key_breadcrumb)}'"
     )
     if treatment == conform.DatetimeErrorTreatmentEnum.MAX:
-        logger.warning("%s. Replacing with MAX value.\n%s\n", msg, ex)
+        logger.warning("%s: %s. Replacing with MAX value.", msg, ex)
         return _MAX_TIMESTAMP if datelike_typename != "time" else _MAX_TIME
 
     if treatment == conform.DatetimeErrorTreatmentEnum.NULL:
-        logger.warning("%s. Replacing with NULL.\n%s\n", msg, ex)
+        logger.warning("%s: %s. Replacing with NULL.", msg, ex)
         return None
 
-    raise ValueError(msg)
+    raise ValueError(msg) from ex
 
 
 def is_string_array_type(type_dict: dict) -> bool:
