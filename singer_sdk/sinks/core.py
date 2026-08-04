@@ -606,7 +606,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
                             date_val = date_fromisoformat(date_val)
                         else:
                             date_val = datetime_fromisoformat(date_val)
-                except ValueError as ex:
+                except (ValueError, TypeError) as ex:
                     date_val = handle_invalid_timestamp_in_record(
                         record,
                         [key],
