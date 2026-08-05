@@ -5,6 +5,7 @@ ci:
   autoupdate_commit_msg: 'chore: pre-commit autoupdate'
   skip:
   - uv-audit
+  - uv-lock
 
 default_language_version:
   python: python3.14

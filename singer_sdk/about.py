@@ -32,7 +32,7 @@ __all__ = [
 
 # Keep these in sync with the supported Python versions in pyproject.toml
 _PY_MIN_VERSION = 10
-_PY_MAX_VERSION = 14
+_PY_MAX_VERSION = 15
 
 
 def _get_min_version(specifiers: SpecifierSet) -> int:
