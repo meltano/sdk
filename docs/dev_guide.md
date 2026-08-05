@@ -187,7 +187,7 @@ The following [extra features](https://packaging.python.org/en/latest/specificat
 ### BATCH file format implementations
 
 - `arrow` - Enables Arrow IPC as [BATCH encoding](batch.md#encoding).
-- `parquet` - Enables as [BATCH encoding](batch.md#encoding).
+- `parquet` - Enables Parquet as a [BATCH encoding](batch.md#encoding).
 
 ## Resources
 
