@@ -14,8 +14,12 @@ import requests
 import requests_mock.adapter as requests_mock_adapter
 
 from singer_sdk.exceptions import (
+    EndOfStreamError,
     FatalAPIError,
     InvalidReplicationKeyException,
+    SingerSDKError,
+    SkippableSyncError,
+    SyncError,
 )
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._compat import datetime_fromisoformat as parse
@@ -837,3 +841,99 @@ def test_state_partitioning_keys_class_variable(
         stream.state_manager.get_state_partition_context(original_context)
         == expected_context
     )
+
+
+def test_end_of_stream_error_skips_partition(tap: Tap):
+    """Raising EndOfStreamError in get_records should skip that partition only.
+
+    Verifies the partition-level try/except in Stream._sync_records: records
+    from healthy partitions are emitted while the failing partition is skipped.
+    """
+
+    class PartitionedStream(SimpleTestStream):
+        @property
+        def partitions(self) -> list[dict]:  # type: ignore[override]
+            return [{"repo": "good"}, {"repo": "broken"}, {"repo": "also-good"}]
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,
+        ) -> t.Generator[dict, None, None]:
+            if context and context["repo"] == "broken":
+                msg = "Simulated partition error."
+                raise EndOfStreamError(msg)
+            yield {"id": 1, "value": "test", "updatedAt": "2021-01-01T00:00:00Z"}
+
+    stream = PartitionedStream(tap)
+    records = list(stream._sync_records(write_messages=False))
+    assert len(records) == 2  # good + also-good emitted; broken skipped
+
+
+def test_end_of_stream_error_skips_stream(tap_class: type[SimpleTestTap]):
+    """Raising EndOfStreamError in sync should skip that stream only.
+
+    Verifies the stream-level try/except in Tap.sync_all: the failing stream
+    is skipped while remaining streams continue to sync normally.
+    """
+    synced_streams: list[str] = []
+
+    class GoodStream(SimpleTestStream):
+        name = "good_stream"
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,  # noqa: ARG002
+        ) -> t.Generator[dict, None, None]:
+            synced_streams.append(self.name)
+            yield {"id": 1, "value": "test", "updatedAt": "2021-01-01T00:00:00Z"}
+
+    class BrokenStream(SimpleTestStream):
+        name = "broken_stream"
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,  # noqa: ARG002
+        ) -> t.Generator[dict, None, None]:
+            msg = "Simulated stream error."
+            raise EndOfStreamError(msg)
+            yield  # noqa: unreachable
+
+        def sync(self) -> None:  # type: ignore[override]
+            msg = "Simulated stream error."
+            raise EndOfStreamError(msg)
+
+    class AnotherGoodStream(SimpleTestStream):
+        name = "another_good_stream"
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,  # noqa: ARG002
+        ) -> t.Generator[dict, None, None]:
+            synced_streams.append(self.name)
+            yield {"id": 2, "value": "test", "updatedAt": "2021-01-01T00:00:00Z"}
+
+    class MultiStreamTap(tap_class):
+        def discover_streams(self) -> list[Stream]:
+            return [GoodStream(self), BrokenStream(self), AnotherGoodStream(self)]
+
+    tap = MultiStreamTap(
+        config={
+            "username": "utest",
+            "password": "ptest",
+            "start_date": "2021-01-01",
+        },
+        parse_env_config=False,
+    )
+    tap.sync_all()
+
+    assert "good_stream" in synced_streams
+    assert "another_good_stream" in synced_streams
+    assert "broken_stream" not in synced_streams
+
+
+def test_end_of_stream_error_hierarchy():
+    """EndOfStreamError must satisfy the expected inheritance chain."""
+
+    assert issubclass(EndOfStreamError, SkippableSyncError)
+    assert issubclass(EndOfStreamError, SyncError)
+    assert issubclass(EndOfStreamError, SingerSDKError)
