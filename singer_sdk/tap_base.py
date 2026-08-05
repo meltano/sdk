@@ -17,6 +17,7 @@ from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
     ConfigValidationError,
+    EndOfStreamError,
 )
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
@@ -510,8 +511,16 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
                 )
                 continue
 
-            stream.sync()
-            stream.finalize_state_progress_markers()
+            try:
+                stream.sync()
+                stream.finalize_state_progress_markers()
+            except EndOfStreamError as e:
+                self.logger.warning(
+                    "Skipping stream '%s': %s",
+                    stream.name,
+                    str(e),  # ruff: ignore[logging-eager-conversion]
+                )
+                continue
 
         # this second loop is needed for all streams to print out their costs
         # including child streams which are otherwise skipped in the loop above
