@@ -771,6 +771,14 @@ class TestOpenAPISchemaNormalization:
                     "AllOfSingleElement": {
                         "allOf": [{"type": "string"}],
                     },
+                    "AllOfSingleElementObject": {
+                        "allOf": [
+                            {
+                                "type": "object",
+                                "properties": {"name": {"type": "string"}},
+                            }
+                        ],
+                    },
                     "AllOfSchemas": {
                         "allOf": [
                             {
@@ -941,6 +949,16 @@ class TestOpenAPISchemaNormalization:
         schema = source.get_schema("AllOfSingleElement")
         normalized = source.preprocess_schema(schema)
         assert normalized == {"type": "string"}
+        assert "allOf" not in normalized
+
+    def test_normalize_all_of_single_object(self, source: OpenAPISchema):
+        """Test that a single-element allOf with an object schema is flattened."""
+        schema = source.get_schema("AllOfSingleElementObject")
+        normalized = source.preprocess_schema(schema)
+        assert normalized == {
+            "type": ["object", "null"],
+            "properties": {"name": {"type": ["string", "null"]}},
+        }
         assert "allOf" not in normalized
 
     def test_normalize_all_of_merge(self, source: OpenAPISchema):
