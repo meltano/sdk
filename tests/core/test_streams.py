@@ -25,14 +25,17 @@ from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMEN
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
-from tests.core.conftest import SimpleTestStream
+from tests.core.conftest import SimpleTestStream, SimpleTestTap
 
 if t.TYPE_CHECKING:
     import requests_mock
 
     from singer_sdk import Stream, Tap
     from singer_sdk.helpers.types import Context, Record
-    from tests.core.conftest import SimpleTestTap
+
+from unittest.mock import patch
+
+from singer_sdk.helpers._util import get_nested_value
 
 CONFIG_START_DATE = "2021-01-01"
 
@@ -75,7 +78,7 @@ class GraphqlTestStream(GraphQLStream):
 
 
 @pytest.fixture
-def stream(tap):
+def stream(tap: SimpleTestTap):
     """Create a new stream instance."""
     return tap.load_streams()[0]
 
@@ -507,7 +510,7 @@ def test_cached_jsonpath():
     assert recompiled is compiled
 
 
-def test_sync_costs_calculation(tap: Tap, caplog):
+def test_sync_costs_calculation(tap: Tap, caplog: pytest.LogCaptureFixture):
     """Test sync costs are added up correctly."""
     fake_request = requests.PreparedRequest()
     fake_response = requests.Response()
@@ -718,7 +721,11 @@ def test_parse_response(tap: Tap):
         ),
     ],
 )
-def test_stream_class_selection(tap_class, input_catalog, selection):
+def test_stream_class_selection(
+    tap_class: type[SimpleTestTap],
+    input_catalog: dict[str, list[t.Any]] | dict[str, list[dict[str, t.Any]]] | None,
+    selection: dict[str, bool],
+):
     """Test stream class selection."""
 
     class SelectedStream(RESTStream):
@@ -837,3 +844,185 @@ def test_state_partitioning_keys_class_variable(
         stream.state_manager.get_state_partition_context(original_context)
         == expected_context
     )
+
+
+class _FakeStateManager:
+    """Simple state manager stub that records increment_state calls."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[dict, str]] = []
+
+    def increment_state(
+        self,
+        latest_record: dict,
+        *,
+        replication_key: str,
+        **_kwargs: object,  # absorbs context= and any other kwargs silently
+    ) -> None:
+        """Record the arguments passed to increment_state for test assertions."""
+        self.calls.append((latest_record, replication_key))
+
+
+"""Tests for nested replication key support - Issue #1198."""
+
+SALESFORCE_RECORD = {
+    "Id": "0015g00000XyZaAAB",
+    "Name": "Acme Corp",
+    "SystemModstamp": "2024-03-15T10:30:00.000Z",  # flat key — existing behavior
+    "attributes": {
+        "type": "Account",
+        "updated": "2024-03-15T10:30:00.000Z",  # nested key — new behavior
+    },
+}
+
+HUBSPOT_RECORD = {
+    "id": "701",
+    "properties": {
+        "createdate": "2024-01-01T00:00:00.000Z",
+        "hs_lastmodifieddate": "2024-06-01T08:45:22.000Z",  # nested timestamp
+        "dealname": "Enterprise Deal",
+    },
+}
+
+GITHUB_RECORD = {
+    "id": 188271,
+    "title": "Support nested replication keys",
+    "updated_at": "2024-06-15T14:22:10Z",  # flat key — existing behavior
+    "user": {
+        "login": "daria-hrabar",
+        "updated_at": "2024-05-01T09:00:00Z",  # nested key — new behavior
+    },
+}
+
+DEEP_NESTED_RECORD = {
+    "id": 42,
+    "meta": {
+        "audit": {
+            "last_modified": "2024-04-20T16:00:00Z",  # 3 levels deep nested key
+        }
+    },
+}
+
+
+def test_flat_replication_key_unchanged() -> None:
+    """Flat keys must behave exactly as before — no regression."""
+    result = get_nested_value(GITHUB_RECORD, "updated_at")
+    assert result == "2024-06-15T14:22:10Z"
+
+
+def test_two_level_nested_key() -> None:
+    """Dotted path traverses two levels to retrieve a nested timestamp."""
+    result = get_nested_value(HUBSPOT_RECORD, "properties.hs_lastmodifieddate")
+    assert result == "2024-06-01T08:45:22.000Z"
+
+
+def test_two_level_nested_key_salesforce() -> None:
+    """Dotted path works for Salesforce-style nested attributes."""
+    result = get_nested_value(SALESFORCE_RECORD, "attributes.updated")
+    assert result == "2024-03-15T10:30:00.000Z"
+
+
+def test_three_level_nested_key() -> None:
+    """Dotted path traverses three levels."""
+    result = get_nested_value(DEEP_NESTED_RECORD, "meta.audit.last_modified")
+    assert result == "2024-04-20T16:00:00Z"
+
+
+# Edge case tests
+
+
+def test_missing_final_key_returns_none() -> None:
+    """Returns None when the final key does not exist."""
+    result = get_nested_value(HUBSPOT_RECORD, "properties.nonexistent_field")
+    assert result is None
+
+
+def test_missing_intermediate_key_returns_none() -> None:
+    """Returns None when an intermediate key does not exist."""
+    result = get_nested_value(GITHUB_RECORD, "organization.updated_at")
+    assert result is None
+
+
+def test_intermediate_value_not_a_dict_returns_none() -> None:
+    """Returns None when an intermediate value is a string, not a dict."""
+    record = {"attributes": "corrupted-string"}
+    result = get_nested_value(record, "attributes.updated")
+    assert result is None
+
+
+def test_empty_record_returns_none() -> None:
+    """Returns None when the record is completely empty."""
+    result = get_nested_value({}, "attributes.updated")
+    assert result is None
+
+
+def test_none_intermediate_value_returns_none() -> None:
+    """Returns None when an intermediate key exists but holds None."""
+    record = {"properties": None}
+    result = get_nested_value(record, "properties.hs_lastmodifieddate")
+    assert result is None
+
+
+def test_get_nested_value_integer_intermediate_returns_none() -> None:
+    """Returns None when intermediate value is an integer, not a dict."""
+    record = {"attributes": 42}
+    result = get_nested_value(record, "attributes.updated")
+    assert result is None
+
+
+def test_invalid_nested_replication_key_raises(tap: SimpleTestTap) -> None:
+    """InvalidReplicationKeyException raised when nested key missing from schema."""
+
+    class NestedKeyInvalidStream(SimpleTestStream):
+        """Stream with a nested replication key not present in schema."""
+
+        replication_key = "attributes.nonexistent"
+
+    stream = NestedKeyInvalidStream(tap)
+
+    with pytest.raises(
+        InvalidReplicationKeyException,
+        match=(
+            f"Field '{stream.replication_key}' is not in schema for stream "
+            f"'{stream.name}'"
+        ),
+    ):
+        _ = stream.is_timestamp_replication_key
+
+
+def test_increment_stream_state_flat_key(tap: SimpleTestTap) -> None:
+    """Flat replication keys pass the original record unchanged to state manager."""
+    stream = tap.streams["test"]
+    fake_state_manager = _FakeStateManager()
+
+    record = {"id": 1, "value": "x", "updatedAt": "2024-06-15T14:22:10Z"}
+
+    with patch.object(type(stream), "state_manager", new=fake_state_manager):
+        stream._increment_stream_state(record, context=None)
+
+    assert len(fake_state_manager.calls) == 1
+    passed_record, passed_key = fake_state_manager.calls[0]
+    assert passed_record == record
+    assert passed_key == "updatedAt"
+
+
+def test_increment_stream_state_nested_key(tap: SimpleTestTap) -> None:
+    """Nested replication keys pass a flattened record to the state manager."""
+
+    class NestedStream(SimpleTestStream):
+        """Stream with a nested replication key for testing state increment."""
+
+        replication_key = "meta.audit.last_modified"
+
+    stream = NestedStream(tap)
+    fake_state_manager = _FakeStateManager()
+
+    record = {"id": 1, "meta": {"audit": {"last_modified": "2024-04-20T16:00:00Z"}}}
+
+    with patch.object(type(stream), "state_manager", new=fake_state_manager):
+        stream._increment_stream_state(record, context=None)
+
+    assert len(fake_state_manager.calls) == 1
+    passed_record, passed_key = fake_state_manager.calls[0]
+    assert passed_record == {"meta.audit.last_modified": "2024-04-20T16:00:00Z"}
+    assert passed_key == "meta.audit.last_modified"

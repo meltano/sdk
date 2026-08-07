@@ -12,6 +12,8 @@ import simplejson
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import StrPath
 
+from collections.abc import Mapping
+
 
 def dump_json(obj: t.Any, **kwargs: t.Any) -> str:  # noqa: ANN401
     """Dump json data to a file.
@@ -73,3 +75,45 @@ def read_json_file(path: StrPath) -> dict[str, t.Any]:
 def utc_now() -> datetime.datetime:
     """Return current time in UTC."""
     return datetime.datetime.now(datetime.timezone.utc)
+
+
+def get_nested_value(
+    record: t.Mapping[str, t.Any],
+    dotted_key: str,
+    *,
+    missing: object | None = None,
+) -> t.Any | None:  # noqa: ANN401
+    """Retrieve a value from a nested mapping using a dotted key path.
+
+    Args:
+        record: The record mapping to traverse.
+        dotted_key: A dot-separated key path (e.g. ``"attributes.updated"``).
+        missing: Sentinel value to return when any level in the path is missing.
+            Defaults to ``None`` for backward-compatible behavior.
+
+    Returns:
+        The value at the nested path if it exists. If any level in the path is
+        missing, returns ``missing`` instead. This allows callers to distinguish
+        between an explicitly stored ``None`` value and a missing path by passing
+        a dedicated sentinel (e.g. ``missing=object()``).
+
+    Examples:
+        >>> get_nested_value({"a": {"b": 1}}, "a.b")
+        1
+        >>> get_nested_value({"a": 1}, "a.b")
+        None
+        >>> sentinel = object()
+        >>> get_nested_value({"a": 1}, "a.b", missing=sentinel) is sentinel
+        True
+        >>> get_nested_value({"a": {"b": None}}, "a.b", missing=sentinel) is None
+        True
+    """
+    keys = dotted_key.split(".")
+    current: t.Any = record
+    for key in keys:
+        if not isinstance(current, Mapping):
+            return missing
+        if key not in current:
+            return missing
+        current = current[key]
+    return current
