@@ -359,7 +359,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
 
         # If the allOf array has only one element, just flatten it.
         if len(subschemas) == 1:
-            return subschemas[0]  # type: ignore[no-any-return]
+            return self.normalize_schema(subschemas[0])
 
         # TODO: merge subschemas:
         # - Taking the most restrictive constraints for each property
