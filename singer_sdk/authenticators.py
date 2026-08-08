@@ -639,8 +639,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
-        refresh_token = token_json.get("refresh_token")
-        if refresh_token:
+        if refresh_token := token_json.get("refresh_token"):
             self.refresh_token = refresh_token
         expiration = token_json.get("expires_in", self._default_expiration)
         self.expires_in = int(expiration) if expiration else None
