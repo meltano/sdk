@@ -7,6 +7,7 @@ import logging
 import sys
 import typing as t
 from io import StringIO
+from textwrap import dedent
 
 import pytest
 
@@ -142,6 +143,16 @@ class TestStructuredFormatter:
         assert "function" in frame
         assert "lineno" in frame
         assert "raise ValueError(msg)" in frame["line"]
+
+        assert dedent("".join(frame["lines"])) == dedent(
+            """\
+            try:
+                msg = "Test exception"
+                raise ValueError(msg)  # noqa: TRY301
+            except ValueError:
+                logger.exception("Error occurred", extra={"error_code": 500})
+            """
+        )
 
     def test_with_chained_exception(self, make_logger: LoggerFactory):
         """Test that StructuredFormatter handles exception chaining properly."""
