@@ -1083,12 +1083,15 @@ class SQLConnector:  # noqa: PLR0904
         self,
         *,
         exclude_schemas: t.Sequence[str] = (),
+        filter_schemas: t.Sequence[str] = (),
         reflect_indices: bool = True,
     ) -> list[dict]:
         """Return a list of catalog entries from discovery.
 
         Args:
             exclude_schemas: A list of schema names to exclude from discovery.
+            filter_schemas: A list of schema names to include in discovery. If empty,
+                all available schemas are discovered.
             reflect_indices: Whether to reflect indices to detect potential primary
                 keys.
 
@@ -1102,7 +1105,10 @@ class SQLConnector:  # noqa: PLR0904
             (reflection.ObjectKind.TABLE, False),
             (reflection.ObjectKind.ANY_VIEW, True),
         )
+        included_schemas = set(filter_schemas)
         for schema_name in self.get_schema_names(engine, inspected):
+            if included_schemas and schema_name not in included_schemas:
+                continue
             if schema_name in exclude_schemas:
                 continue
 
