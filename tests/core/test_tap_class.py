@@ -79,6 +79,24 @@ def test_config_errors(
         assert exc.value.errors == errors
 
 
+def test_config_errors_for_invalid_date_time_format(tap_class: type[Tap]):
+    with pytest.raises(ConfigValidationError, match="Config validation failed") as exc:
+        tap_class(
+            config={
+                "username": "utest",
+                "password": "ptest",
+                "start_date": "not-a-date",
+            },
+            validate_config=True,
+        )
+
+    assert len(exc.value.errors) == 1
+    error = exc.value.errors[0]
+    assert "not-a-date" in error
+    assert "date-time" in error
+    assert "config['start_date']" in error
+
+
 def test_cli(tap_class: type[Tap]):
     """Test the CLI."""
     runner = CliRunner()
