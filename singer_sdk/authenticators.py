@@ -80,12 +80,9 @@ class SingletonMeta(type):
         Returns:
             A singleton instance of the derived class.
         """
-        if cls.__single_instance:
-            return cls.__single_instance  # type: ignore[unreachable]
-        single_obj = cls.__new__(cls, None)  # type: ignore[call-overload]
-        single_obj.__init__(*args, **kwargs)
-        cls.__single_instance = single_obj
-        return single_obj
+        if cls.__single_instance is None:
+            cls.__single_instance = super().__call__(*args, **kwargs)
+        return cls.__single_instance
 
 
 def _get_stream_param(*args: t.Any, **kwargs: t.Any) -> _HTTPStream | None:
