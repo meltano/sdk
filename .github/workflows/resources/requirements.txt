@@ -1,4 +1,4 @@
 griffecli~=2.1
 nox==2026.7.11
-prek==0.4.11
-twine==6.2.0
+prek==0.4.12
+twine==7.0.0
