@@ -932,10 +932,11 @@ def test_end_of_stream_error_skips_stream(tap_class: type[SimpleTestTap]):
 
 
 def test_end_of_stream_error_empty_partition_list(tap: Tap):
-    """Sync on a stream with no partitions should complete without emitting records.
+    """Sync on a stream with empty partitions falls back to a single default context.
 
-    Verifies that when partitions returns an empty list, the sync completes
-    normally without raising and without emitting any records.
+    Verifies that when partitions returns an empty list, the SDK treats the
+    stream as unpartitioned and runs get_records once with an empty context,
+    emitting records normally without raising.
     """
 
     class EmptyPartitionStream(SimpleTestStream):
@@ -953,7 +954,7 @@ def test_end_of_stream_error_empty_partition_list(tap: Tap):
 
     stream = EmptyPartitionStream(tap)
     records = list(stream._sync_records(write_messages=False))
-    assert records == []
+    assert len(records) == 1
 
 
 def test_end_of_stream_error_no_streams(tap_class: type[SimpleTestTap]):
