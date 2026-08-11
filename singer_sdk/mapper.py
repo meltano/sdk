@@ -608,7 +608,7 @@ class CustomStreamMap(StreamMap):
                     except jsonschema.SchemaError as ex:
                         msg = (
                             "Invalid JSON Schema for typed stream map "
-                            f"'{self.stream_alias}:{prop_key}': {ex.message}"
+                            f"'{self.stream_alias}:{prop_key}': {ex}"
                         )
                         raise StreamMapConfigError(msg) from ex
 

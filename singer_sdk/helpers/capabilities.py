@@ -108,7 +108,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
                         ObjectType(
                             Property(
                                 "expr",
-                                StringType,
+                                StringType(),
                                 required=True,
                                 description="Expression used to compute the property.",
                             ),
