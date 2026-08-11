@@ -474,6 +474,9 @@ def test_uuid_transforms(
                 "is_v5": f"check_uuid('{source_uuid}', version=5)",
                 "invalid_uuid": "check_uuid('invalid')",
                 "non_string_uuid": "check_uuid(123)",
+                "empty_uuid": "check_uuid('')",
+                "none_uuid": "check_uuid(None)",
+                "non_ascii_uuid": "check_uuid('☃')",
                 "__else__": None,
             },
             "nested_jellybean": {"id": "uuid4()"},
@@ -495,6 +498,9 @@ def test_uuid_transforms(
         "is_v5": False,
         "invalid_uuid": False,
         "non_string_uuid": False,
+        "empty_uuid": False,
+        "none_uuid": False,
+        "non_ascii_uuid": False,
     }
     assert json.loads(json.dumps(generated_record)) == generated_record
     assert (
@@ -505,6 +511,9 @@ def test_uuid_transforms(
             Property("is_v5", BooleanType),
             Property("invalid_uuid", BooleanType),
             Property("non_string_uuid", BooleanType),
+            Property("empty_uuid", BooleanType),
+            Property("none_uuid", BooleanType),
+            Property("non_ascii_uuid", BooleanType),
         ).to_dict()
     )
     assert (
