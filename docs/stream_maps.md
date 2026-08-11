@@ -184,6 +184,29 @@ one-way hash algorithm above, define those config arguments within the optional
 `stream_map_config` setting. Values defined in `stream_map_config` will be available
 to expressions using the `config` dictionary.
 
+### Setting the JSON Schema for a Mapped Property
+
+The SDK normally infers a mapped property's JSON Schema from its expression. For
+expressions whose result cannot be inferred, define the mapping as an object containing
+an `expr` string and the JSON Schema keywords for the resulting value:
+
+```yaml
+stream_maps:
+  customers:
+    is_gmail:
+      expr: "'@gmail.com' in owner_email"
+      type: [boolean]
+    tags:
+      expr: "[tag['name'] for tag in source_tags]"
+      type: [array, "null"]
+      items:
+        type: [string, "null"]
+```
+
+The `expr` value is evaluated exactly like an existing string mapping. The remaining
+keys must form a valid JSON Schema and are copied to the mapped property's schema.
+String and `null` mapping definitions remain fully supported.
+
 ### Constructing Expressions
 
 Expressions are defined and parsed using the

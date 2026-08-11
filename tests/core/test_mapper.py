@@ -16,7 +16,7 @@ import pytest
 import time_machine
 from typing_extensions import override
 
-from singer_sdk.exceptions import MapExpressionError
+from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
 from singer_sdk.singerlib import Catalog
 from singer_sdk.streams.core import Stream
@@ -457,6 +457,99 @@ def test_map_transforms(
         sample_stream=sample_stream,
         sample_catalog_obj=sample_catalog_obj,
     )
+
+
+def test_typed_property_transforms(
+    sample_stream,
+    sample_catalog_obj,
+    stream_map_config,
+):
+    boolean_definition = {
+        "expr": "foo == 'bar'",
+        "type": ["boolean"],
+        "description": "Whether the source value is bar.",
+    }
+    output, output_schemas = _run_transform(
+        stream_maps={
+            "singular": {
+                "is_bar": boolean_definition,
+                "values": {
+                    "expr": "[foo, None]",
+                    "type": ["array", "null"],
+                    "items": {"type": ["string", "null"]},
+                },
+                "__else__": None,
+            },
+        },
+        stream_map_config=stream_map_config,
+        sample_stream=sample_stream,
+        sample_catalog_obj=sample_catalog_obj,
+    )
+
+    assert output["singular"] == [{"is_bar": True, "values": ["bar", None]}]
+    assert output_schemas["singular"]["properties"] == {
+        "is_bar": {
+            "type": ["boolean"],
+            "description": "Whether the source value is bar.",
+        },
+        "values": {
+            "type": ["array", "null"],
+            "items": {"type": ["string", "null"]},
+        },
+    }
+    assert boolean_definition == {
+        "expr": "foo == 'bar'",
+        "type": ["boolean"],
+        "description": "Whether the source value is bar.",
+    }
+
+
+def test_typed_property_passes_plugin_config_validation():
+    tap = MappedTap(
+        config={
+            "stream_maps": {
+                "mystream": {
+                    "is_positive": {
+                        "expr": "count > 0",
+                        "type": ["boolean"],
+                    },
+                },
+            },
+        },
+        validate_config=True,
+    )
+
+    assert tap.config["stream_maps"]["mystream"]["is_positive"] == {
+        "expr": "count > 0",
+        "type": ["boolean"],
+    }
+
+
+@pytest.mark.parametrize(
+    "property_definition, match",
+    [
+        ({"type": ["boolean"]}, "must include a string 'expr' value"),
+        ({"expr": 42, "type": ["integer"]}, "must include a string 'expr' value"),
+        (
+            {"expr": "foo", "type": "not-a-json-schema-type"},
+            "Invalid JSON Schema",
+        ),
+    ],
+)
+def test_invalid_typed_property_transform(
+    property_definition,
+    match,
+    sample_stream,
+    sample_catalog_obj,
+    stream_map_config,
+):
+    with pytest.raises(StreamMapConfigError, match=match):
+        _run_transform(
+            stream_maps={"singular": {"mapped": property_definition}},
+            stream_map_config=stream_map_config,
+            sample_stream=sample_stream,
+            sample_catalog_obj=sample_catalog_obj,
+        )
 
 
 def test_clone_and_alias_transforms(

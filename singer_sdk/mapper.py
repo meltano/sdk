@@ -17,6 +17,7 @@ import logging
 import sys
 import typing as t
 
+import jsonschema
 import simpleeval
 
 import singer_sdk.typing as th
@@ -572,7 +573,7 @@ class CustomStreamMap(StreamMap):
 
         stream_map_parsed: list[tuple[str, str | None, ast.Expr | None]] = []
         for prop_key, prop_def in list(stream_map.items()):
-            if prop_def in {None, NULL_STRING}:
+            if prop_def is None or prop_def == NULL_STRING:
                 if prop_key in (self.transformed_key_properties or []):
                     msg = (
                         f"Removing key property '{prop_key}' is not permitted in "
@@ -590,29 +591,49 @@ class CustomStreamMap(StreamMap):
                         if item != prop_key
                     ]
                 stream_map_parsed.append((prop_key, prop_def, None))
-            elif isinstance(prop_def, str):
-                default_type: th.JSONTypeHelper = th.StringType()  # Fallback to string
-                existing_schema: dict = (
-                    # Use transformed schema if available
-                    transformed_schema["properties"].get(prop_key, {})
-                    # ...or original schema for passthrough
-                    or self.raw_schema["properties"].get(prop_def, {})
-                )
-                if existing_schema:
-                    # Set default type if property exists already in JSON Schema
-                    default_type = th.CustomType(existing_schema)
+            elif isinstance(prop_def, (str, dict)):
+                if isinstance(prop_def, dict):
+                    typed_prop_def = copy.deepcopy(prop_def)
+                    expression = typed_prop_def.pop("expr", None)
+                    if not isinstance(expression, str):
+                        msg = (
+                            "Typed stream map for "
+                            f"'{self.stream_alias}:{prop_key}' must include a string "
+                            "'expr' value."
+                        )
+                        raise StreamMapConfigError(msg)
 
-                transformed_schema["properties"].update(
-                    th.Property(
-                        prop_key,
-                        self._eval_type(prop_def, default=default_type),
-                    ).to_dict(),
-                )
+                    try:
+                        th.DEFAULT_JSONSCHEMA_VALIDATOR.check_schema(typed_prop_def)
+                    except jsonschema.SchemaError as ex:
+                        msg = (
+                            "Invalid JSON Schema for typed stream map "
+                            f"'{self.stream_alias}:{prop_key}': {ex.message}"
+                        )
+                        raise StreamMapConfigError(msg) from ex
+
+                    transformed_schema["properties"][prop_key] = typed_prop_def
+                else:
+                    expression = prop_def
+                    default_type: th.JSONTypeHelper = th.StringType()
+                    existing_schema: dict = transformed_schema["properties"].get(
+                        prop_key, {}
+                    ) or self.raw_schema["properties"].get(expression, {})
+                    if existing_schema:
+                        default_type = th.CustomType(existing_schema)
+
+                    transformed_schema["properties"].update(
+                        th.Property(
+                            prop_key,
+                            self._eval_type(expression, default=default_type),
+                        ).to_dict(),
+                    )
+
                 try:
-                    parsed_def: ast.Expr = ast.parse(prop_def).body[0]  # type: ignore[assignment]
-                    stream_map_parsed.append((prop_key, prop_def, parsed_def))
+                    parsed_def: ast.Expr = ast.parse(expression).body[0]  # type: ignore[assignment]
+                    stream_map_parsed.append((prop_key, expression, parsed_def))
                 except (SyntaxError, IndexError) as ex:
-                    msg = f"Failed to parse expression {prop_def}."
+                    msg = f"Failed to parse expression {expression}."
                     raise MapExpressionError(msg) from ex
 
             else:
