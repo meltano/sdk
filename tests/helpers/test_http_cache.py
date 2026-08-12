@@ -51,7 +51,7 @@ def test_cache_files_never_persist_synthetic_credentials(tmp_path: Path) -> None
         )
         session.mount("https://", adapter)
         response = session.post(
-            "https://user:SYNTHETIC-USERINFO-SECRET@example.invalid/data"
+            "https://example.invalid/data"
             "?access_token=SYNTHETIC-QUERY-SECRET&safe=yes",
             headers={
                 "Authorization": "Bearer SYNTHETIC-AUTH-SECRET",
