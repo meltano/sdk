@@ -63,7 +63,10 @@ def _strip_url(url: str | None) -> str | None:
         ],
         doseq=True,
     )
-    return urlunsplit((parts.scheme, parts.netloc, parts.path, query, parts.fragment))
+    # urlsplit().hostname drops userinfo but normalising the host can alter IPv6;
+    # removing everything through the last `@` preserves the host and port exactly.
+    netloc = parts.netloc.rsplit("@", maxsplit=1)[-1]
+    return urlunsplit((parts.scheme, netloc, parts.path, query, parts.fragment))
 
 
 def _strip_json_credentials(value: object) -> object:
@@ -91,14 +94,23 @@ def _strip_request(request: PreparedRequest | None) -> None:
     if not request.body:
         return
     if content_type == "application/x-www-form-urlencoded":
-        body = (
-            request.body.decode() if isinstance(request.body, bytes) else request.body
-        )
-        request.body = urlencode([
-            (name, value)
-            for name, value in parse_qsl(body, keep_blank_values=True)
-            if name.lower() not in _SENSITIVE_PARAMETERS
-        ])
+        try:
+            body = (
+                request.body.decode()
+                if isinstance(request.body, bytes)
+                else request.body
+            )
+            request.body = urlencode([
+                (name, value)
+                for name, value in parse_qsl(
+                    body,
+                    keep_blank_values=True,
+                    strict_parsing=True,
+                )
+                if name.lower() not in _SENSITIVE_PARAMETERS
+            ])
+        except (AttributeError, TypeError, UnicodeDecodeError, ValueError):
+            request.body = None
     elif content_type == "application/json":
         try:
             body = (
@@ -108,9 +120,10 @@ def _strip_request(request: PreparedRequest | None) -> None:
             )
             request.body = json.dumps(_strip_json_credentials(json.loads(body)))
         except (TypeError, UnicodeDecodeError, json.JSONDecodeError):
-            # An unparseable body is not persisted by the sample sessions because
-            # they only cache their declared safe request methods.
-            pass
+            request.body = None
+    else:
+        # Do not guess whether opaque or unsupported bodies are credential-free.
+        request.body = None
 
 
 def sanitise_response_for_cache(
