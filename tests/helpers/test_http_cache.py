@@ -1,10 +1,20 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
+import pytest
 import requests
 
-from singer_sdk.helpers.http_cache import SafeCachedSession
+from singer_sdk.helpers.http_cache import (
+    SafeCachedSession,
+    _decode_text,
+    _strip_form_body,
+    _strip_json_body,
+    _strip_request,
+    _strip_url,
+    sanitise_response_for_cache,
+)
 
 
 class _SyntheticAdapter(requests.adapters.BaseAdapter):
@@ -103,3 +113,66 @@ def test_default_cache_is_outside_current_directory(
     with SafeCachedSession() as session:
         assert not Path(session.cache.cache_dir).is_relative_to(tmp_path)
     assert not (tmp_path / ".http_cache").exists()
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        pytest.param("text", "text", id="str"),
+        pytest.param(b"text", "text", id="bytes"),
+        pytest.param(bytearray(b"text"), "text", id="bytearray"),
+        pytest.param(b"\xff\xfe", None, id="undecodable-bytes"),
+        pytest.param(None, None, id="none"),
+        pytest.param(object(), None, id="unsupported-type"),
+    ],
+)
+def test_decode_text(value: object, expected: str | None) -> None:
+    assert _decode_text(value) == expected
+
+
+def test_empty_url_is_returned_unchanged() -> None:
+    assert not _strip_url("")
+
+
+def test_undecodable_bodies_are_dropped() -> None:
+    assert _strip_form_body(None) is None
+    assert _strip_json_body(None) is None
+
+
+def test_form_body_keeps_safe_parameters() -> None:
+    assert (
+        _strip_form_body("token=SYNTHETIC-FORM-SECRET&safe=form-kept")
+        == "safe=form-kept"
+    )
+
+
+def test_json_body_sanitises_nested_lists() -> None:
+    stripped = _strip_json_body(
+        '{"items": [{"token": "SYNTHETIC-LIST-SECRET"}, {"safe": "list-kept"}]}'
+    )
+    assert stripped is not None
+    assert json.loads(stripped) == {"items": [{}, {"safe": "list-kept"}]}
+
+
+def test_strip_request_tolerates_missing_cookie_jar() -> None:
+    request = requests.Request(
+        "GET",
+        "https://example.invalid/x?access_token=SYNTHETIC-BARE-SECRET",
+        headers={"Authorization": "Bearer SYNTHETIC-BARE-SECRET"},
+    ).prepare()
+    del request._cookies
+
+    _strip_request(request)
+
+    assert "Authorization" not in request.headers
+    assert "SYNTHETIC-BARE-SECRET" not in request.url
+
+
+def test_sanitise_response_tolerates_missing_raw() -> None:
+    response = requests.Response()
+    response.status_code = 200
+    response.url = "https://example.invalid/x?access_token=SYNTHETIC-RAW-SECRET"
+
+    assert response.raw is None
+    assert sanitise_response_for_cache(response) is response
+    assert "SYNTHETIC-RAW-SECRET" not in response.url
