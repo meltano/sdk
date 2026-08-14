@@ -3137,6 +3137,9 @@ dependencies = [
 arrow = [
     { name = "pyarrow" },
 ]
+cache = [
+    { name = "requests-cache" },
+]
 faker = [
     { name = "faker" },
 ]
@@ -3324,6 +3327,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "referencing", specifier = ">=0.30.0" },
     { name = "requests", specifier = ">=2.25.1" },
+    { name = "requests-cache", marker = "extra == 'cache'", specifier = ">=1.3" },
     { name = "s3fs", marker = "extra == 's3'", specifier = ">=2024.9.0" },
     { name = "simpleeval", specifier = "==1.0.7" },
     { name = "simplejson", specifier = ">=3.17.6" },
@@ -3333,7 +3337,7 @@ requires-dist = [
     { name = "universal-pathlib", specifier = ">=0.2.6" },
     { name = "urllib3", specifier = ">=1.26.20" },
 ]
-provides-extras = ["arrow", "faker", "jwt", "msgspec", "parquet", "s3", "sql", "ssh", "testing"]
+provides-extras = ["arrow", "cache", "faker", "jwt", "msgspec", "parquet", "s3", "sql", "ssh", "testing"]
 
 [package.metadata.requires-dev]
 benchmark = [
