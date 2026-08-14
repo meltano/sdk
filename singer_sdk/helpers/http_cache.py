@@ -1,19 +1,31 @@
-"""Safe filesystem caching for SDK sample taps."""
+"""Safe filesystem caching for SDK sample taps.
+
+Requires the optional ``requests-cache`` dependency, available as
+``singer-sdk[cache]``.
+"""
 
 from __future__ import annotations
 
 import json
+import sys
 import typing as t
 from tempfile import TemporaryDirectory
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from requests_cache import CachedSession
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 if t.TYPE_CHECKING:
     from collections.abc import Iterable, MutableMapping
     from pathlib import Path
 
     from requests import PreparedRequest, Response
+
+_HeaderValue = t.TypeVar("_HeaderValue")
 
 _SENSITIVE_HEADERS = frozenset({
     "authorization",
@@ -43,7 +55,19 @@ _SENSITIVE_PARAMETERS = frozenset({
 })
 
 
-def _strip_headers(headers: MutableMapping[str, object] | None) -> None:
+def _decode_text(value: object) -> str | None:
+    """Return ``value`` as text, or ``None`` when it is not safely decodable."""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, (bytes, bytearray)):
+        try:
+            return bytes(value).decode()
+        except UnicodeDecodeError:
+            return None
+    return None
+
+
+def _strip_headers(headers: MutableMapping[str, _HeaderValue] | None) -> None:
     if headers is None:
         return
     for name in list(headers):
@@ -51,7 +75,7 @@ def _strip_headers(headers: MutableMapping[str, object] | None) -> None:
             del headers[name]
 
 
-def _strip_url(url: str | None) -> str | None:
+def _strip_url(url: str) -> str:
     if not url:
         return url
     parts = urlsplit(url)
@@ -69,6 +93,10 @@ def _strip_url(url: str | None) -> str | None:
     return urlunsplit((parts.scheme, netloc, parts.path, query, parts.fragment))
 
 
+def _strip_optional_url(url: str | None) -> str | None:
+    return None if url is None else _strip_url(url)
+
+
 def _strip_json_credentials(value: object) -> object:
     if isinstance(value, dict):
         return {
@@ -81,46 +109,49 @@ def _strip_json_credentials(value: object) -> object:
     return value
 
 
+def _strip_form_body(body: str | None) -> str | None:
+    if body is None:
+        return None
+    try:
+        pairs = parse_qsl(body, keep_blank_values=True, strict_parsing=True)
+    except ValueError:
+        return None
+    return urlencode([
+        (name, value)
+        for name, value in pairs
+        if name.lower() not in _SENSITIVE_PARAMETERS
+    ])
+
+
+def _strip_json_body(body: str | None) -> str | None:
+    if body is None:
+        return None
+    try:
+        payload = json.loads(body)
+    except ValueError:
+        return None
+    return json.dumps(_strip_json_credentials(payload))
+
+
 def _strip_request(request: PreparedRequest | None) -> None:
     if request is None:
         return
     _strip_headers(request.headers)
-    request.url = _strip_url(request.url)
+    request.url = _strip_optional_url(request.url)
     cookies = getattr(request, "_cookies", None)
     if cookies is not None:
         cookies.clear()
 
-    content_type = request.headers.get("Content-Type", "").partition(";")[0].lower()
+    raw_content_type = _decode_text(request.headers.get("Content-Type")) or ""
+    content_type = raw_content_type.partition(";")[0].lower()
     if not request.body:
         return
+
+    body = _decode_text(request.body)
     if content_type == "application/x-www-form-urlencoded":
-        try:
-            body = (
-                request.body.decode()
-                if isinstance(request.body, bytes)
-                else request.body
-            )
-            request.body = urlencode([
-                (name, value)
-                for name, value in parse_qsl(
-                    body,
-                    keep_blank_values=True,
-                    strict_parsing=True,
-                )
-                if name.lower() not in _SENSITIVE_PARAMETERS
-            ])
-        except (AttributeError, TypeError, UnicodeDecodeError, ValueError):
-            request.body = None
+        request.body = _strip_form_body(body)
     elif content_type == "application/json":
-        try:
-            body = (
-                request.body.decode()
-                if isinstance(request.body, bytes)
-                else request.body
-            )
-            request.body = json.dumps(_strip_json_credentials(json.loads(body)))
-        except (TypeError, UnicodeDecodeError, json.JSONDecodeError):
-            request.body = None
+        request.body = _strip_json_body(body)
     else:
         # Do not guess whether opaque or unsupported bodies are credential-free.
         request.body = None
@@ -146,7 +177,7 @@ def sanitise_response_for_cache(
         raw = item.raw
         _strip_headers(getattr(raw, "headers", None))
         if hasattr(raw, "_request_url"):
-            raw._request_url = _strip_url(raw._request_url)  # noqa: SLF001
+            raw._request_url = _strip_optional_url(raw._request_url)  # noqa: SLF001
 
     _strip_request(response.next)
     return response
@@ -176,6 +207,7 @@ class SafeCachedSession(CachedSession):
         )
         self.hooks["response"].append(sanitise_response_for_cache)
 
+    @override
     def close(self) -> None:
         """Close the cache backend and remove an automatically-created cache."""
         try:
