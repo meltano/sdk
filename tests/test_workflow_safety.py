@@ -22,6 +22,17 @@ def test_external_calls_require_upstream_identity_and_all_secrets() -> None:
     ):
         assert f"secrets.{secret} != ''" in guard
 
+    skip_step = next(
+        (
+            step
+            for step in external["steps"]
+            if step.get("name") == "Report external test skip"
+        ),
+        None,
+    )
+    assert skip_step is not None
+    assert skip_step.get("if") == "env.EXTERNAL_TESTS_ENABLED != 'true'"
+
     external_steps = [
         step
         for step in external["steps"]
