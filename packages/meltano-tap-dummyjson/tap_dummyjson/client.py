@@ -37,7 +37,7 @@ class DummyJSONStream(RESTStream):
     @property
     @override
     def requests_session(self) -> SafeCachedSession:
-        return SafeCachedSession()
+        return SafeCachedSession(cache_name="tap-dummyjson")
 
     @property
     @override

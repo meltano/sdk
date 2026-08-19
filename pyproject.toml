@@ -88,6 +88,9 @@ msgspec = [
 ]
 
 cache = [
+    # ``attrs`` backs ``requests-cache``'s cached models; ``http_cache`` imports it
+    # directly to copy them, so it is declared rather than relied on transitively.
+    "attrs>=21.2",
     "requests-cache>=1.3",
 ]
 

@@ -3138,6 +3138,7 @@ arrow = [
     { name = "pyarrow" },
 ]
 cache = [
+    { name = "attrs" },
     { name = "requests-cache" },
 ]
 faker = [
@@ -3305,6 +3306,7 @@ typing = [
 
 [package.metadata]
 requires-dist = [
+    { name = "attrs", marker = "extra == 'cache'", specifier = ">=21.2" },
     { name = "backports-datetime-fromisoformat", marker = "python_full_version < '3.11'", specifier = ">=2.0.1" },
     { name = "click", specifier = ">=8.2,<9" },
     { name = "cryptography", marker = "extra == 'jwt'", specifier = ">=3.4.6" },

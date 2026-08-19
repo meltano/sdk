@@ -38,7 +38,10 @@ class CountriesAPIStream(GraphQLStream, abc.ABC):
     @property
     @override
     def requests_session(self) -> SafeCachedSession:
-        return SafeCachedSession(allowable_methods=("POST", "HEAD"))
+        return SafeCachedSession(
+            cache_name="tap-countries",
+            allowable_methods=("POST", "HEAD"),
+        )
 
 
 class CountriesStream(CountriesAPIStream):

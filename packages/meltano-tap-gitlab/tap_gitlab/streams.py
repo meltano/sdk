@@ -49,7 +49,7 @@ class GitlabStream(RESTStream[str]):
     @property
     @override
     def requests_session(self) -> SafeCachedSession:
-        return SafeCachedSession()
+        return SafeCachedSession(cache_name="tap-gitlab")
 
     @property
     @override
