@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import requests.auth
-from requests_cache import CachedSession
+from requests import Session
 from singer_sdk.authenticators import SingletonMeta
 
 if sys.version_info >= (3, 12):
@@ -50,14 +50,9 @@ class DummyJSONAuthenticator(requests.auth.AuthBase, metaclass=SingletonMeta):
         self.password = password
 
         self._token: _Token | None = None
-        self.session = CachedSession(
-            ".http_cache",
-            backend="filesystem",
-            serializer="json",
-            allowable_methods=("POST",),
-            ignored_parameters=["User-Agent"],
-            match_headers=True,
-        )
+        # Authentication responses contain reusable credentials and must never be
+        # persisted to a filesystem cache.
+        self.session = Session()
 
     @override
     def __call__(self, r: PreparedRequest) -> PreparedRequest:

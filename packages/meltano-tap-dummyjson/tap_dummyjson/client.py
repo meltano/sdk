@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING
 
-from requests_cache import CachedSession
+from singer_sdk.helpers.http_cache import SafeCachedSession
 from singer_sdk.pagination import OffsetPaginator
 from singer_sdk.streams import RESTStream
 
@@ -36,14 +36,8 @@ class DummyJSONStream(RESTStream):
 
     @property
     @override
-    def requests_session(self) -> CachedSession:
-        return CachedSession(
-            ".http_cache",
-            backend="filesystem",
-            serializer="json",
-            ignored_parameters=["Authorization", "User-Agent"],
-            match_headers=True,
-        )
+    def requests_session(self) -> SafeCachedSession:
+        return SafeCachedSession(cache_name="tap-dummyjson")
 
     @property
     @override

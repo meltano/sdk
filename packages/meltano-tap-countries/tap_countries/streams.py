@@ -12,10 +12,9 @@ import abc
 import sys
 import typing as t
 
-from requests_cache.session import CachedSession
-
 from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk import typing as th
+from singer_sdk.helpers.http_cache import SafeCachedSession
 from singer_sdk.streams.graphql import GraphQLStream
 from tap_countries import schemas
 
@@ -38,14 +37,10 @@ class CountriesAPIStream(GraphQLStream, abc.ABC):
 
     @property
     @override
-    def requests_session(self) -> CachedSession:
-        return CachedSession(
-            ".http_cache",
-            backend="filesystem",
-            serializer="json",
+    def requests_session(self) -> SafeCachedSession:
+        return SafeCachedSession(
+            cache_name="tap-countries",
             allowable_methods=("POST", "HEAD"),
-            ignored_parameters=["User-Agent"],
-            match_headers=True,
         )
 
 

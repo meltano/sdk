@@ -5,10 +5,9 @@ from __future__ import annotations
 import sys
 import typing as t
 
-from requests_cache import CachedSession
-
 from singer_sdk import RESTStream, SchemaDirectory, StreamSchema
 from singer_sdk.authenticators import SimpleAuthenticator
+from singer_sdk.helpers.http_cache import SafeCachedSession
 from singer_sdk.pagination import SimpleHeaderPaginator
 from singer_sdk.typing import (
     ArrayType,
@@ -49,14 +48,8 @@ class GitlabStream(RESTStream[str]):
 
     @property
     @override
-    def requests_session(self) -> CachedSession:
-        return CachedSession(
-            ".http_cache",
-            backend="filesystem",
-            serializer="json",
-            ignored_parameters=["Private-Token", "User-Agent"],
-            match_headers=True,
-        )
+    def requests_session(self) -> SafeCachedSession:
+        return SafeCachedSession(cache_name="tap-gitlab")
 
     @property
     @override
