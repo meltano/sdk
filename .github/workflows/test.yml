@@ -146,6 +146,9 @@ jobs:
   tests-external:
     name: External Tests
     runs-on: ubuntu-latest
+    # Forks have no access to the sample GitLab secrets, so the whole job is
+    # skipped there and never allocates a runner. Anywhere else the job runs,
+    # and a missing secret is a failure rather than a silently green no-op.
     if: ${{ !github.event.pull_request.head.repo.fork }}
     env:
       NOXSESSION: test-external
@@ -155,6 +158,17 @@ jobs:
       TAP_GITLAB_START_DATE: "2022-01-01T00:00:00Z"
 
     steps:
+    - name: Require sample GitLab secrets
+      run: |
+        status=0
+        for name in TAP_GITLAB_AUTH_TOKEN TAP_GITLAB_GROUP_IDS TAP_GITLAB_PROJECT_IDS; do
+          if [ -z "${!name}" ]; then
+            echo "::error::External tests need the ${name} secret, but it is empty"
+            status=1
+          fi
+        done
+        exit "${status}"
+
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
@@ -221,7 +235,11 @@ jobs:
       run: |
         nox -r --no-install -- xml
 
-    - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+    # Runs on forks too: codecov-action uploads tokenlessly for public-repo pull
+    # requests, so `token` being empty is not a reason to skip the upload, and
+    # `fail_ci_if_error` stays reachable.
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
       with:
         fail_ci_if_error: true
         flags: ${{ matrix.flag }}
