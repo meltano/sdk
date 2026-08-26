@@ -88,7 +88,7 @@ jobs:
         fetch-depth: 0
         persist-credentials: false
 
-    - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+    - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       with:
         cache-suffix: ${{ matrix.session }}
         python-version: ${{ matrix.python-version }}
@@ -128,7 +128,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           cache-suffix: typing
           python-version: ${{ matrix.python-version }}
@@ -160,7 +160,7 @@ jobs:
         fetch-depth: 0
         persist-credentials: false
 
-    - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+    - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       with:
         cache-suffix: external
         version: ${{ env.UV_VERSION }}
@@ -200,7 +200,7 @@ jobs:
         pattern: coverage-data-nox_${{ matrix.nox-session }}-*
         merge-multiple: true
 
-    - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+    - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       with:
         cache-suffix: coverage-${{ matrix.flag }}
         version: ${{ env.UV_VERSION }}
