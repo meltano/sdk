@@ -312,7 +312,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
             records: the input records.
 
         Returns:
-            True if table exists, False if not, None if unsure or undetectable.
+            Count of records inserted.
         """
         insert_sql = self.generate_insert_statement(
             full_table_name,
