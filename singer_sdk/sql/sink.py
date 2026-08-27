@@ -341,7 +341,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
             result = conn.execute(insert_sql, new_records)
 
-        return result.rowcount
+        return result.rowcount if result.rowcount >= 0 else None
 
     def merge_upsert_from_table(
         self,
