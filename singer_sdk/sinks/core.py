@@ -211,7 +211,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
         self._warned_missing_fields: set[str] = set()
 
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
-        self._record_counter: metrics.Counter = self.get_sink_record_counter()
+        self._record_counter = self.get_sink_record_counter()
         self._batch_timer = self.get_batch_processing_timer()
 
     @property
@@ -375,12 +375,16 @@ class Sink(abc.ABC):  # noqa: PLR0904
 
         This method is called automatically by the SDK after
         :meth:`~singer_sdk.Sink.process_record()`
-        or :meth:`~singer_sdk.Sink.process_batch()`.
+        or :meth:`~singer_sdk.Sink.process_batch()`. It also advances the
+        :attr:`~singer_sdk.Sink.record_counter_metric`, so the emitted
+        ``record_count`` metric reflects records that have actually been
+        processed (on a best-effort basis) rather than merely received.
 
         Args:
             count: Number to increase record count by.
         """
         self._total_records_written += count
+        self.record_counter_metric.increment(count)
 
     @t.final
     def tally_duplicate_merged(self, count: int = 1) -> None:
@@ -671,7 +675,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
         return self._context_draining
 
     @abc.abstractmethod
-    def process_batch(self, context: dict) -> None:
+    def process_batch(self, context: dict) -> int | None:
         """Process all records per the batch's `context` dictionary.
 
         If duplicates are merged, these can optionally be tracked via
@@ -771,8 +775,12 @@ class Sink(abc.ABC):  # noqa: PLR0904
                             }
                     else:
                         context = {"records": [deserialize_json(line) for line in file]}
-                    self.record_counter_metric.increment(len(context["records"]))
-                    self.process_batch(context)
+                    count = self.process_batch(context)
+                    self.tally_record_written(
+                        count  # Only when count is not None
+                        if count is not None
+                        else len(context["records"])
+                    )
             elif (
                 importlib.util.find_spec("pyarrow")
                 and encoding.format == BatchFileFormat.PARQUET
@@ -782,8 +790,12 @@ class Sink(abc.ABC):  # noqa: PLR0904
                 with file_storage.open(tail, mode="rb") as file:
                     table = pq.read_table(file)
                     context = {"records": table.to_pylist()}
-                    self.record_counter_metric.increment(len(context["records"]))
-                    self.process_batch(context)
+                    count = self.process_batch(context)
+                    self.tally_record_written(
+                        count  # Only when count is not None
+                        if count is not None
+                        else len(context["records"])
+                    )
             else:
                 msg = f"Unsupported batch encoding format: {encoding.format}"
                 raise NotImplementedError(msg)
