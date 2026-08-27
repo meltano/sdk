@@ -776,7 +776,11 @@ class Sink(abc.ABC):  # noqa: PLR0904
                     else:
                         context = {"records": [deserialize_json(line) for line in file]}
                     count = self.process_batch(context)
-                    self.tally_record_written(count or len(context["records"]))
+                    self.tally_record_written(
+                        count  # Only when count is not None
+                        if count is not None
+                        else len(context["records"])
+                    )
             elif (
                 importlib.util.find_spec("pyarrow")
                 and encoding.format == BatchFileFormat.PARQUET
@@ -787,7 +791,11 @@ class Sink(abc.ABC):  # noqa: PLR0904
                     table = pq.read_table(file)
                     context = {"records": table.to_pylist()}
                     count = self.process_batch(context)
-                    self.tally_record_written(count or len(context["records"]))
+                    self.tally_record_written(
+                        count  # Only when count is not None
+                        if count is not None
+                        else len(context["records"])
+                    )
             else:
                 msg = f"Unsupported batch encoding format: {encoding.format}"
                 raise NotImplementedError(msg)
