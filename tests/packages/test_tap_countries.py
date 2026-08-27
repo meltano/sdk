@@ -26,9 +26,13 @@ if t.TYPE_CHECKING:
     from pytest_snapshot.plugin import Snapshot
 
 # standard tap tests
-TestSampleTapCountries = get_tap_test_class(
-    tap_class=TapCountries,
-    suite_config=SuiteConfig(max_records_limit=5),
+# See `tests/external/test_tap_gitlab.py` for why `vcr_cassette` (not plain
+# `@pytest.mark.vcr`) is required here.
+TestSampleTapCountries = pytest.mark.vcr_cassette("countries.yaml")(
+    get_tap_test_class(
+        tap_class=TapCountries,
+        suite_config=SuiteConfig(max_records_limit=5),
+    ),
 )
 
 
@@ -57,6 +61,7 @@ def test_with_catalog_mismatch():
         assert not stream.selected
 
 
+@pytest.mark.vcr
 def test_with_catalog_entry():
     """Test catalog apply with a matching stream catalog entry for one stream."""
     tap = TapCountries(
@@ -98,6 +103,7 @@ def test_with_catalog_entry():
     assert new_schema == stream.schema
 
 
+@pytest.mark.vcr
 def test_batch_mode(outdir: Path):
     """Test batch mode."""
     tap = TapCountries(

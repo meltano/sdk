@@ -5,7 +5,6 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING
 
-from requests_cache import CachedSession
 from singer_sdk.pagination import OffsetPaginator
 from singer_sdk.streams import RESTStream
 
@@ -33,17 +32,6 @@ class DummyJSONStream(RESTStream):
     def url_base(self) -> str:
         """Return the API URL root, configurable via tap settings."""
         return self.config["api_url"]  # type: ignore[no-any-return]
-
-    @property
-    @override
-    def requests_session(self) -> CachedSession:
-        return CachedSession(
-            ".http_cache",
-            backend="filesystem",
-            serializer="json",
-            ignored_parameters=["Authorization", "User-Agent"],
-            match_headers=True,
-        )
 
     @property
     @override

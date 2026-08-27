@@ -9,7 +9,18 @@ import sqlalchemy as sa
 from tap_sqlite import SQLiteConnector, SQLiteTap
 
 from singer_sdk.singerlib import Catalog
-from singer_sdk.testing import _get_tap_catalog
+from singer_sdk.testing import _get_tap_catalog, default_vcr_config, use_class_cassette
+
+
+@pytest.fixture(scope="module")
+def vcr_config():
+    return default_vcr_config()
+
+
+@pytest.fixture(scope="class", autouse=True)
+def _class_cassette(request: pytest.FixtureRequest, vcr_cassette_dir: str):
+    """See `singer_sdk.testing.vcr.use_class_cassette` for why this is needed."""
+    yield from use_class_cassette(request, vcr_cassette_dir)
 
 
 @pytest.fixture

@@ -1,6 +1,3 @@
-# HTTP cache
-http_cache.sqlite
-
 # Local Poetry configuration file
 
 poetry.toml

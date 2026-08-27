@@ -141,9 +141,9 @@ testing = [
     "pytest>=9",
     "pytest-benchmark>=4.0.0",
     "pytest-github-actions-annotate-failures>=0.3.0",
+    "pytest-recording>=0.13.4",
     "pytest-snapshot>=0.9.0",
     "pytz>=2022.2.1",
-    "requests-cache>=1.3",
     "requests-mock>=1.10.0",
     "responses>=0.26.0",
     "rfc3339-validator>=0.1.4",
@@ -219,6 +219,7 @@ markers = [
     "linux: Tests that only run on Linux",
     "darwin: Tests that only run on Darwin",
     "snapshot: Tests that use pytest-snapshot",
+    "vcr_cassette: Wrap a whole test class in one VCR cassette (see singer_sdk.testing.vcr.use_class_cassette)",
 ]
 minversion = "9"
 norecursedirs = ["cookiecutter"]
@@ -503,7 +504,7 @@ url = "https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"
 explicit = true
 
 [tool.codespell]
-skip = "*.csv,samples/aapl/*.json,packages/*/schemas/*.json,samples/*/schemas/*.json,.http_cache/*.json,tests/*/snapshots/*/*.jsonl"
+skip = "*.csv,samples/aapl/*.json,packages/*/schemas/*.json,samples/*/schemas/*.json,tests/*/cassettes/*/*.yaml,tests/*/snapshots/*/*.jsonl"
 ignore-words-list = "fo,intoto"
 
 [tool.ty.rules]

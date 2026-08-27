@@ -226,6 +226,34 @@ def test_packages(session: nox.Session) -> None:
     )
 
 
+@nox.session(name="record-external-cassettes", python=main_python)
+def record_external_cassettes(session: nox.Session) -> None:
+    """Re-record VCR cassettes for the sample taps against live APIs.
+
+    Not part of the default `test` tag: run manually (with valid sample
+    credentials, e.g. `TAP_GITLAB_*`) whenever the GitLab or DummyJSON
+    sample APIs change and their committed `tests/*/cassettes/` fixtures need
+    refreshing. Never wired into CI, since it needs real network access and
+    secrets, and would otherwise silently re-record over committed fixtures.
+    """
+    session.run_install(
+        *UV_SYNC_COMMAND,
+        "--group=packages",
+        "--group=testing",
+        "--all-extras",
+        env=_install_env(session),
+    )
+
+    _run_pytest(
+        session,
+        "--durations=10",
+        "--record-mode=rewrite",
+        "-m",
+        "external or packages",
+        *session.posargs,
+    )
+
+
 @nox.session(
     name="test-lowest",
     python=python_versions[0],
