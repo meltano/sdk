@@ -104,7 +104,7 @@ class Metadata:
         return result
 
 
-@dataclass(slots=True, kw_only=True)
+@dataclass(slots=True, repr=False, kw_only=True)
 class StreamMetadata(Metadata):
     """Stream metadata."""
 
@@ -325,7 +325,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         return parent_value or False
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, repr=False)
 class CatalogEntry:
     """Singer catalog entry."""
 
