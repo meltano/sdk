@@ -61,7 +61,7 @@ class SelectionMask(dict[Breadcrumb, bool]):  # noqa: FURB189
         return self[breadcrumb[:-2]] if len(breadcrumb) >= 2 else True  # noqa: PLR2004
 
 
-@dataclass(slots=True, kw_only=True)
+@dataclass(slots=True, repr=False, kw_only=True)
 class Metadata:
     """Base stream or property metadata."""
 
@@ -109,7 +109,7 @@ class Metadata:
         return result
 
 
-@dataclass(slots=True, kw_only=True)
+@dataclass(slots=True, repr=False, kw_only=True)
 class StreamMetadata(Metadata):
     """Stream metadata."""
 
@@ -325,7 +325,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         return parent_value or False
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, repr=False)
 class CatalogEntry:
     """Singer catalog entry."""
 
