@@ -61,7 +61,7 @@ class SelectionMask(dict[Breadcrumb, bool]):  # noqa: FURB189
         return self[breadcrumb[:-2]] if len(breadcrumb) >= 2 else True  # noqa: PLR2004
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, kw_only=True)
 class Metadata:
     """Base stream or property metadata."""
 
@@ -109,7 +109,7 @@ class Metadata:
         return result
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, kw_only=True)
 class StreamMetadata(Metadata):
     """Stream metadata."""
 
@@ -170,14 +170,14 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         return self[breadcrumb]
 
     @t.overload
-    def __getitem__(self, breadcrumb: tuple[()]) -> StreamMetadata: ...
+    def __getitem__(self, key: tuple[()]) -> StreamMetadata: ...
 
     @t.overload
-    def __getitem__(self, breadcrumb: Breadcrumb) -> Metadata: ...
+    def __getitem__(self, key: Breadcrumb) -> Metadata: ...
 
     @override
-    def __getitem__(self, breadcrumb: Breadcrumb) -> AnyMetadata:
-        return super().__getitem__(breadcrumb)
+    def __getitem__(self, key: Breadcrumb) -> AnyMetadata:
+        return super().__getitem__(key)
 
     @property
     def root(self) -> StreamMetadata:
