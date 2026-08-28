@@ -15,13 +15,6 @@ from singer import (
     schema,
     utils,
 )
-from singer._dropin import (
-    write_message,
-    write_record,
-    write_schema,
-    write_state,
-    write_version,
-)
 from singer.batch import BaseBatchFileEncoding, BatchMessage
 from singer.bookmarks import (
     clear_bookmark,
@@ -52,6 +45,11 @@ from singer.messages import (
     StateMessage,
     exclude_null_dict,
     format_message,
+    write_message,
+    write_record,
+    write_schema,
+    write_state,
+    write_version,
 )
 from singer.schema import Schema, resolve_schema_references
 from singer.utils import strftime, strptime_to_utc

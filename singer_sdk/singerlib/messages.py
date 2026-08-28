@@ -14,6 +14,10 @@ from singer.messages import (
     exclude_null_dict,
     format_message,
     write_message,
+    write_record,
+    write_schema,
+    write_state,
+    write_version,
 )
 
 __all__ = [
@@ -28,4 +32,8 @@ __all__ = [
     "exclude_null_dict",
     "format_message",
     "write_message",
+    "write_record",
+    "write_schema",
+    "write_state",
+    "write_version",
 ]

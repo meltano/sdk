@@ -110,12 +110,12 @@ testpaths = [
 
 [tool.ruff]
 line-length = 100
-required-version = ">=0.15"
+required-version = ">=0.16.0"
 
 [tool.ruff.lint]
 future-annotations = true
 ignore = [
-    "COM812",  # missing-trailing-comma
+    "missing-trailing-comma",
 ]
 select = ["ALL"]
 
@@ -124,7 +124,7 @@ allow-star-arg-any = true
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = [
-  "S101",  # assert is used by pytest
+  "assert",
 ]
 
 [tool.ruff.lint.pydocstyle]

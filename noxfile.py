@@ -21,15 +21,15 @@ nox.options.reuse_venv = "yes"
 
 RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
+preview = true
 
 [lint]
 extend-ignore = [
-  # Ignore TODO comments
-  "TD002",
-  "TD003",
-  "FIX002",
-  # Commented code
-  "ERA001",
+  "commented-out-code",
+  "line-contains-todo",
+  "missing-copyright-notice",
+  "missing-todo-author",
+  "missing-todo-link",
 ]
 """
 
@@ -314,6 +314,7 @@ def coverage(session: nox.Session) -> None:
 def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
     extras = [
+        "arrow",
         "faker",
         "jwt",
         "msgspec",

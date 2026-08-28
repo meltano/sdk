@@ -25,6 +25,10 @@ from singer.messages import (
     exclude_null_dict,
     format_message,
     write_message,
+    write_record,
+    write_schema,
+    write_state,
+    write_version,
 )
 from singer.schema import Schema, resolve_schema_references
 from singer.utils import strftime, strptime_to_utc
@@ -50,4 +54,8 @@ __all__ = [
     "strftime",
     "strptime_to_utc",
     "write_message",
+    "write_record",
+    "write_schema",
+    "write_state",
+    "write_version",
 ]

@@ -6,7 +6,7 @@ import json.decoder
 import logging
 import sys
 import typing as t
-from collections.abc import Mapping  # noqa: TC003
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
@@ -27,6 +27,8 @@ if t.TYPE_CHECKING:
         from typing import Self  # noqa: ICN003
     else:
         from typing_extensions import Self
+
+Schema: t.TypeAlias = Mapping[str, t.Any]
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +81,7 @@ class RecordMessage(Message):
     stream: str
     """The stream name."""
 
-    record: dict[str, t.Any]
+    record: Mapping[str, t.Any]
     """The record data."""
 
     version: int | None = None
@@ -90,7 +92,7 @@ class RecordMessage(Message):
 
     @classmethod
     @override
-    def from_dict(cls: type[RecordMessage], data: dict[str, t.Any]) -> RecordMessage:
+    def from_dict(cls: type[RecordMessage], data: Mapping[str, t.Any]) -> RecordMessage:
         """Create a record message from a dictionary.
 
         This overrides the default conversion logic, since it uses unnecessary
@@ -151,35 +153,47 @@ class RecordMessage(Message):
             self.time_extracted = self.time_extracted.astimezone(timezone.utc)
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, init=False)
 class SchemaMessage(Message):
     """Singer schema message."""
 
     stream: str
     """The stream name."""
 
-    schema: dict[str, t.Any]
+    schema: Schema
     """The schema definition."""
 
-    key_properties: t.Sequence[str] | None = None
+    key_properties: tuple[str, ...] | None = None
     """The key properties."""
 
-    bookmark_properties: list[str] | None = None
+    bookmark_properties: tuple[str, ...] | None = None
     """The bookmark properties."""
 
-    def __post_init__(self) -> None:
-        """Post-init processing.
-
-        Raises:
-            ValueError: If bookmark_properties is not a string or list of strings.
-        """
+    def __init__(
+        self,
+        stream: str,
+        schema: Schema,
+        key_properties: Sequence[str] | None = None,
+        bookmark_properties: Sequence[str] | None = None,
+    ) -> None:
+        """Initialize schema object."""
         self.type = SingerMessageType.SCHEMA
-
-        if isinstance(self.bookmark_properties, (str, bytes)):
-            self.bookmark_properties = [self.bookmark_properties]  # type: ignore[unreachable]
-        if self.bookmark_properties and not isinstance(self.bookmark_properties, list):
-            msg = "bookmark_properties must be a string or list of strings"  # type: ignore[unreachable]
-            raise ValueError(msg)
+        self.stream = stream
+        self.schema = schema
+        self.key_properties = (
+            None
+            if key_properties is None
+            else (key_properties,)
+            if isinstance(key_properties, str)
+            else tuple(key_properties)
+        )
+        self.bookmark_properties = (
+            None
+            if bookmark_properties is None
+            else (bookmark_properties,)
+            if isinstance(bookmark_properties, str)
+            else tuple(bookmark_properties)
+        )
 
 
 @dataclass(slots=True)
