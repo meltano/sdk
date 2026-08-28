@@ -490,6 +490,8 @@ def api_changes(session: nox.Session) -> None:
     args = [
         "check",
         "singer_sdk",
+        "-s=.",
+        "-s=packages/meltano-singer-python",
     ]
 
     if session.posargs:
