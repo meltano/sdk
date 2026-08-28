@@ -9,21 +9,12 @@ See the online explorer and query builder here:
 from __future__ import annotations
 
 import abc
-import sys
 import typing as t
-
-from requests_cache.session import CachedSession
 
 from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk import typing as th
 from singer_sdk.streams.graphql import GraphQLStream
 from tap_countries import schemas
-
-if sys.version_info >= (3, 12):
-    from typing import override  # noqa: ICN003
-else:
-    from typing_extensions import override
-
 
 SCHEMAS_DIR = SchemaDirectory(schemas)
 
@@ -35,18 +26,6 @@ class CountriesAPIStream(GraphQLStream, abc.ABC):
     """
 
     url_base = "https://countries.trevorblades.com/"
-
-    @property
-    @override
-    def requests_session(self) -> CachedSession:
-        return CachedSession(
-            ".http_cache",
-            backend="filesystem",
-            serializer="json",
-            allowable_methods=("POST", "HEAD"),
-            ignored_parameters=["User-Agent"],
-            match_headers=True,
-        )
 
 
 class CountriesStream(CountriesAPIStream):

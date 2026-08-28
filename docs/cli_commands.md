@@ -134,7 +134,7 @@ The `--about` option displays metadata about the package.
 
 ````{tab} uv
 ```console
-$ uv run sdk-tap-countries-sample --about
+$ uv run tap-countries --about
 Name: sample-tap-countries
 Description: Sample tap for Countries GraphQL API.
 Version: [could not be detected]
@@ -150,22 +150,22 @@ Capabilities:
 Settings:
   - Name: stream_maps
     Type: ['object', 'null']
-    Environment Variable: SAMPLE_TAP_COUNTRIES_STREAM_MAPS
+    Environment Variable: TAP_COUNTRIES_STREAM_MAPS
   - Name: stream_map_config
     Type: ['object', 'null']
-    Environment Variable: SAMPLE_TAP_COUNTRIES_STREAM_MAP_CONFIG
+    Environment Variable: TAP_COUNTRIES_STREAM_MAP_CONFIG
   - Name: faker_config
     Type: ['object', 'null']
-    Environment Variable: SAMPLE_TAP_COUNTRIES_FAKER_CONFIG
+    Environment Variable: TAP_COUNTRIES_FAKER_CONFIG
   - Name: flattening_enabled
     Type: ['boolean', 'null']
-    Environment Variable: SAMPLE_TAP_COUNTRIES_FLATTENING_ENABLED
+    Environment Variable: TAP_COUNTRIES_FLATTENING_ENABLED
   - Name: flattening_max_depth
     Type: ['integer', 'null']
-    Environment Variable: SAMPLE_TAP_COUNTRIES_FLATTENING_MAX_DEPTH
+    Environment Variable: TAP_COUNTRIES_FLATTENING_MAX_DEPTH
   - Name: batch_config
     Type: ['object', 'null']
-    Environment Variable: SAMPLE_TAP_COUNTRIES_BATCH_CONFIG
+    Environment Variable: TAP_COUNTRIES_BATCH_CONFIG
 ```
 ````
 

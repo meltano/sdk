@@ -16,6 +16,13 @@ from .legacy import (
     target_sync_test,
 )
 from .runners import SingerTestRunner, TapTestRunner, TargetTestRunner
+from .vcr import (
+    VCRConfig,
+    default_vcr_config,
+    scrub_request_headers,
+    scrub_response_body,
+    use_class_cassette,
+)
 
 
 def __getattr__(name: str) -> t.Any:  # noqa: ANN401
@@ -53,12 +60,17 @@ __all__ = [
     "SuiteConfig",
     "TapTestRunner",
     "TargetTestRunner",
+    "VCRConfig",
     "_get_tap_catalog",
     "_select_all",
+    "default_vcr_config",
     "get_tap_test_class",
     "get_target_test_class",
+    "scrub_request_headers",
+    "scrub_response_body",
     "sync_end_to_end",
     "tap_sync_test",
     "tap_to_target_sync_test",
     "target_sync_test",
+    "use_class_cassette",
 ]

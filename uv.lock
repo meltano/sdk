@@ -549,20 +549,6 @@ wheels = [
 ]
 
 [[package]]
-name = "cattrs"
-version = "26.1.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "attrs" },
-    { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/a0/ec/ba18945e7d6e55a58364d9fb2e46049c1c2998b3d805f19b703f14e81057/cattrs-26.1.0.tar.gz", hash = "sha256:fa239e0f0ec0715ba34852ce813986dfed1e12117e209b816ab87401271cdd40", size = 495672, upload-time = "2026-02-18T22:15:19.406Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/80/56/60547f7801b97c67e97491dc3d9ade9fbccbd0325058fd3dfcb2f5d98d90/cattrs-26.1.0-py3-none-any.whl", hash = "sha256:d1e0804c42639494d469d08d4f26d6b9de9b8ab26b446db7b5f8c2e97f7c3096", size = 73054, upload-time = "2026-02-18T22:15:17.958Z" },
-]
-
-[[package]]
 name = "certifi"
 version = "2026.7.22"
 source = { registry = "https://pypi.org/simple" }
@@ -1709,7 +1695,6 @@ name = "meltano-tap-countries"
 source = { editable = "packages/meltano-tap-countries" }
 dependencies = [
     { name = "msgspec" },
-    { name = "requests-cache" },
     { name = "singer-sdk" },
     { name = "typing-extensions", marker = "python_full_version < '3.12'" },
 ]
@@ -1717,7 +1702,6 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "msgspec", specifier = ">=0.19.0" },
-    { name = "requests-cache", specifier = ">=1.3" },
     { name = "singer-sdk", editable = "." },
     { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
 ]
@@ -1741,7 +1725,6 @@ name = "meltano-tap-dummyjson"
 source = { editable = "packages/meltano-tap-dummyjson" }
 dependencies = [
     { name = "requests" },
-    { name = "requests-cache" },
     { name = "singer-sdk" },
     { name = "typing-extensions", marker = "python_full_version < '3.12'" },
 ]
@@ -1760,7 +1743,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "requests", specifier = ">=2.32.3" },
-    { name = "requests-cache", specifier = ">=1.3" },
     { name = "s3fs", marker = "extra == 's3'", specifier = ">=2025.9.0" },
     { name = "singer-sdk", editable = "." },
     { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.5.0" },
@@ -2241,15 +2223,6 @@ wheels = [
 ]
 
 [[package]]
-name = "platformdirs"
-version = "4.11.3"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b8/d7/e7bfbc86e9f99ff7807e24de7703f032e9c9ba80bb355cf26e0e9bc5a75e/platformdirs-4.11.3.tar.gz", hash = "sha256:66a73d38a849810252df809a3d8bcbda8e26f6c189920e7535ad608a48dbb5ab", size = 33050, upload-time = "2026-08-13T22:43:27.52Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/19/a9/c34aebedd3a4c9afe5101b1b8713710b3fec18087c8a36c35d2f909861bd/platformdirs-4.11.3-py3-none-any.whl", hash = "sha256:5ed065d443751de711da036041a7a214122efc4a4de393b3f4137ba5576540e7", size = 23491, upload-time = "2026-08-13T22:43:26.121Z" },
-]
-
-[[package]]
 name = "pluggy"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2603,6 +2576,19 @@ wheels = [
 ]
 
 [[package]]
+name = "pytest-recording"
+version = "0.13.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+    { name = "vcrpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/32/9c/f4027c5f1693847b06d11caf4b4f6bb09f22c1581ada4663877ec166b8c6/pytest_recording-0.13.4.tar.gz", hash = "sha256:568d64b2a85992eec4ae0a419c855d5fd96782c5fb016784d86f18053792768c", size = 26576, upload-time = "2025-05-08T10:41:11.231Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/42/c2/ce34735972cc42d912173e79f200fe66530225190c06655c5632a9d88f1e/pytest_recording-0.13.4-py3-none-any.whl", hash = "sha256:ad49a434b51b1c4f78e85b1e6b74fdcc2a0a581ca16e52c798c6ace971f7f439", size = 13723, upload-time = "2025-05-08T10:41:09.684Z" },
+]
+
+[[package]]
 name = "pytest-snapshot"
 version = "0.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2745,23 +2731,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ac/c3/e2a2b89f2d3e2179abd6d00ebd70bff6273f37fb3e0cc209f48b39d00cbf/requests-2.34.2.tar.gz", hash = "sha256:f288924cae4e29463698d6d60bc6a4da69c89185ad1e0bcc4104f584e960b9ed", size = 142856, upload-time = "2026-05-14T19:25:27.735Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a0/f4/c67b0b3f1b9245e8d266f0f112c500d50e5b4e83cb6f3b71b6528104182a/requests-2.34.2-py3-none-any.whl", hash = "sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0", size = 73075, upload-time = "2026-05-14T19:25:26.443Z" },
-]
-
-[[package]]
-name = "requests-cache"
-version = "1.3.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "attrs" },
-    { name = "cattrs" },
-    { name = "platformdirs" },
-    { name = "requests" },
-    { name = "url-normalize" },
-    { name = "urllib3" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/32/ab/a340c7f529646f16e5656a8ba1424ed0de406203e4554868491786628730/requests_cache-1.3.3.tar.gz", hash = "sha256:79b72d5ac5143992d1836ad78f4d8e65666061dd44e220548caab3723089826b", size = 101179, upload-time = "2026-07-03T19:48:57.963Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a5/bf/c1775e49b350225bd851576ba75263bc728d8f05c0e31439a45f3429cc7b/requests_cache-1.3.3-py3-none-any.whl", hash = "sha256:c8df20ff874ebfc026959e3874e6c12bd6724934cdb10925915908453d4b17e4", size = 70788, upload-time = "2026-07-03T19:48:56.693Z" },
 ]
 
 [[package]]
@@ -3254,9 +3223,9 @@ benchmark = [
     { name = "pytest-benchmark" },
     { name = "pytest-codspeed" },
     { name = "pytest-github-actions-annotate-failures" },
+    { name = "pytest-recording" },
     { name = "pytest-snapshot" },
     { name = "pytz" },
-    { name = "requests-cache" },
     { name = "requests-mock" },
     { name = "responses" },
     { name = "rfc3339-validator" },
@@ -3281,9 +3250,9 @@ dev = [
     { name = "pytest" },
     { name = "pytest-benchmark" },
     { name = "pytest-github-actions-annotate-failures" },
+    { name = "pytest-recording" },
     { name = "pytest-snapshot" },
     { name = "pytz" },
-    { name = "requests-cache" },
     { name = "requests-mock" },
     { name = "responses" },
     { name = "rfc3339-validator" },
@@ -3341,9 +3310,9 @@ testing = [
     { name = "pytest" },
     { name = "pytest-benchmark" },
     { name = "pytest-github-actions-annotate-failures" },
+    { name = "pytest-recording" },
     { name = "pytest-snapshot" },
     { name = "pytz" },
-    { name = "requests-cache" },
     { name = "requests-mock" },
     { name = "responses" },
     { name = "rfc3339-validator" },
@@ -3364,9 +3333,9 @@ typing = [
     { name = "pytest" },
     { name = "pytest-benchmark" },
     { name = "pytest-github-actions-annotate-failures" },
+    { name = "pytest-recording" },
     { name = "pytest-snapshot" },
     { name = "pytz" },
-    { name = "requests-cache" },
     { name = "requests-mock" },
     { name = "responses" },
     { name = "rfc3339-validator" },
@@ -3426,9 +3395,9 @@ benchmark = [
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
     { name = "pytest-codspeed", specifier = ">=2.2.0,!=4.1.0" },
     { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
+    { name = "pytest-recording", specifier = ">=0.13.4" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
     { name = "pytz", specifier = ">=2022.2.1" },
-    { name = "requests-cache", specifier = ">=1.3" },
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "responses", specifier = ">=0.26.0" },
     { name = "rfc3339-validator", specifier = ">=0.1.4" },
@@ -3452,9 +3421,9 @@ dev = [
     { name = "pytest", specifier = ">=9" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
     { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
+    { name = "pytest-recording", specifier = ">=0.13.4" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
     { name = "pytz", specifier = ">=2022.2.1" },
-    { name = "requests-cache", specifier = ">=1.3" },
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "responses", specifier = ">=0.26.0" },
     { name = "rfc3339-validator", specifier = ">=0.1.4" },
@@ -3505,9 +3474,9 @@ testing = [
     { name = "pytest", specifier = ">=9" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
     { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
+    { name = "pytest-recording", specifier = ">=0.13.4" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
     { name = "pytz", specifier = ">=2022.2.1" },
-    { name = "requests-cache", specifier = ">=1.3" },
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "responses", specifier = ">=0.26.0" },
     { name = "rfc3339-validator", specifier = ">=0.1.4" },
@@ -3528,9 +3497,9 @@ typing = [
     { name = "pytest", specifier = ">=9" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
     { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
+    { name = "pytest-recording", specifier = ">=0.13.4" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
     { name = "pytz", specifier = ">=2022.2.1" },
-    { name = "requests-cache", specifier = ">=1.3" },
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "responses", specifier = ">=0.26.0" },
     { name = "rfc3339-validator", specifier = ">=0.1.4" },
@@ -4112,24 +4081,25 @@ wheels = [
 ]
 
 [[package]]
-name = "url-normalize"
-version = "3.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "idna" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/8b/cd/846d87d6d49d963b04ef4429b73d71d3c17468059956bab360866a9b0aec/url_normalize-3.0.0.tar.gz", hash = "sha256:0552cbf2831a32a28994a13d29bca58a60e10ff6c0380e343ec6d1c2a0d232d8", size = 21777, upload-time = "2026-04-25T00:31:59.514Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/13/8a/f72344eab18674fd7b174f35abbce41ed88fea72927f111726732d0ca779/url_normalize-3.0.0-py3-none-any.whl", hash = "sha256:95234bd359f86831c1fd87c248877f2a6887db2f3b5087120083f2fffcba4889", size = 16854, upload-time = "2026-04-25T00:31:58.271Z" },
-]
-
-[[package]]
 name = "urllib3"
 version = "2.7.0"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/53/0c/06f8b233b8fd13b9e5ee11424ef85419ba0d8ba0b3138bf360be2ff56953/urllib3-2.7.0.tar.gz", hash = "sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c", size = 433602, upload-time = "2026-05-07T16:13:18.596Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7f/3e/5db95bcf282c52709639744ca2a8b149baccf648e39c8cc87553df9eae0c/urllib3-2.7.0-py3-none-any.whl", hash = "sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897", size = 131087, upload-time = "2026-05-07T16:13:17.151Z" },
+]
+
+[[package]]
+name = "vcrpy"
+version = "8.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyyaml" },
+    { name = "wrapt" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/39/d5/8a1f8eb603e2d35fbb0ecd1e309d0c5c18a0ecfc8c0a8f04088bbc8f833b/vcrpy-8.3.0.tar.gz", hash = "sha256:46d64e77e8d95e5c76c7d9a94ff05d8b38b2ae4e1d4869eb0235024b6fcb5212", size = 96117, upload-time = "2026-07-04T14:27:01.608Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/34/77/cb4219be91508399cbcb6143bad89462cfb16f6c638458f454a5d46ac95a/vcrpy-8.3.0-py3-none-any.whl", hash = "sha256:bd66e6143746778157f00e2a922527a8d96b2fdc350be8988a45a29c843815b9", size = 46530, upload-time = "2026-07-04T14:27:00.546Z" },
 ]
 
 [[package]]

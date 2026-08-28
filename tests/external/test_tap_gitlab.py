@@ -1,12 +1,25 @@
 from __future__ import annotations
 
+import pytest
 from tap_gitlab.tap import TapGitlab
 
 from singer_sdk.helpers import _catalog
 from singer_sdk.singerlib import Catalog
 from singer_sdk.testing import get_tap_test_class
 
-TestSampleTapGitlab = get_tap_test_class(TapGitlab, validate_config=False)
+# `vcr_cassette` (see singer_sdk.testing.vcr.use_class_cassette / conftest.py's
+# `_class_cassette` fixture) wraps the whole class in one cassette, keyed by a
+# stable, explicit name. Plain `@pytest.mark.vcr` doesn't work here: the standard
+# suite's `runner` fixture (class-scoped) does the real HTTP sync once, on whichever
+# test happens to run first, but pytest sets up broader-scoped fixtures before
+# narrower ones — so pytest-recording's function-scoped cassette fixture would
+# always activate too late to intercept it, regardless of cassette naming.
+TestSampleTapGitlab = pytest.mark.vcr_cassette("gitlab.yaml")(
+    get_tap_test_class(
+        TapGitlab,
+        validate_config=False,
+    ),
+)
 
 
 def test_gitlab_replication_keys():
@@ -41,6 +54,7 @@ def test_gitlab_replication_keys():
     )
 
 
+@pytest.mark.vcr
 def test_gitlab_sync_epic_issues():
     """Test sync for just the 'epic_issues' child stream."""
     # Initialize with basic config

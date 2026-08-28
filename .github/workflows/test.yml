@@ -146,12 +146,17 @@ jobs:
   tests-external:
     name: External Tests
     runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.head.repo.fork }}
+    # These tests replay committed VCR cassettes (tests/external/cassettes/) rather
+    # than calling GitLab/DummyJSON live, so they need no secrets or network access
+    # and are safe to run unconditionally, including on fork PRs. The tap config
+    # values below only need to match what the cassettes were recorded with; the
+    # token value is never checked on replay since request headers aren't part of
+    # cassette matching.
     env:
       NOXSESSION: test-external
-      TAP_GITLAB_AUTH_TOKEN: ${{ secrets.SAMPLE_TAP_GITLAB_AUTH_TOKEN }}
-      TAP_GITLAB_GROUP_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_GROUP_IDS }}
-      TAP_GITLAB_PROJECT_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_PROJECT_IDS }}
+      TAP_GITLAB_AUTH_TOKEN: "replay-only-placeholder"
+      TAP_GITLAB_GROUP_IDS: '["2524164"]'
+      TAP_GITLAB_PROJECT_IDS: '["meltano/sdk"]'
       TAP_GITLAB_START_DATE: "2022-01-01T00:00:00Z"
 
     steps:

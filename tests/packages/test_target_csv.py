@@ -67,6 +67,7 @@ COUNTRIES_STREAM_MAPS_CONFIG: dict[str, t.Any] = {
 
 @time_machine.travel(DATETIME, tick=False)
 @pytest.mark.snapshot
+@pytest.mark.vcr
 def test_countries_to_csv(
     csv_config: dict,
     snapshot: Snapshot,
@@ -88,6 +89,7 @@ def test_countries_to_csv(
 
 @time_machine.travel(DATETIME, tick=False)
 @pytest.mark.snapshot
+@pytest.mark.vcr
 @pytest.mark.parametrize(
     "emit_activate_version_messages",
     [True, False],
@@ -161,6 +163,7 @@ def test_fake_people_to_csv(
     snapshot.assert_match(caplog.text, "singer.log")
 
 
+@pytest.mark.vcr
 def test_target_batching():
     """Test batch writing behaviors.
 
