@@ -10,7 +10,6 @@ from singer.encoding.simple import (
     SimpleSingerReader,
     SimpleSingerWriter,
     StateMessage,
-    exclude_null_dict,
 )
 
 __all__ = [
@@ -21,5 +20,4 @@ __all__ = [
     "SimpleSingerReader",
     "SimpleSingerWriter",
     "StateMessage",
-    "exclude_null_dict",
 ]
