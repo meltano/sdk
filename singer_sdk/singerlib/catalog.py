@@ -24,6 +24,15 @@ if t.TYPE_CHECKING:
     else:
         from typing_extensions import Self
 
+__all__ = [
+    "Catalog",
+    "CatalogEntry",
+    "Metadata",
+    "MetadataMapping",
+    "SelectionMask",
+    "StreamMetadata",
+]
+
 Breadcrumb: t.TypeAlias = tuple[str, ...]
 
 logger = logging.getLogger(__name__)
