@@ -28,6 +28,16 @@ if t.TYPE_CHECKING:
     else:
         from typing_extensions import Self
 
+__all__ = [
+    "ActivateVersionMessage",
+    "Message",
+    "RecordMessage",
+    "SchemaMessage",
+    "SimpleSingerReader",
+    "SimpleSingerWriter",
+    "StateMessage",
+]
+
 Schema: t.TypeAlias = Mapping[str, t.Any]
 
 logger = logging.getLogger(__name__)
