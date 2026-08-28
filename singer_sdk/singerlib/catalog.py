@@ -170,13 +170,13 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         return self[breadcrumb]
 
     @t.overload
-    def __getitem__(self, key: tuple[()]) -> StreamMetadata: ...
+    def __getitem__(self, key: tuple[()], /) -> StreamMetadata: ...
 
     @t.overload
-    def __getitem__(self, key: Breadcrumb) -> Metadata: ...
+    def __getitem__(self, key: Breadcrumb, /) -> Metadata: ...
 
     @override
-    def __getitem__(self, key: Breadcrumb) -> AnyMetadata:
+    def __getitem__(self, key: Breadcrumb, /) -> AnyMetadata:
         return super().__getitem__(key)
 
     @property
