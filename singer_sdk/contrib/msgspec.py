@@ -11,9 +11,9 @@ import typing as t
 import msgspec
 import msgspec.json
 
-from singer.encoding.base import GenericSingerReader, GenericSingerWriter
-from singer.encoding.simple import Message
-from singer.exceptions import InvalidInputLine
+from singer_sdk.singerlib.encoding.base import GenericSingerReader, GenericSingerWriter
+from singer_sdk.singerlib.encoding.simple import Message
+from singer_sdk.singerlib.exceptions import InvalidInputLine
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
