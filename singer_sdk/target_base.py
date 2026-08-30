@@ -340,6 +340,11 @@ class Target(BaseSingerReader, abc.ABC):
         """
         self._assert_line_requires(message_dict, requires={"stream", "record"})
 
+        # Drain any sinks whose batches expired since the last record.
+        for sink in self._sinks_active.values():
+            if sink.is_full:
+                self.drain_one(sink)
+
         stream_name = message_dict["stream"]
         if stream_name not in self.mapper.stream_maps:
             self._assert_sink_exists(stream_name)
