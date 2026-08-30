@@ -424,22 +424,24 @@ def test_expired_batch_drained_on_next_record():
     )
     target._sinks_active["foo"] = sink
 
-    # Open a batch with a record and then fake-expire it.
+    # Register the stream in the mapper so _process_record_message finds it.
+    target.mapper.register_raw_stream_schema(
+        "foo",
+        input_schema,
+        key_properties,
+    )
+
+    # Simulate an expired batch by going through the normal flow.
     sink._get_context({"id": "old"})
     sink.process_record({"id": "old"}, sink._pending_batch)
     sink._batch_start_time = time.monotonic() - 2
 
-    # Verify the sink reports as full due to time expiry.
-    assert sink.is_too_old is True
-    assert sink.is_full is True
-
-    # Drain and verify state is reset.
-    sink.start_drain()
-    sink.process_batch(sink._context_draining)
-    sink.mark_drained()
-    assert sink._batch_start_time is None
-    assert sink._batch_records_read == 0
+    # Processing a new record should drain the expired batch first.
+    target._process_record_message(
+        {"stream": "foo", "record": {"id": "new"}, "time_extracted": None},
+    )
     assert target.num_batches_processed == 1
+    assert any(r.get("id") == "new" for r in target.records_written)
 
 
 def test_preprocess_record_starts_timer():
