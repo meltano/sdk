@@ -318,7 +318,7 @@ def test_is_too_old_false_within_limit():
         schema=input_schema,
         key_properties=[],
     )
-    sink._batch_start_time = time.time()
+    sink._batch_start_time = time.monotonic()
     assert sink.is_too_old is False
 
 
@@ -335,7 +335,7 @@ def test_is_too_old_true_after_limit():
         schema=input_schema,
         key_properties=[],
     )
-    sink._batch_start_time = time.time() - 2
+    sink._batch_start_time = time.monotonic() - 2
     assert sink.is_too_old is True
 
 
@@ -357,11 +357,11 @@ def test_is_full_includes_too_old():
     assert sink.is_full is False
 
     # Batch started but not yet expired
-    sink._batch_start_time = time.time()
+    sink._batch_start_time = time.monotonic()
     assert sink.is_full is False
 
     # Batch expired
-    sink._batch_start_time = time.time() - 2
+    sink._batch_start_time = time.monotonic() - 2
     assert sink.is_full is True
 
 
@@ -378,7 +378,7 @@ def test_batch_start_time_reset_on_drain():
         schema=input_schema,
         key_properties=[],
     )
-    sink._batch_start_time = time.time()
+    sink._batch_start_time = time.monotonic()
     sink._batch_records_read = 5
     sink.mark_drained()
     assert sink._batch_start_time is None
@@ -389,3 +389,20 @@ def test_batch_wait_limit_seconds_in_about():
     target = TargetMock()
     about = target._get_about_info()
     assert "batch_wait_limit_seconds" in about.settings["properties"]
+
+
+def test_negative_batch_wait_limit_seconds_ignored():
+    input_schema = {
+        "properties": {
+            "id": {"type": ["string", "null"]},
+        },
+    }
+    target = TargetMock(config={"batch_wait_limit_seconds": -5})
+    sink = BatchSinkMock(
+        target=target,
+        stream_name="foo",
+        schema=input_schema,
+        key_properties=[],
+    )
+    assert sink._batch_wait_limit_seconds is None
+    assert sink.batch_wait_limit_seconds is None

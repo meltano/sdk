@@ -209,6 +209,11 @@ class Sink(abc.ABC):  # noqa: PLR0904
         self._batch_wait_limit_seconds: int | None = target.config.get(
             "batch_wait_limit_seconds",
         )
+        if (
+            self._batch_wait_limit_seconds is not None
+            and self._batch_wait_limit_seconds < 0
+        ):
+            self._batch_wait_limit_seconds = None
         self._batch_start_time: float | None = None
 
         # Track fields we've already warned about missing from schema
@@ -355,7 +360,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
         """True if the current batch has exceeded the wait time limit."""
         if self._batch_start_time is None or self.batch_wait_limit_seconds is None:
             return False
-        return (time.time() - self._batch_start_time) >= self.batch_wait_limit_seconds
+        return (time.monotonic() - self._batch_start_time) >= self.batch_wait_limit_seconds
 
     @property
     def max_size(self) -> int:
@@ -647,8 +652,6 @@ class Sink(abc.ABC):  # noqa: PLR0904
         Args:
             context: Stream partition or context dictionary.
         """
-        if self._batch_start_time is None:
-            self._batch_start_time = time.time()
         self.logger.debug("Processed record: %s", context)
 
     # SDK developer overrides:
@@ -663,6 +666,8 @@ class Sink(abc.ABC):  # noqa: PLR0904
         Returns:
             A new, processed record.
         """
+        if self._batch_start_time is None:
+            self._batch_start_time = time.monotonic()
         return record
 
     @abc.abstractmethod
