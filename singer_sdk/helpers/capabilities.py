@@ -9,6 +9,7 @@ from warnings import warn
 
 from singer_sdk.typing import (
     AnyOf,
+    AnyType,
     ArrayType,
     BooleanType,
     Constant,
@@ -104,6 +105,15 @@ STREAM_MAPS_CONFIG = PropertiesList(
                         Constant("__NULL__"),  # Remove the property from the stream.
                         NullType(),  # Remove the property from the stream.
                         StringType(),  # Compute the property using this expression.
+                        ObjectType(
+                            Property(
+                                "expr",
+                                StringType(),
+                                required=True,
+                                description="Expression used to compute the property.",
+                            ),
+                            additional_properties=AnyType(),
+                        ),
                     ),
                 ),
             ),
