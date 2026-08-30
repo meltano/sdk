@@ -360,7 +360,9 @@ class Sink(abc.ABC):  # noqa: PLR0904
         """True if the current batch has exceeded the wait time limit."""
         if self._batch_start_time is None or self.batch_wait_limit_seconds is None:
             return False
-        return (time.monotonic() - self._batch_start_time) >= self.batch_wait_limit_seconds
+        return (
+            time.monotonic() - self._batch_start_time
+        ) >= self.batch_wait_limit_seconds
 
     @property
     def max_size(self) -> int:
@@ -656,7 +658,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
 
     # SDK developer overrides:
 
-    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: PLR6301, ARG002
+    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: ARG002
         """Process incoming record and return a modified result.
 
         Args:
