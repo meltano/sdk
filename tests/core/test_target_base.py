@@ -406,3 +406,55 @@ def test_negative_batch_wait_limit_seconds_ignored():
     )
     assert sink._batch_wait_limit_seconds is None
     assert sink.batch_wait_limit_seconds is None
+
+
+def test_expired_batch_drained_on_next_record():
+    input_schema = {
+        "properties": {
+            "id": {"type": ["string", "null"]},
+        },
+    }
+    key_properties = []
+    target = TargetMock(config={"batch_wait_limit_seconds": 1})
+    sink = BatchSinkMock(
+        target=target,
+        stream_name="foo",
+        schema=input_schema,
+        key_properties=key_properties,
+    )
+    target._sinks_active["foo"] = sink
+
+    # Open a batch with a record and then fake-expire it.
+    sink._get_context({"id": "old"})
+    sink.process_record({"id": "old"}, sink._pending_batch)
+    sink._batch_start_time = time.monotonic() - 2
+
+    # Verify the sink reports as full due to time expiry.
+    assert sink.is_too_old is True
+    assert sink.is_full is True
+
+    # Drain and verify state is reset.
+    sink.start_drain()
+    sink.process_batch(sink._context_draining)
+    sink.mark_drained()
+    assert sink._batch_start_time is None
+    assert sink._batch_records_read == 0
+    assert target.num_batches_processed == 1
+
+
+def test_preprocess_record_starts_timer():
+    input_schema = {
+        "properties": {
+            "id": {"type": ["string", "null"]},
+        },
+    }
+    target = TargetMock()
+    sink = BatchSinkMock(
+        target=target,
+        stream_name="foo",
+        schema=input_schema,
+        key_properties=[],
+    )
+    assert sink._batch_start_time is None
+    sink.preprocess_record({"id": "x"}, {})
+    assert sink._batch_start_time is not None
