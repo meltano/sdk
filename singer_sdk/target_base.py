@@ -21,6 +21,7 @@ from singer_sdk.helpers.capabilities import (
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
     TARGET_BATCH_SIZE_ROWS_CONFIG,
+    TARGET_BATCH_WAIT_LIMIT_SECONDS_CONFIG,
     TARGET_LOAD_METHOD_CONFIG,
     TARGET_VALIDATE_RECORDS_CONFIG,
     PluginCapabilities,
@@ -674,6 +675,7 @@ class Target(BaseSingerReader, abc.ABC):
         _merge_missing(ADD_RECORD_METADATA_CONFIG, config_jsonschema)
         _merge_missing(TARGET_LOAD_METHOD_CONFIG, config_jsonschema)
         _merge_missing(TARGET_BATCH_SIZE_ROWS_CONFIG, config_jsonschema)
+        _merge_missing(TARGET_BATCH_WAIT_LIMIT_SECONDS_CONFIG, config_jsonschema)
 
         capabilities = cls.capabilities
 
