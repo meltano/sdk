@@ -16,6 +16,7 @@ import json
 import logging
 import sys
 import typing as t
+import uuid
 
 import simpleeval
 
@@ -72,6 +73,11 @@ def sha256(string: str) -> str:
         A string digested into SHA256.
     """
     return hashlib.sha256(string.encode("utf-8")).hexdigest()
+
+
+def uuid4() -> str:
+    """Return a random UUID as a string."""
+    return str(uuid.uuid4())
 
 
 StreamMapsDict: t.TypeAlias = dict[str, str | dict | None]
@@ -395,6 +401,8 @@ class CustomStreamMap(StreamMap):
         funcs: dict[str, t.Any] = dict(simpleeval.DEFAULT_FUNCTIONS)
         funcs["md5"] = md5
         funcs["sha256"] = sha256
+        funcs["UUID"] = uuid.UUID
+        funcs["uuid4"] = uuid4
         funcs["datetime"] = simpleeval.ModuleWrapper(datetime)
         funcs["bool"] = bool
         funcs["json"] = simpleeval.ModuleWrapper(json)

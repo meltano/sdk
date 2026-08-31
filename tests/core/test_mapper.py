@@ -9,6 +9,7 @@ import json
 import logging
 import sys
 import typing as t
+import uuid
 from contextlib import redirect_stdout
 from decimal import Decimal
 
@@ -17,7 +18,7 @@ import time_machine
 from typing_extensions import override
 
 from singer_sdk.exceptions import MapExpressionError
-from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
+from singer_sdk.mapper import CustomStreamMap, PluginMapper, RemoveRecordTransform, md5
 from singer_sdk.singerlib import Catalog
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
@@ -1054,6 +1055,28 @@ def test_deselected_stream_with_key_properties_and_map():
     tap.catalog["mystream"].metadata[()].selected = False
 
     tap.setup_mapper()
+
+
+def test_uuid_functions():
+    stream_map = CustomStreamMap(
+        stream_alias="mystream",
+        map_config={},
+        faker_config={},
+        raw_schema=PropertiesList(Property("id", StringType)).to_dict(),
+        key_properties=None,
+        map_transform={
+            "generated": "uuid4()",
+            "canonical": "str(UUID(id))",
+            "__else__": None,
+        },
+        flattening_options=None,
+    )
+
+    result = stream_map.transform({"id": "F81D4FAE7DEC11D0A76500A0C91E6BF6"})
+
+    assert result is not None
+    assert uuid.UUID(result["generated"]).version == 4
+    assert result["canonical"] == "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
 
 
 def test_bench_simple_map_transforms(
