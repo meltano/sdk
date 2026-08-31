@@ -206,6 +206,15 @@ class Sink(abc.ABC):  # noqa: PLR0904
         self._batch_size_rows: int | None = target.config.get(
             "batch_size_rows",
         )
+        self._batch_wait_limit_seconds: int | None = target.config.get(
+            "batch_wait_limit_seconds",
+        )
+        if (
+            self._batch_wait_limit_seconds is not None
+            and self._batch_wait_limit_seconds < 0
+        ):
+            self._batch_wait_limit_seconds = None
+        self._batch_start_time: float | None = None
 
         # Track fields we've already warned about missing from schema
         self._warned_missing_fields: set[str] = set()
@@ -328,7 +337,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
     @property
     def is_full(self) -> bool:
         """True if the sink needs to be drained."""
-        return self.current_size >= self.max_size
+        return self.current_size >= self.max_size or self.is_too_old
 
     @property
     def batch_size_rows(self) -> int | None:
@@ -337,6 +346,23 @@ class Sink(abc.ABC):  # noqa: PLR0904
         Or None if not set.
         """
         return self._batch_size_rows
+
+    @property
+    def batch_wait_limit_seconds(self) -> int | None:
+        """The maximum number of seconds to wait for a batch to fill.
+
+        Or None if not set.
+        """
+        return self._batch_wait_limit_seconds
+
+    @property
+    def is_too_old(self) -> bool:
+        """True if the current batch has exceeded the wait time limit."""
+        if self._batch_start_time is None or self.batch_wait_limit_seconds is None:
+            return False
+        return (
+            time.monotonic() - self._batch_start_time
+        ) >= self.batch_wait_limit_seconds
 
     @property
     def max_size(self) -> int:
@@ -632,7 +658,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
 
     # SDK developer overrides:
 
-    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: PLR6301, ARG002
+    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: ARG002
         """Process incoming record and return a modified result.
 
         Args:
@@ -642,6 +668,8 @@ class Sink(abc.ABC):  # noqa: PLR0904
         Returns:
             A new, processed record.
         """
+        if self._batch_start_time is None:
+            self._batch_start_time = time.monotonic()
         return record
 
     @abc.abstractmethod
@@ -695,6 +723,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
         self.drained_state = self._draining_state
         self._draining_state = None
         self._context_draining = None
+        self._batch_start_time = None
         if self._batch_records_read:
             self.tally_record_written(
                 self._batch_records_read - self._batch_dupe_records_merged,

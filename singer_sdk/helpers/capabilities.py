@@ -304,6 +304,17 @@ TARGET_BATCH_SIZE_ROWS_CONFIG = PropertiesList(
         description="Maximum number of rows in each batch.",
     ),
 ).to_dict()
+TARGET_BATCH_WAIT_LIMIT_SECONDS_CONFIG = PropertiesList(
+    Property(
+        "batch_wait_limit_seconds",
+        IntegerType,
+        title="Batch Wait Limit (Seconds)",
+        description=(
+            "Maximum number of seconds to wait for a batch to reach "
+            "the configured batch size before processing it anyway."
+        ),
+    ),
+).to_dict()
 
 
 class TargetLoadMethods(str, Enum):

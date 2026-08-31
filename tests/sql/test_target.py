@@ -53,5 +53,6 @@ def test_target_about_info(
         "add_record_metadata",
         "load_method",
         "batch_size_rows",
+        "batch_wait_limit_seconds",
     }
     assert set(about.settings["properties"]) == expected_settings | default_settings
