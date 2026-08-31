@@ -1128,7 +1128,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             if self.stream_maps[0].get_filter_result(record):
                 self._sync_children(copy.copy(context))
 
-    def _sync_records(  # ruff: ignore[complex-structure, too-many-branches]
+    def _sync_records(  # ruff: ignore[complex-structure, too-many-branches, too-many-statements]
         self,
         context: types.Context | None = None,
         *,
@@ -1160,81 +1160,23 @@ class Stream(abc.ABC):  # noqa: PLR0904
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
-        with record_counter, timer:  # ruff: ignore[too-many-nested-blocks]
+        with record_counter, timer:
             for context_element in context_list or [{}]:
-                try:  # ruff: ignore[too-many-statements-in-try-clause]
-                    record_counter.with_context(context_element)
-                    timer.with_context(context_element)
+                record_counter.with_context(context_element)
+                timer.with_context(context_element)
 
-                    current_context = context_element or None
-                    state_partition_context = self._get_state_partition_context(
-                        current_context,
-                    )
-                    self._write_starting_replication_value(current_context)
+                current_context = context_element or None
+                state_partition_context = self._get_state_partition_context(
+                    current_context,
+                )
+                self._write_starting_replication_value(current_context)
 
-                    child_context: types.Context | None = (
-                        None if current_context is None else copy.copy(current_context)
-                    )
+                child_context: types.Context | None = (
+                    None if current_context is None else copy.copy(current_context)
+                )
 
-                    for idx, record_result in enumerate(
-                        self.get_records(current_context)
-                    ):
-                        self._check_max_record_limit(current_record_index=record_index)
-
-                        if isinstance(record_result, tuple):  # pragma: no cover
-                            # Tuple items should be the record and the child context
-                            warnings.warn(
-                                "Yielding a tuple of (record, child_context) is "
-                                "deprecated and will be removed in version 0.49 "
-                                "at the earliest. "
-                                "Please yield a single item instead.",
-                                SingerSDKDeprecationWarning,
-                                stacklevel=2,
-                            )
-                            record, child_context = record_result
-                        else:
-                            record = record_result
-
-                        record = self.post_process(record, current_context)
-                        if record is None:
-                            continue
-
-                        try:
-                            self._process_record(
-                                record,
-                                child_context=child_context,
-                                partition_context=state_partition_context,
-                            )
-                        except InvalidStreamSortException as ex:  # pragma: no cover
-                            self.state_manager.log_sort_error(
-                                ex=ex,
-                                record_count=record_index + 1,
-                                partition_record_count=idx + 1,
-                                current_context=current_context,
-                            )
-                            raise
-
-                        if selected:
-                            if write_messages:
-                                self._write_record_message(record)
-
-                            self._increment_stream_state(
-                                record, context=current_context
-                            )
-                            if (
-                                record_index + 1
-                            ) % self.STATE_MSG_FREQUENCY == 0 and write_messages:
-                                self._write_state_message()
-
-                            record_counter.increment()
-                            yield record
-
-                        record_index += 1
-
-                    if current_context == state_partition_context:
-                        # Finalize per-partition state only if 1:1 with context
-                        state = self.get_context_state(current_context)
-                        self._finalize_state(state)
+                try:
+                    record_iter = self.get_records(current_context)
                 except EndOfStreamError as e:
                     self.logger.warning(
                         "Skipping partition '%s' in stream '%s': %s",
@@ -1243,6 +1185,62 @@ class Stream(abc.ABC):  # noqa: PLR0904
                         str(e),  # ruff: ignore[logging-eager-conversion]
                     )
                     continue
+
+                for idx, record_result in enumerate(record_iter):
+                    self._check_max_record_limit(current_record_index=record_index)
+
+                    if isinstance(record_result, tuple):  # pragma: no cover
+                        # Tuple items should be the record and the child context
+                        warnings.warn(
+                            "Yielding a tuple of (record, child_context) is "
+                            "deprecated and will be removed in version 0.49 "
+                            "at the earliest. "
+                            "Please yield a single item instead.",
+                            SingerSDKDeprecationWarning,
+                            stacklevel=2,
+                        )
+                        record, child_context = record_result
+                    else:
+                        record = record_result
+
+                    record = self.post_process(record, current_context)
+                    if record is None:
+                        continue
+
+                    try:
+                        self._process_record(
+                            record,
+                            child_context=child_context,
+                            partition_context=state_partition_context,
+                        )
+                    except InvalidStreamSortException as ex:  # pragma: no cover
+                        self.state_manager.log_sort_error(
+                            ex=ex,
+                            record_count=record_index + 1,
+                            partition_record_count=idx + 1,
+                            current_context=current_context,
+                        )
+                        raise
+
+                    if selected:
+                        if write_messages:
+                            self._write_record_message(record)
+
+                        self._increment_stream_state(record, context=current_context)
+                        if (
+                            record_index + 1
+                        ) % self.STATE_MSG_FREQUENCY == 0 and write_messages:
+                            self._write_state_message()
+
+                        record_counter.increment()
+                        yield record
+
+                    record_index += 1
+
+                if current_context == state_partition_context:
+                    # Finalize per-partition state only if 1:1 with context
+                    state = self.get_context_state(current_context)
+                    self._finalize_state(state)
 
         if not context:
             # Finalize total stream only if we have the full context.
