@@ -20,9 +20,17 @@ metrics logging.
 
 ### `SINGER_SDK_LOG_CONFIG`
 
-Metrics are written by the `singer_sdk.metrics` logger, so the end user can set
+Metrics are written by the `singer.metrics` logger, so the end user can set
 `SINGER_SDK_LOG_CONFIG` to a logging config file that defines the format and output
 for metrics. See the [logging docs](./logging.md) for an example file.
+
+```{note}
+The metrics implementation lives in the `singer.metrics` module, from the
+[`meltano-singer-python`](https://pypi.org/project/meltano-singer-python/) package.
+Prior to `singer-sdk` v0.55, metrics were logged under the `singer_sdk.metrics`
+logger name; logging configs that filter or route on that name should be updated
+to `singer.metrics`. Metric log points also gained a `pid` tag.
+```
 
 ## Additional Singer Metrics References
 

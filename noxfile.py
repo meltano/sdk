@@ -254,7 +254,6 @@ def test_lowest_requirements(session: nox.Session) -> None:
         "--group=testing",
         "--all-extras",
         "--universal",
-        "--no-sources",
         "--resolution=lowest-direct",
         f"-o={tmpfile.as_posix()}",
         env=install_env,
@@ -487,19 +486,20 @@ def templates(session: nox.Session, replay_file_path: Path) -> None:
 
 @nox.session(name="api", default=False)
 def api_changes(session: nox.Session) -> None:
-    """Check for API changes."""
-    args = [
-        "check",
-        "singer_sdk",
-    ]
+    """Check for API changes.
 
+    Uses `scripts/check_api.py` instead of `griffecli check` directly, because
+    `griffecli check` hardcodes `resolve_external=None` and can never resolve
+    base classes defined in the `singer` package (`packages/meltano-singer-python`),
+    reporting every member `singer_sdk` classes inherit from it as "removed".
+    """
+    session.install("griffe")
+
+    args = []
     if session.posargs:
         args.append(f"-a={session.posargs[0]}")
 
-    if "GITHUB_ACTIONS" in os.environ:
-        args.append("-f=github")
-
-    session.run("uvx", "griffecli", *args, external=True)
+    session.run("python", "scripts/check_api.py", *args)
 
 
 if __name__ == "__main__":

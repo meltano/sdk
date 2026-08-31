@@ -8,7 +8,7 @@ from contextlib import redirect_stdout
 import pytest
 from pytz import timezone
 
-import singer_sdk.singerlib as singer
+import singer
 
 UTC = datetime.timezone.utc
 

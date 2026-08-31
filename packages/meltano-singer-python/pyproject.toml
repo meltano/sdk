@@ -1,0 +1,69 @@
+[project]
+name = "meltano-singer-python"
+dynamic = [
+    "version",
+]
+description = "A lightweight library for building Singer taps and targets, and a drop-in replacement for singer-python"
+authors = [{ name = "Meltano Team and Contributors", email = "hello@meltano.com" }]
+maintainers = [{ name = "Meltano Team and Contributors", email = "hello@meltano.com" }]
+keywords = [
+    "Meltano",
+    "Singer",
+    "Meltano SDK",
+    "Singer SDK",
+    "singer-python",
+    "ELT",
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Typing :: Typed",
+]
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+
+dependencies = [
+    'backports-datetime-fromisoformat>=2.0.1; python_version<"3.11"',
+    "pyyaml>=6",
+    "referencing>=0.30.0",
+    "simplejson>=3.17.6",
+    "typing-extensions>=4.5.0; python_version < '3.13'",
+]
+
+[project.urls]
+Homepage = "https://sdk.meltano.com/en/latest/"
+Repository = "https://github.com/meltano/sdk"
+Documentation = "https://sdk.meltano.com/en/latest/"
+"Issue Tracker" = "https://github.com/meltano/sdk/issues"
+
+[dependency-groups]
+dev = [
+    { include-group = "typing" }
+]
+typing = [
+    "types-pyyaml",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["singer"]
+
+[tool.hatch.version]
+fallback-version = "0.0.0.dev0"
+source = "vcs"
+[tool.hatch.version.raw-options]
+search_parent_directories = true
+
+[build-system]
+requires = [
+    "hatchling>=1,<2",
+    "hatch-vcs",
+]
+build-backend = "hatchling.build"

@@ -17,4 +17,5 @@ sql-target
 migrate-to-uv
 consolidate-sql-imports
 decouple-authenticators
+singer-python
 ```

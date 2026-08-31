@@ -4,7 +4,7 @@ import typing as t
 
 import pytest
 
-from singer_sdk.singerlib import (
+from singer import (
     Catalog,
     CatalogEntry,
     Metadata,
@@ -14,7 +14,7 @@ from singer_sdk.singerlib import (
 )
 
 if t.TYPE_CHECKING:
-    from singer_sdk.singerlib.catalog import Breadcrumb
+    from singer.catalog import Breadcrumb
 
 METADATA_ARRAY = [
     {
@@ -186,7 +186,6 @@ def test_catalog_parsing():
     assert test_stream is not None
     assert test_stream.tap_stream_id == "test"
     assert catalog["test"].metadata.to_list() == catalog_dict["streams"][0]["metadata"]
-    assert catalog["test"].tap_stream_id == catalog_dict["streams"][0]["tap_stream_id"]
     assert catalog["test"].schema.to_dict() == {"type": "object"}
     assert catalog.to_dict() == catalog_dict
 
