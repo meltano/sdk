@@ -246,8 +246,15 @@ The following functions and namespaces are available for use in mapping expressi
 | :--------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`md5()`](inv:python:py:function:#hashlib.md5) | Returns an inline MD5 hash of any string, outputting the string representation of the hash's hex digest. This is defined by the SDK internally with native python: [`hashlib.md5(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest). |
 | [`sha256()`](inv:python:py:function:#hashlib.sha256) | Returns an inline SHA256 hash of any string, outputting the string representation of the hash's hex digest. This is defined by the SDK internally with native python: [`hashlib.sha256(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest). |
+| [`uuid4()`](inv:python:py:function:#uuid.uuid4) | Generates a random version 4 UUID and returns its string representation. For example, `surrogate_id: uuid4()`. |
+| `check_uuid()` | Returns whether a value is a valid UUID string. Pass `version=<number>` to require a specific UUID version, for example `__filter__: check_uuid(id, version=4)`. |
 | [`datetime`](inv:python:py:module:#datetime) | This is the datetime module object from the Python standard library. You can access [`datetime.datetime`](inv:python:py:class:#datetime.datetime), [`datetime.timedelta`](inv:python:py:class:#datetime.timedelta), etc. |
 | [`json`](inv:python:py:module:#json) | This is the json module object from the Python standard library. Primarily used for calling [`json.dumps()`](inv:python:py:function:#json.dumps) and [`json.loads()`](inv:python:py:function:#json.loads). |
+
+```{warning}
+`uuid4()` returns a new random value every time an expression is evaluated, so it is
+not suitable for deterministic IDs that must remain stable across syncs.
+```
 
 ```{tip}
 With `json.dumps()`, you might want to pass the `default` argument. For example, `json.dumps(obj, default=str)` will call `str()` on
