@@ -39,11 +39,6 @@ jobs:
   version_bump:
     name: Bump the package version
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-    permissions:
-      contents: write       # to create a github release
-      pull-requests: write  # to create and update PRs
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -52,6 +47,16 @@ jobs:
         persist-credentials: false
 
     - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+
+    - name: Generate MeltyBot token
+      id: app-token
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+      with:
+        client-id: ${{ secrets.MELTYBOT_APP_CLIENT_ID }}
+        private-key: ${{ secrets.MELTYBOT_APP_PRIVATE_KEY }}
+        permission-contents: write       # to push the metadata refresh branch
+        permission-pull-requests: write  # to open the PR
+        permission-members: read         # to look up org membership for changelog thanks
 
     - name: Bump version
       id: cz-bump
@@ -62,9 +67,11 @@ jobs:
         commit: "false"
         push: "false"
         changelog: "true"
-        github_token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}
+        github_token: ${{ steps.app-token.outputs.token }}
         extra_requirements: 'git+https://github.com/meltano/commitizen-version-bump@main'
         changelog_increment_filename: _changelog_fragment.md
+      env:
+        GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
     - name: Add job summary
       run: |
@@ -79,7 +86,7 @@ jobs:
         body_path: _changelog_fragment.md
         tag_name: v${{ steps.cz-bump.outputs.version }}
         prerelease: ${{ github.event.inputs.prerelease != 'none' }}
-        token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}
+        token: ${{ steps.app-token.outputs.token }}
 
     - name: Set repo file permissions
       run: |
@@ -90,7 +97,7 @@ jobs:
       uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
       id: create-pull-request
       with:
-        token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}
+        token: ${{ steps.app-token.outputs.token }}
         commit-message: "chore: Bump package version"
         title: "chore: Release v${{ steps.cz-bump.outputs.version }}"
         body: |

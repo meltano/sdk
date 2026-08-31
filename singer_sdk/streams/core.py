@@ -161,11 +161,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         if schema:
             if isinstance(schema, (PathLike, str)):
-                if not Path(schema).is_file():  # ty: ignore[invalid-argument-type]
+                if not Path(schema).is_file():
                     msg = f"Could not find schema file '{self.schema_filepath}'."
                     raise FileNotFoundError(msg)
 
-                self._schema_filepath = Path(schema)  # ty: ignore[invalid-argument-type]
+                self._schema_filepath = Path(schema)
                 warnings.warn(
                     "Passing a schema filepath is deprecated. Please pass a schema "
                     "dictionary or a Singer Schema object instead.",
