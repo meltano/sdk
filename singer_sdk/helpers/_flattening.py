@@ -398,12 +398,12 @@ def _flatten_schema(  # noqa: C901, PLR0912
             and len(composite) > 0
             and (first_element := _first(composite))
         ):
-            if first_element["type"] == "string":  # ty:ignore[not-subscriptable]
-                items.append((new_key, {**first_element, "type": ["null", "string"]}))  # ty:ignore[invalid-argument-type]
-            elif first_element["type"] == "array":  # ty:ignore[not-subscriptable]
-                items.append((new_key, {**first_element, "type": ["null", "array"]}))  # ty:ignore[invalid-argument-type]
-            elif first_element["type"] == "object":  # ty:ignore[not-subscriptable]
-                items.append((new_key, {**first_element, "type": ["null", "object"]}))  # ty:ignore[invalid-argument-type]
+            if first_element["type"] == "string":
+                items.append((new_key, {**first_element, "type": ["null", "string"]}))
+            elif first_element["type"] == "array":
+                items.append((new_key, {**first_element, "type": ["null", "array"]}))
+            elif first_element["type"] == "object":
+                items.append((new_key, {**first_element, "type": ["null", "object"]}))
         else:
             # Handle typeless properties (e.g., "PropertyName": {})
             # Treat them as string type to allow JSON serialization
