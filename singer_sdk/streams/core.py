@@ -20,10 +20,11 @@ from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
     DiscoveryError,
-    EndOfStreamError,
     InvalidReplicationKeyException,
     InvalidStreamSortException,
     MaxRecordsLimitException,
+    RetriableSyncError,
+    SkippableSyncError,
 )
 from singer_sdk.helpers._batch import BatchConfig, SDKBatchMessage
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
@@ -1146,6 +1147,8 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Raises:
             InvalidStreamSortException: Raised if sorting errors are found while
                 syncing the records.
+            RetriableSyncError: Re-raised after finalizing partition state when a
+                retriable error occurs, preserving the existing retry mechanism.
         """
         # Type definitions
         context_element: types.Context | None
@@ -1177,14 +1180,24 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
                 try:
                     record_iter = self.get_records(current_context)
-                except EndOfStreamError as e:
+                except SkippableSyncError as e:
                     self.logger.warning(
                         "Skipping partition '%s' in stream '%s': %s",
                         context_element,
                         self.name,
                         str(e),  # ruff: ignore[logging-eager-conversion]
                     )
+                    state = self.get_context_state(current_context)
+                    self._finalize_state(state)
+                    if write_messages:
+                        self._write_state_message()
                     continue
+                except RetriableSyncError:
+                    state = self.get_context_state(current_context)
+                    self._finalize_state(state)
+                    if write_messages:
+                        self._write_state_message()
+                    raise
 
                 for idx, record_result in enumerate(record_iter):
                     self._check_max_record_limit(current_record_index=record_index)

@@ -17,7 +17,7 @@ from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
     ConfigValidationError,
-    EndOfStreamError,
+    SkippableSyncError,
 )
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
@@ -514,7 +514,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
             try:
                 stream.sync()
                 stream.finalize_state_progress_markers()
-            except EndOfStreamError as e:
+            except SkippableSyncError as e:
                 self.logger.warning(
                     "Skipping stream '%s': %s",
                     stream.name,
