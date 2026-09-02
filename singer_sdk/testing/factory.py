@@ -65,6 +65,192 @@ class BaseTestClass:
             cls.params = {}
 
 
+def _new_generated_base(cls: type[BaseTestClass]) -> type[BaseTestClass]:
+    """Create an empty subclass of ``cls``'s current bases with its own params dict.
+
+    Used to hold dynamically-generated fixtures and test methods below
+    ``cls`` in the MRO (see callers), so that ``cls.__bases__`` can later be
+    repointed at it without clobbering anything ``cls`` itself defines.
+
+    Args:
+        cls: The class being configured.
+
+    Returns:
+        A fresh, empty class ready to receive generated members.
+    """
+    generated = type(f"_{cls.__name__}Generated", cls.__bases__, {})
+    generated.params = {}
+    return generated
+
+
+class BaseTapTest(BaseTestClass):
+    """Configurable base class for tap test classes.
+
+    Subclass and pass a ``tap_class`` (plus any other keyword arguments
+    accepted by :meth:`TapTestClassFactory.new_test_class`) as class
+    keyword arguments to get a fully wired test class::
+
+        class TestMyTap(BaseTapTest, tap_class=MyTap):
+            pass
+    """
+
+    def __init_subclass__(
+        cls,
+        *,
+        tap_class: type[Tap] | None = None,
+        config: dict | None = None,
+        include_tap_tests: bool = True,
+        include_stream_tests: bool = True,
+        include_stream_attribute_tests: bool = True,
+        custom_suites: list | None = None,
+        suite_config: SuiteConfig | None = None,
+        **kwargs: t.Any,
+    ) -> None:
+        """Configure a tap test class from class keyword arguments.
+
+        Args:
+            tap_class: Meltano Singer SDK Tap class to test. Subclasses that
+                omit this (e.g. intermediate mixins) are left unconfigured.
+            config: Config dict to use for testing.
+            include_tap_tests: Include tap tests.
+            include_stream_tests: Include Tap stream tests.
+            include_stream_attribute_tests: Include Tap stream attribute tests.
+            custom_suites: Custom test suites to add to standard tests.
+            suite_config: SuiteConfig instance to pass to tests.
+            kwargs: Keyword arguments to pass to the TapTestRunner.
+        """
+        super().__init_subclass__()
+
+        if tap_class is None:
+            return
+
+        cls.tap_class = tap_class
+
+        suites = custom_suites or []
+        if include_tap_tests:
+            suites.append(tap_tests)
+        if include_stream_tests:
+            suites.append(tap_stream_tests)
+        if include_stream_attribute_tests:
+            suites.append(tap_stream_attribute_tests)
+
+        kwargs.setdefault("parse_env_config", True)
+        test_runner = TapTestRunner(
+            tap_class=tap_class,
+            config=config,
+            suite_config=suite_config,
+            **kwargs,
+        )
+
+        # Generated fixtures and test methods are attached to a synthetic
+        # base class inserted below `cls` in the MRO, rather than directly
+        # onto `cls`. This way, methods the user defines in the class body
+        # itself (e.g. to override a generated test and call `super()`) take
+        # precedence instead of being clobbered by `setattr` below.
+        generated = _new_generated_base(cls)
+
+        @pytest.fixture
+        def _config(self) -> SuiteConfig:  # noqa: ANN001  # ruff: ignore[unused-function-argument]
+            return suite_config or SuiteConfig()
+
+        @pytest.fixture
+        def _resource(self) -> t.Any:  # noqa: ANN001, ANN401  # ruff: ignore[unused-function-argument]
+            yield  # noqa: PT022
+
+        @pytest.fixture(scope="class")
+        @classmethod
+        def _runner(inner_cls) -> TapTestRunner:  # noqa: ANN001  # ruff: ignore[unused-function-argument]
+            test_runner.sync_all()
+            return test_runner
+
+        generated.config = _config
+        generated.resource = _resource
+        generated.runner = _runner
+
+        factory = TapTestClassFactory(tap_class=tap_class, config=config)
+        factory._annotate_test_class(generated, suites, test_runner)  # noqa: SLF001
+
+        cls.params = generated.params
+        cls.__bases__ = (generated,)
+
+
+class BaseTargetTest(BaseTestClass):
+    """Configurable base class for target test classes.
+
+    Subclass and pass a ``target_class`` (plus any other keyword arguments
+    accepted by :meth:`TargetTestClassFactory.new_test_class`) as class
+    keyword arguments to get a fully wired test class::
+
+        class TestMyTarget(BaseTargetTest, target_class=MyTarget):
+            pass
+    """
+
+    def __init_subclass__(
+        cls,
+        *,
+        target_class: type[Target] | None = None,
+        config: dict | None = None,
+        custom_suites: list | None = None,
+        suite_config: SuiteConfig | None = None,
+        include_target_tests: bool = True,
+        **kwargs: t.Any,
+    ) -> None:
+        """Configure a target test class from class keyword arguments.
+
+        Args:
+            target_class: Meltano Singer SDK Target class to test. Subclasses
+                that omit this (e.g. intermediate mixins) are left unconfigured.
+            config: Config dict to use for testing.
+            custom_suites: Custom test suites to add to standard tests.
+            suite_config: SuiteConfig instance to pass to tests.
+            include_target_tests: Include standard target tests.
+            kwargs: Keyword arguments to pass to the TargetTestRunner.
+        """
+        super().__init_subclass__()
+
+        if target_class is None:
+            return
+
+        cls.target_class = target_class
+
+        suites = custom_suites or []
+        if include_target_tests:
+            suites.append(target_tests)
+
+        kwargs.setdefault("parse_env_config", True)
+
+        # See BaseTapTest.__init_subclass__ for why generated members go on
+        # a synthetic intermediate base rather than directly onto `cls`.
+        generated = _new_generated_base(cls)
+
+        @pytest.fixture
+        def _config(self) -> SuiteConfig:  # noqa: ANN001  # ruff: ignore[unused-function-argument]
+            return suite_config or SuiteConfig()
+
+        @pytest.fixture
+        def _resource(self) -> t.Any:  # noqa: ANN001, ANN401  # ruff: ignore[unused-function-argument]
+            yield  # noqa: PT022
+
+        @pytest.fixture
+        def _runner(self) -> TargetTestRunner:  # noqa: ANN001  # ruff: ignore[unused-function-argument]
+            return TargetTestRunner(
+                target_class=target_class,
+                config=config,
+                suite_config=suite_config,
+                **kwargs,
+            )
+
+        generated.config = _config
+        generated.resource = _resource
+        generated.runner = _runner
+
+        factory = TargetTestClassFactory(target_class=target_class, config=config)
+        factory._annotate_test_class(generated, suites)  # noqa: SLF001
+
+        cls.params = generated.params
+        cls.__bases__ = (generated,)
+
+
 class TapTestClassFactory:
     """Factory for Tap Test Classes."""
 
@@ -92,7 +278,7 @@ class TapTestClassFactory:
         custom_suites: list | None = None,
         suite_config: SuiteConfig | None = None,
         **kwargs: t.Any,
-    ) -> type[BaseTestClass]:
+    ) -> type[t.Any]:
         """Get a new test class.
 
         Args:
@@ -105,7 +291,10 @@ class TapTestClassFactory:
             kwargs: Default arguments to be passed to tap on create.
 
         Returns:
-            A new test class.
+            A new test class. Typed as ``type[Any]`` rather than
+            ``type[BaseTestClass]`` so that type checkers allow subclassing
+            it directly, since its methods are attached dynamically via
+            ``setattr`` and can't be statically enumerated.
         """
         # compile test suites
         suites = custom_suites or []
@@ -288,7 +477,7 @@ class TargetTestClassFactory:
         suite_config: SuiteConfig | None = None,
         include_target_tests: bool = True,
         **kwargs: t.Any,
-    ) -> type[BaseTestClass]:
+    ) -> type[t.Any]:
         """Get a new Target test class.
 
         Args:
@@ -298,7 +487,8 @@ class TargetTestClassFactory:
             kwargs: Keyword arguments to be passed to the Target on run.
 
         Returns:
-            A new Target test class.
+            A new Target test class. Typed as ``type[Any]`` (see
+            ``TapTestClassFactory.new_test_class`` for rationale).
         """
         # compile test suites
         suites = custom_suites or []
@@ -396,7 +586,7 @@ def get_tap_test_class(
     custom_suites: list | None = None,
     suite_config: SuiteConfig | None = None,
     **kwargs: t.Any,
-) -> type[BaseTestClass]:
+) -> type[t.Any]:
     """Get Tap Test Class.
 
     Args:
@@ -410,20 +600,24 @@ def get_tap_test_class(
         kwargs: Keyword arguments to pass to the TapRunner.
 
     Returns:
-        A test class usable by pytest.
+        A test class usable by pytest. Typed as ``type[Any]`` so that
+        subclassing the result (the common usage pattern) type-checks.
     """
-    factory = TapTestClassFactory(
+
+    class _TapTestClass(
+        BaseTapTest,
         tap_class=tap_class,
         config=config,
-    )
-    return factory.new_test_class(
-        custom_suites=custom_suites,
-        suite_config=suite_config,
         include_tap_tests=include_tap_tests,
         include_stream_tests=include_stream_tests,
         include_stream_attribute_tests=include_stream_attribute_tests,
+        custom_suites=custom_suites,
+        suite_config=suite_config,
         **kwargs,
-    )
+    ):
+        """Tap test class."""
+
+    return _TapTestClass
 
 
 def get_target_test_class(
@@ -434,7 +628,7 @@ def get_target_test_class(
     suite_config: SuiteConfig | None = None,
     include_target_tests: bool = True,
     **kwargs: t.Any,
-) -> type[BaseTestClass]:
+) -> type[t.Any]:
     """Get Target Test Class.
 
     Args:
@@ -446,15 +640,19 @@ def get_target_test_class(
         kwargs: Keyword arguments to pass to the TapRunner.
 
     Returns:
-        A test class usable by pytest.
+        A test class usable by pytest. Typed as ``type[Any]`` so that
+        subclassing the result (the common usage pattern) type-checks.
     """
-    factory = TargetTestClassFactory(
+
+    class _TargetTestClass(
+        BaseTargetTest,
         target_class=target_class,
         config=config,
-    )
-    return factory.new_test_class(
         custom_suites=custom_suites,
         suite_config=suite_config,
         include_target_tests=include_target_tests,
         **kwargs,
-    )
+    ):
+        """Target test class."""
+
+    return _TargetTestClass

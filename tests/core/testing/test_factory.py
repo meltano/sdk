@@ -12,6 +12,8 @@ import pytest
 from singer_sdk import Stream, Tap, Target
 from singer_sdk.testing.config import SuiteConfig
 from singer_sdk.testing.factory import (
+    BaseTapTest,
+    BaseTargetTest,
     BaseTestClass,
     StreamAttributeTestParams,
     TapTestClassFactory,
@@ -606,84 +608,72 @@ class TestConvenienceFunctions:
         target_class.__name__ = "MockTarget"
         return target_class
 
-    @patch("singer_sdk.testing.factory.TapTestClassFactory")
-    def test_get_tap_test_class(
-        self,
-        mock_factory_class,
-        mock_tap_class,
-    ):
-        """Test get_tap_test_class function."""
-        mock_factory = Mock()
-        mock_test_class = Mock()
-        mock_factory.new_test_class.return_value = mock_test_class
-        mock_factory_class.return_value = mock_factory
-
+    def test_get_tap_test_class(self, mock_tap_class):
+        """get_tap_test_class builds a class off the configurable BaseTapTest."""
         config = {"test": "config"}
         suite_config = SuiteConfig()
-        custom_suites = []
 
         result = get_tap_test_class(
             tap_class=mock_tap_class,
             config=config,
             include_tap_tests=True,
             include_stream_tests=False,
-            include_stream_attribute_tests=True,
-            custom_suites=custom_suites,
+            include_stream_attribute_tests=False,
             suite_config=suite_config,
-            custom_kwarg="value",
         )
 
-        # Verify factory was created correctly
-        mock_factory_class.assert_called_once_with(
+        assert issubclass(result, BaseTapTest)
+        assert result.tap_class is mock_tap_class
+        # Own params dict, not the one shared/inherited from BaseTapTest.
+        assert result.params is not BaseTapTest.params
+        assert any(name.startswith("test_tap_") for name in dir(result))
+
+        # A second class built the same way doesn't share test methods or
+        # params state with the first.
+        other = get_tap_test_class(
             tap_class=mock_tap_class,
             config=config,
-        )
-
-        # Verify new_test_class was called correctly
-        mock_factory.new_test_class.assert_called_once_with(
-            custom_suites=custom_suites,
-            suite_config=suite_config,
-            include_tap_tests=True,
             include_stream_tests=False,
-            include_stream_attribute_tests=True,
-            custom_kwarg="value",
+            include_stream_attribute_tests=False,
         )
+        assert other.params is not result.params
 
-        assert result is mock_test_class
+    def test_base_tap_test_allows_overriding_generated_test(self, mock_tap_class):
+        """Subclasses can override a generated test method and call `super()`."""
 
-    @patch("singer_sdk.testing.factory.TargetTestClassFactory")
-    def test_get_target_test_class(self, mock_factory_class, mock_target_class):
-        """Test get_target_test_class function."""
-        mock_factory = Mock()
-        mock_test_class = Mock()
-        mock_factory.new_test_class.return_value = mock_test_class
-        mock_factory_class.return_value = mock_factory
+        class _Configured(
+            BaseTapTest,
+            tap_class=mock_tap_class,
+            include_stream_tests=False,
+            include_stream_attribute_tests=False,
+        ):
+            def test_tap_cli_prints(self, *args, **kwargs):
+                return "overridden:" + str(
+                    super().test_tap_cli_prints(*args, **kwargs),
+                )
 
+        # The override lives directly on the class body...
+        assert "test_tap_cli_prints" in vars(_Configured)
+        # ...and `super()` still resolves to the generated implementation,
+        # rather than the override having clobbered (or been clobbered by)
+        # the generated test method.
+        generated_base = _Configured.__bases__[0]
+        assert generated_base is not BaseTapTest
+        assert "test_tap_cli_prints" in vars(generated_base)
+
+    def test_get_target_test_class(self, mock_target_class):
+        """get_target_test_class builds a class off the configurable BaseTargetTest."""
         config = {"test": "config"}
         suite_config = SuiteConfig()
-        custom_suites = []
 
         result = get_target_test_class(
             target_class=mock_target_class,
             config=config,
-            custom_suites=custom_suites,
             suite_config=suite_config,
-            include_target_tests=False,
-            custom_kwarg="value",
+            include_target_tests=True,
         )
 
-        # Verify factory was created correctly
-        mock_factory_class.assert_called_once_with(
-            target_class=mock_target_class,
-            config=config,
-        )
-
-        # Verify new_test_class was called correctly
-        mock_factory.new_test_class.assert_called_once_with(
-            custom_suites=custom_suites,
-            suite_config=suite_config,
-            include_target_tests=False,
-            custom_kwarg="value",
-        )
-
-        assert result is mock_test_class
+        assert issubclass(result, BaseTargetTest)
+        assert result.target_class is mock_target_class
+        assert result.params is not BaseTargetTest.params
+        assert any(name.startswith("test_target_") for name in dir(result))

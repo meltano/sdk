@@ -6,14 +6,17 @@ import typing as t
 import pytest
 from tap_csv.tap import TapCSV
 
-from singer_sdk.testing import SuiteConfig, get_tap_test_class
+from singer_sdk.testing import SuiteConfig
+from singer_sdk.testing.factory import BaseTapTest
 
 if t.TYPE_CHECKING:
     from tap_csv.client import CSVStream
 
     from singer_sdk.testing import TapTestRunner
 
-_TestCSVMerge = get_tap_test_class(
+
+class TestCSVMerge(
+    BaseTapTest,
     tap_class=TapCSV,
     config={
         "path": "fixtures/csv",
@@ -21,25 +24,18 @@ _TestCSVMerge = get_tap_test_class(
         "stream_name": "people",
         "delimiter": "\t",
     },
-)
+): ...
 
 
-class TestCSVMerge(_TestCSVMerge):
-    pass
-
-
-_TestCSVOneStreamPerFile = get_tap_test_class(
+class TestCSVOneStreamPerFile(
+    BaseTapTest,
     tap_class=TapCSV,
     config={
         "path": "fixtures/csv",
         "read_mode": "one_stream_per_file",
         "delimiter": "\t",
     },
-)
-
-
-class TestCSVOneStreamPerFile(_TestCSVOneStreamPerFile):
-    pass
+): ...
 
 
 # Three days into the future.
@@ -69,7 +65,8 @@ STATE = {
 }
 
 
-_TestCSVOneStreamPerFileIncremental = get_tap_test_class(
+class TestCSVOneStreamPerFileIncremental(
+    BaseTapTest,
     tap_class=TapCSV,
     config={
         "path": "fixtures/csv",
@@ -77,10 +74,7 @@ _TestCSVOneStreamPerFileIncremental = get_tap_test_class(
         "delimiter": "\t",
     },
     state=STATE,
-)
-
-
-class TestCSVOneStreamPerFileIncremental(_TestCSVOneStreamPerFileIncremental):
+):
     @pytest.mark.xfail(
         reason="There are no records because the state is set to the future.",
         strict=True,
@@ -95,7 +89,8 @@ class TestCSVOneStreamPerFileIncremental(_TestCSVOneStreamPerFileIncremental):
         super().test_tap_stream_returns_record(config, resource, runner, stream)
 
 
-TestCSVOneStreamPerFileIncrementalIgnoreNoRecords = get_tap_test_class(
+class TestCSVOneStreamPerFileIncrementalIgnoreNoRecords(
+    BaseTapTest,
     tap_class=TapCSV,
     config={
         "path": "fixtures/csv",
@@ -104,4 +99,4 @@ TestCSVOneStreamPerFileIncrementalIgnoreNoRecords = get_tap_test_class(
     },
     state=STATE,
     suite_config=SuiteConfig(ignore_no_records=True),
-)
+): ...
