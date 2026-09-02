@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import signal
+import sys
 from unittest import mock
 
 import pytest
@@ -12,6 +13,11 @@ from singer_sdk.exceptions import (
 )
 from singer_sdk.helpers.capabilities import PluginCapabilities, TargetCapabilities
 from tests.conftest import BatchSinkMock, SQLSinkMock, SQLTargetMock, TargetMock
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 def test_get_sink():
@@ -158,6 +164,7 @@ def test_create_sink_override():
             injected["extra"] = extra
 
     class CustomTarget(TargetMock):
+        @override
         def create_sink(self, *, stream_name, schema, key_properties=None):
             return CustomSink(
                 target=self,
@@ -184,6 +191,7 @@ def test_sql_create_sink_override():
             injected["extra"] = extra
 
     class CustomSQLTarget(SQLTargetMock):
+        @override
         def create_sink(self, *, stream_name, schema, key_properties=None):
             return CustomSQLSink(
                 target=self,

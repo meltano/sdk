@@ -13,6 +13,11 @@ import pytest
 from singer_sdk import metrics
 from singer_sdk.logging import ConsoleFormatter, StructuredFormatter
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 
 class LoggerFactory(t.Protocol):
     def __call__(
@@ -240,8 +245,8 @@ class TestStructuredFormatter:
         try:
             msg = "Test exception"
             exc = ValueError(msg)
-            exc.add_note("Info")  # type: ignore[attr-defined]
-            exc.add_note("Moar info")  # type: ignore[attr-defined]
+            exc.add_note("Info")  # type: ignore[attr-defined]  # ty: ignore[unresolved-attribute]
+            exc.add_note("Moar info")  # type: ignore[attr-defined]  # ty: ignore[unresolved-attribute]
             raise exc
         except ValueError:
             logger.exception("Error occurred")
@@ -259,6 +264,7 @@ class TestStructuredFormatter:
             def __init__(self):
                 self.data = "test"
 
+            @override
             def __str__(self):
                 return self.data
 

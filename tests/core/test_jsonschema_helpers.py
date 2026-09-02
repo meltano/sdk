@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import sys
 import typing as t
 from textwrap import dedent
 
@@ -60,6 +61,11 @@ from singer_sdk.typing import (
     UUIDType,
 )
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 if t.TYPE_CHECKING:
     from pathlib import Path
 
@@ -91,6 +97,7 @@ class ConfigTestTap(Tap):
         Property("batch_size", IntegerType, default=-1),
     ).to_dict()
 
+    @override
     def discover_streams(self) -> list[Stream]:
         return []
 

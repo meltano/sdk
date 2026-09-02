@@ -415,7 +415,7 @@ def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
         def _request(
             self,
             prepared_request: PreparedRequest,
-            context: Context | None,
+            context: Context | None = None,
         ) -> Response:
             r = Response()
             r.status_code = 200
@@ -493,7 +493,7 @@ def test_continue_if_empty(tap: Tap):
         def _request(
             self,
             prepared_request: PreparedRequest,
-            context: Context | None,
+            context: Context | None = None,
         ) -> Response:
             r = Response()
             r.status_code = 200
@@ -558,7 +558,7 @@ def test_no_paginator(tap: Tap):
         def _request(
             self,
             prepared_request: PreparedRequest,
-            context: Context | None,
+            context: Context | None = None,
         ) -> Response:
             r = Response()
             r.status_code = 200
@@ -600,7 +600,7 @@ def test_prepare_request_override_emits_deprecation(tap: Tap):
         def _request(
             self,
             prepared_request: PreparedRequest,
-            context: Context | None,
+            context: Context | None = None,
         ) -> Response:
             r = Response()
             r.status_code = 200
@@ -649,7 +649,7 @@ def test_prepare_request_override_in_intermediate_class_emits_deprecation(tap: T
         def _request(
             self,
             prepared_request: PreparedRequest,
-            context: Context | None,
+            context: Context | None = None,
         ) -> Response:
             r = Response()
             r.status_code = 200
