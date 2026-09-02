@@ -676,6 +676,7 @@ class CustomObj:
     def __init__(self, value: str):
         self.value = value
 
+    @override
     def __str__(self) -> str:
         return f"obj-{self.value}"
 
@@ -704,7 +705,8 @@ class MappedStream(Stream):
         Property("joined_at", DateTimeType),
     ).to_dict()
 
-    def get_records(self, context):  # noqa: ARG002
+    @override
+    def get_records(self, context: Context | None) -> t.Generator[dict, None, None]:
         yield {
             "email": "alice@example.com",
             "count": 21,
@@ -746,7 +748,8 @@ class MappedTap(Tap):
 
     name = "tap-mapped"
 
-    def discover_streams(self):
+    @override
+    def discover_streams(self) -> list[Stream]:
         """Discover streams."""
         return [MappedStream(self)]
 
