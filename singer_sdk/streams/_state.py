@@ -66,12 +66,9 @@ class StreamStateManager:
 
     @property
     def stream_state(self) -> dict:
-        """Get writable state dict for this stream.
+        """Writable state dict for this stream.
 
         A blank state entry will be created if one doesn't already exist.
-
-        Returns:
-            A writable state dict for this stream.
         """
         return get_writeable_state_dict(self.tap_state, self.stream_name)
 

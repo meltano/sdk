@@ -70,25 +70,25 @@ jobs:
         - "3.14"
         - "3.15"
         include:
-        - { session: tests,         python-version: "3.14", os: "macos-latest" }
+        - { session: tests,         python-version: "3.15", os: "macos-latest" }
         - { session: tests,         python-version: "3.10", os: "macos-latest" }
-        - { session: tests,         python-version: "3.14", os: "windows-latest" }
+        - { session: tests,         python-version: "3.15", os: "windows-latest" }
         - { session: tests,         python-version: "3.10", os: "windows-latest" }
-        - { session: doctest,       python-version: "3.14", os: "ubuntu-latest" }
-        - { session: deps,          python-version: "3.14", os: "ubuntu-latest" }
+        - { session: doctest,       python-version: "3.15", os: "ubuntu-latest" }
+        - { session: deps,          python-version: "3.15", os: "ubuntu-latest" }
         - { session: test-lowest,   python-version: "3.10", os: "ubuntu-latest" }
         - { session: test-contrib,  python-version: "3.10", os: "ubuntu-latest" }
-        - { session: test-contrib,  python-version: "3.14", os: "ubuntu-latest" }
+        - { session: test-contrib,  python-version: "3.15", os: "ubuntu-latest" }
         - { session: test-packages, python-version: "3.10", os: "ubuntu-latest" }
-        - { session: test-packages, python-version: "3.14", os: "ubuntu-latest" }
+        - { session: test-packages, python-version: "3.15", os: "ubuntu-latest" }
 
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
         persist-credentials: false
 
-    - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+    - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       with:
         cache-suffix: ${{ matrix.session }}
         python-version: ${{ matrix.python-version }}
@@ -122,13 +122,13 @@ jobs:
       matrix:
         python-version:
         - "3.10"
-        - "3.14"
+        - "3.15"
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           cache-suffix: typing
           python-version: ${{ matrix.python-version }}
@@ -141,7 +141,7 @@ jobs:
 
       - name: Run Nox
         run: |
-          nox --verbose --tags typing
+          nox --verbose --session typing
 
   tests-external:
     name: External Tests
@@ -155,12 +155,12 @@ jobs:
       TAP_GITLAB_START_DATE: "2022-01-01T00:00:00Z"
 
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
         persist-credentials: false
 
-    - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+    - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       with:
         cache-suffix: external
         version: ${{ env.UV_VERSION }}
@@ -191,7 +191,7 @@ jobs:
         - flag: end-to-end
           nox-session: test-packages
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
 
@@ -200,7 +200,7 @@ jobs:
         pattern: coverage-data-nox_${{ matrix.nox-session }}-*
         merge-multiple: true
 
-    - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+    - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       with:
         cache-suffix: coverage-${{ matrix.flag }}
         version: ${{ env.UV_VERSION }}

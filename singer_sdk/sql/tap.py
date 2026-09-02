@@ -82,11 +82,7 @@ class SQLTap(Tap):
     @property
     @override
     def catalog_dict(self) -> dict:
-        """Get catalog dictionary.
-
-        Returns:
-            The tap's catalog as a dict
-        """
+        """Stream catalog dictionary."""
         if self._catalog_dict is not None:
             return self._catalog_dict
 

@@ -16,6 +16,7 @@ import requests
 import requests.adapters
 import urllib3
 
+from singer_sdk.exceptions import AuthenticationError
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.helpers._util import utc_now
 
@@ -79,12 +80,9 @@ class SingletonMeta(type):
         Returns:
             A singleton instance of the derived class.
         """
-        if cls.__single_instance:
-            return cls.__single_instance  # type: ignore[unreachable]
-        single_obj = cls.__new__(cls, None)  # type: ignore[call-overload]
-        single_obj.__init__(*args, **kwargs)
-        cls.__single_instance = single_obj
-        return single_obj
+        if cls.__single_instance is None:
+            cls.__single_instance = super().__call__(*args, **kwargs)
+        return cls.__single_instance
 
 
 def _get_stream_param(*args: t.Any, **kwargs: t.Any) -> _HTTPStream | None:
@@ -163,11 +161,7 @@ class APIAuthenticatorBase:
         category=SingerSDKDeprecationWarning,
     )
     def config(self) -> t.Mapping[str, t.Any]:
-        """Get stream or tap config.
-
-        Returns:
-            A frozen (read-only) config dictionary map.
-        """
+        """Stream or tap configuration dictionary."""
         return MappingProxyType(self._config)
 
     def authenticate_request(
@@ -539,10 +533,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     @property
     def auth_endpoint(self) -> str:
-        """Get the authorization endpoint.
-
-        Returns:
-            The API authorization endpoint if it is set.
+        """The API authorization endpoint.
 
         Raises:
             ValueError: If the endpoint is not set.
@@ -554,25 +545,17 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     @property
     def oauth_scopes(self) -> str | None:
-        """Get OAuth scopes.
-
-        Returns:
-            String of OAuth scopes, or None if not set.
-        """
+        """OAuth scopes as a string, or None."""
         return self._oauth_scopes
 
     @property
     def oauth_request_payload(self) -> dict:
-        """Get request body.
-
-        Returns:
-            A plain (OAuth) or encrypted (JWT) request body.
-        """
+        """A plain (OAuth) or encrypted (JWT) request body."""
         return self.oauth_request_body
 
     @property
     def oauth_request_body(self) -> dict:
-        """Get formatted body of the OAuth authorization request.
+        """Formatted body of the OAuth authorization request.
 
         Sample implementation:
 
@@ -598,20 +581,12 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     @property
     def client_id(self) -> str | None:
-        """Get client ID string to be used in authentication.
-
-        Returns:
-            Optional client secret from stream config if it has been set.
-        """
+        """Client ID string to be used in authentication."""
         return self._client_id
 
     @property
     def client_secret(self) -> str | None:
-        """Get client secret to be used in authentication.
-
-        Returns:
-            Optional client secret from stream config if it has been set.
-        """
+        """Client secret to be used in authentication."""
         return self._client_secret
 
     def is_token_valid(self) -> bool:
@@ -628,10 +603,10 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     # Authentication and refresh
     def update_access_token(self) -> None:
-        """Update `access_token` along with: `last_refreshed` and `expires_in`.
+        """Update tokens along with: `last_refreshed` and `expires_in`.
 
         Raises:
-            RuntimeError: When OAuth login fails.
+            AuthenticationError: When OAuth login fails.
         """
         self.logger.info("Requesting new access token")
         request_time = utc_now()
@@ -655,12 +630,14 @@ class OAuthAuthenticator(APIAuthenticatorBase):
                 status_code=status_code,
             )
             msg = f"Failed to update access token (status={status_code or 'Unknown'})"
-            raise RuntimeError(msg) from ex
+            raise AuthenticationError(msg) from ex
 
         self.logger.debug("OAuth authorization attempt was successful")
 
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
+        if refresh_token := token_json.get("refresh_token"):
+            self.refresh_token = refresh_token
         expiration = token_json.get("expires_in", self._default_expiration)
         self.expires_in = int(expiration) if expiration else None
         if self.expires_in is None:
@@ -716,26 +693,18 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
 
     @property
     def private_key(self) -> str | None:
-        """Return the private key to use in encryption.
-
-        Returns:
-            Private key from stream config.
-        """
+        """The private key to use in encryption."""
         return self._private_key
 
     @property
     def private_key_passphrase(self) -> str | None:
-        """Return the private key passphrase to use in encryption.
-
-        Returns:
-            Passphrase for private key from stream config.
-        """
+        """The private key passphrase to use in encryption."""
         return self._private_key_passphrase
 
     @property
     @override
     def oauth_request_body(self) -> dict:
-        """Return request body for OAuth request.
+        """Request body for the OAuth request.
 
         Returns:
             Request body mapping for OAuth.
@@ -752,13 +721,10 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
     @property
     @override
     def oauth_request_payload(self) -> dict:
-        """Return request payload for OAuth request.
-
-        Returns:
-            Payload object for OAuth.
+        """Request payload for the OAuth request.
 
         Raises:
-            RuntimeError: If the JWT dependencies are not installed.
+            AuthenticationError: If the JWT dependencies are not installed.
             ValueError: If the private key is not set.
         """
         try:
@@ -767,7 +733,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             from cryptography.hazmat.primitives import serialization  # noqa: PLC0415
         except ModuleNotFoundError as ex:  # pragma: no cover
             msg = "Install singer-sdk[jwt] to use OAuthJWTAuthenticator."
-            raise RuntimeError(msg) from ex
+            raise AuthenticationError(msg) from ex
 
         if not self.private_key:  # pragma: no cover
             msg = "Missing 'private_key' property for OAuth payload."

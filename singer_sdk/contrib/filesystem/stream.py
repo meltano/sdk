@@ -75,7 +75,7 @@ class FileStream(Stream, abc.ABC):
     @property
     @override
     def partitions(self) -> list[dict[str, t.Any]]:
-        """Return the list of partitions for this stream."""
+        """The list of partitions for this stream."""
         return self._partitions
 
     def _get_full_schema(self) -> dict[str, t.Any]:
@@ -92,7 +92,7 @@ class FileStream(Stream, abc.ABC):
     @functools.cached_property
     @override
     def schema(self) -> dict[str, t.Any]:
-        """Return the schema for the stream."""
+        """The schema for the stream."""
         return self._get_full_schema()
 
     @override
