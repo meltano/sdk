@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import typing as t
 from contextlib import nullcontext
+from datetime import datetime, timedelta, timezone
+from email.utils import format_datetime
 
 import pytest
 import requests
@@ -222,3 +224,104 @@ def test_rate_limiting_status_override(
 
     with expectation:
         basic_rest_stream.validate_response(fake_response)
+
+
+@pytest.mark.parametrize(
+    "headers,expected",
+    [
+        ({"Retry-After": "30"}, 30.0),
+        ({"X-RateLimit-Reset": "45"}, 45.0),
+        # Retry-After takes precedence over X-RateLimit-Reset.
+        ({"Retry-After": "30", "X-RateLimit-Reset": "999"}, 30.0),
+        # Zero and negative waits are clamped to 0.0.
+        ({"Retry-After": "0"}, 0.0),
+        ({"Retry-After": "-5"}, 0.0),
+        ({"X-RateLimit-Reset": "0"}, 0.0),
+        ({"X-RateLimit-Reset": "-10"}, 0.0),
+        # Unparsable / missing headers fall back to exponential backoff (None).
+        ({"Retry-After": "not-a-number"}, None),
+        ({"X-RateLimit-Reset": "not-a-number"}, None),
+        ({}, None),
+    ],
+    ids=[
+        "retry-after-seconds",
+        "ratelimit-reset-seconds",
+        "retry-after-precedence",
+        "retry-after-zero",
+        "retry-after-negative-clamped",
+        "ratelimit-reset-zero",
+        "ratelimit-reset-negative-clamped",
+        "retry-after-unparsable",
+        "ratelimit-reset-unparsable",
+        "no-headers",
+    ],
+)
+def test_get_wait_time_from_response(
+    basic_rest_stream: RESTStream,
+    headers: dict[str, str],
+    expected: float | None,
+):
+    response = requests.Response()
+    response.status_code = 429
+    response.headers.update(headers)
+
+    assert basic_rest_stream.get_wait_time_from_response(response) == expected
+
+
+def test_get_wait_time_from_response_http_date(basic_rest_stream: RESTStream):
+    """A ``Retry-After`` HTTP date is converted to seconds from now."""
+    reset_at = datetime.now(tz=timezone.utc) + timedelta(seconds=120)
+    response = requests.Response()
+    response.status_code = 429
+    response.headers.update({"Retry-After": format_datetime(reset_at, usegmt=True)})
+
+    wait = basic_rest_stream.get_wait_time_from_response(response)
+
+    assert wait is not None
+    # Allow a small window for clock drift / test execution time.
+    assert 110 <= wait <= 120
+
+
+def test_get_wait_time_from_response_naive_http_date(basic_rest_stream: RESTStream):
+    """A ``Retry-After`` date without timezone info is interpreted as UTC."""
+    reset_at = datetime.now(tz=timezone.utc) + timedelta(seconds=120)
+    # ``format_datetime`` on a naive datetime emits a ``-0000`` designator, which
+    # ``parsedate_to_datetime`` parses back to a naive datetime.
+    naive_http_date = format_datetime(reset_at.replace(tzinfo=None))
+    response = requests.Response()
+    response.status_code = 429
+    response.headers.update({"Retry-After": naive_http_date})
+
+    wait = basic_rest_stream.get_wait_time_from_response(response)
+
+    assert wait is not None
+    # Allow a small window for clock drift / test execution time.
+    assert 110 <= wait <= 120
+
+
+def _retriable(headers: dict[str, str] | None) -> RetriableAPIError:
+    response = requests.Response()
+    response.status_code = 429
+    if headers:
+        response.headers.update(headers)
+    return RetriableAPIError("rate limited", response)
+
+
+def test_backoff_wait_generator_respects_headers_and_falls_back(
+    basic_rest_stream: RESTStream,
+):
+    """Header waits are respected; other errors fall back to exponential backoff."""
+    gen = basic_rest_stream.backoff_wait_generator()
+    gen.send(None)  # Prime the generator (matches backoff's initialization).
+
+    # 429 with a rate-limit header -> respect the header's wait time.
+    assert gen.send(_retriable({"Retry-After": "30"})) == 30
+
+    # 429 with an unparsable header -> exponential fallback.
+    assert gen.send(_retriable({"Retry-After": "not-a-number"})) == 2
+
+    # Connection-level error has no response -> exponential fallback, no crash.
+    assert gen.send(requests.exceptions.ConnectionError()) == 4
+
+    # 429 without rate-limit headers -> exponential backoff continues.
+    assert gen.send(_retriable(None)) == 8
