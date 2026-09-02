@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
@@ -59,6 +60,10 @@ s3 = [
 ]
 
 parquet = [
+    "pyarrow>=15",
+]
+
+arrow = [
     "pyarrow>=15",
 ]
 
@@ -143,7 +148,7 @@ testing = [
     "requests-mock>=1.10.0",
     "responses>=0.26.0",
     "rfc3339-validator>=0.1.4",
-    "sqlalchemy>=2.0.0.dev0",
+    "sqlalchemy>=2.1.0.dev0",
     "time-machine>=2.10.0",
     "toolz>=1.0.0",
     "xdoctest[colors]>=1.1.1",
@@ -154,7 +159,7 @@ typing = [
     "importlib-metadata",
     "mypy~=2.2",
     "pyarrow-stubs>=19.1",
-    "ty==0.0.61",
+    "ty==0.0.72",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-simplejson>=3.18.0",
@@ -324,6 +329,7 @@ build-backend = "hatchling.build"
 singer_testing = "singer_sdk.testing.pytest_plugin"
 
 [project.entry-points."singer_sdk.batch_encoders"]
+arrow = "singer_sdk.contrib.batch_encoder_arrow:ArrowBatcher"
 jsonl = "singer_sdk.contrib.batch_encoder_jsonl:JSONLinesBatcher"
 parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
 
@@ -470,7 +476,7 @@ convention = "google"
 max-args = 9
 
 [tool.uv]
-prerelease = "if-necessary-or-explicit"
+prerelease = "if-necessary"
 required-version = ">=0.5.19"
 
 [tool.uv.sources]
@@ -486,6 +492,9 @@ meltano-tap-sqlite = { workspace = true }
 meltano-target-csv = { workspace = true }
 meltano-target-parquet = { workspace = true }
 meltano-target-sqlite = { workspace = true }
+pyarrow = [
+    { index = "scientific-python-nightly-wheels", marker = "python_version >= '3.15'" },
+]
 
 [tool.uv.workspace]
 members = [

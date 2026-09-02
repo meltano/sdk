@@ -35,6 +35,11 @@ def adapt_datetime_iso(val: datetime.datetime) -> str:
     return val.isoformat()
 
 
+def adapt_time(val: datetime.time) -> str:
+    """Adapt datetime.time to ISO 8601 time."""
+    return val.isoformat()
+
+
 def adapt_decimal(val: decimal.Decimal) -> str:
     """Adapt decimal.Decimal to string."""
     return str(val)
@@ -55,6 +60,7 @@ sqlite3.register_adapter(datetime.datetime, adapt_datetime_iso)
 sqlite3.register_adapter(decimal.Decimal, adapt_decimal)
 sqlite3.register_adapter(list, adapt_list)
 sqlite3.register_adapter(dict, adapt_dict)
+sqlite3.register_adapter(datetime.time, adapt_time)
 
 
 def convert_date(val: bytes) -> datetime.date:

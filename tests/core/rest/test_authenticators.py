@@ -233,6 +233,36 @@ def test_oauth_authenticator_token_expiry_handling(
         assert not authenticator.expires_in or not authenticator.is_token_valid()
 
 
+@pytest.mark.parametrize(
+    "response_refresh_token, expected_refresh_token",
+    [
+        pytest.param("rotated-refresh-token", "rotated-refresh-token", id="returned"),
+        pytest.param(None, "existing-refresh-token", id="omitted"),
+    ],
+)
+def test_oauth_authenticator_refresh_token_handling(
+    rest_tap: Tap,
+    requests_mock: requests_mock.Mocker,
+    response_refresh_token: str | None,
+    expected_refresh_token: str,
+):
+    """Validate refresh tokens returned by the OAuth endpoint are retained."""
+    response: dict[str, t.Any] = {"access_token": "an-access-token"}
+    if response_refresh_token is not None:
+        response["refresh_token"] = response_refresh_token
+
+    requests_mock.post("https://example.com/oauth", json=response)
+    authenticator = _FakeOAuthAuthenticator(
+        stream=rest_tap.streams["some_stream"],
+        auth_endpoint="https://example.com/oauth",
+    )
+    authenticator.refresh_token = "existing-refresh-token"  # noqa: S105
+
+    authenticator.update_access_token()
+
+    assert authenticator.refresh_token == expected_refresh_token
+
+
 def test_oauth_authenticator_handle_error(
     rest_tap: Tap,
     requests_mock: requests_mock.Mocker,

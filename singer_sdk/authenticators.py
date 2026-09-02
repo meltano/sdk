@@ -80,12 +80,9 @@ class SingletonMeta(type):
         Returns:
             A singleton instance of the derived class.
         """
-        if cls.__single_instance:
-            return cls.__single_instance  # type: ignore[unreachable]
-        single_obj = cls.__new__(cls, None)  # type: ignore[call-overload]
-        single_obj.__init__(*args, **kwargs)
-        cls.__single_instance = single_obj
-        return single_obj
+        if cls.__single_instance is None:
+            cls.__single_instance = super().__call__(*args, **kwargs)
+        return cls.__single_instance
 
 
 def _get_stream_param(*args: t.Any, **kwargs: t.Any) -> _HTTPStream | None:
@@ -606,7 +603,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     # Authentication and refresh
     def update_access_token(self) -> None:
-        """Update `access_token` along with: `last_refreshed` and `expires_in`.
+        """Update tokens along with: `last_refreshed` and `expires_in`.
 
         Raises:
             AuthenticationError: When OAuth login fails.
@@ -639,6 +636,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
+        if refresh_token := token_json.get("refresh_token"):
+            self.refresh_token = refresh_token
         expiration = token_json.get("expires_in", self._default_expiration)
         self.expires_in = int(expiration) if expiration else None
         if self.expires_in is None:

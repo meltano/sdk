@@ -126,7 +126,10 @@ class Stream(abc.ABC):  # noqa: PLR0904
             msg = "Missing argument or class variable 'name'."
             raise ValueError(msg)
 
-        self._logger: logging.Logger = tap.logger.getChild(self.name)
+        self._logger = logging.LoggerAdapter(
+            tap.logger.getChild(self.name),
+            extra={"stream_name": self.name},
+        )
         self.metrics_logger = tap.metrics_logger
         self.tap_name: str = tap.name
         self.context: types.Context | None = None
@@ -156,11 +159,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         if schema:
             if isinstance(schema, (PathLike, str)):
-                if not Path(schema).is_file():  # ty: ignore[invalid-argument-type]
+                if not Path(schema).is_file():
                     msg = f"Could not find schema file '{self.schema_filepath}'."
                     raise FileNotFoundError(msg)
 
-                self._schema_filepath = Path(schema)  # ty: ignore[invalid-argument-type]
+                self._schema_filepath = Path(schema)
                 warnings.warn(
                     "Passing a schema filepath is deprecated. Please pass a schema "
                     "dictionary or a Singer Schema object instead.",
@@ -185,7 +188,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             self._schema = json.loads(self.schema_filepath.read_text())
 
     @property
-    def logger(self) -> logging.Logger:
+    def logger(self) -> logging.LoggerAdapter:
         """Stream logger."""
         return self._logger
 

@@ -9,6 +9,7 @@ import json
 import logging
 import sys
 import typing as t
+import uuid
 from contextlib import redirect_stdout
 from decimal import Decimal
 
@@ -456,6 +457,68 @@ def test_map_transforms(
         expected_schemas=transformed_schemas,
         sample_stream=sample_stream,
         sample_catalog_obj=sample_catalog_obj,
+    )
+
+
+def test_uuid_transforms(
+    sample_stream,
+    sample_catalog_obj,
+    stream_map_config,
+):
+    source_uuid = "123e4567-e89b-42d3-a456-426614174000"
+    output, output_schemas = _run_transform(
+        stream_maps={
+            "singular": {
+                "is_uuid": f"check_uuid('{source_uuid}')",
+                "is_v4": f"check_uuid('{source_uuid}', version=4)",
+                "is_v5": f"check_uuid('{source_uuid}', version=5)",
+                "invalid_uuid": "check_uuid('invalid')",
+                "non_string_uuid": "check_uuid(123)",
+                "empty_uuid": "check_uuid('')",
+                "none_uuid": "check_uuid(None)",
+                "non_ascii_uuid": "check_uuid('☃')",
+                "__else__": None,
+            },
+            "nested_jellybean": {"id": "uuid4()"},
+        },
+        stream_map_config=stream_map_config,
+        sample_stream=sample_stream,
+        sample_catalog_obj=sample_catalog_obj,
+    )
+
+    validation_record = output["singular"][0]
+    generated_record = output["nested_jellybean"][0]
+    generated_uuid = uuid.UUID(generated_record["id"])
+
+    assert isinstance(generated_record["id"], str)
+    assert generated_uuid.version == 4
+    assert validation_record == {
+        "is_uuid": True,
+        "is_v4": True,
+        "is_v5": False,
+        "invalid_uuid": False,
+        "non_string_uuid": False,
+        "empty_uuid": False,
+        "none_uuid": False,
+        "non_ascii_uuid": False,
+    }
+    assert json.loads(json.dumps(generated_record)) == generated_record
+    assert (
+        output_schemas["singular"]
+        == PropertiesList(
+            Property("is_uuid", BooleanType),
+            Property("is_v4", BooleanType),
+            Property("is_v5", BooleanType),
+            Property("invalid_uuid", BooleanType),
+            Property("non_string_uuid", BooleanType),
+            Property("empty_uuid", BooleanType),
+            Property("none_uuid", BooleanType),
+            Property("non_ascii_uuid", BooleanType),
+        ).to_dict()
+    )
+    assert (
+        output_schemas["nested_jellybean"]["properties"]["id"]
+        == (Property("id", StringType).to_dict()["id"])
     )
 
 

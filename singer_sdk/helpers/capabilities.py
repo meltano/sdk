@@ -195,7 +195,6 @@ BATCH_CONFIG = PropertiesList(
                     Property(
                         "format",
                         StringType,
-                        allowed_values=["jsonl", "parquet"],
                         title="Batch Encoding Format",
                         description="Format to use for batch files.",
                     ),
