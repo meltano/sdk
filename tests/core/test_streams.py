@@ -26,7 +26,7 @@ from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMEN
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
-from tests.core.conftest import SimpleTestStream
+from tests.core.conftest import CONFIG_START_DATE, SimpleTestStream
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
@@ -39,8 +39,6 @@ if t.TYPE_CHECKING:
     from singer_sdk import Stream, Tap
     from singer_sdk.helpers.types import Context, Record
     from tests.core.conftest import SimpleTestTap
-
-CONFIG_START_DATE = "2021-01-01"
 
 
 class RestTestStream(RESTStream):
