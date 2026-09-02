@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import abc
-import collections.abc
 import contextlib
 import sys
 import typing as t
 import warnings
+from collections.abc import Mapping
 from enum import Enum
 
 import click
@@ -91,7 +91,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         self,
         *,
         config: dict | PurePath | str | list[PurePath | str] | None = None,
-        catalog: PurePath | str | dict | Catalog | None = None,
+        catalog: PurePath | str | Mapping | Catalog | None = None,
         state: PurePath | str | dict | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
@@ -129,8 +129,8 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         # Process input catalog
         if isinstance(catalog, Catalog):
             self._input_catalog = catalog
-        elif isinstance(catalog, collections.abc.MutableMapping):
-            self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type]  # ty:ignore[invalid-argument-type]
+        elif isinstance(catalog, Mapping):
+            self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type]
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
             warnings.warn(
