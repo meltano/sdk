@@ -27,11 +27,13 @@ class TestSampleTargetParquet(StandardTests):
     """Standard Target Tests."""
 
     @pytest.fixture(scope="class")
-    def test_output_dir(self):
+    @classmethod
+    def test_output_dir(cls) -> Path:
         return SAMPLE_FILEPATH
 
     @pytest.fixture(scope="class")
-    def resource(self, test_output_dir):
+    @classmethod
+    def resource(cls, test_output_dir: Path):
         test_output_dir.mkdir(parents=True, exist_ok=True)
         yield test_output_dir
         shutil.rmtree(test_output_dir)

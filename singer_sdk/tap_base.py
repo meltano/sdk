@@ -163,7 +163,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
     @property
     def streams(self) -> dict[str, Stream]:
-        """Get streams discovered or catalogued for this tap.
+        """Streams discovered or catalogued for this tap.
 
         Results will be cached after first execution.
 
@@ -183,7 +183,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
     @property
     @override
     def state(self) -> types.TapState:
-        """Get tap state.
+        """Tap state.
 
         Returns:
             The tap's state dictionary
@@ -198,7 +198,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
     @property
     def input_catalog(self) -> Catalog | None:
-        """Get the catalog passed to the tap.
+        """The catalog passed to the tap.
 
         Returns:
             Catalog dictionary input, or None if not provided.
@@ -207,7 +207,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
     @property
     def state_writer(self) -> StateWriter:
-        """Get the centralized state writer for this tap.
+        """Centralized state writer for this tap.
 
         Returns:
             The StateWriter instance for coordinated state message writing.
@@ -216,7 +216,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
     @property
     def catalog(self) -> Catalog:
-        """Get the tap's working catalog.
+        """Th tap's working catalog.
 
         Returns:
             A Singer catalog object.
@@ -343,7 +343,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
     @property
     def catalog_dict(self) -> dict:
-        """Get catalog dictionary.
+        """Catalog dictionary.
 
         Returns:
             The tap's catalog as a dict
@@ -352,7 +352,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
     @property
     def catalog_json_text(self) -> str:
-        """Get catalog JSON.
+        """Catalog JSON.
 
         Returns:
             The tap's catalog as formatted JSON text.
@@ -361,7 +361,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
     @property
     def _singer_catalog(self) -> Catalog:
-        """Return a Catalog object.
+        """Catalog object.
 
         Returns:
             :class:`singer_sdk.singerlib.Catalog`.

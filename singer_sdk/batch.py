@@ -81,7 +81,7 @@ class BaseBatcher(ABC):
     @abstractmethod
     def get_batches(
         self,
-        records: t.Iterator[dict],
+        records: t.Iterable[dict],
     ) -> t.Iterator[list[str]]:
         """Yield manifest of batches.
 
@@ -98,7 +98,7 @@ class Batcher(BaseBatcher):
     """Determines batch type and then serializes batches to that format."""
 
     @override
-    def get_batches(self, records: t.Iterator[dict]) -> t.Iterator[list[str]]:
+    def get_batches(self, records: t.Iterable[dict]) -> t.Iterator[list[str]]:
         """Manifest of batches.
 
         Args:

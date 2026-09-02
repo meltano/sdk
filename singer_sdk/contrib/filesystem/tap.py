@@ -154,12 +154,12 @@ class FolderTap(Tap, t.Generic[_T]):
 
     @functools.cached_property
     def path(self) -> str:
-        """Return the path to the directory."""
+        """The path to the directory."""
         return self.config["path"]  # type: ignore[no-any-return]
 
     @functools.cached_property
     def fs(self) -> fsspec.AbstractFileSystem:
-        """Return the filesystem object.
+        """The filesystem object.
 
         Raises:
             ConfigValidationError: If the filesystem configuration is missing.

@@ -222,7 +222,7 @@ class JSONTypeHelper(t.Generic[T]):
 
     @property
     def extras(self) -> dict:
-        """Return dict describing the JSON Schema extras.
+        """Dictionary describing the JSON Schema extras.
 
         Returns:
             A dictionary containing the JSON Schema extras.
@@ -311,6 +311,7 @@ class StringType(JSONTypeHelper[str]):
         return {"format": self.string_format} if self.string_format else {}
 
     @DefaultInstanceProperty
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -481,6 +482,7 @@ class BooleanType(JSONTypeHelper[bool]):
     """
 
     @DefaultInstanceProperty
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -531,6 +533,7 @@ class _NumericType(JSONTypeHelper[T]):
         self.multiple_of = multiple_of
 
     @DefaultInstanceProperty
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -627,11 +630,7 @@ class ArrayType(JSONTypeHelper[list], t.Generic[W]):
     @property
     @override
     def type_dict(self) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
+        """Type dictionary."""
         return {
             "type": ["array", "null"] if self.nullable else "array",
             "items": self.wrapped_type.type_dict,
@@ -650,6 +649,7 @@ class AnyType(JSONTypeHelper):
         super().__init__(*args, **kwargs)
 
     @DefaultInstanceProperty
+    @override
     def type_dict(self) -> dict:
         """Get type dictionary.
 
@@ -723,10 +723,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
     @property
     @override
     def type_dict(self) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
+        """Type dictionary.
 
         Raises:
             ValueError: If the type dict is not valid.
@@ -887,11 +884,7 @@ class ObjectType(JSONTypeHelper):
     @property
     @override
     def type_dict(self) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
+        """Type dictionary."""
         merged_props = {}
         required = []
         dependent_required: dict[str, list[str]] = {}
@@ -965,11 +958,7 @@ class AnyOf(JSONTypeHelper):
     @property
     @override
     def type_dict(self) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
+        """Type dictionary."""
         return {"anyOf": [t.type_dict for t in self.wrapped]}
 
 
@@ -1008,11 +997,7 @@ class OneOf(JSONTypeHelper):
     @property
     @override
     def type_dict(self) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
+        """Type dictionary."""
         return {"oneOf": [t.type_dict for t in self.wrapped]}
 
 
@@ -1068,11 +1053,7 @@ class AllOf(JSONTypeHelper):
     @property
     @override
     def type_dict(self) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
+        """Type dictionary."""
         return {"allOf": [t.type_dict for t in self.wrapped]}
 
 
@@ -1100,11 +1081,7 @@ class Constant(JSONTypeHelper):
     @property
     @override
     def type_dict(self) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
+        """Type dictionary."""
         return {"const": self.value}
 
 
@@ -1195,11 +1172,7 @@ class NullType(JSONTypeHelper[None]):
     @property
     @override
     def type_dict(self) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
+        """Type dictionary."""
         return {"type": "null"}
 
 
@@ -1217,11 +1190,7 @@ class CustomType(JSONTypeHelper):
     @property
     @override
     def type_dict(self) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
+        """Type dictionary."""
         return self._jsonschema_type_dict
 
 
@@ -1330,11 +1299,7 @@ class PropertiesList(ObjectType):
     @property
     @override
     def type_dict(self) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
+        """Type dictionary."""
         d = super().type_dict
         d["$schema"] = "https://json-schema.org/draft/2020-12/schema"
         return d

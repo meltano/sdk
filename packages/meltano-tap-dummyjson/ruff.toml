@@ -5,8 +5,8 @@ src = ["tap_dummyjson"]
 ignore = [
     "CPY",
     "D",
-    "PLR2004", # magic-value-comparison
-    "RUF012",  # mutable-class-default
+    "magic-value-comparison",
+    "mutable-class-default",
 ]
 select = ["ALL"]
 

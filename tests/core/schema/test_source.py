@@ -35,7 +35,7 @@ else:
     from typing_extensions import override
 
 if t.TYPE_CHECKING:
-    from collections.abc import Mapping
+    from singer_sdk.helpers.types import Context
 
 
 @pytest.fixture(scope="session")
@@ -145,7 +145,8 @@ class MockStream(Stream):
 
     name = "test_stream"
 
-    def get_records(self, context: Mapping[str, t.Any] | None):  # noqa: ARG002
+    @override
+    def get_records(self, context: Context | None):
         """Mock method."""
         return []
 
@@ -748,12 +749,35 @@ class TestOpenAPISchemaNormalization:
                             {"type": "object", "properties": {"y": {"type": "string"}}},
                             {"type": "object", "properties": {"z": {"type": "string"}}},
                         ],
+                        "description": "One of a few options",
+                    },
+                    "AnyOfNullable": {
+                        "anyOf": [
+                            {"type": "object", "properties": {"x": {"type": "string"}}},
+                            {"type": "object", "properties": {"y": {"type": "string"}}},
+                            {"nullable": True, "description": "Makes this nullable"},
+                        ],
+                    },
+                    "AnyOfNullableWithRef": {
+                        "anyOf": [
+                            {"type": "object", "properties": {"x": {"type": "string"}}},
+                            {"type": "object", "properties": {"y": {"type": "string"}}},
+                            {"nullable": True, "$ref": "#/components/schemas/Status"},
+                        ],
                     },
                     "AllOfNoElements": {
                         "allOf": [],
                     },
                     "AllOfSingleElement": {
                         "allOf": [{"type": "string"}],
+                    },
+                    "AllOfSingleElementObject": {
+                        "allOf": [
+                            {
+                                "type": "object",
+                                "properties": {"name": {"type": "string"}},
+                            }
+                        ],
                     },
                     "AllOfSchemas": {
                         "allOf": [
@@ -779,6 +803,7 @@ class TestOpenAPISchemaNormalization:
                     "Status": {
                         "type": "string",
                         "enum": ["active", "inactive", "pending"],
+                        "description": "A status",
                     },
                     "Priority": {
                         "type": "integer",
@@ -878,6 +903,39 @@ class TestOpenAPISchemaNormalization:
 
         normalized = source.preprocess_schema(schema)
         assert all(elem["type"] == ["object", "null"] for elem in normalized["anyOf"])
+        assert normalized["description"] == "One of a few options"
+
+    def test_normalize_any_of_nullable(self, source: OpenAPISchema):
+        """Test that anyOf with nullable variants are correctly normalized."""
+        schema = source.fetch_schema("AnyOfNullable")
+        assert len(schema["anyOf"]) == 3
+
+        normalized = source.preprocess_schema(schema)
+        assert [elem["type"] for elem in normalized["anyOf"]] == [
+            ["object", "null"],
+            ["object", "null"],
+            "null",
+        ]
+        assert normalized["anyOf"][-1] == {
+            "type": "null",
+            "description": "Makes this nullable",
+        }
+
+    def test_normalize_any_of_nullable_with_ref(self, source: OpenAPISchema):
+        """Test that anyOf with nullable with $ref variants are correctly normalized."""
+        schema = source.fetch_schema("AnyOfNullableWithRef")
+        assert len(schema["anyOf"]) == 3
+
+        normalized = source.preprocess_schema(schema)
+        assert [elem["type"] for elem in normalized["anyOf"]] == [
+            ["object", "null"],
+            ["object", "null"],
+            ["string", "null"],
+        ]
+        assert normalized["anyOf"][-1] == {
+            "type": ["string", "null"],
+            "description": "A status",
+        }
 
     def test_normalize_all_of_no_elements(self, source: OpenAPISchema):
         """Test that an empty allOf is normalized to an empty schema."""
@@ -891,6 +949,16 @@ class TestOpenAPISchemaNormalization:
         schema = source.get_schema("AllOfSingleElement")
         normalized = source.preprocess_schema(schema)
         assert normalized == {"type": "string"}
+        assert "allOf" not in normalized
+
+    def test_normalize_all_of_single_object(self, source: OpenAPISchema):
+        """Test that a single-element allOf with an object schema is flattened."""
+        schema = source.get_schema("AllOfSingleElementObject")
+        normalized = source.preprocess_schema(schema)
+        assert normalized == {
+            "type": ["object", "null"],
+            "properties": {"name": {"type": ["string", "null"]}},
+        }
         assert "allOf" not in normalized
 
     def test_normalize_all_of_merge(self, source: OpenAPISchema):

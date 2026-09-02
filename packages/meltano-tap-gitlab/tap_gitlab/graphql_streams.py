@@ -32,7 +32,7 @@ class GitlabGraphQLStream(GraphQLStream):
     @property
     @override
     def http_headers(self) -> dict:
-        """Return headers dict to be used for HTTP requests.
+        """Headers dict to be used for HTTP requests.
 
         Note: This sample implementation bypasses the SimpleAuthenticator class and
         simply returns the http_headers directly, with the auth_token.
@@ -63,5 +63,5 @@ class GraphQLProjectsStream(GitlabGraphQLStream):
     @property
     @override
     def query(self) -> str:
-        """Return dynamic GraphQL query."""
+        """Dynamic GraphQL query."""
         return f"project(fullPath: {self.config['project_id']} {{ name }}"
