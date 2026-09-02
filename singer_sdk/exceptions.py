@@ -217,6 +217,10 @@ class TooManyRecordsException(FatalSyncError):
     """Exception to raise when query returns more records than max_records."""
 
 
+class AuthenticationError(FatalAPIError):
+    """Exception raised when API authentication fails."""
+
+
 # ---------------------------------------------------------------------------
 # Sync — retriable
 # ---------------------------------------------------------------------------

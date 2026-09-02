@@ -164,7 +164,8 @@ class TapTestClassFactory:
                 yield  # noqa: PT022
 
             @pytest.fixture(scope="class")
-            def runner(self) -> TapTestRunner | TargetTestRunner:  # noqa: PLR6301
+            @classmethod
+            def runner(cls) -> TapTestRunner | TargetTestRunner:
                 # Populate runner class with cached records for use in tests
                 test_runner.sync_all()
                 return test_runner

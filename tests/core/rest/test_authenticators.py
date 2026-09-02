@@ -35,6 +35,7 @@ from singer_sdk.authenticators import (
     OAuthJWTAuthenticator,
     SimpleAuthenticator,
 )
+from singer_sdk.exceptions import AuthenticationError
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.streams.rest import RESTStream
 
@@ -232,6 +233,36 @@ def test_oauth_authenticator_token_expiry_handling(
         assert not authenticator.expires_in or not authenticator.is_token_valid()
 
 
+@pytest.mark.parametrize(
+    "response_refresh_token, expected_refresh_token",
+    [
+        pytest.param("rotated-refresh-token", "rotated-refresh-token", id="returned"),
+        pytest.param(None, "existing-refresh-token", id="omitted"),
+    ],
+)
+def test_oauth_authenticator_refresh_token_handling(
+    rest_tap: Tap,
+    requests_mock: requests_mock.Mocker,
+    response_refresh_token: str | None,
+    expected_refresh_token: str,
+):
+    """Validate refresh tokens returned by the OAuth endpoint are retained."""
+    response: dict[str, t.Any] = {"access_token": "an-access-token"}
+    if response_refresh_token is not None:
+        response["refresh_token"] = response_refresh_token
+
+    requests_mock.post("https://example.com/oauth", json=response)
+    authenticator = _FakeOAuthAuthenticator(
+        stream=rest_tap.streams["some_stream"],
+        auth_endpoint="https://example.com/oauth",
+    )
+    authenticator.refresh_token = "existing-refresh-token"  # noqa: S105
+
+    authenticator.update_access_token()
+
+    assert authenticator.refresh_token == expected_refresh_token
+
+
 def test_oauth_authenticator_handle_error(
     rest_tap: Tap,
     requests_mock: requests_mock.Mocker,
@@ -247,7 +278,7 @@ def test_oauth_authenticator_handle_error(
         status_code=401,
     )
     with (
-        pytest.raises(RuntimeError, match="Failed to update access token"),
+        pytest.raises(AuthenticationError, match="Failed to update access token"),
         caplog.at_level(logging.ERROR),
     ):
         authenticator.update_access_token()
@@ -704,7 +735,7 @@ def test_oauth_authenticator_refreshes_token_on_retry(
 
         @property
         def oauth_request_body(self) -> dict:
-            """Return minimal OAuth request body."""
+            """Minimal OAuth request body."""
             return {"grant_type": "client_credentials"}
 
         def update_access_token(self) -> None:
@@ -899,8 +930,8 @@ def test_oauth_authenticator_does_not_retry_client_errors(
         auth_endpoint="https://example.com/oauth",
     )
 
-    # Expect RuntimeError to be raised (existing error handling)
-    with pytest.raises(RuntimeError, match="Failed to update access token"):
+    # Expect AuthenticationError to be raised (existing error handling)
+    with pytest.raises(AuthenticationError, match="Failed to update access token"):
         authenticator.update_access_token()
 
     # Verify only 1 request was made (no retries for non-429 4xx)
@@ -930,9 +961,9 @@ def test_oauth_authenticator_fails_after_max_retries(rest_tap: Tap):
         auth_endpoint="https://example.com/oauth",
     )
 
-    # Expect RuntimeError after max retries exhausted
+    # Expect AuthenticationError after max retries exhausted
     with pytest.raises(
-        RuntimeError,
+        AuthenticationError,
         match=r"Failed to update access token \(status=503\)",
     ):
         authenticator.update_access_token()

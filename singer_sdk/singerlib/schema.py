@@ -12,6 +12,11 @@ from referencing.jsonschema import DRAFT202012
 if t.TYPE_CHECKING:
     from referencing._core import Resolver
 
+__all__ = [
+    "Schema",
+    "resolve_schema_references",
+]
+
 _SchemaDict: t.TypeAlias = dict[str, t.Any]
 
 META_KEYS = [
@@ -53,7 +58,7 @@ STANDARD_KEYS = [
 ]
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, repr=False)
 class Schema:
     """Object model for JSON Schema.
 

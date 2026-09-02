@@ -6,7 +6,6 @@ import decimal
 import sys
 from typing import TYPE_CHECKING
 
-import requests  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
@@ -22,6 +21,7 @@ else:
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
+    import requests
     from singer_sdk.helpers.types import Context
 
 
@@ -31,7 +31,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @override
     @property
     def url_base(self) -> str:
-        """Return the API URL root, configurable via tap settings."""
+        """The API URL root, configurable via tap settings."""
         # TODO: hardcode a value here, or retrieve it from self.config
         return "https://api.mysample.com"
 
@@ -40,11 +40,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @override
     @property
     def authenticator(self) -> {{ cookiecutter.source_name }}Authenticator:
-        """Return a new authenticator object.
-
-        Returns:
-            An authenticator instance.
-        """
+        """An authenticator object."""
         return {{ cookiecutter.source_name }}Authenticator()
 
 {%- endif %}
@@ -52,11 +48,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @override
     @property
     def http_headers(self) -> dict:
-        """Return the http headers needed.
-
-        Returns:
-            A dictionary of HTTP headers.
-        """
+        """A dictionary of HTTP headers."""
 {%- if cookiecutter.auth_method not in ("OAuth2", "JWT") %}
         # If not using an authenticator, you may also provide inline auth headers:
         # headers["Private-Token"] = self.config.get("auth_token")

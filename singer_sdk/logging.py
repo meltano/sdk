@@ -40,6 +40,7 @@ class _ExceptionData(t.TypedDict, total=False):
     traceback: list[_FrameData]
     cause: _ExceptionData | None
     context: _ExceptionData | None
+    notes: list[str]
 
 
 DEFAULT_FORMAT = "{asctime:23s} | {levelname:8s} | {name:30s} | {message}"
@@ -123,6 +124,10 @@ class StructuredFormatter(logging.Formatter):
                 tb = tb.tb_next
             exception_data["traceback"] = frames
 
+        # This attribute is created when add_note() is called, thus we use getattr
+        if notes := getattr(exc_value, "__notes__", []):
+            exception_data["notes"] = notes
+
         # Handle exception chaining (__cause__ and __context__)
         if hasattr(exc_value, "__cause__") and exc_value.__cause__:
             exception_data["cause"] = self._format_exception((
@@ -191,12 +196,13 @@ class StructuredFormatter(logging.Formatter):
             "ts": record.created,
             "thread_name": record.threadName,
             "app_name": data.pop("app_name", "singer-sdk"),
-            "stream_name": data.pop("stream_name", None),
         }
+        if stream_name := data.pop("stream_name", None):
+            log_data["stream_name"] = stream_name
 
         # Handle exception information
-        if record.exc_info and (exc_info := self._format_exception(record.exc_info)):
-            log_data["exception"] = exc_info
+        if record.exc_info and (exc_dict := self._format_exception(record.exc_info)):
+            log_data["exception"] = exc_dict
 
         # Handle metric information
         if (

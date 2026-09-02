@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import signal
 import typing as t
 
 import pytest
@@ -174,3 +175,17 @@ def test_singer_command_excepthook(
 
     assert not caplog.messages
     assert "KeyboardInterrupt" in capsys.readouterr().err
+
+
+def test_handle_termination_is_idempotent():
+    """A duplicate termination signal must not restart the shutdown."""
+    plugin = PluginTest(config={"prop1": "hello"})
+
+    with pytest.raises(SystemExit) as exc_info:
+        plugin._handle_termination(signal.SIGTERM, None)
+
+    assert exc_info.value.code == 0
+
+    # e.g. the same signal delivered both directly by the OS and forwarded
+    # by an orchestrator such as Meltano
+    assert plugin._handle_termination(signal.SIGTERM, None) is None

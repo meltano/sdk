@@ -232,7 +232,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
         # Add custom WHERE clauses from configuration, etc.
         # query = query.where(...)
 
-        return query  # noqa: RET504
+        return query  # ruff:ignore[unnecessary-assign]
 
     @override
     def get_records(self, context: Context | None) -> Iterable[Record]:
@@ -268,7 +268,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
                 query = query.where(replication_key_col >= start_val)
 
         # 3. Execute query and yield records
-        with self.connector._connect() as connection:  # noqa: SLF001
+        with self.connector._connect() as connection:  # ruff:ignore[private-member-access]
             for record in connection.execute(query).mappings():
                 yield dict(record)
 

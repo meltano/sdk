@@ -20,7 +20,7 @@ from singer_sdk.exceptions import (
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._compat import datetime_fromisoformat as parse
 from singer_sdk.helpers.jsonpath import _compile_jsonpath
-from singer_sdk.singerlib import Catalog, MetadataMapping
+from singer_sdk.singerlib import Catalog
 from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
@@ -97,7 +97,7 @@ def test_stream_apply_catalog(
                 "streams": [
                     {
                         "tap_stream_id": stream.name,
-                        "metadata": MetadataMapping(),
+                        "metadata": {},
                         "key_properties": ["id"],
                         "stream": stream.name,
                         "schema": stream.schema,

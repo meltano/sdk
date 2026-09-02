@@ -13,7 +13,6 @@ from typing import TYPE_CHECKING, Any, ClassVar
 from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.authenticators import APIKeyAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
@@ -22,7 +21,6 @@ from {{ cookiecutter.library_name }} import schemas
 from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.authenticators import BearerTokenAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
@@ -31,7 +29,6 @@ from {{ cookiecutter.library_name }} import schemas
 from requests.auth import HTTPBasicAuth
 from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
@@ -39,7 +36,6 @@ from {{ cookiecutter.library_name }} import schemas
 {% elif cookiecutter.auth_method == "Custom or N/A" -%}
 from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
@@ -47,7 +43,6 @@ from {{ cookiecutter.library_name }} import schemas
 {% elif cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
@@ -69,6 +64,7 @@ if TYPE_CHECKING:
     {%- else %}
     from singer_sdk.helpers.types import Context
     {%- endif %}
+    from singer_sdk.pagination import BaseAPIPaginator
     from singer_sdk.streams.rest import HTTPRequest, PageContext
 
 
@@ -83,14 +79,14 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     records_jsonpath = "$[*]"
 
     # Update this value if necessary or override `get_new_paginator`.
-    next_page_token_jsonpath = "$.next_page"  # noqa: S105
+    next_page_token_jsonpath = "$.next_page"  # ruff:ignore[hardcoded-password-string]
 
     schema: ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
 
     @override
     @property
     def url_base(self) -> str:
-        """Return the API URL root, configurable via tap settings."""
+        """The API URL root, configurable via tap settings."""
         # TODO: hardcode a value here, or retrieve it from self.config
         return "https://api.mysample.com"
 
@@ -99,11 +95,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @override
     @cached_property
     def authenticator(self) -> Auth:
-        """Return a new authenticator object.
-
-        Returns:
-            An authenticator instance.
-        """
+        """An authenticator object."""
         return {{ cookiecutter.source_name }}Authenticator(
             client_id=self.config["client_id"],
             client_secret=self.config["client_secret"],
@@ -116,11 +108,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @override
     @property
     def authenticator(self) -> APIKeyAuthenticator:
-        """Return a new authenticator object.
-
-        Returns:
-            An authenticator instance.
-        """
+        """An authenticator object."""
         return APIKeyAuthenticator(
             key="x-api-key",
             value=self.config["auth_token"],
@@ -132,11 +120,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @override
     @property
     def authenticator(self) -> BearerTokenAuthenticator:
-        """Return a new authenticator object.
-
-        Returns:
-            An authenticator instance.
-        """
+        """An authenticator object."""
         return BearerTokenAuthenticator(token=self.config["auth_token"])
 
 {%- elif cookiecutter.auth_method == "Basic Auth" %}
@@ -144,11 +128,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @override
     @property
     def authenticator(self) -> HTTPBasicAuth:
-        """Return a new authenticator object.
-
-        Returns:
-            An authenticator instance.
-        """
+        """An authenticator object."""
         return HTTPBasicAuth(
             username=self.config["username"],
             password=self.config["password"],
@@ -159,11 +139,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     @property
     @override
     def http_headers(self) -> dict:
-        """Return the http headers needed.
-
-        Returns:
-            A dictionary of HTTP headers.
-        """
+        """A dictionary of HTTP headers."""
 {%- if cookiecutter.auth_method not in ("OAuth2", "JWT") %}
         # If not using an authenticator, you may also provide inline auth headers:
         # headers["Private-Token"] = self.config.get("auth_token")

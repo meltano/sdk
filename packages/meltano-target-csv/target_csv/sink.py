@@ -21,12 +21,12 @@ class CSVSink(BatchSink):
 
     @property
     def target_folder(self) -> Path:
-        """Return target folder."""
+        """Target folder."""
         return Path(str(self.config["target_folder"]))
 
     @property
     def target_filepath(self) -> Path:
-        """Return target filepath."""
+        """Target filepath."""
         return self.target_folder / f"{self.stream_name}.csv"
 
     @override

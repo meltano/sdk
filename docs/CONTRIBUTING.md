@@ -85,7 +85,7 @@ nox -s tests
 nox -s test-external
 
 # Run type checks
-nox -t typing
+nox -s typing
 ```
 
 To view the code coverage report in HTML format:

@@ -343,6 +343,78 @@ def test_flatten_key_with_long_names(subtests: pytest.Subtests):
         assert result_custom_length.count("__") == len(parent_keys)
 
 
+def test_flatten_schema_no_properties():
+    """Test that flatten_schema handles a schema with no top-level properties."""
+    result = flatten_schema({"type": "object"}, max_level=1)
+    assert result == {"type": "object", "properties": {}}
+
+
+def test_flatten_schema_duplicate_key():
+    """Test that flatten_schema raises ValueError on a duplicate flattened key.
+
+    Two fields that flatten to the same key name should raise a ValueError.
+    """
+    schema = {
+        "type": "object",
+        "properties": {
+            "a__b": {"type": "string"},
+            "a": {
+                "type": "object",
+                "properties": {"b": {"type": "string"}},
+            },
+        },
+    }
+    with pytest.raises(
+        ValueError,
+        match="Duplicate column name produced in schema: a__b",
+    ):
+        flatten_schema(schema, max_level=1)
+
+
+def test_flatten_schema_long_key_abbreviation():
+    """Test that _flatten_schema abbreviates nested keys exceeding max_key_length."""
+    long_key = "a" * 20  # 20 chars; two levels joined = 42 chars, exceeds limit of 30
+    schema = {
+        "type": "object",
+        "properties": {
+            long_key: {
+                "type": "object",
+                "properties": {long_key: {"type": "string"}},
+            },
+        },
+    }
+    result = flatten_schema(schema, max_level=1, max_key_length=30)
+    props = result["properties"]
+    assert len(props) == 1
+    assert len(next(iter(props))) < 30
+
+
+def test_flatten_record_long_key_abbreviation():
+    """Test that _flatten_record abbreviates nested keys exceeding max_key_length."""
+    long_key = "a" * 20  # 20 chars; two levels joined = 42 chars, exceeds limit of 30
+    schema = {
+        "type": "object",
+        "properties": {
+            long_key: {
+                "type": "object",
+                "properties": {long_key: {"type": "string"}},
+            },
+        },
+    }
+    flattened = flatten_schema(schema, max_level=1, max_key_length=30)
+    record = {long_key: {long_key: "value"}}
+    result = flatten_record(
+        record,
+        flattened_schema=flattened,
+        max_level=1,
+        max_key_length=30,
+    )
+    assert len(result) == 1
+    key = next(iter(result))
+    assert len(key) < 30
+    assert result[key] == "value"
+
+
 def test_flatten_schema_with_custom_separator():
     """Test flatten_schema to obey the separator parameter."""
     schema = {
@@ -392,7 +464,10 @@ def test_flatten_record_with_custom_separator():
     }
 
     result = flatten_record(
-        record, max_level=99, flattened_schema=flattened_schema, separator="."
+        record,
+        max_level=99,
+        flattened_schema=flattened_schema,
+        separator=".",
     )
     expected = {
         "key_1": 1,

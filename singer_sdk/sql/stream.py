@@ -66,71 +66,52 @@ class SQLStream(Stream, abc.ABC):
     @property
     @override
     def _singer_catalog_entry(self) -> CatalogEntry:
-        """Return catalog entry as specified by the Singer catalog spec.
-
-        Returns:
-            A CatalogEntry object.
-        """
+        """Catalog entry as specified by the Singer catalog spec."""
         return CatalogEntry.from_dict(self.catalog_entry)
 
     @property
     def connector(self) -> SQLConnector:
-        """Return a connector object.
-
-        Returns:
-            The connector object.
-        """
+        """Connector object."""
         return self._connector
 
     @property
     @override
     def metadata(self) -> MetadataMapping:
-        """Return the Singer metadata.
+        """Singer metadata.
 
         Metadata from an input catalog will override standard metadata.
-
-        Returns:
-            Metadata object as specified in the Singer spec.
         """
         return self._singer_catalog_entry.metadata
 
     @cached_property
+    @override
     def schema(self) -> dict:
-        """Return metadata object (dict) as specified in the Singer spec.
+        """JSON Schema dictionary.
 
         Metadata from an input catalog will override standard metadata.
-
-        Returns:
-            The schema object.
         """
         return self._singer_catalog_entry.schema.to_dict()
 
     @property
     @override
     def tap_stream_id(self) -> str:
-        """Return the unique ID used by the tap to identify this stream.
+        """Unique ID used by the tap to identify this stream.
 
         Generally, this is the same value as in `Stream.name`.
 
         In rare cases, such as for database types with multi-part names,
         this may be slightly different from `Stream.name`.
-
-        Returns:
-            The unique tap stream ID as a string.
         """
         return self._singer_catalog_entry.tap_stream_id
 
     @property
     @override
     def primary_keys(self) -> t.Sequence[str]:
-        """Get primary keys from the catalog entry definition.
-
-        Returns:
-            A list of primary key(s) for the stream.
-        """
+        """Primary keys from the catalog entry definition."""
         return self._singer_catalog_entry.metadata.root.table_key_properties or []
 
     @primary_keys.setter
+    @override
     def primary_keys(self, new_value: t.Sequence[str]) -> None:
         """Set or reset the primary key(s) in the stream's catalog entry.
 
@@ -176,11 +157,7 @@ class SQLStream(Stream, abc.ABC):
     @property
     @override
     def effective_schema(self) -> dict:
-        """Return the effective schema for the stream.
-
-        Returns:
-            The effective schema.
-        """
+        """Effective schema for the stream."""
         return super().effective_schema
 
     def apply_query_filters(

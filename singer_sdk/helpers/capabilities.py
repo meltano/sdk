@@ -195,7 +195,6 @@ BATCH_CONFIG = PropertiesList(
                     Property(
                         "format",
                         StringType,
-                        allowed_values=["jsonl", "parquet"],
                         title="Batch Encoding Format",
                         description="Format to use for batch files.",
                     ),
@@ -335,7 +334,7 @@ TARGET_LOAD_METHOD_CONFIG = PropertiesList(
             TargetLoadMethods.APPEND_ONLY,
             TargetLoadMethods.UPSERT,
             TargetLoadMethods.OVERWRITE,
-        ],  # ty:ignore[invalid-argument-type]
+        ],
         default=TargetLoadMethods.APPEND_ONLY,
     ),
 ).to_dict()
@@ -367,11 +366,7 @@ class DeprecatedEnum(Enum):
 
     @property
     def deprecation_message(self) -> str | None:
-        """Get deprecation message.
-
-        Returns:
-            Deprecation message.
-        """
+        """Deprecation message."""
         return self.deprecation
 
     def emit_warning(self) -> None:

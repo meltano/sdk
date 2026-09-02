@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
@@ -62,8 +63,12 @@ parquet = [
     "pyarrow>=15",
 ]
 
+arrow = [
+    "pyarrow>=15",
+]
+
 testing = [
-    "pytest>=9",
+    "pytest>=9.1",
 ]
 
 faker = [
@@ -143,7 +148,7 @@ testing = [
     "requests-mock>=1.10.0",
     "responses>=0.26.0",
     "rfc3339-validator>=0.1.4",
-    "sqlalchemy>=2.0.0.dev0",
+    "sqlalchemy>=2.1.0.dev0",
     "time-machine>=2.10.0",
     "toolz>=1.0.0",
     "xdoctest[colors]>=1.1.1",
@@ -152,9 +157,9 @@ typing = [
     {"include-group" = "testing"},
     "backports-datetime-fromisoformat",
     "importlib-metadata",
-    "mypy~=2.1.0",
+    "mypy~=2.2",
     "pyarrow-stubs>=19.1",
-    "ty==0.0.42",
+    "ty==0.0.72",
     "types-jsonschema>=4.17.0.6",
     "types-pytz>=2022.7.1.2",
     "types-simplejson>=3.18.0",
@@ -223,7 +228,7 @@ testpaths = ["tests"]
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.54.4"
+version = "0.54.5"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -253,7 +258,9 @@ relative_files = true  # This allows coverage to be measured in Windows
 omit = [
     "tests/*",
     "samples/*",
-    "packages/*",
+    "packages/meltano-mapper-*",
+    "packages/meltano-tap-*",
+    "packages/meltano-target-*",
     "singer_sdk/helpers/_compat.py",
     "singer_sdk/helpers/types.py",
 ]
@@ -311,15 +318,6 @@ warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-[[tool.mypy.overrides]]
-ignore_missing_imports = true
-module = [
-    "backports.datetime_fromisoformat.*",
-    "joblib.*",       # https://github.com/joblib/joblib/issues/1516
-    "fsspec.*",       # https://github.com/fsspec/filesystem_spec/issues/625
-    "jsonpath_ng.*",  # https://github.com/h2non/jsonpath-ng/issues/152
-]
-
 [build-system]
 requires = [
     "hatchling>=1,<2",
@@ -331,6 +329,7 @@ build-backend = "hatchling.build"
 singer_testing = "singer_sdk.testing.pytest_plugin"
 
 [project.entry-points."singer_sdk.batch_encoders"]
+arrow = "singer_sdk.contrib.batch_encoder_arrow:ArrowBatcher"
 jsonl = "singer_sdk.contrib.batch_encoder_jsonl:JSONLinesBatcher"
 parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
 
@@ -343,7 +342,7 @@ extend-include = [
 ]
 line-length = 88
 preview = true
-required-version = ">=0.15.14"
+required-version = ">=0.15.22"
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -352,8 +351,9 @@ docstring-code-format = true
 explicit-preview-rules = false
 future-annotations = true
 ignore = [
-    "N818",    # Exception name should be named with an Error suffix
-    "COM812",  # missing-trailing-comma
+    "error-suffix-on-exception-name",
+    "missing-trailing-comma",
+    "noqa-comments",
 ]
 select = [
     "F",    # Pyflakes
@@ -412,8 +412,8 @@ unfixable = [
 [tool.ruff.lint.per-file-ignores]
 "docs/conf.py" = [
     "D",      # pydocstyle/flake8-docstrings
-    "I002",   # isort: missing-required-import
-    "INP001", # flake8-no-pep420: implicit-namespace-package
+    "missing-required-import",   # isort: missing-required-import
+    "implicit-namespace-package", # flake8-no-pep420: implicit-namespace-package
 ]
 "noxfile.py" = ["ANN"]
 "tests/*" = [
@@ -421,23 +421,25 @@ unfixable = [
     "D1",
     "D2",
     "DOC",
-    "FBT001",
-    "FBT003",
+    "boolean-type-hint-positional-argument",
+    "boolean-positional-value-in-call",
     "INP",      # Allow implicit namespace packages in tests
-    "PLR2004",
-    "S101",
-    "SLF001",   # Allow private method access in tests
-    "PLC2701",  # Allow usage of private members in tests
-    "PLR6301",  # Don't suggest making test methods static, etc.
+    "magic-value-comparison",
+    "assert",
+    "private-member-access",
+    "import-private-name",
+    "no-self-use",
 ]
 # Disabled some checks in helper modules
 "singer_sdk/helpers/_*.py" = ["DOC"]
 # Disabled some checks in samples code
 "samples/*" = ["ANN", "DOC"]
-"packages/*" = ["DOC"]
+"packages/meltano-mapper-*" = ["DOC"]
+"packages/meltano-tap-*" = ["DOC"]
+"packages/meltano-target-*" = ["DOC"]
 # Templates support a generic resource of type Any.
-"singer_sdk/testing/*.py" = ["S101"]
-"singer_sdk/testing/templates.py" = ["ANN401"]
+"singer_sdk/testing/*.py" = ["assert"]
+"singer_sdk/testing/templates.py" = ["any-type"]
 
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
@@ -474,7 +476,7 @@ convention = "google"
 max-args = 9
 
 [tool.uv]
-prerelease = "if-necessary-or-explicit"
+prerelease = "if-necessary"
 required-version = ">=0.5.19"
 
 [tool.uv.sources]
@@ -490,6 +492,9 @@ meltano-tap-sqlite = { workspace = true }
 meltano-target-csv = { workspace = true }
 meltano-target-parquet = { workspace = true }
 meltano-target-sqlite = { workspace = true }
+pyarrow = [
+    { index = "scientific-python-nightly-wheels", marker = "python_version >= '3.15'" },
+]
 
 [tool.uv.workspace]
 members = [
@@ -508,3 +513,6 @@ ignore-words-list = "fo,intoto"
 [tool.ty.rules]
 missing-override-decorator = "error"
 unused-type-ignore-comment = "ignore"
+
+[tool.ty.terminal]
+error-on-warning = false

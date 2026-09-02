@@ -16,6 +16,7 @@ import json
 import logging
 import sys
 import typing as t
+import uuid
 
 import simpleeval
 
@@ -72,6 +73,36 @@ def sha256(string: str) -> str:
         A string digested into SHA256.
     """
     return hashlib.sha256(string.encode("utf-8")).hexdigest()
+
+
+def uuid4() -> str:
+    """Generate a random UUID for use in a stream map expression.
+
+    Returns:
+        The string representation of a random version 4 UUID.
+    """
+    return str(uuid.uuid4())
+
+
+def check_uuid(value: object, version: int | None = None) -> bool:
+    """Check whether a value is a valid UUID string.
+
+    Args:
+        value: Value to validate.
+        version: Optional UUID version to require.
+
+    Returns:
+        Whether the value is a valid UUID string of the requested version.
+    """
+    if not isinstance(value, str):
+        return False
+
+    try:
+        parsed = uuid.UUID(value)
+    except ValueError:
+        return False
+
+    return version is None or parsed.version == version
 
 
 StreamMapsDict: t.TypeAlias = dict[str, str | dict | None]
@@ -271,7 +302,7 @@ class _MapperEval(simpleeval.EvalWithCompoundTypes):
     @override
     def _eval(self, node: ast.AST) -> t.Any:
         try:
-            handler = self.nodes[type(node)]  # ty:ignore[invalid-argument-type, not-subscriptable]
+            handler = self.nodes[type(node)]  # ty:ignore[not-subscriptable]
         except KeyError:
             msg = f"Sorry, {type(node).__name__} is not available in this evaluator"
             raise simpleeval.FeatureNotAvailable(msg) from None
@@ -391,17 +422,15 @@ class CustomStreamMap(StreamMap):
 
     @property
     def functions(self) -> dict[str, t.Callable]:
-        """Get available transformation functions.
-
-        Returns:
-            Functions which should be available for expression evaluation.
-        """
+        """Available transformation functions."""
         funcs: dict[str, t.Any] = dict(simpleeval.DEFAULT_FUNCTIONS)
         funcs["md5"] = md5
         funcs["sha256"] = sha256
         funcs["datetime"] = simpleeval.ModuleWrapper(datetime)
         funcs["bool"] = bool
         funcs["json"] = simpleeval.ModuleWrapper(json)
+        funcs["uuid4"] = uuid4
+        funcs["check_uuid"] = check_uuid
         return funcs
 
     def _eval(
@@ -485,10 +514,10 @@ class CustomStreamMap(StreamMap):
         if expr.startswith("int("):
             return th.IntegerType()
 
-        if expr.startswith("str("):
+        if expr.startswith(("str(", "uuid4(")):
             return th.StringType()
 
-        if expr.startswith("bool("):
+        if expr.startswith(("bool(", "check_uuid(")):
             return th.BooleanType()
 
         if expr.startswith("json.dumps("):
@@ -745,7 +774,7 @@ class PluginMapper:
     def __init__(
         self,
         plugin_config: dict[str, StreamMapsDict],
-        logger: logging.Logger,
+        logger: logging.Logger | logging.LoggerAdapter,
     ) -> None:
         """Initialize mapper.
 
@@ -797,13 +826,18 @@ class PluginMapper:
             catalog: TODO
         """
         for catalog_entry in catalog.streams:
+            stream_name = catalog_entry.stream or catalog_entry.tap_stream_id
+            schema = catalog_entry.schema.to_dict()
+            mask = catalog_entry.metadata.resolve_selection()
+
+            # Unselected streams keep their full schema so they still have a
+            # mapper if later force-selected (e.g. for a connection test).
+            if mask[()]:
+                schema = get_selected_schema(stream_name, schema, mask)
+
             self.register_raw_stream_schema(
-                catalog_entry.stream or catalog_entry.tap_stream_id,
-                get_selected_schema(
-                    catalog_entry.stream or catalog_entry.tap_stream_id,
-                    catalog_entry.schema.to_dict(),
-                    catalog_entry.metadata.resolve_selection(),
-                ),
+                stream_name,
+                schema,
                 catalog_entry.key_properties,
             )
 
