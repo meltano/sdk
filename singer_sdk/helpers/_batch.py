@@ -94,15 +94,11 @@ class SDKBatchMessage(Message):
         self.type = SingerMessageType.BATCH
 
 
-def _default_root() -> str:
-    return f"file://{os.path.join(tempfile.gettempdir(), 'singer-sdk')}"  # ruff: ignore[os-path-join]
-
-
 @dataclass
 class StorageTarget:
     """Storage target for batch files."""
 
-    root: str = field(default_factory=_default_root)
+    root: str = "file://"
     """"The root directory of the storage target.
 
     If not set, the system's temporary directory will be used.
@@ -113,6 +109,11 @@ class StorageTarget:
 
     params: dict[str, t.Any] = field(default_factory=dict)
     """"The storage parameters."""
+
+    def __post_init__(self) -> None:
+        """Initialize the storage target."""
+        if self.root == "file://":
+            self.root = f"file://{os.path.join(tempfile.gettempdir(), 'singer-sdk')}"  # ruff: ignore[os-path-join]
 
     def asdict(self) -> dict[str, t.Any]:
         """Return a dictionary representation of the message.

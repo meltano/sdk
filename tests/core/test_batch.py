@@ -1,12 +1,30 @@
 from __future__ import annotations
 
 import re
+import sys
+import typing as t
 from dataclasses import asdict
 
 import pytest
+from dirty_equals import DirtyEquals
 
 from singer_sdk.batch import Batcher
 from singer_sdk.helpers._batch import BaseBatchFileEncoding, StorageTarget
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
+
+class IsTempBatchDir(DirtyEquals[str]):
+    @override
+    def equals(self, other: t.Any) -> bool:
+        return (
+            isinstance(other, str)
+            and other.startswith("file://")
+            and other.endswith("singer-sdk")
+        )
 
 
 def test_batch_get_unsupported_batcher():
@@ -50,8 +68,12 @@ def test_batch_file_encoding_as_dict(
 
 def test_batch_storage_target_defaults() -> None:
     target = StorageTarget()
-    assert target.root.startswith("file://")
-    assert target.root.endswith("singer-sdk")
+    assert target.root == IsTempBatchDir()
+    assert target.prefix is None
+    assert target.params == {}
+
+    target = StorageTarget(root="file://")
+    assert target.root == IsTempBatchDir()
     assert target.prefix is None
     assert target.params == {}
 
@@ -65,6 +87,16 @@ def test_batch_storage_target_round_trip() -> None:
     target = StorageTarget(root="file://path/to/files")
     d = target.asdict()
     assert d == {"root": "file://path/to/files", "prefix": None, "params": {}}
+    assert StorageTarget.from_dict(d) == target
+
+    target = StorageTarget.from_dict({})
+    d = target.asdict()
+    assert d == {"root": IsTempBatchDir(), "prefix": None, "params": {}}
+    assert StorageTarget.from_dict(d) == target
+
+    target = StorageTarget.from_dict({"root": "file://"})
+    d = target.asdict()
+    assert d == {"root": IsTempBatchDir(), "prefix": None, "params": {}}
     assert StorageTarget.from_dict(d) == target
 
 
