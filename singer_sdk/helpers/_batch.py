@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import enum
+import os.path
 import tempfile
 import typing as t
 from contextlib import contextmanager
@@ -93,11 +94,15 @@ class SDKBatchMessage(Message):
         self.type = SingerMessageType.BATCH
 
 
+def _default_root() -> str:
+    return f"file://{os.path.join(tempfile.gettempdir(), 'singer-sdk')}"  # ruff: ignore[os-path-join]
+
+
 @dataclass
 class StorageTarget:
     """Storage target for batch files."""
 
-    root: str = field(default_factory=lambda: f"file://{tempfile.gettempdir()}")
+    root: str = field(default_factory=_default_root)
     """"The root directory of the storage target.
 
     If not set, the system's temporary directory will be used.

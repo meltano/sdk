@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-import tempfile
 from dataclasses import asdict
 
 import pytest
@@ -51,7 +50,8 @@ def test_batch_file_encoding_as_dict(
 
 def test_batch_storage_target_defaults() -> None:
     target = StorageTarget()
-    assert target.root == f"file://{tempfile.gettempdir()}"
+    assert target.root.startswith("file://")
+    assert target.root.endswith("singer-sdk")
     assert target.prefix is None
     assert target.params == {}
 
