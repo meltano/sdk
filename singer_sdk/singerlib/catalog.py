@@ -19,6 +19,8 @@ else:
 if t.TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
 
+    from singer_sdk.singerlib.types import KeyProperties
+
     if sys.version_info >= (3, 11):
         from typing import Self  # noqa: ICN003
     else:
@@ -113,7 +115,7 @@ class Metadata:
 class StreamMetadata(Metadata):
     """Stream metadata."""
 
-    table_key_properties: t.Sequence[str] | None = None
+    table_key_properties: KeyProperties | None = None
     replication_key: str | None = None
     forced_replication_method: str | None = None
     valid_replication_keys: list[str] | None = None
@@ -190,7 +192,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         *,
         schema: Mapping[str, t.Any] | None = None,
         schema_name: str | None = None,
-        key_properties: t.Sequence[str] | None = None,
+        key_properties: KeyProperties | None = None,
         valid_replication_keys: list[str] | None = None,
         replication_method: str | None = None,
         selected_by_default: bool | None = None,
@@ -333,7 +335,7 @@ class CatalogEntry:
     metadata: MetadataMapping = field(default_factory=MetadataMapping)
     schema: Schema = field(default_factory=Schema)
     stream: str | None = None
-    key_properties: t.Sequence[str] | None = None
+    key_properties: KeyProperties | None = None
     replication_key: str | None = None
     is_view: bool | None = None
     database: str | None = None

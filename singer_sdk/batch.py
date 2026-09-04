@@ -29,7 +29,7 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401 # pragma: no cover
             stacklevel=2,
         )
 
-        from singer_sdk.contrib.batch_encoder_jsonl import JSONLinesBatcher  # noqa: PLC0415, I001
+        from singer_sdk.contrib.batch_encoder_jsonl import JSONLinesBatcher  # ruff: ignore[import-outside-top-level]
 
         return JSONLinesBatcher
 

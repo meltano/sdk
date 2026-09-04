@@ -45,6 +45,7 @@ if t.TYPE_CHECKING:
     from logging import Logger
 
     from singer_sdk.helpers._batch import BaseBatchFileEncoding
+    from singer_sdk.singerlib.types import KeyProperties
     from singer_sdk.target_base import Target
 
 
@@ -163,7 +164,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
         target: Target,
         stream_name: str,
         schema: dict,
-        key_properties: t.Sequence[str] | None,
+        key_properties: KeyProperties | None,
     ) -> None:
         """Initialize target sink.
 
@@ -427,7 +428,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
         return DatetimeErrorTreatmentEnum.ERROR
 
     @property
-    def key_properties(self) -> t.Sequence[str]:
+    def key_properties(self) -> KeyProperties:
         """Key properties.
 
         Override this method to return a list of key properties in a format that is
