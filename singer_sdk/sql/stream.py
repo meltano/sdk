@@ -24,6 +24,7 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.helpers.types import Context, Record
     from singer_sdk.singerlib import MetadataMapping
+    from singer_sdk.singerlib.types import KeyProperties
     from singer_sdk.sql.connector import FullyQualifiedName
     from singer_sdk.tap_base import Tap
 
@@ -106,13 +107,13 @@ class SQLStream(Stream, abc.ABC):
 
     @property
     @override
-    def primary_keys(self) -> t.Sequence[str]:
+    def primary_keys(self) -> KeyProperties:
         """Primary keys from the catalog entry definition."""
         return self._singer_catalog_entry.metadata.root.table_key_properties or []
 
     @primary_keys.setter
     @override
-    def primary_keys(self, new_value: t.Sequence[str]) -> None:
+    def primary_keys(self, new_value: KeyProperties) -> None:
         """Set or reset the primary key(s) in the stream's catalog entry.
 
         Args:

@@ -39,6 +39,7 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.helpers._flattening import FlatteningOptions
     from singer_sdk.singerlib.catalog import Catalog
+    from singer_sdk.singerlib.types import KeyProperties
 
 
 MAPPER_ELSE_OPTION = "__else__"
@@ -115,7 +116,7 @@ class StreamMap(abc.ABC):
         self,
         stream_alias: str,
         raw_schema: dict,
-        key_properties: t.Sequence[str] | None,
+        key_properties: KeyProperties | None,
         flattening_options: FlatteningOptions | None,
     ) -> None:
         """Initialize mapper.
@@ -354,7 +355,7 @@ class CustomStreamMap(StreamMap):
         map_config: dict,
         faker_config: dict,
         raw_schema: dict,
-        key_properties: t.Sequence[str] | None,
+        key_properties: KeyProperties | None,
         map_transform: dict,
         flattening_options: FlatteningOptions | None,
         *,
@@ -845,7 +846,7 @@ class PluginMapper:
         self,
         stream_name: str,
         schema: dict,
-        key_properties: t.Sequence[str] | None,
+        key_properties: KeyProperties | None,
     ) -> None:
         """Register a new stream as described by its name and schema.
 

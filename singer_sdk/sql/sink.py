@@ -28,6 +28,7 @@ else:
 if t.TYPE_CHECKING:
     from sqlalchemy.sql import Executable
 
+    from singer_sdk.singerlib.types import KeyProperties
     from singer_sdk.sql.connector import FullyQualifiedName
     from singer_sdk.target_base import Target
 
@@ -48,7 +49,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         target: Target,
         stream_name: str,
         schema: dict,
-        key_properties: t.Sequence[str] | None,
+        key_properties: KeyProperties | None,
         connector: _C | None = None,
     ) -> None:
         """Initialize SQL Sink.
@@ -233,7 +234,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
 
     @property
     @override
-    def key_properties(self) -> t.Sequence[str]:
+    def key_properties(self) -> KeyProperties:
         """Key properties, conformed to target system naming requirements."""
         return [self.conform_name(key, "column") for key in super().key_properties]
 

@@ -23,6 +23,8 @@ else:
 if t.TYPE_CHECKING:
     import builtins
 
+    from singer_sdk.singerlib.types import KeyProperties
+
     if sys.version_info >= (3, 11):
         from typing import Self  # noqa: ICN003
     else:
@@ -183,7 +185,7 @@ class SchemaMessage(Message):
         self,
         stream: str,
         schema: Schema,
-        key_properties: Sequence[str] | None = None,
+        key_properties: KeyProperties | str | None = None,
         bookmark_properties: Sequence[str] | None = None,
     ) -> None:
         """Initialize schema object."""

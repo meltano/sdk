@@ -19,6 +19,8 @@ if t.TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
     from datetime import datetime
 
+    from .types import KeyProperties
+
 __all__ = [
     "ActivateVersionMessage",
     "Message",
@@ -69,7 +71,7 @@ def write_schema(
     stream_name: str,
     schema: Mapping[str, t.Any],
     *,
-    key_properties: Sequence[str] | None = None,
+    key_properties: KeyProperties | str | None = None,
     bookmark_properties: Sequence[str] | None = None,
 ) -> None:
     """Write a SCHEMA message to stdout.

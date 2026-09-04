@@ -42,6 +42,7 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.singerlib.encoding.base import GenericSingerReader
+    from singer_sdk.singerlib.types import KeyProperties
     from singer_sdk.sinks import Sink
     from singer_sdk.sql import SQLTarget  # noqa: F401
 
@@ -146,7 +147,7 @@ class Target(BaseSingerReader, abc.ABC):
         *,
         record: dict | None = None,
         schema: dict | None = None,
-        key_properties: t.Sequence[str] | None = None,
+        key_properties: KeyProperties | None = None,
     ) -> Sink:
         """Return a sink for the given stream name.
 
@@ -235,7 +236,7 @@ class Target(BaseSingerReader, abc.ABC):
         *,
         stream_name: str,
         schema: dict,
-        key_properties: t.Sequence[str] | None = None,
+        key_properties: KeyProperties | None = None,
     ) -> Sink:
         """Instantiate a new sink object for the given stream.
 
@@ -265,7 +266,7 @@ class Target(BaseSingerReader, abc.ABC):
         self,
         stream_name: str,
         schema: dict,
-        key_properties: t.Sequence[str] | None = None,
+        key_properties: KeyProperties | None = None,
     ) -> Sink:
         """Create a sink and register it.
 
