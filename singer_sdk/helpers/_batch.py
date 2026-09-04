@@ -220,7 +220,7 @@ class BatchConfig:
     encoding: BaseBatchFileEncoding
     """The encoding of the batch file."""
 
-    storage: StorageTarget
+    storage: StorageTarget = field(default_factory=StorageTarget)
     """The storage target of the batch file."""
 
     batch_size: int = DEFAULT_BATCH_SIZE
