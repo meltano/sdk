@@ -215,6 +215,7 @@ BATCH_CONFIG = PropertiesList(
                     Property(
                         "root",
                         StringType,
+                        default="file://",
                         title="Batch Storage Root",
                         description="Root path to use when writing batch files.",
                     ),

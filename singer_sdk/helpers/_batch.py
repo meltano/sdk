@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import enum
+import tempfile
 import typing as t
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
@@ -96,8 +97,11 @@ class SDKBatchMessage(Message):
 class StorageTarget:
     """Storage target for batch files."""
 
-    root: str
-    """"The root directory of the storage target."""
+    root: str = field(default_factory=lambda: f"file://{tempfile.gettempdir()}")
+    """"The root directory of the storage target.
+
+    If not set, the system's temporary directory will be used.
+    """
 
     prefix: str | None = None
     """"The file prefix."""
