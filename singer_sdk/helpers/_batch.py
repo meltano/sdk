@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import enum
+import os.path
+import tempfile
 import typing as t
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
@@ -96,14 +98,22 @@ class SDKBatchMessage(Message):
 class StorageTarget:
     """Storage target for batch files."""
 
-    root: str
-    """"The root directory of the storage target."""
+    root: str = "file://"
+    """"The root directory of the storage target.
+
+    If not set, the system's temporary directory will be used.
+    """
 
     prefix: str | None = None
     """"The file prefix."""
 
     params: dict[str, t.Any] = field(default_factory=dict)
     """"The storage parameters."""
+
+    def __post_init__(self) -> None:
+        """Initialize the storage target."""
+        if self.root == "file://":
+            self.root = f"file://{os.path.join(tempfile.gettempdir(), 'singer-sdk')}"  # ruff: ignore[os-path-join]
 
     def asdict(self) -> dict[str, t.Any]:
         """Return a dictionary representation of the message.
@@ -211,7 +221,7 @@ class BatchConfig:
     encoding: BaseBatchFileEncoding
     """The encoding of the batch file."""
 
-    storage: StorageTarget
+    storage: StorageTarget = field(default_factory=StorageTarget)
     """The storage target of the batch file."""
 
     batch_size: int = DEFAULT_BATCH_SIZE
