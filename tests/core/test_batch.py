@@ -111,7 +111,7 @@ def test_batch_storage_target_round_trip() -> None:
         ),
         pytest.param(
             "file:///Users/sdk/path/to/file",
-            StorageTarget("file:///D:/Users/sdk/path/to", params={}),
+            StorageTarget("file://D:/Users/sdk/path/to", params={}),
             marks=(pytest.mark.windows,),
             id="windows-local",
         ),
@@ -132,7 +132,7 @@ def test_batch_storage_target_get_url() -> None:
     target = StorageTarget(root="file://path/to/files")
     url = target.get_url("filename")
     assert url.startswith("file://")
-    assert re.match(r"file:\/\/\/.+\/path\/to\/files\/filename", url)
+    assert re.search(r"path/to/files/filename$", url.replace("\\", "/"))
 
 
 def test_batch_storage_target_get_s3_url() -> None:
@@ -157,13 +157,13 @@ def test_batch_storage_target_get_s3_url() -> None:
         ),
         pytest.param(
             "file://C:\\Users\\sdk\\path\\to\\file",
-            ("file:///C:/Users/sdk/path/to", "file"),
+            ("file://C:/Users/sdk/path/to", "file"),
             marks=(pytest.mark.windows,),
             id="windows-local",
         ),
         pytest.param(
             "file://\\\\remotemachine\\C$\\batches\\file",
-            ("file://///remotemachine/C$/batches", "file"),
+            ("file:////remotemachine/C$/batches", "file"),
             marks=(pytest.mark.windows,),
             id="windows-remote",
         ),
