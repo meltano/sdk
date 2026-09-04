@@ -263,6 +263,7 @@ omit = [
     "packages/meltano-target-*",
     "singer_sdk/helpers/_compat.py",
     "singer_sdk/helpers/types.py",
+    "singer_sdk/singerlib/types.py",
 ]
 
 [tool.coverage.report]
