@@ -29,6 +29,7 @@ from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
     DEFAULT_JSONSCHEMA_VALIDATOR,
     AllOf,
+    AnyOf,
     AnyType,
     ArrayType,
     BooleanType,
@@ -49,6 +50,7 @@ from singer_sdk.typing import (
     IRIType,
     JSONPointerType,
     ObjectType,
+    OneOf,
     PropertiesList,
     Property,
     RegexType,
@@ -641,9 +643,10 @@ def test_property_creation(
 ) -> None:
     property_dict = property_obj.to_dict()
     assert property_dict == expected_jsonschema
+    property_name = next(iter(property_dict.keys()))
+    property_node = property_dict[property_name]
+    DEFAULT_JSONSCHEMA_VALIDATOR.check_schema(property_node)
     for check_fn in TYPE_FN_CHECKS:
-        property_name = next(iter(property_dict.keys()))
-        property_node = property_dict[property_name]
         if check_fn in type_fn_checks_true:
             assert check_fn(property_node) is True, (
                 f"{check_fn.__name__} was not True for {property_dict!r}"
@@ -652,6 +655,77 @@ def test_property_creation(
             assert check_fn(property_node) is False, (
                 f"{check_fn.__name__} was not False for {property_dict!r}"
             )
+
+
+@pytest.mark.parametrize(
+    "property_obj,expected_jsonschema",
+    [
+        pytest.param(
+            Property(
+                "my_prop",
+                AnyOf(StringType, ArrayType(StringType)),
+                required=True,
+            ),
+            {
+                "my_prop": {
+                    "anyOf": [
+                        {"type": ["string"]},
+                        {"type": "array", "items": {"type": ["string"]}},
+                    ],
+                },
+            },
+            id="anyof_required",
+        ),
+        pytest.param(
+            Property(
+                "my_prop",
+                AnyOf(StringType, ArrayType(StringType)),
+                required=False,
+            ),
+            {
+                "my_prop": {
+                    "anyOf": [
+                        {"type": ["string"]},
+                        {"type": "array", "items": {"type": ["string"]}},
+                        {"type": "null"},
+                    ],
+                },
+            },
+            id="anyof_optional",
+        ),
+        pytest.param(
+            Property(
+                "my_prop",
+                OneOf(StringType, IntegerType),
+                required=False,
+            ),
+            {
+                "my_prop": {
+                    "oneOf": [
+                        {"type": ["string"]},
+                        {"type": ["integer"]},
+                        {"type": "null"},
+                    ],
+                },
+            },
+            id="oneof_optional",
+        ),
+    ],
+)
+def test_optional_composite_type_produces_valid_schema(
+    property_obj: Property,
+    expected_jsonschema: dict,
+) -> None:
+    """Optional `AnyOf`/`OneOf` properties must stay valid JSON Schema.
+
+    Regression test: `append_type` used to splice the bare string "null" into
+    an existing `anyOf`/`oneOf` list instead of a `{"type": "null"}` subschema,
+    which fails JSON Schema meta-validation.
+    """
+    property_dict = property_obj.to_dict()
+    assert property_dict == expected_jsonschema
+    property_name = next(iter(property_dict.keys()))
+    DEFAULT_JSONSCHEMA_VALIDATOR.check_schema(property_dict[property_name])
 
 
 def test_wrapped_type_dict():
