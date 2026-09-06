@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -116,6 +118,7 @@ def test_get_env_var_config(
         assert not set.intersection(missing_props, no_env_config)
 
 
+@mock.patch.dict(os.environ, {}, clear=True)
 def test_get_dotenv_config(tmp_path: Path):
     dotenv = tmp_path / ".env"
     dotenv.write_text("PLUGIN_TEST_PROP1=hello\n")
@@ -123,6 +126,25 @@ def test_get_dotenv_config(tmp_path: Path):
         CONFIG_JSONSCHEMA,
         "PLUGIN_TEST_",
         dotenv_path=dotenv,
+    )
+    assert dotenv_config
+    assert dotenv_config["prop1"] == "hello"
+
+
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_get_dotenv_config_discover_file_cwd(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    dotenv = tmp_path / ".env"
+    dotenv.write_text("PLUGIN_TEST_PROP1=hello\n")
+
+    # Change to the temporary directory
+    monkeypatch.chdir(tmp_path)
+    dotenv_config = parse_environment_config(
+        CONFIG_JSONSCHEMA,
+        "PLUGIN_TEST_",
+        dotenv_path=None,  # Let it discover the .env file
     )
     assert dotenv_config
     assert dotenv_config["prop1"] == "hello"
