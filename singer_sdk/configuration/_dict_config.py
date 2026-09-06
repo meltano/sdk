@@ -47,7 +47,7 @@ def parse_environment_config(
     result: dict[str, t.Any] = {}
 
     if not dotenv_path:
-        dotenv_path = find_dotenv()
+        dotenv_path = find_dotenv(usecwd=True)
 
     logger.debug("Loading configuration from %s", dotenv_path)
     DotEnv(dotenv_path).set_as_environment_variables()

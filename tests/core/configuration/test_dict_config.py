@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -44,6 +46,7 @@ def config_file2(tmpdir) -> str:
     return filepath
 
 
+@mock.patch.dict(os.environ, {}, clear=True)
 def test_get_env_var_config(
     monkeypatch: pytest.MonkeyPatch,
     subtests: pytest.Subtests,
@@ -116,13 +119,36 @@ def test_get_env_var_config(
         assert not set.intersection(missing_props, no_env_config)
 
 
-def test_get_dotenv_config(tmp_path: Path):
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_get_dotenv_config(tmp_path: Path, request: pytest.FixtureRequest):
+    value = request.node.name
     dotenv = tmp_path / ".env"
-    dotenv.write_text("PLUGIN_TEST_PROP1=hello\n")
+    dotenv.write_text(f"PLUGIN_TEST_PROP1={value}\n")
     dotenv_config = parse_environment_config(
         CONFIG_JSONSCHEMA,
         "PLUGIN_TEST_",
         dotenv_path=dotenv,
     )
     assert dotenv_config
-    assert dotenv_config["prop1"] == "hello"
+    assert dotenv_config["prop1"] == value
+
+
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_get_dotenv_config_discover_file_cwd(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    request: pytest.FixtureRequest,
+):
+    value = request.node.name
+    dotenv = tmp_path / ".env"
+    dotenv.write_text(f"PLUGIN_TEST_PROP1={value}\n")
+
+    # Change to the temporary directory
+    monkeypatch.chdir(tmp_path)
+    dotenv_config = parse_environment_config(
+        CONFIG_JSONSCHEMA,
+        "PLUGIN_TEST_",
+        dotenv_path=None,  # Let it discover the .env file
+    )
+    assert dotenv_config
+    assert dotenv_config["prop1"] == value
