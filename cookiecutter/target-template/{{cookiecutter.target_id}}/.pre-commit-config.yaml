@@ -21,7 +21,7 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/zizmorcore/zizmor-pre-commit
-  rev: v1.29.0
+  rev: v1.30.0
   hooks:
   - id: zizmor
 
@@ -33,13 +33,13 @@ repos:
   - id: check-meltano
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.16.2
+  rev: v0.16.6
   hooks:
   - id: ruff-check
   - id: ruff-format
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.12.3
+  rev: 0.12.10
   hooks:
   - id: uv-audit
   - id: uv-lock
@@ -51,6 +51,6 @@ repos:
   - id: mdformat
 
 - repo: https://github.com/crate-ci/typos
-  rev: v1.49.0
+  rev: v1.50.1
   hooks:
   - id: typos
