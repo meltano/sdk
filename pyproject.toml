@@ -93,14 +93,15 @@ sql = [
 ]
 
 [project.urls]
-Homepage = "https://sdk.meltano.com/en/latest/"
-Repository = "https://github.com/meltano/sdk"
+Changelog = "https://github.com/meltano/sdk/blob/main/CHANGELOG.md"
 Documentation = "https://sdk.meltano.com/en/latest/"
+Homepage = "https://sdk.meltano.com/en/latest/"
 "Issue Tracker" = "https://github.com/meltano/sdk/issues"
-"Twitter" = "https://twitter.com/meltanodata/"
-"Changelog" = "https://github.com/meltano/sdk/blob/main/CHANGELOG.md"
-"Slack" = "https://meltano.com/slack"
-"Youtube" = "https://www.youtube.com/meltano"
+Repository = "https://github.com/meltano/sdk"
+Security = "https://github.com/meltano/.github/blob/main/SECURITY.md"
+Slack = "https://meltano.com/slack"
+Twitter = "https://twitter.com/meltanodata/"
+Youtube = "https://www.youtube.com/meltano"
 
 [dependency-groups]
 dev = [
