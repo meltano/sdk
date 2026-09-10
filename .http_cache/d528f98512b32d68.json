@@ -1,0 +1,1555 @@
+{
+  "created_at": "2026-09-10T23:53:17.279850+00:00",
+  "elapsed": 0.258274,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-RAY": "a39259eb38a0df67-DFW",
+    "Connection": "keep-alive",
+    "Content-Encoding": "zstd",
+    "Content-Type": "application/json; charset=utf-8",
+    "Date": "Thu, 10 Sep 2026 23:53:17 GMT",
+    "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=sE0mTAGKZzNR1vo3WKr1aVCalKB9o8746xNFwT9bzCdAxPFFDgNfQEAcnWPvZi5z1PQ%2FyJySPZw9v3yPlfvG14%2F%2BmIeOnE5IhDqY3FLb2QPmQBAJyujvx4702CIWRa6L6o9RoTGTXrH6q7XO\"}]}",
+    "Server": "cloudflare",
+    "Transfer-Encoding": "chunked",
+    "access-control-allow-credentials": "true",
+    "cf-cache-status": "DYNAMIC",
+    "etag": "W/\"9532-FtaGOdqUG4GNZJ8JPebg6o08fLg\"",
+    "strict-transport-security": "max-age=15552000; includeSubDomains",
+    "vary": "Origin, Accept-Encoding",
+    "x-content-type-options": "nosniff",
+    "x-dns-prefetch-control": "off",
+    "x-download-options": "noopen",
+    "x-frame-options": "SAMEORIGIN",
+    "x-ratelimit-limit": "100",
+    "x-ratelimit-remaining": "98",
+    "x-ratelimit-reset": "1789084398",
+    "x-xss-protection": "1; mode=block"
+  },
+  "reason": "OK",
+  "request": {
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate, zstd",
+      "Authorization": "REDACTED",
+      "Connection": "keep-alive",
+      "User-Agent": "REDACTED"
+    },
+    "method": "GET",
+    "url": "https://dummyjson.com/products?limit=25&modifiedAfter=2026-08-01+00%3A00%3A00%2B00%3A00&skip=0"
+  },
+  "status_code": 200,
+  "url": "https://dummyjson.com/products?limit=25&modifiedAfter=2026-08-01+00%3A00%3A00%2B00%3A00&skip=0",
+  "_decoded_content": {
+    "products": [
+      {
+        "id": 15,
+        "title": "Wooden Bathroom Sink With Mirror",
+        "description": "The Wooden Bathroom Sink with Mirror is a unique and stylish addition to your bathroom, featuring a wooden sink countertop and a matching mirror.",
+        "category": "furniture",
+        "price": 799.99,
+        "discountPercentage": 8.8,
+        "rating": 3.59,
+        "stock": 7,
+        "tags": [
+          "furniture",
+          "bathroom"
+        ],
+        "brand": "Bath Trends",
+        "sku": "FUR-BAT-WOO-015",
+        "weight": 10,
+        "dimensions": {
+          "width": 7.98,
+          "height": 8.88,
+          "depth": 28.46
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "Low Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Logan Torres",
+            "reviewerEmail": "logan.torres@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aria Parker",
+            "reviewerEmail": "aria.parker@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Dylan Wells",
+            "reviewerEmail": "dylan.wells@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "60 days return policy",
+        "minimumOrderQuantity": 2,
+        "meta": {
+          "createdAt": "2024-10-08T09:12:20.659Z",
+          "updatedAt": "2026-08-22T08:09:35.091Z",
+          "barcode": "1958104402873",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/1.webp",
+          "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/2.webp",
+          "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/thumbnail.webp"
+      },
+      {
+        "id": 18,
+        "title": "Cat Food",
+        "description": "Nutritious cat food formulated to meet the dietary needs of your feline friend.",
+        "category": "groceries",
+        "price": 8.99,
+        "discountPercentage": 9.58,
+        "rating": 3.13,
+        "stock": 46,
+        "tags": [
+          "pet supplies",
+          "cat food"
+        ],
+        "sku": "GRO-BRD-FOO-018",
+        "weight": 10,
+        "dimensions": {
+          "width": 18.08,
+          "height": 9.26,
+          "depth": 21.86
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Noah Lewis",
+            "reviewerEmail": "noah.lewis@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very unhappy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ruby Andrews",
+            "reviewerEmail": "ruby.andrews@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ethan Thompson",
+            "reviewerEmail": "ethan.thompson@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 18,
+        "meta": {
+          "createdAt": "2025-02-18T18:35:51.211Z",
+          "updatedAt": "2026-08-16T13:50:03.194Z",
+          "barcode": "1483991328610",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/cat-food/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/cat-food/thumbnail.webp"
+      },
+      {
+        "id": 23,
+        "title": "Eggs",
+        "description": "Fresh eggs, a versatile ingredient for baking, cooking, or breakfast.",
+        "category": "groceries",
+        "price": 2.99,
+        "discountPercentage": 11.05,
+        "rating": 2.53,
+        "stock": 9,
+        "tags": [
+          "dairy"
+        ],
+        "sku": "GRO-BRD-EGG-023",
+        "weight": 2,
+        "dimensions": {
+          "width": 11.42,
+          "height": 7.44,
+          "depth": 16.95
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Disappointing product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Penelope King",
+            "reviewerEmail": "penelope.king@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Eleanor Tyler",
+            "reviewerEmail": "eleanor.tyler@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Benjamin Foster",
+            "reviewerEmail": "benjamin.foster@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 32,
+        "meta": {
+          "createdAt": "2026-02-06T14:03:24.867Z",
+          "updatedAt": "2026-08-20T05:44:35.354Z",
+          "barcode": "3478638588469",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/eggs/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/eggs/thumbnail.webp"
+      },
+      {
+        "id": 34,
+        "title": "Nescafe Coffee",
+        "description": "Quality coffee from Nescafe, available in various blends for a rich and satisfying cup.",
+        "category": "groceries",
+        "price": 7.99,
+        "discountPercentage": 1.59,
+        "rating": 4.82,
+        "stock": 57,
+        "tags": [
+          "beverages",
+          "coffee"
+        ],
+        "sku": "GRO-BRD-NES-034",
+        "weight": 6,
+        "dimensions": {
+          "width": 20.54,
+          "height": 29.49,
+          "depth": 29.2
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Gabriel Adams",
+            "reviewerEmail": "gabriel.adams@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ella Cook",
+            "reviewerEmail": "ella.cook@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Logan Torres",
+            "reviewerEmail": "logan.torres@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 8,
+        "meta": {
+          "createdAt": "2026-08-30T03:06:46.632Z",
+          "updatedAt": "2026-08-31T18:25:14.641Z",
+          "barcode": "8572637994159",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/nescafe-coffee/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/nescafe-coffee/thumbnail.webp"
+      },
+      {
+        "id": 36,
+        "title": "Protein Powder",
+        "description": "Nutrient-packed protein powder, ideal for supplementing your diet with essential proteins.",
+        "category": "groceries",
+        "price": 19.99,
+        "discountPercentage": 7.59,
+        "rating": 4.18,
+        "stock": 80,
+        "tags": [
+          "health supplements"
+        ],
+        "sku": "GRO-BRD-PRO-036",
+        "weight": 9,
+        "dimensions": {
+          "width": 9.01,
+          "height": 12.53,
+          "depth": 22.35
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Very unhappy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aurora Rodriguez",
+            "reviewerEmail": "aurora.rodriguez@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Miles Stevenson",
+            "reviewerEmail": "miles.stevenson@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Clara Berry",
+            "reviewerEmail": "clara.berry@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 6,
+        "meta": {
+          "createdAt": "2025-07-12T15:11:42.299Z",
+          "updatedAt": "2026-08-09T10:47:17.777Z",
+          "barcode": "0435397154434",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/protein-powder/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/protein-powder/thumbnail.webp"
+      },
+      {
+        "id": 37,
+        "title": "Red Onions",
+        "description": "Flavorful and aromatic red onions, perfect for adding depth to your savory dishes.",
+        "category": "groceries",
+        "price": 1.99,
+        "discountPercentage": 9.9,
+        "rating": 4.2,
+        "stock": 82,
+        "tags": [
+          "vegetables"
+        ],
+        "sku": "GRO-BRD-ONI-037",
+        "weight": 9,
+        "dimensions": {
+          "width": 16.01,
+          "height": 24.96,
+          "depth": 12.74
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Maya Reed",
+            "reviewerEmail": "maya.reed@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very dissatisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Evelyn Gonzalez",
+            "reviewerEmail": "evelyn.gonzalez@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Jackson Evans",
+            "reviewerEmail": "jackson.evans@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 8,
+        "meta": {
+          "createdAt": "2026-06-18T00:17:12.232Z",
+          "updatedAt": "2026-08-20T10:13:28.319Z",
+          "barcode": "4716374115631",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/red-onions/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/red-onions/thumbnail.webp"
+      },
+      {
+        "id": 38,
+        "title": "Rice",
+        "description": "High-quality rice, a staple for various cuisines and a versatile base for many dishes.",
+        "category": "groceries",
+        "price": 5.99,
+        "discountPercentage": 9.29,
+        "rating": 3.18,
+        "stock": 59,
+        "tags": [
+          "grains"
+        ],
+        "sku": "GRO-BRD-RIC-038",
+        "weight": 5,
+        "dimensions": {
+          "width": 17.21,
+          "height": 9.88,
+          "depth": 17.16
+        },
+        "warrantyInformation": "6 months warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Sophia Brown",
+            "reviewerEmail": "sophia.brown@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Grace Perry",
+            "reviewerEmail": "grace.perry@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Cameron Burke",
+            "reviewerEmail": "cameron.burke@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 20,
+        "meta": {
+          "createdAt": "2025-09-30T02:05:55.814Z",
+          "updatedAt": "2026-08-31T22:07:29.958Z",
+          "barcode": "7339757397015",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/groceries/rice/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/groceries/rice/thumbnail.webp"
+      },
+      {
+        "id": 43,
+        "title": "Decoration Swing",
+        "description": "The Decoration Swing is a charming addition to your home decor. Crafted with intricate details, it adds a touch of elegance and whimsy to any room.",
+        "category": "home-decoration",
+        "price": 59.99,
+        "discountPercentage": 10.41,
+        "rating": 3.16,
+        "stock": 47,
+        "tags": [
+          "home decor",
+          "swing"
+        ],
+        "sku": "HOM-BRD-DEC-043",
+        "weight": 4,
+        "dimensions": {
+          "width": 23.84,
+          "height": 15.19,
+          "depth": 26.05
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 1,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Daniel Cook",
+            "reviewerEmail": "daniel.cook@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Hunter Gordon",
+            "reviewerEmail": "hunter.gordon@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very unhappy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Stella Morris",
+            "reviewerEmail": "stella.morris@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 8,
+        "meta": {
+          "createdAt": "2026-07-18T21:37:59.195Z",
+          "updatedAt": "2026-08-16T08:41:15.136Z",
+          "barcode": "9646971048759",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/home-decoration/decoration-swing/1.webp",
+          "https://cdn.dummyjson.com/product-images/home-decoration/decoration-swing/2.webp",
+          "https://cdn.dummyjson.com/product-images/home-decoration/decoration-swing/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/home-decoration/decoration-swing/thumbnail.webp"
+      },
+      {
+        "id": 48,
+        "title": "Bamboo Spatula",
+        "description": "The Bamboo Spatula is a versatile kitchen tool made from eco-friendly bamboo. Ideal for flipping, stirring, and serving various dishes.",
+        "category": "kitchen-accessories",
+        "price": 7.99,
+        "discountPercentage": 2.84,
+        "rating": 3.27,
+        "stock": 37,
+        "tags": [
+          "kitchen tools",
+          "utensils"
+        ],
+        "sku": "KIT-BRD-BAM-048",
+        "weight": 3,
+        "dimensions": {
+          "width": 21.32,
+          "height": 23.03,
+          "depth": 25.94
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Lucas Ramirez",
+            "reviewerEmail": "lucas.ramirez@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Caleb Perkins",
+            "reviewerEmail": "caleb.perkins@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nolan Gonzalez",
+            "reviewerEmail": "nolan.gonzalez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "60 days return policy",
+        "minimumOrderQuantity": 29,
+        "meta": {
+          "createdAt": "2024-11-07T19:26:12.737Z",
+          "updatedAt": "2026-08-26T17:11:06.380Z",
+          "barcode": "3988181417733",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/bamboo-spatula/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/bamboo-spatula/thumbnail.webp"
+      },
+      {
+        "id": 51,
+        "title": "Boxed Blender",
+        "description": "The Boxed Blender is a powerful and compact blender perfect for smoothies, shakes, and more. Its convenient design and multiple functions make it a versatile kitchen appliance.",
+        "category": "kitchen-accessories",
+        "price": 39.99,
+        "discountPercentage": 7.26,
+        "rating": 4.56,
+        "stock": 9,
+        "tags": [
+          "kitchen appliances",
+          "blenders"
+        ],
+        "sku": "KIT-BRD-BOX-051",
+        "weight": 1,
+        "dimensions": {
+          "width": 9.05,
+          "height": 19.45,
+          "depth": 17.59
+        },
+        "warrantyInformation": "5 year warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ella Adams",
+            "reviewerEmail": "ella.adams@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ruby Andrews",
+            "reviewerEmail": "ruby.andrews@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aurora Lawson",
+            "reviewerEmail": "aurora.lawson@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 4,
+        "meta": {
+          "createdAt": "2026-03-25T03:55:56.058Z",
+          "updatedAt": "2026-08-13T01:11:46.331Z",
+          "barcode": "4823087836817",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/boxed-blender/1.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/boxed-blender/2.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/boxed-blender/3.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/boxed-blender/4.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/boxed-blender/thumbnail.webp"
+      },
+      {
+        "id": 55,
+        "title": "Egg Slicer",
+        "description": "The Egg Slicer is a convenient tool for slicing boiled eggs evenly. It's perfect for salads, sandwiches, and other dishes where sliced eggs are desired.",
+        "category": "kitchen-accessories",
+        "price": 6.99,
+        "discountPercentage": 14.76,
+        "rating": 3.09,
+        "stock": 40,
+        "tags": [
+          "kitchen tools",
+          "slicers"
+        ],
+        "sku": "KIT-BRD-SLI-055",
+        "weight": 2,
+        "dimensions": {
+          "width": 10.81,
+          "height": 19.15,
+          "depth": 13.18
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Very dissatisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Harper Garcia",
+            "reviewerEmail": "harper.garcia@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Lily Torres",
+            "reviewerEmail": "lily.torres@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Not worth the price!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Tyler Davis",
+            "reviewerEmail": "tyler.davis@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 32,
+        "meta": {
+          "createdAt": "2026-08-18T18:31:19.548Z",
+          "updatedAt": "2026-08-28T11:49:56.692Z",
+          "barcode": "6456249953517",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/egg-slicer/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/egg-slicer/thumbnail.webp"
+      },
+      {
+        "id": 66,
+        "title": "Microwave Oven",
+        "description": "The Microwave Oven is a versatile kitchen appliance for quick and efficient cooking, reheating, and defrosting. Its compact size makes it suitable for various kitchen setups.",
+        "category": "kitchen-accessories",
+        "price": 89.99,
+        "discountPercentage": 12.13,
+        "rating": 4.82,
+        "stock": 59,
+        "tags": [
+          "kitchen appliances",
+          "microwaves"
+        ],
+        "sku": "KIT-BRD-MIC-066",
+        "weight": 9,
+        "dimensions": {
+          "width": 16.31,
+          "height": 27.45,
+          "depth": 13.05
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 3,
+            "comment": "Very dissatisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nora Russell",
+            "reviewerEmail": "nora.russell@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Alice Smith",
+            "reviewerEmail": "alice.smith@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ethan Fletcher",
+            "reviewerEmail": "ethan.fletcher@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 4,
+        "meta": {
+          "createdAt": "2026-08-31T06:51:10.913Z",
+          "updatedAt": "2026-08-31T15:18:40.737Z",
+          "barcode": "7578271198951",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/microwave-oven/1.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/microwave-oven/2.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/microwave-oven/3.webp",
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/microwave-oven/4.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/microwave-oven/thumbnail.webp"
+      },
+      {
+        "id": 75,
+        "title": "Tray",
+        "description": "The Tray is a functional and decorative item for serving snacks, appetizers, or drinks. Its stylish design makes it a versatile accessory for entertaining guests.",
+        "category": "kitchen-accessories",
+        "price": 16.99,
+        "discountPercentage": 7.48,
+        "rating": 4.62,
+        "stock": 71,
+        "tags": [
+          "serveware",
+          "trays"
+        ],
+        "sku": "KIT-BRD-TRA-075",
+        "weight": 10,
+        "dimensions": {
+          "width": 12.7,
+          "height": 7.52,
+          "depth": 9.72
+        },
+        "warrantyInformation": "5 year warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Samantha Howard",
+            "reviewerEmail": "samantha.howard@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Benjamin Wilson",
+            "reviewerEmail": "benjamin.wilson@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Caleb Nelson",
+            "reviewerEmail": "caleb.nelson@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 23,
+        "meta": {
+          "createdAt": "2025-12-28T09:25:18.864Z",
+          "updatedAt": "2026-08-25T10:53:22.752Z",
+          "barcode": "5239514403214",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/tray/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/tray/thumbnail.webp"
+      },
+      {
+        "id": 76,
+        "title": "Wooden Rolling Pin",
+        "description": "The Wooden Rolling Pin is a classic kitchen tool for rolling out dough for baking. Its smooth surface and sturdy handles make it easy to achieve uniform thickness.",
+        "category": "kitchen-accessories",
+        "price": 11.99,
+        "discountPercentage": 9.75,
+        "rating": 2.92,
+        "stock": 80,
+        "tags": [
+          "kitchen tools",
+          "baking"
+        ],
+        "sku": "KIT-BRD-WOO-076",
+        "weight": 7,
+        "dimensions": {
+          "width": 5.92,
+          "height": 10.87,
+          "depth": 19.55
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 2,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aurora Lawson",
+            "reviewerEmail": "aurora.lawson@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ava Taylor",
+            "reviewerEmail": "ava.taylor@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Mila Hernandez",
+            "reviewerEmail": "mila.hernandez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 11,
+        "meta": {
+          "createdAt": "2026-08-18T02:19:46.537Z",
+          "updatedAt": "2026-08-21T01:14:28.314Z",
+          "barcode": "6934305212813",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/kitchen-accessories/wooden-rolling-pin/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/kitchen-accessories/wooden-rolling-pin/thumbnail.webp"
+      },
+      {
+        "id": 83,
+        "title": "Blue & Black Check Shirt",
+        "description": "The Blue & Black Check Shirt is a stylish and comfortable men's shirt featuring a classic check pattern. Made from high-quality fabric, it's suitable for both casual and semi-formal occasions.",
+        "category": "mens-shirts",
+        "price": 29.99,
+        "discountPercentage": 15.35,
+        "rating": 3.64,
+        "stock": 38,
+        "tags": [
+          "clothing",
+          "men's shirts"
+        ],
+        "brand": "Fashion Trends",
+        "sku": "MEN-FAS-BLU-083",
+        "weight": 4,
+        "dimensions": {
+          "width": 27.49,
+          "height": 23.73,
+          "depth": 28.61
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 1,
+            "comment": "Waste of money!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Logan Lee",
+            "reviewerEmail": "logan.lee@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Zachary Lee",
+            "reviewerEmail": "zachary.lee@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Aurora Rodriguez",
+            "reviewerEmail": "aurora.rodriguez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 18,
+        "meta": {
+          "createdAt": "2025-10-22T19:25:21.258Z",
+          "updatedAt": "2026-08-10T10:30:40.034Z",
+          "barcode": "7148674604957",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/mens-shirts/blue-&-black-check-shirt/1.webp",
+          "https://cdn.dummyjson.com/product-images/mens-shirts/blue-&-black-check-shirt/2.webp",
+          "https://cdn.dummyjson.com/product-images/mens-shirts/blue-&-black-check-shirt/3.webp",
+          "https://cdn.dummyjson.com/product-images/mens-shirts/blue-&-black-check-shirt/4.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/mens-shirts/blue-&-black-check-shirt/thumbnail.webp"
+      },
+      {
+        "id": 94,
+        "title": "Longines Master Collection",
+        "description": "The Longines Master Collection is an elegant and refined watch known for its precision and craftsmanship. With a timeless design, it's a symbol of luxury and sophistication.",
+        "category": "mens-watches",
+        "price": 1499.99,
+        "discountPercentage": 17.24,
+        "rating": 3.87,
+        "stock": 100,
+        "tags": [
+          "watches",
+          "luxury watches"
+        ],
+        "brand": "Longines",
+        "sku": "MEN-LON-LON-094",
+        "weight": 4,
+        "dimensions": {
+          "width": 15.39,
+          "height": 10.06,
+          "depth": 20.32
+        },
+        "warrantyInformation": "1 week warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Highly impressed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Eli Ward",
+            "reviewerEmail": "eli.ward@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Owen Fisher",
+            "reviewerEmail": "owen.fisher@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nathan Reed",
+            "reviewerEmail": "nathan.reed@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 1,
+        "meta": {
+          "createdAt": "2025-10-25T00:13:59.189Z",
+          "updatedAt": "2026-08-03T06:57:11.915Z",
+          "barcode": "5984080925625",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/mens-watches/longines-master-collection/1.webp",
+          "https://cdn.dummyjson.com/product-images/mens-watches/longines-master-collection/2.webp",
+          "https://cdn.dummyjson.com/product-images/mens-watches/longines-master-collection/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/mens-watches/longines-master-collection/thumbnail.webp"
+      },
+      {
+        "id": 102,
+        "title": "Apple Airpower Wireless Charger",
+        "description": "The Apple AirPower Wireless Charger provides a convenient way to charge your compatible Apple devices wirelessly. Simply place your devices on the charging mat for effortless charging.",
+        "category": "mobile-accessories",
+        "price": 79.99,
+        "discountPercentage": 4.48,
+        "rating": 3.68,
+        "stock": 1,
+        "tags": [
+          "electronics",
+          "wireless chargers"
+        ],
+        "brand": "Apple",
+        "sku": "MOB-APP-APP-102",
+        "weight": 5,
+        "dimensions": {
+          "width": 25.25,
+          "height": 25.44,
+          "depth": 10.98
+        },
+        "warrantyInformation": "2 year warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "Low Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Christian Perez",
+            "reviewerEmail": "christian.perez@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Awesome product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ruby Andrews",
+            "reviewerEmail": "ruby.andrews@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Not worth the price!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Harper Turner",
+            "reviewerEmail": "harper.turner@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 7,
+        "meta": {
+          "createdAt": "2026-07-03T04:26:29.637Z",
+          "updatedAt": "2026-08-02T19:34:22.498Z",
+          "barcode": "3323662242939",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpower-wireless-charger/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpower-wireless-charger/thumbnail.webp"
+      },
+      {
+        "id": 103,
+        "title": "Apple HomePod Mini Cosmic Grey",
+        "description": "The Apple HomePod Mini in Cosmic Grey is a compact smart speaker that delivers impressive audio and integrates seamlessly with the Apple ecosystem for a smart home experience.",
+        "category": "mobile-accessories",
+        "price": 99.99,
+        "discountPercentage": 18.1,
+        "rating": 4.62,
+        "stock": 27,
+        "tags": [
+          "electronics",
+          "smart speakers"
+        ],
+        "brand": "Apple",
+        "sku": "MOB-APP-APP-103",
+        "weight": 10,
+        "dimensions": {
+          "width": 16.02,
+          "height": 29.2,
+          "depth": 19.81
+        },
+        "warrantyInformation": "3 months warranty",
+        "shippingInformation": "Ships in 1 month",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Max Russell",
+            "reviewerEmail": "max.russell@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Isaac Lawrence",
+            "reviewerEmail": "isaac.lawrence@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Avery Carter",
+            "reviewerEmail": "avery.carter@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 8,
+        "meta": {
+          "createdAt": "2026-08-30T05:03:41.643Z",
+          "updatedAt": "2026-08-30T22:35:39.055Z",
+          "barcode": "6135642608024",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/mobile-accessories/apple-homepod-mini-cosmic-grey/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/mobile-accessories/apple-homepod-mini-cosmic-grey/thumbnail.webp"
+      },
+      {
+        "id": 109,
+        "title": "Monopod",
+        "description": "The Monopod is a versatile camera accessory for stable and adjustable shooting. Perfect for capturing selfies, group photos, and videos with ease.",
+        "category": "mobile-accessories",
+        "price": 19.99,
+        "discountPercentage": 8.58,
+        "rating": 4.43,
+        "stock": 48,
+        "tags": [
+          "electronics",
+          "camera accessories"
+        ],
+        "brand": "TechGear",
+        "sku": "MOB-TEC-MON-109",
+        "weight": 10,
+        "dimensions": {
+          "width": 8.8,
+          "height": 12.93,
+          "depth": 21.1
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 1,
+            "comment": "Not worth the price!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Max Parker",
+            "reviewerEmail": "max.parker@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Highly recommended!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Maya Reed",
+            "reviewerEmail": "maya.reed@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Mila Hernandez",
+            "reviewerEmail": "mila.hernandez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "60 days return policy",
+        "minimumOrderQuantity": 30,
+        "meta": {
+          "createdAt": "2026-08-29T19:10:05.237Z",
+          "updatedAt": "2026-08-30T10:37:29.457Z",
+          "barcode": "2915346477518",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/mobile-accessories/monopod/1.webp",
+          "https://cdn.dummyjson.com/product-images/mobile-accessories/monopod/2.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/mobile-accessories/monopod/thumbnail.webp"
+      },
+      {
+        "id": 111,
+        "title": "Selfie Stick Monopod",
+        "description": "The Selfie Stick Monopod is a extendable and foldable device for capturing the perfect selfie or group photo. Compatible with smartphones and cameras.",
+        "category": "mobile-accessories",
+        "price": 12.99,
+        "discountPercentage": 19.12,
+        "rating": 3.88,
+        "stock": 11,
+        "tags": [
+          "electronics",
+          "selfie accessories"
+        ],
+        "brand": "SnapTech",
+        "sku": "MOB-SNA-SEL-111",
+        "weight": 2,
+        "dimensions": {
+          "width": 24.76,
+          "height": 26.38,
+          "depth": 21.39
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Ryan Graham",
+            "reviewerEmail": "ryan.graham@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Nora Russell",
+            "reviewerEmail": "nora.russell@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Very dissatisfied!",
+            "date": "2025-04-30T09:41:02.053Z",
+            "reviewerName": "Luna Perez",
+            "reviewerEmail": "luna.perez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 8,
+        "meta": {
+          "createdAt": "2026-05-10T20:48:35.479Z",
+          "updatedAt": "2026-08-03T07:55:17.267Z",
+          "barcode": "7063982050226",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/mobile-accessories/selfie-stick-monopod/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/mobile-accessories/selfie-stick-monopod/thumbnail.webp"
+      },
+      {
+        "id": 123,
+        "title": "iPhone 13 Pro",
+        "description": "The iPhone 13 Pro is a cutting-edge smartphone with a powerful camera system, high-performance chip, and stunning display. It offers advanced features for users who demand top-notch technology.",
+        "category": "smartphones",
+        "price": 1099.99,
+        "discountPercentage": 9.37,
+        "rating": 4.12,
+        "stock": 56,
+        "tags": [
+          "smartphones",
+          "apple"
+        ],
+        "brand": "Apple",
+        "sku": "SMA-APP-IPH-123",
+        "weight": 8,
+        "dimensions": {
+          "width": 12.63,
+          "height": 5.28,
+          "depth": 14.29
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Christian Perez",
+            "reviewerEmail": "christian.perez@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Not worth the price!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Liam Gonzalez",
+            "reviewerEmail": "liam.gonzalez@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Tristan Scott",
+            "reviewerEmail": "tristan.scott@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 1,
+        "meta": {
+          "createdAt": "2026-02-09T13:45:29.822Z",
+          "updatedAt": "2026-08-11T06:31:30.971Z",
+          "barcode": "4998438802308",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/smartphones/iphone-13-pro/1.webp",
+          "https://cdn.dummyjson.com/product-images/smartphones/iphone-13-pro/2.webp",
+          "https://cdn.dummyjson.com/product-images/smartphones/iphone-13-pro/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/smartphones/iphone-13-pro/thumbnail.webp"
+      },
+      {
+        "id": 125,
+        "title": "Oppo A57",
+        "description": "The Oppo A57 is a mid-range smartphone known for its sleek design and capable features. It offers a balance of performance and affordability, making it a popular choice.",
+        "category": "smartphones",
+        "price": 249.99,
+        "discountPercentage": 2.43,
+        "rating": 3.94,
+        "stock": 19,
+        "tags": [
+          "smartphones",
+          "oppo"
+        ],
+        "brand": "Oppo",
+        "sku": "SMA-OPP-OPP-125",
+        "weight": 5,
+        "dimensions": {
+          "width": 7.2,
+          "height": 10.74,
+          "depth": 23.68
+        },
+        "warrantyInformation": "Lifetime warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Scarlett Wright",
+            "reviewerEmail": "scarlett.wright@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Jacob Cooper",
+            "reviewerEmail": "jacob.cooper@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Zoe Nicholson",
+            "reviewerEmail": "zoe.nicholson@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 3,
+        "meta": {
+          "createdAt": "2026-06-08T09:38:24.572Z",
+          "updatedAt": "2026-08-10T16:53:20.168Z",
+          "barcode": "0651223722522",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/smartphones/oppo-a57/1.webp",
+          "https://cdn.dummyjson.com/product-images/smartphones/oppo-a57/2.webp",
+          "https://cdn.dummyjson.com/product-images/smartphones/oppo-a57/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/smartphones/oppo-a57/thumbnail.webp"
+      },
+      {
+        "id": 134,
+        "title": "Vivo S1",
+        "description": "The Vivo S1 is a stylish and mid-range smartphone offering a blend of design and performance. It features a vibrant display, capable camera system, and reliable functionality.",
+        "category": "smartphones",
+        "price": 249.99,
+        "discountPercentage": 10.17,
+        "rating": 3.5,
+        "stock": 50,
+        "tags": [
+          "smartphones",
+          "vivo"
+        ],
+        "brand": "Vivo",
+        "sku": "SMA-VIV-VIV-134",
+        "weight": 4,
+        "dimensions": {
+          "width": 14.06,
+          "height": 11.79,
+          "depth": 6.78
+        },
+        "warrantyInformation": "6 months warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Samantha Martinez",
+            "reviewerEmail": "samantha.martinez@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Very disappointed!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Logan Lee",
+            "reviewerEmail": "logan.lee@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Sophia Jones",
+            "reviewerEmail": "sophia.jones@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 1,
+        "meta": {
+          "createdAt": "2026-04-30T19:23:10.975Z",
+          "updatedAt": "2026-08-16T11:19:58.996Z",
+          "barcode": "8575699153333",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/smartphones/vivo-s1/1.webp",
+          "https://cdn.dummyjson.com/product-images/smartphones/vivo-s1/2.webp",
+          "https://cdn.dummyjson.com/product-images/smartphones/vivo-s1/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/smartphones/vivo-s1/thumbnail.webp"
+      },
+      {
+        "id": 138,
+        "title": "Baseball Ball",
+        "description": "The Baseball Ball is a standard baseball used in baseball games. It features a durable leather cover and is designed for pitching, hitting, and fielding in the game of baseball.",
+        "category": "sports-accessories",
+        "price": 8.99,
+        "discountPercentage": 1.71,
+        "rating": 2.57,
+        "stock": 100,
+        "tags": [
+          "sports equipment",
+          "baseball"
+        ],
+        "sku": "SPO-BRD-BAS-138",
+        "weight": 5,
+        "dimensions": {
+          "width": 14.42,
+          "height": 22.65,
+          "depth": 15.89
+        },
+        "warrantyInformation": "6 months warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Scarlett Wright",
+            "reviewerEmail": "scarlett.wright@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Great value for money!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Carter Baker",
+            "reviewerEmail": "carter.baker@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Aria Flores",
+            "reviewerEmail": "aria.flores@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 11,
+        "meta": {
+          "createdAt": "2025-01-22T16:34:14.873Z",
+          "updatedAt": "2026-08-10T03:10:39.952Z",
+          "barcode": "8981184448425",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/sports-accessories/baseball-ball/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/sports-accessories/baseball-ball/thumbnail.webp"
+      },
+      {
+        "id": 139,
+        "title": "Baseball Glove",
+        "description": "The Baseball Glove is a protective glove worn by baseball players. It is designed to catch and field the baseball, providing players with comfort and control during the game.",
+        "category": "sports-accessories",
+        "price": 24.99,
+        "discountPercentage": 2.9,
+        "rating": 3.96,
+        "stock": 22,
+        "tags": [
+          "sports equipment",
+          "baseball"
+        ],
+        "sku": "SPO-BRD-BAS-139",
+        "weight": 1,
+        "dimensions": {
+          "width": 23.84,
+          "height": 11.12,
+          "depth": 5.85
+        },
+        "warrantyInformation": "Lifetime warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 1,
+            "comment": "Very unhappy with my purchase!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Hazel Gardner",
+            "reviewerEmail": "hazel.gardner@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Great value for money!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Scarlett Wright",
+            "reviewerEmail": "scarlett.wright@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Nathan Reed",
+            "reviewerEmail": "nathan.reed@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 8,
+        "meta": {
+          "createdAt": "2025-11-08T03:00:37.685Z",
+          "updatedAt": "2026-08-19T09:59:16.490Z",
+          "barcode": "1607433635330",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/sports-accessories/baseball-glove/1.webp",
+          "https://cdn.dummyjson.com/product-images/sports-accessories/baseball-glove/2.webp",
+          "https://cdn.dummyjson.com/product-images/sports-accessories/baseball-glove/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/sports-accessories/baseball-glove/thumbnail.webp"
+      }
+    ],
+    "total": 33,
+    "skip": 0,
+    "limit": 25
+  }
+}

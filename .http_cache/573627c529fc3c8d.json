@@ -1,0 +1,541 @@
+{
+  "created_at": "2026-09-10T23:53:17.552791+00:00",
+  "elapsed": 0.24283,
+  "encoding": "utf-8",
+  "headers": {
+    "CF-RAY": "a39259ecf86ad47c-DFW",
+    "Connection": "keep-alive",
+    "Content-Encoding": "zstd",
+    "Content-Type": "application/json; charset=utf-8",
+    "Date": "Thu, 10 Sep 2026 23:53:17 GMT",
+    "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=AFFgGTv5hmVEZo71xi3aRRPl0%2B3tHQDwf1A%2FrfaAI3GBmFPOct65fvmi%2FuMWzDxK2dzKN9E5BYtzDBy75o7dAVuCg3YU16d1RuOofQo%2FutmrsqQJnSBtHrFYhMLgQkEnhSrVnPpQNeAsHhvU\"}]}",
+    "Server": "cloudflare",
+    "Transfer-Encoding": "chunked",
+    "access-control-allow-credentials": "true",
+    "cf-cache-status": "DYNAMIC",
+    "etag": "W/\"324c-b8+g4JDtRic8vXD1CEQsEgRQ4mc\"",
+    "strict-transport-security": "max-age=15552000; includeSubDomains",
+    "vary": "Origin, Accept-Encoding",
+    "x-content-type-options": "nosniff",
+    "x-dns-prefetch-control": "off",
+    "x-download-options": "noopen",
+    "x-frame-options": "SAMEORIGIN",
+    "x-ratelimit-limit": "100",
+    "x-ratelimit-remaining": "99",
+    "x-ratelimit-reset": "1789084408",
+    "x-xss-protection": "1; mode=block"
+  },
+  "reason": "OK",
+  "request": {
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate, zstd",
+      "Authorization": "REDACTED",
+      "Connection": "keep-alive",
+      "User-Agent": "REDACTED"
+    },
+    "method": "GET",
+    "url": "https://dummyjson.com/products?limit=25&modifiedAfter=2026-08-01+00%3A00%3A00%2B00%3A00&skip=25"
+  },
+  "status_code": 200,
+  "url": "https://dummyjson.com/products?limit=25&modifiedAfter=2026-08-01+00%3A00%3A00%2B00%3A00&skip=25",
+  "_decoded_content": {
+    "products": [
+      {
+        "id": 143,
+        "title": "Cricket Bat",
+        "description": "The Cricket Bat is an essential piece of cricket equipment used by batsmen to hit the cricket ball. It is made of wood and comes in various sizes and designs.",
+        "category": "sports-accessories",
+        "price": 29.99,
+        "discountPercentage": 3.29,
+        "rating": 3.17,
+        "stock": 98,
+        "tags": [
+          "sports equipment",
+          "cricket"
+        ],
+        "sku": "SPO-BRD-CRI-143",
+        "weight": 10,
+        "dimensions": {
+          "width": 27.44,
+          "height": 23.65,
+          "depth": 16.62
+        },
+        "warrantyInformation": "1 year warranty",
+        "shippingInformation": "Ships in 1-2 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Very satisfied!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Samantha Howard",
+            "reviewerEmail": "samantha.howard@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Ella Adams",
+            "reviewerEmail": "ella.adams@x.dummyjson.com"
+          },
+          {
+            "rating": 3,
+            "comment": "Poor quality!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Julian Newton",
+            "reviewerEmail": "julian.newton@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "No return policy",
+        "minimumOrderQuantity": 16,
+        "meta": {
+          "createdAt": "2025-03-07T16:10:28.349Z",
+          "updatedAt": "2026-08-31T15:48:10.312Z",
+          "barcode": "1225217575490",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/sports-accessories/cricket-bat/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/sports-accessories/cricket-bat/thumbnail.webp"
+      },
+      {
+        "id": 147,
+        "title": "Football",
+        "description": "The Football, also known as a soccer ball, is the standard ball used in the sport of football (soccer). It is designed for kicking and passing in the game.",
+        "category": "sports-accessories",
+        "price": 17.99,
+        "discountPercentage": 5.15,
+        "rating": 3.28,
+        "stock": 96,
+        "tags": [
+          "sports equipment",
+          "football"
+        ],
+        "sku": "SPO-BRD-FOO-147",
+        "weight": 1,
+        "dimensions": {
+          "width": 28.93,
+          "height": 23.01,
+          "depth": 11.71
+        },
+        "warrantyInformation": "Lifetime warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Elena Long",
+            "reviewerEmail": "elena.long@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Would not recommend!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Leah Gutierrez",
+            "reviewerEmail": "leah.gutierrez@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Nathan Dixon",
+            "reviewerEmail": "nathan.dixon@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 27,
+        "meta": {
+          "createdAt": "2026-05-29T10:10:17.634Z",
+          "updatedAt": "2026-08-09T08:15:38.827Z",
+          "barcode": "7605305555987",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/sports-accessories/football/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/sports-accessories/football/thumbnail.webp"
+      },
+      {
+        "id": 151,
+        "title": "Tennis Ball",
+        "description": "The Tennis Ball is a standard ball used in the sport of tennis. It is designed for bouncing and hitting with tennis rackets during matches or practice sessions.",
+        "category": "sports-accessories",
+        "price": 6.99,
+        "discountPercentage": 11.76,
+        "rating": 4.06,
+        "stock": 28,
+        "tags": [
+          "sports equipment",
+          "tennis"
+        ],
+        "sku": "SPO-BRD-TEN-151",
+        "weight": 3,
+        "dimensions": {
+          "width": 8.04,
+          "height": 20.35,
+          "depth": 12.24
+        },
+        "warrantyInformation": "5 year warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Addison Ward",
+            "reviewerEmail": "addison.ward@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Great value for money!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Max Russell",
+            "reviewerEmail": "max.russell@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Luna Perez",
+            "reviewerEmail": "luna.perez@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 6,
+        "meta": {
+          "createdAt": "2026-08-28T03:10:43.380Z",
+          "updatedAt": "2026-08-28T15:36:42.750Z",
+          "barcode": "2793132647969",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/sports-accessories/tennis-ball/1.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/sports-accessories/tennis-ball/thumbnail.webp"
+      },
+      {
+        "id": 158,
+        "title": "Sunglasses",
+        "description": "The Sunglasses offer a classic and simple design with a focus on functionality. These sunglasses provide essential UV protection while maintaining a timeless look.",
+        "category": "sunglasses",
+        "price": 22.99,
+        "discountPercentage": 1.51,
+        "rating": 3.02,
+        "stock": 27,
+        "tags": [
+          "eyewear",
+          "sunglasses"
+        ],
+        "brand": "Fashion Shades",
+        "sku": "SUN-FAS-SUN-158",
+        "weight": 1,
+        "dimensions": {
+          "width": 16.15,
+          "height": 24.59,
+          "depth": 10.31
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships in 3-5 business days",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 5,
+            "comment": "Would buy again!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Olivia Wilson",
+            "reviewerEmail": "olivia.wilson@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Not worth the price!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Lillian Bishop",
+            "reviewerEmail": "lillian.bishop@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Leah Henderson",
+            "reviewerEmail": "leah.henderson@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "60 days return policy",
+        "minimumOrderQuantity": 8,
+        "meta": {
+          "createdAt": "2025-05-31T01:18:39.338Z",
+          "updatedAt": "2026-08-18T20:27:59.071Z",
+          "barcode": "8850931201716",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/sunglasses/sunglasses/1.webp",
+          "https://cdn.dummyjson.com/product-images/sunglasses/sunglasses/2.webp",
+          "https://cdn.dummyjson.com/product-images/sunglasses/sunglasses/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/sunglasses/sunglasses/thumbnail.webp"
+      },
+      {
+        "id": 167,
+        "title": "300 Touring",
+        "description": "The 300 Touring is a stylish and comfortable sedan, known for its luxurious features and smooth performance.",
+        "category": "vehicle",
+        "price": 28999.99,
+        "discountPercentage": 3.98,
+        "rating": 4.05,
+        "stock": 54,
+        "tags": [
+          "sedans",
+          "vehicles"
+        ],
+        "brand": "Chrysler",
+        "sku": "VEH-CHR-TOU-167",
+        "weight": 9,
+        "dimensions": {
+          "width": 19.2,
+          "height": 26.17,
+          "depth": 17.28
+        },
+        "warrantyInformation": "3 year warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Luna Russell",
+            "reviewerEmail": "luna.russell@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Great product!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Harper Garcia",
+            "reviewerEmail": "harper.garcia@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Not as described!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Harper Turner",
+            "reviewerEmail": "harper.turner@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 1,
+        "meta": {
+          "createdAt": "2026-08-26T17:22:47.153Z",
+          "updatedAt": "2026-08-31T16:53:46.208Z",
+          "barcode": "6337799339397",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/vehicle/300-touring/1.webp",
+          "https://cdn.dummyjson.com/product-images/vehicle/300-touring/2.webp",
+          "https://cdn.dummyjson.com/product-images/vehicle/300-touring/3.webp",
+          "https://cdn.dummyjson.com/product-images/vehicle/300-touring/4.webp",
+          "https://cdn.dummyjson.com/product-images/vehicle/300-touring/5.webp",
+          "https://cdn.dummyjson.com/product-images/vehicle/300-touring/6.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/vehicle/300-touring/thumbnail.webp"
+      },
+      {
+        "id": 180,
+        "title": "Dress Pea",
+        "description": "The Dress Pea is a stylish and comfortable dress with a pea pattern. Perfect for casual outings, it adds a playful and fun element to your wardrobe, making it a great choice for day-to-day wear.",
+        "category": "womens-dresses",
+        "price": 49.99,
+        "discountPercentage": 17.68,
+        "rating": 4.88,
+        "stock": 6,
+        "tags": [
+          "clothing",
+          "dresses"
+        ],
+        "sku": "WOM-BRD-DRE-180",
+        "weight": 1,
+        "dimensions": {
+          "width": 28.51,
+          "height": 20.99,
+          "depth": 12.58
+        },
+        "warrantyInformation": "2 year warranty",
+        "shippingInformation": "Ships overnight",
+        "availabilityStatus": "Low Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Harper Turner",
+            "reviewerEmail": "harper.turner@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Not worth the price!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Luna Russell",
+            "reviewerEmail": "luna.russell@x.dummyjson.com"
+          },
+          {
+            "rating": 2,
+            "comment": "Would not buy again!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Michael Johnson",
+            "reviewerEmail": "michael.johnson@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "90 days return policy",
+        "minimumOrderQuantity": 6,
+        "meta": {
+          "createdAt": "2026-07-20T21:26:31.320Z",
+          "updatedAt": "2026-08-04T08:18:36.789Z",
+          "barcode": "8142375980193",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/womens-dresses/dress-pea/1.webp",
+          "https://cdn.dummyjson.com/product-images/womens-dresses/dress-pea/2.webp",
+          "https://cdn.dummyjson.com/product-images/womens-dresses/dress-pea/3.webp",
+          "https://cdn.dummyjson.com/product-images/womens-dresses/dress-pea/4.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/womens-dresses/dress-pea/thumbnail.webp"
+      },
+      {
+        "id": 187,
+        "title": "Golden Shoes Woman",
+        "description": "The Golden Shoes for Women are a glamorous choice for special occasions. Featuring a golden hue and stylish design, they add a touch of luxury to your outfit.",
+        "category": "womens-shoes",
+        "price": 49.99,
+        "discountPercentage": 13.93,
+        "rating": 3.26,
+        "stock": 88,
+        "tags": [
+          "footwear",
+          "women's shoes"
+        ],
+        "brand": "Fashion Diva",
+        "sku": "WOM-FAS-GOL-187",
+        "weight": 4,
+        "dimensions": {
+          "width": 16.38,
+          "height": 20.06,
+          "depth": 8.8
+        },
+        "warrantyInformation": "6 months warranty",
+        "shippingInformation": "Ships in 2 weeks",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Excellent quality!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Nolan Gonzalez",
+            "reviewerEmail": "nolan.gonzalez@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Brayden Fleming",
+            "reviewerEmail": "brayden.fleming@x.dummyjson.com"
+          },
+          {
+            "rating": 4,
+            "comment": "Very pleased!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Eleanor Tyler",
+            "reviewerEmail": "eleanor.tyler@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "7 days return policy",
+        "minimumOrderQuantity": 7,
+        "meta": {
+          "createdAt": "2026-04-23T20:21:40.035Z",
+          "updatedAt": "2026-08-27T06:24:10.469Z",
+          "barcode": "0365072601388",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/womens-shoes/golden-shoes-woman/1.webp",
+          "https://cdn.dummyjson.com/product-images/womens-shoes/golden-shoes-woman/2.webp",
+          "https://cdn.dummyjson.com/product-images/womens-shoes/golden-shoes-woman/3.webp",
+          "https://cdn.dummyjson.com/product-images/womens-shoes/golden-shoes-woman/4.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/womens-shoes/golden-shoes-woman/thumbnail.webp"
+      },
+      {
+        "id": 191,
+        "title": "Rolex Cellini Moonphase",
+        "description": "The Rolex Cellini Moonphase watch is a masterpiece of horology. Featuring a moon phase complication, it showcases the craftsmanship and elegance that Rolex is renowned for.",
+        "category": "womens-watches",
+        "price": 15999.99,
+        "discountPercentage": 4.11,
+        "rating": 3.83,
+        "stock": 52,
+        "tags": [
+          "watches",
+          "luxury watches"
+        ],
+        "brand": "Rolex",
+        "sku": "WOM-ROL-ROL-191",
+        "weight": 10,
+        "dimensions": {
+          "width": 12.5,
+          "height": 20.63,
+          "depth": 25.04
+        },
+        "warrantyInformation": "1 month warranty",
+        "shippingInformation": "Ships in 1 week",
+        "availabilityStatus": "In Stock",
+        "reviews": [
+          {
+            "rating": 4,
+            "comment": "Very happy with my purchase!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Gabriel Hayes",
+            "reviewerEmail": "gabriel.hayes@x.dummyjson.com"
+          },
+          {
+            "rating": 5,
+            "comment": "Fast shipping!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Logan Torres",
+            "reviewerEmail": "logan.torres@x.dummyjson.com"
+          },
+          {
+            "rating": 1,
+            "comment": "Disappointing product!",
+            "date": "2025-04-30T09:41:02.054Z",
+            "reviewerName": "Isabella Jackson",
+            "reviewerEmail": "isabella.jackson@x.dummyjson.com"
+          }
+        ],
+        "returnPolicy": "30 days return policy",
+        "minimumOrderQuantity": 1,
+        "meta": {
+          "createdAt": "2026-08-19T13:08:29.367Z",
+          "updatedAt": "2026-08-19T15:21:25.645Z",
+          "barcode": "4608359670564",
+          "qrCode": "https://cdn.dummyjson.com/public/qr-code.png"
+        },
+        "images": [
+          "https://cdn.dummyjson.com/product-images/womens-watches/rolex-cellini-moonphase/1.webp",
+          "https://cdn.dummyjson.com/product-images/womens-watches/rolex-cellini-moonphase/2.webp",
+          "https://cdn.dummyjson.com/product-images/womens-watches/rolex-cellini-moonphase/3.webp"
+        ],
+        "thumbnail": "https://cdn.dummyjson.com/product-images/womens-watches/rolex-cellini-moonphase/thumbnail.webp"
+      }
+    ],
+    "total": 33,
+    "skip": 25,
+    "limit": 8
+  }
+}
