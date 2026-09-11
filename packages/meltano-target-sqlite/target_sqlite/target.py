@@ -113,6 +113,33 @@ class SQLiteSink(SQLSink[SQLiteConnector]):
 
     connector_class = SQLiteConnector
 
+    # `main` and `temp` are SQLite's own built-in schema names, so a database or schema
+    # segment equal to either is dropped rather than folded in.
+    _default_schemas: t.ClassVar[set[str]] = {"main", "temp"}
+
+    @override
+    def parse_stream_name(self, stream_name: str) -> tuple[str | None, str | None, str]:
+        """Parse a stream name into its database, schema, and table parts.
+
+        SQLite has no `CREATE SCHEMA`/`CREATE DATABASE` and no cross-database
+        addressing, so a `<db>-<schema>-<table>` or `<schema>-<table>` stream name
+        is folded into a single physical table name (`db__schema__table`) instead.
+        `database_name`/`schema_name` are left at their inherited defaults, which
+        then come out `None` since they're derived from this same parsed tuple.
+        """
+        db_name, schema_name, table_name = super().parse_stream_name(stream_name)
+        qualifiers = [
+            part
+            for part in (db_name, schema_name)
+            if part and part.lower() not in self._default_schemas
+        ]
+        return None, None, "__".join([*qualifiers, table_name])
+
+    @override
+    @property
+    def schema_name(self) -> str | None:
+        return None
+
 
 class SQLiteTarget(SQLTarget):
     """The Tap class for SQLite."""
