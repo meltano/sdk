@@ -15,8 +15,12 @@ import requests
 import requests_mock.adapter as requests_mock_adapter
 
 from singer_sdk.exceptions import (
+    EndOfStreamError,
     FatalAPIError,
     InvalidReplicationKeyException,
+    SingerSDKError,
+    SkippableSyncError,
+    SyncError,
 )
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._compat import datetime_fromisoformat as parse
@@ -846,3 +850,321 @@ def test_state_partitioning_keys_class_variable(
         stream.state_manager.get_state_partition_context(original_context)
         == expected_context
     )
+
+
+def test_end_of_stream_error_skips_partition(tap: Tap):
+    """Raising EndOfStreamError in get_records should skip that partition only.
+
+    Verifies the partition-level try/except in Stream._sync_records: records
+    from healthy partitions are emitted while the failing partition is skipped.
+    """
+
+    class PartitionedStream(SimpleTestStream):
+        @property
+        def partitions(self) -> list[dict]:  # type: ignore[override]
+            return [{"repo": "good"}, {"repo": "broken"}, {"repo": "also-good"}]
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,
+        ) -> t.Generator[dict, None, None]:
+            if context and context["repo"] == "broken":
+                msg = "Simulated partition error."
+                raise EndOfStreamError(msg)
+            yield {"id": 1, "value": "test", "updatedAt": "2021-01-01T00:00:00Z"}
+
+    stream = PartitionedStream(tap)
+    records = list(stream._sync_records(write_messages=False))
+    assert len(records) == 2  # good + also-good emitted; broken skipped
+
+
+def test_end_of_stream_error_skips_stream(tap_class: type[SimpleTestTap]):
+    """Raising EndOfStreamError in sync should skip that stream only.
+
+    Verifies the stream-level try/except in Tap.sync_all: the failing stream
+    is skipped while remaining streams continue to sync normally.
+    """
+    synced_streams: list[str] = []
+
+    class GoodStream(SimpleTestStream):
+        name = "good_stream"
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,  # noqa: ARG002
+        ) -> t.Generator[dict, None, None]:
+            synced_streams.append(self.name)
+            yield {"id": 1, "value": "test", "updatedAt": "2021-01-01T00:00:00Z"}
+
+    class BrokenStream(SimpleTestStream):
+        name = "broken_stream"
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,  # noqa: ARG002
+        ) -> t.Generator[dict, None, None]:
+            msg = "Simulated stream error."
+            raise EndOfStreamError(msg)
+            yield  # noqa: unreachable
+
+        def sync(self) -> None:  # type: ignore[override]
+            msg = "Simulated stream error."
+            raise EndOfStreamError(msg)
+
+    class AnotherGoodStream(SimpleTestStream):
+        name = "another_good_stream"
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,  # noqa: ARG002
+        ) -> t.Generator[dict, None, None]:
+            synced_streams.append(self.name)
+            yield {"id": 2, "value": "test", "updatedAt": "2021-01-01T00:00:00Z"}
+
+    class MultiStreamTap(tap_class):
+        def discover_streams(self) -> list[Stream]:
+            return [GoodStream(self), BrokenStream(self), AnotherGoodStream(self)]
+
+    tap = MultiStreamTap(
+        config={
+            "username": "utest",
+            "password": "ptest",
+            "start_date": "2021-01-01",
+        },
+        parse_env_config=False,
+    )
+    tap.sync_all()
+
+    assert "good_stream" in synced_streams
+    assert "another_good_stream" in synced_streams
+    assert "broken_stream" not in synced_streams
+
+
+def test_end_of_stream_error_empty_partition_list(tap: Tap):
+    """Sync on a stream with empty partitions falls back to a single default context.
+
+    Verifies that when partitions returns an empty list, the SDK treats the
+    stream as unpartitioned and runs get_records once with an empty context,
+    emitting records normally without raising.
+    """
+
+    class EmptyPartitionStream(SimpleTestStream):
+        @property
+        def partitions(self) -> list[dict]:  # type: ignore[override]
+            """Return an empty partition list."""  # ruff: ignore[property-docstring-starts-with-verb]
+            return []
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,  # noqa: ARG002
+        ) -> t.Generator[dict, None, None]:
+            """Yield records normally."""
+            yield {"id": 1, "value": "test", "updatedAt": "2021-01-01T00:00:00Z"}
+
+    stream = EmptyPartitionStream(tap)
+    records = list(stream._sync_records(write_messages=False))
+    assert len(records) == 1
+
+
+def test_end_of_stream_error_no_streams(tap_class: type[SimpleTestTap]):
+    """sync_all on a tap with no streams should complete without error.
+
+    Verifies that when discover_streams returns an empty list, sync_all
+    exits cleanly without crashing.
+    """
+
+    class EmptyTap(tap_class):
+        def discover_streams(self) -> list[Stream]:
+            """Return no streams."""
+            return []
+
+    empty_tap = EmptyTap(
+        config={
+            "username": "utest",
+            "password": "ptest",
+            "start_date": "2021-01-01",
+        },
+        parse_env_config=False,
+    )
+    empty_tap.sync_all()  # should not raise
+
+
+def test_end_of_stream_error_all_partitions_fail(tap: Tap):
+    """EndOfStreamError on every partition should yield no records but not crash.
+
+    Verifies that when all partitions raise EndOfStreamError, the tap exits
+    cleanly with zero records emitted.
+    """
+
+    class AllFailStream(SimpleTestStream):
+        @property
+        def partitions(self) -> list[dict]:  # type: ignore[override]
+            """Return three partitions that all fail."""  # ruff: ignore[property-docstring-starts-with-verb]
+            return [{"repo": "a"}, {"repo": "b"}, {"repo": "c"}]
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,  # noqa: ARG002
+        ) -> t.Generator[dict, None, None]:
+            """Always raise EndOfStreamError."""
+            msg = "All partitions failed."
+            raise EndOfStreamError(msg)
+            yield  # noqa: unreachable
+
+    stream = AllFailStream(tap)
+    records = list(stream._sync_records(write_messages=False))
+    assert records == []
+
+
+def test_end_of_stream_error_first_partition_skipped(tap: Tap):
+    """EndOfStreamError on the first partition should not prevent others from syncing.
+
+    Verifies the continue correctly skips to the next iteration rather than
+    breaking out of the loop entirely.
+    """
+
+    class FirstFailsStream(SimpleTestStream):
+        @property
+        def partitions(self) -> list[dict]:  # type: ignore[override]
+            """Return partitions where the first one fails."""  # ruff: ignore[property-docstring-starts-with-verb]
+            return [{"repo": "broken"}, {"repo": "good-1"}, {"repo": "good-2"}]
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,
+        ) -> t.Generator[dict, None, None]:
+            """Raise on first partition only."""
+            if context and context["repo"] == "broken":
+                msg = "First partition failed."
+                raise EndOfStreamError(msg)
+            yield {"id": 1, "value": "test", "updatedAt": "2021-01-01T00:00:00Z"}
+
+    stream = FirstFailsStream(tap)
+    records = list(stream._sync_records(write_messages=False))
+    assert len(records) == 2  # good-1 and good-2 emitted
+
+
+def test_end_of_stream_error_last_partition_skipped(tap: Tap):
+    """EndOfStreamError on the last partition should not cause off-by-one issues.
+
+    Verifies that a continue on the final loop iteration exits cleanly with
+    records from earlier partitions preserved.
+    """
+
+    class LastFailsStream(SimpleTestStream):
+        @property
+        def partitions(self) -> list[dict]:  # type: ignore[override]
+            """Return partitions where the last one fails."""  # ruff: ignore[property-docstring-starts-with-verb]
+            return [{"repo": "good-1"}, {"repo": "good-2"}, {"repo": "broken"}]
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,
+        ) -> t.Generator[dict, None, None]:
+            """Raise on last partition only."""
+            if context and context["repo"] == "broken":
+                msg = "Last partition failed."
+                raise EndOfStreamError(msg)
+            yield {"id": 1, "value": "test", "updatedAt": "2021-01-01T00:00:00Z"}
+
+    stream = LastFailsStream(tap)
+    records = list(stream._sync_records(write_messages=False))
+    assert len(records) == 2  # good-1 and good-2 emitted
+
+
+def test_end_of_stream_error_only_partition_fails(tap: Tap):
+    """EndOfStreamError on the sole partition should yield no records but not crash.
+
+    Verifies that a single-partition stream that fails exits cleanly with
+    zero records emitted.
+    """
+
+    class SingleFailStream(SimpleTestStream):
+        @property
+        def partitions(self) -> list[dict]:  # type: ignore[override]
+            """Return a single partition that fails."""  # ruff: ignore[property-docstring-starts-with-verb]
+            return [{"repo": "broken"}]
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,  # noqa: ARG002
+        ) -> t.Generator[dict, None, None]:
+            """Always raise EndOfStreamError."""
+            msg = "Only partition failed."
+            raise EndOfStreamError(msg)
+            yield  # noqa: unreachable
+
+    stream = SingleFailStream(tap)
+    records = list(stream._sync_records(write_messages=False))
+    assert records == []
+
+
+def test_non_end_of_stream_error_propagates_at_partition_level(tap: Tap):
+    """Non-EndOfStreamError exceptions must not be swallowed by the partition catcher.
+
+    Verifies that a plain RuntimeError raised in get_records() propagates
+    through _sync_records and crashes the tap, confirming the except block
+    is precise and does not accidentally catch unrelated errors.
+    """
+
+    class RuntimeErrorStream(SimpleTestStream):
+        @property
+        def partitions(self) -> list[dict]:  # type: ignore[override]
+            """Return a single partition."""  # ruff: ignore[property-docstring-starts-with-verb]
+            return [{"repo": "broken"}]
+
+        def get_records(  # type: ignore[override]
+            self,
+            context: dict | None,  # noqa: ARG002
+        ) -> t.Generator[dict, None, None]:
+            """Raise a non-EndOfStreamError exception."""
+            msg = "Unexpected error."
+            raise RuntimeError(msg)
+            yield  # noqa: unreachable
+
+    stream = RuntimeErrorStream(tap)
+    with pytest.raises(RuntimeError, match="Unexpected error."):  # ruff: ignore[pytest-raises-ambiguous-pattern]
+        list(stream._sync_records(write_messages=False))
+
+
+def test_non_end_of_stream_error_propagates_at_stream_level(
+    tap_class: type[SimpleTestTap],
+):
+    """Non-EndOfStreamError exceptions must not be swallowed by the stream catcher.
+
+    Verifies that a plain RuntimeError raised in stream.sync() propagates
+    through sync_all and crashes the tap, confirming the stream-level except
+    block is precise and does not accidentally catch unrelated errors.
+    """
+
+    class RuntimeErrorStream(SimpleTestStream):
+        name = "runtime_error_stream"
+
+        def sync(self) -> None:  # type: ignore[override]
+            """Raise a non-EndOfStreamError exception."""
+            msg = "Unexpected stream error."
+            raise RuntimeError(msg)
+
+    class RuntimeErrorTap(tap_class):
+        def discover_streams(self) -> list[Stream]:
+            """Return a stream that raises RuntimeError."""
+            return [RuntimeErrorStream(self)]
+
+    error_tap = RuntimeErrorTap(
+        config={
+            "username": "utest",
+            "password": "ptest",
+            "start_date": "2021-01-01",
+        },
+        parse_env_config=False,
+    )
+    with pytest.raises(RuntimeError, match="Unexpected stream error."):  # ruff: ignore[pytest-raises-ambiguous-pattern]
+        error_tap.sync_all()
+
+
+def test_end_of_stream_error_hierarchy():
+    """EndOfStreamError must satisfy the expected inheritance chain."""
+
+    assert issubclass(EndOfStreamError, SkippableSyncError)
+    assert issubclass(EndOfStreamError, SyncError)
+    assert issubclass(EndOfStreamError, SingerSDKError)

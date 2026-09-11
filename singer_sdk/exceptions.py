@@ -47,6 +47,7 @@ __all__ = [  # noqa: RUF022
     "SkippableSyncError",
     "SkippableAPIError",
     "InvalidRecord",
+    "EndOfStreamError",
     # Sync — data quality
     "DataError",
     "InvalidJSONSchema",
@@ -255,6 +256,16 @@ class SkippableSyncError(SyncError):
 
 class SkippableAPIError(SkippableSyncError):
     """Raised when a failed API request can be safely ignored and the sync continued."""
+
+
+class EndOfStreamError(SkippableSyncError):
+    """Raised to signal that a partition or stream should be skipped.
+
+    Tap developers can raise this inside ``get_records()`` to indicate that
+    the current partition or stream encountered a non-fatal, unrecoverable
+    condition. The SDK will log the error, preserve any state written so far,
+    and continue syncing the next partition or stream.
+    """
 
 
 class InvalidRecord(SkippableSyncError):
