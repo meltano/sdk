@@ -417,7 +417,7 @@ def test_conform_primitives(value: t.Any, type_dict: dict, expected: t.Any):
         pytest.param({"type": "array"}, {"type": ["array", "null"]}, id="array"),
         pytest.param(
             {"anyOf": [{"type": "integer"}, {"type": "number"}]},
-            {"anyOf": [{"type": "integer"}, {"type": "number"}, "null"]},
+            {"anyOf": [{"type": "integer"}, {"type": "number"}, {"type": "null"}]},
             id="anyOf",
         ),
         pytest.param(
