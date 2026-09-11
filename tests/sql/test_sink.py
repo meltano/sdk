@@ -84,6 +84,25 @@ class TestSQLSink:
             key_properties=["id"],
         )
 
+    def test_setup_prepares_schema_when_present(
+        self,
+        target: DummySQLTarget,
+        schema: dict,
+    ):
+        """Test `Sink.setup()` calls `prepare_schema` when a schema name is present."""
+        sink = DummySQLSink(
+            target,
+            stream_name="main-foo",
+            schema=schema,
+            key_properties=["id"],
+        )
+
+        assert sink.schema_name == "main"
+
+        sink.setup()
+
+        assert sink.connector.table_exists(sink.full_table_name)
+
     def test_generate_insert_statement(self, sink: DummySQLSink, schema: dict):
         """Test that the insert statement is generated correctly."""
         stmt = sink.generate_insert_statement("foo", schema=schema)
