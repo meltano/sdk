@@ -102,20 +102,20 @@ class SQLSink(BatchSink, t.Generic[_C]):  # noqa: PLR0904
             `db_name` is taken only from config, never from a
             `<db>-<schema>-<table>` stream name:
 
-            ```python
-            def parse_stream_name(
-                self,
-                stream_name: str,
-            ) -> tuple[str | None, str | None, str]:
-                _, schema_name, table_name = super().parse_stream_name(stream_name)
-                schema_name = schema_name or self.config.get("schema")
-                db_name = self.config.get("database")
-                return (
-                    db_name.upper() if db_name else None,
-                    schema_name.upper() if schema_name else None,
-                    table_name,
-                )
-            ```
+            .. code-block:: python
+
+                 def parse_stream_name(
+                     self,
+                     stream_name: str,
+                 ) -> tuple[str | None, str | None, str]:
+                     _, schema_name, table_name = super().parse_stream_name(stream_name)
+                     schema_name = schema_name or self.config.get("schema")
+                     db_name = self.config.get("database")
+                     return (
+                         db_name.upper() if db_name else None,
+                         schema_name.upper() if schema_name else None,
+                         table_name,
+                     )
 
         Args:
             stream_name: The stream name to parse.
@@ -161,12 +161,12 @@ class SQLSink(BatchSink, t.Generic[_C]):  # noqa: PLR0904
         Examples:
             Honor the database segment of a `<db>-<schema>-<table>` stream name:
 
-            ```python
-            @property
-            def database_name(self) -> str | None:
-                db_name, _, _ = self.stream_name_parts
-                return db_name
-            ```
+            .. code-block:: python
+
+                 @property
+                 def database_name(self) -> str | None:
+                     db_name, _, _ = self.stream_name_parts
+                     return db_name
 
         Returns:
             The database name, or `None` if not applicable.
