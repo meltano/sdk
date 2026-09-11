@@ -169,3 +169,9 @@ class TargetRecordMissingOptionalFields(TargetFileTestTemplate):
     """Test Target handles record missing optional fields."""
 
     name = "record_missing_fields"
+
+
+class TargetStreamNameParts(TargetFileTestTemplate):
+    """Test target handles stream name parts like `schema-table`."""
+
+    name = "stream_name_parts"
