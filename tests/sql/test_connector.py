@@ -21,6 +21,8 @@ from singer_sdk.sql.connector import (
     JSONSchemaToSQL,
     SQLToJSONSchema,
 )
+from singer_sdk.sql.stream import SQLStream
+from singer_sdk.sql.tap import SQLTap
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
@@ -62,6 +64,71 @@ class DummySQLConnector(SQLConnector):
                 "column_type": column_type,
             },
         )
+
+
+class DummySQLStream(SQLStream):
+    """Dummy SQL stream."""
+
+    connector_class = DummySQLConnector
+
+
+class DummySQLTap(SQLTap):
+    """Dummy SQL tap."""
+
+    name = "dummy-sql-tap"
+    default_stream_class = DummySQLStream
+
+
+class LegacyDiscoverySQLConnector(DummySQLConnector):
+    """Dummy SQL connector with an older discovery signature."""
+
+    filter_schemas: t.ClassVar[t.Sequence[str] | None] = None
+
+    def discover_catalog_entries(
+        self,
+        *,
+        exclude_schemas: t.Sequence[str] = (),
+        reflect_indices: bool = True,
+    ) -> list[dict]:
+        self.__class__.filter_schemas = self.config.get("filter_schemas")
+        return super().discover_catalog_entries(
+            exclude_schemas=exclude_schemas,
+            reflect_indices=reflect_indices,
+        )
+
+
+class LegacyDiscoverySQLStream(DummySQLStream):
+    """Dummy SQL stream with a legacy connector."""
+
+    connector_class = LegacyDiscoverySQLConnector
+
+
+class LegacyDiscoverySQLTap(DummySQLTap):
+    """Dummy SQL tap with a legacy connector."""
+
+    default_stream_class = LegacyDiscoverySQLStream
+
+
+class VarKwargsDiscoverySQLConnector(DummySQLConnector):
+    """Dummy SQL connector accepting arbitrary discovery kwargs."""
+
+    discovery_kwargs: t.ClassVar[dict[str, t.Any] | None] = None
+
+    def discover_catalog_entries(self, **kwargs: t.Any) -> list[dict]:
+        self.__class__.discovery_kwargs = kwargs
+        return super().discover_catalog_entries(**kwargs)
+
+
+class VarKwargsDiscoverySQLStream(DummySQLStream):
+    """Dummy SQL stream with a kwargs discovery connector."""
+
+    connector_class = VarKwargsDiscoverySQLConnector
+
+
+class VarKwargsDiscoverySQLTap(DummySQLTap):
+    """Dummy SQL tap with a kwargs discovery connector."""
+
+    default_stream_class = VarKwargsDiscoverySQLStream
 
 
 class TestConnectorSQL:  # noqa: PLR0904
@@ -607,6 +674,137 @@ class TestDummySQLConnector:
             reflect_indices=False,
         )
         assert len(entries) == expected_streams
+
+    @pytest.mark.parametrize(
+        "filter_schemas,expected_streams",
+        [
+            ([], 1),
+            (["main"], 1),
+            (["other"], 0),
+        ],
+    )
+    def test_discover_catalog_entries_filter_schemas(
+        self,
+        connector: DummySQLConnector,
+        filter_schemas: list[str],
+        expected_streams: int,
+    ):
+        with connector._engine.connect() as conn, conn.begin():
+            conn.execute(
+                sqlalchemy.text(
+                    "CREATE TABLE test_table (id INTEGER PRIMARY KEY, name STRING)",
+                )
+            )
+
+        entries = connector.discover_catalog_entries(
+            filter_schemas=filter_schemas,
+            reflect_indices=False,
+        )
+
+        assert len(entries) == expected_streams
+
+    def test_sql_tap_passes_configured_filter_schemas(self, tmp_path: Path):
+        db_path = tmp_path / "test.sqlite"
+        sqlalchemy_url = f"sqlite:///{db_path}"
+
+        engine = sqlalchemy.create_engine(sqlalchemy_url)
+        with engine.connect() as conn, conn.begin():
+            conn.execute(
+                sqlalchemy.text(
+                    "CREATE TABLE test_table (id INTEGER PRIMARY KEY, name STRING)",
+                )
+            )
+
+        tap = DummySQLTap(
+            config={
+                "sqlalchemy_url": sqlalchemy_url,
+                "filter_schemas": ["main"],
+            },
+        )
+
+        assert [stream["stream"] for stream in tap.catalog_dict["streams"]] == [
+            "main-test_table"
+        ]
+
+    def test_sql_tap_supports_legacy_connector_discovery_signature(
+        self,
+        tmp_path: Path,
+    ):
+        db_path = tmp_path / "test.sqlite"
+        sqlalchemy_url = f"sqlite:///{db_path}"
+
+        engine = sqlalchemy.create_engine(sqlalchemy_url)
+        with engine.connect() as conn, conn.begin():
+            conn.execute(
+                sqlalchemy.text(
+                    "CREATE TABLE test_table (id INTEGER PRIMARY KEY, name STRING)",
+                )
+            )
+
+        tap = LegacyDiscoverySQLTap(
+            config={
+                "sqlalchemy_url": sqlalchemy_url,
+                "filter_schemas": ["main"],
+            },
+        )
+
+        assert [stream["stream"] for stream in tap.catalog_dict["streams"]] == [
+            "main-test_table"
+        ]
+        assert LegacyDiscoverySQLConnector.filter_schemas == ["main"]
+
+    def test_sql_tap_treats_null_filter_schemas_as_unset(self, tmp_path: Path):
+        db_path = tmp_path / "test.sqlite"
+        sqlalchemy_url = f"sqlite:///{db_path}"
+
+        engine = sqlalchemy.create_engine(sqlalchemy_url)
+        with engine.connect() as conn, conn.begin():
+            conn.execute(
+                sqlalchemy.text(
+                    "CREATE TABLE test_table (id INTEGER PRIMARY KEY, name STRING)",
+                )
+            )
+
+        tap = DummySQLTap(
+            config={
+                "sqlalchemy_url": sqlalchemy_url,
+                "filter_schemas": None,
+            },
+        )
+
+        assert [stream["stream"] for stream in tap.catalog_dict["streams"]] == [
+            "main-test_table"
+        ]
+
+    def test_sql_tap_passes_filter_schemas_to_kwargs_connector(
+        self,
+        tmp_path: Path,
+    ):
+        db_path = tmp_path / "test.sqlite"
+        sqlalchemy_url = f"sqlite:///{db_path}"
+
+        engine = sqlalchemy.create_engine(sqlalchemy_url)
+        with engine.connect() as conn, conn.begin():
+            conn.execute(
+                sqlalchemy.text(
+                    "CREATE TABLE test_table (id INTEGER PRIMARY KEY, name STRING)",
+                )
+            )
+
+        tap = VarKwargsDiscoverySQLTap(
+            config={
+                "sqlalchemy_url": sqlalchemy_url,
+                "filter_schemas": ["main"],
+            },
+        )
+
+        assert [stream["stream"] for stream in tap.catalog_dict["streams"]] == [
+            "main-test_table"
+        ]
+        assert VarKwargsDiscoverySQLConnector.discovery_kwargs == {
+            "exclude_schemas": [],
+            "filter_schemas": ["main"],
+        }
 
 
 def test_adapter_without_json_serde():
