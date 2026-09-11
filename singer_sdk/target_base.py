@@ -111,6 +111,11 @@ class Target(BaseSingerReader, abc.ABC):
         self._sinks_to_clear: list[Sink] = []
         self._max_parallelism: int | None = _MAX_PARALLELISM
 
+        # True for the duration of an in-progress `drain_all()` call. Used to defer
+        # termination-signal handling until the active drain has safely finished,
+        # rather than re-entering `drain_all()`/`drain_one()` mid-flight.
+        self._draining: bool = False
+
         # Approximated for max record age enforcement
         self._last_full_drain_at: float = time.time()
 
@@ -508,24 +513,43 @@ class Target(BaseSingerReader, abc.ABC):
 
         This method is internal to the SDK and should not need to be overridden.
 
+        A termination signal received while this method is already running is not
+        handled re-entrantly: `_handle_termination` defers to `_is_terminating` and
+        lets this call finish normally so that in-flight sinks are not interrupted
+        mid-`process_batch()`. Once the drain that was running when the signal
+        arrived completes, this method notices `_is_terminating` and performs the
+        real end-of-pipe drain and shutdown itself.
+
         Args:
             is_endofpipe: This is called after the target instance has finished
                 listening to the stdin.
         """
-        self._drain_all(self._sinks_to_clear, 1)
-        if is_endofpipe:
-            for sink in self._sinks_to_clear:
-                sink._clean_up()  # ruff:ignore[private-member-access]
-        self._sinks_to_clear = []
-        self._drain_all(self._sinks_active.values(), self.max_parallelism)
-        if is_endofpipe:
-            for sink in self._sinks_active.values():
-                sink._clean_up()  # ruff:ignore[private-member-access]
+        self._draining = True
+        try:
+            self._drain_all(self._sinks_to_clear, 1)
+            if is_endofpipe:
+                for sink in self._sinks_to_clear:
+                    sink._clean_up()  # ruff:ignore[private-member-access]
+            self._sinks_to_clear = []
+            self._drain_all(self._sinks_active.values(), self.max_parallelism)
+            if is_endofpipe:
+                for sink in self._sinks_active.values():
+                    sink._clean_up()  # ruff:ignore[private-member-access]
 
-        if self._latest_state:
-            self._write_state_message(copy.deepcopy(self._latest_state))
+            if self._latest_state:
+                self._write_state_message(copy.deepcopy(self._latest_state))
 
-        self._reset_max_record_age()
+            self._reset_max_record_age()
+        finally:
+            self._draining = False
+
+        if self._is_terminating and not is_endofpipe:
+            # A termination signal arrived while this drain was running. It was
+            # deferred until now to avoid re-entering `drain_one()` for a sink that
+            # was still mid-`process_batch()`. Now that all in-flight records have
+            # been safely committed, perform the real end-of-pipe drain and exit.
+            self.drain_all(is_endofpipe=True)
+            self._terminate()
 
     @t.final
     def drain_one(self, sink: Sink) -> None:  # noqa: PLR6301
@@ -587,6 +611,23 @@ class Target(BaseSingerReader, abc.ABC):
             # drain finish.
             return
         self._is_terminating = True
+
+        if self._draining:
+            # This signal was delivered while a drain_all() call was already
+            # in progress on the main thread (CPython delivers signals between
+            # bytecode instructions, so this can happen mid-`process_batch()`).
+            # Calling drain_all() again here would re-enter `drain_one()` for a
+            # sink that is still mid-drain, clobbering its in-flight batch
+            # context before it commits. Instead, just record that termination
+            # was requested; drain_all() checks `_is_terminating` right after it
+            # finishes and will perform the real shutdown then.
+            self.logger.info(
+                "Received termination signal %d during an active drain; "
+                "deferring shutdown until it completes...",
+                signum,
+            )
+            return
+
         self.logger.info(
             "Received termination signal %d, draining all sinks...",
             signum,

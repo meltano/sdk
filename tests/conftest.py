@@ -128,6 +128,7 @@ class TargetMock(Target):
         self.records_written: list[dict] = []
         self.num_records_processed: int = 0
         self.num_batches_processed: int = 0
+        self.signalled: bool = False
 
     def _write_state_message(self, state: dict):
         """Emit the stream's latest state."""

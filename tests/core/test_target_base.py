@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import signal
 import sys
+import typing as t
 from unittest import mock
 
 import pytest
@@ -265,3 +266,75 @@ def test_duplicate_termination_signal_does_not_redrain():
 
     assert exc_info.value.code == 0
     assert len(drain_calls) == 1
+
+
+def _make_signalled_sink(target: TargetMock, stream_name: str) -> BatchSinkMock:
+    """Register a sink whose first `process_batch()` call fires a SIGTERM.
+
+    This simulates the first signal arriving mid-`process_batch()`, before the
+    original call has committed its records, as described in
+    https://github.com/meltano/sdk/issues/3775.
+    """
+    schema = {"properties": {"id": {"type": "integer"}}}
+    sink = t.cast(
+        "BatchSinkMock",
+        target.get_sink(stream_name, schema=schema, key_properties=["id"]),
+    )
+
+    def process_batch(context: dict) -> None:
+        if not target.signalled:
+            target.signalled = True
+            target._handle_termination(signal.SIGTERM, None)
+        target.records_written.extend(context["records"])
+        target.num_batches_processed += 1
+
+    sink.process_batch = process_batch
+
+    for i in range(3):
+        context = sink._get_context({"id": i})
+        sink.process_record({"id": i}, context)
+        sink.tally_record_read()
+
+    return sink
+
+
+def test_signal_during_final_drain_does_not_lose_records():
+    """A signal mid-`process_batch()` of the final drain must not lose records.
+
+    It must not re-enter `drain_one()` for the same sink either.
+    """
+    target = TargetMock()
+    _make_signalled_sink(target, "foo")
+    target._latest_state = {
+        "bookmarks": {"foo": {"replication_key_value": 2}},
+    }
+
+    # The interrupted drain is already the end-of-pipe drain, so no further
+    # forced shutdown is needed once it completes.
+    target.drain_all(is_endofpipe=True)
+
+    assert target.records_written == [{"id": 0}, {"id": 1}, {"id": 2}]
+    assert target.num_batches_processed == 1
+    assert target.state_messages_written[-1] == target._latest_state
+    assert target._is_terminating is True
+
+
+def test_signal_during_midstream_drain_defers_shutdown_then_exits():
+    """A signal during a non-final drain must defer, then drain and exit.
+
+    A SIGTERM arriving mid-drain (e.g. size/age-triggered) must let the
+    in-flight batch commit, then perform a real end-of-pipe drain and exit.
+    """
+    target = TargetMock()
+    _make_signalled_sink(target, "foo")
+    target._latest_state = {
+        "bookmarks": {"foo": {"replication_key_value": 2}},
+    }
+
+    with pytest.raises(SystemExit) as exc_info:
+        target.drain_all(is_endofpipe=False)
+
+    assert exc_info.value.code == 0
+    assert target.records_written == [{"id": 0}, {"id": 1}, {"id": 2}]
+    assert target.num_batches_processed == 1
+    assert target.state_messages_written[-1] == target._latest_state
