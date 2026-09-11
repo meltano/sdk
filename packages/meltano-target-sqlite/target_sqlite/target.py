@@ -135,6 +135,11 @@ class SQLiteSink(SQLSink[SQLiteConnector]):
         ]
         return None, None, "__".join([*qualifiers, table_name])
 
+    @override
+    @property
+    def schema_name(self) -> str | None:
+        return None
+
 
 class SQLiteTarget(SQLTarget):
     """The Tap class for SQLite."""
