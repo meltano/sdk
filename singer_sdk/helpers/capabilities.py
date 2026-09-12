@@ -203,10 +203,21 @@ BATCH_CONFIG = PropertiesList(
                         StringType,
                         allowed_values=["gzip", "none"],
                         title="Batch Compression Format",
+                    Property(
+                        "format",
+                        StringType,
+                        title="Batch Encoding Format",
+                        description="Format to use for batch files.",
+                        required=True,
+                    ),
+                    Property(
+                        "compression",
+                        StringType,
+                        allowed_values=["gzip", "none"],
+                        title="Batch Compression Format",
                         description="Compression format to use for batch files.",
                     ),
                 ),
-                required=True,
             ),
             Property(
                 "storage",
