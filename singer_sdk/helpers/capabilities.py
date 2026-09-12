@@ -197,6 +197,7 @@ BATCH_CONFIG = PropertiesList(
                         StringType,
                         title="Batch Encoding Format",
                         description="Format to use for batch files.",
+                        required=True,
                     ),
                     Property(
                         "compression",
