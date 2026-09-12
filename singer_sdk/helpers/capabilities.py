@@ -206,6 +206,7 @@ BATCH_CONFIG = PropertiesList(
                         description="Compression format to use for batch files.",
                     ),
                 ),
+                required=True,
             ),
             Property(
                 "storage",
