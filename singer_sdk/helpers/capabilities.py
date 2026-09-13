@@ -181,57 +181,84 @@ FLATTENING_CONFIG = PropertiesList(
         description="The separator to use when flattening keys.",
     ),
 ).to_dict()
-BATCH_CONFIG = PropertiesList(
-    Property(
-        "batch_config",
-        title="Batch Configuration",
-        description="Configuration for BATCH message capabilities.",
-        wrapped=ObjectType(
-            Property(
-                "encoding",
-                title="Batch Encoding Configuration",
-                description="Specifies the format and compression of the batch files.",
-                wrapped=ObjectType(
-                    Property(
-                        "format",
-                        StringType,
-                        title="Batch Encoding Format",
-                        description="Format to use for batch files.",
-                        required=True,
+
+
+def _batch_config_properties(*, encoding_required: bool) -> PropertiesList:
+    """Build the `batch_config` schema.
+
+    Args:
+        encoding_required: Whether the `encoding` property (and its nested
+            `format`) must be specified. Taps must always declare the format
+            they write batch files in, since there is no other source of
+            truth for it. Targets, on the other hand, read the encoding off
+            of each incoming BATCH message, so the config value is never
+            consulted and should remain optional.
+
+    Returns:
+        The `batch_config` properties list.
+    """
+    return PropertiesList(
+        Property(
+            "batch_config",
+            title="Batch Configuration",
+            description="Configuration for BATCH message capabilities.",
+            wrapped=ObjectType(
+                Property(
+                    "encoding",
+                    title="Batch Encoding Configuration",
+                    description=(
+                        "Specifies the format and compression of the batch files."
                     ),
-                    Property(
-                        "compression",
-                        StringType,
-                        allowed_values=["gzip", "none"],
-                        title="Batch Compression Format",
-                        description="Compression format to use for batch files.",
+                    wrapped=ObjectType(
+                        Property(
+                            "format",
+                            StringType,
+                            title="Batch Encoding Format",
+                            description="Format to use for batch files.",
+                            required=encoding_required,
+                        ),
+                        Property(
+                            "compression",
+                            StringType,
+                            allowed_values=["gzip", "none"],
+                            title="Batch Compression Format",
+                            description="Compression format to use for batch files.",
+                        ),
                     ),
+                    required=encoding_required,
                 ),
-                required=True,
-            ),
-            Property(
-                "storage",
-                title="Batch Storage Configuration",
-                description="Defines the storage layer to use when writing batch files",
-                wrapped=ObjectType(
-                    Property(
-                        "root",
-                        StringType,
-                        nullable=False,
-                        title="Batch Storage Root",
-                        description="Root path to use when writing batch files.",
+                Property(
+                    "storage",
+                    title="Batch Storage Configuration",
+                    description=(
+                        "Defines the storage layer to use when writing batch files"
                     ),
-                    Property(
-                        "prefix",
-                        StringType,
-                        title="Batch Storage Prefix",
-                        description="Prefix to use when writing batch files.",
+                    wrapped=ObjectType(
+                        Property(
+                            "root",
+                            StringType,
+                            nullable=False,
+                            title="Batch Storage Root",
+                            description="Root path to use when writing batch files.",
+                        ),
+                        Property(
+                            "prefix",
+                            StringType,
+                            title="Batch Storage Prefix",
+                            description="Prefix to use when writing batch files.",
+                        ),
                     ),
                 ),
             ),
         ),
-    ),
-).to_dict()
+    )
+
+
+TAP_BATCH_CONFIG = _batch_config_properties(encoding_required=True).to_dict()
+"""Batch config schema for taps, which must always specify an encoding format."""
+
+BATCH_CONFIG = _batch_config_properties(encoding_required=False).to_dict()
+"""Batch config schema for targets, which read the encoding off each BATCH message."""
 SQL_TAP_USE_SINGER_DECIMAL = PropertiesList(
     Property(
         "use_singer_decimal",
