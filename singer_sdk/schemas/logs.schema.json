@@ -100,6 +100,13 @@
               "line": {
                 "type": "string",
                 "description": "The line of code"
+              },
+              "lines": {
+                "type": "array",
+                "description": "Additional lines of code around the location of the raised exception",
+		"items": {
+		  "type": "string"
+		}
               }
             },
             "required": ["filename", "function", "lineno", "line"]
