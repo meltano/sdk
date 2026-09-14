@@ -23,8 +23,8 @@ from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._state import StateWriter, write_stream_state
 from singer_sdk.helpers._util import dump_json, load_json, read_json_file
 from singer_sdk.helpers.capabilities import (
-    BATCH_CONFIG,
     EMIT_ACTIVATE_VERSION_CONFIG,
+    TAP_BATCH_CONFIG,
     PluginCapabilities,
     TapCapabilities,
 )
@@ -259,7 +259,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
             )
 
         if PluginCapabilities.BATCH in capabilities:
-            merge_missing_config_jsonschema(BATCH_CONFIG, config_jsonschema)
+            merge_missing_config_jsonschema(TAP_BATCH_CONFIG, config_jsonschema)
 
     # Connection and sync tests:
 
