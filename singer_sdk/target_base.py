@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import abc
 import copy
-import json
 import sys
 import time
 import typing as t
@@ -16,6 +15,7 @@ from joblib import Parallel, delayed, parallel_config
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
+from singer_sdk.helpers._util import dump_json
 from singer_sdk.helpers.capabilities import (
     ACTIVATE_VERSION_CONFIG,
     ADD_RECORD_METADATA_CONFIG,
@@ -562,7 +562,7 @@ class Target(BaseSingerReader, abc.ABC):
         Args:
             state: TODO
         """
-        state_json = json.dumps(state)
+        state_json = dump_json(state)
         self.logger.debug("Emitting completed target state %s", state_json)
         sys.stdout.write(f"{state_json}\n")
         sys.stdout.flush()
