@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import abc
 import copy
-import json
 import sys
 import time
 import typing as t
@@ -28,6 +27,7 @@ from singer_sdk.helpers.capabilities import (
 )
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import BaseSingerReader, _ConfigInput
+from singer_sdk.singerlib.json import serialize_json
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
@@ -562,7 +562,7 @@ class Target(BaseSingerReader, abc.ABC):
         Args:
             state: TODO
         """
-        state_json = json.dumps(state)
+        state_json = serialize_json(state)
         self.logger.debug("Emitting completed target state %s", state_json)
         sys.stdout.write(f"{state_json}\n")
         sys.stdout.flush()

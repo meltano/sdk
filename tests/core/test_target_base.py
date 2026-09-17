@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import copy
+import datetime as dt
+import decimal
+import io
 import signal
 import sys
+from contextlib import redirect_stdout
 from unittest import mock
 
 import pytest
@@ -12,6 +16,7 @@ from singer_sdk.exceptions import (
     RecordsWithoutSchemaException,
 )
 from singer_sdk.helpers.capabilities import PluginCapabilities, TargetCapabilities
+from singer_sdk.singerlib.json import deserialize_json
 from tests.conftest import BatchSinkMock, SQLSinkMock, SQLTargetMock, TargetMock
 
 if sys.version_info >= (3, 12):
@@ -265,3 +270,23 @@ def test_duplicate_termination_signal_does_not_redrain():
 
     assert exc_info.value.code == 0
     assert len(drain_calls) == 1
+
+
+def test_target_write_state():
+    target = TargetMock()
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        target._write_state_message(
+            {
+                "integer": 42,
+                "decimal": decimal.Decimal("3.14"),
+                "datetime": dt.datetime(2021, 1, 1, tzinfo=dt.timezone.utc),
+            },
+        )
+
+    buf.seek(0)
+    assert deserialize_json(buf.read()) == {
+        "integer": 42,
+        "decimal": decimal.Decimal("3.14"),
+        "datetime": "2021-01-01T00:00:00+00:00",
+    }
