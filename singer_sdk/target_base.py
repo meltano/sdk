@@ -15,7 +15,6 @@ from joblib import Parallel, delayed, parallel_config
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
-from singer_sdk.helpers._util import dump_json
 from singer_sdk.helpers.capabilities import (
     ACTIVATE_VERSION_CONFIG,
     ADD_RECORD_METADATA_CONFIG,
@@ -28,6 +27,7 @@ from singer_sdk.helpers.capabilities import (
 )
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import BaseSingerReader, _ConfigInput
+from singer_sdk.singerlib.json import serialize_json
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
@@ -562,7 +562,7 @@ class Target(BaseSingerReader, abc.ABC):
         Args:
             state: TODO
         """
-        state_json = dump_json(state)
+        state_json = serialize_json(state)
         self.logger.debug("Emitting completed target state %s", state_json)
         sys.stdout.write(f"{state_json}\n")
         sys.stdout.flush()
