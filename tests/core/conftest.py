@@ -29,6 +29,9 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Context
 
 
+CONFIG_START_DATE = "2021-01-01T00:00:00Z"
+
+
 class SimpleTestStream(Stream):
     """Test stream class."""
 
@@ -136,7 +139,7 @@ def tap() -> SimpleTestTap:
         config={
             "username": "utest",
             "password": "ptest",
-            "start_date": "2021-01-01",
+            "start_date": CONFIG_START_DATE,
         },
         parse_env_config=False,
     )
