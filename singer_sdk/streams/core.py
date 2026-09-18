@@ -23,6 +23,8 @@ from singer_sdk.exceptions import (
     InvalidReplicationKeyException,
     InvalidStreamSortException,
     MaxRecordsLimitException,
+    RetriableSyncError,
+    SkippableSyncError,
 )
 from singer_sdk.helpers._batch import BatchConfig, SDKBatchMessage
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
@@ -1128,7 +1130,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             if self.stream_maps[0].get_filter_result(record):
                 self._sync_children(copy.copy(context))
 
-    def _sync_records(  # noqa: C901
+    def _sync_records(  # ruff: ignore[complex-structure, too-many-branches, too-many-statements]
         self,
         context: types.Context | None = None,
         *,
@@ -1146,6 +1148,8 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Raises:
             InvalidStreamSortException: Raised if sorting errors are found while
                 syncing the records.
+            RetriableSyncError: Re-raised after finalizing partition state when a
+                retriable error occurs, preserving the existing retry mechanism.
         """
         # Type definitions
         context_element: types.Context | None
@@ -1160,7 +1164,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
-        with record_counter, timer:
+        with record_counter, timer:  # ruff: ignore[too-many-nested-blocks]
             for context_element in context_list or [{}]:
                 record_counter.with_context(context_element)
                 timer.with_context(context_element)
@@ -1175,59 +1179,80 @@ class Stream(abc.ABC):  # noqa: PLR0904
                     None if current_context is None else copy.copy(current_context)
                 )
 
-                for idx, record_result in enumerate(self.get_records(current_context)):
-                    self._check_max_record_limit(current_record_index=record_index)
+                try:  # ruff: ignore[too-many-statements-in-try-clause]
+                    record_iter = self.get_records(current_context)
+                    for idx, record_result in enumerate(record_iter):
+                        self._check_max_record_limit(current_record_index=record_index)
 
-                    if isinstance(record_result, tuple):  # pragma: no cover
-                        # Tuple items should be the record and the child context
-                        warnings.warn(
-                            "Yielding a tuple of (record, child_context) is "
-                            "deprecated and will be removed in version 0.49 "
-                            "at the earliest. "
-                            "Please yield a single item instead.",
-                            SingerSDKDeprecationWarning,
-                            stacklevel=2,
-                        )
-                        record, child_context = record_result
-                    else:
-                        record = record_result
+                        if isinstance(record_result, tuple):  # pragma: no cover
+                            warnings.warn(
+                                "Yielding a tuple of (record, child_context) is "
+                                "deprecated and will be removed in version 0.49 "
+                                "at the earliest. "
+                                "Please yield a single item instead.",
+                                SingerSDKDeprecationWarning,
+                                stacklevel=2,
+                            )
+                            record, child_context = record_result
+                        else:
+                            record = record_result
 
-                    record = self.post_process(record, current_context)
-                    if record is None:
-                        continue
+                        record = self.post_process(record, current_context)
+                        if record is None:
+                            continue
 
-                    try:
-                        self._process_record(
-                            record,
-                            child_context=child_context,
-                            partition_context=state_partition_context,
-                        )
-                    except InvalidStreamSortException as ex:  # pragma: no cover
-                        self.state_manager.log_sort_error(
-                            ex=ex,
-                            record_count=record_index + 1,
-                            partition_record_count=idx + 1,
-                            current_context=current_context,
-                        )
-                        raise
+                        try:
+                            self._process_record(
+                                record,
+                                child_context=child_context,
+                                partition_context=state_partition_context,
+                            )
+                        except InvalidStreamSortException as ex:  # pragma: no cover
+                            self.state_manager.log_sort_error(
+                                ex=ex,
+                                record_count=record_index + 1,
+                                partition_record_count=idx + 1,
+                                current_context=current_context,
+                            )
+                            raise
 
-                    if selected:
-                        if write_messages:
-                            self._write_record_message(record)
+                        if selected:
+                            if write_messages:
+                                self._write_record_message(record)
 
-                        self._increment_stream_state(record, context=current_context)
-                        if (
-                            record_index + 1
-                        ) % self.STATE_MSG_FREQUENCY == 0 and write_messages:
-                            self._write_state_message()
+                            self._increment_stream_state(
+                                record, context=current_context
+                            )
+                            if (
+                                record_index + 1
+                            ) % self.STATE_MSG_FREQUENCY == 0 and write_messages:
+                                self._write_state_message()
 
-                        record_counter.increment()
-                        yield record
+                            record_counter.increment()
+                            yield record
 
-                    record_index += 1
+                        record_index += 1
+
+                except SkippableSyncError as e:
+                    self.logger.warning(
+                        "Skipping partition '%s' in stream '%s': %s",
+                        context_element,
+                        self.name,
+                        str(e),  # ruff: ignore[logging-eager-conversion]
+                    )
+                    state = self.get_context_state(current_context)
+                    self._finalize_state(state)
+                    if write_messages:
+                        self._write_state_message()
+                    continue
+                except RetriableSyncError:
+                    state = self.get_context_state(current_context)
+                    self._finalize_state(state)
+                    if write_messages:
+                        self._write_state_message()
+                    raise
 
                 if current_context == state_partition_context:
-                    # Finalize per-partition state only if 1:1 with context
                     state = self.get_context_state(current_context)
                     self._finalize_state(state)
 
