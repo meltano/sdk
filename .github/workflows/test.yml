@@ -2,30 +2,10 @@ name: Test
 
 on:
   pull_request:
-    paths:
-      - "packages/**"
-      - "samples/**"
-      - "singer_sdk/**"
-      - "tests/**"
-      - "noxfile.py"
-      - "pyproject.toml"
-      - "uv.lock"
-      - ".github/workflows/test.yml"
-      - ".github/workflows/resources/requirements.txt"
   push:
     branches:
       - main
       - v*
-    paths:
-      - "packages/**"
-      - "samples/**"
-      - "singer_sdk/**"
-      - "tests/**"
-      - "noxfile.py"
-      - "pyproject.toml"
-      - "uv.lock"
-      - ".github/workflows/test.yml"
-      - ".github/workflows/resources/requirements.txt"
   merge_group:
   workflow_dispatch:
     inputs: {}
@@ -44,8 +24,37 @@ env:
 permissions: {}
 
 jobs:
+  files-changed:
+    name: Detect file changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      runtime: ${{ steps.changes.outputs.runtime }}
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+      id: changes
+      with:
+        filters: |
+          runtime:
+            - "packages/**"
+            - "samples/**"
+            - "singer_sdk/**"
+            - "tests/**"
+            - "noxfile.py"
+            - "pyproject.toml"
+            - "uv.lock"
+            - ".github/workflows/test.yml"
+            - ".github/workflows/resources/requirements.txt"
+
   tests:
     name: "Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }}"
+    needs: files-changed
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || needs.files-changed.outputs.runtime == 'true' }}
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     env:
@@ -112,6 +121,8 @@ jobs:
 
   typing:
     name: Typing
+    needs: files-changed
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || needs.files-changed.outputs.runtime == 'true' }}
     runs-on: ubuntu-latest
     env:
       NOXFORCEPYTHON: ${{ matrix.python-version }}
@@ -145,8 +156,9 @@ jobs:
 
   tests-external:
     name: External Tests
+    needs: files-changed
     runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.head.repo.fork }}
+    if: ${{ !github.event.pull_request.head.repo.fork && (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || needs.files-changed.outputs.runtime == 'true') }}
     env:
       NOXSESSION: test-external
       TAP_GITLAB_AUTH_TOKEN: ${{ secrets.SAMPLE_TAP_GITLAB_AUTH_TOKEN }}
@@ -226,3 +238,21 @@ jobs:
         fail_ci_if_error: true
         flags: ${{ matrix.flag }}
         token: ${{ secrets.CODECOV_TOKEN }}
+
+  ci:
+    name: CI required checks
+    if: always()
+    needs:
+    - files-changed
+    - tests
+    - typing
+    - tests-external
+    - coverage
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+    - name: Decide whether the needed jobs succeeded or failed
+      uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
+      with:
+        jobs: ${{ toJSON(needs) }}
+        allowed-skips: tests,typing,tests-external,coverage
