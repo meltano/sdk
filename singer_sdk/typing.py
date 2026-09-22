@@ -58,7 +58,7 @@ import typing as t
 
 from jsonschema import validators
 
-from singer_sdk.helpers._compat import SingerSDKPendingDeprecationWarning, deprecated
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
     JSONSCHEMA_ANNOTATION_WRITEONLY,
@@ -1314,8 +1314,9 @@ class PropertiesList(ObjectType):
 
 
 @deprecated(
-    "Use `SQLToJSONSchema` instead.",
-    category=SingerSDKPendingDeprecationWarning,
+    "singer_sdk.typing.to_jsonschema_type is deprecated and will be removed in v0.56."
+    " Use `SQLToJSONSchema` instead.",
+    category=SingerSDKDeprecationWarning,
 )
 def to_jsonschema_type(
     from_type: str | sqlalchemy.types.TypeEngine | type[sqlalchemy.types.TypeEngine],
@@ -1397,8 +1398,9 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
 
 
 @deprecated(
-    "Use `JSONSchemaToSQL` instead.",
-    category=SingerSDKPendingDeprecationWarning,
+    "singer_sdk.typing.to_sql_type is deprecated and will be removed in v0.56."
+    " Use `JSONSchemaToSQL` instead.",
+    category=SingerSDKDeprecationWarning,
 )
 def to_sql_type(  # noqa: PLR0911, C901
     jsonschema_type: dict,

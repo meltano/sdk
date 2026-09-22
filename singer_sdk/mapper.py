@@ -327,7 +327,7 @@ class _MapperEval(simpleeval.EvalWithCompoundTypes):
 
         if callable(self.names):
             try:
-                val = self.names(node)  # ty:ignore[call-top-callable]
+                val = self.names(node)
                 self._check_disallowed_items(val)
             except simpleeval.NameNotDefined:
                 pass

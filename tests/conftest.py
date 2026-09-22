@@ -5,6 +5,7 @@ from __future__ import annotations
 import pathlib
 import platform
 import shutil
+import sys
 import typing as t
 
 import pytest
@@ -15,6 +16,11 @@ from singer_sdk.helpers.conform import DatetimeErrorTreatmentEnum
 from singer_sdk.sinks import BatchSink
 from singer_sdk.sql import SQLConnector, SQLSink, SQLTarget
 from singer_sdk.target_base import Target
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from _pytest.config import Config
@@ -95,16 +101,19 @@ class BatchSinkMock(BatchSink):
         super().__init__(target, stream_name, schema, key_properties)
         self.target = target
 
+    @override
     def process_record(self, record: dict, context: dict) -> None:
         """Tracks the count of processed records."""
         self.target.num_records_processed += 1
         super().process_record(record, context)
 
+    @override
     def process_batch(self, context: dict) -> None:
         """Write to mock trackers."""
         self.target.records_written.extend(context["records"])
         self.target.num_batches_processed += 1
 
+    @override
     @property
     def key_properties(self) -> list[str]:
         return [key.upper() for key in super().key_properties]
@@ -159,16 +168,19 @@ class SQLSinkMock(SQLSink):
         super().__init__(target, stream_name, schema, key_properties, connector)
         self.target = target
 
+    @override
     def process_record(self, record: dict, context: dict) -> None:
         """Tracks the count of processed records."""
         self.target.num_records_processed += 1
         super().process_record(record, context)
 
+    @override
     def process_batch(self, context: dict) -> None:
         """Write to mock trackers."""
         self.target.records_written.extend(context["records"])
         self.target.num_batches_processed += 1
 
+    @override
     @property
     def key_properties(self) -> list[str]:
         return [key.upper() for key in super().key_properties]
