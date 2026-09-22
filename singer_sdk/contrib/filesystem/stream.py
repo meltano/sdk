@@ -38,7 +38,6 @@ class FileStream(Stream, abc.ABC):
         SDC_META_MODIFIED_AT: {"type": ["string", "null"], "format": "date-time"},
     }
 
-    @override
     def __init__(
         self,
         tap: Tap,
