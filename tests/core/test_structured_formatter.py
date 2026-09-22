@@ -38,12 +38,13 @@ class TestStructuredFormatter:
 
     @pytest.fixture
     def validator(self) -> jsonschema.Validator:
-        schema = json.loads(
-            importlib.resources.read_text(
-                "singer_sdk",
-                "schemas/logs.schema.json",
-            )
-        )
+        with (
+            importlib.resources
+            .files("singer_sdk")
+            .joinpath("schemas/logs.schema.json")
+            .open() as schema_file
+        ):
+            schema = json.load(schema_file)
         return jsonschema.Draft202012Validator(schema)
 
     @pytest.fixture
