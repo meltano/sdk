@@ -5,21 +5,8 @@ on:
     branches:
       - "main"
       - "v*"
-    paths:
-      - "singer_sdk/**"
-      - "tests/**"
-      - "noxfile.py"
-      - "pyproject.toml"
-      - "uv.lock"
-      - ".github/workflows/codspeed.yml"
   pull_request:
-    paths:
-      - "singer_sdk/**"
-      - "tests/**"
-      - "noxfile.py"
-      - "pyproject.toml"
-      - "uv.lock"
-      - ".github/workflows/codspeed.yml"
+  merge_group:
   # `workflow_dispatch` allows CodSpeed to trigger backtest
   # performance analysis in order to generate initial data.
   workflow_dispatch:
@@ -35,9 +22,36 @@ env:
 permissions: {}
 
 jobs:
+  files-changed:
+    name: Detect file changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      codspeed: ${{ steps.changes.outputs.codspeed }}
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+      id: changes
+      with:
+        filters: |
+          codspeed:
+            - "singer_sdk/**"
+            - "tests/**"
+            - "noxfile.py"
+            - "pyproject.toml"
+            - "uv.lock"
+            - ".github/workflows/codspeed.yml"
+
   benchmarks:
     name: Run benchmarks
+    needs: files-changed
     runs-on: ubuntu-latest
+    # CodSpeed doesn't support `merge_group` events
+    if: ${{ github.event_name != 'merge_group' && ( github.event_name == 'workflow_dispatch' || needs.files-changed.outputs.codspeed == 'true' ) }}
     permissions:
       contents: read
     steps:
@@ -64,3 +78,18 @@ jobs:
         token: ${{ secrets.CODSPEED_TOKEN }}
         run: pytest tests/ --codspeed
         mode: simulation
+
+  ci:
+    name: CI required checks (benchmarks)
+    if: always()
+    needs:
+    - files-changed
+    - benchmarks
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+    - name: Decide whether the needed jobs succeeded or failed
+      uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
+      with:
+        jobs: ${{ toJSON(needs) }}
+        allowed-skips: benchmarks
