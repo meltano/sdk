@@ -1,51 +1,45 @@
 {
-  "cookies": {
-    "__cf_bm": "CeT9Hxb6Tzba9gTPyrYFhOSOocpNVTkoU5bLdIeGrAw-1763701859-1.0.1.1-njuwg.VohFgjAGwzKr8MZs5Unfc1lu9X7hVcW7kv60FPCZY.M1xyukoISA6xf0fU2w_BFP_u6M.xJgtQpELIjMGIpXqC8s5aEWjgGYSdsdg",
-    "_cfuvid": "OH.46qj89lafDzlsTRi9lKiK7RYxEhZcVgnwfJ_Hvh0-1763701859879-0.0.1.1-604800000"
-  },
-  "created_at": "2025-11-21T05:10:59.774197+00:00",
-  "elapsed": 1.565889,
+  "created_at": "2026-09-24T21:33:50.152892+00:00",
+  "elapsed": 0.641437,
   "encoding": "utf-8",
   "headers": {
-    "CF-Cache-Status": "MISS",
-    "CF-Ray": "9a1daf0d6e028aea-QRO",
+    "CF-Cache-Status": "BYPASS",
+    "CF-Ray": "a404e8e18d5738ef-QRO",
     "Cache-Control": "max-age=0, private, must-revalidate",
     "Connection": "keep-alive",
     "Content-Encoding": "gzip",
     "Content-Type": "application/json",
-    "Date": "Fri, 21 Nov 2025 05:10:59 GMT",
-    "ETag": "W/\"d2d5ef5e063192d394c10b4a6749ade1\"",
+    "Date": "Thu, 24 Sep 2026 21:33:50 GMT",
+    "ETag": "W/\"dd471fc5d744e9c7c8514959ded6983a\"",
     "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/144/issues?epic_iid=144&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/144/issues?epic_iid=144&id=2524164&page=1&per_page=20>; rel=\"last\"",
     "Server": "cloudflare",
-    "Set-Cookie": "__cf_bm=CeT9Hxb6Tzba9gTPyrYFhOSOocpNVTkoU5bLdIeGrAw-1763701859-1.0.1.1-njuwg.VohFgjAGwzKr8MZs5Unfc1lu9X7hVcW7kv60FPCZY.M1xyukoISA6xf0fU2w_BFP_u6M.xJgtQpELIjMGIpXqC8s5aEWjgGYSdsdg; path=/; expires=Fri, 21-Nov-25 05:40:59 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=OH.46qj89lafDzlsTRi9lKiK7RYxEhZcVgnwfJ_Hvh0-1763701859879-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
     "Strict-Transport-Security": "max-age=31536000",
     "Transfer-Encoding": "chunked",
-    "Vary": "Origin, Accept-Encoding",
+    "Vary": "Origin",
     "content-security-policy": "default-src 'none'",
-    "gitlab-lb": "haproxy-main-25-lb-gprd",
+    "gitlab-lb": "haproxy-main-34-lb-gprd",
     "gitlab-sv": "api-gke-us-east1-b",
     "nel": "{\"max_age\": 0}",
     "ratelimit-limit": "2000",
     "ratelimit-name": "throttle_authenticated_api",
-    "ratelimit-observed": "78",
-    "ratelimit-remaining": "1922",
-    "ratelimit-reset": "1763701860",
+    "ratelimit-observed": "3",
+    "ratelimit-remaining": "1997",
+    "ratelimit-reset": "1790285640",
     "referrer-policy": "strict-origin-when-cross-origin",
     "x-content-type-options": "nosniff",
     "x-frame-options": "SAMEORIGIN",
-    "x-gitlab-meta": "{\"correlation_id\":\"9a1daf0d97708aea-ATL\",\"version\":\"1\"}",
+    "x-gitlab-meta": "{\"correlation_id\":\"a404e8e18d5738ef-QRO\",\"version\":\"1\"}",
     "x-next-page": "",
     "x-page": "1",
     "x-per-page": "20",
     "x-prev-page": "",
-    "x-request-id": "9a1daf0d97708aea-ATL",
-    "x-runtime": "0.246205",
+    "x-request-id": "a404e8e18d5738ef-QRO",
+    "x-runtime": "0.416319",
     "x-total": "11",
     "x-total-pages": "1"
   },
   "reason": "OK",
   "request": {
-    "body": "",
     "headers": {
       "Accept": "*/*",
       "Accept-Encoding": "gzip, deflate, zstd",
@@ -59,6 +53,267 @@
   "status_code": 200,
   "url": "https://gitlab.com/api/v4/groups/2524164/epics/144/issues",
   "_decoded_content": [
+    {
+      "id": 108635274,
+      "iid": 3493,
+      "project_id": 7603319,
+      "title": "Update project README for 2.0 launch (Due May 30)",
+      "description": "Once Meltano is on GitHub, the README will be an opportunity for better marketing and info about what Meltano is and does. \n\nIt'd be good to update this to have more information and _possibly_ have some of the getting started instructions. Would be good to get our logo and maybe the website image on there?\n\n@Emily @afolson how do y'all want to think of the readme? cc @aaronsteers \n\n-------------------------\n\n[Draft of the README document](https://docs.google.com/document/d/1cuWAi4D1sDoTrkYX6eRUTfmW_xv0iNIqA00bdKQn3iE/edit?usp=sharing)\n\n## Places that need updated copy:\n* https://github.com/meltano\n* https://github.com/meltano/meltano",
+      "state": "closed",
+      "created_at": "2022-05-16T18:28:12.136Z",
+      "updated_at": "2022-05-31T18:51:47.155Z",
+      "closed_at": "2022-05-31T18:51:47.126Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Marketing",
+        "kind::Non-Product",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png?v=1663359095",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 11542635,
+        "username": "laurameltano",
+        "public_email": "laura@meltano.com",
+        "name": "Laura P\u00e9rez",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png?v=1663359095",
+        "web_url": "https://gitlab.com/laurameltano"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": "2022-05-31",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3493",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3493",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3493/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3493/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3493",
+        "relative": "#3493",
+        "full": "meltano/meltano#3493"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 144,
+      "epic": {
+        "id": 518923,
+        "iid": 144,
+        "title": "Move Meltano to GitHub",
+        "url": "/groups/meltano/-/epics/144",
+        "group_id": 2524164,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1368543,
+      "relative_position": -5130
+    },
+    {
+      "id": 108838650,
+      "iid": 417,
+      "project_id": 27821563,
+      "title": "Transition some CTA's from slack to GitHub",
+      "description": "### Activity \nIn an effort to get more traction on GitHub once we transition we want to make more of our CTA's about checking us out on GitHub or engaging with the growing community on GitHub...\n\n### Todos\n\n- [ ] Update most popular blogs from past 3 months \n- [ ] update selected pages on website\n- [ ] change CTA on paid ads\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
+      "state": "closed",
+      "created_at": "2022-05-19T22:43:45.901Z",
+      "updated_at": "2022-05-31T18:37:48.295Z",
+      "closed_at": "2022-05-31T18:37:48.288Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Content",
+        "Marketing"
+      ],
+      "milestone": null,
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 11457501,
+          "username": "victoria66",
+          "public_email": "victoria@meltano.com",
+          "name": "Victoria Gayton",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11457501/avatar.png?v=1654184477",
+          "web_url": "https://gitlab.com/victoria66"
+        },
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png?v=1663359095",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": "2022-05-31",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/417",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 3,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/417",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/417/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/417/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#417",
+        "relative": "#417",
+        "full": "meltano/marketing/marketing-general#417"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 144,
+      "epic": {
+        "id": 518923,
+        "iid": 144,
+        "title": "Move Meltano to GitHub",
+        "url": "/groups/meltano/-/epics/144",
+        "group_id": 2524164,
+        "human_readable_end_date": "Jun 30, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1390726,
+      "relative_position": -4617
+    },
     {
       "id": 109110437,
       "iid": 3525,
@@ -76,7 +331,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -107,7 +362,7 @@
           "name": "Amanda Folson",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png?v=1789009795",
           "web_url": "https://gitlab.com/afolson"
         }
       ],
@@ -118,7 +373,7 @@
         "name": "Amanda Folson",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png?v=1789009795",
         "web_url": "https://gitlab.com/afolson"
       },
       "type": "ISSUE",
@@ -129,18 +384,19 @@
         "name": "Amanda Folson",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png?v=1789009795",
         "web_url": "https://gitlab.com/afolson"
       },
-      "user_notes_count": 3,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-05-27",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3525",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3525",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -152,7 +408,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -204,7 +460,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -220,7 +476,7 @@
           "name": "Will Da Silva",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png?v=1789013515",
           "web_url": "https://gitlab.com/WillDaSilva"
         }
       ],
@@ -231,7 +487,7 @@
         "name": "Will Da Silva",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png?v=1789013515",
         "web_url": "https://gitlab.com/WillDaSilva"
       },
       "type": "ISSUE",
@@ -242,18 +498,19 @@
         "name": "Will Da Silva",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png?v=1789013515",
         "web_url": "https://gitlab.com/WillDaSilva"
       },
-      "user_notes_count": 9,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meta/-/issues/252",
+      "web_url": "https://gitlab.com/meltano/meta/-/work_items/252",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -265,7 +522,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -314,138 +571,6 @@
       "relative_position": -3591
     },
     {
-      "id": 108838650,
-      "iid": 417,
-      "project_id": 27821563,
-      "title": "Transition some CTA's from slack to GitHub",
-      "description": "### Activity \nIn an effort to get more traction on GitHub once we transition we want to make more of our CTA's about checking us out on GitHub or engaging with the growing community on GitHub...\n\n### Todos\n\n- [ ] Update most popular blogs from past 3 months \n- [ ] update selected pages on website\n- [ ] change CTA on paid ads\n\n\n<!-- Labels to add for triaging -->\n~\"valuestream::Business Operation\" \n~\"kind::Non-Product\"",
-      "state": "closed",
-      "created_at": "2022-05-19T22:43:45.901Z",
-      "updated_at": "2022-05-31T18:37:48.295Z",
-      "closed_at": "2022-05-31T18:37:48.288Z",
-      "closed_by": {
-        "id": 11629953,
-        "username": "MeltyBot",
-        "public_email": "",
-        "name": "Melty Bot",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
-        "web_url": "https://gitlab.com/MeltyBot"
-      },
-      "labels": [
-        "Content",
-        "Marketing"
-      ],
-      "milestone": null,
-      "assignees": [
-        {
-          "id": 220186,
-          "username": "Emily",
-          "public_email": "",
-          "name": "Emily Kyle",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
-          "web_url": "https://gitlab.com/Emily"
-        },
-        {
-          "id": 11457501,
-          "username": "victoria66",
-          "public_email": "victoria@meltano.com",
-          "name": "Victoria Gayton",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11457501/avatar.png",
-          "web_url": "https://gitlab.com/victoria66"
-        },
-        {
-          "id": 11542635,
-          "username": "laurameltano",
-          "public_email": "laura@meltano.com",
-          "name": "Laura P\u00e9rez",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
-          "web_url": "https://gitlab.com/laurameltano"
-        }
-      ],
-      "author": {
-        "id": 220186,
-        "username": "Emily",
-        "public_email": "",
-        "name": "Emily Kyle",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
-        "web_url": "https://gitlab.com/Emily"
-      },
-      "type": "ISSUE",
-      "assignee": {
-        "id": 220186,
-        "username": "Emily",
-        "public_email": "",
-        "name": "Emily Kyle",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
-        "web_url": "https://gitlab.com/Emily"
-      },
-      "user_notes_count": 5,
-      "merge_requests_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": "2022-05-31",
-      "confidential": true,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/417",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 3,
-        "completed_count": 0
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": false,
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/27821563/issues/417",
-        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/417/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/417/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/27821563",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#417",
-        "relative": "#417",
-        "full": "meltano/marketing/marketing-general#417"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 144,
-      "epic": {
-        "id": 518923,
-        "iid": 144,
-        "title": "Move Meltano to GitHub",
-        "url": "/groups/meltano/-/epics/144",
-        "group_id": 2524164,
-        "human_readable_end_date": "Jun 30, 2022",
-        "human_readable_timestamp": "<strong>Past due</strong>"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 1390726,
-      "relative_position": -4617
-    },
-    {
       "id": 108834137,
       "iid": 415,
       "project_id": 27821563,
@@ -462,7 +587,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -479,20 +604,21 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 6,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-06-07",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/415",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/415",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -504,7 +630,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -556,7 +682,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -572,7 +698,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         }
       ],
@@ -583,7 +709,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "type": "ISSUE",
@@ -594,18 +720,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 5,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-05-30",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/414",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/414",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -617,7 +744,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/414",
@@ -652,133 +779,6 @@
       "relative_position": -2565
     },
     {
-      "id": 108635274,
-      "iid": 3493,
-      "project_id": 7603319,
-      "title": "Update project README for 2.0 launch (Due May 30)",
-      "description": "Once Meltano is on GitHub, the README will be an opportunity for better marketing and info about what Meltano is and does. \n\nIt'd be good to update this to have more information and _possibly_ have some of the getting started instructions. Would be good to get our logo and maybe the website image on there?\n\n@Emily @afolson how do y'all want to think of the readme? cc @aaronsteers \n\n-------------------------\n\n[Draft of the README document](https://docs.google.com/document/d/1cuWAi4D1sDoTrkYX6eRUTfmW_xv0iNIqA00bdKQn3iE/edit?usp=sharing)\n\n## Places that need updated copy:\n* https://github.com/meltano\n* https://github.com/meltano/meltano",
-      "state": "closed",
-      "created_at": "2022-05-16T18:28:12.136Z",
-      "updated_at": "2022-05-31T18:51:47.155Z",
-      "closed_at": "2022-05-31T18:51:47.126Z",
-      "closed_by": {
-        "id": 11629953,
-        "username": "MeltyBot",
-        "public_email": "",
-        "name": "Melty Bot",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
-        "web_url": "https://gitlab.com/MeltyBot"
-      },
-      "labels": [
-        "Marketing",
-        "kind::Non-Product",
-        "valuestream::Meltano"
-      ],
-      "milestone": {
-        "id": 2351599,
-        "iid": 209,
-        "group_id": 2524164,
-        "title": "May 2022",
-        "description": "",
-        "state": "active",
-        "created_at": "2021-11-29T21:38:23.665Z",
-        "updated_at": "2021-11-29T21:38:23.665Z",
-        "due_date": "2022-05-31",
-        "start_date": "2022-05-01",
-        "expired": true,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
-      },
-      "assignees": [
-        {
-          "id": 11542635,
-          "username": "laurameltano",
-          "public_email": "laura@meltano.com",
-          "name": "Laura P\u00e9rez",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
-          "web_url": "https://gitlab.com/laurameltano"
-        }
-      ],
-      "author": {
-        "id": 1942272,
-        "username": "tayloramurphy",
-        "public_email": "",
-        "name": "Taylor A Murphy",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
-        "web_url": "https://gitlab.com/tayloramurphy"
-      },
-      "type": "ISSUE",
-      "assignee": {
-        "id": 11542635,
-        "username": "laurameltano",
-        "public_email": "laura@meltano.com",
-        "name": "Laura P\u00e9rez",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
-        "web_url": "https://gitlab.com/laurameltano"
-      },
-      "user_notes_count": 10,
-      "merge_requests_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": "2022-05-31",
-      "confidential": true,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3493",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": true,
-      "task_status": "0 of 0 checklist items completed",
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3493",
-        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3493/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3493/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/7603319",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#3493",
-        "relative": "#3493",
-        "full": "meltano/meltano#3493"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 144,
-      "epic": {
-        "id": 518923,
-        "iid": 144,
-        "title": "Move Meltano to GitHub",
-        "url": "/groups/meltano/-/epics/144",
-        "group_id": 2524164,
-        "human_readable_end_date": "Jun 30, 2022",
-        "human_readable_timestamp": "<strong>Past due</strong>"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 1368543,
-      "relative_position": -5130
-    },
-    {
       "id": 108533194,
       "iid": 246,
       "project_id": 24722673,
@@ -795,7 +795,7 @@
         "name": "Will Da Silva",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png?v=1789013515",
         "web_url": "https://gitlab.com/WillDaSilva"
       },
       "labels": [
@@ -811,7 +811,7 @@
           "name": "Will Da Silva",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png?v=1789013515",
           "web_url": "https://gitlab.com/WillDaSilva"
         }
       ],
@@ -833,18 +833,19 @@
         "name": "Will Da Silva",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png?v=1789013515",
         "web_url": "https://gitlab.com/WillDaSilva"
       },
-      "user_notes_count": 2,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meta/-/issues/246",
+      "web_url": "https://gitlab.com/meltano/meta/-/work_items/246",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -856,7 +857,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -921,7 +922,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -942,15 +943,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 7,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 2,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/administration/-/issues/190",
+      "web_url": "https://gitlab.com/meltano/administration/-/work_items/190",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -962,7 +964,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1014,7 +1016,7 @@
         "name": "Will Da Silva",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png?v=1789013515",
         "web_url": "https://gitlab.com/WillDaSilva"
       },
       "labels": [
@@ -1043,7 +1045,7 @@
           "name": "Will Da Silva",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png?v=1789013515",
           "web_url": "https://gitlab.com/WillDaSilva"
         }
       ],
@@ -1065,18 +1067,19 @@
         "name": "Will Da Silva",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1522656/avatar.png?v=1789013515",
         "web_url": "https://gitlab.com/WillDaSilva"
       },
-      "user_notes_count": 41,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meta/-/issues/242",
+      "web_url": "https://gitlab.com/meltano/meta/-/work_items/242",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1088,7 +1091,7 @@
         "completed_count": 16
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/24722673/issues/242",
@@ -1152,7 +1155,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1190,7 +1193,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         },
         {
@@ -1200,7 +1203,7 @@
           "name": "Laura P\u00e9rez",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png?v=1663359095",
           "web_url": "https://gitlab.com/laurameltano"
         }
       ],
@@ -1225,15 +1228,16 @@
         "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
         "web_url": "https://gitlab.com/DouweM"
       },
-      "user_notes_count": 19,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-05-31",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/397",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/397",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1245,7 +1249,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/397",
@@ -1296,7 +1300,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1351,15 +1355,16 @@
         "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
         "web_url": "https://gitlab.com/DouweM"
       },
-      "user_notes_count": 40,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 4,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meta/-/issues/239",
+      "web_url": "https://gitlab.com/meltano/meta/-/work_items/239",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1371,7 +1376,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {

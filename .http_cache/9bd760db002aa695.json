@@ -1,51 +1,45 @@
 {
-  "cookies": {
-    "__cf_bm": "vlasm7FP.AiiP6NI58yJGTbs1ynPI45UEA.uIDNdH_4-1763701845-1.0.1.1-ytWFPFCFodgtTgdCNtkggYdurEjPIGQpmDaeSsziJkeapKY4RuLnZlu5a1NdJc8zsXwzadv0yzyH5l8pJRbjHUoujIEavDGXWWHbLG6I9E4",
-    "_cfuvid": "Cvqxdr8VR22kJwyJ7TUd4dglldt9l427VTgqTwgBouk-1763701845576-0.0.1.1-604800000"
-  },
-  "created_at": "2025-11-21T05:10:45.469678+00:00",
-  "elapsed": 0.707206,
+  "created_at": "2026-09-24T21:33:33.761190+00:00",
+  "elapsed": 0.793947,
   "encoding": "utf-8",
   "headers": {
-    "CF-Cache-Status": "MISS",
-    "CF-Ray": "9a1daeb33a01a634-QRO",
+    "CF-Cache-Status": "BYPASS",
+    "CF-Ray": "a404e87a5929de87-QRO",
     "Cache-Control": "max-age=0, private, must-revalidate",
     "Connection": "keep-alive",
     "Content-Encoding": "gzip",
     "Content-Type": "application/json",
-    "Date": "Fri, 21 Nov 2025 05:10:45 GMT",
-    "ETag": "W/\"796461d2548e79027c62454a064e80f5\"",
+    "Date": "Thu, 24 Sep 2026 21:33:33 GMT",
+    "ETag": "W/\"80acbd22819d953ff3d9eb2a966abb63\"",
     "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/118/issues?epic_iid=118&id=2524164&page=2&per_page=20>; rel=\"next\", <https://gitlab.com/api/v4/groups/2524164/epics/118/issues?epic_iid=118&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/118/issues?epic_iid=118&id=2524164&page=2&per_page=20>; rel=\"last\"",
     "Server": "cloudflare",
-    "Set-Cookie": "__cf_bm=vlasm7FP.AiiP6NI58yJGTbs1ynPI45UEA.uIDNdH_4-1763701845-1.0.1.1-ytWFPFCFodgtTgdCNtkggYdurEjPIGQpmDaeSsziJkeapKY4RuLnZlu5a1NdJc8zsXwzadv0yzyH5l8pJRbjHUoujIEavDGXWWHbLG6I9E4; path=/; expires=Fri, 21-Nov-25 05:40:45 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=Cvqxdr8VR22kJwyJ7TUd4dglldt9l427VTgqTwgBouk-1763701845576-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
     "Strict-Transport-Security": "max-age=31536000",
     "Transfer-Encoding": "chunked",
-    "Vary": "Origin, Accept-Encoding",
+    "Vary": "Origin",
     "content-security-policy": "default-src 'none'",
-    "gitlab-lb": "haproxy-main-40-lb-gprd",
+    "gitlab-lb": "haproxy-main-07-lb-gprd",
     "gitlab-sv": "api-gke-us-east1-b",
     "nel": "{\"max_age\": 0}",
     "ratelimit-limit": "2000",
     "ratelimit-name": "throttle_authenticated_api",
-    "ratelimit-observed": "61",
-    "ratelimit-remaining": "1939",
-    "ratelimit-reset": "1763701860",
+    "ratelimit-observed": "65",
+    "ratelimit-remaining": "1935",
+    "ratelimit-reset": "1790285640",
     "referrer-policy": "strict-origin-when-cross-origin",
     "x-content-type-options": "nosniff",
     "x-frame-options": "SAMEORIGIN",
-    "x-gitlab-meta": "{\"correlation_id\":\"9a1daeb3506ca634-ATL\",\"version\":\"1\"}",
+    "x-gitlab-meta": "{\"correlation_id\":\"a404e87a5929de87-QRO\",\"version\":\"1\"}",
     "x-next-page": "2",
     "x-page": "1",
     "x-per-page": "20",
     "x-prev-page": "",
-    "x-request-id": "9a1daeb3506ca634-ATL",
-    "x-runtime": "0.359794",
+    "x-request-id": "a404e87a5929de87-QRO",
+    "x-runtime": "0.583559",
     "x-total": "27",
     "x-total-pages": "2"
   },
   "reason": "OK",
   "request": {
-    "body": "",
     "headers": {
       "Accept": "*/*",
       "Accept-Encoding": "gzip, deflate, zstd",
@@ -76,7 +70,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -105,20 +99,21 @@
         "name": "Ken Payne",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png?v=1694601772",
         "web_url": "https://gitlab.com/kgpayne"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 4,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3524",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3524",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -130,7 +125,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -157,7 +152,7 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -181,7 +176,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -215,15 +210,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 2,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3505",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3505",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -235,7 +231,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -262,7 +258,7 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -286,7 +282,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -315,20 +311,21 @@
         "name": "Amanda Folson",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png?v=1789009795",
         "web_url": "https://gitlab.com/afolson"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3475",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3475",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -340,7 +337,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -367,7 +364,7 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -391,7 +388,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -420,20 +417,21 @@
         "name": "Ken Payne",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png?v=1694601772",
         "web_url": "https://gitlab.com/kgpayne"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 4,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3465",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3465",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -445,7 +443,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -472,7 +470,7 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -496,7 +494,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -525,7 +523,7 @@
           "name": "Taylor A Murphy",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
           "web_url": "https://gitlab.com/tayloramurphy"
         }
       ],
@@ -536,7 +534,7 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
       "type": "ISSUE",
@@ -547,18 +545,19 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
-      "user_notes_count": 9,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3463",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3463",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -570,7 +569,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -597,7 +596,7 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -621,7 +620,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -652,7 +651,7 @@
           "name": "Edgar R. Mondrag\u00f3n",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
           "web_url": "https://gitlab.com/edgarrmondragon"
         }
       ],
@@ -674,18 +673,19 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
-      "user_notes_count": 18,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3433",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3433",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -697,7 +697,7 @@
         "completed_count": 0
       },
       "weight": 8,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -724,7 +724,7 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": {
         "id": 56416,
@@ -761,7 +761,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -796,15 +796,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 2,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3432",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3432",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -816,7 +817,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -843,7 +844,7 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -867,7 +868,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -902,15 +903,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 2,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3381",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3381",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -922,7 +924,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -949,7 +951,7 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -973,7 +975,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1008,15 +1010,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3371",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3371",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1028,7 +1031,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1055,12 +1058,118 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
       "epic_issue_id": 1267531,
       "relative_position": -10773
+    },
+    {
+      "id": 105632412,
+      "iid": 3353,
+      "project_id": 7603319,
+      "title": "Add `connection` as first-class construct in `meltano.yml`",
+      "description": "### Problem to solve\n\nAs a user of Meltano, I would like a place in `meltano.yml` to specify `Connection` config objects that can be referenced and reused in all of the plugins I add to my Meltano Project.\n\n### Target audience\n\nEngineers/developers using Meltano with tools that themselves have native constructs for connections, such as dbt, Airflow, Great Expectations and Superset.\n\n### Further details\n\nConnections are a ubiquitous construct across the tools of the data platform, and yet in Meltano these details must still be expressed individually for each plugin as plain config or environment variables. This is not only extra work for users of Meltano, it also adds unnecessary human action in the integration path between plugins accessing the same resources (databases, warehouses, SaaS endpoints etc.).\n\nFor example, in the case of Snowflake:\n\n- Official Snowflake Python [Connector parameters](https://docs.snowflake.com/en/user-guide/python-connector-api.html#label-snowflake-connector-methods) (used under the hood by many python-based tools)\n- Airflow Snowflake [Connection](https://airflow.apache.org/docs/apache-airflow-providers-snowflake/stable/connections/snowflake.html)\n- dbt Snowflake [Profile](https://docs.getdbt.com/reference/warehouse-profiles/snowflake-profile)\n- Superset Snowflake Datasource [connection string](https://superset.apache.org/docs/databases/snowflake)\n- Great Expectations Datasource [connection string](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/snowflake/)\n\nFrom the above it is clear that configuration is commonly expressed in two forms, with tools supporting either or both formats (examples from Airflows [connection docs](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html#exporting-connections-from-the-cli)):\n\n- yaml/json:\n\n\t```yaml\n\tsnowflake_example_connection:\n\t  conn_type: snowflake\n\t  login: user\n\t  password: password\n\t  host: snowflake.example\n\t  schema: db-schema\n\t  extra:\n\t    account: account\n\t    database: snow-db\n\t    region: us-east\n\t    warehouse: snow-warehouse\n\t```\n\n- URI\n\n\t```\n\tsnowflake://user:password@snowflake.example/db-schema?account=account&database=snow-db&region=us-east&warehouse=snow-warehouse\n\t```\n\nWhilst it is common for tools to support the specification of a 'default' connection, the richness of User/Role/Group functionalities in databases and warehouses for controlling access and for cost management (e.g. monitoring Snowflake credit consumption based on per-tool or per-pipeline User/Role definitions) mean that most tools will define or consume several connections based on the execution context. This means a single Project will typically have many more connection definitions than base warehouse and database resources.\n\nInterestingly we _already_ handle connections via a [`ConnectionService`](https://gitlab.com/meltano/meltano/-/blob/1baac4f6780ca761a25ba69632116ad1b7493ba8/src/meltano/core/connection_service.py#L15) in `meltano.core` (for use in the older Model functionality), however (as noted in the [comments](https://gitlab.com/meltano/meltano/-/blob/1baac4f6780ca761a25ba69632116ad1b7493ba8/src/meltano/core/connection_service.py#L39)) this has too detailed an understanding of the expected format of each connection type.\n\n### Proposal\n\nExpected outcomes:\n\n- Allow users to specify and manage connection information via the CLI (including a default connection per type), _without_ the need to explicitly reference that information when adding new compatible plugins.\n- Allow users to specify a named connection on a per-plugin and per-run basis, or override individual settings from the default connection.\n\nTo achieve these two outcomes, we could:\n\n1. Support connection definitions in `discovery.yml`.\n\n```yaml\n# discovery.yaml\nconnections:\n  - name: snowflake\n    variant: meltano # for cases where there really is a wide variety in ways to configure a particular system, multiple variants could possibly be used?\n    dialect: snowflake # as already exists for loaders https://gitlab.com/meltano/meltano/-/blob/master/schema/meltano.schema.json#L421\n    settings:\n      # supporting all the values listed in the Snowflake docs,\n      # with descriptions and kinds (omitted for brevity)\n      # https://docs.snowflake.com/en/user-guide/python-connector-api.html#connect\n      - name: user\n      - name: password\n      - name: host\n      - name: port\n      - name: database\n      - name: account\n      - name: warehouse\n      ...\n  - name: postgres\n    variant: meltano\n    dialect: postgres\n    settings:\n      # supporting all the values listed in the Postgres/sqlalchemy docs,\n      # with descriptions and kinds (omitted for brevity)\n      - name: user\n      - name: password\n      - name: host\n      - name: port\n      - name: database\n```\n\n2. Support configuration of connections, including a `default` per connection dialect. The default could be implied I guess, in cases with only one connection?\n\n```yaml\n# meltano.yml\nversion: 1\nplugins:\n  connections:\n  - name: postgres\n    default: true\n    config:\n      user: meltano\n      password: ${POSTGRES_MELTANO_PASSWORD}\n      host: db.example.com\n      port: 5432\n      database: meltano\n\n  - name: snowflake\n    default: true\n    config:\n      user: \"MELTANO\"\n      password: ${SNOWFLAKE_MELTANO_PASSWORD}\n      host: snowflake.example\n      account: account_name\n      database: snow-db\n      ...\n  - name: snowflake-dbt\n    inherits_from: snowflake\n    config:\n      user: \"DBT\"\n      password: ${SNOWFLAKE_DBT_PASSWORD}\n      # custom settings still supported as normal\n      wacky_auth_setting: smoke_signals  # becomes CONNECTION_SNOWFLAKE_WACKY_AUTH_SETTING\n  \n  extractors:\n  - name: tap-postgres\n    \n  loaders:\n  - name: target-snowflake\n\n  transformers:\n  - name: dbt-snowflake\n```\n\n3. Support the injection of connection details, _without_ requiring the user to specify them explicitly via refs, using either `env_aliases`, `aliases` or the default `value` field in `discovery.yml` with env var of the form `CONNECTION_<dialect>_<setting name>`. E.g.:\n\n```yaml\n# discovery.yml\nextractors:\n  - name: tap-postgres\n    label: PostgreSQL\n    description: PostgreSQL database extractor\n    namespace: tap_postgres\n    variants:\n    - name: transferwise\n      docs: https://hub.meltano.com/extractors/postgres.html\n      repo: https://github.com/transferwise/pipelinewise-tap-postgres\n      pip_url: pipelinewise-tap-postgres\n      capabilities:\n        - catalog\n        - discover\n        - state\n      settings_group_validation:\n        - ['host', 'port', 'user', 'password', 'dbname']\n      settings:\n        - name: host\n          value: localhost\n          description: PostgreSQL host\n          env_aliases: [CONNECTION_POSTGRES_HOST]\n        - name: port\n          kind: integer\n          value: 5432\n          description: PostgreSQL port\n          env_aliases: [CONNECTION_POSTGRES_PORT]\n        - name: user\n          description: PostgreSQL user\n          env_aliases: [CONNECTION_POSTGRES_USER]\n        - name: password\n          kind: password\n          description: PostgreSQL password\n          env_aliases: [CONNECTION_POSTGRES_PASSWORD]\n        - name: dbname\n          description: PostgreSQL database name\n          env_aliases: [CONNECTION_POSTGRES_DATABASE]\n        ...\n\nloaders:\n  - name: target-snowflake\n    label: Snowflake\n    description: Snowflake database loader\n    namespace: target_snowflake\n    dialect: snowflake  # I did not know this already existed \ud83d\ude05\n    target_schema: $TARGET_SNOWFLAKE_SCHEMA\n    variants:\n      - name: transferwise\n        docs: https://hub.meltano.com/loaders/snowflake.html\n        repo: https://github.com/transferwise/pipelinewise-target-snowflake\n        pip_url: pipelinewise-target-snowflake\n        settings_group_validation:\n          - ['account', 'dbname', 'user', 'password', 'warehouse', 'file_format', 'default_target_schema']\n        settings:\n          - name: account\n            label: Account\n            # previous values left for backwards compatibility\n            env_aliases: [SF_ACCOUNT, CONNECTION_SNOWFLAKE_ACCOUNT]\n            description: Snowflake account name (i.e. rtXXXXX.eu-central-1)\n            placeholder: E.g. rtXXXXX.eu-central-1\n          - name: dbname\n            label: DB Name\n            aliases: [database]\n            # previous values left for backwards compatibility\n            env_aliases: [TARGET_SNOWFLAKE_DATABASE, SF_DATABASE, CONNECTION_SNOWFLAKE_DATABASE] \n            description: Snowflake Database name]\n          ...\n```\n\n```yaml\n# dbt profiles\nconfig-version: 2\nversion: 2\nconfig:\n  send_anonymous_usage_stats: True\n  use_colors: True\nmeltano:\n  target: snowflake\n  outputs:\n    snowflake:\n      type: snowflake\n      threads: 4\n      account: \"{{ env_var('CONNECTION_SNOWFLAKE_ACCOUNT') }}\"\n      user: \"{{ env_var('CONNECTION_SNOWFLAKE_USER') }}\"\n      password: \"{{ env_var('CONNECTION_SNOWFLAKE_PASSWORD') }}\"\n      role: \"{{ env_var('CONNECTION_SNOWFLAKE_ROLE') }}\"\n      database: \"{{ env_var('CONNECTION_SNOWFLAKE_DATABASE') }}\"\n      warehouse: \"{{ env_var('CONNECTION_SNOWFLAKE_WAREHOUSE') }}\"\n      schema: \"DEFAULT\"\n```\n\n4. Support the selection of a named connection at the plugin level, or at `run` time. I think the easiest way to control which connection populates the `CONNECTION_*` for each plugins `Context` is using plugin extras:\n\n```yaml\n# meltano.yml\nenvironments:\n- name: dev\n  config:\n    plugins:\n      transformers:\n      - name: dbt-snowflake\n        config:\n          ...\n        # new `connection` plugin extra\n        connection_name: snowflake-dbt # this uses the `snowflake-dbt` connection from 2. above to populate the `CONNECTION_SNOWFLAKE_*` env vars for this plugin in this environment\n```\n\nPlugin extras can also be set at runtime using environment variables (as per the [docs](https://docs.meltano.com/guide/configuration#plugin-extras)):\n\n`TARGET_SNOWFLAKE__CONNECTION_NAME=snowflake-dbt meltano run tap-gitlab target-snowflake dbt-snowflake:run`\n\nAlso users can always revert back to configuring the individual settings manually in the plugin config or via an environment:\n\n```yaml\n# meltano.yml\nenvironments:\n- name: dev\n  config:\n    plugins:\n      loaders:\n      - name: target-snowflake\n        config:\n          user: \"MY_CUSTOM_USER\" # overrides CONNECTION_SNOWFLAKE_USER from the default connection in this environment\n```\n\n### What does success look like, and how can we measure that?\n\n- New users of Meltano are able to get started quickly by specifying default connections once (during onboarding) knowing that any compatible plugins added thereafter will reuse those connections.\n- Power users retain fine-grained control over which connections are used by which plugin per environment or at runtime.\n  - e.g. ```TAP_GITLAB__CONNECTION_NAME=gitlab_dev TARGET_SNOWFLAKE__CONNECTION_NAME=snowflake_ken DBT__CONNECTION_NAME=snowflake_ken meltano run tap-gitlab target-snowflake dbt:run``` (not particularly pretty, but the env vars could also go in a `--environment`).\n- Mapping of Meltano Connection to plugin-specific setting values is part of the _plugin definition_, stored as part of `discovery.yml`.\n- Plugins without `connection` support still work with existing settings and environment variables, 'as-is'.\n\n### Reasons Not to Build\n\n- ~~Not particularly DRY; many connections will reference the same warehouse or database with different User/Group/Role. This might be solved with connection inheritance or resource referencing in future iterations.~~ Connections expressed as plugins immediately support inheritance, solving the DRY issue.\n\n\n### Regression test\n(Ensure the feature doesn't cause any regressions)\n- [ ] Write adequate test cases and submit test results\n- [ ] Test results should be reviewed by a person from the team\n\n### Links / references",
+      "state": "closed",
+      "created_at": "2022-03-28T16:40:45.164Z",
+      "updated_at": "2022-05-30T13:23:20.329Z",
+      "closed_at": "2022-05-30T13:23:20.304Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Discussion",
+        "kind::Feature",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 7646034,
+        "username": "kgpayne",
+        "public_email": "",
+        "name": "Ken Payne",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png?v=1694601772",
+        "web_url": "https://gitlab.com/kgpayne"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3353",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 2,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3353",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3353/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3353/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3353",
+        "relative": "#3353",
+        "full": "meltano/meltano#3353"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 118,
+      "epic": {
+        "id": 331279,
+        "iid": 118,
+        "title": "Pillar 3: Build the future of DataOps with Meltano",
+        "url": "/groups/meltano/-/epics/118",
+        "group_id": 2524164,
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1237420,
+      "relative_position": -10260
     },
     {
       "id": 105780593,
@@ -1079,7 +1188,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1113,15 +1222,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 2,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3360",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3360",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1133,7 +1243,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1160,117 +1270,12 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
       "epic_issue_id": 1237419,
       "relative_position": -9747
-    },
-    {
-      "id": 105632412,
-      "iid": 3353,
-      "project_id": 7603319,
-      "title": "Add `connection` as first-class construct in `meltano.yml`",
-      "description": "### Problem to solve\n\nAs a user of Meltano, I would like a place in `meltano.yml` to specify `Connection` config objects that can be referenced and reused in all of the plugins I add to my Meltano Project.\n\n### Target audience\n\nEngineers/developers using Meltano with tools that themselves have native constructs for connections, such as dbt, Airflow, Great Expectations and Superset.\n\n### Further details\n\nConnections are a ubiquitous construct across the tools of the data platform, and yet in Meltano these details must still be expressed individually for each plugin as plain config or environment variables. This is not only extra work for users of Meltano, it also adds unnecessary human action in the integration path between plugins accessing the same resources (databases, warehouses, SaaS endpoints etc.).\n\nFor example, in the case of Snowflake:\n\n- Official Snowflake Python [Connector parameters](https://docs.snowflake.com/en/user-guide/python-connector-api.html#label-snowflake-connector-methods) (used under the hood by many python-based tools)\n- Airflow Snowflake [Connection](https://airflow.apache.org/docs/apache-airflow-providers-snowflake/stable/connections/snowflake.html)\n- dbt Snowflake [Profile](https://docs.getdbt.com/reference/warehouse-profiles/snowflake-profile)\n- Superset Snowflake Datasource [connection string](https://superset.apache.org/docs/databases/snowflake)\n- Great Expectations Datasource [connection string](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/snowflake/)\n\nFrom the above it is clear that configuration is commonly expressed in two forms, with tools supporting either or both formats (examples from Airflows [connection docs](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html#exporting-connections-from-the-cli)):\n\n- yaml/json:\n\n\t```yaml\n\tsnowflake_example_connection:\n\t  conn_type: snowflake\n\t  login: user\n\t  password: password\n\t  host: snowflake.example\n\t  schema: db-schema\n\t  extra:\n\t    account: account\n\t    database: snow-db\n\t    region: us-east\n\t    warehouse: snow-warehouse\n\t```\n\n- URI\n\n\t```\n\tsnowflake://user:password@snowflake.example/db-schema?account=account&database=snow-db&region=us-east&warehouse=snow-warehouse\n\t```\n\nWhilst it is common for tools to support the specification of a 'default' connection, the richness of User/Role/Group functionalities in databases and warehouses for controlling access and for cost management (e.g. monitoring Snowflake credit consumption based on per-tool or per-pipeline User/Role definitions) mean that most tools will define or consume several connections based on the execution context. This means a single Project will typically have many more connection definitions than base warehouse and database resources.\n\nInterestingly we _already_ handle connections via a [`ConnectionService`](https://gitlab.com/meltano/meltano/-/blob/1baac4f6780ca761a25ba69632116ad1b7493ba8/src/meltano/core/connection_service.py#L15) in `meltano.core` (for use in the older Model functionality), however (as noted in the [comments](https://gitlab.com/meltano/meltano/-/blob/1baac4f6780ca761a25ba69632116ad1b7493ba8/src/meltano/core/connection_service.py#L39)) this has too detailed an understanding of the expected format of each connection type.\n\n### Proposal\n\nExpected outcomes:\n\n- Allow users to specify and manage connection information via the CLI (including a default connection per type), _without_ the need to explicitly reference that information when adding new compatible plugins.\n- Allow users to specify a named connection on a per-plugin and per-run basis, or override individual settings from the default connection.\n\nTo achieve these two outcomes, we could:\n\n1. Support connection definitions in `discovery.yml`.\n\n```yaml\n# discovery.yaml\nconnections:\n  - name: snowflake\n    variant: meltano # for cases where there really is a wide variety in ways to configure a particular system, multiple variants could possibly be used?\n    dialect: snowflake # as already exists for loaders https://gitlab.com/meltano/meltano/-/blob/master/schema/meltano.schema.json#L421\n    settings:\n      # supporting all the values listed in the Snowflake docs,\n      # with descriptions and kinds (omitted for brevity)\n      # https://docs.snowflake.com/en/user-guide/python-connector-api.html#connect\n      - name: user\n      - name: password\n      - name: host\n      - name: port\n      - name: database\n      - name: account\n      - name: warehouse\n      ...\n  - name: postgres\n    variant: meltano\n    dialect: postgres\n    settings:\n      # supporting all the values listed in the Postgres/sqlalchemy docs,\n      # with descriptions and kinds (omitted for brevity)\n      - name: user\n      - name: password\n      - name: host\n      - name: port\n      - name: database\n```\n\n2. Support configuration of connections, including a `default` per connection dialect. The default could be implied I guess, in cases with only one connection?\n\n```yaml\n# meltano.yml\nversion: 1\nplugins:\n  connections:\n  - name: postgres\n    default: true\n    config:\n      user: meltano\n      password: ${POSTGRES_MELTANO_PASSWORD}\n      host: db.example.com\n      port: 5432\n      database: meltano\n\n  - name: snowflake\n    default: true\n    config:\n      user: \"MELTANO\"\n      password: ${SNOWFLAKE_MELTANO_PASSWORD}\n      host: snowflake.example\n      account: account_name\n      database: snow-db\n      ...\n  - name: snowflake-dbt\n    inherits_from: snowflake\n    config:\n      user: \"DBT\"\n      password: ${SNOWFLAKE_DBT_PASSWORD}\n      # custom settings still supported as normal\n      wacky_auth_setting: smoke_signals  # becomes CONNECTION_SNOWFLAKE_WACKY_AUTH_SETTING\n  \n  extractors:\n  - name: tap-postgres\n    \n  loaders:\n  - name: target-snowflake\n\n  transformers:\n  - name: dbt-snowflake\n```\n\n3. Support the injection of connection details, _without_ requiring the user to specify them explicitly via refs, using either `env_aliases`, `aliases` or the default `value` field in `discovery.yml` with env var of the form `CONNECTION_<dialect>_<setting name>`. E.g.:\n\n```yaml\n# discovery.yml\nextractors:\n  - name: tap-postgres\n    label: PostgreSQL\n    description: PostgreSQL database extractor\n    namespace: tap_postgres\n    variants:\n    - name: transferwise\n      docs: https://hub.meltano.com/extractors/postgres.html\n      repo: https://github.com/transferwise/pipelinewise-tap-postgres\n      pip_url: pipelinewise-tap-postgres\n      capabilities:\n        - catalog\n        - discover\n        - state\n      settings_group_validation:\n        - ['host', 'port', 'user', 'password', 'dbname']\n      settings:\n        - name: host\n          value: localhost\n          description: PostgreSQL host\n          env_aliases: [CONNECTION_POSTGRES_HOST]\n        - name: port\n          kind: integer\n          value: 5432\n          description: PostgreSQL port\n          env_aliases: [CONNECTION_POSTGRES_PORT]\n        - name: user\n          description: PostgreSQL user\n          env_aliases: [CONNECTION_POSTGRES_USER]\n        - name: password\n          kind: password\n          description: PostgreSQL password\n          env_aliases: [CONNECTION_POSTGRES_PASSWORD]\n        - name: dbname\n          description: PostgreSQL database name\n          env_aliases: [CONNECTION_POSTGRES_DATABASE]\n        ...\n\nloaders:\n  - name: target-snowflake\n    label: Snowflake\n    description: Snowflake database loader\n    namespace: target_snowflake\n    dialect: snowflake  # I did not know this already existed \ud83d\ude05\n    target_schema: $TARGET_SNOWFLAKE_SCHEMA\n    variants:\n      - name: transferwise\n        docs: https://hub.meltano.com/loaders/snowflake.html\n        repo: https://github.com/transferwise/pipelinewise-target-snowflake\n        pip_url: pipelinewise-target-snowflake\n        settings_group_validation:\n          - ['account', 'dbname', 'user', 'password', 'warehouse', 'file_format', 'default_target_schema']\n        settings:\n          - name: account\n            label: Account\n            # previous values left for backwards compatibility\n            env_aliases: [SF_ACCOUNT, CONNECTION_SNOWFLAKE_ACCOUNT]\n            description: Snowflake account name (i.e. rtXXXXX.eu-central-1)\n            placeholder: E.g. rtXXXXX.eu-central-1\n          - name: dbname\n            label: DB Name\n            aliases: [database]\n            # previous values left for backwards compatibility\n            env_aliases: [TARGET_SNOWFLAKE_DATABASE, SF_DATABASE, CONNECTION_SNOWFLAKE_DATABASE] \n            description: Snowflake Database name]\n          ...\n```\n\n```yaml\n# dbt profiles\nconfig-version: 2\nversion: 2\nconfig:\n  send_anonymous_usage_stats: True\n  use_colors: True\nmeltano:\n  target: snowflake\n  outputs:\n    snowflake:\n      type: snowflake\n      threads: 4\n      account: \"{{ env_var('CONNECTION_SNOWFLAKE_ACCOUNT') }}\"\n      user: \"{{ env_var('CONNECTION_SNOWFLAKE_USER') }}\"\n      password: \"{{ env_var('CONNECTION_SNOWFLAKE_PASSWORD') }}\"\n      role: \"{{ env_var('CONNECTION_SNOWFLAKE_ROLE') }}\"\n      database: \"{{ env_var('CONNECTION_SNOWFLAKE_DATABASE') }}\"\n      warehouse: \"{{ env_var('CONNECTION_SNOWFLAKE_WAREHOUSE') }}\"\n      schema: \"DEFAULT\"\n```\n\n4. Support the selection of a named connection at the plugin level, or at `run` time. I think the easiest way to control which connection populates the `CONNECTION_*` for each plugins `Context` is using plugin extras:\n\n```yaml\n# meltano.yml\nenvironments:\n- name: dev\n  config:\n    plugins:\n      transformers:\n      - name: dbt-snowflake\n        config:\n          ...\n        # new `connection` plugin extra\n        connection_name: snowflake-dbt # this uses the `snowflake-dbt` connection from 2. above to populate the `CONNECTION_SNOWFLAKE_*` env vars for this plugin in this environment\n```\n\nPlugin extras can also be set at runtime using environment variables (as per the [docs](https://docs.meltano.com/guide/configuration#plugin-extras)):\n\n`TARGET_SNOWFLAKE__CONNECTION_NAME=snowflake-dbt meltano run tap-gitlab target-snowflake dbt-snowflake:run`\n\nAlso users can always revert back to configuring the individual settings manually in the plugin config or via an environment:\n\n```yaml\n# meltano.yml\nenvironments:\n- name: dev\n  config:\n    plugins:\n      loaders:\n      - name: target-snowflake\n        config:\n          user: \"MY_CUSTOM_USER\" # overrides CONNECTION_SNOWFLAKE_USER from the default connection in this environment\n```\n\n### What does success look like, and how can we measure that?\n\n- New users of Meltano are able to get started quickly by specifying default connections once (during onboarding) knowing that any compatible plugins added thereafter will reuse those connections.\n- Power users retain fine-grained control over which connections are used by which plugin per environment or at runtime.\n  - e.g. ```TAP_GITLAB__CONNECTION_NAME=gitlab_dev TARGET_SNOWFLAKE__CONNECTION_NAME=snowflake_ken DBT__CONNECTION_NAME=snowflake_ken meltano run tap-gitlab target-snowflake dbt:run``` (not particularly pretty, but the env vars could also go in a `--environment`).\n- Mapping of Meltano Connection to plugin-specific setting values is part of the _plugin definition_, stored as part of `discovery.yml`.\n- Plugins without `connection` support still work with existing settings and environment variables, 'as-is'.\n\n### Reasons Not to Build\n\n- ~~Not particularly DRY; many connections will reference the same warehouse or database with different User/Group/Role. This might be solved with connection inheritance or resource referencing in future iterations.~~ Connections expressed as plugins immediately support inheritance, solving the DRY issue.\n\n\n### Regression test\n(Ensure the feature doesn't cause any regressions)\n- [ ] Write adequate test cases and submit test results\n- [ ] Test results should be reviewed by a person from the team\n\n### Links / references",
-      "state": "closed",
-      "created_at": "2022-03-28T16:40:45.164Z",
-      "updated_at": "2022-05-30T13:23:20.329Z",
-      "closed_at": "2022-05-30T13:23:20.304Z",
-      "closed_by": {
-        "id": 11629953,
-        "username": "MeltyBot",
-        "public_email": "",
-        "name": "Melty Bot",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
-        "web_url": "https://gitlab.com/MeltyBot"
-      },
-      "labels": [
-        "Discussion",
-        "kind::Feature",
-        "valuestream::Meltano"
-      ],
-      "milestone": {
-        "id": 797629,
-        "iid": 42,
-        "group_id": 2524164,
-        "title": "Backlog",
-        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
-        "state": "active",
-        "created_at": "2019-02-21T14:50:28.741Z",
-        "updated_at": "2019-02-21T14:50:28.741Z",
-        "due_date": null,
-        "start_date": "2019-02-25",
-        "expired": false,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
-      },
-      "assignees": [],
-      "author": {
-        "id": 7646034,
-        "username": "kgpayne",
-        "public_email": "",
-        "name": "Ken Payne",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
-        "web_url": "https://gitlab.com/kgpayne"
-      },
-      "type": "ISSUE",
-      "assignee": null,
-      "user_notes_count": 8,
-      "merge_requests_count": 0,
-      "upvotes": 1,
-      "downvotes": 0,
-      "due_date": null,
-      "confidential": false,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3353",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 2,
-        "completed_count": 0
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": false,
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3353",
-        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3353/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3353/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/7603319",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#3353",
-        "relative": "#3353",
-        "full": "meltano/meltano#3353"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 118,
-      "epic": {
-        "id": 331279,
-        "iid": 118,
-        "title": "Pillar 3: Build the future of DataOps with Meltano",
-        "url": "/groups/meltano/-/epics/118",
-        "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 1237420,
-      "relative_position": -10260
     },
     {
       "id": 105311945,
@@ -1289,7 +1294,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1325,15 +1330,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 12,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3343",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3343",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1345,7 +1351,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1372,7 +1378,7 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1396,7 +1402,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1425,20 +1431,21 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3323",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3323",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1450,7 +1457,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1477,7 +1484,7 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1538,15 +1545,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 26,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3302",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3302",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1558,7 +1566,7 @@
         "completed_count": 0
       },
       "weight": 4,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1585,7 +1593,7 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": {
         "id": 56415,
@@ -1622,7 +1630,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1658,15 +1666,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 12,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meta/-/issues/205",
+      "web_url": "https://gitlab.com/meltano/meta/-/work_items/205",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1678,7 +1687,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1705,118 +1714,12 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
       "epic_issue_id": 1127614,
       "relative_position": -7182
-    },
-    {
-      "id": 102006400,
-      "iid": 3218,
-      "project_id": 7603319,
-      "title": "Consider how to migrate from generic utilites to specific plugin types",
-      "description": "@DouweM rightly pointed out that as we figure out some of these abstractions for new plugins we'll have to have a migration path for users. \n\nAssuming there's a future state where we have `analyzer` type plugins, how do we get installed plugins from `utility` to the new type?\n\n@aaronsteers @pandemicsyn @edgarrmondragon @kgpayne if you have quick thoughts. This isn't something I think we need to decide on right now, but it'll come up at some point.",
-      "state": "closed",
-      "created_at": "2022-02-07T15:33:43.174Z",
-      "updated_at": "2022-05-30T10:14:18.946Z",
-      "closed_at": "2022-05-30T10:14:18.860Z",
-      "closed_by": {
-        "id": 11629953,
-        "username": "MeltyBot",
-        "public_email": "",
-        "name": "Melty Bot",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
-        "web_url": "https://gitlab.com/MeltyBot"
-      },
-      "labels": [
-        "Discussion",
-        "kind::Feature",
-        "valuestream::Meltano"
-      ],
-      "milestone": {
-        "id": 2351602,
-        "iid": 211,
-        "group_id": 2524164,
-        "title": "Q3-2022",
-        "description": "",
-        "state": "active",
-        "created_at": "2021-11-29T21:39:41.523Z",
-        "updated_at": "2021-11-29T21:39:41.523Z",
-        "due_date": "2022-09-30",
-        "start_date": "2022-07-01",
-        "expired": true,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/211"
-      },
-      "assignees": [],
-      "author": {
-        "id": 1942272,
-        "username": "tayloramurphy",
-        "public_email": "",
-        "name": "Taylor A Murphy",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
-        "web_url": "https://gitlab.com/tayloramurphy"
-      },
-      "type": "ISSUE",
-      "assignee": null,
-      "user_notes_count": 8,
-      "merge_requests_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": null,
-      "confidential": false,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3218",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": true,
-      "task_status": "0 of 0 checklist items completed",
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3218",
-        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3218/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3218/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/7603319",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#3218",
-        "relative": "#3218",
-        "full": "meltano/meltano#3218"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 118,
-      "epic": {
-        "id": 331279,
-        "iid": 118,
-        "title": "Pillar 3: Build the future of DataOps with Meltano",
-        "url": "/groups/meltano/-/epics/118",
-        "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 1102076,
-      "relative_position": -6156
     },
     {
       "id": 101679618,
@@ -1835,7 +1738,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1873,15 +1776,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 15,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3200",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3200",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1893,7 +1797,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1920,12 +1824,230 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
       "epic_issue_id": 1103422,
       "relative_position": -6669
+    },
+    {
+      "id": 102006400,
+      "iid": 3218,
+      "project_id": 7603319,
+      "title": "Consider how to migrate from generic utilites to specific plugin types",
+      "description": "@DouweM rightly pointed out that as we figure out some of these abstractions for new plugins we'll have to have a migration path for users. \n\nAssuming there's a future state where we have `analyzer` type plugins, how do we get installed plugins from `utility` to the new type?\n\n@aaronsteers @pandemicsyn @edgarrmondragon @kgpayne if you have quick thoughts. This isn't something I think we need to decide on right now, but it'll come up at some point.",
+      "state": "closed",
+      "created_at": "2022-02-07T15:33:43.174Z",
+      "updated_at": "2022-05-30T10:14:18.946Z",
+      "closed_at": "2022-05-30T10:14:18.860Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Discussion",
+        "kind::Feature",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2351602,
+        "iid": 211,
+        "group_id": 2524164,
+        "title": "Q3-2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:39:41.523Z",
+        "updated_at": "2021-11-29T21:39:41.523Z",
+        "due_date": "2022-09-30",
+        "start_date": "2022-07-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/211"
+      },
+      "assignees": [],
+      "author": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3218",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3218",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3218/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3218/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3218",
+        "relative": "#3218",
+        "full": "meltano/meltano#3218"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 118,
+      "epic": {
+        "id": 331279,
+        "iid": 118,
+        "title": "Pillar 3: Build the future of DataOps with Meltano",
+        "url": "/groups/meltano/-/epics/118",
+        "group_id": 2524164,
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1102076,
+      "relative_position": -6156
+    },
+    {
+      "id": 89103589,
+      "iid": 2813,
+      "project_id": 7603319,
+      "title": "Formalize Meltano web API to simplify integration with other workflows/orchestrators",
+      "description": "### Problem to solve\nRight now there is a fair amount of code that needs to be written and maintained for Meltano to be properly integrated with a workflow orchestrator. In order to make it easier to adopt Meltano it would be useful for it to have a web API that is documented and maintained to enable external systems to use that to drive the execution of Meltano pipelines. As part of that API it would be beneficial to expose metadata of the taps/targets, schema, timing, lineage, etc.\n\n### Target audience\n(For whom are we doing this? Include a persona)\nThe audience for this feature includes software developers who want a straightforward way of adding data integration to their systems, data engineers who want to include Meltano as part of their data platform without requiring deep customization or long lead times to build an integration, and analytics engineers who want to use Meltano without adopting it as their entire interface.\n\n### Proposal\nGiven that there is already a web application for Meltano it would probably be easiest to add the APIs to that code. Alternatively, it might be useful to build a separate API application using something like FastAPI to get out of the box support for Swagger, and simplify the work of integrating with the Meltano Python APIs.\n\n### What does success look like, and how can we measure that?\nA successful implementation would provide a set of well designed and documented APIs (REST, GraphQL, gRPC, whatever) that provide access to functionality in Meltano that will drive pipeline execution, allow for querying the state of execution runs (current and past), retrieve pipeline details (sources/destinations, configuration, etc.), and metadata about run results for integrating with data platforms (e.g. data catalogs, lineage systems, orchestrators, etc.)\n\n### Links / references\n- [FastAPI](https://fastapi.tiangolo.com/)\n- [OpenLineage](https://github.com/OpenLineage/OpenLineage)",
+      "state": "closed",
+      "created_at": "2021-06-22T14:55:08.413Z",
+      "updated_at": "2022-05-30T09:24:16.169Z",
+      "closed_at": "2022-05-30T09:24:16.153Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Accepting Merge Requests",
+        "Architecture Decision",
+        "Needs Refinement",
+        "Needs Research Spike",
+        "OKR: Managed Meltano Beta",
+        "Roadmap",
+        "kind::Feature"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [],
+      "author": {
+        "id": 199793,
+        "username": "blarghmatey",
+        "public_email": "tmacey@boundlessnotions.com",
+        "name": "Tobias Macey",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/066db7898caa8153700ca3fbf1fa1367f2328038b8c40cdab4a40bcf495d2243?s=80&d=identicon",
+        "web_url": "https://gitlab.com/blarghmatey"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/2813",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2813",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2813/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2813/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2813",
+        "relative": "#2813",
+        "full": "meltano/meltano#2813"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 118,
+      "epic": {
+        "id": 331279,
+        "iid": 118,
+        "title": "Pillar 3: Build the future of DataOps with Meltano",
+        "url": "/groups/meltano/-/epics/118",
+        "group_id": 2524164,
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1098281,
+      "relative_position": -5643
     },
     {
       "id": 101296712,
@@ -1944,7 +2066,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1973,20 +2095,21 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3182",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3182",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1998,7 +2121,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -2025,7 +2148,7 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -2049,7 +2172,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -2083,15 +2206,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 2,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3152",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3152",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -2103,7 +2227,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/7603319/issues/3152",
@@ -2129,119 +2253,12 @@
         "title": "Pillar 3: Build the future of DataOps with Meltano",
         "url": "/groups/meltano/-/epics/118",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
+        "human_readable_timestamp": "<strong>1941</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
       "epic_issue_id": 1041494,
       "relative_position": -4617
-    },
-    {
-      "id": 100196332,
-      "iid": 3139,
-      "project_id": 7603319,
-      "title": "The Meltano Tasks Service (MTS)",
-      "description": "**Change log:**\n\n- 2022-01-06: v1 First iteration.\n- 2022-01-12: v2 Major description re-write, incorporating feedback and clarifications.\n\n# The Meltano Tasks Service (MTS)\n\n## Proposed Architecture\n\nWe propose using an agent-based architecture, common amongst CI/CD tools (e.g. GitLabs self-hosted runners) for the execution of Tasks (units of work) in local, development and production environments. In this architecture, execution of Meltano tasks is delegated to hosts running a Meltano Task Agent. Rather than connecting directly to these agents (requiring point-to-point network connectivity), commands are submitted to a service on the internet (called the Meltano Tasks Service, or MTS) via an API. Hosts running the Meltano Task Agent need only have outbound internet access to poll the MTS API for new tasks, and to post task statuses, logs and artefacts. Tasks are single invocations of the Meltano CLI (e.g. an `elt` or `invoke` command) and therefore benefit from state, config injection and environment selection. Task Agents can be deployed on hosts close to key resources such as Warehouses and internal databases, and tasks can be directed to specific Task Agents using metadata and routing rules inside your Meltano Project config. Tasks can be submitted to the MTS via the Meltano CLI or directly to the MTS using the API or native integrations provided for your orchestration framework of choice.\n\n![Execution_Models-2](/uploads/8edb95ca1398fac6f1e6364cae3148cb/Execution_Models-2.jpg)\n\nWorking in this way achieves two key goals:\n\n- It provides a single execution model for local, development and production stages all within Meltanos' control, whilst still supporting external orchestration for scheduling and workflow functions.\n\n- It solves the proximity challenges associated with current centralised execution-orchestration platforms by enabling users to execute tasks in proximity to the resources those tasks depend on (rather than relying on SSH Tunnels, Proxies or other network-level bridges to connect to disparate resources to a central processing pool such as a k8s or ECS cluster).\n\n## Background\n\nData platforms have several fundamental differences to other kinds of software systems, necessitating a different approach to their architecture and deployment. The data community is used to thinking about our work in two parallel workstreams; an operational stream and a logical/data stream. In the operational stream, we care about the smooth running of our data processing tasks. In the logical stream we care about the quality of the data and assets produced by those tasks. Stakeholders typically only care about the latter, but data quality depends heavily on reliable, timely execution and effective metadata collection from that execution. Therefore solving the operational challenges (i.e. the execution of tasks) would set us up to collect and centralise the relevant metadata needed to help solve the more visible logical layer concerns. \n\n### Differences from 'Task Orchestration Frameworks'\n\n**Importantly** a 'Task Execution Framework' facilitated by the Meltano Tasks Service is different and complimentary to a 'Task Orchestration Framework' such as Airflow, Dagster or Prefect. The latter determines _what_ task to run _when_ (arranged as DAGs) whilst the former determines _where_ the task should run and _how_ (with what config and state). Current orchestrators enforce a single answer to the _where_ question according to their configured Executors (typically a Celery queue or Kubernetes Cluster), which is simply not flexible enough in the data ecosystem to meet proximity constraints and avoid building network bridges. It is our expectation that todays orchestrators will call the MTS to delegate the 'last mile' execution of tasks as an alternative execution model to delegating tasks to Celery or Kubernetes; i.e. Orchestration and Execution split into two separate, specialised and loosely coupled concerns.\n\nBoth Dagster and Prefect (which already ostensibly follow an agent-based architecture model) are optimised for running whole flows of tasks using a single Daemon/Agent (and both either recommend or only support one Daemon/Agent). Deamons/Agents receive an entire DAG and execute it using one of their supported Executors (typically Celery, Docker (on host), Kubernetes, ECS etc.). This is similar in effect to Airflow, and is the prevailing centralised execution model. Conventional wisdom is that if all resources are not available on the same network as the host or cluster running your jobs (or out on the internet), you need SSH bastions, AWS VPC Transit Gateways/Peering or similar to bridge the gap. We think we can do better, whilst still integrating with existing orchestrators for scheduling and DAG definitions.\n\n### DevOps vs. DataOps\n\nThese two parallel concerns in operational robustness and logical quality impose new constraints that are not common to typical software applications and their deployment:\n\n- In data integration systems, proximity matters. Unlike common software services (micro or monolith), whos components are typically hosted in one central network location (VPC, k8s/ECS cluster etc.), _where_ tasks run is as important as _when_ or _how_ they run for data movement (ELTP) and data transformation. Tasked with collecting and processing data from disparate (private and public) databases and API's, the ability to seamlessly and unintrusively 'drop into' environments hosted and managed by others becomes important. Current tooling relies on network-level constructs such as SSH Tunnels/Bastions, VPNs or AWS Transit Gateway/Peering (or equivalent) to bridge between a centralised data processing infrastructure and disparate sources. This imposes a not-insignificant operational burden, and introduces operational risks and points-of-failure.\n\n- Given the need to test both the operational and logical/data outcomes of data tasks and workflows, development and production data tasks require access to the same data sources. Unlike a typical 3-tier web app, which can readily be instantiated into an isolated environment (populated with mock data and integrations) using Infrastructure-as-Code practices and CI/CD automations, data workflows require the same read-only access to sources in both development and production to generate accurate and testable output data and artefacts (dashboards, reports etc.). Therefore the definition of 'development environment' is different in the data world - it is a state of configuration (e.g. added filters on data sources to minimise processing time, and diverted output locations/schemas for targets/destinations) rather than an isolated physical location/environment. Choosing a model that allows local (for development and 1-off curation tasks), development and production workflows to share the same 'physical' execution environment whilst still providing robust logical separation is highly desirable.\n\nIt is our belief that an agent-based architecture meets these constraints. Task Agents can be deployed in close proximity to resource dependencies, wherever they are hosted, negating the need for network-level bridges. As Task Agents simple call the Meltano CLI to execute Tasks, they benefit from the [Environments](https://meltano.com/docs/environments.html) feature that already handles the configuration differences between local, development and production.\n\n### Implementation and Ordering\n\nAs mentioned below, building such a system is a non-trivial development commitment. My aim in raising this as an option is to avoid us traveling too far down other avenues (wrapping/controlling/tightly integrating with specific orchestrators) without understanding the limitations of current orchestrators 'last-mile' execution models. As the Task Agents will simply be calling the Meltano CLI, much of the development work runs parallel to CLI improvements (rather than in series with). As the team and company grows, additional resources can be allocated to this component independent of CLI development work.\n\nSpecific recommendations:\n\n- Replace the Meltano system database with an API (possibly using the same codebase as the current UI web service). By relying on network connectivity to a shared relational database when executing tasks, we affectively limit the extent to which tasks (CLI invocations) can be distributed. Moving this to an API (that is Meltano-project, and therefore environment, aware) we open the door to running Tasks _anywhere_ (with internet access) using a unified backend. Whilst this is technically possible by hosting a database open to the internet, that is considered a bad practice for security reasons (at a minimum). Naturally the UI will still need a database for persistence, but it will be abstracted and hidden from the CLI behind APIs.\n\n### Other Opportunities\n\n- The MTS could be self-hostable as part of Meltanos Core OS offering, but would also be an excellent SaaS opportunity; a paid offering for managing Task Agent registration, bounded permissions, secrets, rbac, task queues, authentication, logs, artefact store/data lake, and also providing pay-as-you-go worker agents for use cases that do not require self-hosted runners (e.g. EL from a SaaS tool to a SaaS warehouse). This strikes me as 'the GitLab model' \ud83d\ude80\n\n- By intermediating task executions with the MTS, Enterprise and Regulated workloads are afforded additional governance controls; the opportunity to evaluate Authorisation as well as Authentication for entities calling the MTS. Say I am working on some local changes with my personal API creds, but I accidentally flag a task or workflow to run in `--environment=prod` in stead of my own dev environment. With the API in between it can return a 'Permission Denied' error for my user on the `prod` environment \ud83d\udd12 The same could be true at the resource/inventory level; \"User 'ken' does not have permission to target warehouse 'snowflake-prod'.\" \ud83d\ude42\n\n<details>\n<summary><h1>v1</h1></summary>\n\nHow does Meltano execute units of 'work' (called tasks, jobs, steps and similar in various data tools)?\n\nAs part of our progress on `meltano run` we had several discussions around executing multiple elt/invoke actions in a single command (e.g. `meltano run tap-github target-snowflake db:run`) vs. relying on an orchestrator to execute the `meltano` CLI command multiple times as part of a workflow (culminating in an [issue on 'run all'](https://gitlab.com/meltano/meltano/-/issues/3041)). These two approaches can broadly be categorised as 'internal' and 'external' run modes:\n\n- Internal, aka 'the dbt model': `dbt run` executes a complex DAG/workflow of subtasks (model builds) using a single command with rich selection syntax. `meltano run` could do the same, executing complex DAGs of plugin tasks (EL, dbt, Great Expectations etc.) from a single interface.\n\n- External, aka 'the orchestrator model'. In this mode DAGs are defined in an external orchestrator, made up of individual `meltano elt ...` and `meltano invoke ...` tasks. This is how we are running [Meltano at Meltano](https://gitlab.com/meltano/squared) with Airflow today.\n\nBoth these models have their pros and cons, but before briefly summarising them there is one more axis of interest I would like to add; execution locality. _Where_ Meltano runs is as important as _how_ it runs in several critical use cases, including data movement (ELTP) and data transformation. Having fine-grained control over where Meltano runs specific tasks would afford us the ability to co-locate jobs with resources and dependencies, for both performance and security reasons. Think running `dbt run` from a host in the same subnet as Redshift, or sensitive internal database EL's in the same private subnets as the `meltano elt` runner, or particularly intensive tasks on hosts with more CPU/memory/bandwidth/GPU.\n\nWith that in mind, how do the two models compare?\n\n**Internal:**\n\nThe internal execution model is least flexible from an execution locality perspective. All subtasks run on a single host, with limited opportunities for resource isolation and right-sizing of subtasks. dbt manages with threading, however this only works because all of the 'heavy lifting' is performed by the warehouse rather than the host itself. That said, the internal model offers a clean and simple user experience and is especially great for local development and testing.\n\n**External:**\n\nThe external execution model is more flexible in terms of execution locality, at the cost of increased complexity and reduced integration. Orchestrators like Airflow, Dagster and Prefect provide fine-grained control of Task-level resourcing (e.g. using the KubernetesPodOperator in Airflow), however network locality is harder to achieve (i.e. having worker nodes spread across many isolated networks).\n\n---\n\nThese two are not mutually exclusive (it is possible that we can support internal for dev and external in production, using a DAG Generator) but they illustrate the key constraints. In an ideal world we would have the simplicity and convenience of the internal execution model and the flexibility of the external one - with even more flexibility on top!\n\n**Agent-based:**\n\nThis best-of-both-worlds scenario might be achieved using an agent-based architecture, common amongst CI/CD tools (e.g. GitLabs self-hosted [runners](https://docs.gitlab.com/runner/)). In this scenario, execution of Meltano tasks is delegated to hosts running a Meltano agent. Rather than connecting directly to these agents (requiring point-to-point network connectivity), commands are submitted to a service on the internet via an API. Hosts running the Meltano agent need only have outbound internet access to poll the API for new tasks, and to post task statuses, logs and artefacts. Agents can be deployed on hosts close to key resources such as Warehouses and internal databases, and tasks can be directed to specific hosts using metadata and routing rules.\n\nIn this way we get the convenience of the internal model (i.e. complex DAG executions with a single command, as discussed in [Office Hours on 2022-01-05](https://youtu.be/JzWMADHS4tw?t=2382)) with the benefits of the external model (and more) in terms of execution locality flexibility!\n\nDoes this replace orchestration? Not necessarily. This service would not _need_ to implement scheduling. Manual runs could be orchestrated by the host (laptop) executing `meltano run` via the CLI (which would submit API requests for tasks to be performed, returning the responses and logs to the users terminal). Scheduled runs could similarly be executed by an orchestrator, either using the CLI or by a dedicated Meltano Operator (in the Airflow case) to interact with the task API directly. This is particularly compelling in the case of managed orchestrators like Astronomer and Prefect Cloud where accessing an API on the internet to submit tasks is much easier than deploying workers into private hosting environments to run Meltano close to existing resources.\n\nThis API service could be self-hostable as part of Meltanos Core OS offering, but would also be an excellent SaaS opportunity; a paid offering for managing the agent registration, bounded permissions, secrets, rbac, task queues, authentication, logs, artefact store/data lake, and also providing pay-as-you-go worker agents for use cases that do not require self-hosted runners (e.g. EL from a SaaS tool to a SaaS warehouse). This strikes me as 'the GitLab model' \ud83d\ude80\n\n**Additional thoughts:**\n\nAgents would likely need access to a Meltano Project git repository, either directly or via the API, in order to retrieve users Projects and run specific builds/commit hashes (for dev, test and staging use cases). With similar challenges already solved in the CI/CD space as example, such versioning challenges are not insurmountable. This approach may also simplify the environments challenge (dev, prod, staging) - I believe the same Agents would be used for all environments, on the basis that i) your dbt task will likely always prefer to run on the agent closest to the warehouse, regardless of the kind of task and ii) resource constraints can be handled with priorities and Agent scaling (i.e. always giving preference to tasks marked as 'prod' in Agent task queues, and adding Agents based on queue depths).\n\n</details>",
-      "state": "closed",
-      "created_at": "2022-01-06T11:40:07.425Z",
-      "updated_at": "2022-05-30T10:04:19.086Z",
-      "closed_at": "2022-05-30T10:04:19.061Z",
-      "closed_by": {
-        "id": 11629953,
-        "username": "MeltyBot",
-        "public_email": "",
-        "name": "Melty Bot",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
-        "web_url": "https://gitlab.com/MeltyBot"
-      },
-      "labels": [
-        "Backend",
-        "Discussion",
-        "Marketing::Blog Feature",
-        "valuestream::Meltano"
-      ],
-      "milestone": {
-        "id": 797629,
-        "iid": 42,
-        "group_id": 2524164,
-        "title": "Backlog",
-        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
-        "state": "active",
-        "created_at": "2019-02-21T14:50:28.741Z",
-        "updated_at": "2019-02-21T14:50:28.741Z",
-        "due_date": null,
-        "start_date": "2019-02-25",
-        "expired": false,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
-      },
-      "assignees": [],
-      "author": {
-        "id": 7646034,
-        "username": "kgpayne",
-        "public_email": "",
-        "name": "Ken Payne",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
-        "web_url": "https://gitlab.com/kgpayne"
-      },
-      "type": "ISSUE",
-      "assignee": null,
-      "user_notes_count": 28,
-      "merge_requests_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": null,
-      "confidential": false,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3139",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": true,
-      "task_status": "0 of 0 checklist items completed",
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3139",
-        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3139/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3139/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/7603319",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#3139",
-        "relative": "#3139",
-        "full": "meltano/meltano#3139"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 118,
-      "epic": {
-        "id": 331279,
-        "iid": 118,
-        "title": "Pillar 3: Build the future of DataOps with Meltano",
-        "url": "/groups/meltano/-/epics/118",
-        "group_id": 2524164,
-        "human_readable_timestamp": "<strong>1634</strong> days elapsed"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 1035790,
-      "relative_position": -4104
     }
   ]
 }
