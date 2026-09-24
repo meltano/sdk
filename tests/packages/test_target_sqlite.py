@@ -13,7 +13,6 @@ from uuid import uuid4
 
 import pytest
 import sqlalchemy
-import sqlalchemy.exc
 from tap_hostile import TapHostile
 from tap_sqlite import SQLiteTap
 from target_sqlite import SQLiteSink, SQLiteTarget
@@ -206,11 +205,15 @@ def test_sync_sqlite_to_sqlite(
     assert line_num > 0, "No lines read."
 
 
-def test_sqlite_schema_addition(sqlite_sample_target: SQLTarget):
-    """Test that SQL-based targets attempt to create new schema.
+def test_sqlite_schema_addition(
+    sqlite_sample_target: SQLTarget,
+    sqlite_target_test_config: dict,
+):
+    """Test that a schema-qualified stream name loads successfully.
 
-    It should attempt to create a schema if one is included in stream name,
-    e.g. "schema_name-table_name".
+    SQLite has no `CREATE SCHEMA`, so a stream named "schema_name-table_name"
+    is folded by the target into a single physical table
+    "schema_name__table_name" rather than a real schema + table pair.
     """
     schema_name = f"test_schema_{str(uuid4()).split('-')[-1]}"
     table_name = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
@@ -234,16 +237,17 @@ def test_sqlite_schema_addition(sqlite_sample_target: SQLTarget):
             },
         ]
     )
-    # sqlite doesn't support schema creation
-    with pytest.raises(sqlalchemy.exc.OperationalError) as excinfo:
-        target_sync_test(
-            sqlite_sample_target,
-            input=StringIO(tap_output),
-            finalize=True,
-        )
-    # check the target at least tried to create the schema
-    assert isinstance(excinfo.value, sqlalchemy.exc.OperationalError)
-    assert excinfo.value.statement == f"CREATE SCHEMA {schema_name}"
+    target_sync_test(
+        sqlite_sample_target,
+        input=StringIO(tap_output),
+        finalize=True,
+    )
+    table = get_table(sqlite_target_test_config, f"{schema_name}__{table_name}")
+    with sqlalchemy.create_engine(
+        f"sqlite:///{sqlite_target_test_config['path_to_db']}",
+    ).connect() as conn:
+        rows = conn.execute(table.select()).fetchall()
+    assert [row.col_a for row in rows] == ["samplerow1"]
 
 
 def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
