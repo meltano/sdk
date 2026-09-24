@@ -1,51 +1,45 @@
 {
-  "cookies": {
-    "__cf_bm": "a.yGMkSTgJiX2W0Apf9C1AB5Rus2tfAh9V1oU2oIaj0-1763701804-1.0.1.1-IJGwnwYXApUeOqxF7VxlsHAuY4WJe3tI0LQg.EOF42JuQ0y4y_aVmzDNlaAWTgBQynZLLq0TsN5LQNDHNaCovjx8.HHKZCcGi5jUpxtbmbs",
-    "_cfuvid": "7gJfguJSgKGf20DWw8W0QQr4gE2CfqSFQQ1lpf8OLuI-1763701804905-0.0.1.1-604800000"
-  },
-  "created_at": "2025-11-21T05:10:04.890929+00:00",
-  "elapsed": 0.73757,
+  "created_at": "2026-09-24T21:32:52.158985+00:00",
+  "elapsed": 0.439031,
   "encoding": "utf-8",
   "headers": {
-    "CF-Cache-Status": "MISS",
-    "CF-Ray": "9a1dadb57840a09f-QRO",
+    "CF-Cache-Status": "BYPASS",
+    "CF-Ray": "a404e778dea0a65e-QRO",
     "Cache-Control": "max-age=0, private, must-revalidate",
     "Connection": "keep-alive",
     "Content-Encoding": "gzip",
     "Content-Type": "application/json",
-    "Date": "Fri, 21 Nov 2025 05:10:04 GMT",
-    "ETag": "W/\"10f407255809df5361dc7c999d37f79d\"",
+    "Date": "Thu, 24 Sep 2026 21:32:52 GMT",
+    "ETag": "W/\"4d3069892ea9409a28b0a0fe189ba561\"",
     "Link": "<https://gitlab.com/api/v4/groups/12586917/epics/8/issues?epic_iid=8&id=12586917&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/12586917/epics/8/issues?epic_iid=8&id=12586917&page=1&per_page=20>; rel=\"last\"",
     "Server": "cloudflare",
-    "Set-Cookie": "__cf_bm=a.yGMkSTgJiX2W0Apf9C1AB5Rus2tfAh9V1oU2oIaj0-1763701804-1.0.1.1-IJGwnwYXApUeOqxF7VxlsHAuY4WJe3tI0LQg.EOF42JuQ0y4y_aVmzDNlaAWTgBQynZLLq0TsN5LQNDHNaCovjx8.HHKZCcGi5jUpxtbmbs; path=/; expires=Fri, 21-Nov-25 05:40:04 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=7gJfguJSgKGf20DWw8W0QQr4gE2CfqSFQQ1lpf8OLuI-1763701804905-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
     "Strict-Transport-Security": "max-age=31536000",
     "Transfer-Encoding": "chunked",
-    "Vary": "Origin, Accept-Encoding",
+    "Vary": "Origin",
     "content-security-policy": "default-src 'none'",
-    "gitlab-lb": "haproxy-main-44-lb-gprd",
+    "gitlab-lb": "haproxy-main-29-lb-gprd",
     "gitlab-sv": "api-gke-us-east1-c",
     "nel": "{\"max_age\": 0}",
     "ratelimit-limit": "2000",
     "ratelimit-name": "throttle_authenticated_api",
-    "ratelimit-observed": "7",
-    "ratelimit-remaining": "1993",
-    "ratelimit-reset": "1763701860",
+    "ratelimit-observed": "11",
+    "ratelimit-remaining": "1989",
+    "ratelimit-reset": "1790285580",
     "referrer-policy": "strict-origin-when-cross-origin",
     "x-content-type-options": "nosniff",
     "x-frame-options": "SAMEORIGIN",
-    "x-gitlab-meta": "{\"correlation_id\":\"9a1dadb5a3eaa09f-ATL\",\"version\":\"1\"}",
+    "x-gitlab-meta": "{\"correlation_id\":\"a404e778dea0a65e-QRO\",\"version\":\"1\"}",
     "x-next-page": "",
     "x-page": "1",
     "x-per-page": "20",
     "x-prev-page": "",
-    "x-request-id": "9a1dadb5a3eaa09f-ATL",
-    "x-runtime": "0.336706",
+    "x-request-id": "a404e778dea0a65e-QRO",
+    "x-runtime": "0.237115",
     "x-total": "6",
     "x-total-pages": "1"
   },
   "reason": "OK",
   "request": {
-    "body": "",
     "headers": {
       "Accept": "*/*",
       "Accept-Encoding": "gzip, deflate, zstd",
@@ -76,7 +70,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "labels": [
@@ -106,7 +100,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         }
       ],
@@ -117,7 +111,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "type": "ISSUE",
@@ -128,18 +122,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 3,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2021-11-08",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/186",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/186",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -151,7 +146,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -203,7 +198,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "labels": [
@@ -218,7 +213,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         },
         {
@@ -228,7 +223,7 @@
           "name": "Amanda Folson",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png?v=1789009795",
           "web_url": "https://gitlab.com/afolson"
         }
       ],
@@ -239,7 +234,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "type": "ISSUE",
@@ -250,18 +245,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2021-12-01",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/178",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/178",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -273,7 +269,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/178",
@@ -324,7 +320,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "labels": [
@@ -339,7 +335,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         }
       ],
@@ -350,7 +346,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "type": "ISSUE",
@@ -361,18 +357,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2021-12-01",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/177",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/177",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -384,7 +381,7 @@
         "completed_count": 1
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/177",
@@ -435,7 +432,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "labels": [
@@ -450,7 +447,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         },
         {
@@ -460,7 +457,7 @@
           "name": "Suri Patel",
           "state": "blocked",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1985266/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1985266/avatar.png?v=1789014832",
           "web_url": "https://gitlab.com/suripatel"
         }
       ],
@@ -471,7 +468,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "type": "ISSUE",
@@ -482,18 +479,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 2,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2021-11-30",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/176",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/176",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -505,7 +503,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/176",
@@ -556,7 +554,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "labels": [
@@ -586,7 +584,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         }
       ],
@@ -597,7 +595,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "type": "ISSUE",
@@ -608,18 +606,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 4,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2021-12-01",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/174",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/174",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -631,7 +630,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/174",
@@ -682,7 +681,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -713,7 +712,7 @@
           "name": "Amanda Folson",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png?v=1789009795",
           "web_url": "https://gitlab.com/afolson"
         }
       ],
@@ -724,7 +723,7 @@
         "name": "Amanda Folson",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png?v=1789009795",
         "web_url": "https://gitlab.com/afolson"
       },
       "type": "ISSUE",
@@ -735,18 +734,19 @@
         "name": "Amanda Folson",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/394049/avatar.png?v=1789009795",
         "web_url": "https://gitlab.com/afolson"
       },
-      "user_notes_count": 2,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/168",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/168",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -758,7 +758,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
