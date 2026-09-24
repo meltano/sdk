@@ -138,6 +138,7 @@ class TargetMock(Target):
         self.num_records_processed: int = 0
         self.num_batches_processed: int = 0
 
+    @override
     def _write_state_message(self, state: dict):
         """Emit the stream's latest state."""
         super()._write_state_message(state)
@@ -201,6 +202,7 @@ class SQLTargetMock(SQLTarget):
         self.num_records_processed: int = 0
         self.num_batches_processed: int = 0
 
+    @override
     def _write_state_message(self, state: dict):
         """Emit the stream's latest state."""
         super()._write_state_message(state)
