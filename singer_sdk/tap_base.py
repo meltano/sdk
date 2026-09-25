@@ -31,6 +31,7 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import BaseSingerWriter, PluginBase, _ConfigInput
 from singer_sdk.singerlib import Catalog
+from singer_sdk.singerlib.catalog import REPLICATION_FULL_TABLE
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
@@ -482,7 +483,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
                         stream.name,
                     )
                     stream.replication_key = None
-                    stream.forced_replication_method = "FULL_TABLE"
+                    stream.forced_replication_method = REPLICATION_FULL_TABLE
 
     # Sync methods
 
