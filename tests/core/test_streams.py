@@ -205,7 +205,7 @@ def test_stream_apply_catalog__singer_standard(stream: Stream):
             "unix_ts",
             None,
             None,
-            CONFIG_START_DATE,
+            None,
             id="naive-unix-ts-repl-key-no-state",
         ),
         pytest.param(
@@ -226,7 +226,7 @@ def test_stream_apply_catalog__singer_standard(stream: Stream):
             "unix_ts_override",
             None,
             None,
-            CONFIG_START_DATE,
+            None,
             id="unix-ts-repl-key-no-state",
         ),
         pytest.param(

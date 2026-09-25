@@ -128,6 +128,8 @@ class StreamStateManager:
         replication_key: str | None,
         config: dict,
         compare_start_date_fn: t.Callable[[str, str], str] | None = None,
+        *,
+        is_timestamp_replication_key: bool = True,
     ) -> None:
         """Write the starting replication value, if available.
 
@@ -138,6 +140,11 @@ class StreamStateManager:
             config: Stream configuration containing start_date if applicable.
             compare_start_date_fn: Optional function to compare bookmark value
                 with start_date and return the most recent.
+            is_timestamp_replication_key: Whether the replication key holds a
+                date or datetime value. `start_date` only seeds a missing
+                bookmark value when this is `True`, since there's no general
+                way to compare an arbitrary bookmark value against an
+                ISO-formatted `start_date`.
         """
         if replication_method == REPLICATION_FULL_TABLE:
             self._logger.debug(
@@ -159,8 +166,9 @@ class StreamStateManager:
             # Use start_date if it is more recent than the replication_key state
             if start_date_value := config.get("start_date"):
                 if not value:
-                    value = start_date_value
-                elif compare_start_date_fn and value:
+                    if is_timestamp_replication_key:
+                        value = start_date_value
+                elif compare_start_date_fn:
                     value = compare_start_date_fn(value, start_date_value)
 
             self._logger.info(

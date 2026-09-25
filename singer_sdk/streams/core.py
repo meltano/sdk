@@ -470,6 +470,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             replication_key=self.replication_key,
             config=dict(self.config),
             compare_start_date_fn=self.compare_start_date,
+            is_timestamp_replication_key=self.is_timestamp_replication_key,
         )
 
     def get_replication_key_signpost(
