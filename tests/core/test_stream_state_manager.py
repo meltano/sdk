@@ -452,6 +452,25 @@ def test_get_starting_replication_value_full_table_returns_none(
     assert result is None
 
 
+def test_get_starting_replication_value_full_table_does_not_create_partition(
+    tap_state: types.TapState,
+) -> None:
+    """FULL_TABLE lookups must not create an empty partition state entry.
+
+    Regression test: calling this with a partition context used to create a
+    bare `{"context": ...}` partition entry as a side effect of
+    `get_writeable_state_dict`, even though the method always returns `None`
+    for FULL_TABLE streams and writes nothing else.
+    """
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
+    result = manager.get_starting_replication_value(
+        {"workspaceId": "abc"},
+        REPLICATION_FULL_TABLE,
+    )
+    assert result is None
+    assert tap_state == {}
+
+
 def test_get_starting_replication_value_incremental_returns_value(
     tap_state: types.TapState,
 ) -> None:

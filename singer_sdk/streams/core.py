@@ -1226,8 +1226,13 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
                     record_index += 1
 
-                if current_context == state_partition_context:
-                    # Finalize per-partition state only if 1:1 with context
+                if (
+                    current_context == state_partition_context
+                    and self.replication_method != REPLICATION_FULL_TABLE
+                ):
+                    # Finalize per-partition state only if 1:1 with context.
+                    # FULL_TABLE streams never write bookmarks, so skip creating
+                    # an empty state entry for the partition.
                     state = self.get_context_state(current_context)
                     self._finalize_state(state)
 
