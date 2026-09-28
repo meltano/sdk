@@ -908,7 +908,7 @@ class SQLConnector:  # noqa: PLR0904
         statement: str,
         _parameters: object,
         _context: object,
-        _executemany: bool,
+        _executemany: object,
     ) -> None:
         """Clear cached reflection state after SQLAlchemy DDL executes."""
         statement_prefix = statement.lstrip().partition(" ")[0].upper()
