@@ -139,7 +139,7 @@ class StorageTarget:
     def _root_path(self) -> UPath:
         """The root path of the storage target."""
         # https://github.com/fsspec/universal_pathlib/issues/435
-        return UPath(self.root, **self.params).resolve()  # type: ignore[no-any-return]
+        return UPath(self.root, **self.params).resolve()  # type: ignore[no-any-return] # ty: ignore[call-non-callable]
 
     @staticmethod
     def split_url(url: str) -> tuple[str, str]:
@@ -151,7 +151,7 @@ class StorageTarget:
         Returns:
             A tuple of the head and tail parts of the URL.
         """
-        url_path = UPath(url)
+        url_path = UPath(url)  # ty: ignore[call-non-callable]
         head, tail = url_path.parts[:-1], url_path.parts[-1]
         return url_path.with_segments(*head).as_uri(), tail
 
