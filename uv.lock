@@ -2784,15 +2784,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pytz"
-version = "2026.4"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b0/ed/fa23d28713004418bbf2407127f80f385bfb0bf4e677bef02c25c27b00ee/pytz-2026.4.tar.gz", hash = "sha256:464303645bafafd72418898368b2429458f709cf1eb6a15372fbcc396b64da63", size = 318444, upload-time = "2026-09-24T03:58:40.443Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d5/11/e3df59614bebe0ca50c905442603eda64ae7ac19811d4e4f74aa2d51ca85/pytz-2026.4-py2.py3-none-any.whl", hash = "sha256:9d514388fbc89ca0833203464272ac485b8828568ab73532f5020f17e892a0ff", size = 506747, upload-time = "2026-09-24T03:58:38.629Z" },
-]
-
-[[package]]
 name = "pyyaml"
 version = "6.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -3398,7 +3389,6 @@ benchmark = [
     { name = "pytest-codspeed" },
     { name = "pytest-github-actions-annotate-failures" },
     { name = "pytest-snapshot" },
-    { name = "pytz" },
     { name = "requests-cache" },
     { name = "requests-mock" },
     { name = "responses" },
@@ -3426,7 +3416,6 @@ dev = [
     { name = "pytest-benchmark" },
     { name = "pytest-github-actions-annotate-failures" },
     { name = "pytest-snapshot" },
-    { name = "pytz" },
     { name = "requests-cache" },
     { name = "requests-mock" },
     { name = "responses" },
@@ -3445,7 +3434,6 @@ dev = [
     { name = "toolz" },
     { name = "ty" },
     { name = "types-jsonschema" },
-    { name = "types-pytz" },
     { name = "types-pyyaml" },
     { name = "types-simplejson" },
     { name = "xdoctest", extra = ["colors"] },
@@ -3487,7 +3475,6 @@ testing = [
     { name = "pytest-benchmark" },
     { name = "pytest-github-actions-annotate-failures" },
     { name = "pytest-snapshot" },
-    { name = "pytz" },
     { name = "requests-cache" },
     { name = "requests-mock" },
     { name = "responses" },
@@ -3511,7 +3498,6 @@ typing = [
     { name = "pytest-benchmark" },
     { name = "pytest-github-actions-annotate-failures" },
     { name = "pytest-snapshot" },
-    { name = "pytz" },
     { name = "requests-cache" },
     { name = "requests-mock" },
     { name = "responses" },
@@ -3522,7 +3508,6 @@ typing = [
     { name = "toolz" },
     { name = "ty" },
     { name = "types-jsonschema" },
-    { name = "types-pytz" },
     { name = "types-pyyaml" },
     { name = "types-simplejson" },
     { name = "xdoctest", extra = ["colors"] },
@@ -3576,7 +3561,6 @@ benchmark = [
     { name = "pytest-codspeed", specifier = ">=2.2.0,!=4.1.0" },
     { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
-    { name = "pytz", specifier = ">=2022.2.1" },
     { name = "requests-cache", specifier = ">=1.3" },
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "responses", specifier = ">=0.26.0" },
@@ -3602,7 +3586,6 @@ dev = [
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
     { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
-    { name = "pytz", specifier = ">=2022.2.1" },
     { name = "requests-cache", specifier = ">=1.3" },
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "responses", specifier = ">=0.26.0" },
@@ -3617,7 +3600,6 @@ dev = [
     { name = "toolz", specifier = ">=1.0.0" },
     { name = "ty", specifier = "==0.0.82" },
     { name = "types-jsonschema", specifier = ">=4.17.0.6" },
-    { name = "types-pytz", specifier = ">=2022.7.1.2" },
     { name = "types-pyyaml", specifier = ">=6.0.12" },
     { name = "types-simplejson", specifier = ">=3.18.0" },
     { name = "xdoctest", extras = ["colors"], specifier = ">=1.1.1" },
@@ -3655,7 +3637,6 @@ testing = [
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
     { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
-    { name = "pytz", specifier = ">=2022.2.1" },
     { name = "requests-cache", specifier = ">=1.3" },
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "responses", specifier = ">=0.26.0" },
@@ -3678,7 +3659,6 @@ typing = [
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
     { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
-    { name = "pytz", specifier = ">=2022.2.1" },
     { name = "requests-cache", specifier = ">=1.3" },
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "responses", specifier = ">=0.26.0" },
@@ -3688,7 +3668,6 @@ typing = [
     { name = "toolz", specifier = ">=1.0.0" },
     { name = "ty", specifier = "==0.0.82" },
     { name = "types-jsonschema", specifier = ">=4.17.0.6" },
-    { name = "types-pytz", specifier = ">=2022.7.1.2" },
     { name = "types-pyyaml", specifier = ">=6.0.12" },
     { name = "types-simplejson", specifier = ">=3.18.0" },
     { name = "xdoctest", extras = ["colors"], specifier = ">=1.1.1" },
@@ -4290,15 +4269,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/dd/46/73b6a5d61a61015c4248030a8cb07e5bdddb4041430fae9e585a68692578/types_jsonschema-4.26.0.20260518.tar.gz", hash = "sha256:e1dd53dc97a64f5eccdd6fa9839666e09bb500a8ebba2db6fdaf1789faea81a6", size = 16638, upload-time = "2026-05-18T06:06:44.106Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/07/d5/134f8a147dcecda10db7f60cfc6af0578a25a5c53c87b3907a64385e0184/types_jsonschema-4.26.0.20260518-py3-none-any.whl", hash = "sha256:30b30a518c7fe335df85c919fcbcc631b69c03d4a4b5b632fa916bea03065307", size = 16072, upload-time = "2026-05-18T06:06:43.264Z" },
-]
-
-[[package]]
-name = "types-pytz"
-version = "2026.4.0.20260926"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/69/42/7edb292ada68a506f85adfc22f1e16a8efa6ef736abb11b557a47c8bc149/types_pytz-2026.4.0.20260926.tar.gz", hash = "sha256:2ad5cde113cd6a58dd59c34f3c93f1bce2d126c769bfac15207ca7d7efd65390", size = 11064, upload-time = "2026-09-26T06:45:48.674Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/44/db/e65769c124c55958b337069a02a0684259e7e0408cfd18d7ed2e2ea4092a/types_pytz-2026.4.0.20260926-py3-none-any.whl", hash = "sha256:0d0357ffa7680a4416811fb0e56e7a5c0d6efec3f299390d146ea2675b66c774", size = 10173, upload-time = "2026-09-26T06:45:47.615Z" },
 ]
 
 [[package]]
