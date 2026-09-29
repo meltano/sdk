@@ -205,10 +205,6 @@ def test_get_dotenv_config_discover_file_cwd(
             {"properties": {}},
             {"properties": {}, "required": ["a"]},
             id="required-without-source-properties",
-            marks=pytest.mark.xfail(
-                reason="Required fields are merged inside the properties loop",
-                strict=True,
-            ),
         ),
     ],
 )
