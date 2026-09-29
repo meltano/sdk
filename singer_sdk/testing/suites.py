@@ -43,6 +43,7 @@ from .target_tests import (
     TargetSchemaNoProperties,
     TargetSchemaUpdates,
     TargetSpecialCharsInAttributes,
+    TargetStreamNameParts,
     TargetStringFormats,
 )
 from .templates import TestTemplate
@@ -134,5 +135,6 @@ target_tests = SingerTestSuite(
         TargetSchemaUpdates,
         TargetSpecialCharsInAttributes,
         TargetStringFormats,
+        TargetStreamNameParts,
     ],
 )
