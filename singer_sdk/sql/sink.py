@@ -37,7 +37,7 @@ __all__ = ["SQLSink"]
 _C = t.TypeVar("_C", bound=SQLConnector)
 
 
-class SQLSink(BatchSink, t.Generic[_C]):
+class SQLSink(BatchSink, t.Generic[_C]):  # noqa: PLR0904
     """SQL-type sink type."""
 
     connector_class: type[_C]
@@ -80,11 +80,61 @@ class SQLSink(BatchSink, t.Generic[_C]):
         """Default target schema."""
         return self.config.get("default_target_schema", None)  # type: ignore[no-any-return]
 
+    @t.final
+    @functools.cached_property
+    def stream_name_parts(self) -> tuple[str | None, str | None, str]:
+        """Parsed stream name parts (database, schema, table)."""
+        return self.parse_stream_name(self.stream_name)
+
+    def parse_stream_name(  # noqa: PLR6301
+        self,
+        stream_name: str,
+    ) -> tuple[str | None, str | None, str]:
+        """Parse a stream name into its database, schema, and table parts.
+
+        Developers may override this method if their stream naming convention
+        does not follow the traditional pattern: `<table>`, `<schema>-<table>`,
+        or `<db>-<schema>-<table>`.
+
+        Examples:
+            A target that reads `database`/`schema` from config, falling back to
+            the stream name convention, and always upper-cases both. Note that
+            `db_name` is taken only from config, never from a
+            `<db>-<schema>-<table>` stream name:
+
+            .. code-block:: python
+
+                 def parse_stream_name(
+                     self,
+                     stream_name: str,
+                 ) -> tuple[str | None, str | None, str]:
+                     _, schema_name, table_name = super().parse_stream_name(stream_name)
+                     schema_name = schema_name or self.config.get("schema")
+                     db_name = self.config.get("database")
+                     return (
+                         db_name.upper() if db_name else None,
+                         schema_name.upper() if schema_name else None,
+                         table_name,
+                     )
+
+        Args:
+            stream_name: The stream name to parse.
+
+        Returns:
+            A three part tuple (db_name, schema_name, table_name) with any
+            unspecified parts returned as None.
+        """
+        parts = stream_name.split("-")
+        if len(parts) == 1:
+            return None, None, parts[0]
+        if len(parts) == 2:  # noqa: PLR2004
+            return None, parts[0], parts[1]
+        return parts[-3], parts[-2], parts[-1]
+
     @property
     def table_name(self) -> str:
         """Table name, with no schema or database part."""
-        parts = self.stream_name.split("-")
-        table = self.stream_name if len(parts) == 1 else parts[-1]
+        _, _, table = self.stream_name_parts
         return self.conform_name(table, "table")
 
     @property
@@ -97,13 +147,31 @@ class SQLSink(BatchSink, t.Generic[_C]):
         if self.default_target_schema:
             return self.default_target_schema
 
-        parts = self.stream_name.split("-")
-        return self.conform_name(parts[-2], "schema") if len(parts) in {2, 3} else None
+        _, schema, _ = self.stream_name_parts
+        return self.conform_name(schema, "schema") if schema else None
 
     @property
     def database_name(self) -> str | None:
-        """Database name or `None` if using names with no database part."""
-        # Assumes single-DB target context.
+        """Database name or `None` if using names with no database part.
+
+        Assumes single-DB target context by default: the database segment of
+        a `<db>-<schema>-<table>` stream name is ignored. Developers may
+        override this to honor the database segment for targets that support it.
+
+        Examples:
+            Honor the database segment of a `<db>-<schema>-<table>` stream name:
+
+            .. code-block:: python
+
+                 @property
+                 def database_name(self) -> str | None:
+                     db_name, _, _ = self.stream_name_parts
+                     return db_name
+
+        Returns:
+            The database name, or `None` if not applicable.
+        """
+        return None
 
     @property
     def full_table_name(self) -> FullyQualifiedName:
