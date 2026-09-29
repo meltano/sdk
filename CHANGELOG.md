@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.54.7 (2026-09-29)
+
+### 🐛 Fixes
+
+- [#3804](https://github.com/meltano/sdk/issues/3804) Ensure state partition context is a writable object
+
 ## v0.54.6 (2026-09-13)
 
 ### 🐛 Fixes

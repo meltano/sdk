@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 import typing as t
+from types import MappingProxyType
 
 import pytest
 
@@ -140,6 +142,15 @@ def test_get_context_state_with_state_partitioning_keys(
     state = manager.get_context_state(partition_context)
     assert state["context"] == state_context
     assert state["replication_key_value"] == "2021-01-01"
+
+
+def test_get_context_state_serializable(state_manager: StreamStateManager) -> None:
+    context = MappingProxyType({"tenant_id": "abc123"})
+    state = state_manager.get_context_state(context)
+    assert state["context"] == context
+
+    data = json.loads(json.dumps(state))
+    assert data["context"] == context
 
 
 # Tests for get_state_partition_context method
