@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import copy
 import dataclasses
 import logging
 import os
@@ -345,8 +346,7 @@ class PluginBase(abc.ABC):
         Returns:
             Dictionary of configuration parsed from the environment.
         """
-        config_jsonschema = cls.config_jsonschema
-        cls.append_builtin_config(config_jsonschema)
+        config_jsonschema = cls._get_config_jsonschema()
 
         return parse_environment_config(config_jsonschema, cls._env_var_prefix)
 
@@ -455,8 +455,7 @@ class PluginBase(abc.ABC):
             ConfigValidationError: If raise_errors is True and validation fails.
         """
         errors: list[str] = []
-        config_jsonschema = self.config_jsonschema
-        self.append_builtin_config(config_jsonschema)
+        config_jsonschema = self._get_config_jsonschema()
 
         if config_jsonschema:  # pragma: no branch
             self.logger.debug(
@@ -529,8 +528,7 @@ class PluginBase(abc.ABC):
         Returns:
             A dictionary containing the relevant 'about' information.
         """
-        config_jsonschema = cls.config_jsonschema
-        cls.append_builtin_config(config_jsonschema)
+        config_jsonschema = cls._get_config_jsonschema()
 
         return about.AboutInfo(
             name=cls.name,
@@ -542,6 +540,20 @@ class PluginBase(abc.ABC):
             settings=config_jsonschema,
             env_var_prefix=cls._env_var_prefix,
         )
+
+    @classmethod
+    def _get_config_jsonschema(cls) -> dict:
+        """Get a copy of the config JSON schema, including built-in settings.
+
+        A copy is used so that the built-in settings are not added to a schema
+        shared by other plugin classes (e.g. the default ``config_jsonschema``).
+
+        Returns:
+            The plugin config JSON schema with the built-in settings appended.
+        """
+        config_jsonschema = copy.deepcopy(cls.config_jsonschema)
+        cls.append_builtin_config(config_jsonschema)
+        return config_jsonschema
 
     @classmethod
     def append_builtin_config(cls, config_jsonschema: dict) -> None:
