@@ -14,6 +14,7 @@ import fsspec.implementations.dirfs
 
 import singer_sdk.typing as th
 from singer_sdk import Tap
+from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.contrib.filesystem import config as filesystem_config
 from singer_sdk.contrib.filesystem.stream import FileStream
 from singer_sdk.exceptions import ConfigValidationError
@@ -131,20 +132,7 @@ class FolderTap(Tap, t.Generic[_T]):
         Args:
             config_jsonschema: [description]
         """
-
-        def _merge_missing(src: dict, tgt: dict) -> None:
-            # Append any missing properties in the target with those from source.
-            for k, v in src["properties"].items():
-                if k not in tgt["properties"]:
-                    tgt["properties"][k] = v
-
-                # Merge the required fields
-                source_required = src.get("required", [])
-                target_required = tgt.get("required", [])
-                tgt["required"] = list(set(source_required + target_required))
-
-        _merge_missing(BASE_CONFIG_SCHEMA, config_jsonschema)
-
+        merge_missing_config_jsonschema(BASE_CONFIG_SCHEMA, config_jsonschema)
         super().append_builtin_config(config_jsonschema)
 
     @functools.cached_property
