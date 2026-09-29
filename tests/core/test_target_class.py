@@ -13,6 +13,9 @@ from singer_sdk import typing as th
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.sql import SQLTarget
 
+if t.TYPE_CHECKING:
+    from pytest_snapshot.plugin import Snapshot
+
 
 class DummyTarget(SQLTarget):
     """A dummy target class."""

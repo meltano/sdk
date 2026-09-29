@@ -23,6 +23,10 @@ if t.TYPE_CHECKING:
     from pytest_snapshot.plugin import Snapshot
 
 
+if t.TYPE_CHECKING:
+    from pytest_snapshot.plugin import Snapshot
+
+
 class DummyInlineMapper(InlineMapper):
     """A dummy inline mapper."""
 
