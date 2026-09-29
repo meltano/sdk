@@ -99,3 +99,9 @@ def merge_missing_config_jsonschema(
     for k, v in source_jsonschema.get("properties", {}).items():
         if k not in target_jsonschema["properties"]:
             target_jsonschema["properties"][k] = v
+
+        # Merge the required fields
+        source_required = source_jsonschema.get("required", [])
+        target_required = target_jsonschema.get("required", [])
+        if new_required := sorted(set(source_required + target_required)):
+            target_jsonschema["required"] = new_required

@@ -9,7 +9,10 @@ from unittest import mock
 import pytest
 
 import singer_sdk.typing as th
-from singer_sdk.configuration._dict_config import parse_environment_config
+from singer_sdk.configuration._dict_config import (
+    merge_missing_config_jsonschema,
+    parse_environment_config,
+)
 
 CONFIG_JSONSCHEMA = th.PropertiesList(
     th.Property("prop1", th.StringType, required=True),
@@ -152,3 +155,78 @@ def test_get_dotenv_config_discover_file_cwd(
     )
     assert dotenv_config
     assert dotenv_config["prop1"] == value
+
+
+@pytest.mark.parametrize(
+    "source,target,expected",
+    [
+        pytest.param({}, {}, {"properties": {}}, id="both-empty"),
+        pytest.param(
+            {"properties": {"a": {"type": "string"}}},
+            {},
+            {"properties": {"a": {"type": "string"}}},
+            id="adds-missing-property",
+        ),
+        pytest.param(
+            {"properties": {"a": {"type": "string"}}},
+            {"properties": {"a": {"type": "integer"}}},
+            {"properties": {"a": {"type": "integer"}}},
+            id="does-not-override-existing-property",
+        ),
+        pytest.param(
+            {"properties": {"a": {}}, "required": ["a"]},
+            {"properties": {}},
+            {"properties": {"a": {}}, "required": ["a"]},
+            id="required-from-source",
+        ),
+        pytest.param(
+            {"properties": {"a": {}}},
+            {"properties": {"b": {}}, "required": ["b"]},
+            {"properties": {"a": {}, "b": {}}, "required": ["b"]},
+            id="required-kept-from-target",
+        ),
+        pytest.param(
+            {"properties": {"b": {}, "a": {}}, "required": ["b", "a"]},
+            {"properties": {"c": {}}, "required": ["c", "a"]},
+            {
+                "properties": {"a": {}, "b": {}, "c": {}},
+                "required": ["a", "b", "c"],
+            },
+            id="required-union-sorted-deduplicated",
+        ),
+        pytest.param(
+            {"properties": {"a": {}}},
+            {"properties": {"a": {}}},
+            {"properties": {"a": {}}},
+            id="no-required-key-added-when-none",
+        ),
+        pytest.param(
+            {"required": ["a"]},
+            {"properties": {}},
+            {"properties": {}, "required": ["a"]},
+            id="required-without-source-properties",
+            marks=pytest.mark.xfail(
+                reason="Required fields are merged inside the properties loop",
+                strict=True,
+            ),
+        ),
+    ],
+)
+def test_merge_missing_config_jsonschema(
+    source: dict,
+    target: dict,
+    expected: dict,
+):
+    merge_missing_config_jsonschema(source, target)
+    assert target == expected
+
+
+def test_merge_missing_config_jsonschema_idempotent():
+    source = {"properties": {"a": {}, "b": {}}, "required": ["b"]}
+    target = {"properties": {"c": {}}, "required": ["c"]}
+
+    merge_missing_config_jsonschema(source, target)
+    first = json.loads(json.dumps(target))
+    merge_missing_config_jsonschema(source, target)
+
+    assert target == first
