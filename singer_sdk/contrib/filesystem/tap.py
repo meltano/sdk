@@ -133,6 +133,7 @@ class FolderTap(Tap, t.Generic[_T]):
             config_jsonschema: [description]
         """
         merge_missing_config_jsonschema(BASE_CONFIG_SCHEMA, config_jsonschema)
+        super().append_builtin_config(config_jsonschema)
 
     @functools.cached_property
     def read_mode(self) -> ReadMode:

@@ -21,7 +21,10 @@ if t.TYPE_CHECKING:
         pytest.param(
             {},
             pytest.raises(ConfigValidationError, match="Config validation failed"),
-            ["'username' is a required property", "'password' is a required property"],
+            [
+                "'password' is a required property",
+                "'username' is a required property",
+            ],
             id="missing_username_and_password",
         ),
         pytest.param(

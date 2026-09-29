@@ -1,0 +1,535 @@
+{
+  "name": "tap-csv",
+  "description": "Sample Tap for CSV files.",
+  "version": "<version>",
+  "sdk_version": "<sdk_version>",
+  "supported_python_versions": [
+    "3.10",
+    "3.11",
+    "3.12",
+    "3.13",
+    "3.14"
+  ],
+  "capabilities": [
+    "catalog",
+    "state",
+    "discover",
+    "about",
+    "activate-version",
+    "stream-maps",
+    "schema-flattening",
+    "batch",
+    "structured-logging"
+  ],
+  "settings": {
+    "type": "object",
+    "properties": {
+      "delimiter": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "title": "Delimiter",
+        "default": ",",
+        "description": "Field delimiter character."
+      },
+      "quotechar": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "title": "Quote Character",
+        "default": "\"",
+        "description": "Quote character."
+      },
+      "escapechar": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "title": "Escape Character",
+        "description": "Escape character."
+      },
+      "doublequote": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "title": "Double Quote",
+        "default": true,
+        "description": "Whether quotechar inside a field should be doubled."
+      },
+      "filesystem": {
+        "type": [
+          "string"
+        ],
+        "title": "Filesystem",
+        "default": "local",
+        "description": "The filesystem to use.",
+        "enum": [
+          "local",
+          "ftp",
+          "sftp"
+        ]
+      },
+      "path": {
+        "type": [
+          "string"
+        ],
+        "title": "Directory Path",
+        "description": "Path to the directory where the files are stored."
+      },
+      "read_mode": {
+        "type": [
+          "string"
+        ],
+        "title": "Read Mode",
+        "description": "Use `one_stream_per_file` to read each file as a separate stream, or `merge` to merge all files into a single stream.",
+        "enum": [
+          "one_stream_per_file",
+          "merge"
+        ]
+      },
+      "stream_name": {
+        "type": [
+          "string"
+        ],
+        "title": "Stream Name (Merge Mode)",
+        "default": "files",
+        "description": "Name of the stream to use when `read_mode` is `merge`."
+      },
+      "ftp": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "host": {
+            "type": [
+              "string"
+            ],
+            "title": "FTP Host",
+            "description": "FTP server host"
+          },
+          "port": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "title": "FTP Port",
+            "default": 21,
+            "description": "FTP server port"
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "FTP Username",
+            "description": "FTP username"
+          },
+          "password": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "FTP Password",
+            "description": "FTP password",
+            "secret": true,
+            "writeOnly": true
+          },
+          "timeout": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "title": "Timeout",
+            "default": 60,
+            "description": "Timeout of the FTP connection in seconds"
+          },
+          "encoding": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Encoding",
+            "default": "utf-8",
+            "description": "FTP server encoding"
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "additionalProperties": true,
+        "description": "FTP connection settings"
+      },
+      "sftp": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "host": {
+            "type": [
+              "string"
+            ],
+            "title": "SFTP Host",
+            "description": "SFTP server host"
+          },
+          "ssh_kwargs": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "port": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "title": "SFTP Port",
+                "default": 22,
+                "description": "SFTP server port"
+              },
+              "username": {
+                "type": [
+                  "string"
+                ],
+                "title": "SFTP Username",
+                "description": "SFTP username"
+              },
+              "password": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "title": "SFTP Password",
+                "description": "SFTP password",
+                "secret": true,
+                "writeOnly": true
+              },
+              "pkey": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "title": "SFTP Private Key",
+                "description": "Private key",
+                "secret": true,
+                "writeOnly": true
+              },
+              "timeout": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "title": "Timeout",
+                "default": 60,
+                "description": "Timeout of the SFTP connection in seconds"
+              }
+            },
+            "required": [
+              "username"
+            ],
+            "additionalProperties": true,
+            "title": "SSH Connection Settings",
+            "description": "SSH connection settings"
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "additionalProperties": true,
+        "description": "SFTP connection settings"
+      },
+      "stream_maps": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "__else__": {
+            "anyOf": [
+              {
+                "const": "__NULL__"
+              },
+              {
+                "type": "null"
+              },
+              "null"
+            ],
+            "title": "Other streams",
+            "description": "Currently, only setting this to `__NULL__` is supported. This will remove all other streams."
+          }
+        },
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "const": "__NULL__"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "__alias__": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "title": "Stream Alias",
+                  "description": "Alias to use for the stream."
+                },
+                "__else__": {
+                  "anyOf": [
+                    {
+                      "const": "__NULL__"
+                    },
+                    {
+                      "type": "null"
+                    },
+                    "null"
+                  ],
+                  "title": "Other properties",
+                  "description": "Currently, only setting this to `__NULL__` is supported. This will remove all other properties from the stream."
+                },
+                "__filter__": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "title": "Filter",
+                  "description": "Filter out records from a stream. A string expression which must evaluate to `true` to include the record, or `false` to exclude it. Filter expressions should be wrapped in `bool()` to ensure proper type conversion."
+                },
+                "__key_properties__": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "title": "Key Properties",
+                  "description": "Primary key properties for the stream."
+                },
+                "__source__": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Create a new stream from this source stream."
+                }
+              },
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "const": "__NULL__"
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "title": "Stream Maps",
+        "description": "Config object for stream maps capability. For more information check out [Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html)."
+      },
+      "stream_map_config": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {},
+        "additionalProperties": true,
+        "title": "User Stream Map Configuration",
+        "description": "User-defined config values to be used within map expressions."
+      },
+      "faker_config": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "seed": {
+            "oneOf": [
+              {
+                "type": [
+                  "number"
+                ]
+              },
+              {
+                "type": [
+                  "string"
+                ]
+              },
+              {
+                "type": [
+                  "boolean"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faker Seed",
+            "description": "Value to seed the Faker generator for deterministic output: https://faker.readthedocs.io/en/master/#seeding-the-generator"
+          },
+          "locale": {
+            "oneOf": [
+              {
+                "type": [
+                  "string"
+                ]
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faker Locale",
+            "description": "One or more LCID locale strings to produce localized output for: https://faker.readthedocs.io/en/master/#localization"
+          }
+        },
+        "additionalProperties": true,
+        "title": "Faker Configuration",
+        "description": "Config for the [`Faker`](https://faker.readthedocs.io/en/master/) instance variable `fake` used within map expressions. Only applicable if the plugin specifies `faker` as an additional dependency (through the `singer-sdk` `faker` extra or directly)."
+      },
+      "flattening_enabled": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "title": "Enable Schema Flattening",
+        "description": "'True' to enable schema flattening and automatically expand nested properties."
+      },
+      "flattening_max_depth": {
+        "type": [
+          "integer",
+          "null"
+        ],
+        "title": "Max Flattening Depth",
+        "description": "The max depth to flatten schemas."
+      },
+      "flattening_max_key_length": {
+        "type": [
+          "integer",
+          "null"
+        ],
+        "title": "Max Key Length",
+        "description": "The maximum length of a flattened key."
+      },
+      "flattening_separator": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "title": "Flattening Separator",
+        "description": "The separator to use when flattening keys."
+      },
+      "emit_activate_version_messages": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "title": "Emit `ACTIVATE_VERSION` messages",
+        "default": false,
+        "description": "Whether to emit `ACTIVATE_VERSION` messages. If set to `True`, the tap will emit `ACTIVATE_VERSION` messages for each stream."
+      },
+      "batch_config": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "encoding": {
+            "type": "object",
+            "properties": {
+              "format": {
+                "type": [
+                  "string"
+                ],
+                "title": "Batch Encoding Format",
+                "description": "Format to use for batch files."
+              },
+              "compression": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "title": "Batch Compression Format",
+                "description": "Compression format to use for batch files.",
+                "enum": [
+                  "gzip",
+                  "none"
+                ]
+              }
+            },
+            "required": [
+              "format"
+            ],
+            "additionalProperties": true,
+            "title": "Batch Encoding Configuration",
+            "description": "Specifies the format and compression of the batch files."
+          },
+          "storage": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "root": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "title": "Batch Storage Root",
+                "description": "Root path to use when writing batch files."
+              },
+              "prefix": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "title": "Batch Storage Prefix",
+                "description": "Prefix to use when writing batch files."
+              }
+            },
+            "additionalProperties": true,
+            "title": "Batch Storage Configuration",
+            "description": "Defines the storage layer to use when writing batch files"
+          }
+        },
+        "required": [
+          "encoding"
+        ],
+        "additionalProperties": true,
+        "title": "Tap BATCH Configuration",
+        "description": "Configuration for emitting BATCH messages."
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "required": [
+      "filesystem",
+      "path",
+      "read_mode",
+      "stream_name"
+    ]
+  }
+}
