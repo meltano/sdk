@@ -409,7 +409,7 @@ class Sink(abc.ABC):  # noqa: PLR0904
     @cached_property
     def batch_config(self) -> BatchConfig | None:
         """Batch configuration."""
-        if self.config.get("batch_config"):
+        if self.config.get("batch_config"):  # pragma: no cover
             self.logger.warning(
                 "batch_config is not currently supported in targets, ignoring"
             )
