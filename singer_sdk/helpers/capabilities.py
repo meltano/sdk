@@ -242,6 +242,17 @@ SQL_TAP_USE_SINGER_DECIMAL = PropertiesList(
         ),
     ),
 ).to_dict()
+SQL_TAP_FILTER_SCHEMAS = PropertiesList(
+    Property(
+        "filter_schemas",
+        ArrayType(StringType),
+        title="Filter Schemas",
+        description=(
+            "Optional list of database schemas to include during SQL tap discovery. "
+            "If unset or empty, all available schemas are discovered."
+        ),
+    ),
+).to_dict()
 TARGET_SCHEMA_CONFIG = PropertiesList(
     Property(
         "default_target_schema",
