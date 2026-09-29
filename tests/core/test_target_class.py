@@ -1,14 +1,20 @@
 from __future__ import annotations
 
+import io
 import json
-from contextlib import nullcontext
+import typing as t
+from contextlib import nullcontext, redirect_stdout
 
 import pytest
 from click.testing import CliRunner
 
+from singer_sdk import Target
 from singer_sdk import typing as th
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.sql import SQLTarget
+
+if t.TYPE_CHECKING:
+    from pytest_snapshot.plugin import Snapshot
 
 
 class DummyTarget(SQLTarget):
@@ -73,3 +79,26 @@ def test_cli_config_validation(tmp_path, caplog: pytest.LogCaptureFixture):
     assert result.exit_code == 1
     assert not result.stdout
     assert "'required_property' is a required property" in caplog.text
+
+
+@pytest.mark.snapshot
+def test_default_info(snapshot: Snapshot):
+    """Test the default about info."""
+
+    class BasicTarget(Target):
+        """A basic target."""
+
+        name = "target-example"
+        package_name = "singer-sdk"
+
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        BasicTarget.print_about(output_format="json")
+
+    info = json.loads(buf.getvalue())
+    # Environment-dependent values
+    info["version"] = "<version>"
+    info["sdk_version"] = "<sdk_version>"
+    info["supported_python_versions"] = ["<python_version>"]
+
+    snapshot.assert_match(json.dumps(info, indent=2) + "\n", "default_info.json")
