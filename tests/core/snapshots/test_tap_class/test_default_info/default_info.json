@@ -297,8 +297,8 @@
           "encoding"
         ],
         "additionalProperties": true,
-        "title": "Batch Configuration",
-        "description": "Configuration for BATCH message capabilities."
+        "title": "Tap BATCH Configuration",
+        "description": "Configuration for emitting BATCH messages."
       }
     }
   }

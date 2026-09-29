@@ -406,11 +406,14 @@ class Sink(abc.ABC):  # noqa: PLR0904
         """Plugin configuration."""
         return MappingProxyType(self._config)
 
-    @property
+    @cached_property
     def batch_config(self) -> BatchConfig | None:
         """Batch configuration."""
-        raw = self.config.get("batch_config")
-        return BatchConfig.from_dict(raw) if raw else None
+        if self.config.get("batch_config"):
+            self.logger.warning(
+                "batch_config is not currently supported in targets, ignoring"
+            )
+        return None
 
     @property
     def include_sdc_metadata_properties(self) -> bool:

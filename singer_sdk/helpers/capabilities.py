@@ -204,16 +204,8 @@ def _flattening_config() -> dict[str, t.Any]:
     ).to_dict()
 
 
-def _batch_config(*, encoding_required: bool) -> dict[str, t.Any]:
-    """Build the `batch_config` schema.
-
-    Args:
-        encoding_required: Whether the `encoding` property (and its nested
-            `format`) must be specified. Taps must always declare the format
-            they write batch files in, since there is no other source of
-            truth for it. Targets, on the other hand, read the encoding off
-            of each incoming BATCH message, so the config value is never
-            consulted and should remain optional.
+def _tap_batch_config() -> dict[str, t.Any]:
+    """Build the `batch_config` schema for taps.
 
     Returns:
         The JSON schema with the `batch_config` property.
@@ -221,8 +213,8 @@ def _batch_config(*, encoding_required: bool) -> dict[str, t.Any]:
     return PropertiesList(
         Property(
             "batch_config",
-            title="Batch Configuration",
-            description="Configuration for BATCH message capabilities.",
+            title="Tap BATCH Configuration",
+            description="Configuration for emitting BATCH messages.",
             wrapped=ObjectType(
                 Property(
                     "encoding",
@@ -236,7 +228,7 @@ def _batch_config(*, encoding_required: bool) -> dict[str, t.Any]:
                             StringType,
                             title="Batch Encoding Format",
                             description="Format to use for batch files.",
-                            required=encoding_required,
+                            required=True,
                         ),
                         Property(
                             "compression",
@@ -246,7 +238,7 @@ def _batch_config(*, encoding_required: bool) -> dict[str, t.Any]:
                             description="Compression format to use for batch files.",
                         ),
                     ),
-                    required=encoding_required,
+                    required=True,
                 ),
                 Property(
                     "storage",
@@ -271,6 +263,22 @@ def _batch_config(*, encoding_required: bool) -> dict[str, t.Any]:
                     ),
                 ),
             ),
+        ),
+    ).to_dict()
+
+
+def _target_batch_config() -> dict[str, t.Any]:
+    """Build the `batch_config` schema for targets.
+
+    Returns:
+        The JSON schema with the `batch_config` property.
+    """
+    return PropertiesList(
+        Property(
+            "batch_config",
+            title="Target BATCH Configuration",
+            description="Configuration for consuming BATCH messages.",
+            wrapped=ObjectType(additional_properties=False),
         ),
     ).to_dict()
 
@@ -690,7 +698,7 @@ def tap_config_for_capabilities(
     if PluginCapabilities.ACTIVATE_VERSION in capabilities:
         schemas.append(_emit_activate_version_config())
     if PluginCapabilities.BATCH in capabilities:
-        schemas.append(_batch_config(encoding_required=True))
+        schemas.append(_tap_batch_config())
     return _merge_schemas(*schemas)
 
 
@@ -731,7 +739,7 @@ def target_config_for_capabilities(
     if PluginCapabilities.ACTIVATE_VERSION in capabilities:
         schemas.append(_activate_version_config())
     if PluginCapabilities.BATCH in capabilities:
-        schemas.append(_batch_config(encoding_required=False))
+        schemas.append(_target_batch_config())
     if TargetCapabilities.VALIDATE_RECORDS in capabilities:
         schemas.append(_validate_records_config())
     schemas.append(config_for_capabilities(capabilities))
@@ -763,9 +771,9 @@ def sql_target_config_for_capabilities(
 # `*_config_for_capabilities` functions.
 STREAM_MAPS_CONFIG = _stream_maps_config()
 FLATTENING_CONFIG = _flattening_config()
-TAP_BATCH_CONFIG = _batch_config(encoding_required=True)
+BATCH_CONFIG = TAP_BATCH_CONFIG = _tap_batch_config()
 """Batch config schema for taps, which must always specify an encoding format."""
-BATCH_CONFIG = _batch_config(encoding_required=False)
+TARGET_BATCH_CONFIG = _target_batch_config()
 """Batch config schema for targets, which read the encoding off each BATCH message."""
 SQL_TAP_USE_SINGER_DECIMAL = _sql_tap_config()
 TARGET_SCHEMA_CONFIG = _target_schema_config()
