@@ -97,7 +97,7 @@ def _create_in_partitions_list(
     state_partition_context: types.Context,
 ) -> dict:
     # Existing partition not found. Creating new state entry in partitions list...
-    new_partition_state = {"context": state_partition_context}
+    new_partition_state = {"context": dict(state_partition_context)}
     partitions.append(new_partition_state)
     return new_partition_state
 
