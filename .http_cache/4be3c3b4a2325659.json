@@ -1,51 +1,45 @@
 {
-  "cookies": {
-    "__cf_bm": "ZflsuXsEP2RRkMP89.GSnteTGkQE4VKcLiV6qH5qCbE-1763701876-1.0.1.1-yPzEPWtgxl3FNqcecfoxl27ph.HudtKSHHyM2knjth8x2VTGILUgCEN1XpJEorAnGabT_SNVj2Ilno4DLEI.4vlEHNcdXFgG19I4fHXK5M8",
-    "_cfuvid": "uUVjy2rkBwgKKG.z18tXvsHRy.zDI4.F74cRiIPeW_s-1763701876398-0.0.1.1-604800000"
-  },
-  "created_at": "2025-11-21T05:11:16.291063+00:00",
-  "elapsed": 0.784187,
+  "created_at": "2026-09-24T21:34:07.296544+00:00",
+  "elapsed": 0.770597,
   "encoding": "utf-8",
   "headers": {
-    "CF-Cache-Status": "MISS",
-    "CF-Ray": "9a1daf735826e3b6-QRO",
+    "CF-Cache-Status": "BYPASS",
+    "CF-Ray": "a404e94c4c1c4066-QRO",
     "Cache-Control": "max-age=0, private, must-revalidate",
     "Connection": "keep-alive",
     "Content-Encoding": "gzip",
     "Content-Type": "application/json",
-    "Date": "Fri, 21 Nov 2025 05:11:16 GMT",
-    "ETag": "W/\"2b68e538c62293059ba30dc61ed57299\"",
+    "Date": "Thu, 24 Sep 2026 21:34:07 GMT",
+    "ETag": "W/\"925103bd7e38c6454b4a3602b91c486a\"",
     "Link": "<https://gitlab.com/api/v4/projects/meltano%2Fsdk/issues?id=meltano%2Fsdk&order_by=updated_at&page=6&per_page=20&scope=all&sort=asc&state=all&updated_after=2022-01-01T00%3A00%3A00%2B00%3A00&with_labels_details=false>; rel=\"prev\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/issues?id=meltano%2Fsdk&order_by=updated_at&page=8&per_page=20&scope=all&sort=asc&state=all&updated_after=2022-01-01T00%3A00%3A00%2B00%3A00&with_labels_details=false>; rel=\"next\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/issues?id=meltano%2Fsdk&order_by=updated_at&page=1&per_page=20&scope=all&sort=asc&state=all&updated_after=2022-01-01T00%3A00%3A00%2B00%3A00&with_labels_details=false>; rel=\"first\", <https://gitlab.com/api/v4/projects/meltano%2Fsdk/issues?id=meltano%2Fsdk&order_by=updated_at&page=10&per_page=20&scope=all&sort=asc&state=all&updated_after=2022-01-01T00%3A00%3A00%2B00%3A00&with_labels_details=false>; rel=\"last\"",
     "Server": "cloudflare",
-    "Set-Cookie": "__cf_bm=ZflsuXsEP2RRkMP89.GSnteTGkQE4VKcLiV6qH5qCbE-1763701876-1.0.1.1-yPzEPWtgxl3FNqcecfoxl27ph.HudtKSHHyM2knjth8x2VTGILUgCEN1XpJEorAnGabT_SNVj2Ilno4DLEI.4vlEHNcdXFgG19I4fHXK5M8; path=/; expires=Fri, 21-Nov-25 05:41:16 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=uUVjy2rkBwgKKG.z18tXvsHRy.zDI4.F74cRiIPeW_s-1763701876398-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
     "Strict-Transport-Security": "max-age=31536000",
     "Transfer-Encoding": "chunked",
-    "Vary": "Origin, Accept-Encoding",
+    "Vary": "Origin",
     "content-security-policy": "default-src 'none'",
-    "gitlab-lb": "haproxy-main-38-lb-gprd",
+    "gitlab-lb": "haproxy-main-17-lb-gprd",
     "gitlab-sv": "api-gke-us-east1-c",
     "nel": "{\"max_age\": 0}",
     "ratelimit-limit": "2000",
     "ratelimit-name": "throttle_authenticated_api",
-    "ratelimit-observed": "24",
-    "ratelimit-remaining": "1976",
-    "ratelimit-reset": "1763701920",
+    "ratelimit-observed": "27",
+    "ratelimit-remaining": "1973",
+    "ratelimit-reset": "1790285700",
     "referrer-policy": "strict-origin-when-cross-origin",
     "x-content-type-options": "nosniff",
     "x-frame-options": "SAMEORIGIN",
-    "x-gitlab-meta": "{\"correlation_id\":\"9a1daf738622e3b6-ATL\",\"version\":\"1\"}",
+    "x-gitlab-meta": "{\"correlation_id\":\"a404e94c4c1c4066-QRO\",\"version\":\"1\"}",
     "x-next-page": "8",
     "x-page": "7",
     "x-per-page": "20",
     "x-prev-page": "6",
-    "x-request-id": "9a1daf738622e3b6-ATL",
-    "x-runtime": "0.437207",
+    "x-request-id": "a404e94c4c1c4066-QRO",
+    "x-runtime": "0.567140",
     "x-total": "200",
     "x-total-pages": "10"
   },
   "reason": "OK",
   "request": {
-    "body": "",
     "headers": {
       "Accept": "*/*",
       "Accept-Encoding": "gzip, deflate, zstd",
@@ -76,7 +70,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -114,11 +108,12 @@
       "merge_requests_count": 0,
       "upvotes": 1,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/232",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/232",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -171,7 +166,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -201,7 +196,7 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
       "type": "ISSUE",
@@ -210,11 +205,12 @@
       "merge_requests_count": 0,
       "upvotes": 1,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/236",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/236",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -276,7 +272,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -305,7 +301,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "type": "ISSUE",
@@ -314,11 +310,12 @@
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/237",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/237",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -380,7 +377,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -418,11 +415,12 @@
       "merge_requests_count": 0,
       "upvotes": 2,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/239",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/239",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -484,7 +482,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -514,7 +512,7 @@
         "name": "Derek Visch",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png?v=1790279496",
         "web_url": "https://gitlab.com/vischous"
       },
       "type": "ISSUE",
@@ -523,11 +521,12 @@
       "merge_requests_count": 0,
       "upvotes": 2,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/242",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/242",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -589,7 +588,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -628,11 +627,12 @@
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/243",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/243",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -694,7 +694,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -754,11 +754,12 @@
       "merge_requests_count": 1,
       "upvotes": 2,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/247",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/247",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -833,7 +834,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -871,11 +872,12 @@
       "merge_requests_count": 0,
       "upvotes": 1,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/250",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/250",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -936,7 +938,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -974,11 +976,12 @@
       "merge_requests_count": 0,
       "upvotes": 1,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/252",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/252",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1040,7 +1043,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1069,7 +1072,7 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
       "type": "ISSUE",
@@ -1078,11 +1081,12 @@
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/253",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/253",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1144,7 +1148,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1173,7 +1177,7 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
       "type": "ISSUE",
@@ -1182,11 +1186,12 @@
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/254",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/254",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1248,7 +1253,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1277,7 +1282,7 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
       "type": "ISSUE",
@@ -1286,11 +1291,12 @@
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/255",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/255",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1352,7 +1358,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1382,7 +1388,7 @@
           "name": "Edgar R. Mondrag\u00f3n",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
           "web_url": "https://gitlab.com/edgarrmondragon"
         }
       ],
@@ -1393,7 +1399,7 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
       "type": "ISSUE",
@@ -1404,18 +1410,19 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "user_notes_count": 2,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/258",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/258",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1477,7 +1484,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1509,7 +1516,7 @@
           "name": "Edgar R. Mondrag\u00f3n",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
           "web_url": "https://gitlab.com/edgarrmondragon"
         }
       ],
@@ -1531,18 +1538,19 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "user_notes_count": 7,
       "merge_requests_count": 0,
       "upvotes": 1,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/259",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/259",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1609,7 +1617,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1638,7 +1646,7 @@
         "name": "Derek Visch",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png?v=1790279496",
         "web_url": "https://gitlab.com/vischous"
       },
       "type": "ISSUE",
@@ -1647,11 +1655,12 @@
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/260",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/260",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1705,7 +1714,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1743,11 +1752,12 @@
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/262",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/262",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1809,7 +1819,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1838,7 +1848,7 @@
         "name": "Derek Visch",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png?v=1790279496",
         "web_url": "https://gitlab.com/vischous"
       },
       "type": "ISSUE",
@@ -1847,11 +1857,12 @@
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/265",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/265",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1913,7 +1924,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1943,7 +1954,7 @@
         "name": "Derek Visch",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png?v=1790279496",
         "web_url": "https://gitlab.com/vischous"
       },
       "type": "ISSUE",
@@ -1952,11 +1963,12 @@
       "merge_requests_count": 0,
       "upvotes": 5,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/273",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/273",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -2018,7 +2030,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -2058,11 +2070,12 @@
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/274",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/274",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -2123,7 +2136,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -2152,7 +2165,7 @@
         "name": "Derek Visch",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png?v=1790279496",
         "web_url": "https://gitlab.com/vischous"
       },
       "type": "ISSUE",
@@ -2161,11 +2174,12 @@
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/275",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/275",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,

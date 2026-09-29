@@ -1,51 +1,45 @@
 {
-  "cookies": {
-    "__cf_bm": "iAMNuU1xgwOnqADbR5Y1fgzg9ylRy4sF396FMNS1J5Y-1763701857-1.0.1.1-xkr91EareD7nLf508xdUPkxhEK3GePfFc5XaNv9IYMfDfSc7_shaKhXbXjXJw2Hg_363Ot4.VTrNPwztn0ydyUInZ.95jrj3CsiZY7pFRYg",
-    "_cfuvid": "DiDJPZ3lhOPIu8vV3DpkbEPPEtZn2Iu3SI95UD8rlso-1763701857126-0.0.1.1-604800000"
-  },
-  "created_at": "2025-11-21T05:10:57.022347+00:00",
-  "elapsed": 1.079114,
+  "created_at": "2026-09-24T21:33:47.326741+00:00",
+  "elapsed": 1.231483,
   "encoding": "utf-8",
   "headers": {
-    "CF-Cache-Status": "MISS",
-    "CF-Ray": "9a1daef90802649a-QRO",
+    "CF-Cache-Status": "BYPASS",
+    "CF-Ray": "a404e8cca8fbdc07-QRO",
     "Cache-Control": "max-age=0, private, must-revalidate",
     "Connection": "keep-alive",
     "Content-Encoding": "gzip",
     "Content-Type": "application/json",
-    "Date": "Fri, 21 Nov 2025 05:10:57 GMT",
-    "ETag": "W/\"c44384611e92b2c50043af33ebb18867\"",
+    "Date": "Thu, 24 Sep 2026 21:33:47 GMT",
+    "ETag": "W/\"04d0c0e56957245d23dd3f287532ce84\"",
     "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/82/issues?epic_iid=82&id=2524164&page=1&per_page=20>; rel=\"prev\", <https://gitlab.com/api/v4/groups/2524164/epics/82/issues?epic_iid=82&id=2524164&page=3&per_page=20>; rel=\"next\", <https://gitlab.com/api/v4/groups/2524164/epics/82/issues?epic_iid=82&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/82/issues?epic_iid=82&id=2524164&page=4&per_page=20>; rel=\"last\"",
     "Server": "cloudflare",
-    "Set-Cookie": "__cf_bm=iAMNuU1xgwOnqADbR5Y1fgzg9ylRy4sF396FMNS1J5Y-1763701857-1.0.1.1-xkr91EareD7nLf508xdUPkxhEK3GePfFc5XaNv9IYMfDfSc7_shaKhXbXjXJw2Hg_363Ot4.VTrNPwztn0ydyUInZ.95jrj3CsiZY7pFRYg; path=/; expires=Fri, 21-Nov-25 05:40:57 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=DiDJPZ3lhOPIu8vV3DpkbEPPEtZn2Iu3SI95UD8rlso-1763701857126-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
     "Strict-Transport-Security": "max-age=31536000",
     "Transfer-Encoding": "chunked",
-    "Vary": "Origin, Accept-Encoding",
+    "Vary": "Origin",
     "content-security-policy": "default-src 'none'",
-    "gitlab-lb": "haproxy-main-47-lb-gprd",
-    "gitlab-sv": "gke-cny-api",
+    "gitlab-lb": "haproxy-main-18-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-d",
     "nel": "{\"max_age\": 0}",
     "ratelimit-limit": "2000",
     "ratelimit-name": "throttle_authenticated_api",
-    "ratelimit-observed": "75",
-    "ratelimit-remaining": "1925",
-    "ratelimit-reset": "1763701860",
+    "ratelimit-observed": "79",
+    "ratelimit-remaining": "1921",
+    "ratelimit-reset": "1790285640",
     "referrer-policy": "strict-origin-when-cross-origin",
     "x-content-type-options": "nosniff",
     "x-frame-options": "SAMEORIGIN",
-    "x-gitlab-meta": "{\"correlation_id\":\"9a1daef9574f649a-ATL\",\"version\":\"1\"}",
+    "x-gitlab-meta": "{\"correlation_id\":\"a404e8cca8fbdc07-QRO\",\"version\":\"1\"}",
     "x-next-page": "3",
     "x-page": "2",
     "x-per-page": "20",
     "x-prev-page": "1",
-    "x-request-id": "9a1daef9574f649a-ATL",
-    "x-runtime": "0.576826",
+    "x-request-id": "a404e8cca8fbdc07-QRO",
+    "x-runtime": "1.026066",
     "x-total": "64",
     "x-total-pages": "4"
   },
   "reason": "OK",
   "request": {
-    "body": "",
     "headers": {
       "Accept": "*/*",
       "Accept-Encoding": "gzip, deflate, zstd",
@@ -60,15 +54,15 @@
   "url": "https://gitlab.com/api/v4/groups/2524164/epics/82/issues?page=2",
   "_decoded_content": [
     {
-      "id": 101341148,
-      "iid": 6,
-      "project_id": 12712651,
+      "id": 101341152,
+      "iid": 12,
+      "project_id": 16354036,
       "title": "Support dbt>=1.0.0",
       "description": "In [dbt `1.0.0`](https://github.com/dbt-labs/dbt-core/releases/tag/v1.0.0):\n\n> - Change the default dbt packages installation directory to `dbt_packages` from `dbt_modules`. Also rename `modules-path` to `packages-install-path` to allow default overrides of package install directory. Deprecation warning added for projects using the old `dbt_modules` name without specifying a `packages-install-path`. (#3523)\n> \n> - Marked `source-paths` and `data-paths` as deprecated keys in `dbt_project.yml` in favor of `model-paths` and `seed-paths` respectively.\n\n- [ ] `source-paths` => `model-paths`\n- [ ] `data-paths` => `seed-paths`\n- [ ] `dbt_modules` => `dbt_packages`\n- [ ] `modules-path` => `packages-install-path`\n- [ ] Require dbt>=1.0.0 (https://docs.getdbt.com/reference/project-configs/require-dbt-version)\n\nhttps://docs.getdbt.com/docs/guides/migration-guide/upgrading-to-1-0-0",
       "state": "closed",
-      "created_at": "2022-01-26T23:53:06.936Z",
-      "updated_at": "2022-01-28T22:32:53.830Z",
-      "closed_at": "2022-01-28T22:32:53.812Z",
+      "created_at": "2022-01-26T23:53:36.584Z",
+      "updated_at": "2022-01-28T22:32:06.311Z",
+      "closed_at": "2022-01-28T22:32:06.294Z",
       "closed_by": {
         "id": 1134865,
         "username": "edgarrmondragon",
@@ -76,7 +70,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "labels": [
@@ -104,7 +98,7 @@
           "name": "Edgar R. Mondrag\u00f3n",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
           "web_url": "https://gitlab.com/edgarrmondragon"
         }
       ],
@@ -115,7 +109,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "type": "ISSUE",
@@ -126,18 +120,19 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/dbt-tap-google-analytics/-/issues/6",
+      "web_url": "https://gitlab.com/meltano/dbt-tap-facebook/-/work_items/12",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -149,7 +144,132 @@
         "completed_count": 0
       },
       "weight": 2,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/16354036/issues/12",
+        "notes": "https://gitlab.com/api/v4/projects/16354036/issues/12/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/16354036/issues/12/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/16354036",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#12",
+        "relative": "#12",
+        "full": "meltano/dbt-tap-facebook#12"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 82,
+      "epic": {
+        "id": 102873,
+        "iid": 82,
+        "title": "Improved dbt integration",
+        "url": "/groups/meltano/-/epics/82",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1076567,
+      "relative_position": -22059
+    },
+    {
+      "id": 101341148,
+      "iid": 6,
+      "project_id": 12712651,
+      "title": "Support dbt>=1.0.0",
+      "description": "In [dbt `1.0.0`](https://github.com/dbt-labs/dbt-core/releases/tag/v1.0.0):\n\n> - Change the default dbt packages installation directory to `dbt_packages` from `dbt_modules`. Also rename `modules-path` to `packages-install-path` to allow default overrides of package install directory. Deprecation warning added for projects using the old `dbt_modules` name without specifying a `packages-install-path`. (#3523)\n> \n> - Marked `source-paths` and `data-paths` as deprecated keys in `dbt_project.yml` in favor of `model-paths` and `seed-paths` respectively.\n\n- [ ] `source-paths` => `model-paths`\n- [ ] `data-paths` => `seed-paths`\n- [ ] `dbt_modules` => `dbt_packages`\n- [ ] `modules-path` => `packages-install-path`\n- [ ] Require dbt>=1.0.0 (https://docs.getdbt.com/reference/project-configs/require-dbt-version)\n\nhttps://docs.getdbt.com/docs/guides/migration-guide/upgrading-to-1-0-0",
+      "state": "closed",
+      "created_at": "2022-01-26T23:53:06.936Z",
+      "updated_at": "2022-01-28T22:32:53.830Z",
+      "closed_at": "2022-01-28T22:32:53.812Z",
+      "closed_by": {
+        "id": 1134865,
+        "username": "edgarrmondragon",
+        "public_email": "edgar@meltano.com",
+        "name": "Edgar R. Mondrag\u00f3n",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
+        "web_url": "https://gitlab.com/edgarrmondragon"
+      },
+      "labels": [
+        "flow::Review"
+      ],
+      "milestone": {
+        "id": 2363645,
+        "iid": 216,
+        "group_id": 2524164,
+        "title": "Fri: Jan 28, 2022",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-12-06T17:19:34.985Z",
+        "updated_at": "2022-01-31T16:59:52.796Z",
+        "due_date": "2022-01-28",
+        "start_date": "2022-01-22",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/216"
+      },
+      "assignees": [
+        {
+          "id": 1134865,
+          "username": "edgarrmondragon",
+          "public_email": "edgar@meltano.com",
+          "name": "Edgar R. Mondrag\u00f3n",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
+          "web_url": "https://gitlab.com/edgarrmondragon"
+        }
+      ],
+      "author": {
+        "id": 1134865,
+        "username": "edgarrmondragon",
+        "public_email": "edgar@meltano.com",
+        "name": "Edgar R. Mondrag\u00f3n",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
+        "web_url": "https://gitlab.com/edgarrmondragon"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 1134865,
+        "username": "edgarrmondragon",
+        "public_email": "edgar@meltano.com",
+        "name": "Edgar R. Mondrag\u00f3n",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
+        "web_url": "https://gitlab.com/edgarrmondragon"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/dbt-tap-google-analytics/-/work_items/6",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 5,
+        "completed_count": 0
+      },
+      "weight": 2,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/12712651/issues/6",
@@ -200,7 +320,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "labels": [],
@@ -226,7 +346,7 @@
           "name": "Edgar R. Mondrag\u00f3n",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
           "web_url": "https://gitlab.com/edgarrmondragon"
         }
       ],
@@ -237,7 +357,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "type": "ISSUE",
@@ -248,18 +368,19 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
-      "user_notes_count": 1,
-      "merge_requests_count": 2,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/dbt-tap-zendesk/-/issues/2",
+      "web_url": "https://gitlab.com/meltano/dbt-tap-zendesk/-/work_items/2",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -271,7 +392,7 @@
         "completed_count": 0
       },
       "weight": 2,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/11614164/issues/2",
@@ -322,7 +443,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "labels": [
@@ -350,7 +471,7 @@
           "name": "Taylor A Murphy",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
           "web_url": "https://gitlab.com/tayloramurphy"
         }
       ],
@@ -361,7 +482,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "type": "ISSUE",
@@ -372,18 +493,19 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/dbt-tap-carbon-intensity/-/issues/2",
+      "web_url": "https://gitlab.com/meltano/dbt-tap-carbon-intensity/-/work_items/2",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -395,7 +517,7 @@
         "completed_count": 0
       },
       "weight": 2,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/10303502/issues/2",
@@ -446,7 +568,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "labels": [],
@@ -472,7 +594,7 @@
           "name": "Taylor A Murphy",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
           "web_url": "https://gitlab.com/tayloramurphy"
         }
       ],
@@ -483,7 +605,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "type": "ISSUE",
@@ -494,18 +616,19 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/dbt-tap-zuora/-/issues/3",
+      "web_url": "https://gitlab.com/meltano/dbt-tap-zuora/-/work_items/3",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -517,7 +640,7 @@
         "completed_count": 0
       },
       "weight": 2,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/11532446/issues/3",
@@ -552,128 +675,6 @@
       "relative_position": -20007
     },
     {
-      "id": 101341090,
-      "iid": 5,
-      "project_id": 10942742,
-      "title": "Support dbt>=1.0.0",
-      "description": "In [dbt `1.0.0`](https://github.com/dbt-labs/dbt-core/releases/tag/v1.0.0):\n\n> - Change the default dbt packages installation directory to `dbt_packages` from `dbt_modules`. Also rename `modules-path` to `packages-install-path` to allow default overrides of package install directory. Deprecation warning added for projects using the old `dbt_modules` name without specifying a `packages-install-path`. (#3523)\n> \n> - Marked `source-paths` and `data-paths` as deprecated keys in `dbt_project.yml` in favor of `model-paths` and `seed-paths` respectively.\n\n- [ ] `source-paths` => `model-paths`\n- [ ] `data-paths` => `seed-paths`\n- [ ] `dbt_modules` => `dbt_packages`\n- [ ] `modules-path` => `packages-install-path`\n- [ ] Require dbt>=1.0.0 (https://docs.getdbt.com/reference/project-configs/require-dbt-version)\n\nhttps://docs.getdbt.com/docs/guides/migration-guide/upgrading-to-1-0-0",
-      "state": "closed",
-      "created_at": "2022-01-26T23:52:10.102Z",
-      "updated_at": "2022-01-28T23:19:04.215Z",
-      "closed_at": "2022-01-28T23:19:04.198Z",
-      "closed_by": {
-        "id": 1134865,
-        "username": "edgarrmondragon",
-        "public_email": "edgar@meltano.com",
-        "name": "Edgar R. Mondrag\u00f3n",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
-        "web_url": "https://gitlab.com/edgarrmondragon"
-      },
-      "labels": [],
-      "milestone": {
-        "id": 2363645,
-        "iid": 216,
-        "group_id": 2524164,
-        "title": "Fri: Jan 28, 2022",
-        "description": "",
-        "state": "closed",
-        "created_at": "2021-12-06T17:19:34.985Z",
-        "updated_at": "2022-01-31T16:59:52.796Z",
-        "due_date": "2022-01-28",
-        "start_date": "2022-01-22",
-        "expired": true,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/216"
-      },
-      "assignees": [
-        {
-          "id": 1134865,
-          "username": "edgarrmondragon",
-          "public_email": "edgar@meltano.com",
-          "name": "Edgar R. Mondrag\u00f3n",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
-          "web_url": "https://gitlab.com/edgarrmondragon"
-        }
-      ],
-      "author": {
-        "id": 1134865,
-        "username": "edgarrmondragon",
-        "public_email": "edgar@meltano.com",
-        "name": "Edgar R. Mondrag\u00f3n",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
-        "web_url": "https://gitlab.com/edgarrmondragon"
-      },
-      "type": "ISSUE",
-      "assignee": {
-        "id": 1134865,
-        "username": "edgarrmondragon",
-        "public_email": "edgar@meltano.com",
-        "name": "Edgar R. Mondrag\u00f3n",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
-        "web_url": "https://gitlab.com/edgarrmondragon"
-      },
-      "user_notes_count": 1,
-      "merge_requests_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": null,
-      "confidential": false,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/dbt-tap-salesforce/-/issues/5",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 5,
-        "completed_count": 0
-      },
-      "weight": 2,
-      "blocking_issues_count": 0,
-      "has_tasks": false,
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/10942742/issues/5",
-        "notes": "https://gitlab.com/api/v4/projects/10942742/issues/5/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/10942742/issues/5/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/10942742",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#5",
-        "relative": "#5",
-        "full": "meltano/dbt-tap-salesforce#5"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 82,
-      "epic": {
-        "id": 102873,
-        "iid": 82,
-        "title": "Improved dbt integration",
-        "url": "/groups/meltano/-/epics/82",
-        "group_id": 2524164,
-        "human_readable_end_date": "Dec 31, 2022",
-        "human_readable_timestamp": "<strong>Past due</strong>"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 1082237,
-      "relative_position": -24111
-    },
-    {
       "id": 101341086,
       "iid": 1,
       "project_id": 10981775,
@@ -690,7 +691,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "labels": [
@@ -718,7 +719,7 @@
           "name": "Taylor A Murphy",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
           "web_url": "https://gitlab.com/tayloramurphy"
         }
       ],
@@ -729,7 +730,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "type": "ISSUE",
@@ -740,18 +741,19 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/dbt-carbon-intensity-sqlite/-/issues/1",
+      "web_url": "https://gitlab.com/meltano/dbt-carbon-intensity-sqlite/-/work_items/1",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -763,7 +765,7 @@
         "completed_count": 0
       },
       "weight": 2,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/10981775/issues/1",
@@ -814,7 +816,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "labels": [],
@@ -840,7 +842,7 @@
           "name": "Edgar R. Mondrag\u00f3n",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
           "web_url": "https://gitlab.com/edgarrmondragon"
         }
       ],
@@ -851,7 +853,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "type": "ISSUE",
@@ -862,18 +864,19 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/dbt-tap-gitlab/-/issues/8",
+      "web_url": "https://gitlab.com/meltano/dbt-tap-gitlab/-/work_items/8",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -885,7 +888,7 @@
         "completed_count": 5
       },
       "weight": 2,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/11302925/issues/8",
@@ -936,7 +939,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "labels": [
@@ -964,7 +967,7 @@
           "name": "Taylor A Murphy",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
           "web_url": "https://gitlab.com/tayloramurphy"
         }
       ],
@@ -975,7 +978,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "type": "ISSUE",
@@ -986,18 +989,19 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/dbt-tap-stripe/-/issues/8",
+      "web_url": "https://gitlab.com/meltano/dbt-tap-stripe/-/work_items/8",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1009,7 +1013,7 @@
         "completed_count": 0
       },
       "weight": 2,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/11334030/issues/8",
@@ -1060,7 +1064,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "labels": [
@@ -1088,7 +1092,7 @@
           "name": "Taylor A Murphy",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
           "web_url": "https://gitlab.com/tayloramurphy"
         }
       ],
@@ -1099,7 +1103,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "type": "ISSUE",
@@ -1110,18 +1114,19 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/dbt-tap-adwords/-/issues/7",
+      "web_url": "https://gitlab.com/meltano/dbt-tap-adwords/-/work_items/7",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1133,7 +1138,7 @@
         "completed_count": 0
       },
       "weight": 2,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/16838433/issues/7",
@@ -1184,7 +1189,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "labels": [
@@ -1213,7 +1218,7 @@
           "name": "Edgar R. Mondrag\u00f3n",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
           "web_url": "https://gitlab.com/edgarrmondragon"
         }
       ],
@@ -1224,7 +1229,7 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
       "type": "ISSUE",
@@ -1235,18 +1240,19 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "user_notes_count": 0,
-      "merge_requests_count": 1,
+      "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-01-26",
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3176",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3176",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1258,7 +1264,7 @@
         "completed_count": 0
       },
       "weight": 4,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "",
       "_links": {
@@ -1310,7 +1316,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1340,20 +1346,21 @@
         "name": "Pat Nadolny",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
         "web_url": "https://gitlab.com/pnadolny13"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3164",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3164",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1365,7 +1372,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1417,7 +1424,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1447,20 +1454,21 @@
         "name": "Pat Nadolny",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
         "web_url": "https://gitlab.com/pnadolny13"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3163",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3163",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1472,7 +1480,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1524,7 +1532,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1554,20 +1562,21 @@
         "name": "Pat Nadolny",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
         "web_url": "https://gitlab.com/pnadolny13"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3162",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3162",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1579,7 +1588,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1615,6 +1624,260 @@
       "relative_position": -15903
     },
     {
+      "id": 89593279,
+      "iid": 5,
+      "project_id": 19200150,
+      "title": "Update documentation to make it clear what env_alias does for settings, particularly for dbt",
+      "description": "The `profiles.yml` file uses `PG_HOST` `PG_PORT` etc. But most workflows use `TARGET_POSTGRES_HOST` `TARGET_POSTGRES_PORT` etc. i.e. https://meltano.com/docs/getting-started.html#configure-the-loader\n\nWhat is the intention for the default `profiles.yml`? I created a pretty barebones repo with Meltano + 1 tap + dbt project + postgres and was surprised that I had to edit the `profiles.yml` myself. My setup: https://github.com/lightdash/full-stack-tap-github",
+      "state": "closed",
+      "created_at": "2021-07-01T08:39:43.816Z",
+      "updated_at": "2022-01-10T19:26:49.597Z",
+      "closed_at": "2022-01-10T19:26:49.586Z",
+      "closed_by": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "labels": [
+        "Documentation",
+        "Transform",
+        "Won't Do",
+        "flow::Triage",
+        "kind::Bug",
+        "urgency::default",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2363644,
+        "iid": 215,
+        "group_id": 2524164,
+        "title": "Fri: Jan 21, 2022",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-12-06T17:19:07.836Z",
+        "updated_at": "2022-01-24T17:49:13.611Z",
+        "due_date": "2022-01-21",
+        "start_date": "2022-01-15",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/215"
+      },
+      "assignees": [],
+      "author": {
+        "id": 4409896,
+        "username": "owlas",
+        "public_email": "",
+        "name": "Oliver Laslett",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/4409896/avatar.png?v=1789034296",
+        "web_url": "https://gitlab.com/owlas"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/files-dbt/-/work_items/5",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/19200150/issues/5",
+        "notes": "https://gitlab.com/api/v4/projects/19200150/issues/5/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/19200150/issues/5/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/19200150",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#5",
+        "relative": "#5",
+        "full": "meltano/files-dbt#5"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 82,
+      "epic": {
+        "id": 102873,
+        "iid": 82,
+        "title": "Improved dbt integration",
+        "url": "/groups/meltano/-/epics/82",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1038879,
+      "relative_position": -15390
+    },
+    {
+      "id": 98435750,
+      "iid": 3098,
+      "project_id": 7603319,
+      "title": "Command `dbt:run` should work without initializing extra environment variables",
+      "description": "When running `meltano elt tap target --transform=run` - things \"just work\" without little additional work if you're using one of the existing transform packages like in the gitlab demo project in a pipeline.\n\nHowever, running `meltano invoke dbt:run` doesn't work because there are still several env vars we have to set. The big ones (like DBT_TARGET_SCHEMA) are covered very briefly in https://meltano.com/docs/transforms.html#running-a-transform-in-meltano but there's a lot more you need to potentially set if you're trying to use it from the env, namely: PG_DATABASE|PASSWORD|USERNAME|PORT|etc.\n\nAt first, I couldn't tell if those were all env vars we were just setting proactively every time you run `meltano elt` (because we can infer what we need there and what the target context is), or if there was another way I should configure this. i.e. is there a generated config file I should just reference? All the config files I found just seem to reference env vars though.\n\n## Environment Variables currently expected by our bundled `profiles.yml`\n\n| Variable            | Meaning                                                                                                                                        | Maps to                                                                                                                                                                                                                                                                                                                                  |\n| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| `DBT_TARGET`        | > This is the default target your dbt project will use. It must be one of the targets you define in your profile. Commonly it is set to `dev`. | Defaults to Meltano's `$MELTANO_LOAD__DIALECT`.\u00a0With the `profiles.yml`\u00a0currently packaged in the dbt file bundle, this means one of `snowflake`, `postgres`\u00a0or\u00a0`bigquery`. Like @tayloramurphy mentions in\u00a0https://gitlab.com/meltano/meltano/-/issues/3104#note_804770702, this is confusing and not standard practice in dbt projects. |\n| `DBT_TARGET_SCHEMA` | > The default schema that dbt will build objects in.                                                                                           | Defaults to `analytics`.                                                                                                                                                                                                                                                                                                                 |\n| `SF_*`              | Snowflake connection parameters.                                                                                                               | These [leverage the `env_aliases`](https://gitlab.com/meltano/meltano/-/blob/544f7128b3efd783efe7ac7b7c109e80ef9f086c/src/meltano/core/bundle/discovery.yml#L2551-2578)\u00a0injected at runtime by Meltano. So, they get the same values as\u00a0`TARGET_SNOWFLAKE_*`.                                                                                                                                                                                                                   |\n| `SF_ROLE`           | Snowflake Role.                                                                                                                                | This one doesn't use `env_aliases`\u00a0so I'm not sure if it gets injected...                                                                                                                                                                                                                                                                |\n| `PG_*`              | PostgreSQL connection parameters.                                                                                                              | These [leverage the `env_aliases`](https://gitlab.com/meltano/meltano/-/blob/544f7128b3efd783efe7ac7b7c109e80ef9f086c/src/meltano/core/bundle/discovery.yml#L2299-2333) injected at runtime by Meltano. So, they get the same values as `TARGET_POSTGRES_*`.                                                                                                                                                                                                                    |\n| `TARGET_BIGQUERY_*` | BigQuery connection parameters.                                                                                                                | These use directly the same values as `TARGET_BIGQUERY_*`.                                                                                                                                                                                                                                                                               |",
+      "state": "closed",
+      "created_at": "2021-12-03T21:57:53.767Z",
+      "updated_at": "2022-05-30T09:59:07.796Z",
+      "closed_at": "2022-05-30T09:59:07.756Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Office Hours::Discussed",
+        "flow::Triage",
+        "kind::Bug",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 1942272,
+          "username": "tayloramurphy",
+          "public_email": "",
+          "name": "Taylor A Murphy",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
+          "web_url": "https://gitlab.com/tayloramurphy"
+        }
+      ],
+      "author": {
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3098",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": 4,
+      "blocking_issues_count": null,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3098",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3098/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3098/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#3098",
+        "relative": "#3098",
+        "full": "meltano/meltano#3098"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 82,
+      "epic": {
+        "id": 102873,
+        "iid": 82,
+        "title": "Improved dbt integration",
+        "url": "/groups/meltano/-/epics/82",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": {
+        "id": 56416,
+        "iid": 56,
+        "sequence": 3,
+        "group_id": 2524164,
+        "title": null,
+        "description": null,
+        "state": 3,
+        "created_at": "2022-05-13T20:04:48.839Z",
+        "updated_at": "2022-05-30T00:05:02.370Z",
+        "start_date": "2022-05-23",
+        "due_date": "2022-05-29",
+        "web_url": "https://gitlab.com/groups/meltano/-/iterations/56416"
+      },
+      "health_status": null,
+      "epic_issue_id": 1005104,
+      "relative_position": -14877
+    },
+    {
       "id": 98563098,
       "iid": 7,
       "project_id": 19200150,
@@ -1631,7 +1894,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "labels": [
@@ -1661,7 +1924,7 @@
           "name": "Edgar R. Mondrag\u00f3n",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
           "web_url": "https://gitlab.com/edgarrmondragon"
         }
       ],
@@ -1672,7 +1935,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "type": "ISSUE",
@@ -1683,18 +1946,19 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
-      "user_notes_count": 2,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/files-dbt/-/issues/7",
+      "web_url": "https://gitlab.com/meltano/files-dbt/-/work_items/7",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1706,7 +1970,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1758,7 +2022,7 @@
         "name": "Ken Payne",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png?v=1694601772",
         "web_url": "https://gitlab.com/kgpayne"
       },
       "labels": [
@@ -1792,7 +2056,7 @@
           "name": "Ken Payne",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png?v=1694601772",
           "web_url": "https://gitlab.com/kgpayne"
         }
       ],
@@ -1814,18 +2078,19 @@
         "name": "Ken Payne",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/7646034/avatar.png?v=1694601772",
         "web_url": "https://gitlab.com/kgpayne"
       },
-      "user_notes_count": 35,
-      "merge_requests_count": 2,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3105",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3105",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1837,7 +2102,7 @@
         "completed_count": 0
       },
       "weight": 8,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1889,7 +2154,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1924,15 +2189,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 2,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3104",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3104",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1944,7 +2210,7 @@
         "completed_count": 0
       },
       "weight": 8,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1980,15 +2246,15 @@
       "relative_position": -13338
     },
     {
-      "id": 98435750,
-      "iid": 3098,
+      "id": 90854279,
+      "iid": 2870,
       "project_id": 7603319,
-      "title": "Command `dbt:run` should work without initializing extra environment variables",
-      "description": "When running `meltano elt tap target --transform=run` - things \"just work\" without little additional work if you're using one of the existing transform packages like in the gitlab demo project in a pipeline.\n\nHowever, running `meltano invoke dbt:run` doesn't work because there are still several env vars we have to set. The big ones (like DBT_TARGET_SCHEMA) are covered very briefly in https://meltano.com/docs/transforms.html#running-a-transform-in-meltano but there's a lot more you need to potentially set if you're trying to use it from the env, namely: PG_DATABASE|PASSWORD|USERNAME|PORT|etc.\n\nAt first, I couldn't tell if those were all env vars we were just setting proactively every time you run `meltano elt` (because we can infer what we need there and what the target context is), or if there was another way I should configure this. i.e. is there a generated config file I should just reference? All the config files I found just seem to reference env vars though.\n\n## Environment Variables currently expected by our bundled `profiles.yml`\n\n| Variable            | Meaning                                                                                                                                        | Maps to                                                                                                                                                                                                                                                                                                                                  |\n| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| `DBT_TARGET`        | > This is the default target your dbt project will use. It must be one of the targets you define in your profile. Commonly it is set to `dev`. | Defaults to Meltano's `$MELTANO_LOAD__DIALECT`.\u00a0With the `profiles.yml`\u00a0currently packaged in the dbt file bundle, this means one of `snowflake`, `postgres`\u00a0or\u00a0`bigquery`. Like @tayloramurphy mentions in\u00a0https://gitlab.com/meltano/meltano/-/issues/3104#note_804770702, this is confusing and not standard practice in dbt projects. |\n| `DBT_TARGET_SCHEMA` | > The default schema that dbt will build objects in.                                                                                           | Defaults to `analytics`.                                                                                                                                                                                                                                                                                                                 |\n| `SF_*`              | Snowflake connection parameters.                                                                                                               | These [leverage the `env_aliases`](https://gitlab.com/meltano/meltano/-/blob/544f7128b3efd783efe7ac7b7c109e80ef9f086c/src/meltano/core/bundle/discovery.yml#L2551-2578)\u00a0injected at runtime by Meltano. So, they get the same values as\u00a0`TARGET_SNOWFLAKE_*`.                                                                                                                                                                                                                   |\n| `SF_ROLE`           | Snowflake Role.                                                                                                                                | This one doesn't use `env_aliases`\u00a0so I'm not sure if it gets injected...                                                                                                                                                                                                                                                                |\n| `PG_*`              | PostgreSQL connection parameters.                                                                                                              | These [leverage the `env_aliases`](https://gitlab.com/meltano/meltano/-/blob/544f7128b3efd783efe7ac7b7c109e80ef9f086c/src/meltano/core/bundle/discovery.yml#L2299-2333) injected at runtime by Meltano. So, they get the same values as `TARGET_POSTGRES_*`.                                                                                                                                                                                                                    |\n| `TARGET_BIGQUERY_*` | BigQuery connection parameters.                                                                                                                | These use directly the same values as `TARGET_BIGQUERY_*`.                                                                                                                                                                                                                                                                               |",
+      "title": "Compatibility with `dbt Power User` extension for VS Code",
+      "description": "In order to promote the best possible development experience for Meltano dbt users, we should support the [dbt Power User](https://marketplace.visualstudio.com/items?itemName=innoverio.vscode-dbt-power-user) extension for VS Code.\n\nWhen I attempted this for the Academy labs, I found that the extension was not able to find the dbt resources. The most likely explanation was that the extension was looking for `dbt_project.yml` in the root project directory - but there may be other explanations and mitigations available.\n\nI am not against having `dbt_project.yml` at the root directory, and I think there may be other strong advantages of doing so - such as providing dbt with resources within other top-level folders.",
       "state": "closed",
-      "created_at": "2021-12-03T21:57:53.767Z",
-      "updated_at": "2022-05-30T09:59:07.796Z",
-      "closed_at": "2022-05-30T09:59:07.756Z",
+      "created_at": "2021-07-26T14:44:25.650Z",
+      "updated_at": "2022-05-30T09:31:23.003Z",
+      "closed_at": "2022-05-30T09:31:22.956Z",
       "closed_by": {
         "id": 11629953,
         "username": "MeltyBot",
@@ -1996,41 +2262,28 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
-        "Office Hours::Discussed",
-        "flow::Triage",
-        "kind::Bug",
-        "valuestream::Meltano"
+        "kind::Feature",
+        "valuestream::Ecosystem"
       ],
       "milestone": {
-        "id": 2351599,
-        "iid": 209,
+        "id": 797629,
+        "iid": 42,
         "group_id": 2524164,
-        "title": "May 2022",
-        "description": "",
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
         "state": "active",
-        "created_at": "2021-11-29T21:38:23.665Z",
-        "updated_at": "2021-11-29T21:38:23.665Z",
-        "due_date": "2022-05-31",
-        "start_date": "2022-05-01",
-        "expired": true,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
       },
-      "assignees": [
-        {
-          "id": 1942272,
-          "username": "tayloramurphy",
-          "public_email": "",
-          "name": "Taylor A Murphy",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
-          "web_url": "https://gitlab.com/tayloramurphy"
-        }
-      ],
+      "assignees": [],
       "author": {
         "id": 4809760,
         "username": "aaronsteers",
@@ -2042,25 +2295,17 @@
         "web_url": "https://gitlab.com/aaronsteers"
       },
       "type": "ISSUE",
-      "assignee": {
-        "id": 1942272,
-        "username": "tayloramurphy",
-        "public_email": "",
-        "name": "Taylor A Murphy",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
-        "web_url": "https://gitlab.com/tayloramurphy"
-      },
-      "user_notes_count": 15,
+      "assignee": null,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3098",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/2870",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -2071,21 +2316,21 @@
         "count": 0,
         "completed_count": 0
       },
-      "weight": 4,
-      "blocking_issues_count": 0,
+      "weight": null,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
-        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3098",
-        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3098/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3098/award_emoji",
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2870",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2870/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2870/award_emoji",
         "project": "https://gitlab.com/api/v4/projects/7603319",
         "closed_as_duplicate_of": null
       },
       "references": {
-        "short": "#3098",
-        "relative": "#3098",
-        "full": "meltano/meltano#3098"
+        "short": "#2870",
+        "relative": "#2870",
+        "full": "meltano/meltano#2870"
       },
       "severity": "UNKNOWN",
       "moved_to_id": null,
@@ -2102,23 +2347,10 @@
         "human_readable_end_date": "Dec 31, 2022",
         "human_readable_timestamp": "<strong>Past due</strong>"
       },
-      "iteration": {
-        "id": 56416,
-        "iid": 56,
-        "sequence": 3,
-        "group_id": 2524164,
-        "title": null,
-        "description": null,
-        "state": 3,
-        "created_at": "2022-05-13T20:04:48.839Z",
-        "updated_at": "2022-05-30T00:05:02.370Z",
-        "start_date": "2022-05-23",
-        "due_date": "2022-05-29",
-        "web_url": "https://gitlab.com/groups/meltano/-/iterations/56416"
-      },
+      "iteration": null,
       "health_status": null,
-      "epic_issue_id": 1005104,
-      "relative_position": -14877
+      "epic_issue_id": 971468,
+      "relative_position": -12825
     },
     {
       "id": 97144650,
@@ -2137,7 +2369,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -2172,15 +2404,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 2,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/files-dbt/-/issues/6",
+      "web_url": "https://gitlab.com/meltano/files-dbt/-/work_items/6",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -2192,7 +2425,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -2226,254 +2459,6 @@
       "health_status": null,
       "epic_issue_id": 936533,
       "relative_position": -12312
-    },
-    {
-      "id": 95439962,
-      "iid": 2989,
-      "project_id": 7603319,
-      "title": "meltano | Transformation failed (2): Env var required but not provided: 'MELTANO_LOAD_SCHEMA'",
-      "description": "According to @DouweM, this can occur if a custom loader that doesn\u2019t define a schema setting, so the env var doesn\u2019t get populated and dbt doesn\u2019t know what schema to read from.\n\nI think Meltano is probably functioning as designed this feels like a bug to me. In a world where we have 10s of taps loading to the same environment (#2869), dbt should probably be mapping to schema or tap names statically (in yaml config) rather than dynamically (in env vars).\n\nWe should also strive to improve the user experience for users creating their own transformation sets, which will increasingly become the norm as we are moving away from the more fragile `transform` packages that expect specific database dialect (generally postgres) and a specific variant of the given tap.\n\nLabeling as a bug because of the user impact, although in fairness, I do think this is functioning as originally designed.",
-      "state": "closed",
-      "created_at": "2021-10-14T15:57:42.907Z",
-      "updated_at": "2022-05-30T09:46:44.099Z",
-      "closed_at": "2022-05-30T09:46:44.072Z",
-      "closed_by": {
-        "id": 11629953,
-        "username": "MeltyBot",
-        "public_email": "",
-        "name": "Melty Bot",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
-        "web_url": "https://gitlab.com/MeltyBot"
-      },
-      "labels": [
-        "Office Hours::Discussed",
-        "Transform",
-        "flow::Triage",
-        "kind::Bug",
-        "valuestream::Meltano"
-      ],
-      "milestone": {
-        "id": 2351599,
-        "iid": 209,
-        "group_id": 2524164,
-        "title": "May 2022",
-        "description": "",
-        "state": "active",
-        "created_at": "2021-11-29T21:38:23.665Z",
-        "updated_at": "2021-11-29T21:38:23.665Z",
-        "due_date": "2022-05-31",
-        "start_date": "2022-05-01",
-        "expired": true,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
-      },
-      "assignees": [
-        {
-          "id": 1942272,
-          "username": "tayloramurphy",
-          "public_email": "",
-          "name": "Taylor A Murphy",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
-          "web_url": "https://gitlab.com/tayloramurphy"
-        }
-      ],
-      "author": {
-        "id": 4809760,
-        "username": "aaronsteers",
-        "public_email": "aaronsteers@gmail.com",
-        "name": "AJ Steers",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
-        "web_url": "https://gitlab.com/aaronsteers"
-      },
-      "type": "ISSUE",
-      "assignee": {
-        "id": 1942272,
-        "username": "tayloramurphy",
-        "public_email": "",
-        "name": "Taylor A Murphy",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
-        "web_url": "https://gitlab.com/tayloramurphy"
-      },
-      "user_notes_count": 5,
-      "merge_requests_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": null,
-      "confidential": false,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2989",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "weight": 8,
-      "blocking_issues_count": 0,
-      "has_tasks": true,
-      "task_status": "0 of 0 checklist items completed",
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2989",
-        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2989/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2989/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/7603319",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#2989",
-        "relative": "#2989",
-        "full": "meltano/meltano#2989"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 82,
-      "epic": {
-        "id": 102873,
-        "iid": 82,
-        "title": "Improved dbt integration",
-        "url": "/groups/meltano/-/epics/82",
-        "group_id": 2524164,
-        "human_readable_end_date": "Dec 31, 2022",
-        "human_readable_timestamp": "<strong>Past due</strong>"
-      },
-      "iteration": {
-        "id": 56416,
-        "iid": 56,
-        "sequence": 3,
-        "group_id": 2524164,
-        "title": null,
-        "description": null,
-        "state": 3,
-        "created_at": "2022-05-13T20:04:48.839Z",
-        "updated_at": "2022-05-30T00:05:02.370Z",
-        "start_date": "2022-05-23",
-        "due_date": "2022-05-29",
-        "web_url": "https://gitlab.com/groups/meltano/-/iterations/56416"
-      },
-      "health_status": null,
-      "epic_issue_id": 884006,
-      "relative_position": -11286
-    },
-    {
-      "id": 94275128,
-      "iid": 2953,
-      "project_id": 7603319,
-      "title": "Consider how to integrate with dbt Cloud",
-      "description": "dbt has an [API](https://docs.getdbt.com/dbt-cloud/api-v4) to administer jobs. We could build `meltano add transformer dbt-cloud` + `meltano run tap target dbt-cloud`, which would use the API to trigger a job in dbt Cloud after E and L has run.",
-      "state": "closed",
-      "created_at": "2021-09-24T19:14:59.143Z",
-      "updated_at": "2022-05-30T09:42:09.708Z",
-      "closed_at": "2022-05-30T09:42:09.691Z",
-      "closed_by": {
-        "id": 11629953,
-        "username": "MeltyBot",
-        "public_email": "",
-        "name": "Melty Bot",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
-        "web_url": "https://gitlab.com/MeltyBot"
-      },
-      "labels": [
-        "kind::Feature",
-        "valuestream::Meltano"
-      ],
-      "milestone": {
-        "id": 797629,
-        "iid": 42,
-        "group_id": 2524164,
-        "title": "Backlog",
-        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
-        "state": "active",
-        "created_at": "2019-02-21T14:50:28.741Z",
-        "updated_at": "2019-02-21T14:50:28.741Z",
-        "due_date": null,
-        "start_date": "2019-02-25",
-        "expired": false,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
-      },
-      "assignees": [],
-      "author": {
-        "id": 1942272,
-        "username": "tayloramurphy",
-        "public_email": "",
-        "name": "Taylor A Murphy",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
-        "web_url": "https://gitlab.com/tayloramurphy"
-      },
-      "type": "ISSUE",
-      "assignee": null,
-      "user_notes_count": 1,
-      "merge_requests_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": null,
-      "confidential": false,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2953",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": true,
-      "task_status": "0 of 0 checklist items completed",
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2953",
-        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2953/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2953/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/7603319",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#2953",
-        "relative": "#2953",
-        "full": "meltano/meltano#2953"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 82,
-      "epic": {
-        "id": 102873,
-        "iid": 82,
-        "title": "Improved dbt integration",
-        "url": "/groups/meltano/-/epics/82",
-        "group_id": 2524164,
-        "human_readable_end_date": "Dec 31, 2022",
-        "human_readable_timestamp": "<strong>Past due</strong>"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 845382,
-      "relative_position": -10773
     }
   ]
 }

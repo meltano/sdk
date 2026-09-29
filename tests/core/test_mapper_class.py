@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sys
 import typing as t
 from contextlib import nullcontext
 
@@ -11,6 +12,11 @@ import singer_sdk.singerlib as singer
 from singer_sdk import typing as th
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.mapper_base import InlineMapper
+
+if sys.version_info >= (3, 12):
+    from typing import override  # ruff: ignore[banned-import-from]
+else:
+    from typing_extensions import override
 
 
 class DummyInlineMapper(InlineMapper):
@@ -43,6 +49,7 @@ class DummyInlineMapper(InlineMapper):
         ),
     ).to_dict()
 
+    @override
     def map_schema_message(
         self,
         message_dict: dict,
@@ -53,6 +60,7 @@ class DummyInlineMapper(InlineMapper):
             key_properties=message_dict.get("key_properties", []),
         )
 
+    @override
     def map_record_message(
         self,
         message_dict: dict,
@@ -62,6 +70,7 @@ class DummyInlineMapper(InlineMapper):
             record=message_dict["record"],
         )
 
+    @override
     def map_state_message(
         self,
         message_dict: dict,
@@ -70,6 +79,7 @@ class DummyInlineMapper(InlineMapper):
             value=message_dict["value"],
         )
 
+    @override
     def map_activate_version_message(
         self,
         message_dict: dict,

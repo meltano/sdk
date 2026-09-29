@@ -1,51 +1,45 @@
 {
-  "cookies": {
-    "__cf_bm": "QbqeXd1dgmqSTuW3a0nMAj42NOxJCnGr4igmSDNnX34-1763701858-1.0.1.1-oCmXUlwnLlKUfZntAIbZL5vim5MrAetz65bqjFaqLqkJxLtWRnqdcBn5g51djxCh_SUbVGcW62W5ZKC3SdcVYBmCxceZhK1olUKDQrTaW8c",
-    "_cfuvid": "WfKSUAfl0dcOR9.P3LTEXu3DE6rMtpSbMsCVJ6Y3YnM-1763701858290-0.0.1.1-604800000"
-  },
-  "created_at": "2025-11-21T05:10:58.188906+00:00",
-  "elapsed": 0.414512,
+  "created_at": "2026-09-24T21:33:49.423210+00:00",
+  "elapsed": 0.974271,
   "encoding": "utf-8",
   "headers": {
-    "CF-Cache-Status": "MISS",
-    "CF-Ray": "9a1daf047c09b9e1-QRO",
+    "CF-Cache-Status": "BYPASS",
+    "CF-Ray": "a404e8db5a7bd08d-QRO",
     "Cache-Control": "max-age=0, private, must-revalidate",
     "Connection": "keep-alive",
     "Content-Encoding": "gzip",
     "Content-Type": "application/json",
-    "Date": "Fri, 21 Nov 2025 05:10:58 GMT",
-    "ETag": "W/\"2372fde0ead8eb109a73b049ad7c53fa\"",
+    "Date": "Thu, 24 Sep 2026 21:33:49 GMT",
+    "ETag": "W/\"8a8fe33d543836930adb7feca882635f\"",
     "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/82/issues?epic_iid=82&id=2524164&page=3&per_page=20>; rel=\"prev\", <https://gitlab.com/api/v4/groups/2524164/epics/82/issues?epic_iid=82&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/82/issues?epic_iid=82&id=2524164&page=4&per_page=20>; rel=\"last\"",
     "Server": "cloudflare",
-    "Set-Cookie": "__cf_bm=QbqeXd1dgmqSTuW3a0nMAj42NOxJCnGr4igmSDNnX34-1763701858-1.0.1.1-oCmXUlwnLlKUfZntAIbZL5vim5MrAetz65bqjFaqLqkJxLtWRnqdcBn5g51djxCh_SUbVGcW62W5ZKC3SdcVYBmCxceZhK1olUKDQrTaW8c; path=/; expires=Fri, 21-Nov-25 05:40:58 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=WfKSUAfl0dcOR9.P3LTEXu3DE6rMtpSbMsCVJ6Y3YnM-1763701858290-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
     "Strict-Transport-Security": "max-age=31536000",
     "Transfer-Encoding": "chunked",
-    "Vary": "Origin, Accept-Encoding",
+    "Vary": "Origin",
     "content-security-policy": "default-src 'none'",
-    "gitlab-lb": "haproxy-main-16-lb-gprd",
+    "gitlab-lb": "haproxy-main-46-lb-gprd",
     "gitlab-sv": "api-gke-us-east1-b",
     "nel": "{\"max_age\": 0}",
     "ratelimit-limit": "2000",
     "ratelimit-name": "throttle_authenticated_api",
-    "ratelimit-observed": "77",
-    "ratelimit-remaining": "1923",
-    "ratelimit-reset": "1763701860",
+    "ratelimit-observed": "2",
+    "ratelimit-remaining": "1998",
+    "ratelimit-reset": "1790285640",
     "referrer-policy": "strict-origin-when-cross-origin",
     "x-content-type-options": "nosniff",
     "x-frame-options": "SAMEORIGIN",
-    "x-gitlab-meta": "{\"correlation_id\":\"9a1daf04b1ccb9e1-ATL\",\"version\":\"1\"}",
+    "x-gitlab-meta": "{\"correlation_id\":\"a404e8db5a7bd08d-QRO\",\"version\":\"1\"}",
     "x-next-page": "",
     "x-page": "4",
     "x-per-page": "20",
     "x-prev-page": "3",
-    "x-request-id": "9a1daf04b1ccb9e1-ATL",
-    "x-runtime": "0.190292",
+    "x-request-id": "a404e8db5a7bd08d-QRO",
+    "x-runtime": "0.748059",
     "x-total": "64",
     "x-total-pages": "4"
   },
   "reason": "OK",
   "request": {
-    "body": "",
     "headers": {
       "Accept": "*/*",
       "Accept-Encoding": "gzip, deflate, zstd",
@@ -60,53 +54,55 @@
   "url": "https://gitlab.com/api/v4/groups/2524164/epics/82/issues?page=4",
   "_decoded_content": [
     {
-      "id": 70039477,
-      "iid": 2285,
+      "id": 70430080,
+      "iid": 2324,
       "project_id": 7603319,
-      "title": "Add new transform extra `package_name` to use in `dbt_package.yml` and dbt `--models` instead of namespace",
-      "description": "Part of untangling the mess described in https://gitlab.com/meltano/meltano/-/issues/2208#note_388529270:\n\n>>>\nThe inconsistent `namespace`s are an unfortunate consequence of the different roles that `namespace` has come to play in Meltano over time, and the different directions they pull us in:\n\n1. transform `namespace`: model name to be stored in `dbt_project.yml`, requiring `namespace` to match dbt model name\n   * https://gitlab.com/meltano/meltano/-/blob/master/src/meltano/core/transform_add_service.py#L57\n1. extractor `namespace`: default value for `dbt`'s `models` setting, requiring `namespace` to match dbt model name, as in points 2 and 7\n   * https://gitlab.com/meltano/meltano/blob/master/src/meltano/core/bundle/discovery.yml#L739\n>>>\n\n---\n\nThe transform `package_name` extra would be set to `$MELTANO_TRANSFORM_NAMESPACE` by default.\n\nThis will enable us to change the default value of the dbt `models` setting from `$MELTANO_EXTRACTOR_NAMESPACE my_meltano_project` to `$MELTANO_TRANSFORM__PACKAGE_NAME my_meltano_project`.",
+      "title": "Document how to use dbt integration with locally defined models in Data Transformation (T) doc",
+      "description": "See https://meltano.slack.com/archives/CFG3C3C66/p1597253244461700.",
       "state": "closed",
-      "created_at": "2020-08-19T23:08:35.421Z",
-      "updated_at": "2020-09-15T15:04:47.802Z",
-      "closed_at": "2020-09-15T15:04:47.741Z",
+      "created_at": "2020-08-28T16:20:00.859Z",
+      "updated_at": "2022-01-05T16:59:01.488Z",
+      "closed_at": "2022-01-05T16:59:01.474Z",
       "closed_by": {
-        "id": 87854,
-        "username": "DouweM",
+        "id": 1942272,
+        "username": "tayloramurphy",
         "public_email": "",
-        "name": "Douwe Maan",
+        "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
-        "web_url": "https://gitlab.com/DouweM"
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
+        "web_url": "https://gitlab.com/tayloramurphy"
       },
       "labels": [
-        "Accepting Merge Requests",
-        "flow::Review"
+        "Documentation",
+        "kind::Tech Debt",
+        "urgency::high",
+        "valuestream::Meltano"
       ],
       "milestone": {
-        "id": 1471314,
-        "iid": 124,
+        "id": 2363642,
+        "iid": 213,
         "group_id": 2524164,
-        "title": "Fri: Sep 18, 2020",
+        "title": "Fri: Jan 7, 2022",
         "description": "",
         "state": "closed",
-        "created_at": "2020-08-21T23:25:19.372Z",
-        "updated_at": "2020-09-18T23:10:58.954Z",
-        "due_date": "2020-09-19",
-        "start_date": "2020-09-12",
+        "created_at": "2021-12-06T17:18:26.130Z",
+        "updated_at": "2022-01-10T15:56:47.863Z",
+        "due_date": "2022-01-07",
+        "start_date": "2022-01-01",
         "expired": true,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/124"
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/213"
       },
       "assignees": [
         {
-          "id": 87854,
-          "username": "DouweM",
+          "id": 8668050,
+          "username": "pnadolny13",
           "public_email": "",
-          "name": "Douwe Maan",
+          "name": "Pat Nadolny",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
-          "web_url": "https://gitlab.com/DouweM"
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
+          "web_url": "https://gitlab.com/pnadolny13"
         }
       ],
       "author": {
@@ -121,24 +117,25 @@
       },
       "type": "ISSUE",
       "assignee": {
-        "id": 87854,
-        "username": "DouweM",
+        "id": 8668050,
+        "username": "pnadolny13",
         "public_email": "",
-        "name": "Douwe Maan",
+        "name": "Pat Nadolny",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
-        "web_url": "https://gitlab.com/DouweM"
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
+        "web_url": "https://gitlab.com/pnadolny13"
       },
       "user_notes_count": 0,
-      "merge_requests_count": 1,
-      "upvotes": 1,
+      "merge_requests_count": 0,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2285",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/2324",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -150,20 +147,20 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
-        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2285",
-        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2285/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2285/award_emoji",
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2324",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2324/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2324/award_emoji",
         "project": "https://gitlab.com/api/v4/projects/7603319",
         "closed_as_duplicate_of": null
       },
       "references": {
-        "short": "#2285",
-        "relative": "#2285",
-        "full": "meltano/meltano#2285"
+        "short": "#2324",
+        "relative": "#2324",
+        "full": "meltano/meltano#2324"
       },
       "severity": "UNKNOWN",
       "moved_to_id": null,
@@ -182,8 +179,8 @@
       },
       "iteration": null,
       "health_status": null,
-      "epic_issue_id": 217389,
-      "relative_position": -3078
+      "epic_issue_id": 214671,
+      "relative_position": -2694
     },
     {
       "id": 69810711,
@@ -202,7 +199,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -237,20 +234,21 @@
         "name": "Paul Tiplady",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/783565/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/783565/avatar.png?v=1789011074",
         "web_url": "https://gitlab.com/paul.tiplady"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 19,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 3,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2266",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/2266",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -262,7 +260,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/7603319/issues/2266",
@@ -295,134 +293,6 @@
       "health_status": null,
       "epic_issue_id": 217387,
       "relative_position": -2630
-    },
-    {
-      "id": 69769594,
-      "iid": 2259,
-      "project_id": 7603319,
-      "title": "Document how transforms are run in \"Data Transformation (T)\" doc",
-      "description": "",
-      "state": "closed",
-      "created_at": "2020-08-12T16:12:16.248Z",
-      "updated_at": "2021-10-26T22:17:29.267Z",
-      "closed_at": "2021-10-26T22:17:29.045Z",
-      "closed_by": {
-        "id": 1942272,
-        "username": "tayloramurphy",
-        "public_email": "",
-        "name": "Taylor A Murphy",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
-        "web_url": "https://gitlab.com/tayloramurphy"
-      },
-      "labels": [
-        "Documentation",
-        "flow::Review",
-        "kind::Tech Debt",
-        "valuestream::Meltano"
-      ],
-      "milestone": {
-        "id": 2241597,
-        "iid": 192,
-        "group_id": 2524164,
-        "title": "Fri: Oct 29, 2021",
-        "description": "",
-        "state": "closed",
-        "created_at": "2021-09-20T18:58:47.263Z",
-        "updated_at": "2021-11-01T17:41:24.211Z",
-        "due_date": "2021-10-29",
-        "start_date": "2021-10-23",
-        "expired": true,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/192"
-      },
-      "assignees": [
-        {
-          "id": 8668050,
-          "username": "pnadolny13",
-          "public_email": "",
-          "name": "Pat Nadolny",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
-          "web_url": "https://gitlab.com/pnadolny13"
-        }
-      ],
-      "author": {
-        "id": 87854,
-        "username": "DouweM",
-        "public_email": "",
-        "name": "Douwe Maan",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
-        "web_url": "https://gitlab.com/DouweM"
-      },
-      "type": "ISSUE",
-      "assignee": {
-        "id": 8668050,
-        "username": "pnadolny13",
-        "public_email": "",
-        "name": "Pat Nadolny",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
-        "web_url": "https://gitlab.com/pnadolny13"
-      },
-      "user_notes_count": 5,
-      "merge_requests_count": 1,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": null,
-      "confidential": false,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2259",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": true,
-      "task_status": "",
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2259",
-        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2259/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2259/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/7603319",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#2259",
-        "relative": "#2259",
-        "full": "meltano/meltano#2259"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 82,
-      "epic": {
-        "id": 102873,
-        "iid": 82,
-        "title": "Improved dbt integration",
-        "url": "/groups/meltano/-/epics/82",
-        "group_id": 2524164,
-        "human_readable_end_date": "Dec 31, 2022",
-        "human_readable_timestamp": "<strong>Past due</strong>"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 198516,
-      "relative_position": -2052
     },
     {
       "id": 69769593,
@@ -470,7 +340,7 @@
           "name": "Taylor A Murphy",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
           "web_url": "https://gitlab.com/tayloramurphy"
         }
       ],
@@ -492,18 +362,19 @@
         "name": "Taylor A Murphy",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
         "web_url": "https://gitlab.com/tayloramurphy"
       },
-      "user_notes_count": 6,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/2258",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/2258",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -515,7 +386,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -549,6 +420,135 @@
       "health_status": null,
       "epic_issue_id": 198515,
       "relative_position": -2565
+    },
+    {
+      "id": 69769594,
+      "iid": 2259,
+      "project_id": 7603319,
+      "title": "Document how transforms are run in \"Data Transformation (T)\" doc",
+      "description": "",
+      "state": "closed",
+      "created_at": "2020-08-12T16:12:16.248Z",
+      "updated_at": "2021-10-26T22:17:29.267Z",
+      "closed_at": "2021-10-26T22:17:29.045Z",
+      "closed_by": {
+        "id": 1942272,
+        "username": "tayloramurphy",
+        "public_email": "",
+        "name": "Taylor A Murphy",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1942272/avatar.png?v=1789014723",
+        "web_url": "https://gitlab.com/tayloramurphy"
+      },
+      "labels": [
+        "Documentation",
+        "flow::Review",
+        "kind::Tech Debt",
+        "valuestream::Meltano"
+      ],
+      "milestone": {
+        "id": 2241597,
+        "iid": 192,
+        "group_id": 2524164,
+        "title": "Fri: Oct 29, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-09-20T18:58:47.263Z",
+        "updated_at": "2021-11-01T17:41:24.211Z",
+        "due_date": "2021-10-29",
+        "start_date": "2021-10-23",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/192"
+      },
+      "assignees": [
+        {
+          "id": 8668050,
+          "username": "pnadolny13",
+          "public_email": "",
+          "name": "Pat Nadolny",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
+          "web_url": "https://gitlab.com/pnadolny13"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/2259",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": true,
+      "task_status": "",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2259",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2259/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2259/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#2259",
+        "relative": "#2259",
+        "full": "meltano/meltano#2259"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 82,
+      "epic": {
+        "id": 102873,
+        "iid": 82,
+        "title": "Improved dbt integration",
+        "url": "/groups/meltano/-/epics/82",
+        "group_id": 2524164,
+        "human_readable_end_date": "Dec 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 198516,
+      "relative_position": -2052
     }
   ]
 }
