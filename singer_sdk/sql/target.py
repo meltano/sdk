@@ -9,7 +9,10 @@ from singer_sdk.configuration._dict_config import merge_missing_config_jsonschem
 from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
     TargetCapabilities,
-    sql_target_config_for_capabilities,
+    _hard_delete_config,
+    _merge_schemas,
+    _target_schema_config,
+    target_config_for_capabilities,
 )
 from singer_sdk.target_base import Target
 
@@ -26,6 +29,27 @@ if t.TYPE_CHECKING:
     from singer_sdk.sql.sink import SQLSink
 
 __all__ = ["SQLTarget"]
+
+
+def sql_target_config_for_capabilities(
+    capabilities: t.Iterable[CapabilitiesEnum],
+) -> dict[str, t.Any]:
+    """Generate the config JSON schema for SQL target capabilities.
+
+    Args:
+        capabilities: The capabilities supported by the SQL target.
+
+    Returns:
+        A JSON schema with the config properties for the capabilities.
+    """
+    capabilities = set(capabilities)
+    schemas: list[dict[str, t.Any]] = []
+    if TargetCapabilities.TARGET_SCHEMA in capabilities:
+        schemas.append(_target_schema_config())
+    if TargetCapabilities.HARD_DELETE in capabilities:
+        schemas.append(_hard_delete_config())
+    schemas.append(target_config_for_capabilities(capabilities))
+    return _merge_schemas(*schemas)
 
 
 class SQLTarget(Target):

@@ -702,23 +702,6 @@ def tap_config_for_capabilities(
     return _merge_schemas(*schemas)
 
 
-def sql_tap_config_for_capabilities(
-    capabilities: t.Iterable[CapabilitiesEnum],
-) -> dict[str, t.Any]:
-    """Generate the config JSON schema for SQL tap capabilities.
-
-    Args:
-        capabilities: The capabilities supported by the SQL tap.
-
-    Returns:
-        A JSON schema with the config properties for the capabilities.
-    """
-    return _merge_schemas(
-        _sql_tap_config(),
-        tap_config_for_capabilities(capabilities),
-    )
-
-
 def target_config_for_capabilities(
     capabilities: t.Iterable[CapabilitiesEnum],
 ) -> dict[str, t.Any]:
@@ -743,27 +726,6 @@ def target_config_for_capabilities(
     if TargetCapabilities.VALIDATE_RECORDS in capabilities:
         schemas.append(_validate_records_config())
     schemas.append(config_for_capabilities(capabilities))
-    return _merge_schemas(*schemas)
-
-
-def sql_target_config_for_capabilities(
-    capabilities: t.Iterable[CapabilitiesEnum],
-) -> dict[str, t.Any]:
-    """Generate the config JSON schema for SQL target capabilities.
-
-    Args:
-        capabilities: The capabilities supported by the SQL target.
-
-    Returns:
-        A JSON schema with the config properties for the capabilities.
-    """
-    capabilities = set(capabilities)
-    schemas: list[dict[str, t.Any]] = []
-    if TargetCapabilities.TARGET_SCHEMA in capabilities:
-        schemas.append(_target_schema_config())
-    if TargetCapabilities.HARD_DELETE in capabilities:
-        schemas.append(_hard_delete_config())
-    schemas.append(target_config_for_capabilities(capabilities))
     return _merge_schemas(*schemas)
 
 

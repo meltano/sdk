@@ -10,11 +10,11 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
     TargetCapabilities,
     config_for_capabilities,
-    sql_tap_config_for_capabilities,
-    sql_target_config_for_capabilities,
     tap_config_for_capabilities,
     target_config_for_capabilities,
 )
+from singer_sdk.sql.tap import sql_tap_config_for_capabilities
+from singer_sdk.sql.target import sql_target_config_for_capabilities
 
 
 class DummyCapabilitiesEnum(CapabilitiesEnum):
