@@ -5,11 +5,11 @@ from __future__ import annotations
 import sys
 import typing as t
 
+from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.helpers.capabilities import (
-    TARGET_HARD_DELETE_CONFIG,
-    TARGET_SCHEMA_CONFIG,
     PluginCapabilities,
     TargetCapabilities,
+    sql_target_config_for_capabilities,
 )
 from singer_sdk.target_base import Target
 
@@ -73,22 +73,10 @@ class SQLTarget(Target):
         Args:
             config_jsonschema: [description]
         """
-
-        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
-            # Append any missing properties in the target with those from source.
-            for k, v in source_jsonschema["properties"].items():
-                if k not in target_jsonschema["properties"]:
-                    target_jsonschema["properties"][k] = v
-
-        capabilities = cls.capabilities
-
-        if TargetCapabilities.TARGET_SCHEMA in capabilities:
-            _merge_missing(TARGET_SCHEMA_CONFIG, config_jsonschema)
-
-        if TargetCapabilities.HARD_DELETE in capabilities:
-            _merge_missing(TARGET_HARD_DELETE_CONFIG, config_jsonschema)
-
-        super().append_builtin_config(config_jsonschema)
+        merge_missing_config_jsonschema(
+            sql_target_config_for_capabilities(cls.capabilities),
+            config_jsonschema,
+        )
 
     @override
     def create_sink(

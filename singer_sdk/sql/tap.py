@@ -6,7 +6,7 @@ import sys
 import typing as t
 
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
-from singer_sdk.helpers.capabilities import SQL_TAP_USE_SINGER_DECIMAL
+from singer_sdk.helpers.capabilities import sql_tap_config_for_capabilities
 from singer_sdk.tap_base import Tap
 
 if sys.version_info >= (3, 12):
@@ -63,8 +63,10 @@ class SQLTap(Tap):
         Args:
             config_jsonschema: [description]
         """
-        merge_missing_config_jsonschema(SQL_TAP_USE_SINGER_DECIMAL, config_jsonschema)
-        super().append_builtin_config(config_jsonschema)
+        merge_missing_config_jsonschema(
+            sql_tap_config_for_capabilities(cls.capabilities),
+            config_jsonschema,
+        )
 
     @property
     def tap_connector(self) -> SQLConnector:
