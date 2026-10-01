@@ -458,19 +458,21 @@
           "object",
           "null"
         ],
+        "required": [
+          "encoding"
+        ],
         "additionalProperties": true,
         "properties": {
           "encoding": {
-            "type": [
-              "object",
-              "null"
+            "type": "object",
+            "required": [
+              "format"
             ],
             "additionalProperties": true,
             "properties": {
               "format": {
                 "type": [
-                  "string",
-                  "null"
+                  "string"
                 ],
                 "title": "Batch Encoding Format",
                 "description": "Format to use for batch files."
@@ -519,8 +521,8 @@
             "description": "Defines the storage layer to use when writing batch files"
           }
         },
-        "title": "Batch Configuration",
-        "description": "Configuration for BATCH message capabilities."
+        "title": "Tap BATCH Configuration",
+        "description": "Configuration for emitting BATCH messages."
       }
     },
     "required": [

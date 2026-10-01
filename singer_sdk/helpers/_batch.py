@@ -238,21 +238,21 @@ class BatchConfig:
             self.batch_size = DEFAULT_BATCH_SIZE  # type: ignore[unreachable]
 
     def asdict(self) -> dict[str, t.Any]:
-        """Return a dictionary representation of the message.
+        """Return a dictionary representation of the config.
 
         Returns:
-            A dictionary with the defined message fields.
+            A dictionary with the defined config fields.
         """
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, t.Any]) -> BatchConfig:
-        """Create an encoding from a dictionary.
+        """Create a config object from a dictionary.
 
         Args:
-            data: The dictionary to create the message from.
+            data: The dictionary to create the config from.
 
         Returns:
-            The created message.
+            The created config object.
         """
         return cls(**data)

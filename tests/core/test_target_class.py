@@ -36,6 +36,10 @@ class DummyTarget(SQLTarget):
     ).to_dict()
 
 
+if t.TYPE_CHECKING:
+    from pytest_snapshot.plugin import Snapshot
+
+
 @pytest.mark.parametrize(
     "config_dict,expectation,errors",
     [
