@@ -1,5 +1,14 @@
 {
   "type": "object",
+  "required": [
+    "email",
+    "username"
+  ],
+  "additionalProperties": {
+    "type": [
+      "string"
+    ]
+  },
   "properties": {
     "id": {
       "type": [
@@ -23,14 +32,5 @@
         "null"
       ]
     }
-  },
-  "required": [
-    "email",
-    "username"
-  ],
-  "additionalProperties": {
-    "type": [
-      "string"
-    ]
   }
 }

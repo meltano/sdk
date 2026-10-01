@@ -22,7 +22,11 @@
     "structured-logging"
   ],
   "settings": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
+    "required": [
+      "path_to_db"
+    ],
     "properties": {
       "path_to_db": {
         "type": [
@@ -48,21 +52,6 @@
           "object",
           "null"
         ],
-        "properties": {
-          "__else__": {
-            "anyOf": [
-              {
-                "const": "__NULL__"
-              },
-              {
-                "type": "null"
-              },
-              "null"
-            ],
-            "title": "Other streams",
-            "description": "Currently, only setting this to `__NULL__` is supported. This will remove all other streams."
-          }
-        },
         "additionalProperties": {
           "anyOf": [
             {
@@ -73,6 +62,21 @@
             },
             {
               "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "const": "__NULL__"
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                ]
+              },
               "properties": {
                 "__alias__": {
                   "type": [
@@ -123,24 +127,24 @@
                   ],
                   "description": "Create a new stream from this source stream."
                 }
-              },
-              "additionalProperties": {
-                "anyOf": [
-                  {
-                    "const": "__NULL__"
-                  },
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "type": [
-                      "string"
-                    ]
-                  }
-                ]
               }
             }
           ]
+        },
+        "properties": {
+          "__else__": {
+            "anyOf": [
+              {
+                "const": "__NULL__"
+              },
+              {
+                "type": "null"
+              },
+              "null"
+            ],
+            "title": "Other streams",
+            "description": "Currently, only setting this to `__NULL__` is supported. This will remove all other streams."
+          }
         },
         "title": "Stream Maps",
         "description": "Config object for stream maps capability. For more information check out [Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html)."
@@ -150,8 +154,8 @@
           "object",
           "null"
         ],
-        "properties": {},
         "additionalProperties": true,
+        "properties": {},
         "title": "User Stream Map Configuration",
         "description": "User-defined config values to be used within map expressions."
       },
@@ -160,6 +164,7 @@
           "object",
           "null"
         ],
+        "additionalProperties": true,
         "properties": {
           "seed": {
             "oneOf": [
@@ -208,7 +213,6 @@
             "description": "One or more LCID locale strings to produce localized output for: https://faker.readthedocs.io/en/master/#localization"
           }
         },
-        "additionalProperties": true,
         "title": "Faker Configuration",
         "description": "Config for the [`Faker`](https://faker.readthedocs.io/en/master/) instance variable `fake` used within map expressions. Only applicable if the plugin specifies `faker` as an additional dependency (through the `singer-sdk` `faker` extra or directly)."
       },
@@ -258,9 +262,17 @@
           "object",
           "null"
         ],
+        "required": [
+          "encoding"
+        ],
+        "additionalProperties": true,
         "properties": {
           "encoding": {
             "type": "object",
+            "required": [
+              "format"
+            ],
+            "additionalProperties": true,
             "properties": {
               "format": {
                 "type": [
@@ -282,10 +294,6 @@
                 ]
               }
             },
-            "required": [
-              "format"
-            ],
-            "additionalProperties": true,
             "title": "Batch Encoding Configuration",
             "description": "Specifies the format and compression of the batch files."
           },
@@ -294,6 +302,7 @@
               "object",
               "null"
             ],
+            "additionalProperties": true,
             "properties": {
               "root": {
                 "type": [
@@ -312,22 +321,13 @@
                 "description": "Prefix to use when writing batch files."
               }
             },
-            "additionalProperties": true,
             "title": "Batch Storage Configuration",
             "description": "Defines the storage layer to use when writing batch files"
           }
         },
-        "required": [
-          "encoding"
-        ],
-        "additionalProperties": true,
         "title": "Tap BATCH Configuration",
         "description": "Configuration for emitting BATCH messages."
       }
-    },
-    "required": [
-      "path_to_db"
-    ],
-    "$schema": "https://json-schema.org/draft/2020-12/schema"
+    }
   }
 }

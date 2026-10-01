@@ -127,7 +127,12 @@ def test_to_json():
     assert schema.to_json(indent=4) == dedent(
         """\
         {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "required": [
+                "test_property"
+            ],
+            "additionalProperties": false,
             "properties": {
                 "test_property": {
                     "type": [
@@ -146,6 +151,7 @@ def test_to_json():
                     "allOf": [
                         {
                             "type": "object",
+                            "additionalProperties": true,
                             "properties": {
                                 "test_property_4": {
                                     "type": [
@@ -153,11 +159,11 @@ def test_to_json():
                                         "null"
                                     ]
                                 }
-                            },
-                            "additionalProperties": true
+                            }
                         },
                         {
                             "type": "object",
+                            "additionalProperties": true,
                             "properties": {
                                 "test_property_5": {
                                     "type": [
@@ -165,17 +171,11 @@ def test_to_json():
                                         "null"
                                     ]
                                 }
-                            },
-                            "additionalProperties": true
+                            }
                         }
                     ]
                 }
-            },
-            "required": [
-                "test_property"
-            ],
-            "additionalProperties": false,
-            "$schema": "https://json-schema.org/draft/2020-12/schema"
+            }
         }""",
     )
 
