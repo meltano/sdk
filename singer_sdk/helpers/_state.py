@@ -97,7 +97,7 @@ def _create_in_partitions_list(
     state_partition_context: types.Context,
 ) -> dict:
     # Existing partition not found. Creating new state entry in partitions list...
-    new_partition_state = {"context": state_partition_context}
+    new_partition_state = {"context": dict(state_partition_context)}
     partitions.append(new_partition_state)
     return new_partition_state
 
@@ -228,7 +228,7 @@ def increment_state(
     new_rk_value = to_json_compatible(latest_record[replication_key])
 
     if new_rk_value is None:
-        logger.warning("New replication value is null")
+        logger.debug("New replication value is null")
         return
 
     if old_rk_value is None or not check_sorted or new_rk_value >= old_rk_value:

@@ -29,8 +29,10 @@ tap-hostile = 'tap_hostile.tap:TapHostile.cli'
 packages = ["tap_hostile"]
 
 [tool.hatch.version]
-fallback-version = "0.0.0"
+fallback-version = "0.0.0.dev0"
 source = "vcs"
+[tool.hatch.version.raw-options]
+search_parent_directories = true
 
 [tool.mypy]
 warn_unused_configs = true

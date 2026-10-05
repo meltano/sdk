@@ -82,7 +82,7 @@ class BatchSink(Sink):
 
     @override
     @abc.abstractmethod
-    def process_batch(self, context: dict) -> None:
+    def process_batch(self, context: dict) -> int | None:
         """Process a batch with the given batch context.
 
         This method must be overridden.

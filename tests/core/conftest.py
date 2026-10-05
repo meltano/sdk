@@ -25,6 +25,9 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers.types import Context
+
 
 class SimpleTestStream(Stream):
     """Test stream class."""
@@ -44,7 +47,7 @@ class SimpleTestStream(Stream):
     @override
     def get_records(
         self,
-        context: dict | None,
+        context: Context | None,
     ) -> t.Iterable[dict[str, t.Any]]:
         """Generate records."""
         yield {"id": 1, "value": "Egypt", "updatedAt": "2021-01-01T00:00:00Z"}

@@ -6,8 +6,6 @@ incompatible way, following their deprecation, as indicated in the
 
 ## Pending Deprecations
 
-- `singer_sdk.typing.to_jsonschema_type` and `singer_sdk.typing.to_sql_type` will be removed. Use the [`SQLToJSONSchema`](./guides/sql-tap.md#mapping-sql-types-to-json-schema) and [`JSONSchemaToSQL`](./guides/sql-target.md#mapping-json-schema-to-sql-types) classes instead.
-
 - The `BasePageNumberPaginator` and `BaseOffsetPaginator` classes will be removed. Use the `PageNumberPaginator` and `OffsetPaginator` classes instead.
 
 ## v0.54
@@ -32,6 +30,10 @@ from singer_sdk.helpers._batch import BaseBatchFileEncoding
 
 encoding = BaseBatchFileEncoding(format="jsonl")
 ```
+
+### Legacy SQL/JSON Schema mapping
+
+`singer_sdk.typing.to_jsonschema_type` and `singer_sdk.typing.to_sql_type` will be removed. Use the [`SQLToJSONSchema`](./guides/sql-tap.md#mapping-sql-types-to-json-schema) and [`JSONSchemaToSQL`](./guides/sql-target.md#mapping-json-schema-to-sql-types) classes instead.
 
 ## v0.57
 

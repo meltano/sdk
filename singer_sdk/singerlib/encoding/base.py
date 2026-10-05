@@ -16,6 +16,12 @@ if sys.version_info < (3, 11):
 
     MonkeyPatch.patch_fromisoformat()
 
+__all__ = [
+    "GenericSingerReader",
+    "GenericSingerWriter",
+    "SingerMessageType",
+]
+
 logger = logging.getLogger(__name__)
 
 

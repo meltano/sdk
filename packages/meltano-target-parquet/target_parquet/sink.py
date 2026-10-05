@@ -54,7 +54,7 @@ def _json_schema_to_arrow_fields(
     return fields
 
 
-def _json_type_to_arrow_field(  # noqa: PLR0911
+def _json_type_to_arrow_field(  # noqa: PLR0911  # ruff: ignore[complex-structure, too-many-branches]
     schema_type: dict[str, t.Any],
 ) -> pa.DataType:
     """Convert a JSON Schema to an Arrow struct.
@@ -66,6 +66,7 @@ def _json_type_to_arrow_field(  # noqa: PLR0911
         An Arrow struct.
     """
     property_type = schema_type.get("type")
+    string_format = schema_type.get("format")
 
     if isinstance(property_type, list):
         try:
@@ -83,7 +84,15 @@ def _json_type_to_arrow_field(  # noqa: PLR0911
         return pa.struct(_json_schema_to_arrow_fields(schema_type))
 
     if main_type == "string":
-        return pa.string()
+        match string_format:
+            case "date-time":
+                return pa.timestamp("ms", tz="UTC")
+            case "date":
+                return pa.date32()
+            case "time":
+                return pa.time32("ms")
+            case _:
+                return pa.string()
 
     if main_type == "integer":
         return pa.int64()

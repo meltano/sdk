@@ -200,6 +200,15 @@ def test_catalog_parsing():
     assert catalog.get_stream("new") == entry
 
 
+def test_catalog_from_entries():
+    entries = [CatalogEntry(tap_stream_id="a"), CatalogEntry(tap_stream_id="b")]
+    catalog = Catalog.from_entries(entries)
+
+    assert list(catalog) == ["a", "b"]
+    assert catalog["a"] is entries[0]
+    assert catalog["b"] is entries[1]
+
+
 @pytest.mark.parametrize(
     "schema,key_properties,replication_method,valid_replication_keys,schema_name,breadcrumbs",
     [

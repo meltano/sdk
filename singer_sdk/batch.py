@@ -29,7 +29,7 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401 # pragma: no cover
             stacklevel=2,
         )
 
-        from singer_sdk.contrib.batch_encoder_jsonl import JSONLinesBatcher  # noqa: PLC0415, I001
+        from singer_sdk.contrib.batch_encoder_jsonl import JSONLinesBatcher  # ruff: ignore[import-outside-top-level]
 
         return JSONLinesBatcher
 
@@ -81,7 +81,7 @@ class BaseBatcher(ABC):
     @abstractmethod
     def get_batches(
         self,
-        records: t.Iterator[dict],
+        records: t.Iterable[dict],
     ) -> t.Iterator[list[str]]:
         """Yield manifest of batches.
 
@@ -98,7 +98,7 @@ class Batcher(BaseBatcher):
     """Determines batch type and then serializes batches to that format."""
 
     @override
-    def get_batches(self, records: t.Iterator[dict]) -> t.Iterator[list[str]]:
+    def get_batches(self, records: t.Iterable[dict]) -> t.Iterator[list[str]]:
         """Manifest of batches.
 
         Args:

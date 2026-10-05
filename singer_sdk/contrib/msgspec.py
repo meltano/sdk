@@ -20,6 +20,11 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
+__all__ = [
+    "MsgSpecReader",
+    "MsgSpecWriter",
+]
+
 logger = logging.getLogger(__name__)
 
 

@@ -129,6 +129,12 @@ class TargetRecordMissingKeyProperty(TargetFileTestTemplate):
             super().test()
 
 
+class TargetStringFormats(TargetFileTestTemplate):
+    """Test Target handles string formats."""
+
+    name = "string_formats"
+
+
 class TargetRecordMissingRequiredProperty(TargetFileTestTemplate):
     """Test Target handles record missing required property."""
 

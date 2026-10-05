@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import abc
 import copy
-import json
 import sys
 import time
 import typing as t
@@ -28,6 +27,7 @@ from singer_sdk.helpers.capabilities import (
 )
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import BaseSingerReader, _ConfigInput
+from singer_sdk.singerlib.json import serialize_json
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
@@ -42,6 +42,7 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.singerlib.encoding.base import GenericSingerReader
+    from singer_sdk.singerlib.types import KeyProperties
     from singer_sdk.sinks import Sink
     from singer_sdk.sql import SQLTarget  # noqa: F401
 
@@ -146,7 +147,7 @@ class Target(BaseSingerReader, abc.ABC):
         *,
         record: dict | None = None,
         schema: dict | None = None,
-        key_properties: t.Sequence[str] | None = None,
+        key_properties: KeyProperties | None = None,
     ) -> Sink:
         """Return a sink for the given stream name.
 
@@ -235,7 +236,7 @@ class Target(BaseSingerReader, abc.ABC):
         *,
         stream_name: str,
         schema: dict,
-        key_properties: t.Sequence[str] | None = None,
+        key_properties: KeyProperties | None = None,
     ) -> Sink:
         """Instantiate a new sink object for the given stream.
 
@@ -265,7 +266,7 @@ class Target(BaseSingerReader, abc.ABC):
         self,
         stream_name: str,
         schema: dict,
-        key_properties: t.Sequence[str] | None = None,
+        key_properties: KeyProperties | None = None,
     ) -> Sink:
         """Create a sink and register it.
 
@@ -368,7 +369,6 @@ class Target(BaseSingerReader, abc.ABC):
 
             sink.tally_record_read()
             sink.process_record(transformed_record, context)
-            sink.record_counter_metric.increment()
             sink._after_process_record(context)  # noqa: SLF001
 
             if sink.is_full:
@@ -515,12 +515,12 @@ class Target(BaseSingerReader, abc.ABC):
         self._drain_all(self._sinks_to_clear, 1)
         if is_endofpipe:
             for sink in self._sinks_to_clear:
-                sink.clean_up()
+                sink._clean_up()  # ruff:ignore[private-member-access]
         self._sinks_to_clear = []
         self._drain_all(self._sinks_active.values(), self.max_parallelism)
         if is_endofpipe:
             for sink in self._sinks_active.values():
-                sink.clean_up()
+                sink._clean_up()  # ruff:ignore[private-member-access]
 
         if self._latest_state:
             self._write_state_message(copy.deepcopy(self._latest_state))
@@ -562,7 +562,7 @@ class Target(BaseSingerReader, abc.ABC):
         Args:
             state: TODO
         """
-        state_json = json.dumps(state)
+        state_json = serialize_json(state)
         self.logger.debug("Emitting completed target state %s", state_json)
         sys.stdout.write(f"{state_json}\n")
         sys.stdout.flush()
@@ -581,6 +581,12 @@ class Target(BaseSingerReader, abc.ABC):
             signum: Signal number.
             frame: Frame object.
         """
+        if self._is_terminating:
+            # Duplicate signal, e.g. delivered both directly by the OS and
+            # forwarded by an orchestrator such as Meltano. Let the in-flight
+            # drain finish.
+            return
+        self._is_terminating = True
         self.logger.info(
             "Received termination signal %d, draining all sinks...",
             signum,
@@ -588,7 +594,7 @@ class Target(BaseSingerReader, abc.ABC):
         try:
             self.drain_all(is_endofpipe=True)
         finally:
-            super()._handle_termination(signum, frame)
+            self._terminate()
 
     @classmethod
     @override

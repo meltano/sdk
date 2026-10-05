@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import enum
+import os.path
+import tempfile
 import typing as t
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
@@ -96,14 +98,22 @@ class SDKBatchMessage(Message):
 class StorageTarget:
     """Storage target for batch files."""
 
-    root: str
-    """"The root directory of the storage target."""
+    root: str = "file://"
+    """"The root directory of the storage target.
+
+    If not set, the system's temporary directory will be used.
+    """
 
     prefix: str | None = None
     """"The file prefix."""
 
     params: dict[str, t.Any] = field(default_factory=dict)
     """"The storage parameters."""
+
+    def __post_init__(self) -> None:
+        """Initialize the storage target."""
+        if self.root == "file://":
+            self.root = f"file://{os.path.join(tempfile.gettempdir(), 'singer-sdk')}"  # ruff: ignore[os-path-join]
 
     def asdict(self) -> dict[str, t.Any]:
         """Return a dictionary representation of the message.
@@ -129,7 +139,7 @@ class StorageTarget:
     def _root_path(self) -> UPath:
         """The root path of the storage target."""
         # https://github.com/fsspec/universal_pathlib/issues/435
-        return UPath(self.root, **self.params).resolve()  # type: ignore[no-any-return]
+        return UPath(self.root, **self.params).resolve()  # type: ignore[no-any-return] # ty: ignore[call-non-callable]
 
     @staticmethod
     def split_url(url: str) -> tuple[str, str]:
@@ -141,7 +151,7 @@ class StorageTarget:
         Returns:
             A tuple of the head and tail parts of the URL.
         """
-        url_path = UPath(url)
+        url_path = UPath(url)  # ty: ignore[call-non-callable]
         head, tail = url_path.parts[:-1], url_path.parts[-1]
         return url_path.with_segments(*head).as_uri(), tail
 
@@ -211,7 +221,7 @@ class BatchConfig:
     encoding: BaseBatchFileEncoding
     """The encoding of the batch file."""
 
-    storage: StorageTarget
+    storage: StorageTarget = field(default_factory=StorageTarget)
     """The storage target of the batch file."""
 
     batch_size: int = DEFAULT_BATCH_SIZE
@@ -222,7 +232,7 @@ class BatchConfig:
             self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)  # type: ignore[unreachable]
 
         if isinstance(self.storage, dict):
-            self.storage = StorageTarget.from_dict(self.storage)  # ty: ignore[invalid-argument-type]
+            self.storage = StorageTarget.from_dict(self.storage)
 
         if self.batch_size is None:
             self.batch_size = DEFAULT_BATCH_SIZE  # type: ignore[unreachable]

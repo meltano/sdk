@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import copy
 import dataclasses
 import logging
 import os
@@ -283,6 +284,7 @@ class PluginBase(abc.ABC):
         self.__initialized_at = int(time.time() * 1000)
 
         # Signal handling
+        self._is_terminating = False
         self._setup_signal_handlers()
 
     def _setup_signal_handlers(self) -> None:  # pragma: no cover
@@ -345,8 +347,7 @@ class PluginBase(abc.ABC):
         Returns:
             Dictionary of configuration parsed from the environment.
         """
-        config_jsonschema = cls.config_jsonschema
-        cls.append_builtin_config(config_jsonschema)
+        config_jsonschema = cls._get_config_jsonschema()
 
         return parse_environment_config(config_jsonschema, cls._env_var_prefix)
 
@@ -455,8 +456,7 @@ class PluginBase(abc.ABC):
             ConfigValidationError: If raise_errors is True and validation fails.
         """
         errors: list[str] = []
-        config_jsonschema = self.config_jsonschema
-        self.append_builtin_config(config_jsonschema)
+        config_jsonschema = self._get_config_jsonschema()
 
         if config_jsonschema:  # pragma: no branch
             self.logger.debug(
@@ -483,7 +483,7 @@ class PluginBase(abc.ABC):
 
     def _handle_termination(  # pragma: no cover
         self,
-        signum: int,  # noqa: ARG002
+        signum: int,
         frame: FrameType | None,  # noqa: ARG002
     ) -> None:
         """Handle termination signal.
@@ -492,6 +492,20 @@ class PluginBase(abc.ABC):
             signum: Signal number.
             frame: Frame.
         """
+        if self._is_terminating:
+            # Duplicate signal, e.g. delivered both directly by the OS and
+            # forwarded by an orchestrator such as Meltano. Let the in-flight
+            # shutdown finish.
+            self.logger.debug(
+                "Termination signal %s received while shutdown already in progress",
+                signum,
+            )
+            return
+        self._is_terminating = True
+        self._terminate()
+
+    def _terminate(self) -> t.NoReturn:
+        """Exit after a graceful shutdown."""
         self.logger.info("Gracefully shutting down...")
         sys.exit(0)
 
@@ -515,8 +529,7 @@ class PluginBase(abc.ABC):
         Returns:
             A dictionary containing the relevant 'about' information.
         """
-        config_jsonschema = cls.config_jsonschema
-        cls.append_builtin_config(config_jsonschema)
+        config_jsonschema = cls._get_config_jsonschema()
 
         return about.AboutInfo(
             name=cls.name,
@@ -528,6 +541,20 @@ class PluginBase(abc.ABC):
             settings=config_jsonschema,
             env_var_prefix=cls._env_var_prefix,
         )
+
+    @classmethod
+    def _get_config_jsonschema(cls) -> dict:
+        """Get a copy of the config JSON schema, including built-in settings.
+
+        A copy is used so that the built-in settings are not added to a schema
+        shared by other plugin classes (e.g. the default ``config_jsonschema``).
+
+        Returns:
+            The plugin config JSON schema with the built-in settings appended.
+        """
+        config_jsonschema = copy.deepcopy(cls.config_jsonschema)
+        cls.append_builtin_config(config_jsonschema)
+        return config_jsonschema
 
     @classmethod
     def append_builtin_config(cls, config_jsonschema: dict) -> None:

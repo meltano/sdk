@@ -20,6 +20,7 @@ else:
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
+    from singer_sdk.singerlib.types import KeyProperties
     from singer_sdk.sinks.core import Sink
     from singer_sdk.sql.connector import SQLConnector
     from singer_sdk.sql.sink import SQLSink
@@ -95,7 +96,7 @@ class SQLTarget(Target):
         *,
         stream_name: str,
         schema: dict,
-        key_properties: t.Sequence[str] | None = None,
+        key_properties: KeyProperties | None = None,
     ) -> Sink:
         """Instantiate a new SQL sink for the given stream.
 
@@ -124,7 +125,7 @@ class SQLTarget(Target):
         self,
         stream_name: str,
         schema: dict,
-        key_properties: t.Sequence[str] | None = None,
+        key_properties: KeyProperties | None = None,
     ) -> Sink:
         """Create a sink and register it.
 
@@ -181,7 +182,7 @@ class SQLTarget(Target):
         *,
         record: dict | None = None,
         schema: dict | None = None,
-        key_properties: t.Sequence[str] | None = None,
+        key_properties: KeyProperties | None = None,
     ) -> Sink:
         """Return a sink for the given stream name.
 

@@ -66,6 +66,9 @@ class {{ cookiecutter.name }}Mapper(InlineMapper):
 
         Args:
             message_dict: A SCHEMA message JSON dictionary.
+
+        Yields:
+            Transformed SCHEMA messages.
         """
         yield singer.SchemaMessage.from_dict(message_dict)
 
@@ -78,6 +81,9 @@ class {{ cookiecutter.name }}Mapper(InlineMapper):
 
         Args:
             message_dict: A RECORD message JSON dictionary.
+
+        Yields:
+            Transformed RECORD messages.
         """
         yield singer.RecordMessage.from_dict(message_dict)
 
@@ -87,6 +93,9 @@ class {{ cookiecutter.name }}Mapper(InlineMapper):
 
         Args:
             message_dict: A STATE message JSON dictionary.
+
+        Yields:
+            An intact state message.
         """
         yield singer.StateMessage.from_dict(message_dict)
 
@@ -99,6 +108,9 @@ class {{ cookiecutter.name }}Mapper(InlineMapper):
 
         Args:
             message_dict: An ACTIVATE_VERSION message JSON dictionary.
+
+        Yields:
+            Transformed ACTIVATE_VERSION messages.
         """
         yield singer.ActivateVersionMessage.from_dict(message_dict)
 

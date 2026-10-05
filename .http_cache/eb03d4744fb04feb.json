@@ -1,51 +1,45 @@
 {
-  "cookies": {
-    "__cf_bm": "8r1UtnUamSz31k_uZqUF1a41X3AEXln1kEcfdzPrFdA-1763701868-1.0.1.1-LNwhwqmnGOwcsWwLfaDeYXHjNxhdVjH6FWNMVLdW9QXBx8dCOUuA1lVSB7sAgL00IkVdo6Tfm4ozCBg3XgYV6Txi5LPR0LTAIFImhEzifDI",
-    "_cfuvid": "gi6ByZK0_XXLY9U.9u9o6Lbl7RhszKM1_sbDxeM_Wt8-1763701868535-0.0.1.1-604800000"
-  },
-  "created_at": "2025-11-21T05:11:08.483701+00:00",
-  "elapsed": 0.658539,
+  "created_at": "2026-09-24T21:33:59.224006+00:00",
+  "elapsed": 0.874904,
   "encoding": "utf-8",
   "headers": {
-    "CF-Cache-Status": "MISS",
-    "CF-Ray": "9a1daf435914d89f-QRO",
+    "CF-Cache-Status": "BYPASS",
+    "CF-Ray": "a404e9192dd1667b-QRO",
     "Cache-Control": "max-age=0, private, must-revalidate",
     "Connection": "keep-alive",
     "Content-Encoding": "gzip",
     "Content-Type": "application/json",
-    "Date": "Fri, 21 Nov 2025 05:11:08 GMT",
-    "ETag": "W/\"2ad8b9f8d398ec1b5f02862fcb6fc910\"",
+    "Date": "Thu, 24 Sep 2026 21:33:59 GMT",
+    "ETag": "W/\"66621e76dc72ac2b182d6568da092bb9\"",
     "Link": "<https://gitlab.com/api/v4/groups/12586917/epics/3/issues?epic_iid=3&id=12586917&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/12586917/epics/3/issues?epic_iid=3&id=12586917&page=1&per_page=20>; rel=\"last\"",
     "Server": "cloudflare",
-    "Set-Cookie": "__cf_bm=8r1UtnUamSz31k_uZqUF1a41X3AEXln1kEcfdzPrFdA-1763701868-1.0.1.1-LNwhwqmnGOwcsWwLfaDeYXHjNxhdVjH6FWNMVLdW9QXBx8dCOUuA1lVSB7sAgL00IkVdo6Tfm4ozCBg3XgYV6Txi5LPR0LTAIFImhEzifDI; path=/; expires=Fri, 21-Nov-25 05:41:08 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=gi6ByZK0_XXLY9U.9u9o6Lbl7RhszKM1_sbDxeM_Wt8-1763701868535-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
     "Strict-Transport-Security": "max-age=31536000",
     "Transfer-Encoding": "chunked",
-    "Vary": "Origin, Accept-Encoding",
+    "Vary": "Origin",
     "content-security-policy": "default-src 'none'",
-    "gitlab-lb": "haproxy-main-43-lb-gprd",
-    "gitlab-sv": "api-gke-us-east1-b",
+    "gitlab-lb": "haproxy-main-08-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-c",
     "nel": "{\"max_age\": 0}",
     "ratelimit-limit": "2000",
     "ratelimit-name": "throttle_authenticated_api",
-    "ratelimit-observed": "13",
-    "ratelimit-remaining": "1987",
-    "ratelimit-reset": "1763701920",
+    "ratelimit-observed": "16",
+    "ratelimit-remaining": "1984",
+    "ratelimit-reset": "1790285640",
     "referrer-policy": "strict-origin-when-cross-origin",
     "x-content-type-options": "nosniff",
     "x-frame-options": "SAMEORIGIN",
-    "x-gitlab-meta": "{\"correlation_id\":\"9a1daf437216d89f-ATL\",\"version\":\"1\"}",
+    "x-gitlab-meta": "{\"correlation_id\":\"a404e9192dd1667b-QRO\",\"version\":\"1\"}",
     "x-next-page": "",
     "x-page": "1",
     "x-per-page": "20",
     "x-prev-page": "",
-    "x-request-id": "9a1daf437216d89f-ATL",
-    "x-runtime": "0.342949",
+    "x-request-id": "a404e9192dd1667b-QRO",
+    "x-runtime": "0.610789",
     "x-total": "17",
     "x-total-pages": "1"
   },
   "reason": "OK",
   "request": {
-    "body": "",
     "headers": {
       "Accept": "*/*",
       "Accept-Encoding": "gzip, deflate, zstd",
@@ -76,7 +70,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -115,7 +109,7 @@
           "name": "Laura P\u00e9rez",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png?v=1663359095",
           "web_url": "https://gitlab.com/laurameltano"
         }
       ],
@@ -140,15 +134,16 @@
         "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
         "web_url": "https://gitlab.com/DouweM"
       },
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-06-13",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/407",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/407",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -160,7 +155,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/407",
@@ -224,7 +219,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -263,7 +258,7 @@
           "name": "Laura P\u00e9rez",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png?v=1663359095",
           "web_url": "https://gitlab.com/laurameltano"
         }
       ],
@@ -288,15 +283,16 @@
         "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
         "web_url": "https://gitlab.com/DouweM"
       },
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-08-08",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/406",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/406",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -308,7 +304,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/406",
@@ -359,7 +355,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -388,7 +384,7 @@
           "name": "Laura P\u00e9rez",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png?v=1663359095",
           "web_url": "https://gitlab.com/laurameltano"
         }
       ],
@@ -410,18 +406,19 @@
         "name": "Laura P\u00e9rez",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png?v=1663359095",
         "web_url": "https://gitlab.com/laurameltano"
       },
-      "user_notes_count": 4,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-04-26",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/328",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/328",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -433,7 +430,7 @@
         "completed_count": 1
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/328",
@@ -497,7 +494,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -538,7 +535,7 @@
           "name": "Laura P\u00e9rez",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png?v=1663359095",
           "web_url": "https://gitlab.com/laurameltano"
         }
       ],
@@ -563,15 +560,16 @@
         "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
         "web_url": "https://gitlab.com/DouweM"
       },
-      "user_notes_count": 7,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-06-23",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/280",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/280",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -583,7 +581,7 @@
         "completed_count": 1
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/280",
@@ -647,7 +645,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "labels": [
@@ -679,7 +677,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         }
       ],
@@ -701,18 +699,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 4,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-02-22",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/248",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/248",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -724,7 +723,7 @@
         "completed_count": 2
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/248",
@@ -775,7 +774,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "labels": [
@@ -807,7 +806,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         }
       ],
@@ -829,18 +828,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 4,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-01-31",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/246",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/246",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -852,7 +852,7 @@
         "completed_count": 1
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/246",
@@ -903,7 +903,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -945,7 +945,7 @@
           "name": "Laura P\u00e9rez",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png?v=1663359095",
           "web_url": "https://gitlab.com/laurameltano"
         }
       ],
@@ -970,15 +970,16 @@
         "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
         "web_url": "https://gitlab.com/DouweM"
       },
-      "user_notes_count": 3,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-03-01",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/245",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/245",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -990,7 +991,7 @@
         "completed_count": 1
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/245",
@@ -1054,7 +1055,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "labels": [
@@ -1069,7 +1070,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         }
       ],
@@ -1080,7 +1081,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "type": "ISSUE",
@@ -1091,18 +1092,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 4,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-01-28",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/242",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/242",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1114,7 +1116,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/242",
@@ -1165,7 +1167,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1195,7 +1197,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         },
         {
@@ -1205,7 +1207,7 @@
           "name": "Laura P\u00e9rez",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png?v=1663359095",
           "web_url": "https://gitlab.com/laurameltano"
         }
       ],
@@ -1227,18 +1229,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 2,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2022-04-05",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/228",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/228",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1250,7 +1253,7 @@
         "completed_count": 1
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/228",
@@ -1298,15 +1301,15 @@
       "relative_position": -4104
     },
     {
-      "id": 96968544,
-      "iid": 193,
+      "id": 95411978,
+      "iid": 162,
       "project_id": 27821563,
-      "title": "Podcast: Datacast - 2021-11-22",
-      "description": ">>>\nPodcast: Datacast\n\nhttps://podcasts.apple.com/us/podcast/id1481793207\n\nShow Notes: Datacast follows the narrative journey of data practitioners and researchers to unpack the career lessons they learned along the way. James Le hosts the show.\n\n\nRecording information:\n\nhttps://rit.zoom.us/j/4756226925 \n\nHost: James Le, khanhle.1013@gmail.com\n\nGuest: Douwe Maan, douwe@meltano.com\n\nGuest Media Kit: https://kitcaster.com/douwe-maan/\n\nAgent: Jon Brockman, jon@kitcaster.com, 404-991-4977\n>>>\n\n## Getting the most out of every episode/ process:\nOnce booked the following checklist needs to happen...\n- [x] send cal invite for podcast and add Emily and Amanda to the invite so we know when recording is happening and we can plan social \n- [ ] communicate to marketing launch date and when we will get video. transcript (add cal invite whenever possible)\n- [ ] possible strategy call before recording to discuss key positioning, points, and CTA\n\n#### on podcast\n- [ ] push CTA and key points\n- [ ] if it is a potential investor sourcing opportunity... \"Mention in the interview we are preparing to raise a round of funding and describe out ideal investor relationship and how much money you need.\"\n- [ ] thanks the host and let them know we will be promoting the episode and ask if there is anything else we can do to help\n- [ ] ask when it will go live\n- [ ] if there is a connection say you would like to stay in touch if possible (needs to be followed up with a personal email a couple of days later)\n\n#### for marketing post podcast\n- [ ] schedule and craft social plans (must tag host and podcast name in posts)\n- [ ] Collect video snippets and any relevant artwork \n- [ ] collect key quotes for promotion\n- [ ] craft plan for continued promotion and content creation opportunities\n   - [ ] repurpose video/ audio\n   - [ ] transcribe text\n   - [ ] create blog posts/ newsletter from content \n   - [ ] create PR pitch for future",
+      "title": "Podcast: Founder Chats - 2022-03-03",
+      "description": ">>>\nPodcast: Founder Chats\n\nhttps://podcasts.apple.com/us/podcast/id1149886727\n\nShow Notes: Each week we sit down with a different founder to talk shop. Get honest, insightful looks in to how other founders run their businesses.\n\nRecording information:\n\nLink to recording guide sent by the podcast: https://docs.google.com/document/d/1_WLkZc_XA_6_SnSrhAHwbqKhSkEmBaLczVG6lx85QwU/edit\n\n \n\nContact: Lea LeBlanc, lea@baremetrics.com\n\nGuest: Douwe Maan, douwe@meltano.com\n\nGuest Media Kit: https://kitcaster.com/douwe-maan/\n\nAgent: Jon Brockman, jon@kitcaster.com, 404-991-4977\n>>>\n\n\n## Getting the most out of every episode/ process:\nOnce booked the following checklist needs to happen...\n- [x] send cal invite for podcast and add Emily and Amanda to the invite so we know when recording is happening and we can plan social \n- [ ] communicate to marketing launch date and when we will get video. transcript (add cal invite whenever possible)\n- [ ] possible strategy call before recording to discuss key positioning, points, and CTA\n\n#### on podcast\n- [ ] push CTA and key points\n- [ ] if it is a potential investor sourcing opportunity... \"Mention in the interview we are preparing to raise a round of funding and describe out ideal investor relationship and how much money you need.\"\n- [ ] thanks the host and let them know we will be promoting the episode and ask if there is anything else we can do to help\n- [ ] ask when it will go live\n- [ ] if there is a connection say you would like to stay in touch if possible (needs to be followed up with a personal email a couple of days later)\n\n#### for marketing post podcast\n- [ ] schedule and craft social plans (must tag host and podcast name in posts)\n- [ ] Collect video snippets and any relevant artwork \n- [ ] collect key quotes for promotion\n- [ ] craft plan for continued promotion and content creation opportunities\n   - [ ] repurpose video/ audio\n   - [ ] transcribe text\n   - [ ] create blog posts/ newsletter from content \n   - [ ] create PR pitch for future",
       "state": "closed",
-      "created_at": "2021-11-08T21:22:07.082Z",
-      "updated_at": "2022-05-31T18:19:26.755Z",
-      "closed_at": "2022-05-31T18:19:26.732Z",
+      "created_at": "2021-10-14T10:06:06.928Z",
+      "updated_at": "2022-05-31T18:16:48.405Z",
+      "closed_at": "2022-05-31T18:16:48.388Z",
       "closed_by": {
         "id": 11629953,
         "username": "MeltyBot",
@@ -1314,13 +1317,13 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
         "Content",
         "Marketing",
-        "flow::Triage",
+        "flow::To Do",
         "kind::Non-Product",
         "valuestream::Business Operation"
       ],
@@ -1346,7 +1349,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         },
         {
@@ -1356,7 +1359,7 @@
           "name": "Laura P\u00e9rez",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png?v=1663359095",
           "web_url": "https://gitlab.com/laurameltano"
         }
       ],
@@ -1378,18 +1381,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 10,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
-      "due_date": "2021-11-22",
+      "start_date": null,
+      "due_date": "2022-03-03",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/193",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/162",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1401,19 +1405,19 @@
         "completed_count": 1
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
-        "self": "https://gitlab.com/api/v4/projects/27821563/issues/193",
-        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/193/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/193/award_emoji",
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/162",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/162/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/162/award_emoji",
         "project": "https://gitlab.com/api/v4/projects/27821563",
         "closed_as_duplicate_of": null
       },
       "references": {
-        "short": "#193",
-        "relative": "#193",
-        "full": "meltano/marketing/marketing-general#193"
+        "short": "#162",
+        "relative": "#162",
+        "full": "meltano/marketing/marketing-general#162"
       },
       "severity": "UNKNOWN",
       "moved_to_id": null,
@@ -1432,8 +1436,8 @@
       },
       "iteration": null,
       "health_status": null,
-      "epic_issue_id": 929015,
-      "relative_position": -3078
+      "epic_issue_id": 881081,
+      "relative_position": -3591
     },
     {
       "id": 96968478,
@@ -1452,7 +1456,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "labels": [
@@ -1484,7 +1488,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         }
       ],
@@ -1506,18 +1510,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 10,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2021-12-07",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/192",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/192",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1529,7 +1534,7 @@
         "completed_count": 1
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/192",
@@ -1580,7 +1585,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1612,7 +1617,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         },
         {
@@ -1622,7 +1627,7 @@
           "name": "Victoria Gayton",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11457501/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11457501/avatar.png?v=1654184477",
           "web_url": "https://gitlab.com/victoria66"
         }
       ],
@@ -1644,18 +1649,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 14,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/166",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/166",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1667,7 +1673,7 @@
         "completed_count": 1
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/166",
@@ -1702,272 +1708,6 @@
       "relative_position": -3206
     },
     {
-      "id": 95411978,
-      "iid": 162,
-      "project_id": 27821563,
-      "title": "Podcast: Founder Chats - 2022-03-03",
-      "description": ">>>\nPodcast: Founder Chats\n\nhttps://podcasts.apple.com/us/podcast/id1149886727\n\nShow Notes: Each week we sit down with a different founder to talk shop. Get honest, insightful looks in to how other founders run their businesses.\n\nRecording information:\n\nLink to recording guide sent by the podcast: https://docs.google.com/document/d/1_WLkZc_XA_6_SnSrhAHwbqKhSkEmBaLczVG6lx85QwU/edit\n\n \n\nContact: Lea LeBlanc, lea@baremetrics.com\n\nGuest: Douwe Maan, douwe@meltano.com\n\nGuest Media Kit: https://kitcaster.com/douwe-maan/\n\nAgent: Jon Brockman, jon@kitcaster.com, 404-991-4977\n>>>\n\n\n## Getting the most out of every episode/ process:\nOnce booked the following checklist needs to happen...\n- [x] send cal invite for podcast and add Emily and Amanda to the invite so we know when recording is happening and we can plan social \n- [ ] communicate to marketing launch date and when we will get video. transcript (add cal invite whenever possible)\n- [ ] possible strategy call before recording to discuss key positioning, points, and CTA\n\n#### on podcast\n- [ ] push CTA and key points\n- [ ] if it is a potential investor sourcing opportunity... \"Mention in the interview we are preparing to raise a round of funding and describe out ideal investor relationship and how much money you need.\"\n- [ ] thanks the host and let them know we will be promoting the episode and ask if there is anything else we can do to help\n- [ ] ask when it will go live\n- [ ] if there is a connection say you would like to stay in touch if possible (needs to be followed up with a personal email a couple of days later)\n\n#### for marketing post podcast\n- [ ] schedule and craft social plans (must tag host and podcast name in posts)\n- [ ] Collect video snippets and any relevant artwork \n- [ ] collect key quotes for promotion\n- [ ] craft plan for continued promotion and content creation opportunities\n   - [ ] repurpose video/ audio\n   - [ ] transcribe text\n   - [ ] create blog posts/ newsletter from content \n   - [ ] create PR pitch for future",
-      "state": "closed",
-      "created_at": "2021-10-14T10:06:06.928Z",
-      "updated_at": "2022-05-31T18:16:48.405Z",
-      "closed_at": "2022-05-31T18:16:48.388Z",
-      "closed_by": {
-        "id": 11629953,
-        "username": "MeltyBot",
-        "public_email": "",
-        "name": "Melty Bot",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
-        "web_url": "https://gitlab.com/MeltyBot"
-      },
-      "labels": [
-        "Content",
-        "Marketing",
-        "flow::To Do",
-        "kind::Non-Product",
-        "valuestream::Business Operation"
-      ],
-      "milestone": {
-        "id": 2351599,
-        "iid": 209,
-        "group_id": 2524164,
-        "title": "May 2022",
-        "description": "",
-        "state": "active",
-        "created_at": "2021-11-29T21:38:23.665Z",
-        "updated_at": "2021-11-29T21:38:23.665Z",
-        "due_date": "2022-05-31",
-        "start_date": "2022-05-01",
-        "expired": true,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
-      },
-      "assignees": [
-        {
-          "id": 220186,
-          "username": "Emily",
-          "public_email": "",
-          "name": "Emily Kyle",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
-          "web_url": "https://gitlab.com/Emily"
-        },
-        {
-          "id": 11542635,
-          "username": "laurameltano",
-          "public_email": "laura@meltano.com",
-          "name": "Laura P\u00e9rez",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png",
-          "web_url": "https://gitlab.com/laurameltano"
-        }
-      ],
-      "author": {
-        "id": 87854,
-        "username": "DouweM",
-        "public_email": "",
-        "name": "Douwe Maan",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
-        "web_url": "https://gitlab.com/DouweM"
-      },
-      "type": "ISSUE",
-      "assignee": {
-        "id": 220186,
-        "username": "Emily",
-        "public_email": "",
-        "name": "Emily Kyle",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
-        "web_url": "https://gitlab.com/Emily"
-      },
-      "user_notes_count": 4,
-      "merge_requests_count": 0,
-      "upvotes": 1,
-      "downvotes": 0,
-      "due_date": "2022-03-03",
-      "confidential": true,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/162",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 16,
-        "completed_count": 1
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": false,
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/27821563/issues/162",
-        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/162/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/162/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/27821563",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#162",
-        "relative": "#162",
-        "full": "meltano/marketing/marketing-general#162"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 3,
-      "epic": {
-        "id": 331790,
-        "iid": 3,
-        "title": "Kitcaster (podcasting) Q4 and Q1",
-        "url": "/groups/meltano/marketing/-/epics/3",
-        "group_id": 12586917,
-        "human_readable_end_date": "Aug 31, 2022",
-        "human_readable_timestamp": "<strong>Past due</strong>"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 881081,
-      "relative_position": -3591
-    },
-    {
-      "id": 95220378,
-      "iid": 156,
-      "project_id": 27821563,
-      "title": "Podcast: Hashmap on Tap - 2021-10-20",
-      "description": ">>>\nI'm looking forward to you joining [Hashmap on Tap](https://www.google.com/url?q=http%3A%2F%2Fhashmapinc.com%2Fhashmapontap&sa=D&ust=1634143240054000&usg=AOvVaw36-_X0x0Pbij08l5Y_EEvv)!\n\nHere are the details for the show:\n\nLink to Squadcast is here: https://sqdc.st/studio/f5Hs\n\nHashmap on Tap selected beverage: Douwe's choice: Wit beer from Hoegaarden: https://untappd.com/b/brouwerij-hoegaarden-hoegaarden-wit-blanche/6422\n\nShow Notes and Questions are here: \nhttps://docs.google.com/document/d/1QPyMQ000z7UGKDbX31AoBs02Ai1tH469EUcAENMoRlk/edit\n\nPlease feel free to comment/edit this to your liking. We can add, modify, or remove anything you see there, so just update as needed.\n\nI grabbed some introduction information about you from Linkedin, but I'd be glad to modify this however you like for the actual show.\n\nThe questions in the show notes should not be thought of as a list of interview questions, but more like conversation starters. I'm interested in having a natural dialogue and seeing where it takes us. \n\n**On the day of recording, here are a few things to know:**\n- You'll need headphones, a webcam, and a quiet room for about an hour. \n- The recording quality is best if you can use headphones for audio during our sessions. Audio through speakers often gets picked up by our guests' mics and it can be difficult to edit.\n- We record using SquadCast, an online recording tool. It will also serve as our video conference tool for this session (we won't be producing a video though - just the audio podcast). Please join SquadCast when you're ready to get started. I won't start recording until we're both on the call and ready to begin.\n- Previous guests have mentioned that SquadCast doesn't work great with Safari, but Chrome and Brave both seem to work well.\n- Please make sure to have your drink ready for the episode.\n\n**To join our session**, simply open the squadcast link above in a desktop browser. This link will work between now and our recording session, so feel free to jump in to get the lay of the land ahead of time. It's pretty simple, so don't feel that you need to prep or anything.\n\n**Our agenda will be as follows:**\n- We will join the Squadcast call\n- We will do a final review of the show outline and ensure everyone is comfortable with the content of the session before any recording starts.\n- Recording begins\n- After the recording, Hashmap Marketing will edit the raw recordings to create a final episode. Any special editing requests from the recording session can be accommodated here.\n- You will be sent a copy of the edited episode for approval before publishing\n- If all is well and you approve, Hashmap will then publish the episode. Otherwise, Hashmap Marketing will make any requested editing changes and provide you with a promotional URL link as well.\n>>>\n\nHost: Kelly Kohlleffel, 713-628-6030, kelly@hashmapinc.com\n\n## Getting the most out of every episode/ process:\nOnce booked the following checklist needs to happen...\n- [x] send cal invite for podcast and add Emily and Amanda to the invite so we know when recording is happening and we can plan social \n- [ ] communicate to marketing launch date and when we will get video. transcript (add cal invite whenever possible)\n- [ ] possible strategy call before recording to discuss key positioning, points, and CTA\n\n#### on podcast\n- [x] push CTA and key points\n- [ ] if it is a potential investor sourcing opportunity... \"Mention in the interview we are preparing to raise a round of funding and describe out ideal investor relationship and how much money you need.\"\n- [x] thanks the host and let them know we will be promoting the episode and ask if there is anything else we can do to help\n- [x] ask when it will go live\n- [ ] if there is a connection say you would like to stay in touch if possible (needs to be followed up with a personal email a couple of days later)\n\n#### for marketing post podcast\n- [ ] schedule and craft social plans (must tag host and podcast name in posts)\n- [ ] Collect video snippets and any relevant artwork \n- [ ] collect key quotes for promotion\n- [ ] craft plan for continued promotion and content creation opportunities\n   - [ ] repurpose video/ audio\n   - [ ] transcribe text\n   - [ ] create blog posts/ newsletter from content \n   - [ ] create PR pitch for future",
-      "state": "closed",
-      "created_at": "2021-10-11T13:22:22.192Z",
-      "updated_at": "2021-11-16T16:59:55.731Z",
-      "closed_at": "2021-11-10T15:46:08.673Z",
-      "closed_by": {
-        "id": 220186,
-        "username": "Emily",
-        "public_email": "",
-        "name": "Emily Kyle",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
-        "web_url": "https://gitlab.com/Emily"
-      },
-      "labels": [
-        "Content",
-        "Marketing",
-        "flow::Doing",
-        "kind::Non-Product",
-        "valuestream::Business Operation"
-      ],
-      "milestone": {
-        "id": 2286167,
-        "iid": 195,
-        "group_id": 2524164,
-        "title": "Fri: Nov 12, 2021",
-        "description": "",
-        "state": "closed",
-        "created_at": "2021-10-18T15:18:36.195Z",
-        "updated_at": "2021-11-15T15:49:12.319Z",
-        "due_date": "2021-11-12",
-        "start_date": "2021-11-06",
-        "expired": true,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/195"
-      },
-      "assignees": [
-        {
-          "id": 220186,
-          "username": "Emily",
-          "public_email": "",
-          "name": "Emily Kyle",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
-          "web_url": "https://gitlab.com/Emily"
-        }
-      ],
-      "author": {
-        "id": 87854,
-        "username": "DouweM",
-        "public_email": "",
-        "name": "Douwe Maan",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
-        "web_url": "https://gitlab.com/DouweM"
-      },
-      "type": "ISSUE",
-      "assignee": {
-        "id": 220186,
-        "username": "Emily",
-        "public_email": "",
-        "name": "Emily Kyle",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
-        "web_url": "https://gitlab.com/Emily"
-      },
-      "user_notes_count": 12,
-      "merge_requests_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": "2021-10-20",
-      "confidential": true,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/156",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 16,
-        "completed_count": 4
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": false,
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/27821563/issues/156",
-        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/156/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/156/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/27821563",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#156",
-        "relative": "#156",
-        "full": "meltano/marketing/marketing-general#156"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 3,
-      "epic": {
-        "id": 331790,
-        "iid": 3,
-        "title": "Kitcaster (podcasting) Q4 and Q1",
-        "url": "/groups/meltano/marketing/-/epics/3",
-        "group_id": 12586917,
-        "human_readable_end_date": "Aug 31, 2022",
-        "human_readable_timestamp": "<strong>Past due</strong>"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 873495,
-      "relative_position": -1539
-    },
-    {
       "id": 95220050,
       "iid": 155,
       "project_id": 27821563,
@@ -1984,7 +1724,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -2016,7 +1756,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         },
         {
@@ -2026,7 +1766,7 @@
           "name": "Victoria Gayton",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11457501/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11457501/avatar.png?v=1654184477",
           "web_url": "https://gitlab.com/victoria66"
         }
       ],
@@ -2048,18 +1788,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 19,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/155",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/155",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -2071,7 +1812,7 @@
         "completed_count": 1
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/155",
@@ -2106,6 +1847,145 @@
       "relative_position": -3142
     },
     {
+      "id": 96968544,
+      "iid": 193,
+      "project_id": 27821563,
+      "title": "Podcast: Datacast - 2021-11-22",
+      "description": ">>>\nPodcast: Datacast\n\nhttps://podcasts.apple.com/us/podcast/id1481793207\n\nShow Notes: Datacast follows the narrative journey of data practitioners and researchers to unpack the career lessons they learned along the way. James Le hosts the show.\n\n\nRecording information:\n\nhttps://rit.zoom.us/j/4756226925 \n\nHost: James Le, khanhle.1013@gmail.com\n\nGuest: Douwe Maan, douwe@meltano.com\n\nGuest Media Kit: https://kitcaster.com/douwe-maan/\n\nAgent: Jon Brockman, jon@kitcaster.com, 404-991-4977\n>>>\n\n## Getting the most out of every episode/ process:\nOnce booked the following checklist needs to happen...\n- [x] send cal invite for podcast and add Emily and Amanda to the invite so we know when recording is happening and we can plan social \n- [ ] communicate to marketing launch date and when we will get video. transcript (add cal invite whenever possible)\n- [ ] possible strategy call before recording to discuss key positioning, points, and CTA\n\n#### on podcast\n- [ ] push CTA and key points\n- [ ] if it is a potential investor sourcing opportunity... \"Mention in the interview we are preparing to raise a round of funding and describe out ideal investor relationship and how much money you need.\"\n- [ ] thanks the host and let them know we will be promoting the episode and ask if there is anything else we can do to help\n- [ ] ask when it will go live\n- [ ] if there is a connection say you would like to stay in touch if possible (needs to be followed up with a personal email a couple of days later)\n\n#### for marketing post podcast\n- [ ] schedule and craft social plans (must tag host and podcast name in posts)\n- [ ] Collect video snippets and any relevant artwork \n- [ ] collect key quotes for promotion\n- [ ] craft plan for continued promotion and content creation opportunities\n   - [ ] repurpose video/ audio\n   - [ ] transcribe text\n   - [ ] create blog posts/ newsletter from content \n   - [ ] create PR pitch for future",
+      "state": "closed",
+      "created_at": "2021-11-08T21:22:07.082Z",
+      "updated_at": "2022-05-31T18:19:26.755Z",
+      "closed_at": "2022-05-31T18:19:26.732Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Content",
+        "Marketing",
+        "flow::Triage",
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": {
+        "id": 2351599,
+        "iid": 209,
+        "group_id": 2524164,
+        "title": "May 2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
+      },
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
+          "web_url": "https://gitlab.com/Emily"
+        },
+        {
+          "id": 11542635,
+          "username": "laurameltano",
+          "public_email": "laura@meltano.com",
+          "name": "Laura P\u00e9rez",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11542635/avatar.png?v=1663359095",
+          "web_url": "https://gitlab.com/laurameltano"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": "2021-11-22",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/193",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 16,
+        "completed_count": 1
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/193",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/193/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/193/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#193",
+        "relative": "#193",
+        "full": "meltano/marketing/marketing-general#193"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 3,
+      "epic": {
+        "id": 331790,
+        "iid": 3,
+        "title": "Kitcaster (podcasting) Q4 and Q1",
+        "url": "/groups/meltano/marketing/-/epics/3",
+        "group_id": 12586917,
+        "human_readable_end_date": "Aug 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 929015,
+      "relative_position": -3078
+    },
+    {
       "id": 94944515,
       "iid": 148,
       "project_id": 27821563,
@@ -2122,7 +2002,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "labels": [
@@ -2154,7 +2034,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         }
       ],
@@ -2176,18 +2056,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 7,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2021-10-31",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/148",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/148",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -2199,7 +2080,7 @@
         "completed_count": 6
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/148",
@@ -2234,6 +2115,135 @@
       "relative_position": -2052
     },
     {
+      "id": 95220378,
+      "iid": 156,
+      "project_id": 27821563,
+      "title": "Podcast: Hashmap on Tap - 2021-10-20",
+      "description": ">>>\nI'm looking forward to you joining [Hashmap on Tap](https://www.google.com/url?q=http%3A%2F%2Fhashmapinc.com%2Fhashmapontap&sa=D&ust=1634143240054000&usg=AOvVaw36-_X0x0Pbij08l5Y_EEvv)!\n\nHere are the details for the show:\n\nLink to Squadcast is here: https://sqdc.st/studio/f5Hs\n\nHashmap on Tap selected beverage: Douwe's choice: Wit beer from Hoegaarden: https://untappd.com/b/brouwerij-hoegaarden-hoegaarden-wit-blanche/6422\n\nShow Notes and Questions are here: \nhttps://docs.google.com/document/d/1QPyMQ000z7UGKDbX31AoBs02Ai1tH469EUcAENMoRlk/edit\n\nPlease feel free to comment/edit this to your liking. We can add, modify, or remove anything you see there, so just update as needed.\n\nI grabbed some introduction information about you from Linkedin, but I'd be glad to modify this however you like for the actual show.\n\nThe questions in the show notes should not be thought of as a list of interview questions, but more like conversation starters. I'm interested in having a natural dialogue and seeing where it takes us. \n\n**On the day of recording, here are a few things to know:**\n- You'll need headphones, a webcam, and a quiet room for about an hour. \n- The recording quality is best if you can use headphones for audio during our sessions. Audio through speakers often gets picked up by our guests' mics and it can be difficult to edit.\n- We record using SquadCast, an online recording tool. It will also serve as our video conference tool for this session (we won't be producing a video though - just the audio podcast). Please join SquadCast when you're ready to get started. I won't start recording until we're both on the call and ready to begin.\n- Previous guests have mentioned that SquadCast doesn't work great with Safari, but Chrome and Brave both seem to work well.\n- Please make sure to have your drink ready for the episode.\n\n**To join our session**, simply open the squadcast link above in a desktop browser. This link will work between now and our recording session, so feel free to jump in to get the lay of the land ahead of time. It's pretty simple, so don't feel that you need to prep or anything.\n\n**Our agenda will be as follows:**\n- We will join the Squadcast call\n- We will do a final review of the show outline and ensure everyone is comfortable with the content of the session before any recording starts.\n- Recording begins\n- After the recording, Hashmap Marketing will edit the raw recordings to create a final episode. Any special editing requests from the recording session can be accommodated here.\n- You will be sent a copy of the edited episode for approval before publishing\n- If all is well and you approve, Hashmap will then publish the episode. Otherwise, Hashmap Marketing will make any requested editing changes and provide you with a promotional URL link as well.\n>>>\n\nHost: Kelly Kohlleffel, 713-628-6030, kelly@hashmapinc.com\n\n## Getting the most out of every episode/ process:\nOnce booked the following checklist needs to happen...\n- [x] send cal invite for podcast and add Emily and Amanda to the invite so we know when recording is happening and we can plan social \n- [ ] communicate to marketing launch date and when we will get video. transcript (add cal invite whenever possible)\n- [ ] possible strategy call before recording to discuss key positioning, points, and CTA\n\n#### on podcast\n- [x] push CTA and key points\n- [ ] if it is a potential investor sourcing opportunity... \"Mention in the interview we are preparing to raise a round of funding and describe out ideal investor relationship and how much money you need.\"\n- [x] thanks the host and let them know we will be promoting the episode and ask if there is anything else we can do to help\n- [x] ask when it will go live\n- [ ] if there is a connection say you would like to stay in touch if possible (needs to be followed up with a personal email a couple of days later)\n\n#### for marketing post podcast\n- [ ] schedule and craft social plans (must tag host and podcast name in posts)\n- [ ] Collect video snippets and any relevant artwork \n- [ ] collect key quotes for promotion\n- [ ] craft plan for continued promotion and content creation opportunities\n   - [ ] repurpose video/ audio\n   - [ ] transcribe text\n   - [ ] create blog posts/ newsletter from content \n   - [ ] create PR pitch for future",
+      "state": "closed",
+      "created_at": "2021-10-11T13:22:22.192Z",
+      "updated_at": "2021-11-16T16:59:55.731Z",
+      "closed_at": "2021-11-10T15:46:08.673Z",
+      "closed_by": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "labels": [
+        "Content",
+        "Marketing",
+        "flow::Doing",
+        "kind::Non-Product",
+        "valuestream::Business Operation"
+      ],
+      "milestone": {
+        "id": 2286167,
+        "iid": 195,
+        "group_id": 2524164,
+        "title": "Fri: Nov 12, 2021",
+        "description": "",
+        "state": "closed",
+        "created_at": "2021-10-18T15:18:36.195Z",
+        "updated_at": "2021-11-15T15:49:12.319Z",
+        "due_date": "2021-11-12",
+        "start_date": "2021-11-06",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/195"
+      },
+      "assignees": [
+        {
+          "id": 220186,
+          "username": "Emily",
+          "public_email": "",
+          "name": "Emily Kyle",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
+          "web_url": "https://gitlab.com/Emily"
+        }
+      ],
+      "author": {
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 220186,
+        "username": "Emily",
+        "public_email": "",
+        "name": "Emily Kyle",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
+        "web_url": "https://gitlab.com/Emily"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": "2021-10-20",
+      "confidential": true,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/156",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 16,
+        "completed_count": 4
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": false,
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/27821563/issues/156",
+        "notes": "https://gitlab.com/api/v4/projects/27821563/issues/156/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/27821563/issues/156/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/27821563",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#156",
+        "relative": "#156",
+        "full": "meltano/marketing/marketing-general#156"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 3,
+      "epic": {
+        "id": 331790,
+        "iid": 3,
+        "title": "Kitcaster (podcasting) Q4 and Q1",
+        "url": "/groups/meltano/marketing/-/epics/3",
+        "group_id": 12586917,
+        "human_readable_end_date": "Aug 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 873495,
+      "relative_position": -1539
+    },
+    {
       "id": 90701140,
       "iid": 56,
       "project_id": 27821563,
@@ -2250,7 +2260,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "labels": [
@@ -2266,7 +2276,7 @@
           "name": "Emily Kyle",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
           "web_url": "https://gitlab.com/Emily"
         },
         {
@@ -2276,7 +2286,7 @@
           "name": "Suri Patel",
           "state": "blocked",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1985266/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1985266/avatar.png?v=1789014832",
           "web_url": "https://gitlab.com/suripatel"
         }
       ],
@@ -2287,7 +2297,7 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
       "type": "ISSUE",
@@ -2298,18 +2308,19 @@
         "name": "Emily Kyle",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/220186/avatar.png?v=1789009260",
         "web_url": "https://gitlab.com/Emily"
       },
-      "user_notes_count": 15,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": "2021-09-17",
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/issues/56",
+      "web_url": "https://gitlab.com/meltano/marketing/marketing-general/-/work_items/56",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -2321,7 +2332,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/27821563/issues/56",

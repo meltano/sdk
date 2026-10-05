@@ -28,7 +28,7 @@ class JSONLinesBatcher(BaseBatcher):
     @override
     def get_batches(
         self,
-        records: t.Iterator[dict],
+        records: t.Iterable[dict],
     ) -> t.Iterator[list[str]]:
         """Yield manifest of batches.
 

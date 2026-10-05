@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 from functools import cached_property
 
@@ -11,6 +12,11 @@ from requests.auth import HTTPProxyAuth
 from singer_sdk.authenticators import APIAuthenticatorBase, SingletonMeta
 from singer_sdk.streams import RESTStream
 from singer_sdk.tap_base import Tap
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 class SingletonAuthenticator(APIAuthenticatorBase, metaclass=SingletonMeta):
@@ -27,6 +33,7 @@ class SimpleRESTStream(RESTStream):
     }
     path = "/dummy"
 
+    @override
     @property
     def authenticator(self) -> APIAuthenticatorBase:
         """Stream authenticator."""
@@ -36,6 +43,7 @@ class SimpleRESTStream(RESTStream):
 class SingletonAuthStream(SimpleRESTStream):
     """A stream with singleton authenticator."""
 
+    @override
     @property
     def authenticator(self) -> SingletonAuthenticator:
         """Stream authenticator."""
@@ -49,6 +57,7 @@ class NaiveAuthenticator(APIAuthenticatorBase):
 class CachedAuthStream(SimpleRESTStream):
     """A stream with Naive authentication."""
 
+    @override
     @cached_property
     def authenticator(self) -> NaiveAuthenticator:
         """Stream authenticator."""
@@ -59,6 +68,7 @@ class ProxyAuthStream(SimpleRESTStream):
     """A stream with digest authentication."""
 
     @property
+    @override
     def authenticator(self):
         """Stream authenticator."""
         return HTTPProxyAuth("username", "password")
@@ -69,6 +79,7 @@ class SimpleTap(Tap):
 
     name = "tappy"
 
+    @override
     def discover_streams(self):
         """Get collection of streams."""
         return [

@@ -475,7 +475,7 @@ After each PR:
 
 ```bash
 nox -s tests          # no regressions
-nox -t typing         # mypy clean
+nox -s typing         # passing type checks
 pre-commit run --all  # lint/format clean
 nox -s docs           # Sphinx builds without errors
 ```

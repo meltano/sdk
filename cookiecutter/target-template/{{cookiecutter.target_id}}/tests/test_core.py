@@ -24,7 +24,8 @@ class TestTarget{{ cookiecutter.destination_name }}(StandardTargetTests):  # typ
     """Standard Target Tests."""
 
     @pytest.fixture(scope="class")
-    def resource(self):  # noqa: ANN201
+    @classmethod
+    def resource(cls):  # ruff:ignore[missing-return-type-class-method]
         """Generic external resource.
 
         This fixture is useful for setup and teardown of external resources,
@@ -32,6 +33,9 @@ class TestTarget{{ cookiecutter.destination_name }}(StandardTargetTests):  # typ
 
         Example usage can be found in the SDK samples test suite:
         https://github.com/meltano/sdk/tree/main/tests/packages
+
+        Returns:
+            The fixture value.
         """
         return "resource"
 

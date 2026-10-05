@@ -28,6 +28,7 @@ else:
 if t.TYPE_CHECKING:
     from sqlalchemy.sql import Executable
 
+    from singer_sdk.singerlib.types import KeyProperties
     from singer_sdk.sql.connector import FullyQualifiedName
     from singer_sdk.target_base import Target
 
@@ -48,7 +49,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         target: Target,
         stream_name: str,
         schema: dict,
-        key_properties: t.Sequence[str] | None,
+        key_properties: KeyProperties | None,
         connector: _C | None = None,
     ) -> None:
         """Initialize SQL Sink.
@@ -233,12 +234,12 @@ class SQLSink(BatchSink, t.Generic[_C]):
 
     @property
     @override
-    def key_properties(self) -> t.Sequence[str]:
+    def key_properties(self) -> KeyProperties:
         """Key properties, conformed to target system naming requirements."""
         return [self.conform_name(key, "column") for key in super().key_properties]
 
     @override
-    def process_batch(self, context: dict) -> None:
+    def process_batch(self, context: dict) -> int | None:
         """Process a batch with the given batch context.
 
         Writes a batch to the SQL target. Developers may override this method
@@ -246,10 +247,13 @@ class SQLSink(BatchSink, t.Generic[_C]):
 
         Args:
             context: Stream partition or context dictionary.
+
+        Returns:
+            The number of records inserted.
         """
         # If duplicates are merged, these can be tracked via
         # :meth:`~singer_sdk.Sink.tally_duplicate_merged()`.
-        self.bulk_insert_records(
+        return self.bulk_insert_records(
             full_table_name=self.full_table_name,
             schema=self.schema,
             records=context["records"],
@@ -309,7 +313,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
             records: the input records.
 
         Returns:
-            True if table exists, False if not, None if unsure or undetectable.
+            Count of records inserted.
         """
         insert_sql = self.generate_insert_statement(
             full_table_name,
@@ -338,7 +342,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
             result = conn.execute(insert_sql, new_records)
 
-        return result.rowcount
+        return result.rowcount if result.rowcount >= 0 else None
 
     def merge_upsert_from_table(
         self,

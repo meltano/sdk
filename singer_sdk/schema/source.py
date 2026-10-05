@@ -40,14 +40,14 @@ else:
     from typing_extensions import TypeVar
 
 if t.TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable
 
     from singer_sdk.helpers._compat import Traversable
+    from singer_sdk.singerlib.types import KeyProperties
     from singer_sdk.streams.core import Stream
 
 
 Schema: t.TypeAlias = dict[str, t.Any]
-
 
 _TKey = TypeVar("_TKey", bound=t.Hashable, default=str)
 _TStream = TypeVar("_TStream", bound="Stream", default="Stream")
@@ -63,7 +63,7 @@ class SchemaPreprocessor(t.Protocol):
         self,
         schema: Schema,
         *,
-        key_properties: Sequence[str] = (),
+        key_properties: KeyProperties = (),
     ) -> Schema:
         """Pre-process a schema.
 
@@ -89,7 +89,7 @@ class SchemaSource(ABC, t.Generic[_TKey]):
         self,
         schema: Schema,
         *,
-        key_properties: Sequence[str] = (),
+        key_properties: KeyProperties = (),
     ) -> Schema:
         """Pre-process the schema before providing it to the stream.
 
@@ -113,7 +113,7 @@ class SchemaSource(ABC, t.Generic[_TKey]):
         key: _TKey,
         /,
         *,
-        key_properties: Sequence[str] = (),
+        key_properties: KeyProperties = (),
     ) -> Schema:
         """Convenience method to get a schema component.
 
@@ -255,7 +255,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         self,
         schema: Schema,
         *,
-        key_properties: Sequence[str] = (),
+        key_properties: KeyProperties = (),
     ) -> Schema:
         """Handle JSON object schemas.
 
@@ -313,7 +313,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         schema.pop("pattern", None)
         return schema
 
-    def handle_one_of(self, schema: Schema) -> Schema:
+    def _handle_one_of(self, schema: Schema) -> Schema:
         """Handle oneOf constructs in a JSON schema.
 
         - Single element: unwrap.
@@ -345,21 +345,22 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
 
         return {**rest, "oneOf": [self.normalize_schema(s) for s in subschemas]}
 
-    def handle_all_of(self, subschemas: list[Schema]) -> Schema:  # noqa: PLR6301
+    def _handle_all_of(self, schema: Schema) -> Schema:
         """Handle allOf constructs in a JSON schema.
 
         Args:
-            subschemas: A list of JSON schemas.
+            schema: A JSON schema containing an ``allOf`` keyword.
 
         Returns:
             A merged JSON schema.
         """
+        subschemas = schema["allOf"]
         if not subschemas:
             return {}
 
         # If the allOf array has only one element, just flatten it.
         if len(subschemas) == 1:
-            return subschemas[0]
+            return self.normalize_schema(subschemas[0])
 
         # TODO: merge subschemas:
         # - Taking the most restrictive constraints for each property
@@ -374,13 +375,33 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
                 else:
                     result[key] = value
 
-        return result
+        return self.normalize_schema(result)
+
+    def _handle_any_of(self, schema: Schema) -> Schema:
+        """Handle anyOf constructs in a JSON schema.
+
+        Args:
+            schema: A JSON schema containing an ``anyOf`` keyword.
+
+        Returns:
+            A processed anyOf list of schemas.
+        """
+        subschemas = schema["anyOf"]
+        result: list[Schema] = []
+        for subschema in subschemas:
+            if subschema.get("nullable") and "type" not in subschema:
+                result.append(self.normalize_schema({"type": "null", **subschema}))
+            else:
+                result.append(self.normalize_schema(subschema))
+
+        schema["anyOf"] = result
+        return schema
 
     def normalize_schema(
         self,
         schema: Schema,
         *,
-        key_properties: Sequence[str] = (),
+        key_properties: KeyProperties = (),
     ) -> Schema:
         """Normalize an OpenAPI schema to standard JSON Schema.
 
@@ -403,11 +424,11 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
             result["items"] = self.handle_array_items(items)
 
         if "allOf" in result:
-            result = self.normalize_schema(self.handle_all_of(result["allOf"]))
+            result = self._handle_all_of(result)
         if "oneOf" in result:
-            result = self.handle_one_of(result)
+            result = self._handle_one_of(result)
         if "anyOf" in result:
-            result["anyOf"] = [self.normalize_schema(s) for s in result["anyOf"]]
+            result = self._handle_any_of(result)
 
         types_raw = result.get("type", [])
         types = [types_raw] if isinstance(types_raw, str) else types_raw
@@ -429,7 +450,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         self,
         schema: Schema,
         *,
-        key_properties: Sequence[str] = (),
+        key_properties: KeyProperties = (),
     ) -> Schema:
         return self.normalize_schema(schema, key_properties=key_properties)
 

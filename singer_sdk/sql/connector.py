@@ -42,6 +42,8 @@ if t.TYPE_CHECKING:
         ReflectedPrimaryKeyConstraint,
     )
 
+    from singer_sdk.singerlib.types import KeyProperties
+
 
 class FullyQualifiedName(UserString):
     """A fully qualified table name.
@@ -1325,7 +1327,7 @@ class SQLConnector:  # noqa: PLR0904
         self,
         full_table_name: str | FullyQualifiedName,
         schema: dict,
-        primary_keys: t.Sequence[str] | None = None,
+        primary_keys: KeyProperties | None = None,
         partition_keys: list[str] | None = None,
         as_temp_table: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
@@ -1416,7 +1418,7 @@ class SQLConnector:  # noqa: PLR0904
         self,
         full_table_name: str | FullyQualifiedName,
         schema: dict,
-        primary_keys: t.Sequence[str],
+        primary_keys: KeyProperties,
         partition_keys: list[str] | None = None,
         as_temp_table: bool = False,  # noqa: FBT002, FBT001
     ) -> None:
@@ -1477,7 +1479,7 @@ class SQLConnector:  # noqa: PLR0904
         self,
         *,
         full_table_name: str | FullyQualifiedName,  # noqa: ARG002
-        primary_keys: t.Sequence[str],  # noqa: ARG002
+        primary_keys: KeyProperties,  # noqa: ARG002
     ) -> None:
         """Adapt target table primary key to provided schema if possible.
 

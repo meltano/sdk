@@ -1,51 +1,45 @@
 {
-  "cookies": {
-    "__cf_bm": "Vqf4wzV8QX2wmLw.JC6D3uSyuna5ZFgH07V07Lw_sYo-1763701855-1.0.1.1-yyk_ujVsvP5StnuspxU66US5F38UauMRnV0CzJYI69.dY.MI8bdvnDJD3IdB_xV0v7sP7PEj7e.1yJs96zgWnLPuGghlObrCsC.gt2JDHlE",
-    "_cfuvid": "RqMZxLjkrxmh68V_0hLhY9h6.LnZj8ivGIW6c.qkQjA-1763701855008-0.0.1.1-604800000"
-  },
-  "created_at": "2025-11-21T05:10:54.900520+00:00",
-  "elapsed": 1.405464,
+  "created_at": "2026-09-24T21:33:44.067399+00:00",
+  "elapsed": 0.944907,
   "encoding": "utf-8",
   "headers": {
-    "CF-Cache-Status": "MISS",
-    "CF-Ray": "9a1daef00cf8d224-QRO",
+    "CF-Cache-Status": "BYPASS",
+    "CF-Ray": "a404e8ba1f263ebc-QRO",
     "Cache-Control": "max-age=0, private, must-revalidate",
     "Connection": "keep-alive",
     "Content-Encoding": "gzip",
     "Content-Type": "application/json",
-    "Date": "Fri, 21 Nov 2025 05:10:55 GMT",
-    "ETag": "W/\"3cd3a24e3565b98f3deba6a5b5c99f52\"",
+    "Date": "Thu, 24 Sep 2026 21:33:44 GMT",
+    "ETag": "W/\"1a09b9d600203946583b061b50f46e15\"",
     "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/123/issues?epic_iid=123&id=2524164&page=3&per_page=20>; rel=\"prev\", <https://gitlab.com/api/v4/groups/2524164/epics/123/issues?epic_iid=123&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/123/issues?epic_iid=123&id=2524164&page=4&per_page=20>; rel=\"last\"",
     "Server": "cloudflare",
-    "Set-Cookie": "__cf_bm=Vqf4wzV8QX2wmLw.JC6D3uSyuna5ZFgH07V07Lw_sYo-1763701855-1.0.1.1-yyk_ujVsvP5StnuspxU66US5F38UauMRnV0CzJYI69.dY.MI8bdvnDJD3IdB_xV0v7sP7PEj7e.1yJs96zgWnLPuGghlObrCsC.gt2JDHlE; path=/; expires=Fri, 21-Nov-25 05:40:55 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=RqMZxLjkrxmh68V_0hLhY9h6.LnZj8ivGIW6c.qkQjA-1763701855008-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
     "Strict-Transport-Security": "max-age=31536000",
     "Transfer-Encoding": "chunked",
-    "Vary": "Origin, Accept-Encoding",
+    "Vary": "Origin",
     "content-security-policy": "default-src 'none'",
-    "gitlab-lb": "haproxy-main-08-lb-gprd",
-    "gitlab-sv": "api-gke-us-east1-c",
+    "gitlab-lb": "haproxy-main-16-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-b",
     "nel": "{\"max_age\": 0}",
     "ratelimit-limit": "2000",
     "ratelimit-name": "throttle_authenticated_api",
-    "ratelimit-observed": "73",
-    "ratelimit-remaining": "1927",
-    "ratelimit-reset": "1763701860",
+    "ratelimit-observed": "77",
+    "ratelimit-remaining": "1923",
+    "ratelimit-reset": "1790285640",
     "referrer-policy": "strict-origin-when-cross-origin",
     "x-content-type-options": "nosniff",
     "x-frame-options": "SAMEORIGIN",
-    "x-gitlab-meta": "{\"correlation_id\":\"9a1daef01499d224-ATL\",\"version\":\"1\"}",
+    "x-gitlab-meta": "{\"correlation_id\":\"a404e8ba1f263ebc-QRO\",\"version\":\"1\"}",
     "x-next-page": "",
     "x-page": "4",
     "x-per-page": "20",
     "x-prev-page": "3",
-    "x-request-id": "9a1daef01499d224-ATL",
-    "x-runtime": "0.134390",
+    "x-request-id": "a404e8ba1f263ebc-QRO",
+    "x-runtime": "0.729524",
     "x-total": "62",
     "x-total-pages": "4"
   },
   "reason": "OK",
   "request": {
-    "body": "",
     "headers": {
       "Accept": "*/*",
       "Accept-Encoding": "gzip, deflate, zstd",
@@ -60,15 +54,15 @@
   "url": "https://gitlab.com/api/v4/groups/2524164/epics/123/issues?page=4",
   "_decoded_content": [
     {
-      "id": 26052317,
-      "iid": 1151,
+      "id": 53978845,
+      "iid": 2133,
       "project_id": 7603319,
-      "title": "Quick Actions definition file for VS Code",
-      "description": "### Problem to solve\n\nIt's difficult currently to get started for new users and the setup is still very dependent on copy-pasting CLI commands. The proposal would create one or more [tasks.json](https://code.visualstudio.com/Docs/editor/tasks) definition files for VS Code that would give a point-and-click option for users to perform tasks such as launching/stopping the server, initializing a project, etc.\n\n\n### Target audience\n\nNew Meltano users who are using VS Code as their editor, especially less technical roles such as data analysts.\n\n\n### Further details\n\nVS Code \"Tasks\" are documented here: https://code.visualstudio.com/Docs/editor/tasks\n\nThis proposal would add common command-line actions (Tasks) into VS Code that a user of any platform could select from a menu, rather than having to research and copy-paste the appropriate CLI command.\n\n\n### Proposal\n\n\nWhen significant differences exist in command execution, there may be a different set of commands for windows users, Ubuntu users, and Win/Lin users running via docker. These could be surfaced in one of the following ways (progressively more robust):\n1. A code block in the documentation page that a user can copy-paste into their [tasks.json](https://code.visualstudio.com/Docs/editor/tasks) definition file.\n2. A set of files (one for each OS/platform) that a user can download and move into their project folder.\n3. A sample git repo or a GitHub [template](https://help.github.com/en/articles/creating-a-template-repository) that has the actions definition file already. Also could be included in this is README.md file and VS Code extension recommendations.\n4. A VS Code extension could be created for Meltano that does most/all of the above without any work from the user.\n\n\n### What does success look like, and how can we measure that?\n\nProposal option 1 (copy-paste json doc) could be measured by tracking page hits and shared on the docs page.\nProposal option 2 (tasks.json file download) could be measured by tracking download counts.\nProposal option 3 (repo template) could be measured by github stats.\nProposal option 4 (extension) could be measured by Extension download metrics and ratings.\n\n### Regression test\n(Ensure the feature doesn't cause any regressions)\n- [ ] Write adequate test cases and submit test results\n- [ ] Test results should be reviewed by a person from the team\n\n### Links / references\n\n_Please note that this was taken from GitLab, to be changed accordingly_",
+      "title": "Automatically `meltano install` missing tap and target when running `meltano elt`",
+      "description": "`meltano elt tap-foo target-bar` will already add `tap-foo` and `target-bar` to the project (and `meltano.yml`) if they are not already present. \n\nHowever, if they've already been added to the project, but are not actually installed into the `.meltano` directory (such as after cloning a repo from version control without running `meltano install`), `meltano elt` fails with an ugly error message, as reported by @nehiljain:\n\n```\nELT could not complete, an error happened during the process: Cannot start tap or target: [Errno 2] No such file or directory: '/Users/nehiljain/snaptravel/universal-elt-pipeline/airflow-elt/.meltano/extractors/tap-github/venv/bin/tap-github': '/Users/nehiljain/snaptravel/universal-elt-pipeline/airflow-elt/.meltano/extractors/tap-github/venv/bin/tap-github'\n```\n\nWe can do much better, and automatically `meltano install` these missing taps and targets when running `meltano elt` as well.",
       "state": "closed",
-      "created_at": "2019-10-17T17:56:20.263Z",
-      "updated_at": "2022-05-30T04:00:21.684Z",
-      "closed_at": "2022-05-30T04:00:21.565Z",
+      "created_at": "2020-07-06T15:50:24.466Z",
+      "updated_at": "2022-05-30T05:59:33.288Z",
+      "closed_at": "2022-05-30T05:59:33.261Z",
       "closed_by": {
         "id": 11629953,
         "username": "MeltyBot",
@@ -76,11 +70,12 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
         "Accepting Merge Requests",
+        "CLI",
         "kind::Feature",
         "valuestream::Meltano"
       ],
@@ -100,26 +95,27 @@
       },
       "assignees": [],
       "author": {
-        "id": 4809760,
-        "username": "aaronsteers",
-        "public_email": "aaronsteers@gmail.com",
-        "name": "AJ Steers",
+        "id": 87854,
+        "username": "DouweM",
+        "public_email": "",
+        "name": "Douwe Maan",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
-        "web_url": "https://gitlab.com/aaronsteers"
+        "avatar_url": "https://secure.gravatar.com/avatar/bbb752c75ae2744bddf1640d75edf9b6f7d4e5f4fbba4a4f0910961e6f0519b9?s=80&d=identicon",
+        "web_url": "https://gitlab.com/DouweM"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 6,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/1151",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/2133",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -127,23 +123,24 @@
         "human_total_time_spent": null
       },
       "task_completion_status": {
-        "count": 2,
+        "count": 0,
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": false,
+      "blocking_issues_count": null,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
       "_links": {
-        "self": "https://gitlab.com/api/v4/projects/7603319/issues/1151",
-        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/1151/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/1151/award_emoji",
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2133",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2133/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2133/award_emoji",
         "project": "https://gitlab.com/api/v4/projects/7603319",
         "closed_as_duplicate_of": null
       },
       "references": {
-        "short": "#1151",
-        "relative": "#1151",
-        "full": "meltano/meltano#1151"
+        "short": "#2133",
+        "relative": "#2133",
+        "full": "meltano/meltano#2133"
       },
       "severity": "UNKNOWN",
       "moved_to_id": null,
@@ -162,19 +159,19 @@
       },
       "iteration": null,
       "health_status": null,
-      "epic_issue_id": 805942,
-      "relative_position": -4617
+      "epic_issue_id": 805827,
+      "relative_position": -513
     },
     {
-      "id": 15296074,
-      "iid": 141,
+      "id": 71701762,
+      "iid": 2363,
       "project_id": 7603319,
-      "title": "Installing plugin into dedicated venv fails when Meltano was installed using pipenv",
-      "description": "Meltano relies on creating enviroments within meltano to install packages in isolation. \n\nCreation of virtual envs from within a venv created by virtualenv or pipenv will work when sub env is created with python -m venv venv.\n\nReproduce:\n```bash\n\u276f mkvirtualenv meltano\nUsing base prefix '/usr'\nNew python executable in /home/micael/.venvs/meltano/bin/python\nInstalling setuptools, pip, wheel...done.\nvirtualenvwrapper.user_scripts creating /home/micael/.venvs/meltano/bin/predeactivate\nvirtualenvwrapper.user_scripts creating /home/micael/.venvs/meltano/bin/postdeactivate\nvirtualenvwrapper.user_scripts creating /home/micael/.venvs/meltano/bin/preactivate\nvirtualenvwrapper.user_scripts creating /home/micael/.venvs/meltano/bin/postactivate\nvirtualenvwrapper.user_scripts creating /home/micael/.venvs/meltano/bin/get_env_details\n\n~\n(meltano) \u276f python -m venv sub\n\n~\n(meltano) \u276f tree sub\nsub\n\u251c\u2500\u2500 bin\n\u2502   \u251c\u2500\u2500 activate\n\u2502   \u251c\u2500\u2500 activate.csh\n\u2502   \u251c\u2500\u2500 activate.fish\n\u2502   \u251c\u2500\u2500 python -> /home/micael/.venvs/meltano/bin/python\n\u2502   \u2514\u2500\u2500 python3 -> python\n\u251c\u2500\u2500 include\n\u251c\u2500\u2500 lib\n\u2502   \u2514\u2500\u2500 python3.7\n\u2502       \u2514\u2500\u2500 site-packages\n\u251c\u2500\u2500 lib64 -> lib\n\u2514\u2500\u2500 pyvenv.cfg\n\n6 directories, 6 files\n\n~\n(meltano) \u276f \n```\n\nhttps://gitlab.slack.com/archives/C7HD6Q0RE/p1540559152000400\n\npipenv has the same problem.\n\nNotice that subvenv is missing `pip`",
+      "title": "meltano config <plugin> init",
+      "description": "### Problem to solve\n\nSome plugin configurations require nesting structures that may be too complex to set with `meltano config <plugin> set <name>` or to manually insert into `meltano.yml` by hand.\n\nAn option to initialize the skeleton config in `meltano.yml` could be a convenient way to reduce complexity of setting up complex plugin configurations.\n\n### Target audience\n(For whom are we doing this? Include a persona)\n\nThe target audience would be users who are setting up plugins with complex configurations.\n\n### Further details\n(Include use cases, benefits, and/or goals)\n\nAn example use case would be a user trying to setup the [tap-spreadsheets-anywhere](https://github.com/ets/tap-spreadsheets-anywhere) extractor, which has a complex `tables` array:\n\n```\n{\n    \"tables\": [\n        {\n            \"path\": \"s3://my-s3-bucket\",\n            \"name\": \"target_table_name\",\n            \"pattern\": \"subfolder/common_prefix.*\",\n            \"start_date\": \"2017-05-01T00:00:00Z\",\n            \"key_properties\": [],\n            \"format\": \"csv\",\n            \"delimiter\": \"|\",\n            \"quotechar\": '\"',\n            \"universal_newlines\": false,\n            \"sample_rate\": 10,\n            \"max_sampling_read\": 2000,\n            \"max_sampled_files\": 3,\n            \"prefer_number_vs_integer\": true,\n            \"selected\": true,\n\n            // for any field in the table, you can hardcode the json schema datatype to override\n            // the schema infered through discovery mode. \n            // *Note Meltano users* - the scheam override support delivered in Meltano v1.41.1 is more robust\n            //  and should be preferred to this tap-specific override functionality.  \n            \"schema_overrides\": {\n                \"id\": {\n                    \"type\": [\"null\", \"integer\"],\n                },\n                // if you want the tap to enforce that a field is not nullable, you can do it like so:\n                \"first_name\": {\n                    \"type\": \"string\",\n                }\n            }\n        },\n        {\n            \"path\": \"sftp://username:password@host//path/file\",\n            \"name\": \"another_table_name\",\n            \"pattern\": \"subdir/.*User.*\",\n            \"start_date\": \"2017-05-01T00:00:00Z\",\n            \"key_properties\": [\"id\"],\n            \"format\": \"excel\", \n            // you must specify the worksheet name to pull from in your xls(x) file.\n            \"worksheet_name\": \"Names\"\n        }\n    ]\n}\n```\n\nCurrently, as best I understand, a user would have to either construct that entire tables array in a single string passed to `meltano config tap-spreadsheets-anywhere set tables '{...}', or manually author that structure into their `meltano.yml` file.\n\n### Proposal\n(How are we going to solve the problem? Try to include the user journey)\n\nOne idea proposed here is to add a CLI option to initialize a blank default skeleton for a plugin's configuration (assuming this information is somehow associated with the plugin's discovery metadata?)\n\n`meltano config <plugin> init` or `meltano config <plugin> init <name>`\n\nRunning this command would insert the blank config skeleton into the appropriate location within the `meltano.yml` file, leaving the user with the much simpler task of filling in any necessary blanks.\n\n### What does success look like, and how can we measure that?\n(Define both the success metrics and acceptance criteria. Note that success metrics indicate the desired business outcomes, while acceptance criteria indicate when the solution is working correctly. If there is no way to measure success, link to an issue that will implement a way to measure this)\n\n### Regression test\n(Ensure the feature doesn't cause any regressions)\n- [ ] Write adequate test cases and submit test results\n- [ ] Test results should be reviewed by a person from the team\n\n### Links / references\n\n_Please note that this was taken from GitLab, to be changed accordingly_",
       "state": "closed",
-      "created_at": "2018-10-26T15:44:14.406Z",
-      "updated_at": "2022-05-30T01:52:41.545Z",
-      "closed_at": "2022-05-30T01:52:41.531Z",
+      "created_at": "2020-09-25T17:55:39.036Z",
+      "updated_at": "2022-05-30T06:28:13.071Z",
+      "closed_at": "2022-05-30T06:28:13.046Z",
       "closed_by": {
         "id": 11629953,
         "username": "MeltyBot",
@@ -182,12 +179,14 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
         "Accepting Merge Requests",
-        "kind::Bug",
+        "CLI",
+        "Configuration",
+        "kind::Feature",
         "valuestream::Meltano"
       ],
       "milestone": {
@@ -206,26 +205,27 @@
       },
       "assignees": [],
       "author": {
-        "id": 300478,
-        "username": "jschatz1",
+        "id": 2613,
+        "username": "andrewstewart",
         "public_email": "",
-        "name": "Jacob Schatz",
+        "name": "Andrew Stewart",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/300478/avatar.png",
-        "web_url": "https://gitlab.com/jschatz1"
+        "avatar_url": "https://secure.gravatar.com/avatar/17f9b82fe5ac759b5e3a24e32815e645e09ef7a55e383fcecb2a2b2920e87098?s=80&d=identicon",
+        "web_url": "https://gitlab.com/andrewstewart"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 4,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/141",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/2363",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -233,24 +233,23 @@
         "human_total_time_spent": null
       },
       "task_completion_status": {
-        "count": 0,
+        "count": 2,
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": true,
-      "task_status": "0 of 0 checklist items completed",
+      "blocking_issues_count": null,
+      "has_tasks": false,
       "_links": {
-        "self": "https://gitlab.com/api/v4/projects/7603319/issues/141",
-        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/141/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/141/award_emoji",
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/2363",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/2363/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/2363/award_emoji",
         "project": "https://gitlab.com/api/v4/projects/7603319",
         "closed_as_duplicate_of": null
       },
       "references": {
-        "short": "#141",
-        "relative": "#141",
-        "full": "meltano/meltano#141"
+        "short": "#2363",
+        "relative": "#2363",
+        "full": "meltano/meltano#2363"
       },
       "severity": "UNKNOWN",
       "moved_to_id": null,
@@ -269,8 +268,8 @@
       },
       "iteration": null,
       "health_status": null,
-      "epic_issue_id": 805956,
-      "relative_position": -5130
+      "epic_issue_id": 805815,
+      "relative_position": 0
     }
   ]
 }

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import inspect
+import sys
 import typing as t
 from unittest.mock import Mock, patch
 
@@ -30,6 +31,11 @@ from singer_sdk.testing.templates import (
     StreamTestTemplate,
     TapTestTemplate,
 )
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from collections.abc import Callable
@@ -213,21 +219,25 @@ class TestTapTestClassFactory:
         class CustomTapTest(TapTestTemplate):
             name = "custom_tap_test"
 
+            @override
             def test(self) -> None: ...
 
         class CustomStreamTest(StreamTestTemplate):
             name = "custom_stream_test"
 
+            @override
             def test(self) -> None: ...
 
         class CustomAttributeTestOne(AttributeTestTemplate):
             name = "custom_attribute_test_1"
 
+            @override
             def test(self) -> None: ...
 
         class CustomAttributeTestTwo(AttributeTestTemplate):
             name = "custom_attribute_test_2"
 
+            @override
             def test(self) -> None: ...
 
         custom_suite = SingerTestSuite(

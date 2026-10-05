@@ -2,30 +2,10 @@ name: Test
 
 on:
   pull_request:
-    paths:
-      - "packages/**"
-      - "samples/**"
-      - "singer_sdk/**"
-      - "tests/**"
-      - "noxfile.py"
-      - "pyproject.toml"
-      - "uv.lock"
-      - ".github/workflows/test.yml"
-      - ".github/workflows/resources/requirements.txt"
   push:
     branches:
       - main
       - v*
-    paths:
-      - "packages/**"
-      - "samples/**"
-      - "singer_sdk/**"
-      - "tests/**"
-      - "noxfile.py"
-      - "pyproject.toml"
-      - "uv.lock"
-      - ".github/workflows/test.yml"
-      - ".github/workflows/resources/requirements.txt"
   merge_group:
   workflow_dispatch:
     inputs: {}
@@ -44,8 +24,37 @@ env:
 permissions: {}
 
 jobs:
+  files-changed:
+    name: Detect file changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      runtime: ${{ steps.changes.outputs.runtime }}
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+      id: changes
+      with:
+        filters: |
+          runtime:
+            - "packages/**"
+            - "samples/**"
+            - "singer_sdk/**"
+            - "tests/**"
+            - "noxfile.py"
+            - "pyproject.toml"
+            - "uv.lock"
+            - ".github/workflows/test.yml"
+            - ".github/workflows/resources/requirements.txt"
+
   tests:
     name: "Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }}"
+    needs: files-changed
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || needs.files-changed.outputs.runtime == 'true' }}
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     env:
@@ -70,25 +79,25 @@ jobs:
         - "3.14"
         - "3.15"
         include:
-        - { session: tests,         python-version: "3.14", os: "macos-latest" }
+        - { session: tests,         python-version: "3.15", os: "macos-latest" }
         - { session: tests,         python-version: "3.10", os: "macos-latest" }
-        - { session: tests,         python-version: "3.14", os: "windows-latest" }
+        - { session: tests,         python-version: "3.15", os: "windows-latest" }
         - { session: tests,         python-version: "3.10", os: "windows-latest" }
-        - { session: doctest,       python-version: "3.14", os: "ubuntu-latest" }
-        - { session: deps,          python-version: "3.14", os: "ubuntu-latest" }
+        - { session: doctest,       python-version: "3.15", os: "ubuntu-latest" }
+        - { session: deps,          python-version: "3.15", os: "ubuntu-latest" }
         - { session: test-lowest,   python-version: "3.10", os: "ubuntu-latest" }
         - { session: test-contrib,  python-version: "3.10", os: "ubuntu-latest" }
-        - { session: test-contrib,  python-version: "3.14", os: "ubuntu-latest" }
+        - { session: test-contrib,  python-version: "3.15", os: "ubuntu-latest" }
         - { session: test-packages, python-version: "3.10", os: "ubuntu-latest" }
-        - { session: test-packages, python-version: "3.14", os: "ubuntu-latest" }
+        - { session: test-packages, python-version: "3.15", os: "ubuntu-latest" }
 
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
         persist-credentials: false
 
-    - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+    - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
       with:
         cache-suffix: ${{ matrix.session }}
         python-version: ${{ matrix.python-version }}
@@ -112,6 +121,8 @@ jobs:
 
   typing:
     name: Typing
+    needs: files-changed
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || needs.files-changed.outputs.runtime == 'true' }}
     runs-on: ubuntu-latest
     env:
       NOXFORCEPYTHON: ${{ matrix.python-version }}
@@ -122,13 +133,13 @@ jobs:
       matrix:
         python-version:
         - "3.10"
-        - "3.14"
+        - "3.15"
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           cache-suffix: typing
           python-version: ${{ matrix.python-version }}
@@ -141,12 +152,13 @@ jobs:
 
       - name: Run Nox
         run: |
-          nox --verbose --tags typing
+          nox --verbose --session typing
 
   tests-external:
     name: External Tests
+    needs: files-changed
     runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.head.repo.fork }}
+    if: ${{ !github.event.pull_request.head.repo.fork && (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || needs.files-changed.outputs.runtime == 'true') }}
     env:
       NOXSESSION: test-external
       TAP_GITLAB_AUTH_TOKEN: ${{ secrets.SAMPLE_TAP_GITLAB_AUTH_TOKEN }}
@@ -155,12 +167,12 @@ jobs:
       TAP_GITLAB_START_DATE: "2022-01-01T00:00:00Z"
 
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
         persist-credentials: false
 
-    - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+    - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
       with:
         cache-suffix: external
         version: ${{ env.UV_VERSION }}
@@ -191,7 +203,7 @@ jobs:
         - flag: end-to-end
           nox-session: test-packages
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
 
@@ -200,7 +212,7 @@ jobs:
         pattern: coverage-data-nox_${{ matrix.nox-session }}-*
         merge-multiple: true
 
-    - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+    - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
       with:
         cache-suffix: coverage-${{ matrix.flag }}
         version: ${{ env.UV_VERSION }}
@@ -221,8 +233,26 @@ jobs:
       run: |
         nox -r --no-install -- xml
 
-    - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+    - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
       with:
         fail_ci_if_error: true
         flags: ${{ matrix.flag }}
         token: ${{ secrets.CODECOV_TOKEN }}
+
+  ci:
+    name: CI required checks
+    if: always()
+    needs:
+    - files-changed
+    - tests
+    - typing
+    - tests-external
+    - coverage
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+    - name: Decide whether the needed jobs succeeded or failed
+      uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
+      with:
+        jobs: ${{ toJSON(needs) }}
+        allowed-skips: tests,typing,tests-external,coverage

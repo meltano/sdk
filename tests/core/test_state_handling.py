@@ -143,7 +143,7 @@ def test_null_replication_value(caplog):
     is_sorted = True
     check_sorted = False
 
-    with caplog.at_level(logging.WARNING):
+    with caplog.at_level(logging.DEBUG):
         _state.increment_state(
             stream_state,
             latest_record=latest_record,
@@ -155,7 +155,7 @@ def test_null_replication_value(caplog):
     assert stream_state["replication_key_value"] == "2021-05-17T20:41:16Z", (
         "State should not be updated."
     )
-    assert caplog.records[0].levelname == "WARNING"
+    assert caplog.records[0].levelname == "DEBUG"
     assert "is null" in caplog.records[0].message
 
 

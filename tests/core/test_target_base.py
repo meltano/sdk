@@ -1,6 +1,13 @@
 from __future__ import annotations
 
 import copy
+import datetime as dt
+import decimal
+import io
+import signal
+import sys
+from contextlib import redirect_stdout
+from unittest import mock
 
 import pytest
 
@@ -9,7 +16,13 @@ from singer_sdk.exceptions import (
     RecordsWithoutSchemaException,
 )
 from singer_sdk.helpers.capabilities import PluginCapabilities, TargetCapabilities
+from singer_sdk.singerlib.json import deserialize_json
 from tests.conftest import BatchSinkMock, SQLSinkMock, SQLTargetMock, TargetMock
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 
 def test_get_sink():
@@ -156,6 +169,7 @@ def test_create_sink_override():
             injected["extra"] = extra
 
     class CustomTarget(TargetMock):
+        @override
         def create_sink(self, *, stream_name, schema, key_properties=None):
             return CustomSink(
                 target=self,
@@ -182,6 +196,7 @@ def test_sql_create_sink_override():
             injected["extra"] = extra
 
     class CustomSQLTarget(SQLTargetMock):
+        @override
         def create_sink(self, *, stream_name, schema, key_properties=None):
             return CustomSQLSink(
                 target=self,
@@ -234,3 +249,44 @@ def test_batch_size_rows_and_max_size():
     assert sink_set._batch_size_rows == 100000
     assert sink_set.batch_size_rows == 100000
     assert sink_set.max_size == 100000
+
+
+def test_duplicate_termination_signal_does_not_redrain():
+    """A second signal arriving mid-drain is ignored and sinks drain once."""
+    target = TargetMock()
+    drain_calls: list[dict] = []
+
+    def fake_drain_all(**kwargs) -> None:
+        drain_calls.append(kwargs)
+        # simulate the duplicate signal arriving while the drain is in flight,
+        # e.g. delivered by the OS process group and forwarded by Meltano
+        target._handle_termination(signal.SIGINT, None)
+
+    with (
+        mock.patch.object(target, "drain_all", side_effect=fake_drain_all),
+        pytest.raises(SystemExit) as exc_info,
+    ):
+        target._handle_termination(signal.SIGTERM, None)
+
+    assert exc_info.value.code == 0
+    assert len(drain_calls) == 1
+
+
+def test_target_write_state():
+    target = TargetMock()
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        target._write_state_message(
+            {
+                "integer": 42,
+                "decimal": decimal.Decimal("3.14"),
+                "datetime": dt.datetime(2021, 1, 1, tzinfo=dt.timezone.utc),
+            },
+        )
+
+    buf.seek(0)
+    assert deserialize_json(buf.read()) == {
+        "integer": 42,
+        "decimal": decimal.Decimal("3.14"),
+        "datetime": "2021-01-01T00:00:00+00:00",
+    }

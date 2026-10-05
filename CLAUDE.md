@@ -16,7 +16,7 @@ uv sync --all-groups --all-extras --all-packages  # Full development environment
 nox -s tests              # Run core tests
 nox -s test-contrib       # Run contrib (experimental) tests
 nox -s test-packages      # Run package integration tests
-nox -t typing             # Type checking with mypy
+nox -s typing             # Type checking
 ```
 
 ### Linting & Formatting

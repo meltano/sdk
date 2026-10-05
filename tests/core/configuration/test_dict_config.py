@@ -2,12 +2,17 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
 import singer_sdk.typing as th
-from singer_sdk.configuration._dict_config import parse_environment_config
+from singer_sdk.configuration._dict_config import (
+    merge_missing_config_jsonschema,
+    parse_environment_config,
+)
 
 CONFIG_JSONSCHEMA = th.PropertiesList(
     th.Property("prop1", th.StringType, required=True),
@@ -44,6 +49,7 @@ def config_file2(tmpdir) -> str:
     return filepath
 
 
+@mock.patch.dict(os.environ, {}, clear=True)
 def test_get_env_var_config(
     monkeypatch: pytest.MonkeyPatch,
     subtests: pytest.Subtests,
@@ -116,13 +122,107 @@ def test_get_env_var_config(
         assert not set.intersection(missing_props, no_env_config)
 
 
-def test_get_dotenv_config(tmp_path: Path):
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_get_dotenv_config(tmp_path: Path, request: pytest.FixtureRequest):
+    value = request.node.name
     dotenv = tmp_path / ".env"
-    dotenv.write_text("PLUGIN_TEST_PROP1=hello\n")
+    dotenv.write_text(f"PLUGIN_TEST_PROP1={value}\n")
     dotenv_config = parse_environment_config(
         CONFIG_JSONSCHEMA,
         "PLUGIN_TEST_",
         dotenv_path=dotenv,
     )
     assert dotenv_config
-    assert dotenv_config["prop1"] == "hello"
+    assert dotenv_config["prop1"] == value
+
+
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_get_dotenv_config_discover_file_cwd(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    request: pytest.FixtureRequest,
+):
+    value = request.node.name
+    dotenv = tmp_path / ".env"
+    dotenv.write_text(f"PLUGIN_TEST_PROP1={value}\n")
+
+    # Change to the temporary directory
+    monkeypatch.chdir(tmp_path)
+    dotenv_config = parse_environment_config(
+        CONFIG_JSONSCHEMA,
+        "PLUGIN_TEST_",
+        dotenv_path=None,  # Let it discover the .env file
+    )
+    assert dotenv_config
+    assert dotenv_config["prop1"] == value
+
+
+@pytest.mark.parametrize(
+    "source,target,expected",
+    [
+        pytest.param({}, {}, {"properties": {}}, id="both-empty"),
+        pytest.param(
+            {"properties": {"a": {"type": "string"}}},
+            {},
+            {"properties": {"a": {"type": "string"}}},
+            id="adds-missing-property",
+        ),
+        pytest.param(
+            {"properties": {"a": {"type": "string"}}},
+            {"properties": {"a": {"type": "integer"}}},
+            {"properties": {"a": {"type": "integer"}}},
+            id="does-not-override-existing-property",
+        ),
+        pytest.param(
+            {"properties": {"a": {}}, "required": ["a"]},
+            {"properties": {}},
+            {"properties": {"a": {}}, "required": ["a"]},
+            id="required-from-source",
+        ),
+        pytest.param(
+            {"properties": {"a": {}}},
+            {"properties": {"b": {}}, "required": ["b"]},
+            {"properties": {"a": {}, "b": {}}, "required": ["b"]},
+            id="required-kept-from-target",
+        ),
+        pytest.param(
+            {"properties": {"b": {}, "a": {}}, "required": ["b", "a"]},
+            {"properties": {"c": {}}, "required": ["c", "a"]},
+            {
+                "properties": {"a": {}, "b": {}, "c": {}},
+                "required": ["a", "b", "c"],
+            },
+            id="required-union-sorted-deduplicated",
+        ),
+        pytest.param(
+            {"properties": {"a": {}}},
+            {"properties": {"a": {}}},
+            {"properties": {"a": {}}},
+            id="no-required-key-added-when-none",
+        ),
+        pytest.param(
+            {"required": ["a"]},
+            {"properties": {}},
+            {"properties": {}, "required": ["a"]},
+            id="required-without-source-properties",
+        ),
+    ],
+)
+def test_merge_missing_config_jsonschema(
+    source: dict,
+    target: dict,
+    expected: dict,
+):
+    merge_missing_config_jsonschema(source, target)
+    assert target == expected
+
+
+def test_merge_missing_config_jsonschema_idempotent():
+    source = {"properties": {"a": {}, "b": {}}, "required": ["b"]}
+    target = {"properties": {"c": {}}, "required": ["c"]}
+
+    merge_missing_config_jsonschema(source, target)
+    first = json.loads(json.dumps(target))
+    merge_missing_config_jsonschema(source, target)
+
+    assert target == first

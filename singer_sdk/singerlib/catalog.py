@@ -4,18 +4,36 @@ from __future__ import annotations
 
 import enum
 import logging
+import sys
 import typing as t
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 
 from singer_sdk.singerlib.schema import Schema
 
+if sys.version_info >= (3, 12):
+    from typing import override  # ruff:ignore[banned-import-from]
+else:
+    from typing_extensions import override
+
+
 if t.TYPE_CHECKING:
-    import sys
+    from collections.abc import Iterable, Mapping
+
+    from singer_sdk.singerlib.types import KeyProperties
 
     if sys.version_info >= (3, 11):
         from typing import Self  # noqa: ICN003
     else:
         from typing_extensions import Self
+
+__all__ = [
+    "Catalog",
+    "CatalogEntry",
+    "Metadata",
+    "MetadataMapping",
+    "SelectionMask",
+    "StreamMetadata",
+]
 
 Breadcrumb: t.TypeAlias = tuple[str, ...]
 
@@ -45,7 +63,7 @@ class SelectionMask(dict[Breadcrumb, bool]):  # noqa: FURB189
         return self[breadcrumb[:-2]] if len(breadcrumb) >= 2 else True  # noqa: PLR2004
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, repr=False, kw_only=True)
 class Metadata:
     """Base stream or property metadata."""
 
@@ -61,7 +79,7 @@ class Metadata:
     selected_by_default: bool | None = None
 
     @classmethod
-    def from_dict(cls, value: dict[str, t.Any]) -> Self:
+    def from_dict(cls, value: Mapping[str, t.Any]) -> Self:
         """Parse metadata dictionary.
 
         Args:
@@ -93,11 +111,11 @@ class Metadata:
         return result
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, repr=False, kw_only=True)
 class StreamMetadata(Metadata):
     """Stream metadata."""
 
-    table_key_properties: t.Sequence[str] | None = None
+    table_key_properties: KeyProperties | None = None
     replication_key: str | None = None
     forced_replication_method: str | None = None
     valid_replication_keys: list[str] | None = None
@@ -111,10 +129,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
     """Stream metadata mapping."""
 
     @classmethod
-    def from_iterable(
-        cls: type[MetadataMapping],
-        iterable: t.Iterable[dict[str, t.Any]],
-    ) -> MetadataMapping:
+    def from_iterable(cls: type[Self], iterable: t.Iterable[dict[str, t.Any]]) -> Self:
         """Create a metadata mapping from an iterable of metadata dictionaries.
 
         Args:
@@ -156,22 +171,32 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         self[breadcrumb] = Metadata() if breadcrumb else StreamMetadata()
         return self[breadcrumb]
 
+    @t.overload
+    def __getitem__(self, key: tuple[()], /) -> StreamMetadata: ...
+
+    @t.overload
+    def __getitem__(self, key: Breadcrumb, /) -> Metadata: ...
+
+    @override
+    def __getitem__(self, key: Breadcrumb, /) -> AnyMetadata:
+        return super().__getitem__(key)
+
     @property
     def root(self) -> StreamMetadata:
         """Stream (root) metadata from this mapping."""
-        return self[()]  # type: ignore[return-value]  # ty:ignore[invalid-return-type]
+        return self[()]
 
     @classmethod
     def get_standard_metadata(
-        cls: type[MetadataMapping],
+        cls: type[Self],
         *,
-        schema: dict[str, t.Any] | None = None,
+        schema: Mapping[str, t.Any] | None = None,
         schema_name: str | None = None,
-        key_properties: t.Sequence[str] | None = None,
+        key_properties: KeyProperties | None = None,
         valid_replication_keys: list[str] | None = None,
         replication_method: str | None = None,
         selected_by_default: bool | None = None,
-    ) -> MetadataMapping:
+    ) -> Self:
         """Get default metadata for a stream.
 
         Args:
@@ -197,7 +222,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         )
 
         def _add_subfield_metadata(
-            properties: dict,
+            properties: Mapping,
             breadcrumb: Breadcrumb = (),
         ) -> None:
             """Add breadcrumbs and metadata for subfields."""
@@ -302,15 +327,15 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         return parent_value or False
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, repr=False)
 class CatalogEntry:
     """Singer catalog entry."""
 
     tap_stream_id: str
-    metadata: MetadataMapping
-    schema: Schema
+    metadata: MetadataMapping = field(default_factory=MetadataMapping)
+    schema: Schema = field(default_factory=Schema)
     stream: str | None = None
-    key_properties: t.Sequence[str] | None = None
+    key_properties: KeyProperties | None = None
     replication_key: str | None = None
     is_view: bool | None = None
     database: str | None = None
@@ -320,7 +345,7 @@ class CatalogEntry:
     replication_method: str | None = None
 
     @classmethod
-    def from_dict(cls: type[CatalogEntry], stream: dict[str, t.Any]) -> CatalogEntry:
+    def from_dict(cls: type[Self], stream: Mapping[str, t.Any]) -> Self:
         """Create a catalog entry from a dictionary.
 
         Args:
@@ -344,15 +369,18 @@ class CatalogEntry:
             replication_method=stream.get("replication_method"),
         )
 
-    def to_dict(self) -> dict[str, t.Any]:  # noqa: C901
+    def to_dict(self) -> dict[str, t.Any]:
         """Convert entry to a dictionary.
 
         Returns:
             A dictionary representation of the catalog entry.
         """
-        result: dict[str, t.Any] = {}
-        if self.tap_stream_id:
-            result["tap_stream_id"] = self.tap_stream_id
+        result: dict[str, t.Any] = {
+            "tap_stream_id": self.tap_stream_id,
+            "schema": self.schema.to_dict(),
+            "metadata": self.metadata.to_list(),
+        }
+
         if self.database:
             result["database_name"] = self.database
         if self.table:
@@ -363,9 +391,6 @@ class CatalogEntry:
             result["replication_method"] = self.replication_method
         if self.key_properties is not None:
             result["key_properties"] = self.key_properties
-        if self.schema is not None:
-            schema = self.schema.to_dict()  # pylint: disable=no-member
-            result["schema"] = schema
         if self.is_view is not None:
             result["is_view"] = self.is_view
         if self.stream is not None:
@@ -374,8 +399,6 @@ class CatalogEntry:
             result["row_count"] = self.row_count
         if self.stream_alias is not None:
             result["stream_alias"] = self.stream_alias
-        if self.metadata is not None:
-            result["metadata"] = self.metadata.to_list()
         return result
 
 
@@ -383,10 +406,7 @@ class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
     """Singer catalog mapping of stream entries."""
 
     @classmethod
-    def from_dict(
-        cls: type[Catalog],
-        data: dict[str, list[dict[str, t.Any]]],
-    ) -> Catalog:
+    def from_dict(cls: type[Self], data: Mapping[str, list[dict[str, t.Any]]]) -> Self:
         """Create a catalog from a dictionary.
 
         Args:
@@ -397,8 +417,22 @@ class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
         """
         instance = cls()
         for stream in data.get("streams", []):
-            entry = CatalogEntry.from_dict(stream)
-            instance[entry.tap_stream_id] = entry
+            instance.add_stream(CatalogEntry.from_dict(stream))
+        return instance
+
+    @classmethod
+    def from_entries(cls: type[Self], entries: Iterable[CatalogEntry]) -> Self:
+        """Create a catalog from an iterable of stream entries.
+
+        Args:
+            entries: The catalog entries.
+
+        Returns:
+            A catalog.
+        """
+        instance = cls()
+        for entry in entries:
+            instance.add_stream(entry)
         return instance
 
     def to_dict(self) -> dict[str, t.Any]:
