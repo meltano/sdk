@@ -32,6 +32,9 @@ else:
 
 # Default JSON Schema to support config for built-in capabilities:
 
+SQL_TAP_DISCOVER_VIEWS_DEFAULT = True
+SQL_TAP_DISCOVER_MATERIALIZED_VIEWS_DEFAULT = True
+
 STREAM_MAPS_CONFIG = PropertiesList(
     Property(
         "stream_maps",
@@ -239,6 +242,24 @@ SQL_TAP_USE_SINGER_DECIMAL = PropertiesList(
             "Whether to use use strings with `x-singer.decimal` format for "
             "decimals in the discovered schema. "
             "This is useful to avoid precision loss when working with large numbers."
+        ),
+    ),
+).to_dict()
+SQL_TAP_DISCOVERY_CONFIG = PropertiesList(
+    Property(
+        "discover_views",
+        BooleanType,
+        default=SQL_TAP_DISCOVER_VIEWS_DEFAULT,
+        title="Discover Views",
+        description="Whether to include database views during SQL tap discovery.",
+    ),
+    Property(
+        "discover_materialized_views",
+        BooleanType,
+        default=SQL_TAP_DISCOVER_MATERIALIZED_VIEWS_DEFAULT,
+        title="Discover Materialized Views",
+        description=(
+            "Whether to include database materialized views during SQL tap discovery."
         ),
     ),
 ).to_dict()

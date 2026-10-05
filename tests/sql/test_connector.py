@@ -12,10 +12,11 @@ import sqlalchemy.exc
 import sqlalchemy.schema
 import sqlalchemy.types
 from sqlalchemy.dialects import registry, sqlite
+from sqlalchemy.engine import reflection
 from sqlalchemy.engine.default import DefaultDialect
 
 from singer_sdk.exceptions import ConfigValidationError
-from singer_sdk.sql import SQLConnector
+from singer_sdk.sql import SQLConnector, SQLStream, SQLTap
 from singer_sdk.sql.connector import (
     FullyQualifiedName,
     JSONSchemaToSQL,
@@ -62,6 +63,56 @@ class DummySQLConnector(SQLConnector):
                 "column_type": column_type,
             },
         )
+
+
+class SpySQLConnector(SQLConnector):
+    """SQL connector that captures discovery options."""
+
+    discovery_kwargs: t.ClassVar[dict[str, t.Any]] = {}
+
+    def discover_catalog_entries(self, **kwargs: t.Any) -> list[dict]:
+        """Capture discovery kwargs and return an empty catalog."""
+        self.__class__.discovery_kwargs = kwargs
+        return []
+
+
+class LegacyDiscoverySQLConnector(SQLConnector):
+    """SQL connector with a legacy discovery signature."""
+
+    exclude_schemas: t.ClassVar[t.Sequence[str] | None] = None
+
+    def discover_catalog_entries(
+        self,
+        *,
+        exclude_schemas: t.Sequence[str] = (),
+    ) -> list[dict]:
+        self.__class__.exclude_schemas = exclude_schemas
+        return []
+
+
+class SpySQLStream(SQLStream):
+    connector_class = SpySQLConnector
+
+
+class LegacyDiscoverySQLStream(SQLStream):
+    connector_class = LegacyDiscoverySQLConnector
+
+
+class SpySQLTap(SQLTap):
+    name = "spy-sql-tap"
+    default_stream_class = SpySQLStream
+
+
+class LegacyDiscoverySQLTap(SQLTap):
+    name = "legacy-discovery-sql-tap"
+    exclude_schemas: t.ClassVar[list[str]] = ["ignored_schema"]
+    default_stream_class = LegacyDiscoverySQLStream
+
+
+@pytest.fixture(autouse=True)
+def reset_sql_discovery_spies() -> None:
+    SpySQLConnector.discovery_kwargs = {}
+    LegacyDiscoverySQLConnector.exclude_schemas = None
 
 
 class TestConnectorSQL:  # noqa: PLR0904
@@ -607,6 +658,92 @@ class TestDummySQLConnector:
             reflect_indices=False,
         )
         assert len(entries) == expected_streams
+
+    def test_discover_catalog_entries_can_exclude_views(
+        self,
+        connector: DummySQLConnector,
+    ):
+        with connector._engine.connect() as conn, conn.begin():
+            conn.execute(
+                sqlalchemy.text(
+                    "CREATE TABLE test_table (id INTEGER PRIMARY KEY, name STRING)",
+                )
+            )
+            conn.execute(
+                sqlalchemy.text(
+                    "CREATE VIEW test_view AS SELECT id, name FROM test_table",
+                )
+            )
+
+        entries = connector.discover_catalog_entries(
+            discover_views=False,
+            reflect_indices=False,
+        )
+
+        assert {entry["table_name"] for entry in entries} == {"test_table"}
+
+    def test_discover_catalog_entries_can_filter_materialized_views(
+        self,
+        connector: DummySQLConnector,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        inspected = mock.Mock()
+        inspected.get_multi_pk_constraint.return_value = {}
+        inspected.get_multi_indexes.return_value = {}
+        inspected.get_multi_columns.return_value = {}
+        monkeypatch.setattr(sqlalchemy, "inspect", lambda _engine: inspected)
+        monkeypatch.setattr(
+            connector,
+            "get_schema_names",
+            lambda *_args: ["main"],
+        )
+
+        connector.discover_catalog_entries(
+            discover_views=False,
+            discover_materialized_views=True,
+            reflect_indices=False,
+        )
+
+        inspected.get_multi_columns.assert_has_calls(
+            [
+                mock.call(schema="main", kind=reflection.ObjectKind.TABLE),
+                mock.call(
+                    schema="main",
+                    kind=reflection.ObjectKind.MATERIALIZED_VIEW,
+                ),
+            ],
+        )
+        assert inspected.get_multi_columns.call_count == 2
+
+
+def test_sql_tap_passes_discovery_settings_from_config():
+    tap = SpySQLTap(
+        config={
+            "sqlalchemy_url": "sqlite:///",
+            "discover_views": False,
+            "discover_materialized_views": True,
+        },
+    )
+
+    assert tap.catalog_dict == {"streams": []}
+    assert SpySQLConnector.discovery_kwargs == {
+        "exclude_schemas": [],
+        "discover_views": False,
+        "discover_materialized_views": True,
+    }
+
+
+def test_sql_tap_supports_legacy_discovery_connector_signature():
+    tap = LegacyDiscoverySQLTap(
+        config={
+            "sqlalchemy_url": "sqlite:///",
+            "discover_views": False,
+            "discover_materialized_views": False,
+        },
+    )
+
+    assert tap.catalog_dict == {"streams": []}
+    assert LegacyDiscoverySQLConnector.exclude_schemas == ["ignored_schema"]
 
 
 def test_adapter_without_json_serde():
