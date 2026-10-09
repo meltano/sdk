@@ -7,7 +7,7 @@ import sys
 {% if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from functools import cached_property
 {% endif -%}
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any
 
 {% if cookiecutter.auth_method  == "API Key" -%}
 from singer_sdk import SchemaDirectory, StreamSchema
@@ -85,7 +85,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     # Update this value if necessary or override `get_new_paginator`.
     next_page_token_jsonpath = "$.next_page"  # noqa: S105
 
-    schema: ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
+    schema = StreamSchema(SCHEMAS_DIR)
 
     @override
     @property
