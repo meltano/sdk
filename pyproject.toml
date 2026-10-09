@@ -493,9 +493,9 @@ meltano-tap-sqlite = { workspace = true }
 meltano-target-csv = { workspace = true }
 meltano-target-parquet = { workspace = true }
 meltano-target-sqlite = { workspace = true }
-pyarrow = [
-    { index = "scientific-python-nightly-wheels", marker = "python_version >= '3.15'" },
-]
+# pyarrow = [
+#     { index = "scientific-python-nightly-wheels", marker = "python_version >= '3.16'" },
+# ]
 
 [tool.uv.workspace]
 members = [
