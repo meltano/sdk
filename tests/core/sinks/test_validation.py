@@ -17,6 +17,11 @@ from singer_sdk.sinks.core import (
 )
 from tests.conftest import BatchSinkMock, TargetMock
 
+if sys.version_info >= (3, 12):
+    from typing import override  # ruff: ignore[banned-import-from]
+else:
+    from typing_extensions import override
+
 
 class FastJSONSchemaValidator(BaseJSONSchemaValidator):
     def __init__(self, schema: dict[str, t.Any]) -> None:
@@ -27,6 +32,7 @@ class FastJSONSchemaValidator(BaseJSONSchemaValidator):
             error_message = "Schema Validation Error"
             raise InvalidJSONSchema(error_message) from e
 
+    @override
     def validate(self, record: dict):
         try:
             self.validator(record)
@@ -36,6 +42,7 @@ class FastJSONSchemaValidator(BaseJSONSchemaValidator):
 
 
 class FastJSONSchemaSink(BatchSinkMock):
+    @override
     def get_validator(self) -> BaseJSONSchemaValidator | None:
         return FastJSONSchemaValidator(self.schema)
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import decimal
 import io
 import json
+import typing as t
 from contextlib import nullcontext, redirect_stdout
 from textwrap import dedent
 
@@ -17,7 +18,7 @@ from singer_sdk.singerlib.encoding.simple import (
 )
 from singer_sdk.singerlib.exceptions import InvalidInputLine
 
-CALLBACKS = {
+CALLBACKS: dict[str, t.Callable[[dict], None]] = {
     "RECORD": lambda _: None,
     "SCHEMA": lambda _: None,
     "STATE": lambda _: None,

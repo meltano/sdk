@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import sys
 import typing as t
 from textwrap import dedent
 
@@ -60,6 +61,11 @@ from singer_sdk.typing import (
     UUIDType,
 )
 
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
+
 if t.TYPE_CHECKING:
     from pathlib import Path
 
@@ -91,6 +97,7 @@ class ConfigTestTap(Tap):
         Property("batch_size", IntegerType, default=-1),
     ).to_dict()
 
+    @override
     def discover_streams(self) -> list[Stream]:
         return []
 
@@ -120,7 +127,12 @@ def test_to_json():
     assert schema.to_json(indent=4) == dedent(
         """\
         {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "required": [
+                "test_property"
+            ],
+            "additionalProperties": false,
             "properties": {
                 "test_property": {
                     "type": [
@@ -139,6 +151,7 @@ def test_to_json():
                     "allOf": [
                         {
                             "type": "object",
+                            "additionalProperties": true,
                             "properties": {
                                 "test_property_4": {
                                     "type": [
@@ -146,11 +159,11 @@ def test_to_json():
                                         "null"
                                     ]
                                 }
-                            },
-                            "additionalProperties": true
+                            }
                         },
                         {
                             "type": "object",
+                            "additionalProperties": true,
                             "properties": {
                                 "test_property_5": {
                                     "type": [
@@ -158,17 +171,11 @@ def test_to_json():
                                         "null"
                                     ]
                                 }
-                            },
-                            "additionalProperties": true
+                            }
                         }
                     ]
                 }
-            },
-            "required": [
-                "test_property"
-            ],
-            "additionalProperties": false,
-            "$schema": "https://json-schema.org/draft/2020-12/schema"
+            }
         }""",
     )
 

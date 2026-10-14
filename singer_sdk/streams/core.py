@@ -48,6 +48,7 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
     from singer_sdk.mapper import StreamMap
     from singer_sdk.singerlib.catalog import StreamMetadata
+    from singer_sdk.singerlib.types import KeyProperties
     from singer_sdk.tap_base import Tap
 
 
@@ -147,7 +148,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
-        self._primary_keys: t.Sequence[str] | None = None
+        self._primary_keys: KeyProperties | None = None
         self._state_partitioning_keys: t.Sequence[str] | None = None
         self._schema_filepath: Path | Traversable | None = None
         self._metadata: singer.MetadataMapping | None = None
@@ -519,12 +520,12 @@ class Stream(abc.ABC):  # noqa: PLR0904
         return self._schema
 
     @property
-    def primary_keys(self) -> t.Sequence[str]:
+    def primary_keys(self) -> KeyProperties:
         """Primary keys."""
         return self._primary_keys or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: t.Sequence[str]) -> None:
+    def primary_keys(self, new_value: KeyProperties) -> None:
         """Set primary key(s) for the stream.
 
         Args:
@@ -1225,8 +1226,13 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
                     record_index += 1
 
-                if current_context == state_partition_context:
-                    # Finalize per-partition state only if 1:1 with context
+                if (
+                    current_context == state_partition_context
+                    and self.replication_method != REPLICATION_FULL_TABLE
+                ):
+                    # Finalize per-partition state only if 1:1 with context.
+                    # FULL_TABLE streams never write bookmarks, so skip creating
+                    # an empty state entry for the partition.
                     state = self.get_context_state(current_context)
                     self._finalize_state(state)
 

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import datetime
+import io
 import json
 import typing as t
+from contextlib import redirect_stdout
 
 import pytest
 import time_machine
@@ -19,6 +21,8 @@ from singer_sdk.testing import (
 
 if t.TYPE_CHECKING:
     from pathlib import Path
+
+    from pytest_snapshot.plugin import Snapshot
 
     from singer_sdk import SQLStream
     from singer_sdk.tap_base import SQLTap
@@ -155,3 +159,19 @@ def test_sqlite_state(sqlite_sample_tap_state_messages):
         for message in sqlite_sample_tap_state_messages
         for bookmark in message["value"]["bookmarks"].values()
     )
+
+
+@pytest.mark.snapshot
+def test_about_info(snapshot: Snapshot):
+    """Test the default about info."""
+
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        SQLiteTap.print_about(output_format="json")
+
+    info = json.loads(buf.getvalue())
+    # Environment-dependent values
+    info["version"] = "<version>"
+    info["sdk_version"] = "<sdk_version>"
+
+    snapshot.assert_match(json.dumps(info, indent=2) + "\n", "about.json")

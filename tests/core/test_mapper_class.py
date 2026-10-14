@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import io
 import json
+import sys
 import typing as t
-from contextlib import nullcontext
+from contextlib import nullcontext, redirect_stdout
 
 import pytest
 from click.testing import CliRunner
@@ -11,6 +13,15 @@ import singer_sdk.singerlib as singer
 from singer_sdk import typing as th
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.mapper_base import InlineMapper
+
+if sys.version_info >= (3, 12):
+    from typing import override  # ruff: ignore[banned-import-from]
+else:
+    from typing_extensions import override
+
+
+if t.TYPE_CHECKING:
+    from pytest_snapshot.plugin import Snapshot
 
 
 class DummyInlineMapper(InlineMapper):
@@ -43,6 +54,7 @@ class DummyInlineMapper(InlineMapper):
         ),
     ).to_dict()
 
+    @override
     def map_schema_message(
         self,
         message_dict: dict,
@@ -53,6 +65,7 @@ class DummyInlineMapper(InlineMapper):
             key_properties=message_dict.get("key_properties", []),
         )
 
+    @override
     def map_record_message(
         self,
         message_dict: dict,
@@ -62,6 +75,7 @@ class DummyInlineMapper(InlineMapper):
             record=message_dict["record"],
         )
 
+    @override
     def map_state_message(
         self,
         message_dict: dict,
@@ -70,6 +84,7 @@ class DummyInlineMapper(InlineMapper):
             value=message_dict["value"],
         )
 
+    @override
     def map_activate_version_message(
         self,
         message_dict: dict,
@@ -125,3 +140,26 @@ def test_cli_config_validation(tmp_path, caplog: pytest.LogCaptureFixture):
     assert result.exit_code == 1
     assert not result.stdout
     assert "'stream_maps' is a required property" in caplog.text
+
+
+@pytest.mark.snapshot
+def test_default_info(snapshot: Snapshot):
+    """Test the default about info."""
+
+    class BasicMapper(InlineMapper):
+        """A basic mapper."""
+
+        name = "mapper-example"
+        package_name = "singer-sdk"
+
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        BasicMapper.print_about(output_format="json")
+
+    info = json.loads(buf.getvalue())
+    # Environment-dependent values
+    info["version"] = "<version>"
+    info["sdk_version"] = "<sdk_version>"
+    info["supported_python_versions"] = ["<python_version>"]
+
+    snapshot.assert_match(json.dumps(info, indent=2) + "\n", "default_info.json")

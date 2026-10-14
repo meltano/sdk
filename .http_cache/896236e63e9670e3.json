@@ -1,51 +1,45 @@
 {
-  "cookies": {
-    "__cf_bm": "gp04FEELG1_YpHut_QytuU.N5RVkFx2BGQOz.vi9PeQ-1763701831-1.0.1.1-l2LYmpmacg81ii_e.OLVk7k1fHx4SVdqLK86pBNXfgsZQTQSyrY728uob_MOIr64inr6k20O.7Il6T7SrkqmlnFH4JTKb68o0lSGa2Eyrc0",
-    "_cfuvid": "IJ6FTcarr5kw4rF9Pm2L2a1TaMzinF0M3aNiKgqevZY-1763701831938-0.0.1.1-604800000"
-  },
-  "created_at": "2025-11-21T05:10:31.838181+00:00",
-  "elapsed": 0.506259,
+  "created_at": "2026-09-24T21:33:16.674617+00:00",
+  "elapsed": 0.685352,
   "encoding": "utf-8",
   "headers": {
-    "CF-Cache-Status": "MISS",
-    "CF-Ray": "9a1dae5f3fe2efc4-QRO",
+    "CF-Cache-Status": "BYPASS",
+    "CF-Ray": "a404e8107aa33863-QRO",
     "Cache-Control": "max-age=0, private, must-revalidate",
     "Connection": "keep-alive",
     "Content-Encoding": "gzip",
     "Content-Type": "application/json",
-    "Date": "Fri, 21 Nov 2025 05:10:31 GMT",
-    "ETag": "W/\"5cd4bc4ae902c9879f96241ef6b46967\"",
+    "Date": "Thu, 24 Sep 2026 21:33:16 GMT",
+    "ETag": "W/\"ac0a212fd4492735792067751ec14829\"",
     "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/108/issues?epic_iid=108&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/108/issues?epic_iid=108&id=2524164&page=1&per_page=20>; rel=\"last\"",
     "Server": "cloudflare",
-    "Set-Cookie": "__cf_bm=gp04FEELG1_YpHut_QytuU.N5RVkFx2BGQOz.vi9PeQ-1763701831-1.0.1.1-l2LYmpmacg81ii_e.OLVk7k1fHx4SVdqLK86pBNXfgsZQTQSyrY728uob_MOIr64inr6k20O.7Il6T7SrkqmlnFH4JTKb68o0lSGa2Eyrc0; path=/; expires=Fri, 21-Nov-25 05:40:31 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=IJ6FTcarr5kw4rF9Pm2L2a1TaMzinF0M3aNiKgqevZY-1763701831938-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
     "Strict-Transport-Security": "max-age=31536000",
     "Transfer-Encoding": "chunked",
-    "Vary": "Origin, Accept-Encoding",
+    "Vary": "Origin",
     "content-security-policy": "default-src 'none'",
-    "gitlab-lb": "haproxy-main-17-lb-gprd",
-    "gitlab-sv": "api-gke-us-east1-c",
+    "gitlab-lb": "haproxy-main-18-lb-gprd",
+    "gitlab-sv": "api-gke-us-east1-d",
     "nel": "{\"max_age\": 0}",
     "ratelimit-limit": "2000",
     "ratelimit-name": "throttle_authenticated_api",
-    "ratelimit-observed": "44",
-    "ratelimit-remaining": "1956",
-    "ratelimit-reset": "1763701860",
+    "ratelimit-observed": "48",
+    "ratelimit-remaining": "1952",
+    "ratelimit-reset": "1790285640",
     "referrer-policy": "strict-origin-when-cross-origin",
     "x-content-type-options": "nosniff",
     "x-frame-options": "SAMEORIGIN",
-    "x-gitlab-meta": "{\"correlation_id\":\"9a1dae5f5382efc4-ATL\",\"version\":\"1\"}",
+    "x-gitlab-meta": "{\"correlation_id\":\"a404e8107aa33863-QRO\",\"version\":\"1\"}",
     "x-next-page": "",
     "x-page": "1",
     "x-per-page": "20",
     "x-prev-page": "",
-    "x-request-id": "9a1dae5f5382efc4-ATL",
-    "x-runtime": "0.280529",
+    "x-request-id": "a404e8107aa33863-QRO",
+    "x-runtime": "0.298761",
     "x-total": "11",
     "x-total-pages": "1"
   },
   "reason": "OK",
   "request": {
-    "body": "",
     "headers": {
       "Accept": "*/*",
       "Accept-Encoding": "gzip, deflate, zstd",
@@ -76,7 +70,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "labels": [
@@ -112,14 +106,15 @@
       "type": "ISSUE",
       "assignee": null,
       "user_notes_count": 0,
-      "merge_requests_count": 1,
+      "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/385",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/385",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -131,7 +126,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -158,7 +153,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2768</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -182,7 +177,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "labels": [
@@ -218,14 +213,15 @@
       "type": "ISSUE",
       "assignee": null,
       "user_notes_count": 0,
-      "merge_requests_count": 1,
+      "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/376",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/376",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -237,7 +233,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -264,7 +260,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2768</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -288,7 +284,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -317,20 +313,21 @@
         "name": "Derek Visch",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png?v=1790279496",
         "web_url": "https://gitlab.com/vischous"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/374",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/374",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -342,7 +339,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -369,7 +366,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2768</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -393,7 +390,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -429,15 +426,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/373",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/373",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -449,7 +447,7 @@
         "completed_count": 0
       },
       "weight": 2,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -476,118 +474,12 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2768</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
       "epic_issue_id": 1343202,
       "relative_position": -5643
-    },
-    {
-      "id": 108023469,
-      "iid": 372,
-      "project_id": 22672923,
-      "title": "SQL Targets: Processing of activate_version record fails if table does not yet exist",
-      "description": "## Summary\nSQLSink.activate_version assumes that the destination table exists. The first time the pipeline is executed this may not be true, however, since the table will not be created until the first process_batch call.\n\n\n## Steps to reproduce\nCreate a pipeline where the tap produces activate_version records (I used tap-mysql) and the target relies on the SDK to handle activation version records. I discovered this while developing my own target but I was able to reproduce it using the [SDK-based version of the SQLite target](https://github.com/MeltanoLabs/target-sqlite/tree/port-to-sdk).\n\n\n## What is the current bug behavior?\nThe pipeline will fail with a 'table does not exist' error caused by the DELETE FROM that SQLSink.activate_version executes.\n\n\n## What is the expected correct behavior?\nSQLSink.activate_version should do nothing if the table doesn't exist.\n\n\n## Possible fixes\nMR incoming",
-      "state": "closed",
-      "created_at": "2022-05-04T16:08:04.953Z",
-      "updated_at": "2022-05-16T15:13:21.245Z",
-      "closed_at": "2022-05-16T15:13:21.204Z",
-      "closed_by": {
-        "id": 1134865,
-        "username": "edgarrmondragon",
-        "public_email": "edgar@meltano.com",
-        "name": "Edgar R. Mondrag\u00f3n",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
-        "web_url": "https://gitlab.com/edgarrmondragon"
-      },
-      "labels": [
-        "Accepting Merge Requests",
-        "kind::Bug",
-        "valuestream::SDK"
-      ],
-      "milestone": {
-        "id": 797629,
-        "iid": 42,
-        "group_id": 2524164,
-        "title": "Backlog",
-        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
-        "state": "active",
-        "created_at": "2019-02-21T14:50:28.741Z",
-        "updated_at": "2019-02-21T14:50:28.741Z",
-        "due_date": null,
-        "start_date": "2019-02-25",
-        "expired": false,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
-      },
-      "assignees": [],
-      "author": {
-        "id": 11028865,
-        "username": "tbriggs2",
-        "public_email": null,
-        "name": "Thomas Briggs",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://secure.gravatar.com/avatar/0333fed181cc72b244e53f28299a2fbd4c00d3e16ae323c6771a12d3d442917a?s=80&d=identicon",
-        "web_url": "https://gitlab.com/tbriggs2"
-      },
-      "type": "ISSUE",
-      "assignee": null,
-      "user_notes_count": 0,
-      "merge_requests_count": 1,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": null,
-      "confidential": false,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/372",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": true,
-      "task_status": "0 of 0 checklist items completed",
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/22672923/issues/372",
-        "notes": "https://gitlab.com/api/v4/projects/22672923/issues/372/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/22672923/issues/372/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/22672923",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#372",
-        "relative": "#372",
-        "full": "meltano/sdk#372"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 108,
-      "epic": {
-        "id": 302158,
-        "iid": 108,
-        "title": "Expanded Target Functionality in the SDK",
-        "url": "/groups/meltano/-/epics/108",
-        "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 1339539,
-      "relative_position": -4617
     },
     {
       "id": 108021447,
@@ -606,7 +498,7 @@
         "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
         "web_url": "https://gitlab.com/edgarrmondragon"
       },
       "labels": [
@@ -642,14 +534,15 @@
       "type": "ISSUE",
       "assignee": null,
       "user_notes_count": 0,
-      "merge_requests_count": 1,
-      "upvotes": 1,
+      "merge_requests_count": 0,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/371",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/371",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -661,7 +554,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -688,12 +581,119 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2768</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
       "epic_issue_id": 1339540,
       "relative_position": -5130
+    },
+    {
+      "id": 108023469,
+      "iid": 372,
+      "project_id": 22672923,
+      "title": "SQL Targets: Processing of activate_version record fails if table does not yet exist",
+      "description": "## Summary\nSQLSink.activate_version assumes that the destination table exists. The first time the pipeline is executed this may not be true, however, since the table will not be created until the first process_batch call.\n\n\n## Steps to reproduce\nCreate a pipeline where the tap produces activate_version records (I used tap-mysql) and the target relies on the SDK to handle activation version records. I discovered this while developing my own target but I was able to reproduce it using the [SDK-based version of the SQLite target](https://github.com/MeltanoLabs/target-sqlite/tree/port-to-sdk).\n\n\n## What is the current bug behavior?\nThe pipeline will fail with a 'table does not exist' error caused by the DELETE FROM that SQLSink.activate_version executes.\n\n\n## What is the expected correct behavior?\nSQLSink.activate_version should do nothing if the table doesn't exist.\n\n\n## Possible fixes\nMR incoming",
+      "state": "closed",
+      "created_at": "2022-05-04T16:08:04.953Z",
+      "updated_at": "2022-05-16T15:13:21.245Z",
+      "closed_at": "2022-05-16T15:13:21.204Z",
+      "closed_by": {
+        "id": 1134865,
+        "username": "edgarrmondragon",
+        "public_email": "edgar@meltano.com",
+        "name": "Edgar R. Mondrag\u00f3n",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
+        "web_url": "https://gitlab.com/edgarrmondragon"
+      },
+      "labels": [
+        "Accepting Merge Requests",
+        "kind::Bug",
+        "valuestream::SDK"
+      ],
+      "milestone": {
+        "id": 797629,
+        "iid": 42,
+        "group_id": 2524164,
+        "title": "Backlog",
+        "description": "As a start, I think it would be good to prioritize based on:\r\n- urgency of getting feedback\r\n- relative implementation difficulty\r\n- symbiotic relationships between issues",
+        "state": "active",
+        "created_at": "2019-02-21T14:50:28.741Z",
+        "updated_at": "2019-02-21T14:50:28.741Z",
+        "due_date": null,
+        "start_date": "2019-02-25",
+        "expired": false,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/42"
+      },
+      "assignees": [],
+      "author": {
+        "id": 11028865,
+        "username": "tbriggs2",
+        "public_email": null,
+        "name": "Thomas Briggs",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://secure.gravatar.com/avatar/0333fed181cc72b244e53f28299a2fbd4c00d3e16ae323c6771a12d3d442917a?s=80&d=identicon",
+        "web_url": "https://gitlab.com/tbriggs2"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/372",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/22672923/issues/372",
+        "notes": "https://gitlab.com/api/v4/projects/22672923/issues/372/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/22672923/issues/372/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/22672923",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#372",
+        "relative": "#372",
+        "full": "meltano/sdk#372"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 108,
+      "epic": {
+        "id": 302158,
+        "iid": 108,
+        "title": "Expanded Target Functionality in the SDK",
+        "url": "/groups/meltano/-/epics/108",
+        "group_id": 2524164,
+        "human_readable_timestamp": "<strong>2768</strong> days elapsed"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1339539,
+      "relative_position": -4617
     },
     {
       "id": 106604733,
@@ -712,7 +712,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -742,20 +742,21 @@
         "name": "Derek Visch",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/5562019/avatar.png?v=1790279496",
         "web_url": "https://gitlab.com/vischous"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 3,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/362",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/362",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -767,7 +768,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -794,7 +795,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2768</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -818,7 +819,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -853,15 +854,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 5,
-      "merge_requests_count": 1,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/347",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/347",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -873,7 +875,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -900,7 +902,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2768</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -924,7 +926,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -954,20 +956,21 @@
         "name": "Pat Nadolny",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
         "web_url": "https://gitlab.com/pnadolny13"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/344",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/344",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -979,7 +982,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1006,7 +1009,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2768</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1030,7 +1033,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1065,15 +1068,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/306",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/306",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1085,7 +1089,7 @@
         "completed_count": 0
       },
       "weight": 8,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1112,7 +1116,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2768</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,
@@ -1136,7 +1140,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1171,15 +1175,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/sdk/-/issues/135",
+      "web_url": "https://gitlab.com/meltano/sdk/-/work_items/135",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1191,7 +1196,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1218,7 +1223,7 @@
         "title": "Expanded Target Functionality in the SDK",
         "url": "/groups/meltano/-/epics/108",
         "group_id": 2524164,
-        "human_readable_timestamp": "<strong>2461</strong> days elapsed"
+        "human_readable_timestamp": "<strong>2768</strong> days elapsed"
       },
       "iteration": null,
       "health_status": null,

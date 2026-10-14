@@ -58,7 +58,7 @@ import typing as t
 
 from jsonschema import validators
 
-from singer_sdk.helpers._compat import SingerSDKPendingDeprecationWarning, deprecated
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, deprecated
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
     JSONSCHEMA_ANNOTATION_WRITEONLY,
@@ -814,6 +814,10 @@ class ObjectType(JSONTypeHelper):
             >>> print(t.to_json(indent=2))
             {
               "type": "object",
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false,
               "properties": {
                 "name": {
                   "type": [
@@ -832,11 +836,7 @@ class ObjectType(JSONTypeHelper):
                     "null"
                   ]
                 }
-              },
-              "required": [
-                "name"
-              ],
-              "additionalProperties": false
+              }
             }
             >>> t = ObjectType(
             ...     Property("name", StringType, required=True),
@@ -847,6 +847,14 @@ class ObjectType(JSONTypeHelper):
             >>> print(t.to_json(indent=2))
             {
               "type": "object",
+              "required": [
+                "name"
+              ],
+              "additionalProperties": {
+                "type": [
+                  "string"
+                ]
+              },
               "properties": {
                 "name": {
                   "type": [
@@ -865,14 +873,6 @@ class ObjectType(JSONTypeHelper):
                     "null"
                   ]
                 }
-              },
-              "required": [
-                "name"
-              ],
-              "additionalProperties": {
-                "type": [
-                  "string"
-                ]
               }
             }
         """
@@ -896,8 +896,7 @@ class ObjectType(JSONTypeHelper):
                 dependent_required[w.name] = w.requires_properties
 
         result: dict[str, t.Any] = {
-            "type": ["object", "null"] if self.nullable else "object",
-            "properties": merged_props,
+            "type": ["object", "null"] if self.nullable else "object"
         }
 
         if required:
@@ -916,6 +915,8 @@ class ObjectType(JSONTypeHelper):
             result["patternProperties"] = {
                 k: v.type_dict for k, v in self.pattern_properties.items()
             }
+
+        result["properties"] = merged_props
 
         return result
 
@@ -1016,6 +1017,7 @@ class AllOf(JSONTypeHelper):
           "allOf": [
             {
               "type": "object",
+              "additionalProperties": true,
               "properties": {
                 "first_type": {
                   "type": [
@@ -1023,11 +1025,11 @@ class AllOf(JSONTypeHelper):
                     "null"
                   ]
                 }
-              },
-              "additionalProperties": true
+              }
             },
             {
               "type": "object",
+              "additionalProperties": true,
               "properties": {
                 "second_type": {
                   "type": [
@@ -1035,8 +1037,7 @@ class AllOf(JSONTypeHelper):
                     "null"
                   ]
                 }
-              },
-              "additionalProperties": true
+              }
             }
           ]
         }
@@ -1110,29 +1111,29 @@ class DiscriminatedUnion(OneOf):
               "oneOf": [
                 {
                   "type": "object",
+                  "required": [
+                    "species"
+                  ],
+                  "additionalProperties": true,
                   "properties": {
                     "species": {
                       "const": "cat",
                       "description": "Discriminator for object of type 'cat'."
                     }
-                  },
-                  "required": [
-                    "species"
-                  ],
-                  "additionalProperties": true
+                  }
                 },
                 {
                   "type": "object",
+                  "required": [
+                    "species"
+                  ],
+                  "additionalProperties": true,
                   "properties": {
                     "species": {
                       "const": "dog",
                       "description": "Discriminator for object of type 'dog'."
                     }
-                  },
-                  "required": [
-                    "species"
-                  ],
-                  "additionalProperties": true
+                  }
                 }
               ]
             }
@@ -1213,7 +1214,17 @@ class PropertiesList(ObjectType):
         ... )
         >>> print(schema.to_json(indent=2))
         {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
+          "dependentRequired": {
+            "username": [
+              "password"
+            ],
+            "client_id": [
+              "client_secret",
+              "refresh_token"
+            ]
+          },
           "properties": {
             "username": {
               "type": [
@@ -1251,17 +1262,7 @@ class PropertiesList(ObjectType):
               "secret": true,
               "writeOnly": true
             }
-          },
-          "dependentRequired": {
-            "username": [
-              "password"
-            ],
-            "client_id": [
-              "client_secret",
-              "refresh_token"
-            ]
-          },
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
+          }
         }
     """
 
@@ -1300,9 +1301,10 @@ class PropertiesList(ObjectType):
     @override
     def type_dict(self) -> dict:
         """Type dictionary."""
-        d = super().type_dict
-        d["$schema"] = "https://json-schema.org/draft/2020-12/schema"
-        return d
+        return {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            **super().type_dict,
+        }
 
     def __iter__(self) -> t.Iterator[Property]:
         """Iterate all properties of the property list.
@@ -1314,8 +1316,9 @@ class PropertiesList(ObjectType):
 
 
 @deprecated(
-    "Use `SQLToJSONSchema` instead.",
-    category=SingerSDKPendingDeprecationWarning,
+    "singer_sdk.typing.to_jsonschema_type is deprecated and will be removed in v0.56."
+    " Use `SQLToJSONSchema` instead.",
+    category=SingerSDKDeprecationWarning,
 )
 def to_jsonschema_type(
     from_type: str | sqlalchemy.types.TypeEngine | type[sqlalchemy.types.TypeEngine],
@@ -1397,8 +1400,9 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
 
 
 @deprecated(
-    "Use `JSONSchemaToSQL` instead.",
-    category=SingerSDKPendingDeprecationWarning,
+    "singer_sdk.typing.to_sql_type is deprecated and will be removed in v0.56."
+    " Use `JSONSchemaToSQL` instead.",
+    category=SingerSDKDeprecationWarning,
 )
 def to_sql_type(  # noqa: PLR0911, C901
     jsonschema_type: dict,

@@ -276,7 +276,8 @@ def test_one_parent_many_children(
 
         name = "my-tap-many"
 
-        def discover_streams(self):
+        @override
+        def discover_streams(self) -> list[Stream]:
             """Discover streams."""
             return [
                 ParentMany(self),
@@ -388,7 +389,8 @@ def test_preprocess_context_removes_large_payload(
 
         name = "tap-preprocess"
 
-        def discover_streams(self):
+        @override
+        def discover_streams(self) -> list[Stream]:
             """Discover streams."""
             return [
                 ParentWithLargePayload(self),
@@ -478,7 +480,8 @@ def test_parent_records_emitted_when_child_hits_record_limit():
     class TapLimited(Tap):
         name = "tap-limited"
 
-        def discover_streams(self):
+        @override
+        def discover_streams(self) -> list[Stream]:
             return [ParentStream(self), ChildStream(self), SiblingStream(self)]
 
     tap = TapLimited()

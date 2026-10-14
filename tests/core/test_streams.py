@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import decimal
 import logging
+import sys
 import typing as t
 import urllib.parse
 import warnings
@@ -26,6 +27,11 @@ from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 from tests.core.conftest import SimpleTestStream
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     import requests_mock
@@ -558,7 +564,8 @@ def test_non_json_payload(tap: Tap, requests_mock: requests_mock.Mocker):
         path = "/non-json"
         records_jsonpath = "$.data[*]"
 
-        def prepare_request_payload(self, context, next_page_token):  # noqa: ARG002
+        @override
+        def prepare_request_payload(self, context, next_page_token):
             return {"my_key": "my_value"}
 
     stream = NonJsonStream(tap)
@@ -745,13 +752,14 @@ def test_post_process_drops_record(tap: Tap):
     """Test post-processing is applied to records."""
 
     class DropsRecord(SimpleTestStream):
+        @override
         def post_process(
             self,
-            record: Record,
-            context: Context | None,  # noqa: ARG002
+            row: Record,
+            context: Context | None = None,
         ) -> Record | None:
             # Drop even IDs
-            return None if record["id"] % 2 == 0 else record
+            return None if row["id"] % 2 == 0 else row
 
     stream = DropsRecord(tap)
     records = list(stream._sync_records(None, write_messages=False))
@@ -765,13 +773,14 @@ def test_post_process_transforms_record(tap: Tap):
     """Test post-processing is applied to records."""
 
     class TransformsRecord(SimpleTestStream):
+        @override
         def post_process(
             self,
-            record: Record,
-            context: Context | None,  # noqa: ARG002
+            row: Record,
+            context: Context | None = None,
         ) -> Record | None:
-            record["extra"] = "transformed"
-            return record
+            row["extra"] = "transformed"
+            return row
 
     stream = TransformsRecord(tap)
     records = stream._sync_records(None, write_messages=False)

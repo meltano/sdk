@@ -154,6 +154,7 @@ def test_oauth_jwt_authenticator():
 
 
 class _FakeOAuthAuthenticator(OAuthAuthenticator):
+    @override
     def oauth_request_body(self) -> dict:
         return {}
 
@@ -630,6 +631,7 @@ def test_authenticator_invoked_on_each_retry(
             super().__init__(*args, **kwargs)
             self.auth_headers = {}
 
+        @override
         def authenticate_request(
             self,
             request: requests.PreparedRequest,
@@ -733,11 +735,13 @@ def test_oauth_authenticator_refreshes_token_on_retry(
     class TestOAuthAuthenticator(OAuthAuthenticator):
         """OAuth authenticator for testing token refresh on retry."""
 
+        @override
         @property
         def oauth_request_body(self) -> dict:
             """Minimal OAuth request body."""
             return {"grant_type": "client_credentials"}
 
+        @override
         def update_access_token(self) -> None:
             """Track token refresh and update version."""
             nonlocal token_refresh_count, current_token_version

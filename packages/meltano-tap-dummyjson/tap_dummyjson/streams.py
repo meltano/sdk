@@ -1,8 +1,20 @@
 from __future__ import annotations
 
+import sys
+import typing as t
+
 from singer_sdk import typing as th
 
 from .client import DummyJSONStream
+
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
+
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers.types import Context, Record
+    from singer_sdk.streams.rest import HTTPRequest, PageContext
 
 
 class Products(DummyJSONStream):
@@ -15,9 +27,10 @@ class Products(DummyJSONStream):
 
     primary_keys = ["id"]
 
-    replication_key = None
+    replication_key = "_sdc_updated_at"
 
     schema = th.PropertiesList(
+        th.Property("_sdc_updated_at", th.DateTimeType),
         th.Property("id", th.IntegerType),
         th.Property("title", th.StringType),
         th.Property("description", th.StringType),
@@ -67,3 +80,19 @@ class Products(DummyJSONStream):
         th.Property("images", th.ArrayType(th.StringType)),
         th.Property("thumbnail", th.StringType),
     ).to_dict()
+
+    @override
+    def post_process(
+        self,
+        row: Record,
+        context: Context | None = None,
+    ) -> Record | None:
+        row["_sdc_updated_at"] = row["meta"]["updatedAt"]
+        return row
+
+    @override
+    def get_http_request(self, page: PageContext[int]) -> HTTPRequest:
+        request = super().get_http_request(page=page)
+        if modified_after := self.get_starting_timestamp(page.stream_context):
+            request.params["modifiedAfter"] = modified_after
+        return request

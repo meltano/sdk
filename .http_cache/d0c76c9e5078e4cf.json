@@ -1,51 +1,45 @@
 {
-  "cookies": {
-    "__cf_bm": "CEWXJFS6Yda213kn0NVLPD6VeiKn.14fo5HHu8CV.qE-1763701817-1.0.1.1-8y2fnRTFpPL.3fNTAOr6ZTYNIGsO0tzvLAI4qK.ajXiOZaIqpaq0HCbWGTJeanIJFgEfFLyQ3h41.igPwYm3XSncXZbB.9fMRkqpGrAuUrw",
-    "_cfuvid": "GcLcJB60sRgBQ_7RSOpI.iMEgAKw2fLlO3rbujLsI6o-1763701817247-0.0.1.1-604800000"
-  },
-  "created_at": "2025-11-21T05:10:17.141712+00:00",
-  "elapsed": 0.586312,
+  "created_at": "2026-09-24T21:33:01.991932+00:00",
+  "elapsed": 0.705215,
   "encoding": "utf-8",
   "headers": {
-    "CF-Cache-Status": "MISS",
-    "CF-Ray": "9a1dae02ea93f48f-QRO",
+    "CF-Cache-Status": "BYPASS",
+    "CF-Ray": "a404e7b45bc7ab13-QRO",
     "Cache-Control": "max-age=0, private, must-revalidate",
     "Connection": "keep-alive",
     "Content-Encoding": "gzip",
     "Content-Type": "application/json",
-    "Date": "Fri, 21 Nov 2025 05:10:17 GMT",
-    "ETag": "W/\"a1ad608cffa188d6f337502385459e74\"",
+    "Date": "Thu, 24 Sep 2026 21:33:02 GMT",
+    "ETag": "W/\"8744404b84ffb9e42feb3442572a5903\"",
     "Link": "<https://gitlab.com/api/v4/groups/2524164/epics/139/issues?epic_iid=139&id=2524164&page=1&per_page=20>; rel=\"first\", <https://gitlab.com/api/v4/groups/2524164/epics/139/issues?epic_iid=139&id=2524164&page=1&per_page=20>; rel=\"last\"",
     "Server": "cloudflare",
-    "Set-Cookie": "__cf_bm=CEWXJFS6Yda213kn0NVLPD6VeiKn.14fo5HHu8CV.qE-1763701817-1.0.1.1-8y2fnRTFpPL.3fNTAOr6ZTYNIGsO0tzvLAI4qK.ajXiOZaIqpaq0HCbWGTJeanIJFgEfFLyQ3h41.igPwYm3XSncXZbB.9fMRkqpGrAuUrw; path=/; expires=Fri, 21-Nov-25 05:40:17 GMT; domain=.gitlab.com; HttpOnly; Secure; SameSite=None, _cfuvid=GcLcJB60sRgBQ_7RSOpI.iMEgAKw2fLlO3rbujLsI6o-1763701817247-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None",
     "Strict-Transport-Security": "max-age=31536000",
     "Transfer-Encoding": "chunked",
-    "Vary": "Origin, Accept-Encoding",
+    "Vary": "Origin",
     "content-security-policy": "default-src 'none'",
-    "gitlab-lb": "haproxy-main-43-lb-gprd",
+    "gitlab-lb": "haproxy-main-52-lb-gprd",
     "gitlab-sv": "api-gke-us-east1-b",
     "nel": "{\"max_age\": 0}",
     "ratelimit-limit": "2000",
     "ratelimit-name": "throttle_authenticated_api",
-    "ratelimit-observed": "24",
-    "ratelimit-remaining": "1976",
-    "ratelimit-reset": "1763701860",
+    "ratelimit-observed": "28",
+    "ratelimit-remaining": "1972",
+    "ratelimit-reset": "1790285640",
     "referrer-policy": "strict-origin-when-cross-origin",
     "x-content-type-options": "nosniff",
     "x-frame-options": "SAMEORIGIN",
-    "x-gitlab-meta": "{\"correlation_id\":\"9a1dae030221f48f-ATL\",\"version\":\"1\"}",
+    "x-gitlab-meta": "{\"correlation_id\":\"a404e7b45bc7ab13-QRO\",\"version\":\"1\"}",
     "x-next-page": "",
     "x-page": "1",
     "x-per-page": "20",
     "x-prev-page": "",
-    "x-request-id": "9a1dae030221f48f-ATL",
-    "x-runtime": "0.361690",
+    "x-request-id": "a404e7b45bc7ab13-QRO",
+    "x-runtime": "0.502393",
     "x-total": "16",
     "x-total-pages": "1"
   },
   "reason": "OK",
   "request": {
-    "body": "",
     "headers": {
       "Accept": "*/*",
       "Accept-Encoding": "gzip, deflate, zstd",
@@ -76,7 +70,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -110,15 +104,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 2,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": true,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/242",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/242",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -130,7 +125,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -182,7 +177,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -216,15 +211,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 4,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/241",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/241",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -236,7 +232,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "",
       "_links": {
@@ -288,7 +284,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -318,20 +314,21 @@
         "name": "Pat Nadolny",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
         "web_url": "https://gitlab.com/pnadolny13"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 1,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/226",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/226",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -343,7 +340,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -395,7 +392,7 @@
         "name": "Pat Nadolny",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
         "web_url": "https://gitlab.com/pnadolny13"
       },
       "labels": [
@@ -428,7 +425,7 @@
           "name": "Pat Nadolny",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
           "web_url": "https://gitlab.com/pnadolny13"
         }
       ],
@@ -439,7 +436,7 @@
         "name": "Pat Nadolny",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
         "web_url": "https://gitlab.com/pnadolny13"
       },
       "type": "ISSUE",
@@ -450,18 +447,19 @@
         "name": "Pat Nadolny",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
         "web_url": "https://gitlab.com/pnadolny13"
       },
-      "user_notes_count": 1,
-      "merge_requests_count": 1,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/224",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/224",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -473,7 +471,7 @@
         "completed_count": 0
       },
       "weight": 8,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -509,382 +507,6 @@
       "relative_position": -46170
     },
     {
-      "id": 105434666,
-      "iid": 223,
-      "project_id": 25921808,
-      "title": "Hub SSOT - Do we want to support package + metadata versioning?",
-      "description": "First proposed in https://gitlab.com/meltano/hub/-/issues/180.\n\nIf we allow users to pin a version of their package, they need to be able to pin the metadata at that point in time too as metadata changes with the code. If a user has a 0.9.0 package version installed and a breaking change (say a new required setting was added) was introduced to the 1.0.0 (latest) version along with metadata updates, they cant just pull the latest metadata or their pipeline will break.\n\nThis may be resolved by the lock mechanism https://gitlab.com/meltano/meltano/-/issues/3031 but we should decide if we only want to the hub to represent the \"latest\" or \"current\" metadata.\n\nThis decision affects the way we implement the V2 API and the organization of the files in the hub.",
-      "state": "closed",
-      "created_at": "2022-03-24T14:17:25.538Z",
-      "updated_at": "2022-05-29T21:30:50.254Z",
-      "closed_at": "2022-05-29T21:30:50.243Z",
-      "closed_by": {
-        "id": 11629953,
-        "username": "MeltyBot",
-        "public_email": "",
-        "name": "Melty Bot",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
-        "web_url": "https://gitlab.com/MeltyBot"
-      },
-      "labels": [
-        "Discussion",
-        "kind::Feature",
-        "valuestream::Hub"
-      ],
-      "milestone": null,
-      "assignees": [],
-      "author": {
-        "id": 8668050,
-        "username": "pnadolny13",
-        "public_email": "",
-        "name": "Pat Nadolny",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
-        "web_url": "https://gitlab.com/pnadolny13"
-      },
-      "type": "ISSUE",
-      "assignee": null,
-      "user_notes_count": 10,
-      "merge_requests_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": null,
-      "confidential": false,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/223",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": true,
-      "task_status": "0 of 0 checklist items completed",
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/25921808/issues/223",
-        "notes": "https://gitlab.com/api/v4/projects/25921808/issues/223/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/25921808/issues/223/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/25921808",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#223",
-        "relative": "#223",
-        "full": "meltano/hub#223"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 139,
-      "epic": {
-        "id": 450531,
-        "iid": 139,
-        "title": "Hub as Plugin Installation Source",
-        "url": "/groups/meltano/-/epics/139",
-        "group_id": 2524164,
-        "human_readable_end_date": "May 31, 2022",
-        "human_readable_timestamp": "<strong>Past due</strong>"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 1225815,
-      "relative_position": -43605
-    },
-    {
-      "id": 105433139,
-      "iid": 222,
-      "project_id": 25921808,
-      "title": "Hub SSOT - How we blend the current discovery.yml and the current singer spec yaml files",
-      "description": "We want to the V2 hub API to serve both the current discovery contents and the Singer definitions, to do that we need to blend the two schemas into a generic shared schema for all plugins.\n\nThings to consider:\n- Extra Singer metadata `meltano_sdk`, `maintenance_status`, etc.\n- Singer definitions are missing settings and group validations in many cases\n- Singer definitions dont have a schema version like the discovery does",
-      "state": "closed",
-      "created_at": "2022-03-24T13:54:43.176Z",
-      "updated_at": "2022-05-29T21:30:44.149Z",
-      "closed_at": "2022-05-29T21:30:44.141Z",
-      "closed_by": {
-        "id": 11629953,
-        "username": "MeltyBot",
-        "public_email": "",
-        "name": "Melty Bot",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
-        "web_url": "https://gitlab.com/MeltyBot"
-      },
-      "labels": [
-        "Discussion",
-        "kind::Feature",
-        "valuestream::Hub"
-      ],
-      "milestone": null,
-      "assignees": [],
-      "author": {
-        "id": 8668050,
-        "username": "pnadolny13",
-        "public_email": "",
-        "name": "Pat Nadolny",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
-        "web_url": "https://gitlab.com/pnadolny13"
-      },
-      "type": "ISSUE",
-      "assignee": null,
-      "user_notes_count": 2,
-      "merge_requests_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": null,
-      "confidential": false,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/222",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": true,
-      "task_status": "0 of 0 checklist items completed",
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/25921808/issues/222",
-        "notes": "https://gitlab.com/api/v4/projects/25921808/issues/222/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/25921808/issues/222/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/25921808",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#222",
-        "relative": "#222",
-        "full": "meltano/hub#222"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 139,
-      "epic": {
-        "id": 450531,
-        "iid": 139,
-        "title": "Hub as Plugin Installation Source",
-        "url": "/groups/meltano/-/epics/139",
-        "group_id": 2524164,
-        "human_readable_end_date": "May 31, 2022",
-        "human_readable_timestamp": "<strong>Past due</strong>"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 1225816,
-      "relative_position": -44118
-    },
-    {
-      "id": 105432375,
-      "iid": 221,
-      "project_id": 25921808,
-      "title": "Hub SSOT - How MeltanoHub stores vs renders the API payloads",
-      "description": "The current V1 hub API just basically serializes the raw taps and target metadata files as 1 large json and serves it up.\n\nFor the V2 endpoint depending on our implementation strategy we might find it better to decouple the file format and organization of the plugin definitions from the way that we serve the data. The hub files serve multiple purposes that might conflict: API data source, static site data source, organized for easy community maintenance and contribution.\n\n\nFor example (just for illustrating my point) we might find that for easier maintenance and contribution we want to split the files into directories and maybe theres a top level definition that is shared by all variants and each variant definition is its own file, later compiled by the API file generator to meet the API payload schema we want.\n\n```\nextractors/\n    tap-csv/\n        base.yml\n        meltanolabs/\n            variant.yml\n        meltano/\n            variant.yml\n    tap-postgres/\n        ...\n```\n\nThe point is that we have the option to decouple the files from the API payload, and each have different goals (maintenance/contribution vs serving the front end static site vs API for serving an application efficiently).",
-      "state": "closed",
-      "created_at": "2022-03-24T13:45:23.033Z",
-      "updated_at": "2022-05-29T21:30:37.515Z",
-      "closed_at": "2022-05-29T21:30:37.503Z",
-      "closed_by": {
-        "id": 11629953,
-        "username": "MeltyBot",
-        "public_email": "",
-        "name": "Melty Bot",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
-        "web_url": "https://gitlab.com/MeltyBot"
-      },
-      "labels": [
-        "Discussion",
-        "kind::Feature",
-        "valuestream::Hub"
-      ],
-      "milestone": null,
-      "assignees": [],
-      "author": {
-        "id": 8668050,
-        "username": "pnadolny13",
-        "public_email": "",
-        "name": "Pat Nadolny",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
-        "web_url": "https://gitlab.com/pnadolny13"
-      },
-      "type": "ISSUE",
-      "assignee": null,
-      "user_notes_count": 1,
-      "merge_requests_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": null,
-      "confidential": false,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/221",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": true,
-      "task_status": "0 of 0 checklist items completed",
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/25921808/issues/221",
-        "notes": "https://gitlab.com/api/v4/projects/25921808/issues/221/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/25921808/issues/221/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/25921808",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#221",
-        "relative": "#221",
-        "full": "meltano/hub#221"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 139,
-      "epic": {
-        "id": 450531,
-        "iid": 139,
-        "title": "Hub as Plugin Installation Source",
-        "url": "/groups/meltano/-/epics/139",
-        "group_id": 2524164,
-        "human_readable_end_date": "May 31, 2022",
-        "human_readable_timestamp": "<strong>Past due</strong>"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 1225817,
-      "relative_position": -44631
-    },
-    {
-      "id": 105431411,
-      "iid": 220,
-      "project_id": 25921808,
-      "title": "Hub SSOT - How Meltano consumes the V2 MeltanoHub API",
-      "description": "If Meltano is to use the hub's API for retrieving plugin metatdata, we need to flesh out the consumption patterns so we can customize the API to serve the right data in the right format.",
-      "state": "closed",
-      "created_at": "2022-03-24T13:33:09.332Z",
-      "updated_at": "2022-05-29T21:30:31.502Z",
-      "closed_at": "2022-05-29T21:30:31.491Z",
-      "closed_by": {
-        "id": 11629953,
-        "username": "MeltyBot",
-        "public_email": "",
-        "name": "Melty Bot",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
-        "web_url": "https://gitlab.com/MeltyBot"
-      },
-      "labels": [
-        "Discussion",
-        "kind::Feature",
-        "valuestream::Hub"
-      ],
-      "milestone": null,
-      "assignees": [],
-      "author": {
-        "id": 8668050,
-        "username": "pnadolny13",
-        "public_email": "",
-        "name": "Pat Nadolny",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
-        "web_url": "https://gitlab.com/pnadolny13"
-      },
-      "type": "ISSUE",
-      "assignee": null,
-      "user_notes_count": 2,
-      "merge_requests_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": null,
-      "confidential": false,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/220",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "weight": null,
-      "blocking_issues_count": 0,
-      "has_tasks": true,
-      "task_status": "0 of 0 checklist items completed",
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/25921808/issues/220",
-        "notes": "https://gitlab.com/api/v4/projects/25921808/issues/220/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/25921808/issues/220/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/25921808",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#220",
-        "relative": "#220",
-        "full": "meltano/hub#220"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 139,
-      "epic": {
-        "id": 450531,
-        "iid": 139,
-        "title": "Hub as Plugin Installation Source",
-        "url": "/groups/meltano/-/epics/139",
-        "group_id": 2524164,
-        "human_readable_end_date": "May 31, 2022",
-        "human_readable_timestamp": "<strong>Past due</strong>"
-      },
-      "iteration": null,
-      "health_status": null,
-      "epic_issue_id": 1225818,
-      "relative_position": -45144
-    },
-    {
       "id": 105431236,
       "iid": 219,
       "project_id": 25921808,
@@ -901,7 +523,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -931,20 +553,21 @@
         "name": "Pat Nadolny",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
         "web_url": "https://gitlab.com/pnadolny13"
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 21,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/219",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/219",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -956,7 +579,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -992,6 +615,386 @@
       "relative_position": -45657
     },
     {
+      "id": 105431411,
+      "iid": 220,
+      "project_id": 25921808,
+      "title": "Hub SSOT - How Meltano consumes the V2 MeltanoHub API",
+      "description": "If Meltano is to use the hub's API for retrieving plugin metatdata, we need to flesh out the consumption patterns so we can customize the API to serve the right data in the right format.",
+      "state": "closed",
+      "created_at": "2022-03-24T13:33:09.332Z",
+      "updated_at": "2022-05-29T21:30:31.502Z",
+      "closed_at": "2022-05-29T21:30:31.491Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Discussion",
+        "kind::Feature",
+        "valuestream::Hub"
+      ],
+      "milestone": null,
+      "assignees": [],
+      "author": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/220",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/25921808/issues/220",
+        "notes": "https://gitlab.com/api/v4/projects/25921808/issues/220/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/25921808/issues/220/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/25921808",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#220",
+        "relative": "#220",
+        "full": "meltano/hub#220"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 139,
+      "epic": {
+        "id": 450531,
+        "iid": 139,
+        "title": "Hub as Plugin Installation Source",
+        "url": "/groups/meltano/-/epics/139",
+        "group_id": 2524164,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1225818,
+      "relative_position": -45144
+    },
+    {
+      "id": 105432375,
+      "iid": 221,
+      "project_id": 25921808,
+      "title": "Hub SSOT - How MeltanoHub stores vs renders the API payloads",
+      "description": "The current V1 hub API just basically serializes the raw taps and target metadata files as 1 large json and serves it up.\n\nFor the V2 endpoint depending on our implementation strategy we might find it better to decouple the file format and organization of the plugin definitions from the way that we serve the data. The hub files serve multiple purposes that might conflict: API data source, static site data source, organized for easy community maintenance and contribution.\n\n\nFor example (just for illustrating my point) we might find that for easier maintenance and contribution we want to split the files into directories and maybe theres a top level definition that is shared by all variants and each variant definition is its own file, later compiled by the API file generator to meet the API payload schema we want.\n\n```\nextractors/\n    tap-csv/\n        base.yml\n        meltanolabs/\n            variant.yml\n        meltano/\n            variant.yml\n    tap-postgres/\n        ...\n```\n\nThe point is that we have the option to decouple the files from the API payload, and each have different goals (maintenance/contribution vs serving the front end static site vs API for serving an application efficiently).",
+      "state": "closed",
+      "created_at": "2022-03-24T13:45:23.033Z",
+      "updated_at": "2022-05-29T21:30:37.515Z",
+      "closed_at": "2022-05-29T21:30:37.503Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Discussion",
+        "kind::Feature",
+        "valuestream::Hub"
+      ],
+      "milestone": null,
+      "assignees": [],
+      "author": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/221",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/25921808/issues/221",
+        "notes": "https://gitlab.com/api/v4/projects/25921808/issues/221/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/25921808/issues/221/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/25921808",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#221",
+        "relative": "#221",
+        "full": "meltano/hub#221"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 139,
+      "epic": {
+        "id": 450531,
+        "iid": 139,
+        "title": "Hub as Plugin Installation Source",
+        "url": "/groups/meltano/-/epics/139",
+        "group_id": 2524164,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1225817,
+      "relative_position": -44631
+    },
+    {
+      "id": 105433139,
+      "iid": 222,
+      "project_id": 25921808,
+      "title": "Hub SSOT - How we blend the current discovery.yml and the current singer spec yaml files",
+      "description": "We want to the V2 hub API to serve both the current discovery contents and the Singer definitions, to do that we need to blend the two schemas into a generic shared schema for all plugins.\n\nThings to consider:\n- Extra Singer metadata `meltano_sdk`, `maintenance_status`, etc.\n- Singer definitions are missing settings and group validations in many cases\n- Singer definitions dont have a schema version like the discovery does",
+      "state": "closed",
+      "created_at": "2022-03-24T13:54:43.176Z",
+      "updated_at": "2022-05-29T21:30:44.149Z",
+      "closed_at": "2022-05-29T21:30:44.141Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Discussion",
+        "kind::Feature",
+        "valuestream::Hub"
+      ],
+      "milestone": null,
+      "assignees": [],
+      "author": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/222",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/25921808/issues/222",
+        "notes": "https://gitlab.com/api/v4/projects/25921808/issues/222/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/25921808/issues/222/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/25921808",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#222",
+        "relative": "#222",
+        "full": "meltano/hub#222"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 139,
+      "epic": {
+        "id": 450531,
+        "iid": 139,
+        "title": "Hub as Plugin Installation Source",
+        "url": "/groups/meltano/-/epics/139",
+        "group_id": 2524164,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1225816,
+      "relative_position": -44118
+    },
+    {
+      "id": 105434666,
+      "iid": 223,
+      "project_id": 25921808,
+      "title": "Hub SSOT - Do we want to support package + metadata versioning?",
+      "description": "First proposed in https://gitlab.com/meltano/hub/-/issues/180.\n\nIf we allow users to pin a version of their package, they need to be able to pin the metadata at that point in time too as metadata changes with the code. If a user has a 0.9.0 package version installed and a breaking change (say a new required setting was added) was introduced to the 1.0.0 (latest) version along with metadata updates, they cant just pull the latest metadata or their pipeline will break.\n\nThis may be resolved by the lock mechanism https://gitlab.com/meltano/meltano/-/issues/3031 but we should decide if we only want to the hub to represent the \"latest\" or \"current\" metadata.\n\nThis decision affects the way we implement the V2 API and the organization of the files in the hub.",
+      "state": "closed",
+      "created_at": "2022-03-24T14:17:25.538Z",
+      "updated_at": "2022-05-29T21:30:50.254Z",
+      "closed_at": "2022-05-29T21:30:50.243Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Discussion",
+        "kind::Feature",
+        "valuestream::Hub"
+      ],
+      "milestone": null,
+      "assignees": [],
+      "author": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "type": "ISSUE",
+      "assignee": null,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/223",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/25921808/issues/223",
+        "notes": "https://gitlab.com/api/v4/projects/25921808/issues/223/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/25921808/issues/223/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/25921808",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#223",
+        "relative": "#223",
+        "full": "meltano/hub#223"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 139,
+      "epic": {
+        "id": 450531,
+        "iid": 139,
+        "title": "Hub as Plugin Installation Source",
+        "url": "/groups/meltano/-/epics/139",
+        "group_id": 2524164,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 1225815,
+      "relative_position": -43605
+    },
+    {
       "id": 104765603,
       "iid": 214,
       "project_id": 25921808,
@@ -1008,7 +1011,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1043,15 +1046,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 10,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 3,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/214",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/214",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1063,7 +1067,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1115,7 +1119,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1151,15 +1155,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 5,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/213",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/213",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1171,7 +1176,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1223,7 +1228,7 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
@@ -1257,15 +1262,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 2,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
-      "upvotes": 1,
+      "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/207",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/207",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1277,7 +1283,7 @@
         "completed_count": 0
       },
       "weight": null,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1313,6 +1319,134 @@
       "relative_position": -42066
     },
     {
+      "id": 98971330,
+      "iid": 180,
+      "project_id": 25921808,
+      "title": "Singer Metadata API - Proposal",
+      "description": "The gap the singer community has right now is that theres no reliable way for an application to access tap/target metadata. Its much easier for SDK based connectors but we need a short term solution since the majority are not SDK based and its not worth it to come up with standard settings and get them installed in every legacy tap/target.\n\nWe compiled a ton of useful info for the hub docs but its not useful for applications yet, although we're very close. We expose the tap/target json endpoints but without versioning individual taps, its not very useful for building applications on (including Meltano). The hub has current state of settings which is good for docs and new installers but not for stability of existing pipelines.\n\nI propose that we create a singer metadata API. Once this exists Meltano will have a much easier time interacting with community/legacy connectors.\n\nA solution I've been thinking of is:\n\n* we add a new `version` key to all the hub yamls\n* pypi installable packages or git repos that have release tags get pinned with those\n* for raw git urls we pin a commit hash and we assign it a 3rd party semantic version. For these we can manage bumping the commit hash and determining if its a small/med/large version via a hub MR. This unlocks Meltano features to know when a tap/target has a breaking change.\n* every change to these hub yamls is sent to the singer metadata service API (probably in CI)\n\nSinger Metadata API:\n\n* receives changes from the hub of yaml files which are snapshotted and stored in S3 or dyanmo by plugin/variant/version\n* a GET endpoint which returns the settings given a plugin/variant/version (and we can return defaults too)\n* eventually we can incorporate more automation here to keep things up to date\n\nThis would also give the Singer community the missing piece that it needs for applications to easily be built on top of it (i.e. hotglue, Matatika dont need to manage metadata anymore).\n\nOpen Questions and thoughts:\n- we need to decide what happens when a metadata definition is found to be incorrect in the hub but the package version is the same. Is it alright to overwrite the existing metadata definition in the API?\n- git url versioning with commit hashes we need to decided on how the yaml definitions track this. Maybe like the below example or just include the hash in the pip_url.\n```yaml\nlabel: Sample\nname: sample\nsinger_name: tap-sample\ntype: tap\nvariants:\n- default: true\n  name: foo_user\n  pip_url: tap-sample\n  version: 1.0.1\n  ...\n- default: false\n  name: bar_user\n  pip_url: git+https://github.com/bar_user/tap-sample.git\n  git_hash: 9eabf5b536662000f79978c4d1b6e4eff5c8d785\n  3P_version: 0.0.1\n```\n- Should we track the setup.py version? Many times its not reliable because people commit right to the main branch without bumping versions.\n- for git url versioning we need to append a namespace or something in the case that a package was unversioned then ended up being versioned, so we dont have future conflicts.",
+      "state": "closed",
+      "created_at": "2021-12-13T21:40:52.476Z",
+      "updated_at": "2022-05-29T21:26:43.708Z",
+      "closed_at": "2022-05-29T21:26:43.618Z",
+      "closed_by": {
+        "id": 11629953,
+        "username": "MeltyBot",
+        "public_email": "",
+        "name": "Melty Bot",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
+        "web_url": "https://gitlab.com/MeltyBot"
+      },
+      "labels": [
+        "Office Hours::Discussed",
+        "kind::Feature",
+        "valuestream::Ecosystem"
+      ],
+      "milestone": {
+        "id": 2286180,
+        "iid": 206,
+        "group_id": 2524164,
+        "title": "Q2-2022",
+        "description": "",
+        "state": "active",
+        "created_at": "2021-10-18T15:22:10.509Z",
+        "updated_at": "2022-01-24T17:51:23.679Z",
+        "due_date": "2022-06-30",
+        "start_date": "2022-04-01",
+        "expired": true,
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/206"
+      },
+      "assignees": [
+        {
+          "id": 8668050,
+          "username": "pnadolny13",
+          "public_email": "",
+          "name": "Pat Nadolny",
+          "state": "active",
+          "locked": false,
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
+          "web_url": "https://gitlab.com/pnadolny13"
+        }
+      ],
+      "author": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "type": "ISSUE",
+      "assignee": {
+        "id": 8668050,
+        "username": "pnadolny13",
+        "public_email": "",
+        "name": "Pat Nadolny",
+        "state": "active",
+        "locked": false,
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
+        "web_url": "https://gitlab.com/pnadolny13"
+      },
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "start_date": null,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "issue_type": "issue",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/180",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "task_completion_status": {
+        "count": 0,
+        "completed_count": 0
+      },
+      "weight": null,
+      "blocking_issues_count": null,
+      "has_tasks": true,
+      "task_status": "0 of 0 checklist items completed",
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/25921808/issues/180",
+        "notes": "https://gitlab.com/api/v4/projects/25921808/issues/180/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/25921808/issues/180/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/25921808",
+        "closed_as_duplicate_of": null
+      },
+      "references": {
+        "short": "#180",
+        "relative": "#180",
+        "full": "meltano/hub#180"
+      },
+      "severity": "UNKNOWN",
+      "moved_to_id": null,
+      "imported": false,
+      "imported_from": "none",
+      "service_desk_reply_to": null,
+      "epic_iid": 139,
+      "epic": {
+        "id": 450531,
+        "iid": 139,
+        "title": "Hub as Plugin Installation Source",
+        "url": "/groups/meltano/-/epics/139",
+        "group_id": 2524164,
+        "human_readable_end_date": "May 31, 2022",
+        "human_readable_timestamp": "<strong>Past due</strong>"
+      },
+      "iteration": null,
+      "health_status": null,
+      "epic_issue_id": 999469,
+      "relative_position": -41553
+    },
+    {
       "id": 102960850,
       "iid": 203,
       "project_id": 25921808,
@@ -1329,7 +1463,7 @@
         "name": "Pat Nadolny",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
         "web_url": "https://gitlab.com/pnadolny13"
       },
       "labels": [
@@ -1361,7 +1495,7 @@
           "name": "Pat Nadolny",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
           "web_url": "https://gitlab.com/pnadolny13"
         }
       ],
@@ -1383,18 +1517,19 @@
         "name": "Pat Nadolny",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png?v=1752739227",
         "web_url": "https://gitlab.com/pnadolny13"
       },
-      "user_notes_count": 17,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/203",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/203",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1406,7 +1541,7 @@
         "completed_count": 0
       },
       "weight": 4,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": false,
       "_links": {
         "self": "https://gitlab.com/api/v4/projects/25921808/issues/203",
@@ -1452,149 +1587,6 @@
       "health_status": null,
       "epic_issue_id": 1144011,
       "relative_position": -41040
-    },
-    {
-      "id": 102959619,
-      "iid": 3283,
-      "project_id": 7603319,
-      "title": "Support `meltano add` directly from Hub",
-      "description": "(Probably) blocked by #3031. \n\nWe'd like users to be able to add MeltanoHub plugins directly from the `meltano add` command.\n\nOnce this is working, the Hub can be updated with the install instructions on each detail page.\n\nFor instance, similar to the `choco install ...` CLI guidance on Chocolatey detail pages:\n\n<details><summary>Click to expand</summary>\n\n![image](/uploads/90016121dc45b9a0d726c8124a7e78ed/image.png)\n\n</details>\n\n... we'd have the text:\n\n> Install with Meltano:\n>\n> ```console\n> meltano add extractor tap-gitlab --variant=MeltanoLabs\n> ```\n\n... or with an http ref:\n\n> Install with Meltano:\n>\n> ```console\n> meltano add extractor tap-gitlab --from_ref=https://hub.meltano.com/singer/taps/tap-gitlab--meltanolabs.yml\n> ```\n\nWe'll likely need to first build #3031+, since this is the issue which decouples us from `discovery.yml`. We could go in another order, but then the inference is that the entire plugin definition would need to live in their `meltano.yml` file, which is parity with `--custom` but doesn't give a similar experience versus `discovery.yml`.",
-      "state": "closed",
-      "created_at": "2022-02-23T23:01:08.045Z",
-      "updated_at": "2022-05-30T10:22:17.861Z",
-      "closed_at": "2022-05-30T10:22:17.841Z",
-      "closed_by": {
-        "id": 11629953,
-        "username": "MeltyBot",
-        "public_email": "",
-        "name": "Melty Bot",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
-        "web_url": "https://gitlab.com/MeltyBot"
-      },
-      "labels": [
-        "OKR: Be the DataOps OS",
-        "Office Hours::Discussed",
-        "Roadmap",
-        "kind::Feature",
-        "v2.0",
-        "valuestream::Meltano"
-      ],
-      "milestone": {
-        "id": 2351599,
-        "iid": 209,
-        "group_id": 2524164,
-        "title": "May 2022",
-        "description": "",
-        "state": "active",
-        "created_at": "2021-11-29T21:38:23.665Z",
-        "updated_at": "2021-11-29T21:38:23.665Z",
-        "due_date": "2022-05-31",
-        "start_date": "2022-05-01",
-        "expired": true,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
-      },
-      "assignees": [
-        {
-          "id": 1134865,
-          "username": "edgarrmondragon",
-          "public_email": "edgar@meltano.com",
-          "name": "Edgar R. Mondrag\u00f3n",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
-          "web_url": "https://gitlab.com/edgarrmondragon"
-        }
-      ],
-      "author": {
-        "id": 4809760,
-        "username": "aaronsteers",
-        "public_email": "aaronsteers@gmail.com",
-        "name": "AJ Steers",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
-        "web_url": "https://gitlab.com/aaronsteers"
-      },
-      "type": "ISSUE",
-      "assignee": {
-        "id": 1134865,
-        "username": "edgarrmondragon",
-        "public_email": "edgar@meltano.com",
-        "name": "Edgar R. Mondrag\u00f3n",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png",
-        "web_url": "https://gitlab.com/edgarrmondragon"
-      },
-      "user_notes_count": 20,
-      "merge_requests_count": 1,
-      "upvotes": 0,
-      "downvotes": 0,
-      "due_date": null,
-      "confidential": false,
-      "discussion_locked": null,
-      "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/meltano/-/issues/3283",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "weight": 8,
-      "blocking_issues_count": 0,
-      "has_tasks": true,
-      "task_status": "0 of 0 checklist items completed",
-      "_links": {
-        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3283",
-        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3283/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3283/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/7603319",
-        "closed_as_duplicate_of": null
-      },
-      "references": {
-        "short": "#3283",
-        "relative": "#3283",
-        "full": "meltano/meltano#3283"
-      },
-      "severity": "UNKNOWN",
-      "moved_to_id": null,
-      "imported": false,
-      "imported_from": "none",
-      "service_desk_reply_to": null,
-      "epic_iid": 139,
-      "epic": {
-        "id": 450531,
-        "iid": 139,
-        "title": "Hub as Plugin Installation Source",
-        "url": "/groups/meltano/-/epics/139",
-        "group_id": 2524164,
-        "human_readable_end_date": "May 31, 2022",
-        "human_readable_timestamp": "<strong>Past due</strong>"
-      },
-      "iteration": {
-        "id": 56416,
-        "iid": 56,
-        "sequence": 3,
-        "group_id": 2524164,
-        "title": null,
-        "description": null,
-        "state": 3,
-        "created_at": "2022-05-13T20:04:48.839Z",
-        "updated_at": "2022-05-30T00:05:02.370Z",
-        "start_date": "2022-05-23",
-        "due_date": "2022-05-29",
-        "web_url": "https://gitlab.com/groups/meltano/-/iterations/56416"
-      },
-      "health_status": null,
-      "epic_issue_id": 1143978,
-      "relative_position": -40014
     },
     {
       "id": 102959191,
@@ -1651,15 +1643,16 @@
       },
       "type": "ISSUE",
       "assignee": null,
-      "user_notes_count": 3,
-      "merge_requests_count": 1,
+      "user_notes_count": 0,
+      "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/202",
+      "web_url": "https://gitlab.com/meltano/hub/-/work_items/202",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1671,7 +1664,7 @@
         "completed_count": 0
       },
       "weight": 8,
-      "blocking_issues_count": 0,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
@@ -1720,15 +1713,15 @@
       "relative_position": -40527
     },
     {
-      "id": 98971330,
-      "iid": 180,
-      "project_id": 25921808,
-      "title": "Singer Metadata API - Proposal",
-      "description": "The gap the singer community has right now is that theres no reliable way for an application to access tap/target metadata. Its much easier for SDK based connectors but we need a short term solution since the majority are not SDK based and its not worth it to come up with standard settings and get them installed in every legacy tap/target.\n\nWe compiled a ton of useful info for the hub docs but its not useful for applications yet, although we're very close. We expose the tap/target json endpoints but without versioning individual taps, its not very useful for building applications on (including Meltano). The hub has current state of settings which is good for docs and new installers but not for stability of existing pipelines.\n\nI propose that we create a singer metadata API. Once this exists Meltano will have a much easier time interacting with community/legacy connectors.\n\nA solution I've been thinking of is:\n\n* we add a new `version` key to all the hub yamls\n* pypi installable packages or git repos that have release tags get pinned with those\n* for raw git urls we pin a commit hash and we assign it a 3rd party semantic version. For these we can manage bumping the commit hash and determining if its a small/med/large version via a hub MR. This unlocks Meltano features to know when a tap/target has a breaking change.\n* every change to these hub yamls is sent to the singer metadata service API (probably in CI)\n\nSinger Metadata API:\n\n* receives changes from the hub of yaml files which are snapshotted and stored in S3 or dyanmo by plugin/variant/version\n* a GET endpoint which returns the settings given a plugin/variant/version (and we can return defaults too)\n* eventually we can incorporate more automation here to keep things up to date\n\nThis would also give the Singer community the missing piece that it needs for applications to easily be built on top of it (i.e. hotglue, Matatika dont need to manage metadata anymore).\n\nOpen Questions and thoughts:\n- we need to decide what happens when a metadata definition is found to be incorrect in the hub but the package version is the same. Is it alright to overwrite the existing metadata definition in the API?\n- git url versioning with commit hashes we need to decided on how the yaml definitions track this. Maybe like the below example or just include the hash in the pip_url.\n```yaml\nlabel: Sample\nname: sample\nsinger_name: tap-sample\ntype: tap\nvariants:\n- default: true\n  name: foo_user\n  pip_url: tap-sample\n  version: 1.0.1\n  ...\n- default: false\n  name: bar_user\n  pip_url: git+https://github.com/bar_user/tap-sample.git\n  git_hash: 9eabf5b536662000f79978c4d1b6e4eff5c8d785\n  3P_version: 0.0.1\n```\n- Should we track the setup.py version? Many times its not reliable because people commit right to the main branch without bumping versions.\n- for git url versioning we need to append a namespace or something in the case that a package was unversioned then ended up being versioned, so we dont have future conflicts.",
+      "id": 102959619,
+      "iid": 3283,
+      "project_id": 7603319,
+      "title": "Support `meltano add` directly from Hub",
+      "description": "(Probably) blocked by #3031. \n\nWe'd like users to be able to add MeltanoHub plugins directly from the `meltano add` command.\n\nOnce this is working, the Hub can be updated with the install instructions on each detail page.\n\nFor instance, similar to the `choco install ...` CLI guidance on Chocolatey detail pages:\n\n<details><summary>Click to expand</summary>\n\n![image](/uploads/90016121dc45b9a0d726c8124a7e78ed/image.png)\n\n</details>\n\n... we'd have the text:\n\n> Install with Meltano:\n>\n> ```console\n> meltano add extractor tap-gitlab --variant=MeltanoLabs\n> ```\n\n... or with an http ref:\n\n> Install with Meltano:\n>\n> ```console\n> meltano add extractor tap-gitlab --from_ref=https://hub.meltano.com/singer/taps/tap-gitlab--meltanolabs.yml\n> ```\n\nWe'll likely need to first build #3031+, since this is the issue which decouples us from `discovery.yml`. We could go in another order, but then the inference is that the entire plugin definition would need to live in their `meltano.yml` file, which is parity with `--custom` but doesn't give a similar experience versus `discovery.yml`.",
       "state": "closed",
-      "created_at": "2021-12-13T21:40:52.476Z",
-      "updated_at": "2022-05-29T21:26:43.708Z",
-      "closed_at": "2022-05-29T21:26:43.618Z",
+      "created_at": "2022-02-23T23:01:08.045Z",
+      "updated_at": "2022-05-30T10:22:17.861Z",
+      "closed_at": "2022-05-30T10:22:17.841Z",
       "closed_by": {
         "id": 11629953,
         "username": "MeltyBot",
@@ -1736,70 +1729,74 @@
         "name": "Melty Bot",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png",
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/11629953/avatar.png?v=1681749183",
         "web_url": "https://gitlab.com/MeltyBot"
       },
       "labels": [
+        "OKR: Be the DataOps OS",
         "Office Hours::Discussed",
+        "Roadmap",
         "kind::Feature",
-        "valuestream::Ecosystem"
+        "v2.0",
+        "valuestream::Meltano"
       ],
       "milestone": {
-        "id": 2286180,
-        "iid": 206,
+        "id": 2351599,
+        "iid": 209,
         "group_id": 2524164,
-        "title": "Q2-2022",
+        "title": "May 2022",
         "description": "",
         "state": "active",
-        "created_at": "2021-10-18T15:22:10.509Z",
-        "updated_at": "2022-01-24T17:51:23.679Z",
-        "due_date": "2022-06-30",
-        "start_date": "2022-04-01",
+        "created_at": "2021-11-29T21:38:23.665Z",
+        "updated_at": "2021-11-29T21:38:23.665Z",
+        "due_date": "2022-05-31",
+        "start_date": "2022-05-01",
         "expired": true,
-        "web_url": "https://gitlab.com/groups/meltano/-/milestones/206"
+        "web_url": "https://gitlab.com/groups/meltano/-/milestones/209"
       },
       "assignees": [
         {
-          "id": 8668050,
-          "username": "pnadolny13",
-          "public_email": "",
-          "name": "Pat Nadolny",
+          "id": 1134865,
+          "username": "edgarrmondragon",
+          "public_email": "edgar@meltano.com",
+          "name": "Edgar R. Mondrag\u00f3n",
           "state": "active",
           "locked": false,
-          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
-          "web_url": "https://gitlab.com/pnadolny13"
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
+          "web_url": "https://gitlab.com/edgarrmondragon"
         }
       ],
       "author": {
-        "id": 8668050,
-        "username": "pnadolny13",
-        "public_email": "",
-        "name": "Pat Nadolny",
+        "id": 4809760,
+        "username": "aaronsteers",
+        "public_email": "aaronsteers@gmail.com",
+        "name": "AJ Steers",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
-        "web_url": "https://gitlab.com/pnadolny13"
+        "avatar_url": "https://secure.gravatar.com/avatar/a2595480c83e2879745276d7beca618e489d7df97677ed44888fd6f0f50efb29?s=80&d=identicon",
+        "web_url": "https://gitlab.com/aaronsteers"
       },
       "type": "ISSUE",
       "assignee": {
-        "id": 8668050,
-        "username": "pnadolny13",
-        "public_email": "",
-        "name": "Pat Nadolny",
+        "id": 1134865,
+        "username": "edgarrmondragon",
+        "public_email": "edgar@meltano.com",
+        "name": "Edgar R. Mondrag\u00f3n",
         "state": "active",
         "locked": false,
-        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/8668050/avatar.png",
-        "web_url": "https://gitlab.com/pnadolny13"
+        "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1134865/avatar.png?v=1790285321",
+        "web_url": "https://gitlab.com/edgarrmondragon"
       },
-      "user_notes_count": 4,
+      "user_notes_count": 0,
       "merge_requests_count": 0,
       "upvotes": 0,
       "downvotes": 0,
+      "start_date": null,
       "due_date": null,
       "confidential": false,
       "discussion_locked": null,
       "issue_type": "issue",
-      "web_url": "https://gitlab.com/meltano/hub/-/issues/180",
+      "web_url": "https://gitlab.com/meltano/meltano/-/work_items/3283",
       "time_stats": {
         "time_estimate": 0,
         "total_time_spent": 0,
@@ -1810,21 +1807,21 @@
         "count": 0,
         "completed_count": 0
       },
-      "weight": null,
-      "blocking_issues_count": 0,
+      "weight": 8,
+      "blocking_issues_count": null,
       "has_tasks": true,
       "task_status": "0 of 0 checklist items completed",
       "_links": {
-        "self": "https://gitlab.com/api/v4/projects/25921808/issues/180",
-        "notes": "https://gitlab.com/api/v4/projects/25921808/issues/180/notes",
-        "award_emoji": "https://gitlab.com/api/v4/projects/25921808/issues/180/award_emoji",
-        "project": "https://gitlab.com/api/v4/projects/25921808",
+        "self": "https://gitlab.com/api/v4/projects/7603319/issues/3283",
+        "notes": "https://gitlab.com/api/v4/projects/7603319/issues/3283/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/7603319/issues/3283/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/7603319",
         "closed_as_duplicate_of": null
       },
       "references": {
-        "short": "#180",
-        "relative": "#180",
-        "full": "meltano/hub#180"
+        "short": "#3283",
+        "relative": "#3283",
+        "full": "meltano/meltano#3283"
       },
       "severity": "UNKNOWN",
       "moved_to_id": null,
@@ -1841,10 +1838,23 @@
         "human_readable_end_date": "May 31, 2022",
         "human_readable_timestamp": "<strong>Past due</strong>"
       },
-      "iteration": null,
+      "iteration": {
+        "id": 56416,
+        "iid": 56,
+        "sequence": 3,
+        "group_id": 2524164,
+        "title": null,
+        "description": null,
+        "state": 3,
+        "created_at": "2022-05-13T20:04:48.839Z",
+        "updated_at": "2022-05-30T00:05:02.370Z",
+        "start_date": "2022-05-23",
+        "due_date": "2022-05-29",
+        "web_url": "https://gitlab.com/groups/meltano/-/iterations/56416"
+      },
       "health_status": null,
-      "epic_issue_id": 999469,
-      "relative_position": -41553
+      "epic_issue_id": 1143978,
+      "relative_position": -40014
     }
   ]
 }

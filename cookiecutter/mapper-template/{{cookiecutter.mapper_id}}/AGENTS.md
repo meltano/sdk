@@ -196,7 +196,7 @@ stream_maps = {
         "transaction_id": "id",
         "amount": "amount",
         "flagged": "'high_value'",
-    }
+    },
 }
 ```
 
@@ -248,6 +248,7 @@ def test_field_rename():
     result = mapper.map_record(record, "stream_name")
     assert result["new_name"] == "value"
     assert "old_name" not in result
+
 
 def test_filtering():
     mapper = {{ cookiecutter.name }}Mapper(config={})

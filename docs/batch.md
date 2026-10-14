@@ -106,6 +106,14 @@ In `config.json`:
 }
 ```
 
+`prefix` is prepended directly to each generated batch filename, e.g. `prefix: "test-batch-"` produces filenames like `test-batch-<stream>-<uuid>-1.jsonl.gz`. It is not a subdirectory, and no path separator is inserted between `prefix` and the filename.
+
+### Default storage location
+
+If `storage.root` is left unset (or explicitly set to `"file://"`, its schema default), batch files are written to a `singer-sdk` subdirectory of the OS temporary directory (as returned by Python's `tempfile.gettempdir()`), e.g. `/tmp/singer-sdk` on Linux/macOS. This directory is created on demand and is **not** managed or cleaned up by the SDK.
+
+This default assumes the common case: a target reads and processes batch files shortly after the tap writes them, within the same sync run. It is not meant as durable or long-term storage — OS temp-cleanup policies (`systemd-tmpfiles`, Windows Disk Cleanup, ephemeral container filesystems that reset `/tmp` between runs) may remove files under this path independently of the sync's lifecycle. If your tap/target pairing has a significant delay between writing and reading batch files, or runs in an environment that aggressively purges temp storage, configure an explicit `storage.root` pointing at durable storage instead.
+
 ## Custom batch file creation and processing
 
 ### Tap side

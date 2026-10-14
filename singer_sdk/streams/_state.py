@@ -275,13 +275,11 @@ class StreamStateManager:
         Returns:
             Starting replication value.
         """
-        state = self.get_context_state(context)
+        if replication_method == REPLICATION_FULL_TABLE:
+            return None
 
-        return (
-            get_starting_replication_value(state)
-            if replication_method != REPLICATION_FULL_TABLE
-            else None
-        )
+        state = self.get_context_state(context)
+        return get_starting_replication_value(state)
 
     def is_state_non_resumable(self, context: types.Context | None = None) -> bool:
         """Check if state is non-resumable.

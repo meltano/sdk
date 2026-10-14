@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+import sys
 import typing as t
 from unittest.mock import Mock, patch
 
@@ -12,6 +13,11 @@ import pytest
 from singer_sdk import Tap, Target
 from singer_sdk.testing.config import SuiteConfig
 from singer_sdk.testing.runners import SingerTestRunner, TapTestRunner, TargetTestRunner
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from pathlib import Path
@@ -38,6 +44,7 @@ class TestSingerTestRunner:
         """Test that concrete subclass can be instantiated."""
 
         class ConcreteRunner(SingerTestRunner):
+            @override
             def sync_all(self, **kwargs):
                 pass
 

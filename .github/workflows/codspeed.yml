@@ -5,21 +5,8 @@ on:
     branches:
       - "main"
       - "v*"
-    paths:
-      - "singer_sdk/**"
-      - "tests/**"
-      - "noxfile.py"
-      - "pyproject.toml"
-      - "uv.lock"
-      - ".github/workflows/codspeed.yml"
   pull_request:
-    paths:
-      - "singer_sdk/**"
-      - "tests/**"
-      - "noxfile.py"
-      - "pyproject.toml"
-      - "uv.lock"
-      - ".github/workflows/codspeed.yml"
+  merge_group:
   # `workflow_dispatch` allows CodSpeed to trigger backtest
   # performance analysis in order to generate initial data.
   workflow_dispatch:
@@ -35,9 +22,36 @@ env:
 permissions: {}
 
 jobs:
+  files-changed:
+    name: Detect file changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      codspeed: ${{ steps.changes.outputs.codspeed }}
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+      id: changes
+      with:
+        filters: |
+          codspeed:
+            - "singer_sdk/**"
+            - "tests/**"
+            - "noxfile.py"
+            - "pyproject.toml"
+            - "uv.lock"
+            - ".github/workflows/codspeed.yml"
+
   benchmarks:
     name: Run benchmarks
+    needs: files-changed
     runs-on: ubuntu-latest
+    # CodSpeed doesn't support `merge_group` events
+    if: ${{ github.event_name != 'merge_group' && ( github.event_name == 'workflow_dispatch' || needs.files-changed.outputs.codspeed == 'true' ) }}
     permissions:
       contents: read
     steps:
@@ -49,7 +63,7 @@ jobs:
         python-version-file: .python-version
 
     - name: Install uv
-      uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+      uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
         cache-suffix: benchmarks
         version: ${{ env.UV_VERSION }}
@@ -59,8 +73,23 @@ jobs:
         uv export --all-packages --no-editable --frozen --no-hashes --no-dev --all-extras --group benchmark --output-file requirements.codspeed.txt
         uv pip install --system -r requirements.codspeed.txt
 
-    - uses: CodSpeedHQ/action@4296e51e7041e24dadb86d1d6e8b9320d223dbe8 # v5.0.3
+    - uses: CodSpeedHQ/action@c4fd08a3a159bd0cc208da1e0edf32b8c47d75e5 # v5.4.0
       with:
         token: ${{ secrets.CODSPEED_TOKEN }}
         run: pytest tests/ --codspeed
         mode: simulation
+
+  ci:
+    name: CI required checks (benchmarks)
+    if: always()
+    needs:
+    - files-changed
+    - benchmarks
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+    - name: Decide whether the needed jobs succeeded or failed
+      uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
+      with:
+        jobs: ${{ toJSON(needs) }}
+        allowed-skips: benchmarks

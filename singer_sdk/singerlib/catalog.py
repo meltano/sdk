@@ -17,7 +17,9 @@ else:
 
 
 if t.TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Mapping
+
+    from singer_sdk.singerlib.types import KeyProperties
 
     if sys.version_info >= (3, 11):
         from typing import Self  # noqa: ICN003
@@ -77,7 +79,7 @@ class Metadata:
     selected_by_default: bool | None = None
 
     @classmethod
-    def from_dict(cls, value: dict[str, t.Any]) -> Self:
+    def from_dict(cls, value: Mapping[str, t.Any]) -> Self:
         """Parse metadata dictionary.
 
         Args:
@@ -113,7 +115,7 @@ class Metadata:
 class StreamMetadata(Metadata):
     """Stream metadata."""
 
-    table_key_properties: t.Sequence[str] | None = None
+    table_key_properties: KeyProperties | None = None
     replication_key: str | None = None
     forced_replication_method: str | None = None
     valid_replication_keys: list[str] | None = None
@@ -188,9 +190,9 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
     def get_standard_metadata(
         cls: type[Self],
         *,
-        schema: dict[str, t.Any] | None = None,
+        schema: Mapping[str, t.Any] | None = None,
         schema_name: str | None = None,
-        key_properties: t.Sequence[str] | None = None,
+        key_properties: KeyProperties | None = None,
         valid_replication_keys: list[str] | None = None,
         replication_method: str | None = None,
         selected_by_default: bool | None = None,
@@ -220,7 +222,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):  # noqa: FURB189
         )
 
         def _add_subfield_metadata(
-            properties: dict,
+            properties: Mapping,
             breadcrumb: Breadcrumb = (),
         ) -> None:
             """Add breadcrumbs and metadata for subfields."""
@@ -333,7 +335,7 @@ class CatalogEntry:
     metadata: MetadataMapping = field(default_factory=MetadataMapping)
     schema: Schema = field(default_factory=Schema)
     stream: str | None = None
-    key_properties: t.Sequence[str] | None = None
+    key_properties: KeyProperties | None = None
     replication_key: str | None = None
     is_view: bool | None = None
     database: str | None = None
@@ -343,7 +345,7 @@ class CatalogEntry:
     replication_method: str | None = None
 
     @classmethod
-    def from_dict(cls: type[Self], stream: dict[str, t.Any]) -> Self:
+    def from_dict(cls: type[Self], stream: Mapping[str, t.Any]) -> Self:
         """Create a catalog entry from a dictionary.
 
         Args:
@@ -373,10 +375,11 @@ class CatalogEntry:
         Returns:
             A dictionary representation of the catalog entry.
         """
-        result: dict[str, t.Any] = {}
-        result["tap_stream_id"] = self.tap_stream_id
-        result["schema"] = self.schema.to_dict()
-        result["metadata"] = self.metadata.to_list()
+        result: dict[str, t.Any] = {
+            "tap_stream_id": self.tap_stream_id,
+            "schema": self.schema.to_dict(),
+            "metadata": self.metadata.to_list(),
+        }
 
         if self.database:
             result["database_name"] = self.database
@@ -403,7 +406,7 @@ class Catalog(dict[str, CatalogEntry]):  # noqa: FURB189
     """Singer catalog mapping of stream entries."""
 
     @classmethod
-    def from_dict(cls: type[Self], data: dict[str, list[dict[str, t.Any]]]) -> Self:
+    def from_dict(cls: type[Self], data: Mapping[str, list[dict[str, t.Any]]]) -> Self:
         """Create a catalog from a dictionary.
 
         Args:

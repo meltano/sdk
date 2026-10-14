@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import BooleanType, PropertiesList, Property
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from singer_sdk.streams.core import Stream
@@ -22,6 +28,7 @@ class TapConfigTest(Tap):
         Property("default_false", BooleanType, default=False),
     ).to_dict()
 
+    @override
     def discover_streams(self) -> list[Stream]:
         """Noop."""
         return []

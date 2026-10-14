@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sys
 import typing as t
 from contextlib import nullcontext
 from datetime import datetime, timedelta, timezone
@@ -11,6 +12,11 @@ import requests
 
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.streams.rest import RESTStream
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from contextlib import AbstractContextManager
@@ -31,6 +37,7 @@ class CustomResponseValidationStream(RESTStream):
         ERROR = "ERROR"
         UNAVAILABLE = "UNAVAILABLE"
 
+    @override
     def validate_response(self, response: requests.Response):
         super().validate_response(response)
         data = response.json()

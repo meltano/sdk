@@ -1,5 +1,6 @@
 {
   "type": "object",
+  "additionalProperties": true,
   "properties": {
     "id": {
       "type": [
@@ -25,6 +26,5 @@
         "null"
       ]
     }
-  },
-  "additionalProperties": true
+  }
 }

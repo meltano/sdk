@@ -40,9 +40,10 @@ else:
     from typing_extensions import TypeVar
 
 if t.TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable
 
     from singer_sdk.helpers._compat import Traversable
+    from singer_sdk.singerlib.types import KeyProperties
     from singer_sdk.streams.core import Stream
 
 
@@ -62,7 +63,7 @@ class SchemaPreprocessor(t.Protocol):
         self,
         schema: Schema,
         *,
-        key_properties: Sequence[str] = (),
+        key_properties: KeyProperties = (),
     ) -> Schema:
         """Pre-process a schema.
 
@@ -88,7 +89,7 @@ class SchemaSource(ABC, t.Generic[_TKey]):
         self,
         schema: Schema,
         *,
-        key_properties: Sequence[str] = (),
+        key_properties: KeyProperties = (),
     ) -> Schema:
         """Pre-process the schema before providing it to the stream.
 
@@ -112,7 +113,7 @@ class SchemaSource(ABC, t.Generic[_TKey]):
         key: _TKey,
         /,
         *,
-        key_properties: Sequence[str] = (),
+        key_properties: KeyProperties = (),
     ) -> Schema:
         """Convenience method to get a schema component.
 
@@ -254,7 +255,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         self,
         schema: Schema,
         *,
-        key_properties: Sequence[str] = (),
+        key_properties: KeyProperties = (),
     ) -> Schema:
         """Handle JSON object schemas.
 
@@ -400,7 +401,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         self,
         schema: Schema,
         *,
-        key_properties: Sequence[str] = (),
+        key_properties: KeyProperties = (),
     ) -> Schema:
         """Normalize an OpenAPI schema to standard JSON Schema.
 
@@ -449,7 +450,7 @@ class OpenAPISchemaNormalizer(SchemaPreprocessor):
         self,
         schema: Schema,
         *,
-        key_properties: Sequence[str] = (),
+        key_properties: KeyProperties = (),
     ) -> Schema:
         return self.normalize_schema(schema, key_properties=key_properties)
 

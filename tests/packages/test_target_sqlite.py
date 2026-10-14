@@ -622,7 +622,7 @@ def test_sqlite_process_batch_parquet(
         input=StringIO(tap_output),
         finalize=True,
     )
-    db = sqlite3.connect(config["path_to_db"])
+    db = sqlite3.connect(config["path_to_db"])  # ty: ignore[invalid-argument-type]
     cursor = db.cursor()
     cursor.execute("SELECT COUNT(*) as count FROM continents")
     assert cursor.fetchone()[0] == 7

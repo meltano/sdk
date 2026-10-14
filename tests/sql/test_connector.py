@@ -617,6 +617,7 @@ def test_adapter_without_json_serde():
     )
 
     class CustomConnector(SQLConnector):
+        @override
         def create_engine(self) -> Engine:
             return super().create_engine()
 
@@ -708,6 +709,7 @@ def test_sql_to_json_schema_map(
 
 def test_custom_type_to_jsonschema():
     class MyMap(SQLToJSONSchema):
+        @override
         @functools.singledispatchmethod
         def to_jsonschema(self, column_type: sqlalchemy.types.TypeEngine):
             return super().to_jsonschema(column_type)
@@ -936,6 +938,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
 
     def test_multiple_types_custom_handler(self):
         class CustomJSONSchemaToSQL(JSONSchemaToSQL):
+            @override
             def handle_multiple_types(
                 self,
                 types: t.Sequence[str],
@@ -972,6 +975,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
 
     def test_custom_handle_raw_string(self):
         class CustomJSONSchemaToSQL(JSONSchemaToSQL):
+            @override
             def handle_raw_string(self, schema):
                 if schema.get("contentMediaType") == "image/png":
                     return sqlalchemy.LargeBinary()

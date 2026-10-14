@@ -10,6 +10,8 @@ from referencing import Registry
 from referencing.jsonschema import DRAFT202012
 
 if t.TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from referencing._core import Resolver
 
 __all__ = [
@@ -134,7 +136,7 @@ class Schema:
     @classmethod
     def from_dict(
         cls: t.Type[Schema],  # noqa: UP006
-        data: dict,
+        data: Mapping,
         **schema_defaults: t.Any,
     ) -> Schema:
         """Initialize a Schema object based on the JSON Schema structure.
@@ -255,7 +257,7 @@ _OPTIONAL_SCHEMA_KEYWORDS: tuple[str, ...] = (
 
 def resolve_schema_references(
     schema: _SchemaDict,
-    refs: dict[str, _SchemaDict] | None = None,
+    refs: Mapping[str, _SchemaDict] | None = None,
 ) -> dict:
     """Resolves and replaces json-schema $refs with the appropriate dict.
 

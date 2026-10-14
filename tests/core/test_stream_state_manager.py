@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 import typing as t
+from types import MappingProxyType
 
 import pytest
 
@@ -140,6 +142,15 @@ def test_get_context_state_with_state_partitioning_keys(
     state = manager.get_context_state(partition_context)
     assert state["context"] == state_context
     assert state["replication_key_value"] == "2021-01-01"
+
+
+def test_get_context_state_serializable(state_manager: StreamStateManager) -> None:
+    context = MappingProxyType({"tenant_id": "abc123"})
+    state = state_manager.get_context_state(context)
+    assert state["context"] == context
+
+    data = json.loads(json.dumps(state))
+    assert data["context"] == context
 
 
 # Tests for get_state_partition_context method
@@ -450,6 +461,25 @@ def test_get_starting_replication_value_full_table_returns_none(
     manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
     result = manager.get_starting_replication_value(None, REPLICATION_FULL_TABLE)
     assert result is None
+
+
+def test_get_starting_replication_value_full_table_does_not_create_partition(
+    tap_state: types.TapState,
+) -> None:
+    """FULL_TABLE lookups must not create an empty partition state entry.
+
+    Regression test: calling this with a partition context used to create a
+    bare `{"context": ...}` partition entry as a side effect of
+    `get_writeable_state_dict`, even though the method always returns `None`
+    for FULL_TABLE streams and writes nothing else.
+    """
+    manager = StreamStateManager(stream_name="test_stream", tap_state=tap_state)
+    result = manager.get_starting_replication_value(
+        {"workspaceId": "abc"},
+        REPLICATION_FULL_TABLE,
+    )
+    assert result is None
+    assert tap_state == {}
 
 
 def test_get_starting_replication_value_incremental_returns_value(
