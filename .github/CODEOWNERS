@@ -11,10 +11,10 @@
 
 # Docs (General)
 /docs/ @meltano/engineering @meltano/marketing
-/README.md @tayloramurphy @meltano/engineering @meltano/marketing
+/README.md @meltano/engineering @meltano/marketing
 
 # Docs (Contributing)
-/docs/CONTRIBUTING.md @tayloramurphy @meltano/engineering
+/docs/CONTRIBUTING.md @meltano/engineering
 
 # Release Ops (see `/.pyproject.toml` for list of bumped files)
 /cookiecutter/*/*/pyproject.toml @meltano/engineering
