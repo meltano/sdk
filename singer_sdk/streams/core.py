@@ -464,11 +464,21 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Args:
             context: Stream partition or context dictionary.
         """
+        config = dict(self.config)
+        if (
+            not self.is_timestamp_replication_key
+            and type(self).compare_start_date is Stream.compare_start_date
+        ):
+            # ``start_date`` is an ISO timestamp. Do not use it to seed a
+            # non-timestamp replication key unless the stream explicitly
+            # overrides ``compare_start_date`` to support that conversion.
+            config.pop("start_date", None)
+
         self.state_manager.write_starting_replication_value(
             context=context,
             replication_method=self.replication_method,
             replication_key=self.replication_key,
-            config=dict(self.config),
+            config=config,
             compare_start_date_fn=self.compare_start_date,
         )
 
