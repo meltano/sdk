@@ -4,10 +4,10 @@
 # nested in that directory, on any level
 
 # Default owners
-* @edgarrmondragon
+@meltano/engineering
 
 # CI/CD
-/.github/workflows/ @edgarrmondragon @meltano/engineering
+/.github/workflows/ @meltano/engineering
 
 # Docs (General)
 /docs/ @meltano/engineering @meltano/marketing
