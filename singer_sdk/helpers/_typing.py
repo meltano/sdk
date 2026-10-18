@@ -80,10 +80,12 @@ def append_type(type_dict: dict, new_type: str) -> dict:
     """Return a combined type definition using the 'anyOf' JSON Schema construct."""
     result = copy.deepcopy(type_dict)
     if "anyOf" in result:
-        if isinstance(result["anyOf"], list) and new_type not in result["anyOf"]:
-            result["anyOf"].append(new_type)
-        elif new_type != result["anyOf"]:
-            result["anyOf"] = [result["anyOf"], new_type]
+        new_type_dict = {"type": new_type}
+        if isinstance(result["anyOf"], list):
+            if new_type_dict not in result["anyOf"]:
+                result["anyOf"].append(new_type_dict)
+        elif new_type_dict != result["anyOf"]:
+            result["anyOf"] = [result["anyOf"], new_type_dict]
         return result
 
     if "oneOf" in result:
