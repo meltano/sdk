@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import decimal
 import sys
 {% if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from functools import cached_property
@@ -12,7 +11,6 @@ from typing import TYPE_CHECKING, Any
 {% if cookiecutter.auth_method  == "API Key" -%}
 from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.authenticators import APIKeyAuthenticator
-from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
@@ -20,7 +18,6 @@ from {{ cookiecutter.library_name }} import schemas
 {% elif cookiecutter.auth_method  == "Bearer Token" -%}
 from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.authenticators import BearerTokenAuthenticator
-from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
@@ -28,21 +25,18 @@ from {{ cookiecutter.library_name }} import schemas
 {% elif cookiecutter.auth_method == "Basic Auth" -%}
 from requests.auth import HTTPBasicAuth
 from singer_sdk import SchemaDirectory, StreamSchema
-from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
 
 {% elif cookiecutter.auth_method == "Custom or N/A" -%}
 from singer_sdk import SchemaDirectory, StreamSchema
-from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
 
 {% elif cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from singer_sdk import SchemaDirectory, StreamSchema
-from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
@@ -56,9 +50,6 @@ else:
     from typing_extensions import override
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
-
-    import requests
     {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
     from singer_sdk.helpers.types import Auth, Context
     {%- else %}
@@ -75,7 +66,11 @@ SCHEMAS_DIR = SchemaDirectory(schemas)
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
-    # Update this value if necessary or override `parse_response`.
+    # JSONPath expression that selects the records in the API response. "$[*]"
+    # matches every item of a top-level array. If the records are wrapped in an
+    # envelope, like `{"data": [{"id": 1}, {"id": 2}]}`, use "$.data[*]" instead. If
+    # the response is a single object, use "$". Update this value if necessary or
+    # override `parse_response`.
     records_jsonpath = "$[*]"
 
     # Update this value if necessary or override `get_new_paginator`.
@@ -184,22 +179,6 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         # Optionally, add the payload for a POST request
         # request.data = ...
         return request
-
-    @override
-    def parse_response(self, response: requests.Response) -> Iterable[dict]:
-        """Parse the response and return an iterator of result records.
-
-        Args:
-            response: The HTTP ``requests.Response`` object.
-
-        Yields:
-            Each record from the source.
-        """
-        # TODO: Parse response body and return a set of records.
-        yield from extract_jsonpath(
-            self.records_jsonpath,
-            input=response.json(parse_float=decimal.Decimal),
-        )
 
     @override
     def post_process(
