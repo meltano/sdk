@@ -40,7 +40,7 @@ def extract_jsonpath(
 
     match: jsonpath_ng.DatumInContext
 
-    if _is_wildcard_child(compiled_jsonpath):
+    if _is_wildcard_child(compiled_jsonpath, expression):
         # jsonpath-ng>=1.11 no longer coerces scalars and objects into single-item
         # arrays for `[*]`, so a lone object would yield its values instead of
         # itself. Evaluate the parent path and keep the legacy behavior.
@@ -79,18 +79,26 @@ def _docs_url() -> str:
     return f"https://sdk.meltano.com/en/{ref}/code_samples.html"
 
 
-def _is_wildcard_child(path: jsonpath_ng.JSONPath) -> t.TypeGuard[Child]:
+def _is_wildcard_child(
+    path: jsonpath_ng.JSONPath,
+    expression: str,
+) -> t.TypeGuard[Child]:
     """Check whether a compiled JSONPath ends in an unbounded ``[*]``.
+
+    jsonpath-ng parses both ``[*]`` and ``[:]`` as an unbounded slice, so the original
+    expression is checked to only match the former.
 
     Args:
         path: A compiled JSONPath expression.
+        expression: The JSONPath expression ``path`` was compiled from.
 
     Returns:
-        True if the expression is a child with an unbounded slice, False otherwise.
+        True if the expression is a child with a ``[*]`` wildcard, False otherwise.
     """
     right = getattr(path, "right", None)
     return (
-        isinstance(path, Child)
+        expression.rstrip().endswith("[*]")
+        and isinstance(path, Child)
         and isinstance(right, Slice)
         and right.start is None
         and right.end is None

@@ -44,8 +44,16 @@ def test_descendant_wildcard():
 
 def test_bare_descendant_wildcard_not_rewritten():
     """``$..[*]`` has no parent path to evaluate, so it is left to jsonpath-ng."""
-    assert not jsonpath._is_wildcard_child(jsonpath._compile_jsonpath("$..[*]"))
-    assert jsonpath._is_wildcard_child(jsonpath._compile_jsonpath("$..items[*]"))
+    for expression, expected in [("$..[*]", False), ("$..items[*]", True)]:
+        compiled = jsonpath._compile_jsonpath(expression)
+        assert jsonpath._is_wildcard_child(compiled, expression) is expected
+
+
+def test_unbounded_slice_is_not_a_wildcard():
+    """``[:]`` shares an AST with ``[*]`` but must keep its slice semantics."""
+    expression = "$.data[:]"
+    compiled = jsonpath._compile_jsonpath(expression)
+    assert not jsonpath._is_wildcard_child(compiled, expression)
 
 
 @pytest.mark.parametrize(
