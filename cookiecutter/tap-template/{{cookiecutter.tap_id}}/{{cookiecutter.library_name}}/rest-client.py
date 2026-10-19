@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import decimal
 import sys
 {% if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from functools import cached_property
@@ -12,7 +11,6 @@ from typing import TYPE_CHECKING, Any
 {% if cookiecutter.auth_method  == "API Key" -%}
 from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.authenticators import APIKeyAuthenticator
-from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
@@ -20,7 +18,6 @@ from {{ cookiecutter.library_name }} import schemas
 {% elif cookiecutter.auth_method  == "Bearer Token" -%}
 from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.authenticators import BearerTokenAuthenticator
-from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
@@ -28,21 +25,18 @@ from {{ cookiecutter.library_name }} import schemas
 {% elif cookiecutter.auth_method == "Basic Auth" -%}
 from requests.auth import HTTPBasicAuth
 from singer_sdk import SchemaDirectory, StreamSchema
-from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
 
 {% elif cookiecutter.auth_method == "Custom or N/A" -%}
 from singer_sdk import SchemaDirectory, StreamSchema
-from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
 
 {% elif cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from singer_sdk import SchemaDirectory, StreamSchema
-from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }} import schemas
@@ -56,9 +50,6 @@ else:
     from typing_extensions import override
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
-
-    import requests
     {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
     from singer_sdk.helpers.types import Auth, Context
     {%- else %}
