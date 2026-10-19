@@ -26,20 +26,20 @@ repos:
   - id: zizmor
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.38.0
+  rev: 0.38.2
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
   - id: check-meltano
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.16.8
+  rev: v0.16.10
   hooks:
   - id: ruff-check
   - id: ruff-format
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.12.17
+  rev: 0.12.24
   hooks:
   - id: uv-audit
   - id: uv-lock
@@ -51,6 +51,6 @@ repos:
   - id: mdformat
 
 - repo: https://github.com/crate-ci/typos
-  rev: v1.50.2
+  rev: v1.51.1
   hooks:
   - id: typos

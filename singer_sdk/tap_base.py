@@ -77,6 +77,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         TapCapabilities.CATALOG,
         TapCapabilities.STATE,
         TapCapabilities.DISCOVER,
+        TapCapabilities.START_DATE,
         PluginCapabilities.ABOUT,
         PluginCapabilities.ACTIVATE_VERSION,
         PluginCapabilities.STREAM_MAPS,

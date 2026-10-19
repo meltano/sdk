@@ -12,6 +12,7 @@ from singer_sdk.typing import (
     ArrayType,
     BooleanType,
     Constant,
+    DateTimeType,
     DecimalType,
     IntegerType,
     NullType,
@@ -200,6 +201,22 @@ def _flattening_config() -> dict[str, t.Any]:
             StringType(),
             title="Flattening Separator",
             description="The separator to use when flattening keys.",
+        ),
+    ).to_dict()
+
+
+def _start_date_config() -> dict[str, t.Any]:
+    """Build the JSON schema for `START_DATE_CONFIG`.
+
+    Returns:
+        The JSON schema.
+    """
+    return PropertiesList(
+        Property(
+            "start_date",
+            DateTimeType(nullable=True),
+            title="Start Date",
+            description="The earliest record date to sync",
         ),
     ).to_dict()
 
@@ -620,6 +637,10 @@ class TapCapabilities(CapabilitiesEnum):
     #: feature in `MeltanoHub <https://hub.meltano.com/singer/docs#log-based>`_.
     LOG_BASED = "log-based"
 
+    #: Accept a ``start_date`` setting. An incremental stream starts from that date
+    #: when it has no bookmark, or when its timestamp bookmark is older.
+    START_DATE = "start-date"
+
     #: Deprecated. Please use :attr:`~TapCapabilities.CATALOG` instead.
     PROPERTIES = "properties", "Please use CATALOG instead."
 
@@ -699,6 +720,8 @@ def tap_config_for_capabilities(
         schemas.append(_emit_activate_version_config())
     if PluginCapabilities.BATCH in capabilities:
         schemas.append(_tap_batch_config())
+    if TapCapabilities.START_DATE in capabilities:
+        schemas.append(_start_date_config())
     return _merge_schemas(*schemas)
 
 
@@ -739,6 +762,7 @@ TARGET_BATCH_CONFIG = _target_batch_config()
 """Batch config schema for targets, which read the encoding off each BATCH message."""
 SQL_TAP_USE_SINGER_DECIMAL = _sql_tap_config()
 TARGET_SCHEMA_CONFIG = _target_schema_config()
+START_DATE_CONFIG = _start_date_config()
 EMIT_ACTIVATE_VERSION_CONFIG = _emit_activate_version_config()
 ACTIVATE_VERSION_CONFIG = _activate_version_config()
 ADD_RECORD_METADATA_CONFIG = _add_record_metadata_config()

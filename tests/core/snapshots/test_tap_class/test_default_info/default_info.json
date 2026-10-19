@@ -10,6 +10,7 @@
     "catalog",
     "state",
     "discover",
+    "start-date",
     "about",
     "activate-version",
     "stream-maps",
@@ -299,6 +300,15 @@
         },
         "title": "Tap BATCH Configuration",
         "description": "Configuration for emitting BATCH messages."
+      },
+      "start_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "format": "date-time",
+        "title": "Start Date",
+        "description": "The earliest record date to sync"
       }
     }
   }

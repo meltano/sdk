@@ -10,6 +10,8 @@ from click.testing import CliRunner
 
 from singer_sdk import Tap
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers.capabilities import TapCapabilities
+from singer_sdk.typing import PropertiesList
 
 if t.TYPE_CHECKING:
     from pytest_snapshot.plugin import Snapshot
@@ -82,6 +84,34 @@ def test_config_errors(
 
     if isinstance(exc, pytest.ExceptionInfo):
         assert exc.value.errors == errors
+
+
+@pytest.mark.parametrize(
+    "tap_capabilities,expectation",
+    [
+        pytest.param(
+            Tap.capabilities,
+            nullcontext(),
+            id="default_capabilities",
+        ),
+        pytest.param(
+            [c for c in Tap.capabilities if c is not TapCapabilities.START_DATE],
+            pytest.raises(ConfigValidationError, match="Config validation failed"),
+            id="without_start_date_capability",
+        ),
+    ],
+)
+def test_start_date_capability(tap_capabilities: list[TapCapabilities], expectation):
+    class StartDateTap(Tap):
+        name = "start-date-tap"
+        capabilities = tap_capabilities
+        config_jsonschema = PropertiesList(additional_properties=False).to_dict()
+
+        def discover_streams(self):
+            return []
+
+    with expectation:
+        StartDateTap(config={"start_date": "2021-01-01T00:00:00Z"})
 
 
 def test_cli(tap_class: type[Tap]):

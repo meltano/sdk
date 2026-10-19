@@ -502,5 +502,25 @@ def api_changes(session: nox.Session) -> None:
     session.run("uvx", "griffecli", *args, external=True)
 
 
+@nox.session(name="bump", default=False)
+def bump_version(session: nox.Session) -> None:
+    """Bump package version."""
+    token = session.run("gh", "auth", "token", external=True, silent=True)
+    assert isinstance(token, str)  # ruff: ignore[assert]
+    session.run(
+        "uvx",
+        "--with=git+https://github.com/meltano/commitizen-version-bump@main",
+        "--from=commitizen",
+        "cz",
+        "bump",
+        "--changelog",
+        env={
+            "GITHUB_REPOSITORY": "meltano/sdk",
+            "GITHUB_TOKEN": token.strip(),
+            "UV_NO_CACHE": "1",
+        },
+    )
+
+
 if __name__ == "__main__":
     nox.main()

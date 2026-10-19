@@ -658,7 +658,7 @@ class SQLConnector:  # noqa: PLR0904
         )
 
     @contextmanager
-    def _connect(self) -> t.Iterator[sa.Connection]:
+    def _connect(self) -> t.Generator[sa.Connection]:
         with self._engine.connect().execution_options(stream_results=True) as conn:
             yield conn
 
