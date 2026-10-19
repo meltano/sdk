@@ -14,6 +14,7 @@
     "catalog",
     "state",
     "discover",
+    "start-date",
     "about",
     "activate-version",
     "stream-maps",
@@ -458,21 +459,19 @@
           "object",
           "null"
         ],
-        "required": [
-          "encoding"
-        ],
         "additionalProperties": true,
         "properties": {
           "encoding": {
-            "type": "object",
-            "required": [
-              "format"
+            "type": [
+              "object",
+              "null"
             ],
             "additionalProperties": true,
             "properties": {
               "format": {
                 "type": [
-                  "string"
+                  "string",
+                  "null"
                 ],
                 "title": "Batch Encoding Format",
                 "description": "Format to use for batch files."
@@ -523,6 +522,15 @@
         },
         "title": "Tap BATCH Configuration",
         "description": "Configuration for emitting BATCH messages."
+      },
+      "start_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "format": "date-time",
+        "title": "Start Date",
+        "description": "The earliest record date to sync"
       }
     },
     "required": [
