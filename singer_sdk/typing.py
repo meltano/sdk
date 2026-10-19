@@ -52,6 +52,13 @@ Note:
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "json",
+    "jsonschema.protocols",
+    "singer_sdk.helpers._typing",
+    "sqlalchemy.types",
+}
+
 import json
 import sys
 import typing as t

@@ -2,6 +2,26 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "click",
+    "collections.abc",
+    "contextlib",
+    "pathlib",
+    "singer_sdk.configuration._dict_config",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.helpers._state",
+    "singer_sdk.helpers._util",
+    "singer_sdk.mapper",
+    "singer_sdk.singerlib",
+    "singer_sdk.singerlib.catalog",
+    "singer_sdk.singerlib.encoding.base",
+    "singer_sdk.streams",
+    "types",
+    "warnings",
+}
+
 import abc
 import contextlib
 import sys

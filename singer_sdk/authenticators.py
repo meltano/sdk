@@ -2,6 +2,22 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "base64",
+    "datetime",
+    "logging",
+    "math",
+    "requests",
+    "requests.adapters",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers._util",
+    "singer_sdk.streams.rest",
+    "types",
+    "urllib.parse",
+    "urllib3",
+    "warnings",
+}
+
 import base64
 import datetime
 import logging

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"collections.abc", "json", "singer_sdk.helpers", "types"}
+
 import abc
 import enum
 import json

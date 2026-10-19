@@ -2,6 +2,22 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "collections.abc",
+    "datetime",
+    "logging",
+    "singer_sdk",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers._util",
+    "singer_sdk.helpers.capabilities",
+    "singer_sdk.singerlib",
+    "singer_sdk.singerlib.types",
+    "sqlalchemy.engine",
+    "sqlalchemy.engine.interfaces",
+    "sqlalchemy.sql",
+    "warnings",
+}
+
 import functools
 import logging
 import typing as t

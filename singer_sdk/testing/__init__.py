@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "singer_sdk.testing.config",
+    "singer_sdk.testing.factory",
+    "singer_sdk.testing.legacy",
+    "singer_sdk.testing.runners",
+    "typing",
+    "warnings",
+}
+
 import typing as t
 import warnings
 
-from .config import SuiteConfig
-from .factory import get_tap_test_class, get_target_test_class
-from .legacy import (
+from singer_sdk.testing.config import SuiteConfig
+from singer_sdk.testing.factory import get_tap_test_class, get_target_test_class
+from singer_sdk.testing.legacy import (
     _get_tap_catalog,
     _select_all,
     sync_end_to_end,
@@ -15,7 +24,7 @@ from .legacy import (
     tap_to_target_sync_test,
     target_sync_test,
 )
-from .runners import SingerTestRunner, TapTestRunner, TargetTestRunner
+from singer_sdk.testing.runners import SingerTestRunner, TapTestRunner, TargetTestRunner
 
 
 def __getattr__(name: str) -> t.Any:  # noqa: ANN401

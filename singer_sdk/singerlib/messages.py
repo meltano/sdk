@@ -2,11 +2,19 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "collections.abc",
+    "datetime",
+    "singer_sdk.singerlib.encoding.base",
+    "singer_sdk.singerlib.encoding.simple",
+    "singer_sdk.singerlib.types",
+}
+
 import typing as t
 
-from .encoding import SimpleSingerWriter as SingerWriter
-from .encoding.base import SingerMessageType
-from .encoding.simple import (
+from singer_sdk.singerlib.encoding import SimpleSingerWriter as SingerWriter
+from singer_sdk.singerlib.encoding.base import SingerMessageType
+from singer_sdk.singerlib.encoding.simple import (
     ActivateVersionMessage,
     Message,
     RecordMessage,
@@ -19,7 +27,7 @@ if t.TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
     from datetime import datetime
 
-    from .types import KeyProperties
+    from singer_sdk.singerlib.types import KeyProperties
 
 __all__ = [
     "ActivateVersionMessage",

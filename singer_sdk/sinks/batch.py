@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"datetime", "uuid"}
+
 import abc
 import datetime
 import sys

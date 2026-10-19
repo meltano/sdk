@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"click"}
+
 import typing as t
 
 if t.TYPE_CHECKING:

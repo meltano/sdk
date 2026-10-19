@@ -2,6 +2,28 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "copy",
+    "importlib",
+    "jsonschema",
+    "logging",
+    "pathlib",
+    "signal",
+    "singer_sdk",
+    "singer_sdk._logging",
+    "singer_sdk.configuration._dict_config",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.helpers._packaging",
+    "singer_sdk.helpers._util",
+    "singer_sdk.helpers.types",
+    "singer_sdk.mapper",
+    "singer_sdk.singerlib.encoding.base",
+    "threading",
+    "types",
+    "warnings",
+}
+
 import abc
 import copy
 import dataclasses

@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "datetime",
+    "decimal",
+    "pathlib",
+    "simplejson",
+    "singer_sdk.helpers.types",
+}
+
 import datetime
 import decimal
 import typing as t

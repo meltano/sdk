@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "dotenv",
+    "dotenv.main",
+    "singer_sdk.helpers",
+    "singer_sdk.helpers._util",
+    "singer_sdk.helpers.types",
+}
+
 import logging
 import os
 import typing as t

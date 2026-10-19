@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "datetime",
+    "logging",
+    "singer_sdk.helpers",
+    "singer_sdk.helpers._state",
+    "singer_sdk.singerlib.catalog",
+}
+
 import logging
 import typing as t
 

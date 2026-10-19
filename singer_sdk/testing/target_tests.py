@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"pytest", "singer_sdk.exceptions"}
+
 import sys
 
 import pytest

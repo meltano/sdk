@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"singer_sdk.helpers.types", "uuid"}
+
 import sys
 import typing as t
 from uuid import uuid4

@@ -2,6 +2,18 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "copy",
+    "decimal",
+    "math",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.helpers.conform",
+    "uuid",
+    "warnings",
+}
+
 import copy
 import datetime
 import decimal

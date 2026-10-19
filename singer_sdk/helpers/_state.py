@@ -2,6 +2,15 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "copy",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers",
+    "singer_sdk.helpers._typing",
+    "singer_sdk.singerlib.encoding.base",
+    "singer_sdk.singerlib.encoding.simple",
+}
+
 import copy
 import logging
 import typing as t

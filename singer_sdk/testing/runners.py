@@ -2,6 +2,17 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "collections",
+    "contextlib",
+    "io",
+    "json",
+    "pathlib",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.helpers.types",
+    "singer_sdk.testing.config",
+}
+
 import abc
 import io
 import json

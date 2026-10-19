@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"fsspec", "tempfile", "upath", "urllib.parse"}
+
 import enum
 import os.path
 import tempfile

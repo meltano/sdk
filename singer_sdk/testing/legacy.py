@@ -2,6 +2,15 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "contextlib",
+    "io",
+    "singer_sdk.mapper_base",
+    "singer_sdk.singerlib",
+    "singer_sdk.tap_base",
+    "singer_sdk.target_base",
+}
+
 import io
 import typing as t
 from contextlib import redirect_stderr, redirect_stdout

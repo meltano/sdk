@@ -2,6 +2,22 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "collections.abc",
+    "copy",
+    "importlib.resources",
+    "json",
+    "pathlib",
+    "requests",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.singerlib.schema",
+    "singer_sdk.singerlib.types",
+    "singer_sdk.streams.core",
+    "types",
+    "urllib.parse",
+}
+
 import importlib.resources
 import json
 import sys

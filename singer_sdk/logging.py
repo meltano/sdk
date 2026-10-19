@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"json", "linecache", "singer_sdk"}
+
 import json
 import linecache
 import logging

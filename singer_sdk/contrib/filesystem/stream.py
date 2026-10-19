@@ -2,6 +2,16 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "datetime",
+    "fsspec",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers._util",
+    "singer_sdk.helpers.types",
+    "singer_sdk.streams.core",
+    "singer_sdk.tap_base",
+}
+
 import abc
 import functools
 import sys

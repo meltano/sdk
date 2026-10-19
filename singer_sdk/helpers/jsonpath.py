@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "jsonpath_ng",
+    "jsonpath_ng.ext",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.helpers._packaging",
+    "warnings",
+}
+
 import logging
 import re
 import typing as t
