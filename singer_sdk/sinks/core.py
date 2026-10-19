@@ -2,6 +2,26 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "copy",
+    "datetime",
+    "gzip",
+    "importlib.util",
+    "jsonschema",
+    "logging",
+    "singer_sdk",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers._batch",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.helpers._typing",
+    "singer_sdk.helpers.conform",
+    "singer_sdk.singerlib.json",
+    "singer_sdk.singerlib.types",
+    "singer_sdk.target_base",
+    "singer_sdk.typing",
+    "types",
+}
+
 import abc
 import copy
 import datetime

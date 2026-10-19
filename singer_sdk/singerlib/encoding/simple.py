@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "datetime",
+    "json.decoder",
+    "singer_sdk.singerlib.exceptions",
+    "singer_sdk.singerlib.json",
+    "singer_sdk.singerlib.types",
+}
+
 import json.decoder
 import logging
 import sys

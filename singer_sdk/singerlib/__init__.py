@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "singer_sdk.singerlib",
+    "singer_sdk.singerlib.catalog",
+    "singer_sdk.singerlib.messages",
+    "singer_sdk.singerlib.schema",
+    "singer_sdk.singerlib.utils",
+}
+
 from singer_sdk.singerlib import exceptions
 from singer_sdk.singerlib.catalog import (
     Catalog,

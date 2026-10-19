@@ -2,6 +2,30 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "backoff",
+    "backoff.types",
+    "copy",
+    "datetime",
+    "decimal",
+    "http",
+    "logging",
+    "requests",
+    "requests.exceptions",
+    "singer_sdk",
+    "singer_sdk.authenticators",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.helpers._packaging",
+    "singer_sdk.helpers.jsonpath",
+    "singer_sdk.helpers.types",
+    "singer_sdk.pagination",
+    "singer_sdk.singerlib",
+    "singer_sdk.tap_base",
+    "urllib.parse",
+    "warnings",
+}
+
 import abc
 import copy
 import decimal

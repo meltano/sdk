@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"datetime"}
+
 import sys
 from datetime import datetime, timedelta, timezone
 

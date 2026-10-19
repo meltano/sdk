@@ -2,6 +2,16 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "importlib",
+    "importlib.abc",
+    "importlib.metadata",
+    "importlib.resources.abc",
+    "importlib_metadata",
+    "typing_extensions",
+    "warnings",
+}
+
 import datetime
 import sys
 import warnings

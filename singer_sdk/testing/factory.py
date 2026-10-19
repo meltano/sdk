@@ -2,14 +2,23 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "pytest",
+    "singer_sdk",
+    "singer_sdk.testing.config",
+    "singer_sdk.testing.runners",
+    "singer_sdk.testing.suites",
+    "singer_sdk.testing.templates",
+}
+
 import typing as t
 from dataclasses import dataclass
 
 import pytest
 
-from .config import SuiteConfig
-from .runners import TapTestRunner, TargetTestRunner
-from .suites import (
+from singer_sdk.testing.config import SuiteConfig
+from singer_sdk.testing.runners import TapTestRunner, TargetTestRunner
+from singer_sdk.testing.suites import (
     tap_stream_attribute_tests,
     tap_stream_tests,
     tap_tests,
@@ -18,13 +27,12 @@ from .suites import (
 
 if t.TYPE_CHECKING:
     from singer_sdk import Stream, Tap, Target
+    from singer_sdk.testing.suites import SingerTestSuite
     from singer_sdk.testing.templates import (
         AttributeTestTemplate,
         StreamTestTemplate,
         TapTestTemplate,
     )
-
-    from .suites import SingerTestSuite
 
 
 class StreamTestParams(t.NamedTuple):

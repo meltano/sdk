@@ -6,6 +6,13 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "singer_sdk.helpers._compat",
+    "singer_sdk.sql",
+    "singer_sdk.sql.connector",
+    "warnings",
+}
+
 import typing as t
 import warnings
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"gzip", "singer_sdk.singerlib.json", "uuid"}
+
 import gzip
 import sys
 import typing as t

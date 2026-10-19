@@ -2,6 +2,21 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "collections",
+    "copy",
+    "re",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers._conformers",
+    "singer_sdk.helpers._util",
+    "singer_sdk.singerlib.types",
+    "singer_sdk.target_base",
+    "sqlalchemy",
+    "sqlalchemy.sql",
+    "sqlalchemy.sql.expression",
+    "warnings",
+}
+
 import functools
 import re
 import sys

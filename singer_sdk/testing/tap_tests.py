@@ -2,6 +2,17 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "jsonschema.exceptions",
+    "pytest",
+    "singer_sdk",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.helpers._typing",
+    "singer_sdk.streams.core",
+    "singer_sdk.typing",
+    "warnings",
+}
+
 import sys
 import typing as t
 import warnings

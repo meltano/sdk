@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "fsspec",
+    "fsspec.implementations.dirfs",
+    "pathlib",
+    "singer_sdk.configuration._dict_config",
+    "singer_sdk.exceptions",
+}
+
 import enum
 import functools
 import logging

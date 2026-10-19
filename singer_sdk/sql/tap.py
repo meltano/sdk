@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "singer_sdk.configuration._dict_config",
+    "singer_sdk.helpers.capabilities",
+    "singer_sdk.sql.connector",
+    "singer_sdk.sql.stream",
+    "singer_sdk.streams.core",
+}
+
 import sys
 import typing as t
 

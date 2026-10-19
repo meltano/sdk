@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"singer_sdk.sql.stream"}
+
 import warnings
 
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning

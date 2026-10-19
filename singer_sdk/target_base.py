@@ -2,6 +2,26 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "click",
+    "collections.abc",
+    "copy",
+    "joblib",
+    "pathlib",
+    "singer_sdk.configuration._dict_config",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers._batch",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.mapper",
+    "singer_sdk.singerlib.encoding.base",
+    "singer_sdk.singerlib.json",
+    "singer_sdk.singerlib.types",
+    "singer_sdk.sinks",
+    "singer_sdk.sql",
+    "types",
+    "warnings",
+}
+
 import abc
 import copy
 import sys

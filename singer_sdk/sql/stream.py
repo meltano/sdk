@@ -2,6 +2,16 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "singer_sdk.helpers._catalog",
+    "singer_sdk.helpers.types",
+    "singer_sdk.singerlib",
+    "singer_sdk.singerlib.types",
+    "singer_sdk.tap_base",
+    "sqlalchemy",
+    "sqlalchemy.sql",
+}
+
 import abc
 import sys
 import typing as t

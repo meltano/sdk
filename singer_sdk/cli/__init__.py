@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
-from ._decorator import plugin_cli
+__lazy_modules__ = {"singer_sdk.cli._decorator"}
+
+from singer_sdk.cli._decorator import plugin_cli
 
 __all__ = ["plugin_cli"]

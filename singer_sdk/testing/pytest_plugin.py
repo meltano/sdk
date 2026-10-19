@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"pytest", "singer_sdk.testing.factory"}
+
 import pytest
 
 from singer_sdk.testing.factory import BaseTestClass

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"requests", "singer_sdk.exceptions", "singer_sdk.helpers.types"}
+
 import abc
 import sys
 import typing as t
