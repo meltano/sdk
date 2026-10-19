@@ -207,6 +207,7 @@ Configuration properties are defined in the tap class:
 - Secret properties (passwords, tokens)
 - Mark sensitive data with `secret=True` parameter
 - Defaults specified in config schema
+- The SDK adds a built-in `start_date` setting, so do not define it
 
 Example configuration schema:
 
@@ -216,7 +217,6 @@ from singer_sdk import typing as th
 config_jsonschema = th.PropertiesList(
     th.Property("api_url", th.StringType, required=True),
     th.Property("api_key", th.StringType, required=True, secret=True),
-    th.Property("start_date", th.DateTimeType),
 ).to_dict()
 ```
 
