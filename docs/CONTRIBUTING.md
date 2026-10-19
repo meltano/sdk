@@ -1,6 +1,6 @@
 # Contributing Guide
 
-_**Note:** The SDK currently works with Python versions 3.10 through 3.14.x._
+_**Note:** The SDK currently works with Python versions 3.10 through 3.15.x._
 
 Let's build together! Please see our [Contributor Guide](https://docs.meltano.com/contribute/)
 for more information on contributing to Meltano.
