@@ -520,8 +520,8 @@
             "description": "Defines the storage layer to use when writing batch files"
           }
         },
-        "title": "Batch Configuration",
-        "description": "Configuration for BATCH message capabilities."
+        "title": "Tap BATCH Configuration",
+        "description": "Configuration for emitting BATCH messages."
       },
       "start_date": {
         "type": [

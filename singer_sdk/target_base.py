@@ -12,18 +12,14 @@ import warnings
 import click
 from joblib import Parallel, delayed, parallel_config
 
+from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers.capabilities import (
-    ACTIVATE_VERSION_CONFIG,
-    ADD_RECORD_METADATA_CONFIG,
-    BATCH_CONFIG,
-    TARGET_BATCH_SIZE_ROWS_CONFIG,
-    TARGET_LOAD_METHOD_CONFIG,
-    TARGET_VALIDATE_RECORDS_CONFIG,
     PluginCapabilities,
     TargetCapabilities,
+    target_config_for_capabilities,
 )
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import BaseSingerReader, _ConfigInput
@@ -665,29 +661,10 @@ class Target(BaseSingerReader, abc.ABC):
         Args:
             config_jsonschema: [description]
         """
-
-        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
-            # Append any missing properties in the target with those from source.
-            for k, v in source_jsonschema["properties"].items():
-                if k not in target_jsonschema["properties"]:
-                    target_jsonschema["properties"][k] = v
-
-        _merge_missing(ADD_RECORD_METADATA_CONFIG, config_jsonschema)
-        _merge_missing(TARGET_LOAD_METHOD_CONFIG, config_jsonschema)
-        _merge_missing(TARGET_BATCH_SIZE_ROWS_CONFIG, config_jsonschema)
-
-        capabilities = cls.capabilities
-
-        if PluginCapabilities.ACTIVATE_VERSION in capabilities:
-            _merge_missing(ACTIVATE_VERSION_CONFIG, config_jsonschema)
-
-        if PluginCapabilities.BATCH in capabilities:
-            _merge_missing(BATCH_CONFIG, config_jsonschema)
-
-        if TargetCapabilities.VALIDATE_RECORDS in capabilities:
-            _merge_missing(TARGET_VALIDATE_RECORDS_CONFIG, config_jsonschema)
-
-        super().append_builtin_config(config_jsonschema)
+        merge_missing_config_jsonschema(
+            target_config_for_capabilities(cls.capabilities),
+            config_jsonschema,
+        )
 
 
 def __getattr__(name: str) -> t.Any:  # noqa: ANN401

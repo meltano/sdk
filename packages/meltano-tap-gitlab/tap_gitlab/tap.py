@@ -6,9 +6,9 @@ import sys
 import typing as t
 
 from singer_sdk import Tap
+from singer_sdk.helpers.capabilities import CapabilitiesEnum, TapCapabilities
 from singer_sdk.typing import (
     ArrayType,
-    DateTimeType,
     PropertiesList,
     Property,
     StringType,
@@ -47,6 +47,10 @@ class TapGitlab(Tap):
 
     name: str = "tap-gitlab"
     package_name: str = "meltano-tap-gitlab"
+    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+        *Tap.capabilities,
+        TapCapabilities.START_DATE,
+    ]
     config_jsonschema = PropertiesList(
         Property(
             "auth_token",
@@ -68,12 +72,6 @@ class TapGitlab(Tap):
             nullable=False,
             default=[],
             title="Group IDs",
-        ),
-        Property(
-            "start_date",
-            DateTimeType,
-            required=True,
-            title="Start Date",
         ),
         Property(
             "url_base",

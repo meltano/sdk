@@ -5,7 +5,16 @@ from inspect import currentframe, getframeinfo
 
 import pytest
 
-from singer_sdk.helpers.capabilities import CapabilitiesEnum
+from singer_sdk.helpers.capabilities import (
+    CapabilitiesEnum,
+    PluginCapabilities,
+    TargetCapabilities,
+    config_for_capabilities,
+    tap_config_for_capabilities,
+    target_config_for_capabilities,
+)
+from singer_sdk.sql.tap import sql_tap_config_for_capabilities
+from singer_sdk.sql.target import sql_target_config_for_capabilities
 
 
 class DummyCapabilitiesEnum(CapabilitiesEnum):
@@ -41,3 +50,76 @@ def test_deprecated_capabilities():
     frameinfo = getframeinfo(currentframe())
     assert warning.lineno == frameinfo.lineno - 3
     assert warning.filename.endswith("test_capabilities.py")
+
+
+def test_config_for_capabilities():
+    assert config_for_capabilities([]) == {"type": "object", "properties": {}}
+
+    schema = config_for_capabilities(
+        [PluginCapabilities.STREAM_MAPS, PluginCapabilities.FLATTENING],
+    )
+    assert {"stream_maps", "stream_map_config", "faker_config"} <= set(
+        schema["properties"],
+    )
+    assert "flattening_enabled" in schema["properties"]
+
+
+def test_tap_config_for_capabilities():
+    schema = tap_config_for_capabilities(
+        [PluginCapabilities.ACTIVATE_VERSION, PluginCapabilities.BATCH],
+    )
+    assert "emit_activate_version_messages" in schema["properties"]
+    batch = schema["properties"]["batch_config"]
+    assert "format" in batch["properties"]["encoding"]["properties"]
+
+
+def test_target_config_for_capabilities():
+    schema = target_config_for_capabilities(
+        [
+            PluginCapabilities.BATCH,
+            PluginCapabilities.ACTIVATE_VERSION,
+            TargetCapabilities.VALIDATE_RECORDS,
+        ],
+    )
+    assert {
+        "add_record_metadata",
+        "load_method",
+        "batch_size_rows",
+        "process_activate_version_messages",
+        "validate_records",
+    } <= set(schema["properties"])
+    assert "required" not in schema["properties"]["batch_config"]
+
+
+def test_sql_config_for_capabilities():
+    assert "use_singer_decimal" in sql_tap_config_for_capabilities([])["properties"]
+
+    schema = sql_target_config_for_capabilities(
+        [TargetCapabilities.TARGET_SCHEMA, TargetCapabilities.HARD_DELETE],
+    )
+    assert {"default_target_schema", "hard_delete", "load_method"} <= set(
+        schema["properties"],
+    )
+    assert (
+        "default_target_schema"
+        not in sql_target_config_for_capabilities([])["properties"]
+    )
+
+
+def _find_required(schema: object, path: str = "") -> list[str]:
+    """Return the paths of all `required` lists in a JSON schema."""
+    found: list[str] = []
+    if isinstance(schema, dict):
+        for key, value in schema.items():
+            if key == "required" and isinstance(value, list):
+                found.append(path)
+            else:
+                found.extend(_find_required(value, f"{path}.{key}"))
+    return found
+
+
+def test_tap_batch_config_has_no_required_properties():
+    """Settings managers flatten nested `required` into mandatory settings."""
+    schema = tap_config_for_capabilities([PluginCapabilities.BATCH])
+    assert "batch_config" in schema["properties"]
+    assert _find_required(schema["properties"]["batch_config"]) == []

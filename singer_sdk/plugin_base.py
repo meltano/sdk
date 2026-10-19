@@ -32,9 +32,8 @@ from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, warn_python_
 from singer_sdk.helpers._packaging import SDK_PACKAGE_NAME, get_package_version
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
-    FLATTENING_CONFIG,
-    STREAM_MAPS_CONFIG,
     PluginCapabilities,
+    config_for_capabilities,
 )
 from singer_sdk.io_base import SingerMessageType, SingerReader, SingerWriter
 from singer_sdk.mapper import PluginMapper
@@ -572,12 +571,10 @@ class PluginBase(abc.ABC):
         Args:
             config_jsonschema: [description]
         """
-        capabilities = cls.capabilities
-        if PluginCapabilities.STREAM_MAPS in capabilities:
-            merge_missing_config_jsonschema(STREAM_MAPS_CONFIG, config_jsonschema)
-
-        if PluginCapabilities.FLATTENING in capabilities:
-            merge_missing_config_jsonschema(FLATTENING_CONFIG, config_jsonschema)
+        merge_missing_config_jsonschema(
+            config_for_capabilities(cls.capabilities),
+            config_jsonschema,
+        )
 
     @classmethod
     def print_about(

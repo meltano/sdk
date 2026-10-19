@@ -19,6 +19,9 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
+if t.TYPE_CHECKING:
+    from pytest_snapshot.plugin import Snapshot
+
 
 if t.TYPE_CHECKING:
     from pytest_snapshot.plugin import Snapshot
