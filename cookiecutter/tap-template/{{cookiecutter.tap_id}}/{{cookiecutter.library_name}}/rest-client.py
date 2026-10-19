@@ -75,8 +75,11 @@ SCHEMAS_DIR = SchemaDirectory(schemas)
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
-    # Update this value if necessary or override `parse_response`.
-    records_jsonpath = "$[*]"
+    # JSONPath expression that selects the records in the API response. For example,
+    # "$.data[*]" matches every item of the `data` array in a response like
+    # `{"data": [{"id": 1}, {"id": 2}]}`, and "$[*]" matches every item of a
+    # top-level array. Update this value if necessary or override `parse_response`.
+    records_jsonpath = "$.data[*]"
 
     # Update this value if necessary or override `get_new_paginator`.
     next_page_token_jsonpath = "$.next_page"  # ruff:ignore[hardcoded-password-string]
@@ -184,22 +187,6 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         # Optionally, add the payload for a POST request
         # request.data = ...
         return request
-
-    @override
-    def parse_response(self, response: requests.Response) -> Iterable[dict]:
-        """Parse the response and return an iterator of result records.
-
-        Args:
-            response: The HTTP ``requests.Response`` object.
-
-        Yields:
-            Each record from the source.
-        """
-        # TODO: Parse response body and return a set of records.
-        yield from extract_jsonpath(
-            self.records_jsonpath,
-            input=response.json(parse_float=decimal.Decimal),
-        )
 
     @override
     def post_process(
