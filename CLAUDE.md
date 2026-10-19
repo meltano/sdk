@@ -95,6 +95,11 @@ warnings.warn("...", SingerSDKPendingDeprecationWarning, stacklevel=2)
 
 **Deprecation policy**: at least 3 months / 3 feature releases notice, named removal version required. See `docs/release_process.md` and `docs/deprecation.md`.
 
+**Every new deprecation must be documented in `docs/deprecation.md`** in the same PR that adds the warning:
+under the removal version's heading if one is named, otherwise under "Pending Deprecations". If users need
+to change their code, also add a migration note or guide and link to it from both the warning message and
+`docs/deprecation.md`.
+
 ## Architecture
 
 The SDK uses abstract base classes for its plugin system:

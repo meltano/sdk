@@ -157,6 +157,15 @@ records_jsonpath = "$.items[?(@.status=='active')]"
 # Matches: {"items": [{"status": "active"}, {"status": "inactive"}]}
 ```
 
+### JSONPath wildcards on a single object
+
+Versions of `jsonpath-ng` before 1.11 treated a lone object as a one-item array, so `[*]` matched the object itself. Since 1.11, `[*]` on an object matches its _values_ instead. To keep existing taps working, the SDK still yields a single object matched by a trailing `[*]` (for example `$[*]` or `$.data[*]`) as one record, but this is deprecated and emits a `SingerSDKPendingDeprecationWarning`. If your API can return an object in place of an array, use a path that selects the object itself:
+
+```python
+records_jsonpath = "$.data"
+# Matches: {"data": {"id": 1}} -> {"id": 1}
+```
+
 ### Dynamically discovering `schema` for a stream
 
 Here is an example which parses schema from a CSV file:
