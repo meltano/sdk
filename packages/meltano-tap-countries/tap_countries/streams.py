@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import abc
 import sys
-import typing as t
 
 from requests_cache.session import CachedSession
 
@@ -105,7 +104,7 @@ class ContinentsStream(CountriesAPIStream):
 
     name = "continents"
     primary_keys = ("code",)
-    schema: t.ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
+    schema: StreamSchema = StreamSchema(SCHEMAS_DIR)
     query = """
         continents {
             code

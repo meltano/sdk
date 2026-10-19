@@ -39,7 +39,7 @@ class GitlabStream(RESTStream[str]):
     """Sample tap test for gitlab."""
 
     _LOG_REQUEST_METRIC_URLS = True
-    schema: t.ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
+    schema: StreamSchema = StreamSchema(SCHEMAS_DIR)
 
     @property
     @override
@@ -177,7 +177,7 @@ class EpicsStream(ProjectBasedStream):
     primary_keys = ("id",)
     replication_key = "updated_at"
     is_sorted = True
-    schema = PropertiesList(
+    schema = PropertiesList(  # ty: ignore[invalid-assignment]
         Property("id", IntegerType, required=True),
         Property("iid", IntegerType, required=True),
         Property("group_id", IntegerType, required=True),

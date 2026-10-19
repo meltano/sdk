@@ -7,7 +7,6 @@
 from __future__ import annotations
 
 import sys
-import typing as t
 
 from singer_sdk import SchemaDirectory, StreamSchema
 from singer_sdk.streams import GraphQLStream
@@ -27,7 +26,7 @@ class GitlabGraphQLStream(GraphQLStream):
     """Sample tap test for gitlab."""
 
     url_base = SITE_URL
-    schema: t.ClassVar[StreamSchema] = StreamSchema(SCHEMAS_DIR)
+    schema: StreamSchema = StreamSchema(SCHEMAS_DIR)
 
     @property
     @override
