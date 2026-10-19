@@ -12,6 +12,7 @@ from singer_sdk.typing import (
     ArrayType,
     BooleanType,
     Constant,
+    DateTimeType,
     DecimalType,
     IntegerType,
     NullType,
@@ -240,6 +241,14 @@ SQL_TAP_USE_SINGER_DECIMAL = PropertiesList(
             "decimals in the discovered schema. "
             "This is useful to avoid precision loss when working with large numbers."
         ),
+    ),
+).to_dict()
+START_DATE_CONFIG = PropertiesList(
+    Property(
+        "start_date",
+        DateTimeType(nullable=True),
+        title="Start Date",
+        description="The earliest record date to sync",
     ),
 ).to_dict()
 TARGET_SCHEMA_CONFIG = PropertiesList(
@@ -495,6 +504,10 @@ class TapCapabilities(CapabilitiesEnum):
     #: Support for ``replication_method: LOG_BASED``. You can read more about this
     #: feature in `MeltanoHub <https://hub.meltano.com/singer/docs#log-based>`_.
     LOG_BASED = "log-based"
+
+    #: Accept a ``start_date`` setting. An incremental stream starts from that date
+    #: when it has no bookmark, or when its timestamp bookmark is older.
+    START_DATE = "start-date"
 
     #: Deprecated. Please use :attr:`~TapCapabilities.CATALOG` instead.
     PROPERTIES = "properties", "Please use CATALOG instead."

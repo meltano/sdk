@@ -39,6 +39,7 @@ The following capabilities are supported by default.
 .. autoattribute:: TapCapabilities.CATALOG
 .. autoattribute:: TapCapabilities.STATE
 .. autoattribute:: TapCapabilities.TEST
+.. autoattribute:: TapCapabilities.START_DATE
 
 =======================
 Custom tap capabilities
