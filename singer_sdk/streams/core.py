@@ -1483,7 +1483,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             context: Stream partition or context dictionary.
         """
 
-    def get_batch_config(self, config: t.Mapping) -> BatchConfig | None:  # noqa: PLR6301
+    def get_batch_config(self, config: t.Mapping) -> BatchConfig | None:
         """Return the batch config for this stream.
 
         Args:
@@ -1493,7 +1493,19 @@ class Stream(abc.ABC):  # noqa: PLR0904
             Batch config for this stream.
         """
         raw = config.get("batch_config")
-        return BatchConfig.from_dict(raw) if raw else None
+        if not raw:
+            return None
+
+        if not raw.get("encoding"):
+            # Settings managers may send a partial `batch_config` (e.g. only default
+            # values for `storage` or `batch_size`) to users who never enabled BATCH.
+            self.logger.warning(
+                "Ignoring `batch_config` because it has no `encoding`. "
+                "Set `batch_config.encoding.format` to emit BATCH messages.",
+            )
+            return None
+
+        return BatchConfig.from_dict(raw)
 
     def get_batches(
         self,

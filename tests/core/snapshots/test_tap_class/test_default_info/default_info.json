@@ -235,21 +235,19 @@
           "object",
           "null"
         ],
-        "required": [
-          "encoding"
-        ],
         "additionalProperties": true,
         "properties": {
           "encoding": {
-            "type": "object",
-            "required": [
-              "format"
+            "type": [
+              "object",
+              "null"
             ],
             "additionalProperties": true,
             "properties": {
               "format": {
                 "type": [
-                  "string"
+                  "string",
+                  "null"
                 ],
                 "title": "Batch Encoding Format",
                 "description": "Format to use for batch files."

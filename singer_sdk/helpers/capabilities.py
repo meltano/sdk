@@ -245,7 +245,6 @@ def _tap_batch_config() -> dict[str, t.Any]:
                             StringType,
                             title="Batch Encoding Format",
                             description="Format to use for batch files.",
-                            required=True,
                         ),
                         Property(
                             "compression",
@@ -255,7 +254,6 @@ def _tap_batch_config() -> dict[str, t.Any]:
                             description="Compression format to use for batch files.",
                         ),
                     ),
-                    required=True,
                 ),
                 Property(
                     "storage",

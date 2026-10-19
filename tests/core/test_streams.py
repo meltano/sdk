@@ -846,3 +846,41 @@ def test_state_partitioning_keys_class_variable(
         stream.state_manager.get_state_partition_context(original_context)
         == expected_context
     )
+
+
+@pytest.mark.parametrize(
+    "batch_config",
+    [
+        pytest.param(None, id="missing"),
+        pytest.param({}, id="empty"),
+        pytest.param(
+            {"batch_size": 100_000, "storage": {"root": "file://.batch_files"}},
+            id="partial-without-encoding",
+        ),
+    ],
+)
+def test_get_batch_config_without_encoding(
+    stream: SimpleTestStream,
+    batch_config: dict | None,
+):
+    """BATCH is only enabled when an encoding is configured."""
+    config = {} if batch_config is None else {"batch_config": batch_config}
+    assert stream.get_batch_config(config) is None
+
+
+def test_get_batch_config_partial_warns(
+    stream: SimpleTestStream,
+    caplog: pytest.LogCaptureFixture,
+):
+    config = {"batch_config": {"storage": {"root": "file://.batch_files"}}}
+    with caplog.at_level("WARNING"):
+        assert stream.get_batch_config(config) is None
+    assert "Ignoring `batch_config` because it has no `encoding`" in caplog.text
+
+
+def test_get_batch_config_with_encoding(stream: SimpleTestStream):
+    batch_config = stream.get_batch_config(
+        {"batch_config": {"encoding": {"format": "jsonl"}}},
+    )
+    assert batch_config is not None
+    assert batch_config.encoding.format == "jsonl"

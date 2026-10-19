@@ -70,8 +70,7 @@ def test_tap_config_for_capabilities():
     )
     assert "emit_activate_version_messages" in schema["properties"]
     batch = schema["properties"]["batch_config"]
-    assert batch["required"] == ["encoding"]
-    assert batch["properties"]["encoding"]["required"] == ["format"]
+    assert "format" in batch["properties"]["encoding"]["properties"]
 
 
 def test_target_config_for_capabilities():
@@ -105,3 +104,22 @@ def test_sql_config_for_capabilities():
         "default_target_schema"
         not in sql_target_config_for_capabilities([])["properties"]
     )
+
+
+def _find_required(schema: object, path: str = "") -> list[str]:
+    """Return the paths of all `required` lists in a JSON schema."""
+    found: list[str] = []
+    if isinstance(schema, dict):
+        for key, value in schema.items():
+            if key == "required" and isinstance(value, list):
+                found.append(path)
+            else:
+                found.extend(_find_required(value, f"{path}.{key}"))
+    return found
+
+
+def test_tap_batch_config_has_no_required_properties():
+    """Settings managers flatten nested `required` into mandatory settings."""
+    schema = tap_config_for_capabilities([PluginCapabilities.BATCH])
+    assert "batch_config" in schema["properties"]
+    assert _find_required(schema["properties"]["batch_config"]) == []
