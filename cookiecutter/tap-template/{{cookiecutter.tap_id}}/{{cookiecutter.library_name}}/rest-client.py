@@ -66,11 +66,12 @@ SCHEMAS_DIR = SchemaDirectory(schemas)
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
-    # JSONPath expression that selects the records in the API response. For example,
-    # "$.data[*]" matches every item of the `data` array in a response like
-    # `{"data": [{"id": 1}, {"id": 2}]}`, and "$[*]" matches every item of a
-    # top-level array. Update this value if necessary or override `parse_response`.
-    records_jsonpath = "$.data[*]"
+    # JSONPath expression that selects the records in the API response. "$[*]"
+    # matches every item of a top-level array. If the records are wrapped in an
+    # envelope, like `{"data": [{"id": 1}, {"id": 2}]}`, use "$.data[*]" instead. If
+    # the response is a single object, use "$". Update this value if necessary or
+    # override `parse_response`.
+    records_jsonpath = "$[*]"
 
     # Update this value if necessary or override `get_new_paginator`.
     next_page_token_jsonpath = "$.next_page"  # ruff:ignore[hardcoded-password-string]
