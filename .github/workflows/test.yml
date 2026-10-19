@@ -50,6 +50,7 @@ jobs:
             - "uv.lock"
             - ".github/workflows/test.yml"
             - ".github/workflows/resources/requirements.txt"
+            - ".python-version"
 
   tests:
     name: "Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }}"

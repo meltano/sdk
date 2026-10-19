@@ -45,6 +45,7 @@ jobs:
             - "pyproject.toml"
             - "uv.lock"
             - ".github/workflows/codspeed.yml"
+            - ".python-version"
 
   benchmarks:
     name: Run benchmarks
