@@ -148,6 +148,15 @@ myst_enable_extensions = {
 
 redirects = {
     "porting.html": "guides/porting.html",
+    # Schema source redirects (re-exported from main __init__.py)
+    "classes/singer_sdk.SchemaSource.html": "classes/singer_sdk.schema.source.SchemaSource.html",  # noqa: E501
+    "classes/singer_sdk.SchemaDirectory.html": "classes/singer_sdk.schema.source.SchemaDirectory.html",  # noqa: E501
+    "classes/singer_sdk.StreamSchema.html": "classes/singer_sdk.schema.source.StreamSchema.html",  # noqa: E501
+    "classes/singer_sdk.OpenAPISchema.html": "classes/singer_sdk.schema.source.OpenAPISchema.html",  # noqa: E501
+    # Deprecated batch encoder redirect
+    "classes/singer_sdk.batch.JSONLinesBatcher.html": "classes/singer_sdk.contrib.batch_encoder_jsonl.JSONLinesBatcher.html",  # noqa: E501
+    # Testing module redirects (re-exported from testing.__init__.py)
+    "classes/singer_sdk.testing.SuiteConfig.html": "classes/singer_sdk.testing.config.SuiteConfig.html",  # noqa: E501
 }
 
 # -- Options for extlinks -----------------------------------------------------
@@ -190,7 +199,36 @@ def linkcode_resolve(domain: str, info: dict) -> str | None:
         return None
     if not info["module"]:
         return None
-    filename = info["module"].replace(".", "/")
+
+    # Map re-exported classes to their canonical source files
+    module = info["module"]
+    fullname = info.get("fullname", "")
+
+    # Extract the class name (first part before any dots for nested items)
+    classname = fullname.split(".")[0] if fullname else ""
+
+    # Classes re-exported from singer_sdk.__init__ but defined elsewhere
+    if module == "singer_sdk" and classname:
+        canonical_locations = {
+            "Tap": "singer_sdk/tap_base",
+            "Target": "singer_sdk/target_base",
+            "InlineMapper": "singer_sdk/mapper_base",
+            "PluginBase": "singer_sdk/plugin_base",
+            "Stream": "singer_sdk/streams/core",
+            "RESTStream": "singer_sdk/streams/rest",
+            "GraphQLStream": "singer_sdk/streams/graphql",
+            "Sink": "singer_sdk/sinks/core",
+            "RecordSink": "singer_sdk/sinks/core",
+            "BatchSink": "singer_sdk/sinks/core",
+            "SchemaSource": "singer_sdk/schema/source",
+            "SchemaDirectory": "singer_sdk/schema/source",
+            "StreamSchema": "singer_sdk/schema/source",
+            "OpenAPISchema": "singer_sdk/schema/source",
+        }
+        if classname in canonical_locations:
+            return f"https://github.com/meltano/sdk/tree/main/{canonical_locations[classname]}.py"
+
+    filename = module.replace(".", "/")
 
     if filename == "singer_sdk":
         filename = "singer_sdk/__init__"
