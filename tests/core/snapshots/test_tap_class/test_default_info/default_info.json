@@ -10,6 +10,7 @@
     "catalog",
     "state",
     "discover",
+    "start-date",
     "about",
     "activate-version",
     "stream-maps",
@@ -297,6 +298,15 @@
         },
         "title": "Batch Configuration",
         "description": "Configuration for BATCH message capabilities."
+      },
+      "start_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "format": "date-time",
+        "title": "Start Date",
+        "description": "The earliest record date to sync"
       }
     }
   }

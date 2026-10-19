@@ -25,6 +25,7 @@ from singer_sdk.helpers._util import dump_json, load_json, read_json_file
 from singer_sdk.helpers.capabilities import (
     BATCH_CONFIG,
     EMIT_ACTIVATE_VERSION_CONFIG,
+    START_DATE_CONFIG,
     PluginCapabilities,
     TapCapabilities,
 )
@@ -78,6 +79,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         TapCapabilities.CATALOG,
         TapCapabilities.STATE,
         TapCapabilities.DISCOVER,
+        TapCapabilities.START_DATE,
         PluginCapabilities.ABOUT,
         PluginCapabilities.ACTIVATE_VERSION,
         PluginCapabilities.STREAM_MAPS,
@@ -261,6 +263,9 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
 
         if PluginCapabilities.BATCH in capabilities:
             merge_missing_config_jsonschema(BATCH_CONFIG, config_jsonschema)
+
+        if TapCapabilities.START_DATE in capabilities:
+            merge_missing_config_jsonschema(START_DATE_CONFIG, config_jsonschema)
 
     # Connection and sync tests:
 

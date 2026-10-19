@@ -81,11 +81,6 @@ class Tap{{ cookiecutter.source_name }}(Tap):
             description="Project IDs to replicate",
         ),
         th.Property(
-            "start_date",
-            th.DateTimeType(nullable=True),
-            description="The earliest record date to sync",
-        ),
-        th.Property(
             "api_url",
             th.StringType(nullable=False),
             title="API URL",
