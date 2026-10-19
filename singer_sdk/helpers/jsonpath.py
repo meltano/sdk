@@ -79,7 +79,7 @@ def _docs_url() -> str:
     return f"https://sdk.meltano.com/en/{ref}/code_samples.html"
 
 
-def _is_wildcard_child(path: jsonpath_ng.JSONPath) -> bool:
+def _is_wildcard_child(path: jsonpath_ng.JSONPath) -> t.TypeGuard[Child]:
     """Check whether a compiled JSONPath ends in an unbounded ``[*]``.
 
     Args:
