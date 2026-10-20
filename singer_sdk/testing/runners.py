@@ -14,6 +14,7 @@ __lazy_modules__ = {
 }
 
 import abc
+import contextlib
 import io
 import json
 import sys
@@ -291,11 +292,20 @@ class TargetTestRunner(SingerTestRunner[Target]):
             kwargs: Unused keyword arguments.
         """
         target = self.new_target()
-        stdout, stderr = self._execute_sync(
-            target=target,
-            target_input=self.target_input,
-            finalize=finalize,
-        )
+        with contextlib.ExitStack() as stack:
+            # Open file input per call so it is always closed, and so retries or
+            # overlapping syncs each read the file from the start.
+            if self._input is None and not self.input_io and self.input_filepath:
+                target_input: t.IO[str] | None = stack.enter_context(
+                    self.input_filepath.open(encoding="utf8"),
+                )
+            else:
+                target_input = self.target_input
+            stdout, stderr = self._execute_sync(
+                target=target,
+                target_input=target_input,
+                finalize=finalize,
+            )
         self.stdout, self.stderr = (stdout.read(), stderr.read())
         self.state_messages.extend(self._clean_sync_output(self.stdout))
 
