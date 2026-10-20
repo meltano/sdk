@@ -310,9 +310,21 @@ class Stream(abc.ABC):  # noqa: PLR0904
     def supports_start_date(self) -> bool:
         """Whether ``start_date`` can seed this stream's replication key.
 
-        Streams with custom replication-key formats can override this property to
-        prevent an incompatible ``start_date`` value from being used as the initial
-        replication bookmark.
+        Returns:
+            Whether the stream supports using ``start_date`` as its initial
+            replication bookmark.
+        """
+        return self._supports_start_date()
+
+    def _supports_start_date(self) -> bool:  # noqa: PLR6301
+        """Determine whether ``start_date`` can seed this stream's replication key.
+
+        Override this method for streams with custom replication-key formats that
+        cannot use ``start_date`` as their initial replication bookmark.
+
+        Returns:
+            Whether the stream supports using ``start_date`` as its initial
+            replication bookmark.
         """
         return True
 

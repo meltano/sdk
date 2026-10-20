@@ -175,17 +175,20 @@ class SQLStream(Stream, abc.ABC):
         """Effective schema for the stream."""
         return super().effective_schema
 
-    @cached_property
     @override
-    def supports_start_date(self) -> bool:
+    def _supports_start_date(self) -> bool:
         """Whether ``start_date`` can seed this stream's replication key.
+
+        Returns:
+            Whether the stream supports using ``start_date`` as its initial
+            replication bookmark.
 
         Raises:
             InvalidReplicationKeyException: If the replication key is absent from the
                 effective schema.
         """
         if not self.replication_key:
-            return super().supports_start_date
+            return super()._supports_start_date()
 
         replication_key_schema = self.effective_schema.get("properties", {}).get(
             self.replication_key

@@ -283,9 +283,8 @@ def test_stream_warns_when_start_date_is_unsupported(
     """Streams that reject ``start_date`` do not persist it as a bookmark."""
 
     class UnsupportedStartDateStream(UnixTimestampIncrementalStream):
-        @property
         @override
-        def supports_start_date(self) -> bool:
+        def _supports_start_date(self) -> bool:
             return False
 
     stream = UnsupportedStartDateStream(tap)
