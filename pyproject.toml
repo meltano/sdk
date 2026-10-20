@@ -63,10 +63,6 @@ parquet = [
     "pyarrow>=15",
 ]
 
-arrow = [
-    "pyarrow>=15",
-]
-
 testing = [
     "pytest>=9.1",
 ]
