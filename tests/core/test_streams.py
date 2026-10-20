@@ -292,9 +292,12 @@ def test_stream_warns_when_start_date_is_unsupported(
 
     with caplog.at_level(logging.WARNING):
         stream._write_starting_replication_value(None)
+        stream._write_starting_replication_value(None)
 
     assert stream.get_starting_replication_key_value(None) is None
-    assert "`start_date` for stream 'unix_ts' is not supported" in caplog.messages
+    assert caplog.messages == [
+        "`start_date` for stream 'unix_ts' is not supported",
+    ]
 
 
 def test_stream_invalid_replication_key(tap: SimpleTestTap):

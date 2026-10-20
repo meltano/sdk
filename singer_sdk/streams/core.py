@@ -181,6 +181,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         self._schema: dict | None = None
         self._sync_costs: dict[str, int] = {}
         self._state_manager: StreamStateManager | None = None
+        self._warned_unsupported_start_date = False
         self.child_streams: list[Stream] = []
 
         if schema:
@@ -501,10 +502,12 @@ class Stream(abc.ABC):  # noqa: PLR0904
         """
         config = dict(self.config)
         if "start_date" in config and not self.supports_start_date:
-            self.logger.warning(
-                "`start_date` for stream '%s' is not supported",
-                self.name,
-            )
+            if not self._warned_unsupported_start_date:
+                self.logger.warning(
+                    "`start_date` for stream '%s' is not supported",
+                    self.name,
+                )
+                self._warned_unsupported_start_date = True
             config.pop("start_date")
 
         self.state_manager.write_starting_replication_value(

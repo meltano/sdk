@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 __lazy_modules__ = {
+    "singer_sdk.exceptions",
     "singer_sdk.helpers._catalog",
     "singer_sdk.helpers._typing",
     "singer_sdk.helpers.types",
@@ -21,6 +22,7 @@ from functools import cached_property
 import sqlalchemy as sa
 
 import singer_sdk.helpers._catalog as catalog
+from singer_sdk.exceptions import InvalidReplicationKeyException
 from singer_sdk.helpers._typing import is_string_type
 from singer_sdk.singerlib import CatalogEntry
 from singer_sdk.sql.connector import SQLConnector
@@ -176,13 +178,25 @@ class SQLStream(Stream, abc.ABC):
     @cached_property
     @override
     def supports_start_date(self) -> bool:
-        """Whether ``start_date`` can seed this stream's replication key."""
+        """Whether ``start_date`` can seed this stream's replication key.
+
+        Raises:
+            InvalidReplicationKeyException: If the replication key is absent from the
+                effective schema.
+        """
         if not self.replication_key:
             return super().supports_start_date
 
-        replication_key_schema = self.effective_schema["properties"][
+        replication_key_schema = self.effective_schema.get("properties", {}).get(
             self.replication_key
-        ]
+        )
+        if replication_key_schema is None:
+            msg = (
+                f"Field '{self.replication_key}' is not in schema for stream "
+                f"'{self.name}'"
+            )
+            raise InvalidReplicationKeyException(msg)
+
         return bool(is_string_type(replication_key_schema))
 
     def apply_query_filters(

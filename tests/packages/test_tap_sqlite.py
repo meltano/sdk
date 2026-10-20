@@ -12,6 +12,7 @@ from click.testing import CliRunner
 from tap_sqlite import SQLiteTap
 from target_csv.target import TargetCSV
 
+from singer_sdk.exceptions import InvalidReplicationKeyException
 from singer_sdk.singerlib import MetadataMapping, StreamMetadata
 from singer_sdk.testing import (
     get_standard_tap_tests,
@@ -149,6 +150,32 @@ def test_sql_stream_supports_start_date(
     stream = t.cast("SQLStream", tap.streams["main-t0"])
 
     assert stream.supports_start_date is expected
+
+
+def test_sql_stream_rejects_missing_replication_key_schema(
+    sqlite_sample_db,
+    sqlite_sample_db_catalog,
+    sqlite_sample_db_config,
+    sqlite_sample_db_state,
+):
+    """An invalid SQL replication key produces the standard SDK error."""
+    _ = sqlite_sample_db
+    catalog_entry = sqlite_sample_db_catalog.get_stream("main-t0")
+    assert catalog_entry is not None
+    catalog_entry.replication_key = "missing"
+
+    tap = SQLiteTap(
+        config=sqlite_sample_db_config,
+        catalog=sqlite_sample_db_catalog.to_dict(),
+        state=sqlite_sample_db_state,
+    )
+    stream = t.cast("SQLStream", tap.streams["main-t0"])
+
+    with pytest.raises(
+        InvalidReplicationKeyException,
+        match="Field 'missing' is not in schema for stream 'main-t0'",
+    ):
+        _ = stream.supports_start_date
 
 
 def test_sqlite_tap_standard_tests(sqlite_sample_tap: SQLTap):
