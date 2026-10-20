@@ -291,6 +291,8 @@ DEP002 = [
     # Plugins
     "paramiko",
     "s3fs",
+    # Imported lazily via `singer_sdk.batch.import_batch_dependency`
+    "pyarrow",
     # Legacy dependencies
     "importlib-resources",
 ]
