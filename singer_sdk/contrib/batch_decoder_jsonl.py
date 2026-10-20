@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__lazy_modules__ = {"gzip", "singer_sdk.singerlib.json"}
+__lazy_modules__ = {"gzip", "singer_sdk.helpers.types", "singer_sdk.singerlib.json"}
 
 import gzip
 import sys

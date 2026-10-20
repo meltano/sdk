@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 __lazy_modules__ = {
+    "enum",
     "importlib",
     "itertools",
+    "singer_sdk.exceptions",
     "singer_sdk.helpers._batch",
     "singer_sdk.helpers._compat",
+    "singer_sdk.helpers.types",
     "warnings",
 }
 

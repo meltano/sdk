@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"singer_sdk.helpers.types"}
+
 import sys
 import typing as t
 
