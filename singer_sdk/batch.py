@@ -3,18 +3,25 @@
 from __future__ import annotations
 
 __lazy_modules__ = {
+    "enum",
+    "importlib",
     "itertools",
+    "singer_sdk.exceptions",
     "singer_sdk.helpers._batch",
     "singer_sdk.helpers._compat",
+    "singer_sdk.helpers.types",
     "warnings",
 }
 
+import importlib
 import itertools
 import sys
 import typing as t
 import warnings
 from abc import ABC, abstractmethod
+from enum import Enum
 
+from singer_sdk.exceptions import MissingDependencyError
 from singer_sdk.helpers._compat import entry_points
 
 if sys.version_info >= (3, 12):
@@ -23,7 +30,8 @@ else:
     from typing_extensions import override
 
 if t.TYPE_CHECKING:
-    from singer_sdk.helpers._batch import BatchConfig
+    from singer_sdk.helpers._batch import BaseBatchFileEncoding, BatchConfig
+    from singer_sdk.helpers.types import Record
 
 _T = t.TypeVar("_T")
 
@@ -42,6 +50,36 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401 # pragma: no cover
 
     msg = f"module {__name__} has no attribute {name}"
     raise AttributeError(msg)
+
+
+def import_batch_dependency(
+    module: str,
+    *,
+    feature: str,
+    install: str | None = None,
+) -> t.Any:  # noqa: ANN401
+    """Import an optional dependency needed to read or write a batch file format.
+
+    Args:
+        module: The name of the module to import.
+        feature: A description of what needs the module, used in the error message.
+        install: The requirement to install, if different from the top-level package.
+
+    Returns:
+        The imported module.
+
+    Raises:
+        MissingDependencyError: If the module is not installed.
+        ModuleNotFoundError: If the module is installed but one of its own
+            dependencies is missing.
+    """
+    try:
+        return importlib.import_module(module)
+    except ModuleNotFoundError as e:
+        package = module.partition(".")[0]
+        if e.name != package:
+            raise
+        raise MissingDependencyError(package, feature=feature, install=install) from e
 
 
 def lazy_chunked_generator(
@@ -145,3 +183,71 @@ class Batcher(BaseBatcher):
             raise ValueError(message) from None
 
         return plugin.load()  # type: ignore[no-any-return]
+
+
+class BaseBatchReader(ABC):
+    """Base batch file reader.
+
+    A reader turns the contents of a single batch file into records. It is the
+    counterpart of :class:`BaseBatcher`, which writes records to batch files.
+
+    Readers are registered through the ``singer_sdk.batch_decoders`` entry point
+    group, keyed by the encoding format name.
+    """
+
+    def __init__(self, encoding: BaseBatchFileEncoding) -> None:
+        """Initialize the reader.
+
+        Args:
+            encoding: The encoding of the batch files to read.
+        """
+        self.encoding = encoding
+
+    @abstractmethod
+    def read(self, file: t.IO[bytes]) -> t.Iterable[Record]:
+        """Read records from an open batch file.
+
+        Args:
+            file: The batch file, opened in binary mode.
+
+        Raises:
+            NotImplementedError: If the method is not implemented.
+        """
+        raise NotImplementedError
+
+    @classmethod
+    def get_reader_class(cls, name: str) -> type[BaseBatchReader]:
+        """Get a reader class by encoding format name.
+
+        Args:
+            name: The encoding format name, e.g. ``jsonl``.
+
+        Returns:
+            The reader class.
+
+        Raises:
+            NotImplementedError: If no reader is registered for the format.
+        """
+        plugins = entry_points(group="singer_sdk.batch_decoders")
+
+        try:
+            plugin = next(filter(lambda x: x.name == name, plugins))
+        except StopIteration:
+            message = f"Unsupported batch encoding format: {name}"
+            raise NotImplementedError(message) from None
+
+        return plugin.load()  # type: ignore[no-any-return]
+
+    @classmethod
+    def from_encoding(cls, encoding: BaseBatchFileEncoding) -> BaseBatchReader:
+        """Create the reader matching a batch file encoding.
+
+        Args:
+            encoding: The batch file encoding.
+
+        Returns:
+            A reader instance.
+        """
+        fmt = encoding.format
+        name = fmt.value if isinstance(fmt, Enum) else fmt
+        return cls.get_reader_class(name)(encoding)

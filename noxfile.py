@@ -315,7 +315,6 @@ def coverage(session: nox.Session) -> None:
 def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
     extras = [
-        "arrow",
         "faker",
         "jwt",
         "msgspec",

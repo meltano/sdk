@@ -10,7 +10,8 @@ all SDK-level errors with a single `except SingerSDKError` clause.
 SingerSDKError
 ├── ConfigurationError
 │   ├── ConfigValidationError
-│   └── MapperNotInitialized
+│   ├── MapperNotInitialized
+│   └── MissingDependencyError
 ├── DiscoveryError
 │   ├── EmptySchemaTypeError
 │   ├── InvalidReplicationKeyException
@@ -73,6 +74,7 @@ required values.
 |---|---|
 | `ConfigValidationError` | The config dict fails JSON Schema validation. Carries `.errors` (list of messages) and `.schema` (the schema that was checked). |
 | `MapperNotInitialized` | `setup_mapper()` was not called before the mapper was accessed. |
+| `MissingDependencyError` | An optional dependency (e.g. `pyarrow` or `nanoarrow` for batch files) is not installed. Also an `ImportError`; the message includes the `pip install` command. |
 
 **Tap developers** — you do not normally raise these directly. The SDK raises
 `ConfigValidationError` automatically when `Tap.config_jsonschema` validation fails.

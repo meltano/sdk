@@ -4,16 +4,21 @@ import decimal
 import importlib.util
 import re
 import typing as t
+from unittest import mock
 
 import pytest
 
 from singer_sdk.batch import Batcher
 from singer_sdk.contrib.batch_encoder_arrow import ArrowBatcher
+from singer_sdk.exceptions import MissingDependencyError
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
+    BatchFileFormat,
     StorageTarget,
 )
+from singer_sdk.sinks import BatchSink
+from tests.contrib.batch.helpers import block_import
 
 if t.TYPE_CHECKING:
     from pathlib import Path
@@ -75,3 +80,55 @@ def test_batcher_with_arrow_encoding():
         for batch in batches
         for filepath in batch
     )
+
+
+def test_sink_reads_arrow_batch_files(tmp_path: Path) -> None:
+    """Round-trip: ArrowBatcher output is readable by a sink using nanoarrow."""
+    pytest.importorskip("pyarrow")
+    pytest.importorskip("nanoarrow")
+
+    received: list[dict] = []
+
+    class MySink(BatchSink):
+        def process_batch(self, context: dict) -> None:
+            received.extend(context["records"])
+
+    root = tmp_path.joinpath("batches")
+    root.mkdir()
+    config = BatchConfig(
+        encoding=BaseBatchFileEncoding(format="arrow"),
+        storage=StorageTarget(root=f"file://{root}"),
+        batch_size=2,
+    )
+    records = [
+        {"id": 1, "name": "a", "nested": {"x": 1}},
+        {"id": 2, "name": None, "nested": {"x": 2}},
+        {"id": 3, "name": "c", "nested": {"x": 3}},
+    ]
+    files = [
+        f
+        for batch in ArrowBatcher("tap", "s", config).get_batches(records)
+        for f in batch
+    ]
+
+    sink = MySink(
+        target=mock.MagicMock(),
+        stream_name="s",
+        schema={"type": "object", "properties": {}},
+        key_properties=None,
+    )
+    sink.process_batch_files(BaseBatchFileEncoding(format=BatchFileFormat.ARROW), files)
+
+    assert received == records
+
+
+def test_batcher_missing_pyarrow(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    block_import(monkeypatch, "pyarrow")
+    config = BatchConfig(
+        encoding=BaseBatchFileEncoding(format="arrow"),
+        storage=StorageTarget(root=str(tmp_path)),
+    )
+    with pytest.raises(MissingDependencyError, match="pip install 'pyarrow'"):
+        next(ArrowBatcher("tap", "stream", config).get_batches([{"id": 1}]))

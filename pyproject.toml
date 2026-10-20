@@ -63,10 +63,6 @@ parquet = [
     "pyarrow>=15",
 ]
 
-arrow = [
-    "pyarrow>=15",
-]
-
 testing = [
     "pytest>=9.1",
 ]
@@ -140,6 +136,7 @@ testing = [
     "coverage[toml]>=7.9",
     "dirty-equals>=0.11",
     "fastjsonschema>=2.19.1",
+    "nanoarrow>=0.7",
     "pytest>=9",
     "pytest-benchmark>=4.0.0",
     "pytest-github-actions-annotate-failures>=0.3.0",
@@ -294,6 +291,8 @@ DEP002 = [
     # Plugins
     "paramiko",
     "s3fs",
+    # Imported lazily via `singer_sdk.batch.import_batch_dependency`
+    "pyarrow",
     # Legacy dependencies
     "importlib-resources",
 ]
@@ -333,6 +332,11 @@ singer_testing = "singer_sdk.testing.pytest_plugin"
 arrow = "singer_sdk.contrib.batch_encoder_arrow:ArrowBatcher"
 jsonl = "singer_sdk.contrib.batch_encoder_jsonl:JSONLinesBatcher"
 parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
+
+[project.entry-points."singer_sdk.batch_decoders"]
+arrow = "singer_sdk.contrib.batch_decoder_arrow:ArrowReader"
+jsonl = "singer_sdk.contrib.batch_decoder_jsonl:JSONLinesReader"
+parquet = "singer_sdk.contrib.batch_decoder_parquet:ParquetReader"
 
 [tool.ruff]
 extend-exclude = [
