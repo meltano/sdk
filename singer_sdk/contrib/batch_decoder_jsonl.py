@@ -21,6 +21,8 @@ if t.TYPE_CHECKING:
 
 __all__ = ["JSONLinesReader"]
 
+_GZIP_MAGIC = b"\x1f\x8b"
+
 
 class JSONLinesReader(BaseBatchReader):
     """JSON Lines batch file reader.
@@ -30,7 +32,9 @@ class JSONLinesReader(BaseBatchReader):
 
     @override
     def read(self, file: t.IO[bytes]) -> t.Iterable[Record]:
-        if self.encoding.compression == "gzip":
-            with gzip.open(file) as decompressed:
-                return [deserialize_json(line) for line in decompressed]
-        return [deserialize_json(line) for line in file]
+        data = file.read()
+        # Detect gzip from the bytes: the encoding metadata may not reflect how the
+        # file was actually written.
+        if self.encoding.compression == "gzip" or data[:2] == _GZIP_MAGIC:
+            data = gzip.decompress(data)
+        return [deserialize_json(line) for line in data.splitlines() if line]
