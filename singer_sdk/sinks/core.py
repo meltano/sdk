@@ -5,8 +5,6 @@ from __future__ import annotations
 __lazy_modules__ = {
     "copy",
     "datetime",
-    "gzip",
-    "importlib.util",
     "jsonschema",
     "logging",
     "singer_sdk",
@@ -25,23 +23,22 @@ __lazy_modules__ = {
 import abc
 import copy
 import datetime
-import importlib.util
 import sys
 import time
 import typing as t
 from functools import cached_property
-from gzip import open as gzip_open
 from types import MappingProxyType
 
 import jsonschema
 
 from singer_sdk import metrics
+from singer_sdk.batch import BaseBatchReader
 from singer_sdk.exceptions import (
     InvalidJSONSchema,
     InvalidRecord,
     MissingKeyPropertiesError,
 )
-from singer_sdk.helpers._batch import BatchConfig, BatchFileFormat, StorageTarget
+from singer_sdk.helpers._batch import BatchConfig, StorageTarget
 from singer_sdk.helpers._compat import (
     date_fromisoformat,
     datetime_fromisoformat,
@@ -52,7 +49,6 @@ from singer_sdk.helpers._typing import (
     handle_invalid_timestamp_in_record,
 )
 from singer_sdk.helpers.conform import DatetimeErrorTreatmentEnum
-from singer_sdk.singerlib.json import deserialize_json
 from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
 if sys.version_info >= (3, 12):
@@ -61,7 +57,6 @@ else:
     from typing_extensions import override
 
 if t.TYPE_CHECKING:
-    from gzip import GzipFile
     from logging import Logger
 
     from singer_sdk.helpers._batch import BaseBatchFileEncoding
@@ -771,55 +766,27 @@ class Sink(abc.ABC):  # noqa: PLR0904
     ) -> None:
         """Process a batch file with the given batch context.
 
-        For JSONL-encoded batch files, expects raw JSON records (one per line),
-        not Singer protocol messages.
+        Files are decoded with the :class:`~singer_sdk.batch.BaseBatchReader`
+        registered for the encoding format. For JSONL-encoded batch files, expects
+        raw JSON records (one per line), not Singer protocol messages.
 
         Args:
             encoding: The batch file encoding.
             files: The batch files to process.
-
-        Raises:
-            NotImplementedError: If the batch file encoding is not supported.
         """
-        file: GzipFile | t.IO
         storage = self.batch_config.storage if self.batch_config else None
+        reader = BaseBatchReader.from_encoding(encoding)
 
         for path in files:
             head, tail = StorageTarget.split_url(path)
             file_storage = storage or StorageTarget.from_url(head)
 
-            if encoding.format == BatchFileFormat.JSONL:
-                with file_storage.open(tail, mode="rb") as file:
-                    if encoding.compression == "gzip":
-                        with gzip_open(file) as context_file:
-                            context = {
-                                "records": [
-                                    deserialize_json(line) for line in context_file
-                                ]
-                            }
-                    else:
-                        context = {"records": [deserialize_json(line) for line in file]}
-                    count = self.process_batch(context)
-                    self.tally_record_written(
-                        count  # Only when count is not None
-                        if count is not None
-                        else len(context["records"])
-                    )
-            elif (
-                importlib.util.find_spec("pyarrow")
-                and encoding.format == BatchFileFormat.PARQUET
-            ):
-                import pyarrow.parquet as pq  # noqa: PLC0415
+            with file_storage.open(tail, mode="rb") as file:
+                context = {"records": list(reader.read(file))}
 
-                with file_storage.open(tail, mode="rb") as file:
-                    table = pq.read_table(file)
-                    context = {"records": table.to_pylist()}
-                    count = self.process_batch(context)
-                    self.tally_record_written(
-                        count  # Only when count is not None
-                        if count is not None
-                        else len(context["records"])
-                    )
-            else:
-                msg = f"Unsupported batch encoding format: {encoding.format}"
-                raise NotImplementedError(msg)
+            count = self.process_batch(context)
+            self.tally_record_written(
+                count  # Only when count is not None
+                if count is not None
+                else len(context["records"])
+            )

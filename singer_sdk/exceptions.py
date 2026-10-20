@@ -19,6 +19,7 @@ __all__ = [  # noqa: RUF022
     "ConfigurationError",
     "ConfigValidationError",
     "MapperNotInitialized",
+    "MissingDependencyError",
     # Discovery
     "DiscoveryError",
     "EmptySchemaTypeError",
@@ -110,6 +111,27 @@ class MapperNotInitialized(ConfigurationError):
     def __init__(self) -> None:
         """Initialize the exception."""
         super().__init__("Mapper not initialized. Please call setup_mapper() first.")
+
+
+class MissingDependencyError(ConfigurationError, ImportError):
+    """Raised when an optional dependency required by a feature is not installed."""
+
+    def __init__(self, package: str, *, feature: str, install: str | None = None):
+        """Initialize the exception.
+
+        Args:
+            package: The name of the missing package.
+            feature: A description of what needs the package.
+            install: The requirement to install, if different from the package name.
+        """
+        self.package = package
+        self.feature = feature
+        self.install = install or package
+        super().__init__(
+            f"{feature} requires the '{package}' package, which is not installed. "
+            f"Install it with: pip install '{self.install}'",
+            name=package,
+        )
 
 
 # ---------------------------------------------------------------------------

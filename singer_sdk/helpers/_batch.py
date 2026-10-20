@@ -33,6 +33,9 @@ class BatchFileFormat(str, enum.Enum):
     PARQUET = "parquet"
     """Parquet format."""
 
+    ARROW = "arrow"
+    """Arrow IPC file format."""
+
 
 @dataclass(slots=True)
 class BaseBatchFileEncoding:

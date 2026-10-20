@@ -8,7 +8,11 @@ import sys
 import typing as t
 from uuid import uuid4
 
-from singer_sdk.batch import BaseBatcher, lazy_chunked_generator
+from singer_sdk.batch import (
+    BaseBatcher,
+    import_batch_dependency,
+    lazy_chunked_generator,
+)
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
@@ -37,7 +41,10 @@ class ArrowBatcher(BaseBatcher):
         Yields:
             A list of file paths (called a manifest).
         """
-        import pyarrow as pa  # noqa: PLC0415
+        pa = import_batch_dependency(
+            "pyarrow",
+            feature="Writing Arrow batch files",
+        )
 
         sync_id = f"{self.tap_name}--{self.stream_name}-{uuid4()}"
         prefix = self.batch_config.storage.prefix or ""
@@ -54,7 +61,7 @@ class ArrowBatcher(BaseBatcher):
             table = pa.Table.from_pylist(list(chunk))
             with (
                 storage.open(filename, "wb") as f,
-                pa.ipc.new_file(f, table.schema) as writer,  # type: ignore[arg-type] # ty: ignore[invalid-argument-type]
+                pa.ipc.new_file(f, table.schema) as writer,  # ty: ignore[invalid-argument-type]
             ):
                 writer.write_table(table)
 
