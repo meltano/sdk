@@ -115,6 +115,38 @@ def test_sqlite_input_catalog(sqlite_sample_tap: SQLTap):
     assert stream.fully_qualified_name == "main.t1"
 
 
+@pytest.mark.parametrize(
+    "replication_key,expected",
+    [
+        pytest.param("c1", False, id="integer"),
+        pytest.param("c2", True, id="string"),
+        pytest.param(None, True, id="no-replication-key"),
+    ],
+)
+def test_sql_stream_supports_start_date(
+    sqlite_sample_db,
+    sqlite_sample_db_catalog,
+    sqlite_sample_db_config,
+    sqlite_sample_db_state,
+    replication_key: str | None,
+    expected: bool,
+):
+    """Only SQL streams with string replication keys support ``start_date``."""
+    _ = sqlite_sample_db
+    catalog_entry = sqlite_sample_db_catalog.get_stream("main-t0")
+    assert catalog_entry is not None
+    catalog_entry.replication_key = replication_key
+
+    tap = SQLiteTap(
+        config=sqlite_sample_db_config,
+        catalog=sqlite_sample_db_catalog.to_dict(),
+        state=sqlite_sample_db_state,
+    )
+    stream = t.cast("SQLStream", tap.streams["main-t0"])
+
+    assert stream.supports_start_date is expected
+
+
 def test_sqlite_tap_standard_tests(sqlite_sample_tap: SQLTap):
     """Run standard tap tests against Countries tap."""
     tests = get_standard_tap_tests(

@@ -9,6 +9,7 @@ import json
 import logging
 import typing as t
 import warnings
+from functools import cached_property
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
@@ -280,6 +281,16 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         return is_datetime_type(type_dict)
 
+    @cached_property
+    def supports_start_date(self) -> bool:
+        """Whether ``start_date`` can seed this stream's replication key.
+
+        Streams with custom replication-key formats can override this property to
+        prevent an incompatible ``start_date`` value from being used as the initial
+        replication bookmark.
+        """
+        return True
+
     def get_starting_replication_key_value(
         self,
         context: types.Context | None,
@@ -465,14 +476,12 @@ class Stream(abc.ABC):  # noqa: PLR0904
             context: Stream partition or context dictionary.
         """
         config = dict(self.config)
-        if (
-            not self.is_timestamp_replication_key
-            and type(self).compare_start_date is Stream.compare_start_date
-        ):
-            # ``start_date`` is an ISO timestamp. Do not use it to seed a
-            # non-timestamp replication key unless the stream explicitly
-            # overrides ``compare_start_date`` to support that conversion.
-            config.pop("start_date", None)
+        if "start_date" in config and not self.supports_start_date:
+            self.logger.warning(
+                "`start_date` for stream '%s' is not supported",
+                self.name,
+            )
+            config.pop("start_date")
 
         self.state_manager.write_starting_replication_value(
             context=context,
