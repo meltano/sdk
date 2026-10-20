@@ -2,7 +2,30 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "copy",
+    "importlib",
+    "jsonschema",
+    "logging",
+    "pathlib",
+    "signal",
+    "singer_sdk",
+    "singer_sdk._logging",
+    "singer_sdk.configuration._dict_config",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.helpers._packaging",
+    "singer_sdk.helpers._util",
+    "singer_sdk.helpers.types",
+    "singer_sdk.mapper",
+    "singer_sdk.singerlib.encoding.base",
+    "threading",
+    "types",
+    "warnings",
+}
+
 import abc
+import copy
 import dataclasses
 import logging
 import os
@@ -31,9 +54,8 @@ from singer_sdk.helpers._compat import SingerSDKDeprecationWarning, warn_python_
 from singer_sdk.helpers._packaging import SDK_PACKAGE_NAME, get_package_version
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
-    FLATTENING_CONFIG,
-    STREAM_MAPS_CONFIG,
     PluginCapabilities,
+    config_for_capabilities,
 )
 from singer_sdk.io_base import SingerMessageType, SingerReader, SingerWriter
 from singer_sdk.mapper import PluginMapper
@@ -346,8 +368,7 @@ class PluginBase(abc.ABC):
         Returns:
             Dictionary of configuration parsed from the environment.
         """
-        config_jsonschema = cls.config_jsonschema
-        cls.append_builtin_config(config_jsonschema)
+        config_jsonschema = cls._get_config_jsonschema()
 
         return parse_environment_config(config_jsonschema, cls._env_var_prefix)
 
@@ -456,8 +477,7 @@ class PluginBase(abc.ABC):
             ConfigValidationError: If raise_errors is True and validation fails.
         """
         errors: list[str] = []
-        config_jsonschema = self.config_jsonschema
-        self.append_builtin_config(config_jsonschema)
+        config_jsonschema = self._get_config_jsonschema()
 
         if config_jsonschema:  # pragma: no branch
             self.logger.debug(
@@ -530,8 +550,7 @@ class PluginBase(abc.ABC):
         Returns:
             A dictionary containing the relevant 'about' information.
         """
-        config_jsonschema = cls.config_jsonschema
-        cls.append_builtin_config(config_jsonschema)
+        config_jsonschema = cls._get_config_jsonschema()
 
         return about.AboutInfo(
             name=cls.name,
@@ -543,6 +562,20 @@ class PluginBase(abc.ABC):
             settings=config_jsonschema,
             env_var_prefix=cls._env_var_prefix,
         )
+
+    @classmethod
+    def _get_config_jsonschema(cls) -> dict:
+        """Get a copy of the config JSON schema, including built-in settings.
+
+        A copy is used so that the built-in settings are not added to a schema
+        shared by other plugin classes (e.g. the default ``config_jsonschema``).
+
+        Returns:
+            The plugin config JSON schema with the built-in settings appended.
+        """
+        config_jsonschema = copy.deepcopy(cls.config_jsonschema)
+        cls.append_builtin_config(config_jsonschema)
+        return config_jsonschema
 
     @classmethod
     def append_builtin_config(cls, config_jsonschema: dict) -> None:
@@ -560,12 +593,10 @@ class PluginBase(abc.ABC):
         Args:
             config_jsonschema: [description]
         """
-        capabilities = cls.capabilities
-        if PluginCapabilities.STREAM_MAPS in capabilities:
-            merge_missing_config_jsonschema(STREAM_MAPS_CONFIG, config_jsonschema)
-
-        if PluginCapabilities.FLATTENING in capabilities:
-            merge_missing_config_jsonschema(FLATTENING_CONFIG, config_jsonschema)
+        merge_missing_config_jsonschema(
+            config_for_capabilities(cls.capabilities),
+            config_jsonschema,
+        )
 
     @classmethod
     def print_about(

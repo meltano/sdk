@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import datetime
+import io
+import json
 import typing as t
+from contextlib import redirect_stdout
 
 import pytest
 from tap_csv.tap import TapCSV
@@ -9,6 +12,7 @@ from tap_csv.tap import TapCSV
 from singer_sdk.testing import SuiteConfig, get_tap_test_class
 
 if t.TYPE_CHECKING:
+    from pytest_snapshot.plugin import Snapshot
     from tap_csv.client import CSVStream
 
     from singer_sdk.testing import TapTestRunner
@@ -105,3 +109,19 @@ TestCSVOneStreamPerFileIncrementalIgnoreNoRecords = get_tap_test_class(
     state=STATE,
     suite_config=SuiteConfig(ignore_no_records=True),
 )
+
+
+@pytest.mark.snapshot
+def test_about_info(snapshot: Snapshot):
+    """Test the default about info."""
+
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        TapCSV.print_about(output_format="json")
+
+    info = json.loads(buf.getvalue())
+    # Environment-dependent values
+    info["version"] = "<version>"
+    info["sdk_version"] = "<sdk_version>"
+
+    snapshot.assert_match(json.dumps(info, indent=2) + "\n", "about.json")

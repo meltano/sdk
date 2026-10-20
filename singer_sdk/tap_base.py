@@ -2,6 +2,26 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "click",
+    "collections.abc",
+    "contextlib",
+    "pathlib",
+    "singer_sdk.configuration._dict_config",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.helpers._state",
+    "singer_sdk.helpers._util",
+    "singer_sdk.mapper",
+    "singer_sdk.singerlib",
+    "singer_sdk.singerlib.catalog",
+    "singer_sdk.singerlib.encoding.base",
+    "singer_sdk.streams",
+    "types",
+    "warnings",
+}
+
 import abc
 import contextlib
 import sys
@@ -23,14 +43,14 @@ from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._state import StateWriter, write_stream_state
 from singer_sdk.helpers._util import dump_json, load_json, read_json_file
 from singer_sdk.helpers.capabilities import (
-    BATCH_CONFIG,
-    EMIT_ACTIVATE_VERSION_CONFIG,
     PluginCapabilities,
     TapCapabilities,
+    tap_config_for_capabilities,
 )
 from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import BaseSingerWriter, PluginBase, _ConfigInput
 from singer_sdk.singerlib import Catalog
+from singer_sdk.singerlib.catalog import REPLICATION_FULL_TABLE
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
@@ -77,6 +97,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         TapCapabilities.CATALOG,
         TapCapabilities.STATE,
         TapCapabilities.DISCOVER,
+        TapCapabilities.START_DATE,
         PluginCapabilities.ABOUT,
         PluginCapabilities.ACTIVATE_VERSION,
         PluginCapabilities.STREAM_MAPS,
@@ -249,17 +270,10 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         Args:
             config_jsonschema: [description]
         """
-        PluginBase.append_builtin_config(config_jsonschema)
-
-        capabilities = cls.capabilities
-        if PluginCapabilities.ACTIVATE_VERSION in capabilities:
-            merge_missing_config_jsonschema(
-                EMIT_ACTIVATE_VERSION_CONFIG,
-                config_jsonschema,
-            )
-
-        if PluginCapabilities.BATCH in capabilities:
-            merge_missing_config_jsonschema(BATCH_CONFIG, config_jsonschema)
+        merge_missing_config_jsonschema(
+            tap_config_for_capabilities(cls.capabilities),
+            config_jsonschema,
+        )
 
     # Connection and sync tests:
 
@@ -482,7 +496,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
                         stream.name,
                     )
                     stream.replication_key = None
-                    stream.forced_replication_method = "FULL_TABLE"
+                    stream.forced_replication_method = REPLICATION_FULL_TABLE
 
     # Sync methods
 

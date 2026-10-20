@@ -2,6 +2,30 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "copy",
+    "datetime",
+    "json",
+    "pathlib",
+    "singer_sdk.batch",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers",
+    "singer_sdk.helpers._batch",
+    "singer_sdk.helpers._catalog",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.helpers._flattening",
+    "singer_sdk.helpers._typing",
+    "singer_sdk.helpers._util",
+    "singer_sdk.mapper",
+    "singer_sdk.singerlib",
+    "singer_sdk.singerlib.catalog",
+    "singer_sdk.singerlib.types",
+    "singer_sdk.streams._state",
+    "singer_sdk.tap_base",
+    "types",
+    "warnings",
+}
+
 import abc
 import copy
 import datetime
@@ -1245,8 +1269,13 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
                     record_index += 1
 
-                if current_context == state_partition_context:
-                    # Finalize per-partition state only if 1:1 with context
+                if (
+                    current_context == state_partition_context
+                    and self.replication_method != REPLICATION_FULL_TABLE
+                ):
+                    # Finalize per-partition state only if 1:1 with context.
+                    # FULL_TABLE streams never write bookmarks, so skip creating
+                    # an empty state entry for the partition.
                     state = self.get_context_state(current_context)
                     self._finalize_state(state)
 
@@ -1497,7 +1526,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             context: Stream partition or context dictionary.
         """
 
-    def get_batch_config(self, config: t.Mapping) -> BatchConfig | None:  # noqa: PLR6301
+    def get_batch_config(self, config: t.Mapping) -> BatchConfig | None:
         """Return the batch config for this stream.
 
         Args:
@@ -1507,7 +1536,19 @@ class Stream(abc.ABC):  # noqa: PLR0904
             Batch config for this stream.
         """
         raw = config.get("batch_config")
-        return BatchConfig.from_dict(raw) if raw else None
+        if not raw:
+            return None
+
+        if not raw.get("encoding"):
+            # Settings managers may send a partial `batch_config` (e.g. only default
+            # values for `storage` or `batch_size`) to users who never enabled BATCH.
+            self.logger.warning(
+                "Ignoring `batch_config` because it has no `encoding`. "
+                "Set `batch_config.encoding.format` to emit BATCH messages.",
+            )
+            return None
+
+        return BatchConfig.from_dict(raw)
 
     def get_batches(
         self,

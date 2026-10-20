@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"re", "string"}
+
 import re
 from string import ascii_lowercase, digits
 

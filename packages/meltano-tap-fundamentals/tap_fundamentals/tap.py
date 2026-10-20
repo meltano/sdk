@@ -27,7 +27,7 @@ class AAPL(Stream):
     """An AAPL stream."""
 
     name = "aapl"
-    schema: t.ClassVar[StreamSchema] = StreamSchema(SCHEMA_DIR, key="fundamentals")
+    schema: StreamSchema = StreamSchema(SCHEMA_DIR, key="fundamentals")
 
     @override
     def get_records(

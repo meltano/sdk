@@ -1,16 +1,20 @@
 from __future__ import annotations
 
+import io
 import json
 import typing as t
-from contextlib import nullcontext
+from contextlib import nullcontext, redirect_stdout
 
 import pytest
 from click.testing import CliRunner
 
+from singer_sdk import Tap
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers.capabilities import TapCapabilities
+from singer_sdk.typing import PropertiesList
 
 if t.TYPE_CHECKING:
-    from singer_sdk import Tap
+    from pytest_snapshot.plugin import Snapshot
 
 
 @pytest.mark.parametrize(
@@ -19,7 +23,10 @@ if t.TYPE_CHECKING:
         pytest.param(
             {},
             pytest.raises(ConfigValidationError, match="Config validation failed"),
-            ["'username' is a required property", "'password' is a required property"],
+            [
+                "'password' is a required property",
+                "'username' is a required property",
+            ],
             id="missing_username_and_password",
         ),
         pytest.param(
@@ -79,6 +86,34 @@ def test_config_errors(
         assert exc.value.errors == errors
 
 
+@pytest.mark.parametrize(
+    "tap_capabilities,expectation",
+    [
+        pytest.param(
+            Tap.capabilities,
+            nullcontext(),
+            id="default_capabilities",
+        ),
+        pytest.param(
+            [c for c in Tap.capabilities if c is not TapCapabilities.START_DATE],
+            pytest.raises(ConfigValidationError, match="Config validation failed"),
+            id="without_start_date_capability",
+        ),
+    ],
+)
+def test_start_date_capability(tap_capabilities: list[TapCapabilities], expectation):
+    class StartDateTap(Tap):
+        name = "start-date-tap"
+        capabilities = tap_capabilities
+        config_jsonschema = PropertiesList(additional_properties=False).to_dict()
+
+        def discover_streams(self):
+            return []
+
+    with expectation:
+        StartDateTap(config={"start_date": "2021-01-01T00:00:00Z"})
+
+
 def test_cli(tap_class: type[Tap]):
     """Test the CLI."""
     runner = CliRunner()
@@ -119,3 +154,26 @@ def test_cli_discover(tap_class: type[Tap], tmp_path):
     )
     assert result.exit_code == 0
     assert "streams" in json.loads(result.stdout)
+
+
+@pytest.mark.snapshot
+def test_default_info(snapshot: Snapshot):
+    """Test the default about info."""
+
+    class BasicTap(Tap):
+        """A basic tap."""
+
+        name = "tap-example"
+        package_name = "singer-sdk"
+
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        BasicTap.print_about(output_format="json")
+
+    info = json.loads(buf.getvalue())
+    # Environment-dependent values
+    info["version"] = "<version>"
+    info["sdk_version"] = "<sdk_version>"
+    info["supported_python_versions"] = ["<python_version>"]
+
+    snapshot.assert_match(json.dumps(info, indent=2) + "\n", "default_info.json")

@@ -2,6 +2,16 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "importlib",
+    "importlib.abc",
+    "importlib.metadata",
+    "importlib.resources.abc",
+    "importlib_metadata",
+    "typing_extensions",
+    "warnings",
+}
+
 import datetime
 import sys
 import warnings
@@ -51,8 +61,10 @@ _PYTHON_EOL_DATES: dict[tuple[int, int], datetime.date] = {
     (3, 12): datetime.date(2028, 10, 1),
     (3, 13): datetime.date(2029, 10, 1),
     (3, 14): datetime.date(2030, 10, 1),
+    (3, 15): datetime.date(2031, 10, 1),
+    (3, 16): datetime.date(2032, 10, 1),
 }
-_PYTHON_EOL_WARNING_PERIOD = datetime.timedelta(days=365)  # warn 1 year before EOL
+_PYTHON_EOL_WARNING_PERIOD = datetime.timedelta(days=180)  # warn ~6 months before EOL
 
 
 def warn_python_eol(

@@ -31,6 +31,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
 ]
 {%- if cookiecutter.license != "None" %}
 license = "{{cookiecutter.license}}"
@@ -39,9 +40,9 @@ license-files = [ "LICENSE" ]
 requires-python = ">=3.10"
 dependencies = [
     {%- if extras %}
-    "singer-sdk[{{ extras|join(',') }}]~=0.54.5",
+    "singer-sdk[{{ extras|join(',') }}]~=0.54.9",
     {%- else %}
-    "singer-sdk~=0.54.5",
+    "singer-sdk~=0.54.9",
     {%- endif %}
     {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
     "requests~=2.34.0",

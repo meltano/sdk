@@ -2,11 +2,23 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "singer_sdk.configuration._dict_config",
+    "singer_sdk.helpers.capabilities",
+    "singer_sdk.sql.connector",
+    "singer_sdk.sql.stream",
+    "singer_sdk.streams.core",
+}
+
 import sys
 import typing as t
 
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
-from singer_sdk.helpers.capabilities import SQL_TAP_USE_SINGER_DECIMAL
+from singer_sdk.helpers.capabilities import (
+    _merge_schemas,
+    _sql_tap_config,
+    tap_config_for_capabilities,
+)
 from singer_sdk.tap_base import Tap
 
 if sys.version_info >= (3, 12):
@@ -15,11 +27,29 @@ else:
     from typing_extensions import override
 
 if t.TYPE_CHECKING:
+    from singer_sdk.helpers.capabilities import CapabilitiesEnum
     from singer_sdk.sql.connector import SQLConnector
     from singer_sdk.sql.stream import SQLStream
     from singer_sdk.streams.core import Stream
 
 __all__ = ["SQLTap"]
+
+
+def sql_tap_config_for_capabilities(
+    capabilities: t.Iterable[CapabilitiesEnum],
+) -> dict[str, t.Any]:
+    """Generate the config JSON schema for SQL tap capabilities.
+
+    Args:
+        capabilities: The capabilities supported by the SQL tap.
+
+    Returns:
+        A JSON schema with the config properties for the capabilities.
+    """
+    return _merge_schemas(
+        _sql_tap_config(),
+        tap_config_for_capabilities(capabilities),
+    )
 
 
 class SQLTap(Tap):
@@ -63,8 +93,10 @@ class SQLTap(Tap):
         Args:
             config_jsonschema: [description]
         """
-        merge_missing_config_jsonschema(SQL_TAP_USE_SINGER_DECIMAL, config_jsonschema)
-        super().append_builtin_config(config_jsonschema)
+        merge_missing_config_jsonschema(
+            sql_tap_config_for_capabilities(cls.capabilities),
+            config_jsonschema,
+        )
 
     @property
     def tap_connector(self) -> SQLConnector:

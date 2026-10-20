@@ -13,7 +13,7 @@ else:
     from typing_extensions import override
 
 if t.TYPE_CHECKING:
-    from types import ModuleType
+    from sqlalchemy.engine.interfaces import DBAPIModule
 
 
 class CustomSQLDialect(DefaultDialect):
@@ -23,17 +23,7 @@ class CustomSQLDialect(DefaultDialect):
 
     @classmethod
     @override
-    def import_dbapi(cls):
-        """Import the sqlite3 DBAPI."""
-        import sqlite3  # noqa: PLC0415
+    def import_dbapi(cls) -> DBAPIModule:
+        from sqlite3 import dbapi2 as sqlite  # noqa: PLC0415
 
-        return sqlite3
-
-    @classmethod
-    @override
-    def dbapi(cls) -> ModuleType:  # type: ignore[override]
-        """Return the DBAPI module.
-
-        NOTE: This is a legacy method that will stop being used by SQLAlchemy at some point.
-        """  # noqa: E501
-        return cls.import_dbapi()  # type: ignore[no-any-return]
+        return t.cast("DBAPIModule", sqlite)

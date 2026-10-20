@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__lazy_modules__ = {"importlib"}
+
 from importlib import metadata
 
 SDK_PACKAGE_NAME = "singer_sdk"

@@ -1,6 +1,6 @@
 # Contributing Guide
 
-_**Note:** The SDK currently works with Python versions 3.10 through 3.14.x._
+_**Note:** The SDK currently works with Python versions 3.10 through 3.15.x._
 
 Let's build together! Please see our [Contributor Guide](https://docs.meltano.com/contribute/)
 for more information on contributing to Meltano.
@@ -202,6 +202,22 @@ scopes:
 - `templates` # cookiecutters
 
 More advanced rules and settings can be found within the file [`.github/semantic.yml`](https://github.com/meltano/sdk/blob/main/.github/semantic.yml).
+
+## Deprecating Features
+
+Follow the [deprecation policy](./release_process.md#deprecation-policy) when removing or
+changing public behavior in a backward incompatible way. Every new deprecation must be
+documented in the same PR that adds the warning:
+
+1. Emit the appropriate warning class from `singer_sdk.helpers._compat`: use
+   `SingerSDKDeprecationWarning` when a removal version is known, or
+   `SingerSDKPendingDeprecationWarning` when there is no committed timeline.
+1. Add an entry to [`docs/deprecation.md`](./deprecation.md), under the removal version's
+   heading, or under "Pending Deprecations" if no version is set yet.
+1. If users need to change their code, document how (a section in the docs or a
+   migration guide) and link to it from both the warning message and the deprecation
+   timeline entry.
+1. Add a test that checks the warning is emitted.
 
 ## Workspace Development Strategies for the SDK
 

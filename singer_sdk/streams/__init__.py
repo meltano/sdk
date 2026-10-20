@@ -2,6 +2,15 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "singer_sdk.helpers._compat",
+    "singer_sdk.streams.core",
+    "singer_sdk.streams.graphql",
+    "singer_sdk.streams.rest",
+    "typing",
+    "warnings",
+}
+
 import typing as t
 import warnings
 

@@ -3,10 +3,10 @@ from __future__ import annotations
 import datetime
 import io
 import json
+import zoneinfo
 from contextlib import redirect_stdout
 
 import pytest
-from pytz import timezone
 
 import singer_sdk.singerlib as singer
 
@@ -83,13 +83,16 @@ def test_record_message_naive_time_extracted():
 
 def test_record_message_time_extracted_to_utc():
     """Check that record message's time_extracted is converted to UTC."""
-    naive = datetime.datetime(2021, 1, 1, 12)  # noqa: DTZ001
-    nairobi = timezone("Africa/Nairobi")
-
     record = singer.RecordMessage(
         stream="test",
         record={"id": 1, "name": "test"},
-        time_extracted=nairobi.localize(naive),
+        time_extracted=datetime.datetime(
+            2021,
+            1,
+            1,
+            12,
+            tzinfo=zoneinfo.ZoneInfo("Africa/Nairobi"),
+        ),
     )
     assert record.time_extracted == datetime.datetime(2021, 1, 1, 9, tzinfo=UTC)
 

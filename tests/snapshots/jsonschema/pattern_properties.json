@@ -1,5 +1,13 @@
 {
   "type": "object",
+  "additionalProperties": true,
+  "patternProperties": {
+    "^attr_[a-z]+$": {
+      "type": [
+        "string"
+      ]
+    }
+  },
   "properties": {
     "id": {
       "type": [
@@ -23,14 +31,6 @@
       "type": [
         "string",
         "null"
-      ]
-    }
-  },
-  "additionalProperties": true,
-  "patternProperties": {
-    "^attr_[a-z]+$": {
-      "type": [
-        "string"
       ]
     }
   }

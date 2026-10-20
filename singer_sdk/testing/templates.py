@@ -2,6 +2,16 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "contextlib",
+    "importlib.resources",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.streams",
+    "singer_sdk.testing",
+    "singer_sdk.testing.config",
+    "warnings",
+}
+
 import contextlib
 import importlib.resources
 import sys
@@ -20,9 +30,8 @@ else:
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
     from singer_sdk.streams import Stream
+    from singer_sdk.testing.config import SuiteConfig
     from singer_sdk.testing.runners import TapTestRunner
-
-    from .config import SuiteConfig
 
 
 _T = t.TypeVar("_T", bound=SingerTestRunner)

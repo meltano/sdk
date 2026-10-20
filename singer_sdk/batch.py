@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "itertools",
+    "singer_sdk.helpers._batch",
+    "singer_sdk.helpers._compat",
+    "warnings",
+}
+
 import itertools
 import sys
 import typing as t

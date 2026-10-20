@@ -2,6 +2,16 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "collections.abc",
+    "importlib.metadata",
+    "json",
+    "packaging.specifiers",
+    "packaging.version",
+    "singer_sdk.helpers.capabilities",
+    "textwrap",
+}
+
 import abc
 import dataclasses
 import json

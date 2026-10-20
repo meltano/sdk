@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "collections.abc",
+    "inflection",
+    "singer_sdk.exceptions",
+    "singer_sdk.singerlib.json",
+}
+
 import collections.abc
 import re
 import typing as t

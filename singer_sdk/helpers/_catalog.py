@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"copy", "singer_sdk.helpers._typing", "singer_sdk.singerlib"}
+
 import typing as t
 from copy import deepcopy
 

@@ -53,6 +53,13 @@ repos:
   - id: check-github-workflows
   - id: check-readthedocs
 
+- repo: https://github.com/henryiii/flake8-lazy
+  rev: v0.10.1
+  hooks:
+  - id: flake8-lazy
+    pass_filenames: false
+    args: ["--apply=set", "singer_sdk"]
+
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.16.6
   hooks:

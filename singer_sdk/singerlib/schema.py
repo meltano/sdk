@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "collections.abc",
+    "functools",
+    "referencing",
+    "referencing._core",
+    "referencing.jsonschema",
+}
+
 import functools
 import typing as t
 from dataclasses import KW_ONLY, dataclass

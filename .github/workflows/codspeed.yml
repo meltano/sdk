@@ -42,9 +42,11 @@ jobs:
             - "singer_sdk/**"
             - "tests/**"
             - "noxfile.py"
+            - "codspeed.yml"
             - "pyproject.toml"
             - "uv.lock"
             - ".github/workflows/codspeed.yml"
+            - ".python-version"
 
   benchmarks:
     name: Run benchmarks
@@ -63,7 +65,7 @@ jobs:
         python-version-file: .python-version
 
     - name: Install uv
-      uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
       with:
         cache-suffix: benchmarks
         version: ${{ env.UV_VERSION }}
@@ -73,10 +75,43 @@ jobs:
         uv export --all-packages --no-editable --frozen --no-hashes --no-dev --all-extras --group benchmark --output-file requirements.codspeed.txt
         uv pip install --system -r requirements.codspeed.txt
 
-    - uses: CodSpeedHQ/action@373d6868929f444bc08d901fd0eb0ad52a8875ea # v5.2.1
+    - uses: CodSpeedHQ/action@f842b9a3ffe213dbb81768fd7f7eeb4dfcf1c369 # v5.4.2
       with:
         token: ${{ secrets.CODSPEED_TOKEN }}
         run: pytest tests/ --codspeed
+        mode: simulation
+
+  imports:
+    name: Measure import times
+    needs: files-changed
+    runs-on: ubuntu-latest
+    # CodSpeed doesn't support `merge_group` events
+    if: ${{ github.event_name != 'merge_group' && ( github.event_name == 'workflow_dispatch' || needs.files-changed.outputs.codspeed == 'true' ) }}
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version-file: .python-version
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      with:
+        cache-suffix: imports
+        version: ${{ env.UV_VERSION }}
+
+    - name: Install the SDK
+      run: uv pip install --system --compile-bytecode .
+
+    # Runs the exec benchmarks from codspeed.yml. Walltime needs CodSpeed's
+    # macro runners, so we measure simulated CPU work on a regular runner.
+    - name: Run import benchmarks
+      uses: CodSpeedHQ/action@f842b9a3ffe213dbb81768fd7f7eeb4dfcf1c369 # v5.4.2
+      with:
+        token: ${{ secrets.CODSPEED_TOKEN }}
         mode: simulation
 
   ci:
@@ -85,6 +120,7 @@ jobs:
     needs:
     - files-changed
     - benchmarks
+    - imports
     runs-on: ubuntu-latest
     permissions: {}
     steps:
@@ -92,4 +128,4 @@ jobs:
       uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
       with:
         jobs: ${{ toJSON(needs) }}
-        allowed-skips: benchmarks
+        allowed-skips: benchmarks,imports

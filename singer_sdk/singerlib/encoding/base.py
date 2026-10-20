@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"collections", "singer_sdk.singerlib"}
+
 import abc
 import enum
 import logging

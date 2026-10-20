@@ -2,8 +2,17 @@
 
 from __future__ import annotations
 
-from .base import GenericSingerReader, GenericSingerWriter, SingerMessageType
-from .simple import SimpleSingerReader, SimpleSingerWriter
+__lazy_modules__ = {
+    "singer_sdk.singerlib.encoding.base",
+    "singer_sdk.singerlib.encoding.simple",
+}
+
+from singer_sdk.singerlib.encoding.base import (
+    GenericSingerReader,
+    GenericSingerWriter,
+    SingerMessageType,
+)
+from singer_sdk.singerlib.encoding.simple import SimpleSingerReader, SimpleSingerWriter
 
 __all__ = [
     "GenericSingerReader",

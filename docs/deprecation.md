@@ -7,6 +7,7 @@ incompatible way, following their deprecation, as indicated in the
 ## Pending Deprecations
 
 - The `BasePageNumberPaginator` and `BaseOffsetPaginator` classes will be removed. Use the `PageNumberPaginator` and `OffsetPaginator` classes instead.
+- Yielding a single object (or scalar) matched by a JSONPath expression ending in `[*]`, such as `records_jsonpath = "$.data[*]"`, as one record will stop working. `jsonpath-ng` 1.11 no longer does this, and the SDK only preserves the old behavior with a `SingerSDKPendingDeprecationWarning`. Use a path that selects the object itself instead. See [JSONPath wildcards on a single object](./code_samples.md#jsonpath-wildcards-on-a-single-object).
 
 ## v0.54
 

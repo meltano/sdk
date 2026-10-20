@@ -2,6 +2,26 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "copy",
+    "datetime",
+    "gzip",
+    "importlib.util",
+    "jsonschema",
+    "logging",
+    "singer_sdk",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers._batch",
+    "singer_sdk.helpers._compat",
+    "singer_sdk.helpers._typing",
+    "singer_sdk.helpers.conform",
+    "singer_sdk.singerlib.json",
+    "singer_sdk.singerlib.types",
+    "singer_sdk.target_base",
+    "singer_sdk.typing",
+    "types",
+}
+
 import abc
 import copy
 import datetime
@@ -406,11 +426,14 @@ class Sink(abc.ABC):  # noqa: PLR0904
         """Plugin configuration."""
         return MappingProxyType(self._config)
 
-    @property
+    @cached_property
     def batch_config(self) -> BatchConfig | None:
         """Batch configuration."""
-        raw = self.config.get("batch_config")
-        return BatchConfig.from_dict(raw) if raw else None
+        if self.config.get("batch_config"):  # pragma: no cover
+            self.logger.warning(
+                "batch_config is not currently supported in targets, ignoring"
+            )
+        return None
 
     @property
     def include_sdc_metadata_properties(self) -> bool:

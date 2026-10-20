@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {"datetime", "decimal", "json", "simplejson", "typing"}
+
 import datetime
 import decimal
 import json

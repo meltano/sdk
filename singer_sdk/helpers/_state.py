@@ -2,6 +2,15 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "copy",
+    "singer_sdk.exceptions",
+    "singer_sdk.helpers",
+    "singer_sdk.helpers._typing",
+    "singer_sdk.singerlib.encoding.base",
+    "singer_sdk.singerlib.encoding.simple",
+}
+
 import copy
 import logging
 import typing as t
@@ -97,7 +106,7 @@ def _create_in_partitions_list(
     state_partition_context: types.Context,
 ) -> dict:
     # Existing partition not found. Creating new state entry in partitions list...
-    new_partition_state = {"context": state_partition_context}
+    new_partition_state = {"context": dict(state_partition_context)}
     partitions.append(new_partition_state)
     return new_partition_state
 
