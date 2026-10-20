@@ -4,6 +4,7 @@ from __future__ import annotations
 
 __lazy_modules__ = {
     "singer_sdk.helpers._catalog",
+    "singer_sdk.helpers._typing",
     "singer_sdk.helpers.types",
     "singer_sdk.singerlib",
     "singer_sdk.singerlib.types",
