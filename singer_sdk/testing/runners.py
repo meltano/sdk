@@ -247,6 +247,7 @@ class TargetTestRunner(SingerTestRunner[Target]):
         self.input_filepath = input_filepath
         self.input_io = input_io
         self._input: t.IO[str] | None = None
+        self._owns_input = False
         self.stdout: str | None = None
         self.stderr: str | None = None
 
@@ -270,11 +271,22 @@ class TargetTestRunner(SingerTestRunner[Target]):
                 self._input = self.input_io
             elif self.input_filepath:
                 self._input = self.input_filepath.open(encoding="utf8")
+                self._owns_input = True
         return t.cast("t.IO[str]", self._input)
 
     @target_input.setter
     def target_input(self, value: t.IO[str]) -> None:
+        self._close_input()
         self._input = value
+        self._owns_input = False
+
+    def _close_input(self) -> None:
+        """Close the input file if it was opened by this runner."""
+        if self._owns_input and self._input is not None:
+            self._input.close()
+            # Keep the "exhausted stream" semantics for any later sync.
+            self._input = io.StringIO()
+            self._owns_input = False
 
     @override
     def sync_all(
@@ -291,11 +303,14 @@ class TargetTestRunner(SingerTestRunner[Target]):
             kwargs: Unused keyword arguments.
         """
         target = self.new_target()
-        stdout, stderr = self._execute_sync(
-            target=target,
-            target_input=self.target_input,
-            finalize=finalize,
-        )
+        try:
+            stdout, stderr = self._execute_sync(
+                target=target,
+                target_input=self.target_input,
+                finalize=finalize,
+            )
+        finally:
+            self._close_input()
         self.stdout, self.stderr = (stdout.read(), stderr.read())
         self.state_messages.extend(self._clean_sync_output(self.stdout))
 
