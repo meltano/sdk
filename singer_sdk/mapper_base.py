@@ -38,7 +38,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, abc.ABC):
     """Abstract base class for inline mappers."""
 
     #: A list of plugin capabilities.
-    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+    capabilities: t.ClassVar[t.Sequence[CapabilitiesEnum]] = [
         PluginCapabilities.ABOUT,
         PluginCapabilities.STREAM_MAPS,
         PluginCapabilities.FLATTENING,

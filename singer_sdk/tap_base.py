@@ -93,7 +93,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
     """The message writer class to use for writing messages."""
 
     #: A list of capabilities supported by this tap.
-    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+    capabilities: t.ClassVar[t.Sequence[CapabilitiesEnum]] = [
         TapCapabilities.CATALOG,
         TapCapabilities.STATE,
         TapCapabilities.DISCOVER,

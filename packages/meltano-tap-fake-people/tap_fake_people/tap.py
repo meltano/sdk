@@ -54,7 +54,7 @@ class TapFakePeople(Tap):
     """Tap for fake people."""
 
     name = "tap-fake-people"
-    package_name: str = "meltano-tap-fake-people"
+    package_name = "meltano-tap-fake-people"
 
     @override  # type: ignore[misc]
     def write_message(self, message: Message) -> None:  # ty: ignore[override-of-final-method]

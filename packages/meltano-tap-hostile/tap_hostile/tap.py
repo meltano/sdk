@@ -23,7 +23,7 @@ class TapHostile(Tap):
     """Sample tap for for testing SQL target property name transformations."""
 
     name: str = "tap-hostile"
-    package_name: str = "meltano-tap-hostile"
+    package_name = "meltano-tap-hostile"
     config_jsonschema = PropertiesList().to_dict()
 
     @override

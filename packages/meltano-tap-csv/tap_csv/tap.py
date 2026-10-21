@@ -11,7 +11,7 @@ class TapCSV(FolderTap):
     """Sample Tap for CSV files."""
 
     name = "tap-csv"
-    package_name: str = "meltano-tap-csv"
+    package_name = "meltano-tap-csv"
     valid_extensions: tuple[str, ...] = (".csv",)
     default_stream_class = CSVStream
 

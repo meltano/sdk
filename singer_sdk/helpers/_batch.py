@@ -62,7 +62,7 @@ class BaseBatchFileEncoding:
 class JSONLinesEncoding(BaseBatchFileEncoding):
     """JSON Lines encoding for batch files."""
 
-    format: t.Literal["jsonl"] = "jsonl"
+    format: t.Literal["jsonl"] = "jsonl"  # ty: ignore[invalid-mutable-override]
 
 
 @deprecated(
@@ -73,7 +73,7 @@ class JSONLinesEncoding(BaseBatchFileEncoding):
 class ParquetEncoding(BaseBatchFileEncoding):
     """Parquet encoding for batch files."""
 
-    format: t.Literal["parquet"] = "parquet"
+    format: t.Literal["parquet"] = "parquet"  # ty: ignore[invalid-mutable-override]
 
 
 @dataclass(slots=True)

@@ -29,7 +29,7 @@ class TapCountries(Tap):
     """Sample tap for Countries GraphQL API."""
 
     name: str = "tap-countries"
-    package_name: str = "meltano-tap-countries"
+    package_name = "meltano-tap-countries"
 
     message_writer_class = MsgSpecWriter
 
