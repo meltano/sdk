@@ -85,7 +85,7 @@ class Target(BaseSingerReader, abc.ABC):
     """The message reader class to use for reading messages."""
 
     #: A list of plugin capabilities supported by this target.
-    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+    capabilities: t.ClassVar[t.Sequence[CapabilitiesEnum]] = [
         PluginCapabilities.ABOUT,
         PluginCapabilities.STREAM_MAPS,
         PluginCapabilities.FLATTENING,

@@ -46,8 +46,8 @@ class TapGitlab(Tap):
     """Sample tap for Gitlab."""
 
     name: str = "tap-gitlab"
-    package_name: str = "meltano-tap-gitlab"
-    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+    package_name = "meltano-tap-gitlab"
+    capabilities: t.ClassVar[t.Sequence[CapabilitiesEnum]] = [
         *Tap.capabilities,
         TapCapabilities.START_DATE,
     ]

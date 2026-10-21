@@ -65,10 +65,10 @@ class SQLTarget(Target):
 
     _target_connector: SQLConnector | None = None
 
-    default_sink_class: type[SQLSink]
+    default_sink_class: type[SQLSink]  # ty: ignore[invalid-mutable-override]
 
     #: A list of capabilities supported by this target.
-    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+    capabilities: t.ClassVar[t.Sequence[CapabilitiesEnum]] = [
         *Target.capabilities,
         PluginCapabilities.ACTIVATE_VERSION,
         TargetCapabilities.TARGET_SCHEMA,

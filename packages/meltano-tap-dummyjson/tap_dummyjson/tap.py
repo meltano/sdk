@@ -22,7 +22,7 @@ class TapDummyJSON(Tap):
     """DummyJSON tap class."""
 
     name = "tap-dummyjson"
-    package_name: str = "meltano-tap-dummyjson"
+    package_name = "meltano-tap-dummyjson"
     capabilities = [
         *Tap.capabilities,
         TapCapabilities.START_DATE,

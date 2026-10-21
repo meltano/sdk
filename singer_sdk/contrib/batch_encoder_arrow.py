@@ -61,7 +61,7 @@ class ArrowBatcher(BaseBatcher):
             table = pa.Table.from_pylist(list(chunk))
             with (
                 storage.open(filename, "wb") as f,
-                pa.ipc.new_file(f, table.schema) as writer,  # ty: ignore[invalid-argument-type]
+                pa.ipc.new_file(f, table.schema) as writer,
             ):
                 writer.write_table(table)
 
