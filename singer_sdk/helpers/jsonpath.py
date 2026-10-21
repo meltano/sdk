@@ -124,4 +124,4 @@ def _compile_jsonpath(expression: str) -> jsonpath_ng.JSONPath:
     Returns:
         A compiled JSONPath object.
     """
-    return parse(expression)  # type: ignore[no-any-return]
+    return parse(expression)  # type: ignore[no-any-return,unused-ignore]
