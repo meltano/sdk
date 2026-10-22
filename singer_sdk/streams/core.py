@@ -7,6 +7,7 @@ __lazy_modules__ = {
     "datetime",
     "json",
     "pathlib",
+    "pyarrow",
     "singer_sdk.batch",
     "singer_sdk.exceptions",
     "singer_sdk.helpers",
@@ -39,7 +40,7 @@ from types import MappingProxyType
 
 import singer_sdk.singerlib as singer
 from singer_sdk import metrics
-from singer_sdk.batch import Batcher
+from singer_sdk.batch import Batcher, import_batch_dependency
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
@@ -55,7 +56,11 @@ from singer_sdk.helpers._compat import (
     datetime_fromisoformat,
 )
 from singer_sdk.helpers._flattening import get_flattening_options
-from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type
+from singer_sdk.helpers._typing import (
+    _warn_unmapped_properties,
+    conform_record_data_types,
+    is_datetime_type,
+)
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.helpers.conform import TypeConformanceLevel
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform
@@ -67,6 +72,8 @@ from singer_sdk.singerlib.catalog import (
 from singer_sdk.streams._state import StreamStateManager
 
 if t.TYPE_CHECKING:
+    import pyarrow as pa
+
     from singer_sdk.helpers import types
     from singer_sdk.helpers._batch import BaseBatchFileEncoding
     from singer_sdk.helpers._compat import Traversable
@@ -1548,6 +1555,38 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
+        # Only get_records() can produce child contexts, and a deselected stream is
+        # only synced to drive its selected children, so both use the record path.
+        # Tap.sync_all() skips streams that are neither selected nor have selected
+        # descendants, so the child check alone covers deselected streams there.
+        # `self.selected` states the intent, and still guards a deselected stream
+        # when sync() is called directly.
+        if (
+            batch_config.encoding.format == "arrow"
+            and self.selected
+            and not self.child_streams
+        ):
+            # Iterate partitions the same way _sync_records() does
+            context_list = [context] if context is not None else self.partitions
+            rows_written = 0  # Counted across partitions, like _sync_records()
+            for index, context_element in enumerate(context_list or [{}]):
+                current_context = context_element or None
+                # Lets get_record_batches() call get_starting_replication_key_value()
+                self._write_starting_replication_value(current_context)
+                tables = self.get_record_batches(current_context)
+                if tables is None and index == 0:
+                    break  # The stream doesn't produce Arrow data
+                for encoding, manifest, rows in self._get_arrow_batches(
+                    tables or (),
+                    batch_config,
+                    current_context,
+                    rows_written=rows_written,
+                ):
+                    rows_written += rows
+                    yield encoding, manifest
+            else:
+                return
+
         batcher = Batcher(
             tap_name=self.tap_name,
             stream_name=self.name,
@@ -1556,6 +1595,134 @@ class Stream(abc.ABC):  # noqa: PLR0904
         records = self._sync_records(context, write_messages=False)
         for manifest in batcher.get_batches(records=records):
             yield batch_config.encoding, manifest
+
+    def get_record_batches(  # noqa: PLR6301
+        self,
+        context: types.Context | None,  # noqa: ARG002
+    ) -> t.Iterable[pa.Table | pa.RecordBatch] | None:
+        """Return the stream's data as native Arrow tables or record batches.
+
+        Override this method when the source can produce Arrow data directly, e.g.
+        with an ADBC driver, ``fetch_arrow_batches()`` or ``pymongoarrow``. When the
+        ``arrow`` batch encoding is configured, the SDK then writes these tables to
+        Arrow IPC batch files of ``batch_size`` rows without converting each row to
+        a Python dictionary. The SDK:
+
+        - re-slices the tables to the configured ``batch_size``,
+        - drops columns for deselected top-level properties,
+        - advances the replication key bookmark from each batch file's data, and
+          emits a STATE message once the file is written.
+
+        The tables must contain one column per schema property, already conformed
+        to the stream schema, and rows must be ordered by the replication key if
+        :attr:`is_sorted` is ``True``. Unlike RECORD mode, the SDK only checks that
+        order between batch files, not between the rows inside one, so the source
+        query must guarantee it. Stream maps and :meth:`post_process` are not
+        applied.
+
+        Streams with child streams, and deselected streams synced only for their
+        children, are batched from :meth:`get_records` instead, since only records
+        can produce child contexts.
+
+        For a partitioned stream, this is called once per partition, like
+        :meth:`get_records`, and each partition's bookmark advances separately.
+        Return ``None`` for every partition to batch from :meth:`get_records`. If
+        the first partition returns Arrow data, a later partition that returns
+        ``None`` is treated as having no rows.
+
+        Args:
+            context: Stream partition or context dictionary.
+
+        Returns:
+            An iterable of Arrow tables or record batches, or ``None`` (the
+            default) to batch the records from :meth:`get_records` instead.
+
+        .. versionadded:: 0.55.0
+        """
+        return None
+
+    def _get_arrow_batches(
+        self,
+        tables: t.Iterable[pa.Table | pa.RecordBatch],
+        batch_config: BatchConfig,
+        context: types.Context | None,
+        *,
+        rows_written: int,
+    ) -> t.Iterator[tuple[BaseBatchFileEncoding, list[str], int]]:
+        """Write native Arrow data to batch files, advancing state after each one.
+
+        Args:
+            tables: Arrow tables or record batches from :meth:`get_record_batches`.
+            batch_config: Batch config for this stream.
+            context: Stream partition or context dictionary.
+            rows_written: Rows already written by this sync, for the record limit.
+
+        Yields:
+            A tuple of (encoding, manifest, number of rows) for each batch.
+        """
+        pc = import_batch_dependency(
+            "pyarrow.compute",
+            feature="Writing Arrow batch files",
+            install="pyarrow",
+        )
+
+        from singer_sdk.contrib.batch_encoder_arrow import (  # noqa: PLC0415
+            ArrowBatcher,
+            rechunk_tables,
+        )
+
+        batcher = ArrowBatcher(
+            tap_name=self.tap_name,
+            stream_name=self.name,
+            batch_config=batch_config,
+        )
+        properties = self.schema.get("properties", {})
+        # Same rule as conform_record_data_types() in RECORD mode
+        keep_undeclared = self.TYPE_CONFORMANCE_LEVEL == TypeConformanceLevel.NONE or (
+            bool(self.schema.get("additionalProperties"))
+        )
+
+        with self.get_record_counter() as record_counter:
+            record_counter.with_context(context)
+            for table in rechunk_tables(tables, batch_config.batch_size):
+                # Abort before writing past the limit, like _sync_records()
+                self._check_max_record_limit(current_record_index=rows_written)
+                limit = self.ABORT_AT_RECORD_COUNT
+                truncated = False
+                if limit is not None and rows_written + table.num_rows > limit:
+                    # Before the bookmark, so it never covers rows left unwritten
+                    table = table.slice(0, limit - rows_written)  # noqa: PLW2901
+                    truncated = True
+
+                if self.replication_key in table.column_names:
+                    # The max, not the last value: the state manager treats streams
+                    # with custom state partitioning as unsorted, and max skips nulls
+                    latest = pc.max(table[self.replication_key])
+                    latest_record = {self.replication_key: latest.as_py()}
+                else:
+                    latest_record = {}
+
+                undeclared = [n for n in table.column_names if n not in properties]
+                if undeclared and not keep_undeclared:
+                    _warn_unmapped_properties(self.name, tuple(undeclared), self.logger)
+                columns = [
+                    name
+                    for name in table.column_names
+                    if self.mask["properties", name]
+                    and (name in properties or keep_undeclared)
+                ]
+                if len(columns) < table.num_columns:
+                    table = table.select(columns)  # noqa: PLW2901
+
+                manifest = batcher.write_table(table)
+                record_counter.increment(table.num_rows)
+                # Only advance the bookmark once the batch file is written
+                self._increment_stream_state(latest_record, context=context)
+                yield batch_config.encoding, manifest, table.num_rows
+
+                rows_written += table.num_rows
+                if truncated:  # Rows past the limit were dropped, so abort now
+                    self._check_max_record_limit(current_record_index=rows_written)
 
     def preprocess_context(  # noqa: PLR6301
         self,
