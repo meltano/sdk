@@ -1694,10 +1694,10 @@ class Stream(abc.ABC):  # noqa: PLR0904
                     truncated = True
 
                 if self.replication_key in table.column_names:
-                    column = table[self.replication_key]
-                    # A sorted stream's last value is its max, and is cheaper to get
-                    latest = column[-1] if self.is_sorted else pc.max(column)
-                    latest_record = {self.replication_key: latest.as_py()}  # ty: ignore[unresolved-attribute]
+                    # The max, not the last value: the state manager treats streams
+                    # with custom state partitioning as unsorted, and max skips nulls
+                    latest = pc.max(table[self.replication_key])
+                    latest_record = {self.replication_key: latest.as_py()}
                 else:
                     latest_record = {}
 

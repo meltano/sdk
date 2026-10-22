@@ -226,7 +226,15 @@ class ArrowStream(Stream):
 
 class UnsortedArrowStream(ArrowStream):
     is_sorted = False
-    id_batches: t.ClassVar[list[list[int]]] = [[3, 1], [5, 2], [4]]
+    # Batch files [5, 1, 2] and [4, 3], whose last values aren't their max
+    id_batches: t.ClassVar[list[list[int]]] = [[5, 1], [2], [4, 3]]
+
+
+class StatePartitionedArrowStream(UnsortedArrowStream):
+    """Declared sorted, but custom state partitioning makes its state unsorted."""
+
+    is_sorted = True
+    state_partitioning_keys: t.ClassVar[list[str]] = []
 
 
 class FullTableArrowStream(ArrowStream):
@@ -405,13 +413,30 @@ def test_stream_get_record_batches(tmp_path: Path) -> None:
 
 
 @skip_if_no_pyarrow
-def test_stream_get_record_batches_unsorted(tmp_path: Path) -> None:
-    """An unsorted stream bookmarks each file's max value, not its last."""
-    messages = _sync_arrow_tap(tmp_path, UnsortedArrowStream)
+@pytest.mark.parametrize(
+    "stream_class",
+    [UnsortedArrowStream, StatePartitionedArrowStream],
+)
+def test_stream_get_record_batches_unsorted(
+    tmp_path: Path,
+    stream_class: type[Stream],
+) -> None:
+    """Unsorted state is bookmarked at each file's max value, not its last."""
+    messages = _sync_arrow_tap(tmp_path, stream_class)
     assert [[row["id"] for row in rows] for rows in _read_batch_files(messages)] == [
-        [3, 1, 5],
-        [2, 4],
+        [5, 1, 2],
+        [4, 3],
     ]
+
+    # The STATE after each BATCH holds progress markers, unless it's the final one
+    progress = []
+    for i, message in enumerate(messages):
+        if message["type"] == "BATCH":
+            bookmark = messages[i + 1]["value"]["bookmarks"]["arrow_stream"]
+            progress.append(
+                bookmark.get("progress_markers", bookmark)["replication_key_value"],
+            )
+    assert progress == [5, 5]
     assert _final_bookmark(messages) == 5
 
 
