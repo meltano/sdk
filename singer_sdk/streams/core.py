@@ -1562,11 +1562,21 @@ class Stream(abc.ABC):  # noqa: PLR0904
             and self.selected
             and not self.child_streams
         ):
-            # Lets get_record_batches() call get_starting_replication_key_value()
-            self._write_starting_replication_value(context)
-            tables = self.get_record_batches(context)
-            if tables is not None:
-                yield from self._get_arrow_batches(tables, batch_config, context)
+            # Iterate partitions the same way _sync_records() does
+            context_list = [context] if context is not None else self.partitions
+            for index, context_element in enumerate(context_list or [{}]):
+                current_context = context_element or None
+                # Lets get_record_batches() call get_starting_replication_key_value()
+                self._write_starting_replication_value(current_context)
+                tables = self.get_record_batches(current_context)
+                if tables is None and index == 0:
+                    break  # The stream doesn't produce Arrow data
+                yield from self._get_arrow_batches(
+                    tables or (),
+                    batch_config,
+                    current_context,
+                )
+            else:
                 return
 
         batcher = Batcher(
@@ -1604,6 +1614,12 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Streams with child streams, and deselected streams synced only for their
         children, are batched from :meth:`get_records` instead, since only records
         can produce child contexts.
+
+        For a partitioned stream, this is called once per partition, like
+        :meth:`get_records`, and each partition's bookmark advances separately.
+        Return ``None`` for every partition to batch from :meth:`get_records`. If
+        the first partition returns Arrow data, a later partition that returns
+        ``None`` is treated as having no rows.
 
         Args:
             context: Stream partition or context dictionary.

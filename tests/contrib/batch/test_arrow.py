@@ -250,6 +250,26 @@ class EmptyArrowStream(ArrowStream):
         return []
 
 
+class PartitionedArrowStream(ArrowStream):
+    ids_by_shard: t.ClassVar[dict[str, list[int]]] = {"a": [1, 2], "b": [10, 11]}
+
+    @property
+    @override
+    def partitions(self) -> list[dict]:
+        return [{"shard": shard} for shard in self.ids_by_shard]
+
+    @override
+    def get_record_batches(self, context: Context | None) -> t.Iterable[t.Any]:
+        pa = pytest.importorskip("pyarrow")
+
+        assert context is not None
+        start = self.get_starting_replication_key_value(context) or 0
+        ids = [i for i in self.ids_by_shard[context["shard"]] if i > start]
+        yield pa.table(
+            {"id": ids, "value": [str(i) for i in ids], "secret": ["x"] * len(ids)},
+        )
+
+
 class ParentArrowStream(ArrowStream):
     name = "parent"
 
@@ -459,3 +479,24 @@ def test_stream_with_children_batches_records(
         if m["stream"] == "child"
     ]
     assert child_rows == [[{"parent_id": 1}], [{"parent_id": 2}]]
+
+
+@skip_if_no_pyarrow
+def test_stream_get_record_batches_partitions(tmp_path: Path) -> None:
+    """Each partition gets its own call, batch files and bookmark."""
+    messages = _sync_arrow_tap(tmp_path, PartitionedArrowStream)
+    assert [[row["id"] for row in rows] for rows in _read_batch_files(messages)] == [
+        [1, 2],
+        [10, 11],
+    ]
+
+    state = next(m for m in reversed(messages) if m["type"] == "STATE")["value"]
+    partitions = state["bookmarks"]["arrow_stream"]["partitions"]
+    assert [(p["context"], p["replication_key_value"]) for p in partitions] == [
+        ({"shard": "a"}, 2),
+        ({"shard": "b"}, 11),
+    ]
+
+    # Resuming starts each partition from its own bookmark
+    resumed = _sync_arrow_tap(tmp_path, PartitionedArrowStream, state=state)
+    assert not [m for m in resumed if m["type"] == "BATCH"]
