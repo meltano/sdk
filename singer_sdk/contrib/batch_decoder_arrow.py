@@ -33,6 +33,8 @@ _ARROW_FILE_MAGIC = b"ARROW1\x00\x00"
 
 # https://arrow.apache.org/docs/format/CanonicalExtensions.html#json
 _JSON_EXTENSION = "arrow.json"
+# nanoarrow can't convert maps, and its IPC reader rejects list views, so files
+# with those types fail before any JSON would be decoded
 _LIST_TYPES = frozenset({"LIST", "LARGE_LIST", "FIXED_SIZE_LIST"})
 
 

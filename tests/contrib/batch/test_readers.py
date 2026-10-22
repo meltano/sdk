@@ -93,6 +93,10 @@ def test_arrow_reader_decodes_json(recwarn: pytest.WarningsRecorder) -> None:
                 mask=pa.array([False, False, True]),
             ),
             "counts": pa.array([[1], [], None], pa.list_(pa.int64())),
+            "events": pa.LargeListArray.from_arrays(
+                pa.array([0, 1, 1, 1], pa.int64()),
+                json_('{"e": 1}'),
+            ),
         },
     )
     buf = io.BytesIO()
@@ -101,13 +105,17 @@ def test_arrow_reader_decodes_json(recwarn: pytest.WarningsRecorder) -> None:
     buf.seek(0)
 
     reader = ArrowReader(BaseBatchFileEncoding("arrow"))
-    assert list(reader.read(buf)) == [
+    records = list(reader.read(buf))
+    # Parsed like RECORD lines: floats become Decimal, which `==` alone can't tell
+    assert isinstance(records[0]["payload"]["a"][1], decimal.Decimal)
+    assert records == [
         {
             "id": 1,
             "payload": {"a": [1, decimal.Decimal("2.5")]},
             "document": {"name": "Ada", "address": {"city": "Oslo"}},
             "tags": [1, {"k": None}],
             "counts": [1],
+            "events": [{"e": 1}],
         },
         {
             "id": 2,
@@ -115,8 +123,16 @@ def test_arrow_reader_decodes_json(recwarn: pytest.WarningsRecorder) -> None:
             "document": {"name": "Bo", "address": "x"},
             "tags": [[]],
             "counts": [],
+            "events": [],
         },
-        {"id": 3, "payload": None, "document": None, "tags": None, "counts": None},
+        {
+            "id": 3,
+            "payload": None,
+            "document": None,
+            "tags": None,
+            "counts": None,
+            "events": [],
+        },
     ]
     assert not [w for w in recwarn if "arrow.json" in str(w.message)]
 
