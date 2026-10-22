@@ -250,12 +250,40 @@ class EmptyArrowStream(ArrowStream):
         return []
 
 
+class ParentArrowStream(ArrowStream):
+    name = "parent"
+
+    @override
+    def get_records(self, context: Context | None) -> t.Iterable[Record]:
+        for i in (1, 2):
+            yield {"id": i, "value": str(i), "secret": "x"}
+
+    @override
+    def get_record_batches(self, context: Context | None) -> t.Iterable[t.Any]:
+        pytest.fail("Streams with child streams should be batched from get_records")
+
+    @override
+    def get_child_context(self, record: Record, context: Context | None) -> Context:
+        return {"parent_id": record["id"]}
+
+
+class ChildStream(Stream):
+    name = "child"
+    schema = PropertiesList(Property("parent_id", IntegerType)).to_dict()
+    parent_stream_type = ParentArrowStream
+
+    @override
+    def get_records(self, context: Context | None) -> t.Iterable[Record]:
+        assert context is not None
+        yield {"parent_id": context["parent_id"]}
+
+
 def _sync_arrow_tap(
     tmp_path: Path,
-    stream_class: type[Stream] = ArrowStream,
-    *,
+    *stream_classes: type[Stream],
     state: dict | None = None,
     deselected: tuple[str, ...] = ("secret",),
+    deselected_streams: tuple[str, ...] = (),
 ) -> list[dict]:
     class ArrowTap(Tap):
         name = "tap-arrow"
@@ -263,12 +291,17 @@ def _sync_arrow_tap(
 
         @override
         def discover_streams(self) -> list[Stream]:
-            return [stream_class(self)]
+            return [cls(self) for cls in stream_classes or (ArrowStream,)]
 
     catalog = ArrowTap(config={}, parse_env_config=False).catalog_dict
     for stream in catalog["streams"]:
         for entry in stream["metadata"]:
             if entry["breadcrumb"][-1:] and entry["breadcrumb"][-1] in deselected:
+                entry["metadata"]["selected"] = False
+            if (
+                not entry["breadcrumb"]
+                and stream["tap_stream_id"] in deselected_streams
+            ):
                 entry["metadata"]["selected"] = False
 
     tap = ArrowTap(
@@ -391,3 +424,38 @@ def test_stream_get_record_batches_missing_pyarrow(
     monkeypatch.setattr(builtins, "__import__", import_)
     with pytest.raises(MissingDependencyError, match="pip install 'pyarrow'"):
         _sync_arrow_tap(tmp_path, EmptyArrowStream)
+
+
+@skip_if_no_pyarrow
+@pytest.mark.parametrize(
+    "deselected_streams,batched_streams",
+    [
+        pytest.param((), ["child", "child", "parent"], id="selected-parent"),
+        pytest.param(("parent",), ["child", "child"], id="deselected-parent"),
+    ],
+)
+def test_stream_with_children_batches_records(
+    tmp_path: Path,
+    deselected_streams: tuple[str, ...],
+    batched_streams: list[str],
+) -> None:
+    """Only records produce child contexts, and deselected parents emit nothing."""
+    messages = _sync_arrow_tap(
+        tmp_path,
+        ParentArrowStream,
+        ChildStream,
+        deselected=(),
+        deselected_streams=deselected_streams,
+    )
+    batches = [m["stream"] for m in messages if m["type"] == "BATCH"]
+    assert sorted(batches) == batched_streams
+    child_rows = [
+        rows
+        for m, rows in zip(
+            [m for m in messages if m["type"] == "BATCH"],
+            _read_batch_files(messages),
+            strict=True,
+        )
+        if m["stream"] == "child"
+    ]
+    assert child_rows == [[{"parent_id": 1}], [{"parent_id": 2}]]

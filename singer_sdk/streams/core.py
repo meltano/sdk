@@ -1551,7 +1551,17 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
-        if batch_config.encoding.format == "arrow":
+        # Only get_records() can produce child contexts, and a deselected stream is
+        # only synced to drive its selected children, so both use the record path.
+        # Tap.sync_all() skips streams that are neither selected nor have selected
+        # descendants, so the child check alone covers deselected streams there.
+        # `self.selected` states the intent, and still guards a deselected stream
+        # when sync() is called directly.
+        if (
+            batch_config.encoding.format == "arrow"
+            and self.selected
+            and not self.child_streams
+        ):
             # Lets get_record_batches() call get_starting_replication_key_value()
             self._write_starting_replication_value(context)
             tables = self.get_record_batches(context)
@@ -1589,7 +1599,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
         to the stream schema, and rows must be ordered by the replication key if
         :attr:`is_sorted` is ``True``. Unlike RECORD mode, the SDK only checks that
         order between batch files, not between the rows inside one, so the source
-        query must guarantee it. Stream maps and child streams are not applied.
+        query must guarantee it. Stream maps are not applied.
+
+        Streams with child streams, and deselected streams synced only for their
+        children, are batched from :meth:`get_records` instead, since only records
+        can produce child contexts.
 
         Args:
             context: Stream partition or context dictionary.
