@@ -40,7 +40,7 @@ from types import MappingProxyType
 
 import singer_sdk.singerlib as singer
 from singer_sdk import metrics
-from singer_sdk.batch import Batcher
+from singer_sdk.batch import Batcher, import_batch_dependency
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
@@ -1618,7 +1618,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
-        import pyarrow.compute as pc  # noqa: PLC0415
+        pc = import_batch_dependency(
+            "pyarrow.compute",
+            feature="Writing Arrow batch files",
+            install="pyarrow",
+        )
 
         from singer_sdk.contrib.batch_encoder_arrow import (  # noqa: PLC0415
             ArrowBatcher,

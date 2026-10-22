@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 import decimal
 import importlib.util
 import io
@@ -241,6 +242,14 @@ class RecordsOnlyStream(Stream):
             yield {"id": i, "value": str(i), "secret": "x"}
 
 
+class EmptyArrowStream(ArrowStream):
+    """Opts into native Arrow without needing pyarrow to build its (empty) data."""
+
+    @override
+    def get_record_batches(self, context: Context | None) -> t.Iterable[t.Any]:
+        return []
+
+
 def _sync_arrow_tap(
     tmp_path: Path,
     stream_class: type[Stream] = ArrowStream,
@@ -363,3 +372,22 @@ def test_stream_without_get_record_batches_batches_records(tmp_path: Path) -> No
             {"id": 3, "value": "3", "secret": "x"},
         ],
     ]
+
+
+def test_stream_get_record_batches_missing_pyarrow(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    # Block `import pyarrow...` statements too, not just `import_batch_dependency`
+    block_import(monkeypatch, "pyarrow")
+    real_import = builtins.__import__
+
+    def import_(name: str, *args: t.Any, **kwargs: t.Any) -> t.Any:
+        if name.partition(".")[0] == "pyarrow":
+            msg = "No module named 'pyarrow'"
+            raise ModuleNotFoundError(msg, name="pyarrow")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", import_)
+    with pytest.raises(MissingDependencyError, match="pip install 'pyarrow'"):
+        _sync_arrow_tap(tmp_path, EmptyArrowStream)
