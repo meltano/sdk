@@ -5,6 +5,7 @@ import decimal
 import importlib.util
 import io
 import json
+import logging
 import re
 import sys
 import typing as t
@@ -23,6 +24,8 @@ from singer_sdk.helpers._batch import (
     BatchFileFormat,
     StorageTarget,
 )
+from singer_sdk.helpers._typing import _warn_unmapped_properties
+from singer_sdk.helpers.conform import TypeConformanceLevel
 from singer_sdk.sinks import BatchSink
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 from tests.contrib.batch.helpers import block_import
@@ -248,6 +251,18 @@ class EmptyArrowStream(ArrowStream):
     @override
     def get_record_batches(self, context: Context | None) -> t.Iterable[t.Any]:
         return []
+
+
+class UndeclaredColumnArrowStream(ArrowStream):
+    """Yields an `extra` column that isn't in the stream schema."""
+
+    @override
+    def get_record_batches(self, context: Context | None) -> t.Iterable[t.Any]:
+        pa = pytest.importorskip("pyarrow")
+
+        for batch in super().get_record_batches(context):
+            table = pa.Table.from_batches([batch])
+            yield table.append_column("extra", pa.array(["e"] * table.num_rows))
 
 
 class PartitionedArrowStream(ArrowStream):
@@ -500,3 +515,41 @@ def test_stream_get_record_batches_partitions(tmp_path: Path) -> None:
     # Resuming starts each partition from its own bookmark
     resumed = _sync_arrow_tap(tmp_path, PartitionedArrowStream, state=state)
     assert not [m for m in resumed if m["type"] == "BATCH"]
+
+
+@skip_if_no_pyarrow
+@pytest.mark.parametrize(
+    "level,additional_properties,kept",
+    [
+        pytest.param(TypeConformanceLevel.RECURSIVE, False, False, id="dropped"),
+        pytest.param(TypeConformanceLevel.NONE, False, True, id="no-conformance"),
+        pytest.param(TypeConformanceLevel.RECURSIVE, True, True, id="additional"),
+    ],
+)
+def test_stream_get_record_batches_undeclared_columns(
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+    level: TypeConformanceLevel,
+    additional_properties: bool,
+    kept: bool,
+) -> None:
+    """Columns missing from the schema are handled like RECORD mode handles them."""
+    _warn_unmapped_properties.cache_clear()
+    stream_class = type(
+        "Stream",
+        (UndeclaredColumnArrowStream,),
+        {
+            "TYPE_CONFORMANCE_LEVEL": level,
+            "schema": {
+                **UndeclaredColumnArrowStream.schema,
+                "additionalProperties": additional_properties,
+            },
+        },
+    )
+    with caplog.at_level(logging.WARNING):
+        messages = _sync_arrow_tap(tmp_path, stream_class)
+
+    rows = [row for rows in _read_batch_files(messages) for row in rows]
+    assert rows
+    assert all(("extra" in row) is kept for row in rows)
+    assert ("not found in catalog schema" in caplog.text) is not kept

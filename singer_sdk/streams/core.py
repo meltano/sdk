@@ -56,7 +56,11 @@ from singer_sdk.helpers._compat import (
     datetime_fromisoformat,
 )
 from singer_sdk.helpers._flattening import get_flattening_options
-from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type
+from singer_sdk.helpers._typing import (
+    _warn_unmapped_properties,
+    conform_record_data_types,
+    is_datetime_type,
+)
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.helpers.conform import TypeConformanceLevel
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform
@@ -1664,11 +1668,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
             stream_name=self.name,
             batch_config=batch_config,
         )
-        deselected = {
-            name
-            for name in self.schema.get("properties", {})
-            if not self.mask["properties", name]
-        }
+        properties = self.schema.get("properties", {})
+        # Same rule as conform_record_data_types() in RECORD mode
+        keep_undeclared = self.TYPE_CONFORMANCE_LEVEL == TypeConformanceLevel.NONE or (
+            bool(self.schema.get("additionalProperties"))
+        )
 
         with self.get_record_counter() as record_counter:
             record_counter.with_context(context)
@@ -1681,8 +1685,17 @@ class Stream(abc.ABC):  # noqa: PLR0904
                 else:
                     latest_record = {}
 
-                if dropped := deselected.intersection(table.column_names):
-                    table = table.drop_columns(list(dropped))  # noqa: PLW2901
+                undeclared = [n for n in table.column_names if n not in properties]
+                if undeclared and not keep_undeclared:
+                    _warn_unmapped_properties(self.name, tuple(undeclared), self.logger)
+                columns = [
+                    name
+                    for name in table.column_names
+                    if self.mask["properties", name]
+                    and (name in properties or keep_undeclared)
+                ]
+                if len(columns) < table.num_columns:
+                    table = table.select(columns)  # noqa: PLW2901
 
                 manifest = batcher.write_table(table)
                 record_counter.increment(table.num_rows)
