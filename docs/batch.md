@@ -132,6 +132,28 @@ class MyStream(Stream):
         )
 ```
 
+#### Native Arrow data
+
+If the source can produce [Apache Arrow](https://arrow.apache.org/) data directly (for example through an [ADBC](https://arrow.apache.org/adbc/) driver, a database client's `fetch_arrow_batches()`, or [PyMongoArrow](https://www.mongodb.com/docs/languages/python/pymongo-arrow-driver/current/)), implement [`get_record_batches`](singer_sdk.Stream.get_record_batches) instead of overriding `get_batches`. When `batch_config.encoding.format` is `arrow`, the SDK writes those tables straight to Arrow IPC batch files, without converting each row to a Python dictionary:
+
+```python
+class MyStream(Stream):
+    replication_key = "id"
+    is_sorted = True
+
+    def get_record_batches(self, context):
+        start = self.get_starting_replication_key_value(context)
+        reader = my_driver.query_arrow(
+            "SELECT * FROM t WHERE id > ? ORDER BY id",
+            start,
+        )
+        yield from reader  # pyarrow.RecordBatch or pyarrow.Table objects
+```
+
+The SDK re-slices the tables into files of `batch_size` rows, drops deselected top-level columns, and emits a `STATE` message after each file is written. If the tables include the replication key column, the bookmark advances to the file's last value when [`is_sorted`](singer_sdk.Stream.is_sorted) is `True`, or to its maximum value otherwise, so an interrupted sync resumes from the last written file.
+
+The tables must already match the stream schema. In particular, cast types that JSON Schema can't express the same way as Arrow (e.g. integer-encoded booleans or `date` columns declared as `date-time`) before yielding them. Other encoding formats, and RECORD mode, still use [`get_records`](singer_sdk.Stream.get_records).
+
 ### Target side
 
 Targets can optionally customize the batch file processing by implementing the [`process_batch_files`](singer_sdk.Sink.process_batch_files).
@@ -144,7 +166,7 @@ class MySink(Sink):
 
 ## Known Limitations of `BATCH`
 
-1. Currently the built-in `BATCH` implementation does not support incremental bookmarks or `STATE` tracking. This work is tracked in [Issue #976](https://github.com/meltano/sdk/issues/976).
+1. Apart from [native Arrow data](#native-arrow-data), the built-in `BATCH` implementation does not support incremental bookmarks or `STATE` tracking. This work is tracked in [Issue #976](https://github.com/meltano/sdk/issues/976).
 1. The `BATCH` implementation is not currently compatible with [Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html). This is certainly possible to implement in theory, but it would also introduce some performance penalties. This limitation is tracked in [Issue 1117#](https://github.com/meltano/sdk/issues/1117).
 
 If you are interested in contributing to one or both of these features, please add a comment in the respective issue.

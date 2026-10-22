@@ -67,6 +67,8 @@ from singer_sdk.singerlib.catalog import (
 from singer_sdk.streams._state import StreamStateManager
 
 if t.TYPE_CHECKING:
+    import pyarrow as pa
+
     from singer_sdk.helpers import types
     from singer_sdk.helpers._batch import BaseBatchFileEncoding
     from singer_sdk.helpers._compat import Traversable
@@ -1548,6 +1550,14 @@ class Stream(abc.ABC):  # noqa: PLR0904
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
+        if batch_config.encoding.format == "arrow":
+            # Lets get_record_batches() call get_starting_replication_key_value()
+            self._write_starting_replication_value(context)
+            tables = self.get_record_batches(context)
+            if tables is not None:
+                yield from self._get_arrow_batches(tables, batch_config, context)
+                return
+
         batcher = Batcher(
             tap_name=self.tap_name,
             stream_name=self.name,
@@ -1556,6 +1566,93 @@ class Stream(abc.ABC):  # noqa: PLR0904
         records = self._sync_records(context, write_messages=False)
         for manifest in batcher.get_batches(records=records):
             yield batch_config.encoding, manifest
+
+    def get_record_batches(  # noqa: PLR6301
+        self,
+        context: types.Context | None,  # noqa: ARG002
+    ) -> t.Iterable[pa.Table | pa.RecordBatch] | None:
+        """Return the stream's data as native Arrow tables or record batches.
+
+        Override this method when the source can produce Arrow data directly, e.g.
+        with an ADBC driver, ``fetch_arrow_batches()`` or ``pymongoarrow``. When the
+        ``arrow`` batch encoding is configured, the SDK then writes these tables to
+        Arrow IPC batch files of ``batch_size`` rows without converting each row to
+        a Python dictionary. The SDK:
+
+        - re-slices the tables to the configured ``batch_size``,
+        - drops columns for deselected top-level properties,
+        - advances the replication key bookmark from each batch file's data, and
+          emits a STATE message once the file is written.
+
+        The tables must contain one column per schema property, already conformed
+        to the stream schema, and rows must be ordered by the replication key if
+        :attr:`is_sorted` is ``True``. Stream maps and child streams are not
+        applied.
+
+        Args:
+            context: Stream partition or context dictionary.
+
+        Returns:
+            An iterable of Arrow tables or record batches, or ``None`` (the
+            default) to batch the records from :meth:`get_records` instead.
+
+        .. versionadded:: 0.55.0
+        """
+        return None
+
+    def _get_arrow_batches(
+        self,
+        tables: t.Iterable[pa.Table | pa.RecordBatch],
+        batch_config: BatchConfig,
+        context: types.Context | None,
+    ) -> t.Iterator[tuple[BaseBatchFileEncoding, list[str]]]:
+        """Write native Arrow data to batch files, advancing state after each one.
+
+        Args:
+            tables: Arrow tables or record batches from :meth:`get_record_batches`.
+            batch_config: Batch config for this stream.
+            context: Stream partition or context dictionary.
+
+        Yields:
+            A tuple of (encoding, manifest) for each batch.
+        """
+        import pyarrow.compute as pc  # noqa: PLC0415
+
+        from singer_sdk.contrib.batch_encoder_arrow import (  # noqa: PLC0415
+            ArrowBatcher,
+            rechunk_tables,
+        )
+
+        batcher = ArrowBatcher(
+            tap_name=self.tap_name,
+            stream_name=self.name,
+            batch_config=batch_config,
+        )
+        deselected = {
+            name
+            for name in self.schema.get("properties", {})
+            if not self.mask["properties", name]
+        }
+
+        with self.get_record_counter() as record_counter:
+            record_counter.with_context(context)
+            for table in rechunk_tables(tables, batch_config.batch_size):
+                if self.replication_key in table.column_names:
+                    column = table[self.replication_key]
+                    # A sorted stream's last value is its max, and is cheaper to get
+                    latest = column[-1] if self.is_sorted else pc.max(column)
+                    latest_record = {self.replication_key: latest.as_py()}  # ty: ignore[unresolved-attribute]
+                else:
+                    latest_record = {}
+
+                if dropped := deselected.intersection(table.column_names):
+                    table = table.drop_columns(list(dropped))  # noqa: PLW2901
+
+                manifest = batcher.write_table(table)
+                record_counter.increment(table.num_rows)
+                # Only advance the bookmark once the batch file is written
+                self._increment_stream_state(latest_record, context=context)
+                yield batch_config.encoding, manifest
 
     def preprocess_context(  # noqa: PLR6301
         self,
