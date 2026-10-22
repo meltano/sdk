@@ -141,28 +141,34 @@ def extend_validator_with_defaults(validator_class: type[DEFAULT_JSONSCHEMA_VALI
     Returns:
         The extended JSON Schema Validator class.
     """
-    validate_properties = validator_class.VALIDATORS["properties"]
 
-    def set_defaults(
-        validator: Validator,
-        properties: t.Mapping[str, dict],
-        instance: t.MutableMapping[str, t.Any],
-        schema: dict,
-    ) -> t.Generator[ValidationError, None, None]:
-        for prop, subschema in properties.items():
-            if "default" in subschema:
-                instance.setdefault(prop, subschema["default"])
+    def fill_defaults(validator: Validator, instance: t.Any, schema: dict) -> None:  # noqa: ANN401
+        if validator.is_type(instance, "object"):
+            for prop, subschema in schema.get("properties", {}).items():
+                if isinstance(subschema, dict) and "default" in subschema:
+                    instance.setdefault(prop, subschema["default"])
 
-        yield from validate_properties(
-            validator,
-            properties,
-            instance,
-            schema,
-        )
+    def with_defaults(validate: t.Callable) -> t.Callable:
+        def validate_with_defaults(
+            validator: Validator,
+            value: t.Any,  # noqa: ANN401
+            instance: t.Any,  # noqa: ANN401
+            schema: dict,
+        ) -> t.Iterator[ValidationError]:
+            fill_defaults(validator, instance, schema)
+            yield from validate(validator, value, instance, schema)
 
+        return validate_with_defaults
+
+    # Keywords are checked in schema order, so fill in defaults before whichever
+    # keyword of a (sub)schema runs first, e.g. `required` or `if` before
+    # `properties`. Filling them in is idempotent.
     return validators.extend(
         validator_class,
-        {"properties": set_defaults},
+        {
+            keyword: with_defaults(validate)
+            for keyword, validate in validator_class.VALIDATORS.items()
+        },
     )
 
 
