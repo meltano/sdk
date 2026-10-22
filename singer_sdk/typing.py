@@ -142,6 +142,15 @@ def extend_validator_with_defaults(validator_class: type[DEFAULT_JSONSCHEMA_VALI
         The extended JSON Schema Validator class.
     """
     validate_properties = validator_class.VALIDATORS["properties"]
+    validate_required = validator_class.VALIDATORS["required"]
+
+    def fill_defaults(
+        properties: t.Mapping[str, dict],
+        instance: t.MutableMapping[str, t.Any],
+    ) -> None:
+        for prop, subschema in properties.items():
+            if "default" in subschema:
+                instance.setdefault(prop, subschema["default"])
 
     def set_defaults(
         validator: Validator,
@@ -149,10 +158,7 @@ def extend_validator_with_defaults(validator_class: type[DEFAULT_JSONSCHEMA_VALI
         instance: t.MutableMapping[str, t.Any],
         schema: dict,
     ) -> t.Generator[ValidationError, None, None]:
-        for prop, subschema in properties.items():
-            if "default" in subschema:
-                instance.setdefault(prop, subschema["default"])
-
+        fill_defaults(properties, instance)
         yield from validate_properties(
             validator,
             properties,
@@ -160,9 +166,22 @@ def extend_validator_with_defaults(validator_class: type[DEFAULT_JSONSCHEMA_VALI
             schema,
         )
 
+    def set_defaults_then_check_required(
+        validator: Validator,
+        required: t.Sequence[str],
+        instance: t.MutableMapping[str, t.Any],
+        schema: dict,
+    ) -> t.Generator[ValidationError, None, None]:
+        # Keywords are checked in schema order, and generated schemas list
+        # `required` before `properties`, so a required property with a default
+        # must be filled in here too.
+        if validator.is_type(instance, "object"):
+            fill_defaults(schema.get("properties", {}), instance)
+        yield from validate_required(validator, required, instance, schema)
+
     return validators.extend(
         validator_class,
-        {"properties": set_defaults},
+        {"properties": set_defaults, "required": set_defaults_then_check_required},
     )
 
 

@@ -6,7 +6,13 @@ import sys
 import typing as t
 
 from singer_sdk.tap_base import Tap
-from singer_sdk.typing import BooleanType, PropertiesList, Property
+from singer_sdk.typing import (
+    ArrayType,
+    BooleanType,
+    PropertiesList,
+    Property,
+    StringType,
+)
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
@@ -41,3 +47,25 @@ def test_tap_config_defaults():
     assert "default_false" in tap.config
     assert tap.config["default_true"] is True
     assert tap.config["default_false"] is False
+
+
+class TapRequiredDefaultTest(TapConfigTest):
+    """Tap with a required setting that has a default."""
+
+    name = "tap-required-default-test"
+    config_jsonschema = PropertiesList(
+        Property("names", ArrayType(StringType), required=True, default=[]),
+    ).to_dict()
+
+
+def test_tap_config_required_default():
+    """A required setting with a default may be omitted from the config.
+
+    Generated schemas list ``required`` before ``properties``, so the default must
+    be filled in before ``required`` is checked.
+    """
+    schema = TapRequiredDefaultTest.config_jsonschema
+    assert list(schema).index("required") < list(schema).index("properties")
+
+    tap = TapRequiredDefaultTest(config={}, parse_env_config=False)
+    assert tap.config["names"] == []
