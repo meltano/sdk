@@ -129,24 +129,6 @@ class ArrowBatcher(BaseBatcher):
 
         return [storage.get_url(filename)]
 
-    def get_batches_from_tables(
-        self,
-        tables: t.Iterable[pa.Table | pa.RecordBatch],
-    ) -> t.Iterator[tuple[list[str], pa.Table]]:
-        """Write native Arrow data to batch files of ``batch_size`` rows.
-
-        Args:
-            tables: Arrow tables or record batches, in order.
-
-        Yields:
-            A tuple of (manifest, table) for each batch file written. The table is
-            the data in the file, e.g. to read the last replication key value.
-
-        .. versionadded:: 0.55.0
-        """
-        for table in rechunk_tables(tables, self.batch_config.batch_size):
-            yield self.write_table(table), table
-
     @override
     def get_batches(
         self,
