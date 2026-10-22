@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import itertools
 import sys
 import typing as t
 
+from singer_sdk.plugin_base import JSONSchemaValidator
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
     ArrayType,
@@ -69,3 +71,30 @@ def test_tap_config_required_default():
 
     tap = TapRequiredDefaultTest(config={}, parse_env_config=False)
     assert tap.config["names"] == []
+
+
+def test_config_defaults_independent_of_keyword_order():
+    """Defaults are filled in before any keyword is checked, whatever the order.
+
+    An ``if`` on a defaulted setting must see the default, even when it comes
+    before ``properties``.
+    """
+    keywords = {
+        "type": "object",
+        "if": {"required": ["mode"]},
+        "then": {"required": ["other"]},
+        "required": ["names"],
+        "properties": {
+            "mode": {"type": "string", "default": "full"},
+            "names": {"type": "array", "default": []},
+            "other": {"type": "string"},
+        },
+    }
+    for order in itertools.permutations(keywords):
+        schema = {keyword: keywords[keyword] for keyword in order}
+        config: dict[str, t.Any] = {}
+        errors = [
+            error.message for error in JSONSchemaValidator(schema).iter_errors(config)
+        ]
+        assert errors == ["'other' is a required property"], order
+        assert config == {"mode": "full", "names": []}, order
