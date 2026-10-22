@@ -161,7 +161,7 @@ If the tables include the replication key column, state advances to each file's 
 - When [`is_sorted`](singer_sdk.Stream.is_sorted) is `True`, the bookmark itself advances, so an interrupted sync resumes from the last written file. Filter with `>=` the bookmark, as in the example above, so that rows sharing its value aren't skipped when they span two files. The rows at the bookmark's value are read again on resume.
 - Otherwise, progress is kept in progress markers and the bookmark only advances once the sync completes, so an interrupted sync starts over from the previous bookmark.
 
-The tables must already match the stream schema. In particular, cast types that JSON Schema can't express the same way as Arrow (e.g. integer-encoded booleans or `date` columns declared as `date-time`) before yielding them. Stream maps and [`post_process`](singer_sdk.Stream.post_process) aren't applied. Other encoding formats, RECORD mode, and streams with child streams still use [`get_records`](singer_sdk.Stream.get_records).
+The tables must already match the stream schema. In particular, cast types that JSON Schema can't express the same way as Arrow (e.g. integer-encoded booleans or `date` columns declared as `date-time`) before yielding them. For free-form values with no fixed Arrow type, such as properties declared as a bare `object`, use Arrow's canonical JSON extension type (`pyarrow.json_()`) with the JSON text: SDK targets decode those values into the same objects a `RECORD` message would carry. Stream maps and [`post_process`](singer_sdk.Stream.post_process) aren't applied. Other encoding formats, RECORD mode, and streams with child streams still use [`get_records`](singer_sdk.Stream.get_records).
 
 ### Target side
 
