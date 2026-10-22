@@ -146,16 +146,22 @@ class MyStream(Stream):
         if start is None:  # First sync: no bookmark yet
             reader = my_driver.query_arrow("SELECT * FROM t ORDER BY id")
         else:
+            # `>=`: rows sharing the bookmark's value may span two files
             reader = my_driver.query_arrow(
-                "SELECT * FROM t WHERE id > ? ORDER BY id",
+                "SELECT * FROM t WHERE id >= ? ORDER BY id",
                 start,
             )
         yield from reader  # pyarrow.RecordBatch or pyarrow.Table objects
 ```
 
-The SDK re-slices the tables into files of `batch_size` rows, drops deselected top-level columns, and emits a `STATE` message after each file is written. If the tables include the replication key column, the bookmark advances to the file's last value when [`is_sorted`](singer_sdk.Stream.is_sorted) is `True`, or to its maximum value otherwise, so an interrupted sync resumes from the last written file.
+The SDK re-slices the tables into files of `batch_size` rows, drops deselected top-level columns, handles columns missing from the stream schema the same way RECORD mode does, and emits a `STATE` message after each file is written. For a partitioned stream, `get_record_batches` is called once per partition.
 
-The tables must already match the stream schema. In particular, cast types that JSON Schema can't express the same way as Arrow (e.g. integer-encoded booleans or `date` columns declared as `date-time`) before yielding them. Other encoding formats, and RECORD mode, still use [`get_records`](singer_sdk.Stream.get_records).
+If the tables include the replication key column, state advances to each file's maximum value. As in RECORD mode:
+
+- When [`is_sorted`](singer_sdk.Stream.is_sorted) is `True`, the bookmark itself advances, so an interrupted sync resumes from the last written file. Filter with `>=` the bookmark, as in the example above, so that rows sharing its value aren't skipped when they span two files. The rows at the bookmark's value are read again on resume.
+- Otherwise, progress is kept in progress markers and the bookmark only advances once the sync completes, so an interrupted sync starts over from the previous bookmark.
+
+The tables must already match the stream schema. In particular, cast types that JSON Schema can't express the same way as Arrow (e.g. integer-encoded booleans or `date` columns declared as `date-time`) before yielding them. Stream maps and [`post_process`](singer_sdk.Stream.post_process) aren't applied. Other encoding formats, RECORD mode, and streams with child streams still use [`get_records`](singer_sdk.Stream.get_records).
 
 ### Target side
 

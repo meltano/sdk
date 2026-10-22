@@ -1617,7 +1617,8 @@ class Stream(abc.ABC):  # noqa: PLR0904
         to the stream schema, and rows must be ordered by the replication key if
         :attr:`is_sorted` is ``True``. Unlike RECORD mode, the SDK only checks that
         order between batch files, not between the rows inside one, so the source
-        query must guarantee it. Stream maps are not applied.
+        query must guarantee it. Stream maps and :meth:`post_process` are not
+        applied.
 
         Streams with child streams, and deselected streams synced only for their
         children, are batched from :meth:`get_records` instead, since only records
