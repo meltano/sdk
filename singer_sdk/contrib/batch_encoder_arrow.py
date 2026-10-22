@@ -57,8 +57,15 @@ def rechunk_tables(
     Yields:
         Arrow tables of at most ``chunk_size`` rows.
 
+    Raises:
+        ValueError: If ``chunk_size`` is less than 1.
+
     .. versionadded:: 0.55.0
     """
+    if chunk_size < 1:
+        msg = f"Batch size must be at least 1, got {chunk_size}"
+        raise ValueError(msg)
+
     pa = _import_pyarrow()
 
     buffered: list[t.Any] = []

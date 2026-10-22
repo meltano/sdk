@@ -166,6 +166,15 @@ def test_rechunk_tables() -> None:
 
 
 @skip_if_no_pyarrow
+@pytest.mark.parametrize("chunk_size", [0, -1])
+def test_rechunk_tables_rejects_non_positive_size(chunk_size: int) -> None:
+    pa = pytest.importorskip("pyarrow")
+
+    with pytest.raises(ValueError, match="Batch size must be at least 1"):
+        next(rechunk_tables([pa.table({"id": [1]})], chunk_size))
+
+
+@skip_if_no_pyarrow
 def test_rechunk_tables_promotes_schemas() -> None:
     pa = pytest.importorskip("pyarrow")
 
