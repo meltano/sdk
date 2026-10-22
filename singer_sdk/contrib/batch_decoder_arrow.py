@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-__lazy_modules__ = {"functools", "singer_sdk.helpers.types"}
+__lazy_modules__ = {
+    "functools",
+    "singer_sdk.helpers.types",
+    "singer_sdk.singerlib.json",
+    "warnings",
+}
 
 import functools
 import sys
