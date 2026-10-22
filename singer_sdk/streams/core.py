@@ -7,6 +7,7 @@ __lazy_modules__ = {
     "datetime",
     "json",
     "pathlib",
+    "pyarrow",
     "singer_sdk.batch",
     "singer_sdk.exceptions",
     "singer_sdk.helpers",

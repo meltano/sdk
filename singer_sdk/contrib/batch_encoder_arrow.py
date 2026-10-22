@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-__lazy_modules__ = {"singer_sdk.helpers.types", "uuid"}
+__lazy_modules__ = {
+    "pyarrow",
+    "singer_sdk.helpers._batch",
+    "singer_sdk.helpers.types",
+    "uuid",
+}
 
 import sys
 import typing as t
