@@ -1568,6 +1568,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         ):
             # Iterate partitions the same way _sync_records() does
             context_list = [context] if context is not None else self.partitions
+            rows_written = 0  # Counted across partitions, like _sync_records()
             for index, context_element in enumerate(context_list or [{}]):
                 current_context = context_element or None
                 # Lets get_record_batches() call get_starting_replication_key_value()
@@ -1575,11 +1576,14 @@ class Stream(abc.ABC):  # noqa: PLR0904
                 tables = self.get_record_batches(current_context)
                 if tables is None and index == 0:
                     break  # The stream doesn't produce Arrow data
-                yield from self._get_arrow_batches(
+                for encoding, manifest, rows in self._get_arrow_batches(
                     tables or (),
                     batch_config,
                     current_context,
-                )
+                    rows_written=rows_written,
+                ):
+                    rows_written += rows
+                    yield encoding, manifest
             else:
                 return
 
@@ -1641,16 +1645,19 @@ class Stream(abc.ABC):  # noqa: PLR0904
         tables: t.Iterable[pa.Table | pa.RecordBatch],
         batch_config: BatchConfig,
         context: types.Context | None,
-    ) -> t.Iterator[tuple[BaseBatchFileEncoding, list[str]]]:
+        *,
+        rows_written: int,
+    ) -> t.Iterator[tuple[BaseBatchFileEncoding, list[str], int]]:
         """Write native Arrow data to batch files, advancing state after each one.
 
         Args:
             tables: Arrow tables or record batches from :meth:`get_record_batches`.
             batch_config: Batch config for this stream.
             context: Stream partition or context dictionary.
+            rows_written: Rows already written by this sync, for the record limit.
 
         Yields:
-            A tuple of (encoding, manifest) for each batch.
+            A tuple of (encoding, manifest, number of rows) for each batch.
         """
         pc = import_batch_dependency(
             "pyarrow.compute",
@@ -1677,6 +1684,15 @@ class Stream(abc.ABC):  # noqa: PLR0904
         with self.get_record_counter() as record_counter:
             record_counter.with_context(context)
             for table in rechunk_tables(tables, batch_config.batch_size):
+                # Abort before writing past the limit, like _sync_records()
+                self._check_max_record_limit(current_record_index=rows_written)
+                limit = self.ABORT_AT_RECORD_COUNT
+                truncated = False
+                if limit is not None and rows_written + table.num_rows > limit:
+                    # Before the bookmark, so it never covers rows left unwritten
+                    table = table.slice(0, limit - rows_written)  # noqa: PLW2901
+                    truncated = True
+
                 if self.replication_key in table.column_names:
                     column = table[self.replication_key]
                     # A sorted stream's last value is its max, and is cheaper to get
@@ -1701,7 +1717,11 @@ class Stream(abc.ABC):  # noqa: PLR0904
                 record_counter.increment(table.num_rows)
                 # Only advance the bookmark once the batch file is written
                 self._increment_stream_state(latest_record, context=context)
-                yield batch_config.encoding, manifest
+                yield batch_config.encoding, manifest, table.num_rows
+
+                rows_written += table.num_rows
+                if truncated:  # Rows past the limit were dropped, so abort now
+                    self._check_max_record_limit(current_record_index=rows_written)
 
     def preprocess_context(  # noqa: PLR6301
         self,

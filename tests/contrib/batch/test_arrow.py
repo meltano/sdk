@@ -319,6 +319,7 @@ def _sync_arrow_tap(
     state: dict | None = None,
     deselected: tuple[str, ...] = ("secret",),
     deselected_streams: tuple[str, ...] = (),
+    record_limit: int | None = None,
 ) -> list[dict]:
     class ArrowTap(Tap):
         name = "tap-arrow"
@@ -353,7 +354,10 @@ def _sync_arrow_tap(
     )
     buf = io.StringIO()
     with redirect_stdout(buf):
-        tap.sync_all()
+        if record_limit is None:
+            tap.sync_all()
+        else:
+            tap.run_sync_dry_run(dry_run_record_limit=record_limit)
     return [json.loads(line) for line in buf.getvalue().splitlines()]
 
 
@@ -553,3 +557,28 @@ def test_stream_get_record_batches_undeclared_columns(
     assert rows
     assert all(("extra" in row) is kept for row in rows)
     assert ("not found in catalog schema" in caplog.text) is not kept
+
+
+@skip_if_no_pyarrow
+@pytest.mark.parametrize(
+    "stream_class,record_limit,ids,bookmark",
+    [
+        pytest.param(ArrowStream, 2, [[1, 2]], 2, id="truncated"),
+        pytest.param(ArrowStream, 3, [[1, 2, 3]], 3, id="at-file-boundary"),
+        pytest.param(ArrowStream, 5, [[1, 2, 3], [4, 5]], 5, id="not-reached"),
+        pytest.param(PartitionedArrowStream, 3, [[1, 2], [10]], None, id="partitions"),
+    ],
+)
+def test_stream_get_record_batches_record_limit(
+    tmp_path: Path,
+    stream_class: type[Stream],
+    record_limit: int,
+    ids: list[list[int]],
+    bookmark: int | None,
+) -> None:
+    """Native Arrow syncs stop at the record limit, counted across partitions."""
+    messages = _sync_arrow_tap(tmp_path, stream_class, record_limit=record_limit)
+    assert [[row["id"] for row in rows] for rows in _read_batch_files(messages)] == ids
+    if bookmark is not None:
+        # The bookmark covers only rows that were written
+        assert _final_bookmark(messages) == bookmark
