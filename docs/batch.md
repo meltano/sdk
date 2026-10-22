@@ -143,10 +143,13 @@ class MyStream(Stream):
 
     def get_record_batches(self, context):
         start = self.get_starting_replication_key_value(context)
-        reader = my_driver.query_arrow(
-            "SELECT * FROM t WHERE id > ? ORDER BY id",
-            start,
-        )
+        if start is None:  # First sync: no bookmark yet
+            reader = my_driver.query_arrow("SELECT * FROM t ORDER BY id")
+        else:
+            reader = my_driver.query_arrow(
+                "SELECT * FROM t WHERE id > ? ORDER BY id",
+                start,
+            )
         yield from reader  # pyarrow.RecordBatch or pyarrow.Table objects
 ```
 

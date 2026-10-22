@@ -1587,8 +1587,9 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         The tables must contain one column per schema property, already conformed
         to the stream schema, and rows must be ordered by the replication key if
-        :attr:`is_sorted` is ``True``. Stream maps and child streams are not
-        applied.
+        :attr:`is_sorted` is ``True``. Unlike RECORD mode, the SDK only checks that
+        order between batch files, not between the rows inside one, so the source
+        query must guarantee it. Stream maps and child streams are not applied.
 
         Args:
             context: Stream partition or context dictionary.
