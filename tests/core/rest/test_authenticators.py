@@ -235,6 +235,50 @@ def test_oauth_authenticator_token_expiry_handling(
 
 
 @pytest.mark.parametrize(
+    "expires_in,token_expiry_margin,valid_until",
+    [
+        pytest.param(3600, None, 3300, id="default-margin"),
+        pytest.param(3600, 120, 3480, id="custom-margin"),
+        pytest.param(3600, 0, 3600, id="no-margin"),
+        pytest.param(60, None, 30, id="margin-capped-at-half-lifetime"),
+    ],
+)
+def test_oauth_authenticator_token_expiry_margin(
+    rest_tap: Tap,
+    requests_mock: requests_mock.Mocker,
+    expires_in: int,
+    token_expiry_margin: int | None,
+    valid_until: int,
+):
+    """Validate that tokens are refreshed ahead of their stated expiry."""
+    requests_mock.post(
+        "https://example.com/oauth",
+        json={"access_token": "an-access-token", "expires_in": expires_in},
+    )
+
+    authenticator = _FakeOAuthAuthenticator(
+        stream=rest_tap.streams["some_stream"],
+        auth_endpoint="https://example.com/oauth",
+        token_expiry_margin=token_expiry_margin,
+    )
+    start = datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc)
+    with time_machine.travel(start, tick=False):
+        authenticator.update_access_token()
+
+    with time_machine.travel(
+        start + datetime.timedelta(seconds=valid_until - 1),
+        tick=False,
+    ):
+        assert authenticator.is_token_valid()
+
+    with time_machine.travel(
+        start + datetime.timedelta(seconds=valid_until),
+        tick=False,
+    ):
+        assert not authenticator.is_token_valid()
+
+
+@pytest.mark.parametrize(
     "response_refresh_token, expected_refresh_token",
     [
         pytest.param("rotated-refresh-token", "rotated-refresh-token", id="returned"),

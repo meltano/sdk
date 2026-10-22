@@ -467,6 +467,12 @@ class BasicAuthenticator(APIAuthenticatorBase):
 class OAuthAuthenticator(APIAuthenticatorBase):
     """API Authenticator for OAuth 2.0 flows."""
 
+    #: Seconds before the token's stated expiry at which it is treated as expired
+    #: and refreshed. Using a token in the final moments of its life races clock
+    #: skew and network latency against the API's own expiry check. The margin is
+    #: capped at half of the token's lifetime.
+    token_expiry_margin: int = 300
+
     def __init__(
         self,
         *args: t.Any,
@@ -476,6 +482,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         oauth_headers: dict | None = None,
         client_id: str | None = None,
         client_secret: str | None = None,
+        token_expiry_margin: int | None = None,
         **kwargs: t.Any,
     ) -> None:
         """Create a new authenticator.
@@ -489,6 +496,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             oauth_headers: An optional dict of headers required to get a token.
             client_id: The client ID to use in authentication.
             client_secret: The client secret to use in authentication.
+            token_expiry_margin: Seconds before expiry at which to refresh the
+                token. Defaults to the `token_expiry_margin` class attribute.
             **kwargs: Keyword arguments.
         """
         if stream := _get_stream_param(*args, **kwargs):
@@ -509,6 +518,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
         self._auth_endpoint = auth_endpoint
         self._default_expiration = default_expiration
+        if token_expiry_margin is not None:
+            self.token_expiry_margin = token_expiry_margin
         self._oauth_scopes = oauth_scopes
         self._oauth_headers = oauth_headers or {}
 
@@ -608,6 +619,9 @@ class OAuthAuthenticator(APIAuthenticatorBase):
     def is_token_valid(self) -> bool:
         """Check if token is valid.
 
+        The token is treated as expired `token_expiry_margin` seconds before its
+        stated expiry, so it is refreshed before the API starts rejecting it.
+
         Returns:
             True if the token is valid (fresh).
         """
@@ -615,7 +629,9 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             return False
         if not self.expires_in:
             return True
-        return self.expires_in > (utc_now() - self.last_refreshed).total_seconds()
+        margin = min(self.token_expiry_margin, self.expires_in / 2)
+        elapsed = (utc_now() - self.last_refreshed).total_seconds()
+        return self.expires_in - margin > elapsed
 
     # Authentication and refresh
     def update_access_token(self) -> None:
