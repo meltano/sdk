@@ -189,6 +189,7 @@ class ArrowStream(Stream):
     ).to_dict()
     replication_key = "id"
     is_sorted = True
+    id_batches: t.ClassVar[list[list[int]]] = [[1, 2], [3, 4], [5]]
 
     @override
     def get_records(self, context: Context | None) -> t.Iterable[Record]:
@@ -199,32 +200,57 @@ class ArrowStream(Stream):
         pa = pytest.importorskip("pyarrow")
 
         start = self.get_starting_replication_key_value(context) or 0
-        ids = [i for i in range(1, 6) if i > start]
-        for i in range(0, len(ids), 2):
-            batch_ids = ids[i : i + 2]
-            yield pa.RecordBatch.from_pydict(
-                {
-                    "id": batch_ids,
-                    "value": [str(i) for i in batch_ids],
-                    "secret": ["x"] * len(batch_ids),
-                },
-            )
+        for batch in self.id_batches:
+            if ids := [i for i in batch if i > start]:
+                yield pa.RecordBatch.from_pydict(
+                    {
+                        "id": ids,
+                        "value": [str(i) for i in ids],
+                        "secret": ["x"] * len(ids),
+                    },
+                )
 
 
-class ArrowTap(Tap):
-    name = "tap-arrow"
-    config_jsonschema = PropertiesList().to_dict()
+class UnsortedArrowStream(ArrowStream):
+    is_sorted = False
+    id_batches: t.ClassVar[list[list[int]]] = [[3, 1], [5, 2], [4]]
+
+
+class FullTableArrowStream(ArrowStream):
+    replication_key = None
+
+
+class RecordsOnlyStream(Stream):
+    """A stream that doesn't implement `get_record_batches`."""
+
+    name = "arrow_stream"
+    schema = ArrowStream.schema
 
     @override
-    def discover_streams(self) -> list[Stream]:
-        return [ArrowStream(self)]
+    def get_records(self, context: Context | None) -> t.Iterable[Record]:
+        for i in range(1, 4):
+            yield {"id": i, "value": str(i), "secret": "x"}
 
 
-def _sync_arrow_tap(tmp_path: Path, state: dict | None = None) -> list[dict]:
+def _sync_arrow_tap(
+    tmp_path: Path,
+    stream_class: type[Stream] = ArrowStream,
+    *,
+    state: dict | None = None,
+    deselected: tuple[str, ...] = ("secret",),
+) -> list[dict]:
+    class ArrowTap(Tap):
+        name = "tap-arrow"
+        config_jsonschema = PropertiesList().to_dict()
+
+        @override
+        def discover_streams(self) -> list[Stream]:
+            return [stream_class(self)]
+
     catalog = ArrowTap(config={}, parse_env_config=False).catalog_dict
     for stream in catalog["streams"]:
         for entry in stream["metadata"]:
-            if entry["breadcrumb"] == ["properties", "secret"]:
+            if entry["breadcrumb"][-1:] and entry["breadcrumb"][-1] in deselected:
                 entry["metadata"]["selected"] = False
 
     tap = ArrowTap(
@@ -245,21 +271,31 @@ def _sync_arrow_tap(tmp_path: Path, state: dict | None = None) -> list[dict]:
     return [json.loads(line) for line in buf.getvalue().splitlines()]
 
 
-@skip_if_no_pyarrow
-def test_stream_get_record_batches(tmp_path: Path) -> None:
+def _read_batch_files(messages: list[dict]) -> list[list[dict]]:
     pa = pytest.importorskip("pyarrow")
 
+    tables = []
+    for message in messages:
+        if message["type"] == "BATCH":
+            (url,) = message["manifest"]
+            with pa.ipc.open_file(url.removeprefix("file://")) as reader:
+                tables.append(reader.read_all().to_pylist())
+    return tables
+
+
+def _final_bookmark(messages: list[dict]) -> t.Any:
+    state = next(m for m in reversed(messages) if m["type"] == "STATE")["value"]
+    return state["bookmarks"]["arrow_stream"].get("replication_key_value")
+
+
+@skip_if_no_pyarrow
+def test_stream_get_record_batches(tmp_path: Path) -> None:
     messages = _sync_arrow_tap(tmp_path)
     batches = [m for m in messages if m["type"] == "BATCH"]
     assert [m["encoding"]["format"] for m in batches] == ["arrow", "arrow"]
     assert not [m for m in messages if m["type"] == "RECORD"]
 
-    tables = []
-    for message in batches:
-        (url,) = message["manifest"]
-        with pa.ipc.open_file(url.removeprefix("file://")) as reader:
-            tables.append(reader.read_all())
-    assert [table.to_pylist() for table in tables] == [
+    assert _read_batch_files(messages) == [
         [{"id": 1, "value": "1"}, {"id": 2, "value": "2"}, {"id": 3, "value": "3"}],
         [{"id": 4, "value": "4"}, {"id": 5, "value": "5"}],
     ]
@@ -274,4 +310,47 @@ def test_stream_get_record_batches(tmp_path: Path) -> None:
 
     # Resuming from the final state yields no new data
     state = next(m for m in reversed(messages) if m["type"] == "STATE")["value"]
-    assert not [m for m in _sync_arrow_tap(tmp_path, state) if m["type"] == "BATCH"]
+    resumed = _sync_arrow_tap(tmp_path, state=state)
+    assert not [m for m in resumed if m["type"] == "BATCH"]
+
+
+@skip_if_no_pyarrow
+def test_stream_get_record_batches_unsorted(tmp_path: Path) -> None:
+    """An unsorted stream bookmarks each file's max value, not its last."""
+    messages = _sync_arrow_tap(tmp_path, UnsortedArrowStream)
+    assert [[row["id"] for row in rows] for rows in _read_batch_files(messages)] == [
+        [3, 1, 5],
+        [2, 4],
+    ]
+    assert _final_bookmark(messages) == 5
+
+
+@skip_if_no_pyarrow
+def test_stream_get_record_batches_full_table(tmp_path: Path) -> None:
+    """Without a replication key there's no bookmark; all columns are kept."""
+    messages = _sync_arrow_tap(tmp_path, FullTableArrowStream, deselected=())
+    assert _read_batch_files(messages) == [
+        [
+            {"id": 1, "value": "1", "secret": "x"},
+            {"id": 2, "value": "2", "secret": "x"},
+            {"id": 3, "value": "3", "secret": "x"},
+        ],
+        [
+            {"id": 4, "value": "4", "secret": "x"},
+            {"id": 5, "value": "5", "secret": "x"},
+        ],
+    ]
+    assert _final_bookmark(messages) is None
+
+
+@skip_if_no_pyarrow
+def test_stream_without_get_record_batches_batches_records(tmp_path: Path) -> None:
+    """Streams that don't produce Arrow data are batched from `get_records`."""
+    messages = _sync_arrow_tap(tmp_path, RecordsOnlyStream, deselected=())
+    assert _read_batch_files(messages) == [
+        [
+            {"id": 1, "value": "1", "secret": "x"},
+            {"id": 2, "value": "2", "secret": "x"},
+            {"id": 3, "value": "3", "secret": "x"},
+        ],
+    ]
