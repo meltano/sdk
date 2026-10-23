@@ -44,6 +44,12 @@ else:
 if t.TYPE_CHECKING:
     from singer_sdk.streams.rest import _HTTPStream
 
+# Seconds before a token's stated expiry at which it is treated as expired and
+# refreshed. Using a token in the final moments of its life races clock skew and
+# network latency against the API's own expiry check. The margin is capped at half
+# of the token's lifetime.
+_DEFAULT_TOKEN_EXPIRY_MARGIN = 300
+
 
 def _add_parameters(initial_url: str, extra_parameters: dict) -> str:
     """Add parameters to an URL and return the new URL.
@@ -467,12 +473,6 @@ class BasicAuthenticator(APIAuthenticatorBase):
 class OAuthAuthenticator(APIAuthenticatorBase):
     """API Authenticator for OAuth 2.0 flows."""
 
-    #: Seconds before the token's stated expiry at which it is treated as expired
-    #: and refreshed. Using a token in the final moments of its life races clock
-    #: skew and network latency against the API's own expiry check. The margin is
-    #: capped at half of the token's lifetime.
-    token_expiry_margin: int = 300
-
     def __init__(
         self,
         *args: t.Any,
@@ -497,7 +497,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             client_id: The client ID to use in authentication.
             client_secret: The client secret to use in authentication.
             token_expiry_margin: Seconds before expiry at which to refresh the
-                token. Defaults to the `token_expiry_margin` class attribute.
+                token. Defaults to 5 minutes.
             **kwargs: Keyword arguments.
         """
         if stream := _get_stream_param(*args, **kwargs):
@@ -518,8 +518,11 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
         self._auth_endpoint = auth_endpoint
         self._default_expiration = default_expiration
-        if token_expiry_margin is not None:
-            self.token_expiry_margin = token_expiry_margin
+        self._token_expiry_margin = (
+            _DEFAULT_TOKEN_EXPIRY_MARGIN
+            if token_expiry_margin is None
+            else token_expiry_margin
+        )
         self._oauth_scopes = oauth_scopes
         self._oauth_headers = oauth_headers or {}
 
