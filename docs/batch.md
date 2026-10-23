@@ -1,3 +1,8 @@
+---
+myst:
+  heading_anchors: 4
+---
+
 # Batch Messages
 
 ```{warning}
