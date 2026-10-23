@@ -44,6 +44,12 @@ else:
 if t.TYPE_CHECKING:
     from singer_sdk.streams.rest import _HTTPStream
 
+# Seconds before a token's stated expiry at which it is treated as expired and
+# refreshed. Using a token in the final moments of its life races clock skew and
+# network latency against the API's own expiry check. The margin is capped at half
+# of the token's lifetime.
+_DEFAULT_TOKEN_EXPIRY_MARGIN = 300
+
 
 def _add_parameters(initial_url: str, extra_parameters: dict) -> str:
     """Add parameters to an URL and return the new URL.
@@ -476,6 +482,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         oauth_headers: dict | None = None,
         client_id: str | None = None,
         client_secret: str | None = None,
+        token_expiry_margin: int | None = None,
         **kwargs: t.Any,
     ) -> None:
         """Create a new authenticator.
@@ -489,7 +496,12 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             oauth_headers: An optional dict of headers required to get a token.
             client_id: The client ID to use in authentication.
             client_secret: The client secret to use in authentication.
+            token_expiry_margin: Seconds before expiry at which to refresh the
+                token. Defaults to 5 minutes.
             **kwargs: Keyword arguments.
+
+        .. versionadded:: 0.55.0
+          The ``token_expiry_margin`` parameter.
         """
         if stream := _get_stream_param(*args, **kwargs):
             _warn_stream_param_deprecation()
@@ -509,6 +521,11 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
         self._auth_endpoint = auth_endpoint
         self._default_expiration = default_expiration
+        self._token_expiry_margin = (
+            _DEFAULT_TOKEN_EXPIRY_MARGIN
+            if token_expiry_margin is None
+            else token_expiry_margin
+        )
         self._oauth_scopes = oauth_scopes
         self._oauth_headers = oauth_headers or {}
 
@@ -608,6 +625,9 @@ class OAuthAuthenticator(APIAuthenticatorBase):
     def is_token_valid(self) -> bool:
         """Check if token is valid.
 
+        The token is treated as expired ``token_expiry_margin`` seconds before its
+        stated expiry, so it is refreshed before the API starts rejecting it.
+
         Returns:
             True if the token is valid (fresh).
         """
@@ -615,7 +635,9 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             return False
         if not self.expires_in:
             return True
-        return self.expires_in > (utc_now() - self.last_refreshed).total_seconds()
+        margin = max(0, min(self._token_expiry_margin, self.expires_in / 2))
+        elapsed = (utc_now() - self.last_refreshed).total_seconds()
+        return self.expires_in - margin > elapsed
 
     # Authentication and refresh
     def update_access_token(self) -> None:
