@@ -629,7 +629,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             return False
         if not self.expires_in:
             return True
-        margin = min(self.token_expiry_margin, self.expires_in / 2)
+        margin = max(0, min(self._token_expiry_margin, self.expires_in / 2))
         elapsed = (utc_now() - self.last_refreshed).total_seconds()
         return self.expires_in - margin > elapsed
 
