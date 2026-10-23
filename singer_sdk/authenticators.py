@@ -625,7 +625,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
     def is_token_valid(self) -> bool:
         """Check if token is valid.
 
-        The token is treated as expired `token_expiry_margin` seconds before its
+        The token is treated as expired ``token_expiry_margin`` seconds before its
         stated expiry, so it is refreshed before the API starts rejecting it.
 
         Returns:
