@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import decimal
 import gzip
 import io
 import typing as t
@@ -67,6 +68,73 @@ def test_arrow_reader() -> None:
     buf.seek(0)
     reader = ArrowReader(BaseBatchFileEncoding("arrow"))
     assert list(reader.read(buf)) == RECORDS
+
+
+def test_arrow_reader_decodes_json(recwarn: pytest.WarningsRecorder) -> None:
+    """``arrow.json`` values are decoded at the top level, in structs and in lists."""
+    pa = pytest.importorskip("pyarrow")
+    pytest.importorskip("nanoarrow")
+
+    def json_(*values: str | None) -> t.Any:
+        return pa.array(list(values), type=pa.json_())
+
+    table = pa.table(
+        {
+            "id": [1, 2, 3],
+            "payload": json_('{"a": [1, 2.5]}', None, "null"),
+            "document": pa.StructArray.from_arrays(
+                [pa.array(["Ada", "Bo", None]), json_('{"city": "Oslo"}', '"x"', None)],
+                names=["name", "address"],
+                mask=pa.array([False, False, True]),
+            ),
+            "tags": pa.ListArray.from_arrays(
+                pa.array([0, 2, 3, 3], pa.int32()),
+                json_("1", '{"k": null}', "[]"),
+                mask=pa.array([False, False, True]),
+            ),
+            "counts": pa.array([[1], [], None], pa.list_(pa.int64())),
+            "events": pa.LargeListArray.from_arrays(
+                pa.array([0, 1, 1, 1], pa.int64()),
+                json_('{"e": 1}'),
+            ),
+        },
+    )
+    buf = io.BytesIO()
+    with pa.ipc.new_file(buf, table.schema) as writer:
+        writer.write_table(table)
+    buf.seek(0)
+
+    reader = ArrowReader(BaseBatchFileEncoding("arrow"))
+    records = list(reader.read(buf))
+    # Parsed like RECORD lines: floats become Decimal, which `==` alone can't tell
+    assert isinstance(records[0]["payload"]["a"][1], decimal.Decimal)
+    assert records == [
+        {
+            "id": 1,
+            "payload": {"a": [1, decimal.Decimal("2.5")]},
+            "document": {"name": "Ada", "address": {"city": "Oslo"}},
+            "tags": [1, {"k": None}],
+            "counts": [1],
+            "events": [{"e": 1}],
+        },
+        {
+            "id": 2,
+            "payload": None,
+            "document": {"name": "Bo", "address": "x"},
+            "tags": [[]],
+            "counts": [],
+            "events": [],
+        },
+        {
+            "id": 3,
+            "payload": None,
+            "document": None,
+            "tags": None,
+            "counts": None,
+            "events": [],
+        },
+    ]
+    assert not [w for w in recwarn if "arrow.json" in str(w.message)]
 
 
 def test_arrow_reader_rejects_non_ipc_file() -> None:
