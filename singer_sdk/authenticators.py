@@ -499,6 +499,9 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             token_expiry_margin: Seconds before expiry at which to refresh the
                 token. Defaults to 5 minutes.
             **kwargs: Keyword arguments.
+
+        .. versionadded:: 0.55.0
+          The ``token_expiry_margin`` parameter.
         """
         if stream := _get_stream_param(*args, **kwargs):
             _warn_stream_param_deprecation()
