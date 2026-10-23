@@ -241,7 +241,7 @@ def test_oauth_authenticator_token_expiry_handling(
         pytest.param(3600, 120, 3480, id="custom-margin"),
         pytest.param(3600, 0, 3600, id="no-margin"),
         pytest.param(60, None, 30, id="margin-capped-at-half-lifetime"),
-        pytest.param(60, -10, 60, id="negative-marging"),
+        pytest.param(60, -10, 60, id="negative-margin-clamped"),
     ],
 )
 def test_oauth_authenticator_token_expiry_margin(
