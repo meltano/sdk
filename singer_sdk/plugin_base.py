@@ -42,7 +42,7 @@ from types import MappingProxyType
 import click
 
 from singer_sdk import about, metrics
-from singer_sdk._logging import _setup_console_logging
+from singer_sdk._logging import _setup_console_logging, _setup_warning_logging
 from singer_sdk.cli import plugin_cli
 from singer_sdk.configuration._dict_config import (
     merge_missing_config_jsonschema,
@@ -163,7 +163,7 @@ class SingerCommand(click.Command):
         Returns:
             The result of the command invocation.
         """
-        logging.captureWarnings(capture=True)
+        restore_warnings = _setup_warning_logging()
         warnings.filterwarnings("once", category=DeprecationWarning)
         sys.excepthook = self.excepthook
         try:
@@ -176,6 +176,8 @@ class SingerCommand(click.Command):
                 extra={"schema": exc.schema},
             )
             ctx.exit(1)
+        finally:
+            restore_warnings()
 
 
 def _format_validation_error(error: ValidationError) -> str:
