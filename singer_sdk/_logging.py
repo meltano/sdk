@@ -95,6 +95,19 @@ def _log_warning(
     )
 
 
-def _setup_warning_logging() -> None:
-    """Send warnings through the logging system as structured records."""
+def _setup_warning_logging() -> t.Callable[[], None]:
+    """Send warnings through the logging system as structured records.
+
+    Returns:
+        A callable that restores the previous `warnings.showwarning` hook.
+    """
+    previous = warnings.showwarning
+    if previous is _log_warning:
+        return lambda: None
+
     warnings.showwarning = _log_warning  # ty: ignore[invalid-assignment]
+
+    def restore() -> None:
+        warnings.showwarning = previous
+
+    return restore

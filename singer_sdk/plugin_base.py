@@ -163,7 +163,7 @@ class SingerCommand(click.Command):
         Returns:
             The result of the command invocation.
         """
-        _setup_warning_logging()
+        restore_warnings = _setup_warning_logging()
         warnings.filterwarnings("once", category=DeprecationWarning)
         sys.excepthook = self.excepthook
         try:
@@ -176,6 +176,8 @@ class SingerCommand(click.Command):
                 extra={"schema": exc.schema},
             )
             ctx.exit(1)
+        finally:
+            restore_warnings()
 
 
 def _format_validation_error(error: ValidationError) -> str:

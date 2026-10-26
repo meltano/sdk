@@ -38,3 +38,18 @@ def test_warnings_are_logged_with_structured_extras(
     assert record.getMessage() == "DeprecationWarning: old thing"
     assert record.warning_category == "DeprecationWarning"  # type: ignore[attr-defined]
     assert record.warning_source.startswith(__file__)  # type: ignore[attr-defined]
+
+
+@pytest.mark.usefixtures("restore_showwarning")
+def test_setup_is_reversible():
+    original = warnings.showwarning
+
+    restore = _setup_warning_logging()
+    assert warnings.showwarning is not original
+
+    # Repeated setup must not clobber the saved hook
+    _setup_warning_logging()()
+    assert warnings.showwarning is not original
+
+    restore()
+    assert warnings.showwarning is original
