@@ -70,21 +70,36 @@ def test_arrow_reader() -> None:
     assert list(reader.read(buf)) == RECORDS
 
 
-def test_arrow_reader_is_lazy() -> None:
-    """Records are decoded one Arrow chunk at a time."""
+def test_arrow_reader_is_lazy(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Arrow chunks are converted to records only as the iterator reaches them."""
     pa = pytest.importorskip("pyarrow")
-    pytest.importorskip("nanoarrow")
+    na = pytest.importorskip("nanoarrow")
+
     buf = io.BytesIO()
     table = pa.Table.from_pylist(RECORDS)
     with pa.ipc.new_file(buf, table.schema) as writer:
-        writer.write_table(table)
-        writer.write_table(table)
+        for _ in range(3):
+            writer.write_table(table)
     buf.seek(0)
 
-    records = ArrowReader(BaseBatchFileEncoding("arrow")).read(buf)
-    assert not isinstance(records, list)
-    assert next(iter(records)) == RECORDS[0]
-    assert list(records) == [*RECORDS[1:], *RECORDS]
+    converted = 0
+    to_pylist = na.Array.to_pylist
+
+    def counting_to_pylist(self: t.Any) -> list:
+        nonlocal converted
+        converted += 1
+        return to_pylist(self)  # type: ignore[no-any-return]
+
+    monkeypatch.setattr(na.Array, "to_pylist", counting_to_pylist)
+
+    records = iter(ArrowReader(BaseBatchFileEncoding("arrow")).read(buf))
+    assert converted == 0
+
+    assert next(records) == RECORDS[0]
+    assert converted == 1
+
+    assert len(list(records)) == len(RECORDS) * 3 - 1
+    assert converted == 3
 
 
 def test_arrow_reader_decodes_json(recwarn: pytest.WarningsRecorder) -> None:
