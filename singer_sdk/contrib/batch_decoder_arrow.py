@@ -124,6 +124,16 @@ class ArrowReader(BaseBatchReader):
 
     @staticmethod
     def _iter_records(stream: t.Any) -> t.Iterator[Record]:  # noqa: ANN401
+        """Decode the records of an Arrow stream, one chunk at a time.
+
+        The stream is closed once the iterator is exhausted or closed.
+
+        Args:
+            stream: A nanoarrow array stream positioned at the start of the data.
+
+        Yields:
+            The records in the stream.
+        """
         decode = _json_decoder(stream.schema)
         with stream:
             for chunk in stream.iter_chunks():
