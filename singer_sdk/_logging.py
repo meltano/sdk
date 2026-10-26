@@ -97,4 +97,4 @@ def _log_warning(
 
 def _setup_warning_logging() -> None:
     """Send warnings through the logging system as structured records."""
-    warnings.showwarning = _log_warning
+    warnings.showwarning = _log_warning  # ty: ignore[invalid-assignment]

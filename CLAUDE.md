@@ -19,6 +19,8 @@ nox -s test-packages      # Run package integration tests
 nox -s typing             # Type checking
 ```
 
+**After every code change, run `nox -s typing` (and fix any new diagnostics) before considering the work done or opening a PR.** It runs mypy and ty on Python 3.10 and 3.15; some diagnostics only show up on one version.
+
 ### Linting & Formatting
 
 ```bash
