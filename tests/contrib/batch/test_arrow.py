@@ -139,6 +139,39 @@ def test_sink_reads_arrow_batch_files(tmp_path: Path) -> None:
     assert received == records
 
 
+def test_sink_processes_arrow_batch_files_in_chunks(tmp_path: Path) -> None:
+    """Records reach ``process_batch`` in ``max_size`` chunks, not all at once."""
+    pa = pytest.importorskip("pyarrow")
+    pytest.importorskip("nanoarrow")
+
+    batches: list[list[dict]] = []
+
+    class MySink(BatchSink):
+        max_size = 2
+
+        def process_batch(self, context: dict) -> None:
+            batches.append(context["records"])
+
+    path = tmp_path / "batch.arrow"
+    table = pa.table({"id": list(range(5))})
+    with path.open("wb") as f, pa.ipc.new_file(f, table.schema) as writer:
+        for batch in table.to_batches(max_chunksize=1):
+            writer.write_batch(batch)
+
+    sink = MySink(
+        target=mock.MagicMock(),
+        stream_name="s",
+        schema={"type": "object", "properties": {}},
+        key_properties=None,
+    )
+    sink.process_batch_files(
+        BaseBatchFileEncoding(format=BatchFileFormat.ARROW),
+        [path.as_uri()],
+    )
+
+    assert [[r["id"] for r in batch] for batch in batches] == [[0, 1], [2, 3], [4]]
+
+
 def test_batcher_missing_pyarrow(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

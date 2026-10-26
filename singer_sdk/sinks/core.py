@@ -5,6 +5,7 @@ from __future__ import annotations
 __lazy_modules__ = {
     "copy",
     "datetime",
+    "itertools",
     "jsonschema",
     "logging",
     "singer_sdk",
@@ -23,6 +24,7 @@ __lazy_modules__ = {
 import abc
 import copy
 import datetime
+import itertools
 import sys
 import time
 import typing as t
@@ -770,6 +772,11 @@ class Sink(abc.ABC):  # noqa: PLR0904
         registered for the encoding format. For JSONL-encoded batch files, expects
         raw JSON records (one per line), not Singer protocol messages.
 
+        Records are read incrementally and passed to
+        :meth:`~singer_sdk.Sink.process_batch` in chunks of at most
+        :attr:`~singer_sdk.Sink.max_size` records, so memory use doesn't scale with
+        the size of the file.
+
         Args:
             encoding: The batch file encoding.
             files: The batch files to process.
@@ -782,11 +789,12 @@ class Sink(abc.ABC):  # noqa: PLR0904
             file_storage = storage or StorageTarget.from_url(head)
 
             with file_storage.open(tail, mode="rb") as file:
-                context = {"records": list(reader.read(file))}
-
-            count = self.process_batch(context)
-            self.tally_record_written(
-                count  # Only when count is not None
-                if count is not None
-                else len(context["records"])
-            )
+                records = iter(reader.read(file))
+                while chunk := list(itertools.islice(records, self.max_size)):
+                    context = {"records": chunk}
+                    count = self.process_batch(context)
+                    self.tally_record_written(
+                        count  # Only when count is not None
+                        if count is not None
+                        else len(chunk)
+                    )
