@@ -84,6 +84,9 @@ def _log_warning(
         file: Unused. Required by the `warnings.showwarning` signature.
         line: Unused. Required by the `warnings.showwarning` signature.
     """
+    # `logging.config.dictConfig` disables loggers it doesn't know about unless
+    # `disable_existing_loggers` is false. Warnings must never be silently lost.
+    warnings_logger.disabled = False
     warnings_logger.warning(
         "%s: %s",
         category.__name__,

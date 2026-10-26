@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import logging.config
 import typing as t
 import warnings
 
@@ -53,3 +54,19 @@ def test_setup_is_reversible():
 
     restore()
     assert warnings.showwarning is original
+
+
+@pytest.mark.usefixtures("restore_showwarning")
+def test_warnings_survive_disable_existing_loggers(
+    caplog: pytest.LogCaptureFixture,
+):
+    logging.config.dictConfig({"version": 1, "disable_existing_loggers": True})
+    try:
+        with warnings.catch_warnings(), caplog.at_level(logging.WARNING):
+            warnings.simplefilter("always")
+            _setup_warning_logging()
+            warnings.warn("old thing", DeprecationWarning, stacklevel=1)
+
+        assert [r for r in caplog.records if r.name == "singer_sdk.warnings"]
+    finally:
+        logging.getLogger("singer_sdk.warnings").disabled = False
