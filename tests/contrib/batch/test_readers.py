@@ -70,6 +70,23 @@ def test_arrow_reader() -> None:
     assert list(reader.read(buf)) == RECORDS
 
 
+def test_arrow_reader_is_lazy() -> None:
+    """Records are decoded one Arrow chunk at a time."""
+    pa = pytest.importorskip("pyarrow")
+    pytest.importorskip("nanoarrow")
+    buf = io.BytesIO()
+    table = pa.Table.from_pylist(RECORDS)
+    with pa.ipc.new_file(buf, table.schema) as writer:
+        writer.write_table(table)
+        writer.write_table(table)
+    buf.seek(0)
+
+    records = ArrowReader(BaseBatchFileEncoding("arrow")).read(buf)
+    assert not isinstance(records, list)
+    assert next(iter(records)) == RECORDS[0]
+    assert list(records) == [*RECORDS[1:], *RECORDS]
+
+
 def test_arrow_reader_decodes_json(recwarn: pytest.WarningsRecorder) -> None:
     """``arrow.json`` values are decoded at the top level, in structs and in lists."""
     pa = pytest.importorskip("pyarrow")

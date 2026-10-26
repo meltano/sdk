@@ -96,14 +96,16 @@ class ArrowReader(BaseBatchReader):
     """
 
     @override
-    def read(self, file: t.IO[bytes]) -> t.Iterable[Record]:
+    def read(self, file: t.IO[bytes]) -> t.Iterator[Record]:
         """Read records from an Arrow IPC file.
 
         Args:
             file: The batch file, opened in binary mode.
 
         Returns:
-            The records in the file.
+            An iterator over the records in the file. Records are decoded one
+            Arrow chunk at a time, so ``file`` must stay open until the iterator
+            is exhausted.
 
         Raises:
             ValueError: If the file is not in the Arrow IPC file format.
@@ -118,15 +120,25 @@ class ArrowReader(BaseBatchReader):
             raise ValueError(msg)
 
         stream = na.ArrayStream.from_readable(file)
-        decode = _json_decoder(stream.schema)
-        with warnings.catch_warnings():
-            # This reader handles arrow.json itself
-            warnings.filterwarnings(
-                "ignore",
-                message=rf".*unregistered extension '{_JSON_EXTENSION}'",
-            )
-            records = stream.read_all().to_pylist()
+        return self._iter_records(stream)
 
-        if decode is None:
-            return records  # type: ignore[no-any-return]
-        return [decode(record) for record in records]
+    @staticmethod
+    def _iter_records(stream: t.Any) -> t.Iterator[Record]:  # noqa: ANN401
+        decode = _json_decoder(stream.schema)
+        with stream:
+            for chunk in stream.iter_chunks():
+                with warnings.catch_warnings():
+                    # This reader handles arrow.json itself. The filter is scoped to
+                    # the conversion so it isn't active while the caller consumes
+                    # the records.
+                    warnings.filterwarnings(
+                        "ignore",
+                        message=rf".*unregistered extension '{_JSON_EXTENSION}'",
+                    )
+                    records = chunk.to_pylist()
+
+                if decode is None:
+                    yield from records
+                else:
+                    for record in records:
+                        yield decode(record)
