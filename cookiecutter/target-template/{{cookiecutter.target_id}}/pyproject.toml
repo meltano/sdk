@@ -108,6 +108,7 @@ addopts = [
 ]
 filterwarnings = [
     "error",
+    "once:Python 3.* its end of life:FutureWarning",
 ]
 log_level = "INFO"
 minversion = "9"

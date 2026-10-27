@@ -115,6 +115,7 @@ filterwarnings = [
     "error",
     "once:No records were available to test:UserWarning",
     "once:Fields in transformed catalog but not in records:UserWarning",
+    "once:Python 3.* its end of life:FutureWarning",
 ]
 log_level = "INFO"
 minversion = "9"
