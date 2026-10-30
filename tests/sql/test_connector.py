@@ -537,6 +537,33 @@ class TestDummySQLConnector:
             mock_connect.return_value.__enter__.return_value.begin.assert_called_once()
             mock_connect.return_value.__enter__.return_value.execute.assert_called_once()
 
+    def test_schema_exists_for_real_schema(self, connector: DummySQLConnector):
+        """Test `schema_exists` returns True for existing schemas."""
+        # SQLite's built-in "main" schema always exists
+        assert connector.schema_exists("main") is True
+
+    def test_schema_exists_for_missing_schema(self, connector: DummySQLConnector):
+        """Test `schema_exists` returns False for missing schemas."""
+        assert connector.schema_exists("does_not_exist") is False
+
+    def test_prepare_schema_skips_creation_when_schema_exists(
+        self,
+        connector: DummySQLConnector,
+    ):
+        """Test `prepare_schema` does not create a schema that already exists."""
+        with mock.patch.object(connector, "create_schema") as mock_create_schema:
+            connector.prepare_schema("main")
+
+        mock_create_schema.assert_not_called()
+
+    def test_prepare_schema_creates_missing_schema(
+        self,
+        connector: DummySQLConnector,
+    ):
+        """Test `prepare_schema` attempts to create a schema that doesn't exist."""
+        with pytest.raises(sqlalchemy.exc.OperationalError, match="CREATE SCHEMA"):
+            connector.prepare_schema("does_not_exist")
+
     def test_column_rename(self, connector: DummySQLConnector):
         engine = connector._engine
         meta = sqlalchemy.MetaData()
