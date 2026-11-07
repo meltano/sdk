@@ -268,8 +268,13 @@ This is automatically included in the most recent version of the tap and target 
 ### Debugging targets that read from stdin
 
 Targets read Singer messages from stdin, so an interactive `pdb` session would
-compete with the input stream. Use [remote-pdb](https://github.com/ionelmc/python-remote-pdb)
-to send debugger commands through a separate local connection instead.
+compete with the input stream. Use
+[remote-pdb](https://github.com/ionelmc/python-remote-pdb) to send debugger commands
+through a separate local connection instead.
+
+Use this workflow only on a trusted development host. Anyone able to connect to
+the unauthenticated debugger socket can execute Python in the target process,
+including other local users on a shared host.
 
 Install it in the environment that runs your target. For a target project managed
 with uv:
@@ -314,8 +319,10 @@ Singer messages through stdin; debugger input and output use the local socket.
 `REMOTE_PDB_QUIET` suppresses the debugger's connection notices.
 
 When running through Meltano, install `remote-pdb` in the target plugin's isolated
-environment as well. Remove the breakpoints and parallelism override when you
-finish debugging, and stop setting the debugger environment variables.
+environment as well. If you add it to the target's installable dependencies,
+reinstall the target plugin in Meltano, including for editable (`-e`) installs.
+Remove the breakpoints and parallelism override when you finish debugging, and
+stop setting the debugger environment variables.
 
 ### Testing performance
 
