@@ -26,7 +26,7 @@ from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMEN
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
-from tests.core.conftest import SimpleTestStream
+from tests.core.conftest import SimpleTestStream, UnixTimestampIncrementalStream
 
 if sys.version_info >= (3, 12):
     from typing import override  # noqa: ICN003
@@ -274,6 +274,29 @@ def test_stream_starting_timestamp(
 
     with stream.with_replication_method(forced_replication_method):
         assert get_starting_value(None) == expected_starting_value
+
+
+def test_stream_warns_when_start_date_is_unsupported(
+    tap: SimpleTestTap,
+    caplog: pytest.LogCaptureFixture,
+):
+    """Streams that reject ``start_date`` do not persist it as a bookmark."""
+
+    class UnsupportedStartDateStream(UnixTimestampIncrementalStream):
+        @override
+        def _supports_start_date(self) -> bool:
+            return False
+
+    stream = UnsupportedStartDateStream(tap)
+
+    with caplog.at_level(logging.WARNING):
+        stream._write_starting_replication_value(None)
+        stream._write_starting_replication_value(None)
+
+    assert stream.get_starting_replication_key_value(None) is None
+    assert caplog.messages == [
+        "`start_date` for stream 'unix_ts' is not supported",
+    ]
 
 
 def test_stream_invalid_replication_key(tap: SimpleTestTap):
