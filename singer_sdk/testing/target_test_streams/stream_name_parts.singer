@@ -1,0 +1,4 @@
+{"type":"SCHEMA","stream":"schema-name","key_properties":["id"], "schema":{"type":"object","properties":{"id":{"type":"integer"}, "name":{"type":"string"}}, "required":["id"]}}
+{"type":"RECORD","stream":"schema-name","record":{"id":1,"name":"Anna"}}
+{"type":"SCHEMA","stream":"database-schema-name","key_properties":["id"], "schema":{"type":"object","properties":{"id":{"type":"integer"}, "name":{"type":"string"}}, "required":["id"]}}
+{"type":"RECORD","stream":"database-schema-name","record":{"id":2,"name":"Bertha"}}
