@@ -234,7 +234,7 @@ def increment_state(
     # the values from the state and the record should be pre-processed.
     # https://github.com/meltano/sdk/issues/2753
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
-    new_rk_value = to_json_compatible(latest_record[replication_key])
+    new_rk_value = to_json_compatible(latest_record.get(replication_key))
 
     if new_rk_value is None:
         logger.debug("New replication value is null")
