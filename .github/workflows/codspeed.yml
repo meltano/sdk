@@ -75,7 +75,7 @@ jobs:
         uv export --all-packages --no-editable --frozen --no-hashes --no-dev --all-extras --group benchmark --output-file requirements.codspeed.txt
         uv pip install --system -r requirements.codspeed.txt
 
-    - uses: CodSpeedHQ/action@61efe07e57e55bedeab750c434504de272a56e8c # v5.6.1
+    - uses: CodSpeedHQ/action@af75f77f17a054769abefaa42fe8dc2975469b5f # v5.6.3
       with:
         token: ${{ secrets.CODSPEED_TOKEN }}
         run: pytest tests/ --codspeed
@@ -109,7 +109,7 @@ jobs:
     # Runs the exec benchmarks from codspeed.yml. Walltime needs CodSpeed's
     # macro runners, so we measure simulated CPU work on a regular runner.
     - name: Run import benchmarks
-      uses: CodSpeedHQ/action@61efe07e57e55bedeab750c434504de272a56e8c # v5.6.1
+      uses: CodSpeedHQ/action@af75f77f17a054769abefaa42fe8dc2975469b5f # v5.6.3
       with:
         token: ${{ secrets.CODSPEED_TOKEN }}
         mode: simulation
