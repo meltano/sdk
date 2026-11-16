@@ -133,12 +133,18 @@ def test_irresumable_state():
     }
 
 
-def test_null_replication_value(caplog):
+@pytest.mark.parametrize(
+    "latest_record",
+    [
+        pytest.param({"updated_at": None}, id="null_value"),
+        pytest.param({}, id="missing_key"),
+    ],
+)
+def test_null_replication_value(caplog, latest_record):
     stream_state = {
         "replication_key": "updated_at",
         "replication_key_value": "2021-05-17T20:41:16Z",
     }
-    latest_record = {"updated_at": None}
     replication_key = "updated_at"
     is_sorted = True
     check_sorted = False
