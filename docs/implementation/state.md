@@ -160,10 +160,18 @@ by the target, those records preceding the state message should be assumed to be
 written by the target. In practice, this means that if a sorted stream is interrupted, the
 tap may resume from the last successfully processed state message.
 
-To enable resume after interruption, developers may set `is_sorted = True`
-within the `Stream` class definition. If this is set, the SDK
-will check each record and throw an `InvalidStreamSortException` if unsorted records are
-detected during sync.
+Set `is_sorted = True` on a stream when its source returns records in
+non-decreasing order of the replication key. This lets the SDK advance the
+bookmark during a sync. On a sorted stream, the SDK checks each key by default
+(`check_sorted = True`) and raises `InvalidStreamSortException` if a key goes
+backward.
+
+Setting `check_sorted = False` lets the bookmark follow the latest record even
+when its key compares lower than the previous one. This does not make a stream
+safe to resume: a checkpoint can move backward or get ahead of records that
+the source has not returned yet. In particular, sorting records by timestamp
+does not guarantee that an opaque cursor used as the replication key is also
+sorted. See the [resumability FAQ](../faq.md) for more on sorted streams and state.
 
 ### Dealing with Unsorted Streams
 
