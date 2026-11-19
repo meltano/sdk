@@ -160,16 +160,28 @@ by the target, those records preceding the state message should be assumed to be
 written by the target. In practice, this means that if a sorted stream is interrupted, the
 tap may resume from the last successfully processed state message.
 
-To enable resume after interruption, developers may set `is_sorted = True`
-within the `Stream` class definition. If this is set, the SDK
-will check each record and throw an `InvalidStreamSortException` if unsorted records are
-detected during sync.
+Set `is_sorted = True` on a stream when its source returns records in
+non-decreasing order of the replication key. This lets the SDK advance the
+bookmark during a sync. For sorted streams without custom state partitioning,
+`check_sorted = True` (the default) raises `InvalidStreamSortException` if a
+record's key goes backward. When writing native Arrow batch files, the SDK
+compares the maximum replication key in each file with the previous file's
+maximum. It does not check row order inside a file, so the source must still
+order those rows by replication key.
+
+For streams treated as sorted, `check_sorted = False` lets the bookmark move
+backward when the next record key or native Arrow batch maximum is lower.
+Disabling the check does not make an out-of-order stream safe to resume: a
+checkpoint can move backward or get ahead of records the source has not
+returned yet. In particular, sorting records by timestamp does not guarantee
+that an opaque cursor used as the replication key is also sorted. See the
+[resumability FAQ](../faq.md) for more on sorted streams and state.
 
 ### Dealing with Unsorted Streams
 
 There are some sources which are unable to send records sorted by their replication key,
 even when there is a valid replication key. In these cases, the SDK
-creates a separate `progress_tracking` object within the state dictionary. This is used to
+creates a separate `progress_markers` object within the state dictionary. This is used to
 track the max value seen for the `replication_key` during the current sync.
 
 Unlike the replication key tracking for pre-sorted streams, the progress trackers will be
@@ -177,9 +189,9 @@ ignored (reset and wiped) for the purposes of resuming a failed sync operation. 
 the sync reaches 100% completion will those progress markers be promoted to a valid
 replication key bookmark for future sync operations.
 
-This behavior is also the default for any streams which override `state_partitioning_keys`,
-since iterating through multiple parent contexts or partitions will naturally emit
-records in an unsorted manner.
+The SDK also uses unsorted progress tracking when `state_partitioning_keys`
+is set, even if `is_sorted = True`. In that case, `check_sorted = True` does
+not raise for a backward key.
 
 ### Replication Key Signposts
 
