@@ -1,8 +1,10 @@
 # Emit version messages from a full-table tap
 
 A tap can emit a Singer `ACTIVATE_VERSION` message at the start of each
-full-table stream. The SDK emits it after `SCHEMA` and before the first `RECORD`.
-Both the message and the records carry the same version for that sync.
+full-table stream. The SDK emits it after `SCHEMA` and before the first
+`RECORD` or `BATCH` message. With record output, each `RECORD` carries the
+version announced by `ACTIVATE_VERSION`. With batch output, the SDK still
+emits `ACTIVATE_VERSION`, but the `BATCH` messages do not carry that version.
 
 ## Enable version messages
 
