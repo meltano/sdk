@@ -64,7 +64,7 @@ parquet = [
 ]
 
 testing = [
-    "pytest~=9.1.1",
+    "pytest~=9.2.0",
 ]
 
 faker = [
@@ -156,7 +156,7 @@ typing = [
     "importlib-metadata",
     "mypy~=2.2",
     "pyarrow-stubs>=19.1",
-    "ty==0.0.91",
+    "ty==0.0.104",
     "types-jsonschema>=4.17.0.6",
     "types-simplejson>=3.18.0",
     "types-PyYAML>=6.0.12",
