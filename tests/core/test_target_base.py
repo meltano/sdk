@@ -4,8 +4,10 @@ import copy
 import datetime as dt
 import decimal
 import io
+import json
 import signal
 import sys
+import typing as t
 from contextlib import redirect_stdout
 from unittest import mock
 
@@ -15,7 +17,11 @@ from singer_sdk.exceptions import (
     MissingKeyPropertiesError,
     RecordsWithoutSchemaException,
 )
-from singer_sdk.helpers.capabilities import PluginCapabilities, TargetCapabilities
+from singer_sdk.helpers.capabilities import (
+    CapabilitiesEnum,
+    PluginCapabilities,
+    TargetCapabilities,
+)
 from singer_sdk.singerlib.json import deserialize_json
 from tests.conftest import BatchSinkMock, SQLSinkMock, SQLTargetMock, TargetMock
 
@@ -290,3 +296,51 @@ def test_target_write_state():
         "decimal": decimal.Decimal("3.14"),
         "datetime": "2021-01-01T00:00:00+00:00",
     }
+
+
+@pytest.mark.parametrize(
+    "config,expected",
+    [
+        pytest.param(
+            {"state_id": "dev:tap-users-to-target-mock"},
+            [("dev:tap-users-to-target-mock", {"bookmarks": {"users": {"id": 1}}}, 1)],
+            id="state-id",
+        ),
+        pytest.param({}, [], id="no-state-id"),
+    ],
+)
+def test_target_writes_state_to_destination_after_drain(
+    config: dict,
+    expected: list[tuple[str, dict, int]],
+):
+    class StateTarget(TargetMock):
+        capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+            *TargetMock.capabilities,
+            PluginCapabilities.STATE,
+        ]
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.destination_states: list[tuple[str, dict, int]] = []
+
+        @override
+        def write_state(self, state_id: str, state: dict) -> None:
+            self.destination_states.append(
+                (state_id, state, len(self.records_written)),
+            )
+
+    messages = [
+        {
+            "type": "SCHEMA",
+            "stream": "users",
+            "schema": {"properties": {"id": {"type": "integer"}}},
+            "key_properties": ["id"],
+        },
+        {"type": "RECORD", "stream": "users", "record": {"id": 1}},
+        {"type": "STATE", "value": {"bookmarks": {"users": {"id": 1}}}},
+    ]
+    target = StateTarget(config=config)
+    with redirect_stdout(io.StringIO()):
+        target.listen(io.StringIO("".join(f"{json.dumps(m)}\n" for m in messages)))
+
+    assert target.destination_states == expected

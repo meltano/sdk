@@ -426,6 +426,35 @@ def _validate_records_config() -> dict[str, t.Any]:
     ).to_dict()
 
 
+def _state_config() -> dict[str, t.Any]:
+    """Build the JSON schema for the target ``STATE`` capability.
+
+    Returns:
+        The JSON schema.
+    """
+    return PropertiesList(
+        Property(
+            "state_id",
+            StringType(),
+            title="State ID",
+            description=(
+                "The ID of the state, such as the Meltano state ID of the pipeline. "
+                "When it is set, the target writes `STATE` to the destination."
+            ),
+        ),
+        Property(
+            "state_namespace",
+            StringType(),
+            title="State Namespace",
+            description=(
+                "The namespace in the destination that holds the state, such as a "
+                "database schema. Defaults to the plugin namespace, such as "
+                "`target_postgres`."
+            ),
+        ),
+    ).to_dict()
+
+
 def _batch_size_rows_config() -> dict[str, t.Any]:
     """Build the JSON schema for `TARGET_BATCH_SIZE_ROWS_CONFIG`.
 
@@ -617,6 +646,13 @@ class PluginCapabilities(CapabilitiesEnum):
     #: Support structured logging with contextual information.
     STRUCTURED_LOGGING = "structured-logging"
 
+    #: Store ``STATE`` in the destination. A target writes the state after each
+    #: drain when the ``state_id`` setting is set. Requires an implementation of
+    #: :meth:`~singer_sdk.Target.write_state`, which
+    #: :class:`~singer_sdk.sql.SQLTarget` has. A tap declares
+    #: :attr:`TapCapabilities.STATE`, which has the same value.
+    STATE = "state"
+
 
 class TapCapabilities(CapabilitiesEnum):
     """Tap-specific capabilities."""
@@ -748,6 +784,8 @@ def target_config_for_capabilities(
         schemas.append(_target_batch_config())
     if TargetCapabilities.VALIDATE_RECORDS in capabilities:
         schemas.append(_validate_records_config())
+    if PluginCapabilities.STATE in capabilities:
+        schemas.append(_state_config())
     schemas.append(config_for_capabilities(capabilities))
     return _merge_schemas(*schemas)
 
