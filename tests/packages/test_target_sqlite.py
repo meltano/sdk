@@ -884,3 +884,60 @@ def test_overwrite_load_method(sqlite_target_test_config: dict):
     cursor.execute(f"SELECT col_a FROM {test_tbl} ;")  # noqa: S608
     records = [res[0] for res in cursor.fetchall()]
     assert records == ["456"]
+
+
+class SQLiteTargetInMain(SQLiteTarget):
+    namespace = "main"
+
+
+@pytest.mark.parametrize(
+    "target_class,state_settings",
+    [
+        pytest.param(SQLiteTarget, {"state_namespace": "main"}, id="setting"),
+        pytest.param(SQLiteTargetInMain, {}, id="plugin-namespace"),
+    ],
+)
+def test_sqlite_target_state(
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+    target_class: type[SQLiteTarget],
+    state_settings: dict,
+):
+    """Test that the target writes the state for each state ID to the destination."""
+    db_path = tmp_path / "target.sqlite"
+
+    def sync(state_id: str, bookmark: int) -> None:
+        messages = [
+            {
+                "type": "SCHEMA",
+                "stream": "users",
+                "schema": {"properties": {"id": {"type": "integer"}}},
+                "key_properties": ["id"],
+            },
+            {"type": "RECORD", "stream": "users", "record": {"id": bookmark}},
+            {"type": "STATE", "value": {"bookmarks": {"users": {"id": bookmark}}}},
+        ]
+        config = {"path_to_db": str(db_path), "state_id": state_id, **state_settings}
+        target_sync_test(
+            target_class(config=config),
+            input=StringIO("".join(f"{json.dumps(m)}\n" for m in messages)),
+        )
+
+    with caplog.at_level("INFO"):
+        sync("a", 1)
+        sync("a", 2)
+        sync("b", 3)
+
+    assert "Wrote state 'b' to main.state" in caplog.text
+
+    engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
+    with engine.connect() as conn:
+        rows = conn.execute(
+            sqlalchemy.text("SELECT state_id, state, updated_at FROM main.state"),
+        ).all()
+
+    assert {row.state_id: json.loads(row.state) for row in rows} == {
+        "a": {"bookmarks": {"users": {"id": 2}}},
+        "b": {"bookmarks": {"users": {"id": 3}}},
+    }
+    assert all(row.updated_at for row in rows)

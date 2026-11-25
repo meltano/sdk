@@ -3,15 +3,22 @@
 from __future__ import annotations
 
 __lazy_modules__ = {
+    "datetime",
     "singer_sdk.configuration._dict_config",
+    "singer_sdk.singerlib.json",
     "singer_sdk.singerlib.types",
     "singer_sdk.sinks.core",
     "singer_sdk.sql.connector",
     "singer_sdk.sql.sink",
+    "sqlalchemy",
 }
 
+import datetime
 import sys
 import typing as t
+
+import sqlalchemy as sa
+import sqlalchemy.exc
 
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.helpers.capabilities import (
@@ -22,6 +29,7 @@ from singer_sdk.helpers.capabilities import (
     _target_schema_config,
     target_config_for_capabilities,
 )
+from singer_sdk.singerlib.json import serialize_json
 from singer_sdk.target_base import Target
 
 if sys.version_info >= (3, 12):
@@ -73,6 +81,7 @@ class SQLTarget(Target):
         PluginCapabilities.ACTIVATE_VERSION,
         TargetCapabilities.TARGET_SCHEMA,
         TargetCapabilities.HARD_DELETE,
+        PluginCapabilities.STATE,
     ]
 
     @property
@@ -87,6 +96,43 @@ class SQLTarget(Target):
                 dict(self.config),
             )
         return self._target_connector
+
+    @property
+    def _state_namespace(self) -> str:
+        namespace: str = self.config.get("state_namespace") or self.namespace
+        return namespace
+
+    @property
+    def _state_table(self) -> sa.Table:
+        return sa.Table(
+            "state",
+            sa.MetaData(schema=self._state_namespace),
+            sa.Column("state_id", sa.String(255), primary_key=True),
+            sa.Column("state", sa.Text, nullable=False),
+            sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
+        )
+
+    @override
+    def write_state(self, state_id: str, state: dict) -> None:
+        table = self._state_table
+        connector = self.target_connector
+        try:
+            connector.prepare_schema(self._state_namespace)
+        except sa.exc.DBAPIError:
+            # A pipeline that runs in parallel can create the schema first.
+            if not connector.schema_exists(self._state_namespace):
+                raise
+        with connector._connect() as conn, conn.begin():  # noqa: SLF001
+            conn.execute(sa.schema.CreateTable(table, if_not_exists=True))
+            conn.execute(table.delete().where(table.c.state_id == state_id))
+            conn.execute(
+                table.insert().values(
+                    state_id=state_id,
+                    state=serialize_json(state),
+                    updated_at=datetime.datetime.now(datetime.timezone.utc),
+                ),
+            )
+        self.logger.info("Wrote state '%s' to %s", state_id, table.fullname)
 
     @classmethod
     @override
