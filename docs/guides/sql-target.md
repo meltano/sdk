@@ -127,9 +127,9 @@ Starting from version `0.45.0`, the Meltano Singer SDK supports the `x-singer.de
 
 Read more about target support for `x-singer.decimal` in the [SQL tap guide](./sql-tap.md#sql-tap-support-for-singer-decimal-string-format).
 
-## Write `STATE` to the destination
+## Write state to the destination
 
-`SQLTarget` declares the `STATE` capability. When a user sets `state_id`, the target writes the latest `STATE` to a table named `state` after each drain. The table holds one row for each state ID, with the time of the last write in `updated_at`.
+`SQLTarget` declares the `STATE` capability. When a user sets `state_id`, the target writes the latest state to a table named `state` after each drain. The table holds one row for each state ID, with the time of the last write in `updated_at`.
 
 The `state_namespace` setting gives the schema of the table. It defaults to the plugin namespace, such as `target_postgres`, so that a stream named `state` does not load into the same table. The target creates the schema if it does not exist.
 

@@ -427,7 +427,7 @@ def _validate_records_config() -> dict[str, t.Any]:
 
 
 def _state_config() -> dict[str, t.Any]:
-    """Build the JSON schema for the target ``STATE`` capability.
+    """Build the JSON schema for the target `STATE` capability.
 
     Returns:
         The JSON schema.
@@ -439,7 +439,7 @@ def _state_config() -> dict[str, t.Any]:
             title="State ID",
             description=(
                 "The ID of the state, such as the Meltano state ID of the pipeline. "
-                "When it is set, the target writes `STATE` to the destination."
+                "When it is set, the target writes the state to the destination."
             ),
         ),
         Property(
@@ -646,7 +646,7 @@ class PluginCapabilities(CapabilitiesEnum):
     #: Support structured logging with contextual information.
     STRUCTURED_LOGGING = "structured-logging"
 
-    #: Store ``STATE`` in the destination. A target writes the state after each
+    #: Store the state in the destination. A target writes the state after each
     #: drain when the ``state_id`` setting is set. Requires an implementation of
     #: :meth:`~singer_sdk.Target.write_state`, which
     #: :class:`~singer_sdk.sql.SQLTarget` has. A tap declares
