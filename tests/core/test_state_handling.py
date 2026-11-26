@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import logging
 import uuid
 
@@ -183,14 +183,14 @@ def test_datetime_with_microseconds():
         "replication_key_value": "2021-05-17T20:41:16.000000+00:00",
     }
     latest_record = {
-        "updated_at": datetime.datetime(
+        "updated_at": dt.datetime(
             2021,
             5,
             17,
             20,
             41,
             16,
-            tzinfo=datetime.timezone.utc,
+            tzinfo=dt.timezone.utc,
         )
     }
     _state.increment_state(

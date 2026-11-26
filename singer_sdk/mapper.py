@@ -26,7 +26,7 @@ __lazy_modules__ = {
 import abc
 import ast
 import copy
-import datetime
+import datetime as dt
 import fnmatch
 import hashlib
 import importlib.util
@@ -445,7 +445,7 @@ class CustomStreamMap(StreamMap):
         funcs: dict[str, t.Any] = dict(simpleeval.DEFAULT_FUNCTIONS)
         funcs["md5"] = md5
         funcs["sha256"] = sha256
-        funcs["datetime"] = simpleeval.ModuleWrapper(datetime)
+        funcs["datetime"] = simpleeval.ModuleWrapper(dt)
         funcs["bool"] = bool
         funcs["json"] = simpleeval.ModuleWrapper(json)
         funcs["uuid4"] = uuid4

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-import datetime
+import datetime as dt
 import io
 import json
 import logging
@@ -755,7 +755,7 @@ class MappedTap(Tap):
 
 
 @time_machine.travel(
-    datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc),
+    dt.datetime(2022, 1, 1, tzinfo=dt.timezone.utc),
     tick=False,
 )
 @pytest.mark.snapshot

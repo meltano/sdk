@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import decimal
 import itertools
 import logging
@@ -334,25 +334,25 @@ def test_conform_object_no_additional_properties(
     [
         # Datetime conversions
         pytest.param(
-            datetime.datetime(2020, 5, 17, tzinfo=datetime.timezone.utc),
+            dt.datetime(2020, 5, 17, tzinfo=dt.timezone.utc),
             {"type": "string"},
             "2020-05-17T00:00:00.000000+00:00",
             id="datetime_to_string",
         ),
         pytest.param(
-            datetime.date(2020, 5, 17),
+            dt.date(2020, 5, 17),
             {"type": "string"},
             "2020-05-17",
             id="date_to_string",
         ),
         pytest.param(
-            datetime.timedelta(365),
+            dt.timedelta(365),
             {"type": "string"},
             "1971-01-01T00:00:00+00:00",
             id="timedelta_to_string",
         ),
         pytest.param(
-            datetime.time(12, 0, 0), {"type": "string"}, "12:00:00", id="time_to_string"
+            dt.time(12, 0, 0), {"type": "string"}, "12:00:00", id="time_to_string"
         ),
         # Bytes to string conversions
         pytest.param(b"\x00", {"type": "string"}, "00", id="bytes_00_to_string"),
@@ -473,7 +473,7 @@ def test_bench_conform_record_data_types(benchmark: BenchmarkFixture):
     }
     record = {
         "id": 1,
-        "created_at": datetime.datetime(2021, 1, 1, tzinfo=datetime.timezone.utc),
+        "created_at": dt.datetime(2021, 1, 1, tzinfo=dt.timezone.utc),
         "count": 10,
         "amount": 100.0,
         "is_active": True,

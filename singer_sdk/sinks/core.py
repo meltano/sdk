@@ -23,7 +23,7 @@ __lazy_modules__ = {
 
 import abc
 import copy
-import datetime
+import datetime as dt
 import itertools
 import sys
 import time
@@ -475,12 +475,11 @@ class Sink(abc.ABC):  # noqa: PLR0904
             context: Stream partition or context dictionary.
         """
         record["_sdc_extracted_at"] = message.get("time_extracted")
-        record["_sdc_received_at"] = datetime.datetime.now(
-            tz=datetime.timezone.utc,
+        record["_sdc_received_at"] = dt.datetime.now(
+            tz=dt.timezone.utc,
         ).isoformat()
         record["_sdc_batched_at"] = (
-            context.get("batch_start_time")
-            or datetime.datetime.now(tz=datetime.timezone.utc)
+            context.get("batch_start_time") or dt.datetime.now(tz=dt.timezone.utc)
         ).isoformat()
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
         record["_sdc_sequence"] = round(time.time() * 1000)

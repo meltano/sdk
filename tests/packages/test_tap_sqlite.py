@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import io
 import json
 import typing as t
@@ -139,7 +139,7 @@ def test_sync_sqlite_to_csv(sqlite_sample_tap: SQLTap, tmp_path: Path):
 
 @pytest.fixture
 @time_machine.travel(
-    datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc),
+    dt.datetime(2022, 1, 1, tzinfo=dt.timezone.utc),
     tick=False,
 )
 def sqlite_sample_tap_state_messages(sqlite_sample_tap: SQLTap) -> list[dict]:

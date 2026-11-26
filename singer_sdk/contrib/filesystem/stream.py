@@ -29,7 +29,7 @@ else:
 
 
 if t.TYPE_CHECKING:
-    import datetime
+    import datetime as dt
 
     import fsspec
 
@@ -127,7 +127,7 @@ class FileStream(Stream, abc.ABC):
 
         path: str = context[SDC_META_FILEPATH]
 
-        mtime: datetime.datetime | None
+        mtime: dt.datetime | None
         try:
             mtime = self.filesystem.modified(path)
         except NotImplementedError:  # pragma: no cover

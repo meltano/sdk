@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import io
 import json
 import typing as t
@@ -47,7 +47,7 @@ class TestCSVOneStreamPerFile(_TestCSVOneStreamPerFile):
 
 
 # Three days into the future.
-FUTURE = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(days=3)
+FUTURE = dt.datetime.now(tz=dt.timezone.utc) + dt.timedelta(days=3)
 
 STATE = {
     "bookmarks": {

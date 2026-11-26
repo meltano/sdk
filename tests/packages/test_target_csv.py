@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import importlib.resources
 import io
 import json
@@ -34,7 +34,7 @@ if t.TYPE_CHECKING:
 
 TEST_OUTPUT_DIR = Path(f".output/test_{uuid.uuid4()}/")
 SAMPLE_CONFIG = {"target_folder": f"{TEST_OUTPUT_DIR}/"}
-DATETIME = datetime.datetime(2025, 6, 1, tzinfo=datetime.timezone.utc)
+DATETIME = dt.datetime(2025, 6, 1, tzinfo=dt.timezone.utc)
 
 
 StandardTests = get_target_test_class(
@@ -172,29 +172,29 @@ def test_target_batching():
 
     buf, _ = tap_sync_test(tap)
 
-    mocked_starttime = datetime.datetime(
+    mocked_starttime = dt.datetime(
         2012,
         1,
         1,
         12,
         0,
-        tzinfo=datetime.timezone.utc,
+        tzinfo=dt.timezone.utc,
     )
-    mocked_jumptotime2 = datetime.datetime(
+    mocked_jumptotime2 = dt.datetime(
         2012,
         1,
         1,
         12,
         31,
-        tzinfo=datetime.timezone.utc,
+        tzinfo=dt.timezone.utc,
     )
-    mocked_jumptotime3 = datetime.datetime(
+    mocked_jumptotime3 = dt.datetime(
         2012,
         1,
         1,
         13,
         2,
-        tzinfo=datetime.timezone.utc,
+        tzinfo=dt.timezone.utc,
     )
     countries_record_count = 257
 

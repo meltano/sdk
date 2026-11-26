@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import decimal
 import logging
 import sys
@@ -165,14 +165,14 @@ def test_stream_apply_catalog__singer_standard(stream: Stream):
             "test",
             None,
             None,
-            parse(CONFIG_START_DATE).replace(tzinfo=datetime.timezone.utc),
+            parse(CONFIG_START_DATE).replace(tzinfo=dt.timezone.utc),
             id="datetime-repl-key-no-state",
         ),
         pytest.param(
             "test",
             None,
             "2021-02-01",
-            datetime.datetime(2021, 2, 1, tzinfo=datetime.timezone.utc),
+            dt.datetime(2021, 2, 1, tzinfo=dt.timezone.utc),
             id="datetime-repl-key-recent-bookmark",
         ),
         pytest.param(
@@ -186,18 +186,18 @@ def test_stream_apply_catalog__singer_standard(stream: Stream):
             "test",
             None,
             "2020-01-01",
-            parse(CONFIG_START_DATE).replace(tzinfo=datetime.timezone.utc),
+            parse(CONFIG_START_DATE).replace(tzinfo=dt.timezone.utc),
             id="datetime-repl-key-old-bookmark",
         ),
         pytest.param(
             "test",
             None,
             "2021-01-02T00:00:00-08:00",
-            datetime.datetime(
+            dt.datetime(
                 2021,
                 1,
                 2,
-                tzinfo=datetime.timezone(datetime.timedelta(hours=-8)),
+                tzinfo=dt.timezone(dt.timedelta(hours=-8)),
             ),
             id="datetime-repl-key-recent-bookmark-tz-aware",
         ),

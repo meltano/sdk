@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import decimal
 import json
 import sqlite3
@@ -25,17 +25,17 @@ if t.TYPE_CHECKING:
 DB_PATH_CONFIG = "path_to_db"
 
 
-def adapt_date_iso(val: datetime.date) -> str:
+def adapt_date_iso(val: dt.date) -> str:
     """Adapt datetime.date to ISO 8601 date."""
     return val.isoformat()
 
 
-def adapt_datetime_iso(val: datetime.datetime) -> str:
+def adapt_datetime_iso(val: dt.datetime) -> str:
     """Adapt datetime.datetime to timezone-naive ISO 8601 date."""
     return val.isoformat()
 
 
-def adapt_time(val: datetime.time) -> str:
+def adapt_time(val: dt.time) -> str:
     """Adapt datetime.time to ISO 8601 time."""
     return val.isoformat()
 
@@ -55,27 +55,27 @@ def adapt_dict(val: dict) -> str:
     return json.dumps(val, default=str)
 
 
-sqlite3.register_adapter(datetime.date, adapt_date_iso)
-sqlite3.register_adapter(datetime.datetime, adapt_datetime_iso)
+sqlite3.register_adapter(dt.date, adapt_date_iso)
+sqlite3.register_adapter(dt.datetime, adapt_datetime_iso)
 sqlite3.register_adapter(decimal.Decimal, adapt_decimal)
 sqlite3.register_adapter(list, adapt_list)
 sqlite3.register_adapter(dict, adapt_dict)
-sqlite3.register_adapter(datetime.time, adapt_time)
+sqlite3.register_adapter(dt.time, adapt_time)
 
 
-def convert_date(val: bytes) -> datetime.date:
+def convert_date(val: bytes) -> dt.date:
     """Convert ISO 8601 date to datetime.date object."""
-    return datetime.date.fromisoformat(val.decode())
+    return dt.date.fromisoformat(val.decode())
 
 
-def convert_datetime(val: bytes) -> datetime.datetime:
+def convert_datetime(val: bytes) -> dt.datetime:
     """Convert ISO 8601 datetime to datetime.datetime object."""
-    return datetime.datetime.fromisoformat(val.decode())
+    return dt.datetime.fromisoformat(val.decode())
 
 
-def convert_timestamp(val: bytes) -> datetime.datetime:
+def convert_timestamp(val: bytes) -> dt.datetime:
     """Convert Unix epoch timestamp to datetime.datetime object."""
-    return datetime.datetime.fromtimestamp(int(val), tz=datetime.timezone.utc)
+    return dt.datetime.fromtimestamp(int(val), tz=dt.timezone.utc)
 
 
 sqlite3.register_converter("date", convert_date)

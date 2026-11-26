@@ -29,7 +29,7 @@ __lazy_modules__ = {
 
 import abc
 import copy
-import datetime
+import datetime as dt
 import json
 import logging
 import typing as t
@@ -343,7 +343,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
     def get_starting_timestamp(
         self,
         context: types.Context | None,
-    ) -> datetime.datetime | None:
+    ) -> dt.datetime | None:
         """Get starting replication timestamp.
 
         Will return the value of the stream's replication key when `--state` is passed.
@@ -378,7 +378,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
             raise ValueError(msg)
 
         result = datetime_fromisoformat(value)
-        return result if result.tzinfo else result.replace(tzinfo=datetime.timezone.utc)
+        return result if result.tzinfo else result.replace(tzinfo=dt.timezone.utc)
 
     @property
     def selected(self) -> bool:
@@ -439,7 +439,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
     def _write_replication_key_signpost(
         self,
         context: types.Context | None,
-        value: datetime.datetime | str | float | None,
+        value: dt.datetime | str | float | None,
     ) -> None:
         """Write the signpost value, if available.
 
@@ -449,7 +449,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
         """
         self.state_manager.write_replication_key_signpost(value, context=context)
 
-    def _parse_datetime(self, value: str) -> datetime.datetime:  # noqa: PLR6301
+    def _parse_datetime(self, value: str) -> dt.datetime:  # noqa: PLR6301
         """Parse a datetime string.
 
         Args:
@@ -462,7 +462,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
 
         # Ensure datetime is timezone-aware
         if not result.tzinfo:
-            result = result.replace(tzinfo=datetime.timezone.utc)
+            result = result.replace(tzinfo=dt.timezone.utc)
 
         return result
 
@@ -506,7 +506,7 @@ class Stream(abc.ABC):  # noqa: PLR0904
     def get_replication_key_signpost(
         self,
         context: types.Context | None = None,  # noqa: ARG002
-    ) -> datetime.datetime | t.Any | None:  # noqa: ANN401
+    ) -> dt.datetime | t.Any | None:  # noqa: ANN401
         """Get the replication signpost.
 
         For timestamp-based replication keys, this defaults to `utc_now()`. For
@@ -525,9 +525,9 @@ class Stream(abc.ABC):  # noqa: PLR0904
             Max allowable bookmark value for this stream's replication key.
         """
         return (
-            datetime.datetime.fromtimestamp(
+            dt.datetime.fromtimestamp(
                 self._initialized_at / 1000.0,
-                tz=datetime.timezone.utc,
+                tz=dt.timezone.utc,
             )
             if self.is_timestamp_replication_key
             else None

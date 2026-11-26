@@ -13,7 +13,7 @@ __lazy_modules__ = {
     "sqlalchemy",
 }
 
-import datetime
+import datetime as dt
 import functools
 import sys
 import typing as t
@@ -134,7 +134,7 @@ class SQLTarget(Target):
                 table.insert().values(
                     state_id=state_id,
                     state=serialize_json(state),
-                    updated_at=datetime.datetime.now(datetime.timezone.utc),
+                    updated_at=dt.datetime.now(dt.timezone.utc),
                 ),
             )
         self.logger.info("Wrote state '%s' to %s", state_id, table.fullname)

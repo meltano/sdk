@@ -21,8 +21,10 @@ import singer_sdk.logging
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
 
-logger = logging.getLogger(__name__)
-warnings_logger = logging.getLogger("singer_sdk.warnings")
+# The eager `import logging` binds `logging`, so these calls do not load the lazy
+# `logging.config` import.
+logger = logging.getLogger(__name__)  # noqa: TID255
+warnings_logger = logging.getLogger("singer_sdk.warnings")  # noqa: TID255
 
 
 def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN401 # pragma: no cover

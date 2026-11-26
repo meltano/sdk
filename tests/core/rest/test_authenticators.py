@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import http
 import logging
 import os
@@ -214,7 +214,7 @@ def test_oauth_authenticator_token_expiry_handling(
         default_expiration=default_expiration,
     )
     with time_machine.travel(
-        datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc),
+        dt.datetime(2023, 1, 1, tzinfo=dt.timezone.utc),
         tick=False,
     ):
         authenticator.update_access_token()
@@ -222,13 +222,13 @@ def test_oauth_authenticator_token_expiry_handling(
     assert authenticator.expires_in == result
 
     with time_machine.travel(
-        datetime.datetime(2023, 1, 1, 0, 1, tzinfo=datetime.timezone.utc),
+        dt.datetime(2023, 1, 1, 0, 1, tzinfo=dt.timezone.utc),
         tick=False,
     ):
         assert authenticator.is_token_valid()
 
     with time_machine.travel(
-        datetime.datetime(2023, 1, 1, 0, 5, tzinfo=datetime.timezone.utc),
+        dt.datetime(2023, 1, 1, 0, 5, tzinfo=dt.timezone.utc),
         tick=False,
     ):
         assert not authenticator.expires_in or not authenticator.is_token_valid()
@@ -262,18 +262,18 @@ def test_oauth_authenticator_token_expiry_margin(
         auth_endpoint="https://example.com/oauth",
         token_expiry_margin=token_expiry_margin,
     )
-    start = datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc)
+    start = dt.datetime(2023, 1, 1, tzinfo=dt.timezone.utc)
     with time_machine.travel(start, tick=False):
         authenticator.update_access_token()
 
     with time_machine.travel(
-        start + datetime.timedelta(seconds=valid_until - 1),
+        start + dt.timedelta(seconds=valid_until - 1),
         tick=False,
     ):
         assert authenticator.is_token_valid()
 
     with time_machine.travel(
-        start + datetime.timedelta(seconds=valid_until),
+        start + dt.timedelta(seconds=valid_until),
         tick=False,
     ):
         assert not authenticator.is_token_valid()
@@ -838,13 +838,13 @@ def test_oauth_authenticator_refreshes_token_on_retry(
 
     # Set initial time and get initial token
     with time_machine.travel(
-        datetime.datetime(
+        dt.datetime(
             2023,
             1,
             1,
             0,
             0,
-            tzinfo=datetime.timezone.utc,
+            tzinfo=dt.timezone.utc,
         ),
         tick=False,
     ):
@@ -860,13 +860,13 @@ def test_oauth_authenticator_refreshes_token_on_retry(
     # Make first request (will fail and be retried)
     # Move time forward so token appears expired during retry check
     with time_machine.travel(
-        datetime.datetime(
+        dt.datetime(
             2023,
             1,
             1,
             0,
             2,
-            tzinfo=datetime.timezone.utc,
+            tzinfo=dt.timezone.utc,
         ),
         tick=False,
     ):
