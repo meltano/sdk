@@ -204,7 +204,7 @@ class StreamTestTemplate(TestTemplate):
         resource: t.Any,
         runner: TapTestRunner,
         stream: Stream,
-    ) -> None:  # ty:ignore[invalid-method-override]
+    ) -> None:  # ty:ignore[incompatible-method-override]
         """Test main run method.
 
         Args:
@@ -239,7 +239,7 @@ class AttributeTestTemplate(StreamTestTemplate):
         runner: TapTestRunner,
         stream: Stream,
         attribute_name: str,
-    ) -> None:  # ty:ignore[invalid-method-override]
+    ) -> None:  # ty:ignore[incompatible-method-override]
         """Test main run method.
 
         Args:

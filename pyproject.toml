@@ -38,7 +38,7 @@ dependencies = [
     'importlib-metadata>=6.5; python_version<"3.12"',
     "inflection>=0.5.1",
     "joblib>=1.3.0",
-    "jsonpath-ng>=1.5.3",
+    "jsonpath-ng>=1.6.0",
     "jsonschema>=4.16.0",
     "packaging>=23.1",
     "python-backoff>=2.2.2",
@@ -64,7 +64,7 @@ parquet = [
 ]
 
 testing = [
-    "pytest~=9.1.1",
+    "pytest~=9.2.0",
 ]
 
 faker = [
@@ -107,7 +107,7 @@ dev = [
     "deptry>=0.15.0",
 ]
 docs = [
-    "furo>=2024.5.6",
+    "furo>=2024.5.6; python_full_version >= '3.11.5'",
     "myst-parser>=3",
     "pytest>=9",
     "sphinx>=7",
@@ -156,7 +156,7 @@ typing = [
     "importlib-metadata",
     "mypy~=2.2",
     "pyarrow-stubs>=19.1",
-    "ty==0.0.91",
+    "ty==0.0.104",
     "types-jsonschema>=4.17.0.6",
     "types-simplejson>=3.18.0",
     "types-PyYAML>=6.0.12",

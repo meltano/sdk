@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import sys
 import typing as t
 from copy import deepcopy
 from io import StringIO
@@ -17,6 +18,7 @@ import sqlalchemy.exc
 from tap_hostile import TapHostile
 from tap_sqlite import SQLiteTap
 from target_sqlite import SQLiteSink, SQLiteTarget
+from target_sqlite.target import SQLiteConnector
 
 from singer_sdk import typing as th
 from singer_sdk.testing import (
@@ -25,6 +27,11 @@ from singer_sdk.testing import (
     tap_to_target_sync_test,
     target_sync_test,
 )
+
+if sys.version_info >= (3, 12):
+    from typing import override  # noqa: ICN003
+else:
+    from typing_extensions import override
 
 if t.TYPE_CHECKING:
     from collections.abc import Mapping
@@ -884,3 +891,113 @@ def test_overwrite_load_method(sqlite_target_test_config: dict):
     cursor.execute(f"SELECT col_a FROM {test_tbl} ;")  # noqa: S608
     records = [res[0] for res in cursor.fetchall()]
     assert records == ["456"]
+
+
+class SQLiteTargetInMain(SQLiteTarget):
+    namespace = "main"
+
+
+@pytest.mark.parametrize(
+    "target_class,state_settings",
+    [
+        pytest.param(SQLiteTarget, {"state_namespace": "main"}, id="setting"),
+        pytest.param(SQLiteTargetInMain, {}, id="plugin-namespace"),
+    ],
+)
+def test_sqlite_target_state(
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+    target_class: type[SQLiteTarget],
+    state_settings: dict,
+):
+    """Test that the target writes the state for each state ID to the destination."""
+    db_path = tmp_path / "target.sqlite"
+
+    def sync(state_id: str, bookmark: int) -> None:
+        messages = [
+            {
+                "type": "SCHEMA",
+                "stream": "users",
+                "schema": {"properties": {"id": {"type": "integer"}}},
+                "key_properties": ["id"],
+            },
+            {"type": "RECORD", "stream": "users", "record": {"id": bookmark}},
+            {"type": "STATE", "value": {"bookmarks": {"users": {"id": bookmark}}}},
+        ]
+        config = {"path_to_db": str(db_path), "state_id": state_id, **state_settings}
+        target_sync_test(
+            target_class(config=config),
+            input=StringIO("".join(f"{json.dumps(m)}\n" for m in messages)),
+        )
+
+    with caplog.at_level("INFO"):
+        sync("a", 1)
+        sync("a", 2)
+        sync("b", 3)
+
+    assert "Wrote state 'b' to main.state" in caplog.text
+
+    engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
+    with engine.connect() as conn:
+        rows = conn.execute(
+            sqlalchemy.text("SELECT state_id, state, updated_at FROM main.state"),
+        ).all()
+
+    assert {row.state_id: json.loads(row.state) for row in rows} == {
+        "a": {"bookmarks": {"users": {"id": 2}}},
+        "b": {"bookmarks": {"users": {"id": 3}}},
+    }
+    assert all(row.updated_at for row in rows)
+
+
+def _target_that_cannot_create_schemas(
+    db_path: Path,
+    *,
+    schema_created_elsewhere: bool,
+) -> SQLiteTarget:
+    schema_checks = 0
+
+    class Connector(SQLiteConnector):
+        @override
+        def schema_exists(self, schema_name: str) -> bool:
+            # The first check runs before another pipeline can create the schema.
+            nonlocal schema_checks
+            schema_checks += 1
+            return schema_created_elsewhere and schema_checks > 1
+
+        @override
+        def create_schema(self, schema_name: str) -> None:
+            statement = f"CREATE SCHEMA {schema_name}"
+            reason = Exception(f"schema {schema_name} cannot be created")
+            raise sqlalchemy.exc.ProgrammingError(statement, None, reason)
+
+    class Sink(SQLiteSink):
+        connector_class = Connector
+
+    class Target(SQLiteTarget):
+        default_sink_class = Sink
+
+    return Target(config={"path_to_db": str(db_path), "state_namespace": "main"})
+
+
+def test_sqlite_target_state_schema_created_by_parallel_run(tmp_path: Path):
+    """Test that the state is written when a parallel run created the schema."""
+    db_path = tmp_path / "target.sqlite"
+    target = _target_that_cannot_create_schemas(db_path, schema_created_elsewhere=True)
+
+    target.write_state("a", {"bookmarks": {"users": {"id": 1}}})
+
+    with sqlite3.connect(db_path) as conn:
+        rows = conn.execute("SELECT state_id, state FROM state").fetchall()
+    assert rows == [("a", '{"bookmarks":{"users":{"id":1}}}')]
+
+
+def test_sqlite_target_state_schema_cannot_be_created(tmp_path: Path):
+    """Test that the error is raised when the state schema does not exist."""
+    target = _target_that_cannot_create_schemas(
+        tmp_path / "target.sqlite",
+        schema_created_elsewhere=False,
+    )
+
+    with pytest.raises(sqlalchemy.exc.ProgrammingError, match="cannot be created"):
+        target.write_state("a", {"bookmarks": {"users": {"id": 1}}})

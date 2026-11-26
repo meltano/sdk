@@ -23,6 +23,7 @@ Custom base capabilities
 The following capabilities have to be implemented in the plugin.
 
 .. autoattribute:: PluginCapabilities.ACTIVATE_VERSION
+.. autoattribute:: PluginCapabilities.STATE
 
 Tap Capabilities
 ----------------
