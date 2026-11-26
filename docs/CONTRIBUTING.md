@@ -169,6 +169,9 @@ To build the docs and live-reload them locally:
 nox -s docs-serve
 ```
 
+Use Python `3.11.5` or later to build the docs. The docs theme, `furo`, is not
+installed on older versions.
+
 Sphinx will automatically generate class stubs, so be sure to `git add` them.
 
 ## Semantic Pull Requests
