@@ -271,7 +271,7 @@ The following variables are available in the context of a mapping expression:
 | `record` | An alias for the record values dictionary in the current stream. |
 | `_` | Same as `record` but shorter to type. |
 | `self` | The existing property value if the property already exists. |
-| `fake` | A [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config` (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers) for available methods. |
+| `fake` | A [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config` (see previous example) - see the built-in [standard providers](https://faker.readthedocs.io/en/master/providers.html) for available methods. |
 | `__stream_name__` | The name of the stream. Useful when [applying the same transformation to multiple streams](#applying-a-mapping-across-two-or-more-streams). If used outside of `__alias__`, this will reference the aliased stream name. |
 | `__original_stream_name__` | The original name of the stream. Useful when `__alias__` is specified but you want to reference the original (unaliased) stream name elsewhere (e.g. property mapping). If `__alias__` is not specified, this will reference the same value as `__stream_name__`. |
 
