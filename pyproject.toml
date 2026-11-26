@@ -107,7 +107,7 @@ dev = [
     "deptry>=0.15.0",
 ]
 docs = [
-    "furo>=2024.5.6",
+    "furo>=2024.5.6; python_full_version >= '3.11.5'",
     "myst-parser>=3",
     "pytest>=9",
     "sphinx>=7",
