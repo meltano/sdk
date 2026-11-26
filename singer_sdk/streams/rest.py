@@ -294,7 +294,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
             )
-            return self.rest_method  # type: ignore[no-any-return]  # ty:ignore[invalid-return-type]
+            return self.rest_method  # type: ignore[no-any-return]  # ty:ignore[invalid-explicit-return]
 
         return "GET"
 
@@ -508,7 +508,7 @@ class _HTTPStream(Stream, abc.ABC, t.Generic[_TToken]):  # noqa: PLR0904
             A :class:`requests.PreparedRequest` object.
         """
         request = requests.Request(*args, **kwargs)
-        request.headers.setdefault("User-Agent", self.user_agent)  # type: ignore[attr-defined] # ty: ignore[unresolved-attribute]
+        request.headers.setdefault("User-Agent", self.user_agent)  # type: ignore[attr-defined] # ty: ignore[missing-attribute]
         self.requests_session.auth = self.authenticator
         return self.requests_session.prepare_request(request)
 

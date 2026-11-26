@@ -30,6 +30,14 @@ class PluginTest(PluginBase):
     ).to_dict()
 
 
+def test_namespace():
+    class PluginWithNamespace(PluginTest):
+        namespace = "custom_namespace"
+
+    assert PluginTest.namespace == "plugin_test"
+    assert PluginWithNamespace.namespace == "custom_namespace"
+
+
 def test_config_path(tmp_path: Path):
     """Test that the config path is correctly set."""
     config_json = '{"prop1": "hello", "prop2": 123}'

@@ -211,7 +211,7 @@ def _plugin_log_level(*, plugin_name: str) -> str:
     return level.upper() if level is not None else DEFAULT_LOG_LEVEL
 
 
-class PluginBase(abc.ABC):
+class PluginBase(abc.ABC):  # noqa: PLR0904
     """Abstract base class for taps."""
 
     #: The executable name of the tap or target plugin. e.g. tap-foo
@@ -243,6 +243,18 @@ class PluginBase(abc.ABC):
             Plugin logger.
         """
         return logging.getLogger(cls.name)
+
+    @classproperty
+    def namespace(cls) -> str:  # noqa: N805
+        """The plugin namespace, such as ``tap_foo``.
+
+        Defaults to the plugin name, with ``_`` in place of ``-``. Override it to
+        match a different plugin namespace in Meltano.
+
+        Returns:
+            The plugin namespace.
+        """
+        return cls.name.replace("-", "_")
 
     # Constructor
 

@@ -365,7 +365,7 @@ def test_preprocess_context_removes_large_payload(
         @override
         def preprocess_context(self, context: Context) -> Context:
             """Remove large payload from parent context."""
-            self.set_numbers(context.pop("large_payload", []))  # ty:ignore[unresolved-attribute]
+            self.set_numbers(context.pop("large_payload", []))  # ty:ignore[missing-attribute]
             return context
 
         @override
