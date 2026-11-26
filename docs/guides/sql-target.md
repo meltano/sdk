@@ -131,8 +131,6 @@ Read more about target support for `x-singer.decimal` in the [SQL tap guide](./s
 
 `SQLTarget` declares the `STATE` capability. When a user sets `state_id`, the target writes the latest `STATE` to a table named `state` after each drain. The table holds one row for each state ID, with the time of the last write in `updated_at`.
 
-The `meltano state` commands do not read this table yet. Query it directly to see how far the data in the destination goes.
-
 The `state_namespace` setting gives the schema of the table. It defaults to the plugin namespace, such as `target_postgres`, so that a stream named `state` does not load into the same table. The target creates the schema if it does not exist.
 
 For a different layout, override `write_state`.
