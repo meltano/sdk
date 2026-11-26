@@ -539,6 +539,8 @@ class Target(BaseSingerReader, abc.ABC):
                 sink._clean_up()  # ruff:ignore[private-member-access]
 
         if self._latest_state:
+            if state_id := self.config.get("state_id"):
+                self.write_state(state_id, copy.deepcopy(self._latest_state))
             self._write_state_message(copy.deepcopy(self._latest_state))
 
         self._reset_max_record_age()
@@ -571,6 +573,20 @@ class Target(BaseSingerReader, abc.ABC):
 
         with parallel_config(backend="threading", n_jobs=parallelism):
             Parallel()(delayed(_drain_sink)(sink=sink) for sink in sink_list)
+
+    def write_state(self, state_id: str, state: dict) -> None:
+        """Write the state to the destination.
+
+        When the ``state_id`` setting is set, the target calls this method after
+        all sinks drain, and before it emits the state to stdout. The default
+        implementation does nothing. Override it in a target that declares
+        :attr:`~singer_sdk.helpers.capabilities.PluginCapabilities.STATE`.
+
+        Args:
+            state_id: The ID of the state, from the ``state_id`` setting.
+            state: The latest state, which is safe to persist because all
+                records that it covers are drained.
+        """
 
     def _write_state_message(self, state: dict) -> None:
         """Emit the stream's latest state.
