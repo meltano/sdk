@@ -1,13 +1,13 @@
 """Tests standard tap features using the built-in SDK tests library."""
 
-import datetime
+import datetime as dt
 
 from singer_sdk.testing import get_tap_test_class
 
 from {{ cookiecutter.library_name }}.tap import Tap{{ cookiecutter.source_name }}
 
 SAMPLE_CONFIG = {
-    "start_date": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"),
+    "start_date": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d"),
     # TODO: Initialize minimal tap config
 }
 
