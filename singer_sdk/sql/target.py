@@ -14,6 +14,7 @@ __lazy_modules__ = {
 }
 
 import datetime
+import functools
 import sys
 import typing as t
 
@@ -102,19 +103,17 @@ class SQLTarget(Target):
         namespace: str = self.config.get("state_namespace") or self.namespace
         return namespace
 
-    @property
+    @functools.cached_property
     def _state_table(self) -> sa.Table:
-        return sa.Table(
+        # Create the schema and the table on the first state write only, so that
+        # later drains in the same run skip the checks.
+        table = sa.Table(
             "state",
             sa.MetaData(schema=self._state_namespace),
             sa.Column("state_id", sa.String(255), primary_key=True),
             sa.Column("state", sa.Text, nullable=False),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         )
-
-    @override
-    def write_state(self, state_id: str, state: dict) -> None:
-        table = self._state_table
         connector = self.target_connector
         try:
             connector.prepare_schema(self._state_namespace)
@@ -124,6 +123,12 @@ class SQLTarget(Target):
                 raise
         with connector._connect() as conn, conn.begin():  # noqa: SLF001
             conn.execute(sa.schema.CreateTable(table, if_not_exists=True))
+        return table
+
+    @override
+    def write_state(self, state_id: str, state: dict) -> None:
+        table = self._state_table
+        with self.target_connector._connect() as conn, conn.begin():  # noqa: SLF001
             conn.execute(table.delete().where(table.c.state_id == state_id))
             conn.execute(
                 table.insert().values(
