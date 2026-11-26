@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import io
 import json
 import logging
@@ -24,7 +24,7 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.helpers.types import Context, Record
 
-DATETIME = datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc)
+DATETIME = dt.datetime(2022, 1, 1, tzinfo=dt.timezone.utc)
 
 
 class Parent(Stream):

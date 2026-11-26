@@ -4,7 +4,7 @@ from __future__ import annotations
 
 __lazy_modules__ = {"datetime", "singer_sdk.singerlib.exceptions"}
 
-import datetime
+import datetime as dt
 import decimal
 import logging
 import sys
@@ -39,7 +39,7 @@ def enc_hook(obj: t.Any) -> t.Any:  # noqa: ANN401
     Returns:
         The object converted to the appropriate type, default is str
     """
-    return obj.isoformat(sep="T") if isinstance(obj, datetime.datetime) else str(obj)
+    return obj.isoformat(sep="T") if isinstance(obj, dt.datetime) else str(obj)
 
 
 def dec_hook(type: type, obj: t.Any) -> t.Any:  # noqa: ARG001, A002, ANN401

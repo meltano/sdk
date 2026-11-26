@@ -19,7 +19,7 @@ __lazy_modules__ = {
 }
 
 import base64
-import datetime
+import datetime as dt
 import logging
 import math
 import sys
@@ -532,7 +532,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         # Initialize internal tracking attributes
         self.access_token: str | None = None
         self.refresh_token: str | None = None
-        self.last_refreshed: datetime.datetime | None = None
+        self.last_refreshed: dt.datetime | None = None
         self.expires_in: int | None = None
         self._session = requests.Session()
         self._session.mount(
@@ -752,7 +752,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             "iss": self.client_id,
             "scope": self.oauth_scopes,
             "aud": self.auth_endpoint,
-            "exp": math.floor((request_time + datetime.timedelta(hours=1)).timestamp()),
+            "exp": math.floor((request_time + dt.timedelta(hours=1)).timestamp()),
             "iat": math.floor(request_time.timestamp()),
         }
 

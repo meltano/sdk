@@ -15,7 +15,7 @@ __lazy_modules__ = {
 }
 
 import copy
-import datetime
+import datetime as dt
 import decimal
 import logging
 import math
@@ -38,7 +38,7 @@ _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
 JSONSCHEMA_ANNOTATION_SECRET = "secret"  # noqa: S105
 JSONSCHEMA_ANNOTATION_WRITEONLY = "writeOnly"
-UTC = datetime.timezone.utc
+UTC = dt.timezone.utc
 
 logger = logging.getLogger(__name__)
 
@@ -75,14 +75,14 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
 
 def to_json_compatible(val: t.Any) -> t.Any:  # noqa: ANN401
     """Return as string if datetime. JSON does not support proper datetime types."""
-    if isinstance(val, (datetime.datetime,)):
+    if isinstance(val, (dt.datetime,)):
         return _datetime_to_json_compatible(val)
     if isinstance(val, (uuid.UUID,)):
         return str(val)
     return val
 
 
-def _datetime_to_json_compatible(val: datetime.datetime) -> str:
+def _datetime_to_json_compatible(val: dt.datetime) -> str:
     if val.tzinfo is None:  # Make naive datetimes UTC
         val = val.replace(tzinfo=UTC)
     return val.isoformat("T", timespec="microseconds")
@@ -538,17 +538,17 @@ def _conform_primitive_property(  # noqa: PLR0911
     property_schema: dict,
 ) -> t.Any:  # noqa: ANN401
     """Converts a primitive (i.e. not object or array) to a json compatible type."""
-    if isinstance(elem, (datetime.datetime,)):
+    if isinstance(elem, (dt.datetime,)):
         return _datetime_to_json_compatible(elem)
-    if isinstance(elem, datetime.date):
+    if isinstance(elem, dt.date):
         return elem.isoformat()
-    if isinstance(elem, datetime.timedelta):
-        epoch = datetime.datetime.fromtimestamp(0, UTC)
+    if isinstance(elem, dt.timedelta):
+        epoch = dt.datetime.fromtimestamp(0, UTC)
         timedelta_from_epoch = epoch + elem
         if timedelta_from_epoch.tzinfo is None:
             timedelta_from_epoch = timedelta_from_epoch.replace(tzinfo=UTC)
         return timedelta_from_epoch.isoformat()
-    if isinstance(elem, datetime.time):
+    if isinstance(elem, dt.time):
         return str(elem)
     if isinstance(elem, bytes):
         # for BIT value, treat 0 as False and anything else as True

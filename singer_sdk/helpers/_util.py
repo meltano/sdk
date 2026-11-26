@@ -10,7 +10,7 @@ __lazy_modules__ = {
     "singer_sdk.helpers.types",
 }
 
-import datetime
+import datetime as dt
 import decimal
 import typing as t
 from pathlib import Path
@@ -78,6 +78,6 @@ def read_json_file(path: StrPath) -> dict[str, t.Any]:
     return load_json(Path(path).read_text(encoding="utf-8"))
 
 
-def utc_now() -> datetime.datetime:
+def utc_now() -> dt.datetime:
     """Return current time in UTC."""
-    return datetime.datetime.now(datetime.timezone.utc)
+    return dt.datetime.now(dt.timezone.utc)

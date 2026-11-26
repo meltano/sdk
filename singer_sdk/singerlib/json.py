@@ -4,7 +4,7 @@ from __future__ import annotations
 
 __lazy_modules__ = {"datetime", "decimal", "json", "simplejson", "typing"}
 
-import datetime
+import datetime as dt
 import decimal
 import json
 import typing as t
@@ -26,7 +26,7 @@ def _default_encoding(obj: t.Any) -> str:  # noqa: ANN401
     Returns:
         The encoded object.
     """
-    return obj.isoformat(sep="T") if isinstance(obj, datetime.datetime) else str(obj)
+    return obj.isoformat(sep="T") if isinstance(obj, dt.datetime) else str(obj)
 
 
 def deserialize_json(json_str: str | bytes, **kwargs: t.Any) -> dict:

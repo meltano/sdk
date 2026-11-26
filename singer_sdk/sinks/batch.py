@@ -5,7 +5,7 @@ from __future__ import annotations
 __lazy_modules__ = {"datetime", "uuid"}
 
 import abc
-import datetime
+import datetime as dt
 import sys
 import uuid
 
@@ -38,7 +38,7 @@ class BatchSink(Sink):
         if self._pending_batch is None:
             new_context = {
                 "batch_id": str(uuid.uuid4()),
-                "batch_start_time": datetime.datetime.now(tz=datetime.timezone.utc),
+                "batch_start_time": dt.datetime.now(tz=dt.timezone.utc),
             }
             self.start_batch(new_context)
             self._pending_batch = new_context

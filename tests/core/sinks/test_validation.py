@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import itertools
 import sys
 import typing as t
@@ -75,7 +75,7 @@ def test_jsonschema_validator():
     @format_checker.checks("date-time")
     def _is_date_time(value: object) -> bool:
         try:
-            datetime.datetime.fromisoformat(value)
+            dt.datetime.fromisoformat(value)
         except (TypeError, ValueError):
             return False
 
@@ -153,23 +153,23 @@ def test_validate_record():
     }
     updated_record = sink._validate_and_parse(record)
 
-    assert updated_record["created_at"] == datetime.datetime(
+    assert updated_record["created_at"] == dt.datetime(
         2021,
         1,
         1,
         0,
         0,
-        tzinfo=datetime.timezone.utc,
+        tzinfo=dt.timezone.utc,
     )
-    assert updated_record["created_at_date"] == datetime.date(
+    assert updated_record["created_at_date"] == dt.date(
         2021,
         1,
         1,
     )
-    assert updated_record["created_at_time"] == datetime.time(
+    assert updated_record["created_at_time"] == dt.time(
         0,
         1,
-        tzinfo=datetime.timezone.utc,
+        tzinfo=dt.timezone.utc,
     )
     assert updated_record["missing_datetime"] == "2021-01-01T00:00:00+00:00"
     assert updated_record["invalid_datetime"] == "9999-12-31 23:59:59.999999"
@@ -303,23 +303,23 @@ def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
     with caplog.at_level("WARNING"):
         updated_record = sink._validate_and_parse(record)
 
-    assert updated_record["created_at"] == datetime.datetime(
+    assert updated_record["created_at"] == dt.datetime(
         2021,
         1,
         1,
         0,
         0,
-        tzinfo=datetime.timezone.utc,
+        tzinfo=dt.timezone.utc,
     )
-    assert updated_record["created_at_date"] == datetime.date(
+    assert updated_record["created_at_date"] == dt.date(
         2021,
         1,
         1,
     )
-    assert updated_record["created_at_time"] == datetime.time(
+    assert updated_record["created_at_time"] == dt.time(
         0,
         1,
-        tzinfo=datetime.timezone.utc,
+        tzinfo=dt.timezone.utc,
     )
     assert updated_record["missing_datetime"] == "2021-01-01T00:00:00+00:00"
     assert updated_record["missing_null"] is None

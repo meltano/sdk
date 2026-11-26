@@ -20,12 +20,12 @@ from singer_sdk.helpers._typing import to_json_compatible
 from singer_sdk.singerlib.encoding.simple import StateMessage
 
 if t.TYPE_CHECKING:
-    import datetime
+    import datetime as dt
 
     from singer_sdk.helpers import types
     from singer_sdk.singerlib.encoding.base import GenericSingerWriter
 
-    _T = t.TypeVar("_T", datetime.datetime, str, int, float)
+    _T = t.TypeVar("_T", dt.datetime, str, int, float)
 
 PROGRESS_MARKERS = "progress_markers"
 PROGRESS_MARKER_NOTE = "Note"

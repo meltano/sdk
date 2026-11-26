@@ -26,7 +26,7 @@ from singer_sdk.helpers._state import (
 from singer_sdk.singerlib.catalog import REPLICATION_FULL_TABLE
 
 if t.TYPE_CHECKING:
-    import datetime
+    import datetime as dt
 
     from singer_sdk.helpers import types
 
@@ -181,7 +181,7 @@ class StreamStateManager:
 
     def write_replication_key_signpost(
         self,
-        value: datetime.datetime | str | float | None,
+        value: dt.datetime | str | float | None,
         *,
         context: types.Context | None = None,
     ) -> None:

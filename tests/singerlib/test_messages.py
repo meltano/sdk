@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import io
 import json
 import zoneinfo
@@ -10,7 +10,7 @@ import pytest
 
 import singer_sdk.singerlib as singer
 
-UTC = datetime.timezone.utc
+UTC = dt.timezone.utc
 
 
 def test_exclude_null_dict():
@@ -68,7 +68,7 @@ def test_record_message_parse_time_extracted():
     assert record.type == "RECORD"
     assert record.stream == "test"
     assert record.record == {"id": 1, "name": "test"}
-    assert record.time_extracted == datetime.datetime(2021, 1, 1, 0, 0, 0, tzinfo=UTC)
+    assert record.time_extracted == dt.datetime(2021, 1, 1, 0, 0, 0, tzinfo=UTC)
 
 
 def test_record_message_naive_time_extracted():
@@ -77,7 +77,7 @@ def test_record_message_naive_time_extracted():
         singer.RecordMessage(
             stream="test",
             record={"id": 1, "name": "test"},
-            time_extracted=datetime.datetime(2021, 1, 1),  # noqa: DTZ001
+            time_extracted=dt.datetime(2021, 1, 1),  # noqa: DTZ001
         )
 
 
@@ -86,7 +86,7 @@ def test_record_message_time_extracted_to_utc():
     record = singer.RecordMessage(
         stream="test",
         record={"id": 1, "name": "test"},
-        time_extracted=datetime.datetime(
+        time_extracted=dt.datetime(
             2021,
             1,
             1,
@@ -94,7 +94,7 @@ def test_record_message_time_extracted_to_utc():
             tzinfo=zoneinfo.ZoneInfo("Africa/Nairobi"),
         ),
     )
-    assert record.time_extracted == datetime.datetime(2021, 1, 1, 9, tzinfo=UTC)
+    assert record.time_extracted == dt.datetime(2021, 1, 1, 9, tzinfo=UTC)
 
 
 def test_record_message_with_version():
@@ -185,7 +185,7 @@ def test_write_record_write_schema_write_state(capsys: pytest.CaptureFixture):
     singer.write_record(
         "s",
         {"a": 3},
-        time_extracted=datetime.datetime(2026, 1, 1, tzinfo=UTC),
+        time_extracted=dt.datetime(2026, 1, 1, tzinfo=UTC),
     )
 
     singer.write_state({"bookmarks": {}})

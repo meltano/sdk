@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 
 import time_machine
 
@@ -9,7 +9,7 @@ from tests.conftest import BatchSinkMock, TargetMock
 
 def test_sdc_metadata():
     with time_machine.travel(
-        datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc),
+        dt.datetime(2023, 1, 1, tzinfo=dt.timezone.utc),
         tick=False,
     ):
         target = TargetMock()
@@ -31,7 +31,7 @@ def test_sdc_metadata():
     record = record_message["record"]
 
     with time_machine.travel(
-        datetime.datetime(2023, 1, 1, 0, 5, tzinfo=datetime.timezone.utc),
+        dt.datetime(2023, 1, 1, 0, 5, tzinfo=dt.timezone.utc),
         tick=False,
     ):
         sink._add_sdc_metadata_to_record(record, record_message, {})
