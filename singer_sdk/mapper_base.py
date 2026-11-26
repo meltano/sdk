@@ -152,7 +152,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, abc.ABC):
         about_format: str | None = None,
         config: _ConfigInput | None = None,
         file_input: t.IO[str] | None = None,
-    ) -> None:  # ty:ignore[invalid-method-override]
+    ) -> None:  # ty:ignore[incompatible-method-override]
         """Invoke the mapper.
 
         Args:
