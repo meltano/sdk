@@ -302,8 +302,8 @@ class TestStructuredFormatter:
         try:
             msg = "Test exception"
             exc = ValueError(msg)
-            exc.add_note("Info")  # type: ignore[attr-defined]  # ty: ignore[unresolved-attribute]
-            exc.add_note("Moar info")  # type: ignore[attr-defined]  # ty: ignore[unresolved-attribute]
+            exc.add_note("Info")  # type: ignore[attr-defined]  # ty: ignore[missing-attribute]
+            exc.add_note("Moar info")  # type: ignore[attr-defined]  # ty: ignore[missing-attribute]
             raise exc
         except ValueError:
             logger.exception("Error occurred")

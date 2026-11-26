@@ -563,7 +563,7 @@ class Tap(BaseSingerWriter, abc.ABC):  # noqa: PLR0904
         config: _ConfigInput | None = None,
         state: t.IO[str] | None = None,
         catalog: t.IO[str] | None = None,
-    ) -> None:  # ty:ignore[invalid-method-override]
+    ) -> None:  # ty:ignore[incompatible-method-override]
         """Invoke the tap's command line interface.
 
         Args:
