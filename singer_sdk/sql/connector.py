@@ -756,6 +756,25 @@ class SQLConnector:  # noqa: PLR0904
         Developers can generally override just one of the following:
         `sqlalchemy_engine`, `get_sqlalchemy_url`.
 
+        To construct a URL from separate connection settings, use
+        `sqlalchemy.engine.URL.create()` with the original, unescaped
+        credentials rather than interpolating them into a string. An override
+        can return the rendered URL, for example:
+
+        .. code-block:: python
+
+            from sqlalchemy.engine import URL
+
+            return URL.create(
+                "postgresql+psycopg",
+                username=config["username"],
+                password=config["password"],
+                host=config["host"],
+                database=config["database"],
+            ).render_as_string(hide_password=False)
+
+        The returned string contains the credentials. Do not log it.
+
         Args:
             config: A dictionary of settings from the tap or target config.
 
