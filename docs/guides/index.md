@@ -13,6 +13,7 @@ config-schema
 performance
 sql-tap
 sql-target
+activate-version
 
 migrate-to-uv
 consolidate-sql-imports
