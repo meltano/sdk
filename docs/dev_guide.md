@@ -265,6 +265,65 @@ if __name__ == "__main__":
 
 This is automatically included in the most recent version of the tap and target cookiecutters.
 
+### Debugging targets that read from stdin
+
+Targets read Singer messages from stdin, so an interactive `pdb` session would
+compete with the input stream. Use
+[remote-pdb](https://github.com/ionelmc/python-remote-pdb) to send debugger commands
+through a separate local connection instead.
+
+Use this workflow only on a trusted development host. Anyone able to connect to
+the unauthenticated debugger socket can execute Python in the target process,
+including other local users on a shared host.
+
+Install it in the environment that runs your target. For a target project managed
+with uv:
+
+```bash
+uv add --dev remote-pdb
+```
+
+Targets can drain multiple sinks concurrently. Temporarily override
+{attr}`Target.max_parallelism <singer_sdk.Target.max_parallelism>` in your target
+class so sink draining runs sequentially while debugging:
+
+```python
+@property
+def max_parallelism(self) -> int:
+    """Drain sinks sequentially while debugging."""
+    return 1
+```
+
+Add `breakpoint()` where you want execution to pause, then run your target with
+the remote debugger hook. Replace `target-example`, `config.json`, and
+`messages.jsonl` with your target's command and input files:
+
+```bash
+PYTHONBREAKPOINT=remote_pdb.set_trace \
+REMOTE_PDB_HOST=127.0.0.1 \
+REMOTE_PDB_PORT=4444 \
+REMOTE_PDB_QUIET=1 \
+uv run target-example --config config.json < messages.jsonl
+```
+
+The process waits when it reaches the breakpoint. In another terminal, connect
+with Netcat (`nc`) or Telnet:
+
+```bash
+nc 127.0.0.1 4444
+```
+
+Use `continue` to resume execution, then disconnect Netcat with Ctrl-C. Reconnect
+to the same port if another breakpoint is reached. The target still receives
+Singer messages through stdin; debugger input and output use the local socket.
+`REMOTE_PDB_QUIET` suppresses the debugger's connection notices.
+
+When running through Meltano, install `remote-pdb` in the target plugin's isolated
+environment as well. If you add it to the target's installable dependencies,
+reinstall the target plugin in Meltano, including for editable (`-e`) installs.
+Remove the breakpoints and parallelism override when you finish debugging, and
+stop setting the debugger environment variables.
+
 ### Testing performance
 
 Moved to a separate page: [Measuring Performance](./guides/performance.md#measuring-performance).
